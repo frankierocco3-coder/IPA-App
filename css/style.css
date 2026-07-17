@@ -44,7 +44,17 @@ body {
 }
 .brand { font-size: 22px; font-weight: 800; color: var(--green); }
 .brand span { color: var(--ink); }
-.stats { display: flex; gap: 14px; font-weight: 800; }
+.stats { display: flex; gap: 14px; font-weight: 800; align-items: center; }
+
+.freeplay {
+  font-size: 17px; background: #fff; border: 2px solid var(--line);
+  border-bottom-width: 3px; border-radius: 10px; padding: 4px 9px; cursor: pointer;
+}
+.freeplay.on { background: #eaffd6; border-color: var(--green); }
+.freeplay-note {
+  text-align: center; font-size: 13px; color: var(--green-dark);
+  font-weight: 700; padding: 10px 20px 0;
+}
 
 .tree { padding: 20px; display: flex; flex-direction: column; gap: 34px; padding-bottom: 60px; }
 

@@ -10,6 +10,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 const ALL_LESSONS = COURSE.flatMap(u => u.lessons.map(l => ({ ...l, unit: u })));
 
 function isUnlocked(lessonId) {
+  if (store.freePlay) return true;
   const i = ALL_LESSONS.findIndex(l => l.id === lessonId);
   return i === 0 || store.isCompleted(ALL_LESSONS[i - 1].id);
 }
@@ -48,9 +49,17 @@ function renderHome() {
       <div class="stats">
         <span class="stat">🔥 ${store.displayStreak}</span>
         <span class="stat">⚡ ${store.xp} XP</span>
+        <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay"
+                title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>
       </div>
     </header>
+    ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
     <main class="tree">${units}</main>`;
+
+  document.getElementById('freeplay').addEventListener('click', () => {
+    store.freePlay = !store.freePlay;
+    renderHome();
+  });
 
   app.querySelectorAll('.node[data-lesson]').forEach(btn =>
     btn.addEventListener('click', () => {
