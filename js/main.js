@@ -2,7 +2,9 @@ import { COURSE } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson } from './engine.js';
 import { store } from './state.js';
-import { speak } from './audio.js';
+import { speak, ACCENT_LANG } from './audio.js';
+
+const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
 const app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -89,8 +91,9 @@ function renderGuide(lesson) {
       </div>`;
   }).join('');
 
-  const rpWords = lesson.rpOnly
-    ? WORDS.filter(w => w.rp && w.ipa.some(s => lesson.phonemes.includes(s)))
+  const accentName = { rp: 'RP', nam: 'Neutral American' }[lesson.accent] ?? '';
+  const accentWords = lesson.accent
+    ? WORDS.filter(w => w.accent === lesson.accent && w.ipa.some(s => lesson.phonemes.includes(s)))
         .map(w => `
           <div class="guide-word">
             <button class="word-chip" data-say="${esc(w.word)}">🔊 ${esc(w.word)}</button>
@@ -109,7 +112,7 @@ function renderGuide(lesson) {
       <p class="guide-text">${esc(lesson.guide ?? '')}</p>
       <h2 class="guide-heading">Sounds in this lesson</h2>
       ${phonemeCards}
-      ${rpWords ? `<h2 class="guide-heading">RP words to know</h2>${rpWords}` : ''}
+      ${accentWords ? `<h2 class="guide-heading">${esc(accentName)} words to know</h2>${accentWords}` : ''}
       <div class="guide-start">
         <button class="btn btn-primary" id="start">Start lesson</button>
       </div>
@@ -118,7 +121,7 @@ function renderGuide(lesson) {
   document.getElementById('quit').addEventListener('click', renderHome);
   document.getElementById('start').addEventListener('click', () => startLesson(lesson));
   app.querySelectorAll('[data-say]').forEach(btn =>
-    btn.addEventListener('click', () => speak(btn.dataset.say))
+    btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson) }))
   );
 }
 
@@ -148,7 +151,7 @@ function lessonChrome(s, body) {
       <div class="progress"><div class="progress-fill" style="width:${progressPct(s)}%"></div></div>
       <div class="hearts">${'❤️'.repeat(s.hearts)}${'🖤'.repeat(3 - s.hearts)}</div>
     </header>
-    <main class="exercise">${body}</main>
+    <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback"></footer>`;
   document.getElementById('quit').addEventListener('click', renderHome);
 }
@@ -168,12 +171,12 @@ function audioButton(ex) {
     : '';
 }
 
-function wireAudio(ex, onFirstPlay) {
+function wireAudio(s, ex, onFirstPlay) {
   const btn = document.getElementById('speaker');
   if (!btn) return;
   let played = false;
   btn.addEventListener('click', () => {
-    speak(ex.audioText);
+    speak(ex.audioText, { lang: langFor(s.lesson) });
     if (!played) { played = true; onFirstPlay?.(); }
   });
 }
@@ -215,11 +218,11 @@ function renderChoice(s, ex) {
         </button>`).join('')}
     </div>`);
 
-  wireAudio(ex, () => {
+  wireAudio(s, ex, () => {
     document.querySelectorAll('.choice').forEach(b => (b.disabled = false));
     document.getElementById('choices')?.classList.remove('gated');
   });
-  if (ex.audioText && !gated) setTimeout(() => speak(ex.audioText), 300);
+  if (ex.audioText && !gated) setTimeout(() => speak(ex.audioText, { lang: langFor(s.lesson) }), 300);
 
   document.querySelectorAll('.choice').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -289,8 +292,8 @@ function renderBuild(s, ex) {
     </div>
     <button class="btn btn-primary" id="check" disabled>Check</button>`);
 
-  wireAudio(ex);
-  setTimeout(() => speak(ex.audioText), 300);
+  wireAudio(s, ex);
+  setTimeout(() => speak(ex.audioText, { lang: langFor(s.lesson) }), 300);
 
   const chosen = [];
   const answerEl = document.getElementById('answer');

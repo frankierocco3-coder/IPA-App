@@ -7,17 +7,23 @@ import { EXERCISES_PER_LESSON } from './data/course.js';
 const shuffle = arr => arr.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const contains = (entry, ph) => entry.ipa.includes(ph);
-const wordsWith = ph => WORDS.filter(w => contains(w, ph));
-const wordsWithout = phs => WORDS.filter(w => phs.every(p => !contains(w, p)));
 const ipaString = entry => '/' + entry.ipa.join('') + '/';
+
+// The core course uses RP as its reference accent, so untagged and
+// RP-tagged words form the default pool; other accents get their own.
+const poolFor = accent => WORDS.filter(w => !w.accent || w.accent === (accent ?? 'rp'));
+const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
+const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
+
+const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American' };
 
 // ── Individual generators ─────────────────────────────────────
 
-function genSymbolToWord(target) {
-  const correctPool = wordsWith(target);
+function genSymbolToWord(target, accent) {
+  const correctPool = wordsWith(target, accent);
   if (!correctPool.length) return null;
   const correct = pick(correctPool);
-  const distractors = shuffle(wordsWithout([target]).filter(w => w.word !== correct.word)).slice(0, 3);
+  const distractors = shuffle(wordsWithout([target], accent).filter(w => w.word !== correct.word)).slice(0, 3);
   if (distractors.length < 3) return null;
   const choices = shuffle([{ label: correct.word, ok: true }, ...distractors.map(d => ({ label: d.word }))]);
   return {
@@ -30,8 +36,8 @@ function genSymbolToWord(target) {
   };
 }
 
-function genSoundToSymbol(target, lessonPhonemes) {
-  const wordPool = wordsWith(target);
+function genSoundToSymbol(target, lessonPhonemes, accent) {
+  const wordPool = wordsWith(target, accent);
   if (!wordPool.length) return null;
   const word = pick(wordPool);
   const wrong = shuffle(lessonPhonemes.filter(p => p !== target && !contains(word, p)));
@@ -68,13 +74,13 @@ function genDescription(target, lessonPhonemes) {
 
 // 4 symbol↔word pairs where each word contains exactly its own symbol
 // and none of the other three.
-function genMatch(lessonPhonemes) {
+function genMatch(lessonPhonemes, accent) {
   const phs = shuffle([...lessonPhonemes]);
   const chosen = [];
   for (const ph of phs) {
     if (chosen.length === 4) break;
     const others = [...chosen.map(c => c.ph)];
-    const candidates = wordsWith(ph).filter(w =>
+    const candidates = wordsWith(ph, accent).filter(w =>
       others.every(o => !contains(w, o)) &&
       chosen.every(c => !contains(c.entry, ph)) &&
       !chosen.some(c => c.entry.word === w.word)
@@ -89,9 +95,8 @@ function genMatch(lessonPhonemes) {
   };
 }
 
-function genBuild(lessonPhonemes, { rpOnly = false } = {}) {
-  const pool = WORDS.filter(w =>
-    (rpOnly ? w.rp : true) &&
+function genBuild(lessonPhonemes, { accent = null } = {}) {
+  const pool = (accent ? WORDS.filter(w => w.accent === accent) : poolFor(null)).filter(w =>
     w.ipa.length >= 2 && w.ipa.length <= 5 &&
     w.ipa.some(p => lessonPhonemes.includes(p))
   );
@@ -128,45 +133,59 @@ function genMinimalPair() {
   };
 }
 
-// RP feature question: correct RP transcription vs plausible wrong ones.
-function genRpFact() {
-  const entry = pick(WORDS.filter(w => w.rp));
-  const wrongs = [];
-  // Rhotic error: insert an r after the long vowel / centring diphthong.
-  const rhotic = entry.ipa.flatMap(p => (['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə', 'ʊə'].includes(p) ? [p, 'r'] : [p]));
-  if (rhotic.join('') !== entry.ipa.join('')) wrongs.push(rhotic);
-  // BATH error: flat /æ/ instead of /ɑː/.
-  const flat = entry.ipa.map(p => (p === 'ɑː' ? 'æ' : p));
-  if (flat.join('') !== entry.ipa.join('')) wrongs.push(flat);
-  // Vowel swap fallback.
-  if (wrongs.length < 2) wrongs.push(entry.ipa.map(p => (p === 'ɔː' ? 'ɒ' : p === 'ɜː' ? 'e' : p === 'ɪə' ? 'iː' : p)));
+// Accent feature question: the accent's correct transcription vs the
+// characteristic mistakes a learner of that accent makes.
+const ACCENT_ERRORS = {
+  rp: [
+    // rhotic error: pronouncing the dead /r/
+    ipa => ipa.flatMap(p => (['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə', 'ʊə'].includes(p) ? [p, 'r'] : [p])),
+    // flat-BATH error
+    ipa => ipa.map(p => (p === 'ɑː' ? 'æ' : p)),
+    // vowel-quality slips
+    ipa => ipa.map(p => (p === 'ɔː' ? 'ɒ' : p === 'ɜː' ? 'e' : p === 'ɪə' ? 'iː' : p)),
+  ],
+  nam: [
+    // non-rhotic error: dropping the /r/ (and de-rhotacizing ɝ/ɚ)
+    ipa => ipa.filter(p => p !== 'r').map(p => (p === 'ɝ' ? 'ɜː' : p === 'ɚ' ? 'ə' : p)),
+    // British-vowel errors: broad BATH, rounded LOT, RP GOAT
+    ipa => ipa.map(p => (p === 'æ' ? 'ɑː' : p === 'ɑ' ? 'ɒ' : p === 'oʊ' ? 'əʊ' : p)),
+    // r-coloring slip: plain vowel + r instead of ɝ/ɚ
+    ipa => ipa.flatMap(p => (p === 'ɝ' ? ['ɜː', 'r'] : p === 'ɚ' ? ['ə', 'r'] : [p])),
+  ],
+};
+
+function genAccentFact(accent) {
+  const entry = pick(WORDS.filter(w => w.accent === accent));
+  const wrongs = ACCENT_ERRORS[accent].map(fn => fn(entry.ipa));
   const uniqueWrongs = [...new Map(wrongs.map(w => [w.join(''), w])).values()]
     .filter(w => w.join('') !== entry.ipa.join(''))
     .slice(0, 2);
+  if (!uniqueWrongs.length) return null;
+  const name = ACCENT_NAMES[accent];
   const choices = shuffle([
     { label: '/' + entry.ipa.join('') + '/', ok: true },
     ...uniqueWrongs.map(w => ({ label: '/' + w.join('') + '/' })),
   ]);
   return {
     type: 'choice',
-    prompt: `How does RP pronounce “${entry.word}”?`,
+    prompt: `How does ${name} pronounce “${entry.word}”?`,
     audioText: entry.word,
     display: entry.word,
     choices,
-    explain: `RP: ${ipaString(entry)}${entry.note ? ` — ${entry.note}` : ''}`,
+    explain: `${name}: ${ipaString(entry)}${entry.note ? ` — ${entry.note}` : ''}`,
   };
 }
 
 // ── Lesson assembly ───────────────────────────────────────────
 
 const GENERATORS = {
-  symbolToWord: l => genSymbolToWord(pick(l.phonemes)),
-  soundToSymbol: l => genSoundToSymbol(pick(l.phonemes), l.phonemes),
+  symbolToWord: l => genSymbolToWord(pick(l.phonemes), l.accent),
+  soundToSymbol: l => genSoundToSymbol(pick(l.phonemes), l.phonemes, l.accent),
   description: l => genDescription(pick(l.phonemes), l.phonemes),
-  match: l => genMatch(l.phonemes),
-  build: l => genBuild(l.phonemes, { rpOnly: l.rpOnly }),
+  match: l => genMatch(l.phonemes, l.accent),
+  build: l => genBuild(l.phonemes, { accent: l.accent }),
   minimalPair: () => genMinimalPair(),
-  rpFact: () => genRpFact(),
+  accentFact: l => genAccentFact(l.accent),
 };
 
 export function generateLesson(lesson) {

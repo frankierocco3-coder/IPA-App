@@ -29,6 +29,12 @@ export const PHONEMES = {
   'eə': { type: 'diphthong', name: 'SQUARE diphthong', hint: 'glides from mid front toward schwa', examples: ['square', 'fair', 'there', 'care'] },
   'ʊə': { type: 'diphthong', name: 'CURE diphthong', hint: 'glides from close back toward schwa', examples: ['cure', 'tour', 'pure', 'jury'] },
 
+  // ── Neutral American vowels (accent-track symbols) ─────────
+  'ɑ': { type: 'vowel', name: 'American LOT/PALM', hint: 'open back unrounded vowel — the unrounded American “ah”', examples: ['lot', 'father', 'stop', 'hot'] },
+  'oʊ': { type: 'diphthong', name: 'American GOAT', hint: 'glides from mid back rounded toward close back', examples: ['go', 'show', 'soap', 'home'] },
+  'ɝ': { type: 'vowel', name: 'American NURSE', hint: 'r-colored mid central vowel (stressed)', examples: ['nurse', 'word', 'learn', 'stir'] },
+  'ɚ': { type: 'vowel', name: 'American lettER', hint: 'r-colored schwa (unstressed)', examples: ['teacher', 'father', 'doctor', 'never'] },
+
   // ── Stops & nasals ──────────────────────────────────────────
   'p': { type: 'consonant', name: 'p', hint: 'voiceless bilabial plosive', examples: ['pen', 'happy', 'cup', 'apple'] },
   'b': { type: 'consonant', name: 'b', hint: 'voiced bilabial plosive', examples: ['bad', 'baby', 'job', 'rubber'] },
@@ -98,16 +104,36 @@ export const WORDS = [
   { word: 'tour', ipa: ['t', 'ʊə'] },
   { word: 'pure', ipa: ['p', 'j', 'ʊə'] },
   // RP-specific: non-rhotic + BATH/PALM words
-  { word: 'car', ipa: ['k', 'ɑː'], rp: true, note: 'non-rhotic: no /r/ at the end' },
-  { word: 'start', ipa: ['s', 't', 'ɑː', 't'], rp: true, note: 'non-rhotic: /r/ before a consonant is dropped' },
-  { word: 'north', ipa: ['n', 'ɔː', 'θ'], rp: true, note: 'non-rhotic: vowel lengthens instead of /r/' },
-  { word: 'word', ipa: ['w', 'ɜː', 'd'], rp: true, note: 'non-rhotic: NURSE vowel, no /r/' },
-  { word: 'bath', ipa: ['b', 'ɑː', 'θ'], rp: true, note: 'BATH word: RP uses long /ɑː/, not /æ/' },
-  { word: 'dance', ipa: ['d', 'ɑː', 'n', 's'], rp: true, note: 'BATH word: RP /ɑː/' },
-  { word: 'grass', ipa: ['g', 'r', 'ɑː', 's'], rp: true, note: 'BATH word: RP /ɑː/' },
-  { word: 'ask', ipa: ['ɑː', 's', 'k'], rp: true, note: 'BATH word: RP /ɑː/' },
-  { word: 'here', ipa: ['h', 'ɪə'], rp: true, note: 'non-rhotic: NEAR diphthong, no /r/' },
-  { word: 'four', ipa: ['f', 'ɔː'], rp: true, note: 'non-rhotic: THOUGHT vowel, no /r/' },
+  { word: 'car', ipa: ['k', 'ɑː'], accent: 'rp', note: 'non-rhotic: no /r/ at the end' },
+  { word: 'start', ipa: ['s', 't', 'ɑː', 't'], accent: 'rp', note: 'non-rhotic: /r/ before a consonant is dropped' },
+  { word: 'north', ipa: ['n', 'ɔː', 'θ'], accent: 'rp', note: 'non-rhotic: vowel lengthens instead of /r/' },
+  { word: 'word', ipa: ['w', 'ɜː', 'd'], accent: 'rp', note: 'non-rhotic: NURSE vowel, no /r/' },
+  { word: 'bath', ipa: ['b', 'ɑː', 'θ'], accent: 'rp', note: 'BATH word: RP uses long /ɑː/, not /æ/' },
+  { word: 'dance', ipa: ['d', 'ɑː', 'n', 's'], accent: 'rp', note: 'BATH word: RP /ɑː/' },
+  { word: 'grass', ipa: ['g', 'r', 'ɑː', 's'], accent: 'rp', note: 'BATH word: RP /ɑː/' },
+  { word: 'ask', ipa: ['ɑː', 's', 'k'], accent: 'rp', note: 'BATH word: RP /ɑː/' },
+  { word: 'here', ipa: ['h', 'ɪə'], accent: 'rp', note: 'non-rhotic: NEAR diphthong, no /r/' },
+  { word: 'four', ipa: ['f', 'ɔː'], accent: 'rp', note: 'non-rhotic: THOUGHT vowel, no /r/' },
+
+  // Neutral American: rhotic, flat BATH, unrounded LOT, /oʊ/ GOAT
+  { word: 'car', ipa: ['k', 'ɑ', 'r'], accent: 'nam', note: 'rhotic: the /r/ is always pronounced' },
+  { word: 'start', ipa: ['s', 't', 'ɑ', 'r', 't'], accent: 'nam', note: 'rhotic: /r/ survives before a consonant' },
+  { word: 'north', ipa: ['n', 'ɔː', 'r', 'θ'], accent: 'nam', note: 'rhotic: THOUGHT vowel + /r/' },
+  { word: 'word', ipa: ['w', 'ɝ', 'd'], accent: 'nam', note: 'r-colored NURSE vowel /ɝ/' },
+  { word: 'nurse', ipa: ['n', 'ɝ', 's'], accent: 'nam', note: 'r-colored NURSE vowel /ɝ/' },
+  { word: 'here', ipa: ['h', 'ɪ', 'r'], accent: 'nam', note: 'rhotic: vowel + /r/, no centring diphthong' },
+  { word: 'four', ipa: ['f', 'ɔː', 'r'], accent: 'nam', note: 'rhotic: THOUGHT vowel + /r/' },
+  { word: 'bath', ipa: ['b', 'æ', 'θ'], accent: 'nam', note: 'flat BATH: American keeps /æ/' },
+  { word: 'dance', ipa: ['d', 'æ', 'n', 's'], accent: 'nam', note: 'flat BATH: /æ/' },
+  { word: 'grass', ipa: ['g', 'r', 'æ', 's'], accent: 'nam', note: 'flat BATH: /æ/' },
+  { word: 'ask', ipa: ['æ', 's', 'k'], accent: 'nam', note: 'flat BATH: /æ/' },
+  { word: 'lot', ipa: ['l', 'ɑ', 't'], accent: 'nam', note: 'American LOT: open unrounded /ɑ/, not /ɒ/' },
+  { word: 'stop', ipa: ['s', 't', 'ɑ', 'p'], accent: 'nam', note: 'American LOT: /ɑ/' },
+  { word: 'father', ipa: ['f', 'ɑ', 'ð', 'ɚ'], accent: 'nam', note: '/ɑ/ plus the r-colored lettER schwa /ɚ/' },
+  { word: 'go', ipa: ['g', 'oʊ'], accent: 'nam', note: 'American GOAT starts back and rounded: /oʊ/, not /əʊ/' },
+  { word: 'soap', ipa: ['s', 'oʊ', 'p'], accent: 'nam', note: 'American GOAT: /oʊ/' },
+  { word: 'home', ipa: ['h', 'oʊ', 'm'], accent: 'nam', note: 'American GOAT: /oʊ/' },
+  { word: 'teacher', ipa: ['t', 'iː', 'tʃ', 'ɚ'], accent: 'nam', note: 'r-colored lettER schwa /ɚ/ in the last syllable' },
 ];
 
 // Minimal pairs for listening discrimination.

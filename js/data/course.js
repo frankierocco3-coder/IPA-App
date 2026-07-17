@@ -65,6 +65,20 @@ export const COURSE = [
     ],
   },
   {
+    id: 'nam',
+    title: 'Neutral American',
+    color: '#c0392b',
+    icon: '🇺🇸',
+    accent: true,
+    blurb: 'The baseline stage accent for American actors — rhotic, flat BATH, open LOT.',
+    lessons: [
+      { id: 'nam-1', title: 'R is everywhere', accent: 'nam', guide: 'Neutral American is rhotic: every written r is spoken. After a vowel it colors the vowel itself — the stressed NURSE vowel becomes /ɝ/ (word, learn) and the unstressed lettER ending becomes /ɚ/ (teacher, father). Elsewhere the /r/ simply survives: car /kɑr/, here /hɪr/.', phonemes: ['ɝ', 'ɚ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
+      { id: 'nam-2', title: 'Flat BATH, open LOT', accent: 'nam', guide: 'Two vowels separate American from British at a glance. BATH words keep flat /æ/ — bath, dance, grass, ask — where RP broadens to /ɑː/. And LOT words open and unround to /ɑ/ — lot, stop, father — where RP keeps rounded /ɒ/.', phonemes: ['æ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
+      { id: 'nam-3', title: 'The American GOAT', accent: 'nam', guide: 'The GOAT diphthong starts differently on each side of the Atlantic. American /oʊ/ begins back and rounded (go, home, soap); RP /əʊ/ begins at the neutral schwa. Your ear will catch it faster than your eye.', phonemes: ['oʊ', 'ɑ', 'ɚ'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'nam-4', title: 'Transcribe American', accent: 'nam', guide: 'Full Neutral American transcriptions. Keep every /r/, keep BATH flat at /æ/, open LOT to /ɑ/, start GOAT at /oʊ/, and give r-colored vowels their hooks: /ɝ/ stressed, /ɚ/ unstressed.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ'], types: ['build', 'accentFact', 'soundToSymbol'] },
+    ],
+  },
+  {
     id: 'rp',
     title: 'RP: Received Pronunciation',
     color: '#2b70c9',
@@ -72,9 +86,9 @@ export const COURSE = [
     accent: true,
     blurb: 'The classic “BBC English” accent — non-rhoticity, the BATH split, and full transcriptions.',
     lessons: [
-      { id: 'rp-1', title: 'Where did the R go?', rpOnly: true, guide: 'RP is non-rhotic: /r/ is only pronounced before a vowel. Everywhere else it vanished, leaving a long vowel or centring diphthong behind — car /kɑː/, north /nɔːθ/, word /wɜːd/, here /hɪə/.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['rpFact', 'build', 'soundToSymbol'] },
-      { id: 'rp-2', title: 'The BATH split', rpOnly: true, guide: 'In RP, a set of words spelled with \'a\' — bath, dance, grass, ask — take long /ɑː/ instead of flat /æ/. This BATH split is one of the sharpest dividers between RP and most other accents.', phonemes: ['ɑː', 'æ'], types: ['rpFact', 'build', 'minimalPair'] },
-      { id: 'rp-3', title: 'Transcribe like the BBC', rpOnly: true, guide: 'Everything together: transcribe full words the way an RP speaker says them. Remember — no /r/ unless a vowel follows, BATH words take /ɑː/, and unstressed syllables collapse to schwa.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'rpFact', 'soundToSymbol'] },
+      { id: 'rp-1', title: 'Where did the R go?', accent: 'rp', guide: 'RP is non-rhotic: /r/ is only pronounced before a vowel. Everywhere else it vanished, leaving a long vowel or centring diphthong behind — car /kɑː/, north /nɔːθ/, word /wɜːd/, here /hɪə/.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['accentFact', 'build', 'soundToSymbol'] },
+      { id: 'rp-2', title: 'The BATH split', accent: 'rp', guide: 'In RP, a set of words spelled with \'a\' — bath, dance, grass, ask — take long /ɑː/ instead of flat /æ/. This BATH split is one of the sharpest dividers between RP and most other accents.', phonemes: ['ɑː', 'æ'], types: ['accentFact', 'build', 'minimalPair'] },
+      { id: 'rp-3', title: 'Transcribe like the BBC', accent: 'rp', guide: 'Everything together: transcribe full words the way an RP speaker says them. Remember — no /r/ unless a vowel follows, BATH words take /ɑː/, and unstressed syllables collapse to schwa.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'accentFact', 'soundToSymbol'] },
     ],
   },
 ];
