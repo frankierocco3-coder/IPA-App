@@ -94,6 +94,47 @@ body {
 .node.done { border-color: var(--node-color); }
 .node-title { font-weight: 700; }
 
+/* ── Lesson guide ── */
+.guide-title-bar {
+  flex: 1; text-align: center; font-weight: 800; color: #fff;
+  background: var(--unit-color); border-radius: 10px; padding: 8px 14px;
+  margin-right: 34px; /* balance the ✕ on the left */
+}
+.guide { flex: 1; padding: 8px 24px 40px; max-width: 520px; margin: 0 auto; width: 100%; }
+.guide h1 { font-size: 24px; margin-bottom: 8px; }
+.guide-text { color: var(--ink); line-height: 1.5; margin-bottom: 10px; }
+.guide-heading {
+  font-size: 13px; text-transform: uppercase; letter-spacing: 1px;
+  color: var(--muted); margin: 22px 0 10px;
+}
+.guide-card {
+  display: flex; gap: 14px; align-items: flex-start;
+  border: 2px solid var(--line); border-radius: 16px; padding: 14px; margin-bottom: 10px;
+}
+.guide-symbol {
+  font: inherit; font-size: 26px; font-weight: 800; color: var(--green-dark);
+  background: #eaffd6; border: 2px solid var(--green); border-bottom-width: 4px;
+  border-radius: 12px; padding: 10px 12px; cursor: pointer; flex: none; min-width: 64px;
+}
+.guide-symbol:active { transform: translateY(2px); border-bottom-width: 2px; }
+.guide-info h3 { font-size: 16px; }
+.guide-info p { font-size: 13px; color: var(--muted); margin: 2px 0 8px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.word-chip {
+  font: inherit; font-size: 13px; font-weight: 700;
+  background: #fff; border: 2px solid var(--line); border-radius: 999px;
+  padding: 4px 10px; cursor: pointer;
+}
+.word-chip:active { background: #f4f4f4; }
+.guide-word {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  border-bottom: 1px solid var(--line); padding: 8px 2px;
+}
+.guide-ipa { font-weight: 800; }
+.guide-note { font-size: 12px; color: var(--muted); flex-basis: 100%; padding-left: 4px; }
+.guide-start { display: flex; justify-content: center; margin-top: 26px; }
+.guide-start .btn { padding: 14px 42px; font-size: 16px; }
+
 /* ── Lesson chrome ── */
 .lesson-top { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
 .quit { font-size: 18px; border: none; background: none; color: var(--muted); cursor: pointer; }

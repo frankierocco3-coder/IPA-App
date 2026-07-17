@@ -1,4 +1,5 @@
 import { COURSE } from './data/course.js';
+import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson } from './engine.js';
 import { store } from './state.js';
 import { speak } from './audio.js';
@@ -64,8 +65,60 @@ function renderHome() {
   app.querySelectorAll('.node[data-lesson]').forEach(btn =>
     btn.addEventListener('click', () => {
       const lesson = ALL_LESSONS.find(l => l.id === btn.dataset.lesson);
-      startLesson(lesson);
+      renderGuide(lesson);
     })
+  );
+}
+
+// ── Lesson guide (the teaching page before the exercises) ─────
+
+function renderGuide(lesson) {
+  const unit = lesson.unit;
+  const phonemeCards = lesson.phonemes.map(ph => {
+    const p = PHONEMES[ph];
+    const chips = p.examples.map(w =>
+      `<button class="word-chip" data-say="${esc(w)}">🔊 ${esc(w)}</button>`).join('');
+    return `
+      <div class="guide-card">
+        <button class="guide-symbol" data-say="${esc(p.examples[0])}" title="Hear “${esc(p.examples[0])}”">/${ph}/</button>
+        <div class="guide-info">
+          <h3>${esc(p.name)}</h3>
+          <p>${esc(p.hint)}</p>
+          <div class="chips">${chips}</div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const rpWords = lesson.rpOnly
+    ? WORDS.filter(w => w.rp && w.ipa.some(s => lesson.phonemes.includes(s)))
+        .map(w => `
+          <div class="guide-word">
+            <button class="word-chip" data-say="${esc(w.word)}">🔊 ${esc(w.word)}</button>
+            <span class="guide-ipa">/${w.ipa.join('')}/</span>
+            <span class="guide-note">${esc(w.note ?? '')}</span>
+          </div>`).join('')
+    : '';
+
+  app.innerHTML = `
+    <header class="lesson-top">
+      <button class="quit" id="quit">✕</button>
+      <div class="guide-title-bar" style="--unit-color:${unit.color}">${esc(unit.title)}</div>
+    </header>
+    <main class="guide">
+      <h1>${esc(lesson.title)}</h1>
+      <p class="guide-text">${esc(lesson.guide ?? '')}</p>
+      <h2 class="guide-heading">Sounds in this lesson</h2>
+      ${phonemeCards}
+      ${rpWords ? `<h2 class="guide-heading">RP words to know</h2>${rpWords}` : ''}
+      <div class="guide-start">
+        <button class="btn btn-primary" id="start">Start lesson</button>
+      </div>
+    </main>`;
+
+  document.getElementById('quit').addEventListener('click', renderHome);
+  document.getElementById('start').addEventListener('click', () => startLesson(lesson));
+  app.querySelectorAll('[data-say]').forEach(btn =>
+    btn.addEventListener('click', () => speak(btn.dataset.say))
   );
 }
 

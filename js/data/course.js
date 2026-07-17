@@ -9,10 +9,10 @@ export const COURSE = [
     icon: 'ɪ',
     blurb: 'The six short vowels of English, plus the humble schwa.',
     lessons: [
-      { id: 'v1-1', title: 'KIT, DRESS & TRAP', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
-      { id: 'v1-2', title: 'STRUT, FOOT & LOT', phonemes: ['ʌ', 'ʊ', 'ɒ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
-      { id: 'v1-3', title: 'Meet the schwa', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
-      { id: 'v1-4', title: 'Short vowels round-up', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
+      { id: 'v1-1', title: 'KIT, DRESS & TRAP', guide: 'Three front vowels, stacked by how open your mouth is: /ɪ/ is nearly closed (kit), /e/ is halfway (dress), /æ/ is nearly open (trap). Say them in a row and feel your jaw drop.', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'v1-2', title: 'STRUT, FOOT & LOT', guide: 'Three more short vowels, made further back in the mouth: /ʌ/ is open and relaxed (strut), /ʊ/ is high with rounded lips (foot), /ɒ/ is low with rounded lips (lot).', phonemes: ['ʌ', 'ʊ', 'ɒ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'v1-3', title: 'Meet the schwa', guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
+      { id: 'v1-4', title: 'Short vowels round-up', guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
     ],
   },
   {
@@ -22,9 +22,9 @@ export const COURSE = [
     icon: 'iː',
     blurb: 'Five long vowels — the length mark ː is your friend.',
     lessons: [
-      { id: 'v2-1', title: 'FLEECE & GOOSE', phonemes: ['iː', 'uː', 'ɪ', 'ʊ'], types: ['symbolToWord', 'soundToSymbol', 'minimalPair'] },
-      { id: 'v2-2', title: 'PALM, THOUGHT & NURSE', phonemes: ['ɑː', 'ɔː', 'ɜː'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
-      { id: 'v2-3', title: 'Long vs short', phonemes: ['iː', 'ɪ', 'uː', 'ʊ', 'ɑː', 'æ'], types: ['soundToSymbol', 'minimalPair', 'build'] },
+      { id: 'v2-1', title: 'FLEECE & GOOSE', guide: 'The length mark ː means \'hold it longer\'. /iː/ (fleece) is a longer, tenser cousin of /ɪ/ (kit); /uː/ (goose) pairs the same way with /ʊ/ (foot). Ship–sheep and full–fool live or die on this difference.', phonemes: ['iː', 'uː', 'ɪ', 'ʊ'], types: ['symbolToWord', 'soundToSymbol', 'minimalPair'] },
+      { id: 'v2-2', title: 'PALM, THOUGHT & NURSE', guide: 'Three long vowels from the back and centre of the mouth: /ɑː/ (palm), /ɔː/ (thought), and /ɜː/ (nurse) — the long neutral vowel in stir, learn, word.', phonemes: ['ɑː', 'ɔː', 'ɜː'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'v2-3', title: 'Long vs short', guide: 'Long versus short, head to head. Every pair here differs mainly by length and tension: /iː–ɪ/, /uː–ʊ/, /ɑː–æ/. Listen for duration, not just quality.', phonemes: ['iː', 'ɪ', 'uː', 'ʊ', 'ɑː', 'æ'], types: ['soundToSymbol', 'minimalPair', 'build'] },
     ],
   },
   {
@@ -34,9 +34,9 @@ export const COURSE = [
     icon: 'aɪ',
     blurb: 'Vowels that travel — eight glides from one position to another.',
     lessons: [
-      { id: 'd-1', title: 'FACE, PRICE & CHOICE', phonemes: ['eɪ', 'aɪ', 'ɔɪ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
-      { id: 'd-2', title: 'GOAT & MOUTH', phonemes: ['əʊ', 'aʊ'], types: ['symbolToWord', 'soundToSymbol', 'build'] },
-      { id: 'd-3', title: 'NEAR, SQUARE & CURE', phonemes: ['ɪə', 'eə', 'ʊə'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'd-1', title: 'FACE, PRICE & CHOICE', guide: 'Diphthongs are vowels in motion — one vowel gliding into another within a syllable. /eɪ/ (face), /aɪ/ (price), and /ɔɪ/ (choice) all glide toward an /ɪ/-like sound.', phonemes: ['eɪ', 'aɪ', 'ɔɪ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'd-2', title: 'GOAT & MOUTH', guide: 'Two glides that travel toward /ʊ/: /əʊ/ starts at schwa (goat, show), /aʊ/ starts open (mouth, now). The starting point is what separates them.', phonemes: ['əʊ', 'aʊ'], types: ['symbolToWord', 'soundToSymbol', 'build'] },
+      { id: 'd-3', title: 'NEAR, SQUARE & CURE', guide: 'The centring diphthongs glide toward schwa — /ɪə/ (near), /eə/ (square), /ʊə/ (cure). They mostly appear where an r used to be pronounced, which is why RP loves them.', phonemes: ['ɪə', 'eə', 'ʊə'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
     ],
   },
   {
@@ -46,9 +46,9 @@ export const COURSE = [
     icon: 'ŋ',
     blurb: 'Familiar friends — plus /ŋ/, the sound at the end of “sing”.',
     lessons: [
-      { id: 'c1-1', title: 'Plosives', phonemes: ['p', 'b', 't', 'd', 'k', 'g'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'c1-2', title: 'Nasals', phonemes: ['m', 'n', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
-      { id: 'c1-3', title: 'Stops & nasals round-up', phonemes: ['p', 'b', 't', 'd', 'k', 'g', 'm', 'n', 'ŋ'], types: ['soundToSymbol', 'match', 'build'] },
+      { id: 'c1-1', title: 'Plosives', guide: 'Plosives block the air, then release it. They come in voiceless/voiced pairs made at the same spot: /p b/ at the lips, /t d/ at the tooth ridge, /k g/ at the back of the mouth.', phonemes: ['p', 'b', 't', 'd', 'k', 'g'], types: ['description', 'soundToSymbol', 'match'] },
+      { id: 'c1-2', title: 'Nasals', guide: 'Nasals send the air through your nose: /m/ at the lips, /n/ at the tooth ridge, and /ŋ/ at the back — the \'ng\' in sing. English never starts a word with /ŋ/, but it ends plenty.', phonemes: ['m', 'n', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
+      { id: 'c1-3', title: 'Stops & nasals round-up', guide: 'All nine stops and nasals mixed: /p b t d k g m n ŋ/. Watch for /ŋ/ hiding in spelling — \'thanks\' has it, and \'finger\' has /ŋg/, two sounds.', phonemes: ['p', 'b', 't', 'd', 'k', 'g', 'm', 'n', 'ŋ'], types: ['soundToSymbol', 'match', 'build'] },
     ],
   },
   {
@@ -58,10 +58,10 @@ export const COURSE = [
     icon: 'θ',
     blurb: 'Where IPA earns its keep: θ, ð, ʃ, ʒ and company.',
     lessons: [
-      { id: 'c2-1', title: 'The two “th” sounds', phonemes: ['θ', 'ð', 'f', 'v'], types: ['description', 'symbolToWord', 'minimalPair'] },
-      { id: 'c2-2', title: 'Hissers & hushers', phonemes: ['s', 'z', 'ʃ', 'ʒ', 'h'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'c2-3', title: 'Affricates & glides', phonemes: ['tʃ', 'dʒ', 'l', 'r', 'w', 'j'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'c2-4', title: 'Consonant round-up', phonemes: ['θ', 'ð', 'ʃ', 'ʒ', 'tʃ', 'dʒ', 'ŋ', 'j'], types: ['soundToSymbol', 'build', 'match'] },
+      { id: 'c2-1', title: 'The two “th” sounds', guide: 'English has two \'th\' sounds and four lip-teeth friends. /θ/ (think) is voiceless, /ð/ (this) is voiced — same tongue position, different buzz. Same pairing for /f/ (fat) and /v/ (van).', phonemes: ['θ', 'ð', 'f', 'v'], types: ['description', 'symbolToWord', 'minimalPair'] },
+      { id: 'c2-2', title: 'Hissers & hushers', guide: 'The hissers /s z/ are made at the tooth ridge; the hushers /ʃ ʒ/ slightly further back with rounded lips — ship, measure. /h/ is just breath through an open throat.', phonemes: ['s', 'z', 'ʃ', 'ʒ', 'h'], types: ['description', 'soundToSymbol', 'match'] },
+      { id: 'c2-3', title: 'Affricates & glides', guide: 'Affricates are a stop released into a fricative: /tʃ/ (chin), /dʒ/ (jam). The approximants /l r w j/ barely obstruct the air at all — they\'re almost vowels.', phonemes: ['tʃ', 'dʒ', 'l', 'r', 'w', 'j'], types: ['description', 'soundToSymbol', 'match'] },
+      { id: 'c2-4', title: 'Consonant round-up', guide: 'The consonants that make IPA worth learning: both th-sounds, both hushers, both affricates, /ŋ/, and /j/ — the \'y\' sound hiding in few /fjuː/ and use /juːz/.', phonemes: ['θ', 'ð', 'ʃ', 'ʒ', 'tʃ', 'dʒ', 'ŋ', 'j'], types: ['soundToSymbol', 'build', 'match'] },
     ],
   },
   {
@@ -72,9 +72,9 @@ export const COURSE = [
     accent: true,
     blurb: 'The classic “BBC English” accent — non-rhoticity, the BATH split, and full transcriptions.',
     lessons: [
-      { id: 'rp-1', title: 'Where did the R go?', rpOnly: true, phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['rpFact', 'build', 'soundToSymbol'] },
-      { id: 'rp-2', title: 'The BATH split', rpOnly: true, phonemes: ['ɑː', 'æ'], types: ['rpFact', 'build', 'minimalPair'] },
-      { id: 'rp-3', title: 'Transcribe like the BBC', rpOnly: true, phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'rpFact', 'soundToSymbol'] },
+      { id: 'rp-1', title: 'Where did the R go?', rpOnly: true, guide: 'RP is non-rhotic: /r/ is only pronounced before a vowel. Everywhere else it vanished, leaving a long vowel or centring diphthong behind — car /kɑː/, north /nɔːθ/, word /wɜːd/, here /hɪə/.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['rpFact', 'build', 'soundToSymbol'] },
+      { id: 'rp-2', title: 'The BATH split', rpOnly: true, guide: 'In RP, a set of words spelled with \'a\' — bath, dance, grass, ask — take long /ɑː/ instead of flat /æ/. This BATH split is one of the sharpest dividers between RP and most other accents.', phonemes: ['ɑː', 'æ'], types: ['rpFact', 'build', 'minimalPair'] },
+      { id: 'rp-3', title: 'Transcribe like the BBC', rpOnly: true, guide: 'Everything together: transcribe full words the way an RP speaker says them. Remember — no /r/ unless a vowel follows, BATH words take /ɑː/, and unstressed syllables collapse to schwa.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'rpFact', 'soundToSymbol'] },
     ],
   },
 ];
