@@ -1,4 +1,4 @@
-import { COURSE } from './data/course.js';
+import { COURSE, TRACKS } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson } from './engine.js';
 import { store } from './state.js';
@@ -9,41 +9,44 @@ const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 const app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
-// Global order of lessons for the unlock chain.
-const ALL_LESSONS = COURSE.flatMap(u => u.lessons.map(l => ({ ...l, unit: u })));
+// Each track has its own unlock chain, independent of the others.
+const unitById = Object.fromEntries(COURSE.map(u => [u.id, u]));
+const TRACK_LESSONS = Object.fromEntries(TRACKS.map(t => [
+  t.id,
+  t.unitIds.flatMap(uid => unitById[uid].lessons.map(l => ({ ...l, unit: unitById[uid], track: t }))),
+]));
+const ALL_LESSONS = Object.values(TRACK_LESSONS).flat();
 
-function isUnlocked(lessonId) {
+function isUnlocked(lesson) {
   if (store.freePlay) return true;
-  const i = ALL_LESSONS.findIndex(l => l.id === lessonId);
-  return i === 0 || store.isCompleted(ALL_LESSONS[i - 1].id);
+  const chain = TRACK_LESSONS[lesson.track.id];
+  const i = chain.findIndex(l => l.id === lesson.id);
+  return i === 0 || store.isCompleted(chain[i - 1].id);
 }
 
-// ── Home / skill tree ─────────────────────────────────────────
+function trackProgress(track) {
+  const chain = TRACK_LESSONS[track.id];
+  return { done: chain.filter(l => store.isCompleted(l.id)).length, total: chain.length };
+}
+
+// ── Home: track picker ────────────────────────────────────────
 
 function renderHome() {
-  const units = COURSE.map(unit => {
-    const nodes = unit.lessons.map(l => {
-      const done = store.isCompleted(l.id);
-      const unlocked = isUnlocked(l.id);
-      const cls = done ? 'done' : unlocked ? 'open' : 'locked';
-      return `
-        <button class="node ${cls}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
-                style="${done || unlocked ? `--node-color:${unit.color}` : ''}">
-          <span class="node-icon">${done ? '✓' : unlocked ? '★' : '🔒'}</span>
-          <span class="node-title">${esc(l.title)}</span>
-        </button>`;
-    }).join('');
+  const cards = TRACKS.map(t => {
+    const { done, total } = trackProgress(t);
     return `
-      <section class="unit">
-        <header class="unit-header" style="--unit-color:${unit.color}">
-          <div class="unit-glyph">${unit.icon}</div>
-          <div>
-            <h2>${esc(unit.title)}${unit.accent ? ' <span class="badge">ACCENT</span>' : ''}</h2>
-            <p>${esc(unit.blurb)}</p>
+      <button class="track-card" data-track="${t.id}" style="--track-color:${t.color}">
+        <div class="track-glyph">${t.icon}</div>
+        <div class="track-info">
+          <h2>${esc(t.title)}${t.accent ? ' <span class="badge badge-dark">DIALECT</span>' : ''}</h2>
+          <p>${esc(t.blurb)}</p>
+          <div class="track-progress">
+            <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
+            <span>${done}/${total}</span>
           </div>
-        </header>
-        <div class="nodes">${nodes}</div>
-      </section>`;
+        </div>
+        <div class="track-arrow">›</div>
+      </button>`;
   }).join('');
 
   app.innerHTML = `
@@ -57,16 +60,64 @@ function renderHome() {
       </div>
     </header>
     ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
-    <main class="tree">${units}</main>`;
+    <main class="track-list">
+      <h1 class="home-heading">Choose your track</h1>
+      ${cards}
+    </main>`;
 
   document.getElementById('freeplay').addEventListener('click', () => {
     store.freePlay = !store.freePlay;
     renderHome();
   });
+  app.querySelectorAll('.track-card').forEach(btn =>
+    btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
+  );
+}
 
+// ── Track page: that dialect's units & lessons ────────────────
+
+function renderTrack(track) {
+  const units = track.unitIds.map(uid => {
+    const unit = unitById[uid];
+    const nodes = unit.lessons.map(raw => {
+      const l = TRACK_LESSONS[track.id].find(x => x.id === raw.id);
+      const done = store.isCompleted(l.id);
+      const unlocked = isUnlocked(l);
+      const cls = done ? 'done' : unlocked ? 'open' : 'locked';
+      return `
+        <button class="node ${cls}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
+                style="${done || unlocked ? `--node-color:${unit.color}` : ''}">
+          <span class="node-icon">${done ? '✓' : unlocked ? '★' : '🔒'}</span>
+          <span class="node-title">${esc(l.title)}</span>
+        </button>`;
+    }).join('');
+    // Single-unit tracks don't need a second header repeating the track name.
+    const header = track.unitIds.length > 1 ? `
+      <header class="unit-header" style="--unit-color:${unit.color}">
+        <div class="unit-glyph">${unit.icon}</div>
+        <div>
+          <h2>${esc(unit.title)}</h2>
+          <p>${esc(unit.blurb)}</p>
+        </div>
+      </header>` : '';
+    return `<section class="unit">${header}<div class="nodes">${nodes}</div></section>`;
+  }).join('');
+
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="back" id="back" title="All tracks">‹</button>
+      <div class="track-title" style="color:${track.color}">${track.icon} ${esc(track.title)}</div>
+      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+    </header>
+    <main class="tree">
+      <p class="track-blurb">${esc(track.blurb)}</p>
+      ${units}
+    </main>`;
+
+  document.getElementById('back').addEventListener('click', renderHome);
   app.querySelectorAll('.node[data-lesson]').forEach(btn =>
     btn.addEventListener('click', () => {
-      const lesson = ALL_LESSONS.find(l => l.id === btn.dataset.lesson);
+      const lesson = TRACK_LESSONS[track.id].find(l => l.id === btn.dataset.lesson);
       renderGuide(lesson);
     })
   );
@@ -118,7 +169,7 @@ function renderGuide(lesson) {
       </div>
     </main>`;
 
-  document.getElementById('quit').addEventListener('click', renderHome);
+  document.getElementById('quit').addEventListener('click', () => renderTrack(lesson.track));
   document.getElementById('start').addEventListener('click', () => startLesson(lesson));
   app.querySelectorAll('[data-say]').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson) }))
@@ -153,7 +204,7 @@ function lessonChrome(s, body) {
     </header>
     <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback"></footer>`;
-  document.getElementById('quit').addEventListener('click', renderHome);
+  document.getElementById('quit').addEventListener('click', () => renderTrack(s.lesson.track));
 }
 
 function renderExercise(s) {
@@ -341,7 +392,7 @@ function renderResults(s) {
       <p class="end-xp">+${xp} XP${perfect ? ' (perfect bonus)' : ''}</p>
       <button class="btn btn-primary" id="home">Continue</button>
     </main>`;
-  document.getElementById('home').addEventListener('click', renderHome);
+  document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
 }
 
 function renderFail(s) {
@@ -356,7 +407,7 @@ function renderFail(s) {
       </div>
     </main>`;
   document.getElementById('retry').addEventListener('click', () => startLesson(s.lesson));
-  document.getElementById('home').addEventListener('click', renderHome);
+  document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
 }
 
 renderHome();

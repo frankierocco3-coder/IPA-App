@@ -93,4 +93,35 @@ export const COURSE = [
   },
 ];
 
+// Top-level navigation: each track is a self-contained section with its
+// own units, lessons, and unlock chain.
+export const TRACKS = [
+  {
+    id: 'core',
+    title: 'IPA Foundations',
+    icon: 'ʃə',
+    color: '#58cc02',
+    blurb: 'The alphabet itself — every English sound from schwa to /ʒ/. Start here.',
+    unitIds: ['vowels-1', 'vowels-2', 'diphthongs', 'consonants-1', 'consonants-2'],
+  },
+  {
+    id: 'nam',
+    title: 'Neutral American',
+    icon: '🇺🇸',
+    color: '#c0392b',
+    accent: true,
+    blurb: 'The baseline stage accent for American actors — rhotic, flat BATH, open LOT.',
+    unitIds: ['nam'],
+  },
+  {
+    id: 'rp',
+    title: 'RP · Received Pronunciation',
+    icon: '🇬🇧',
+    color: '#2b70c9',
+    accent: true,
+    blurb: 'Standard British for classical text — non-rhotic, broad BATH, centring diphthongs.',
+    unitIds: ['rp'],
+  },
+];
+
 export const EXERCISES_PER_LESSON = 8;
