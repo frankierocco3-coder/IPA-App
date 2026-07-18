@@ -79,6 +79,19 @@ export const COURSE = [
     ],
   },
   {
+    id: 'shift',
+    title: 'Accent Shift Drills',
+    color: '#7c3aed',
+    icon: '⇄',
+    blurb: 'The working actor’s skill: transform a word between accents on command.',
+    lessons: [
+      { id: 'sh-1', title: 'Hear the difference', guide: 'Before you can shift an accent, you have to hear the shift. Same word, two accents: American keeps its r’s and flat vowels; RP drops post-vocalic r and broadens BATH. Listen for /r/ at word ends, /æ/ vs /ɑː/, and where the GOAT glide starts.', phonemes: ['ɑː', 'ɑ', 'æ', 'oʊ', 'əʊ'], types: ['accentEar', 'shiftChoice'] },
+      { id: 'sh-2', title: 'Shift into RP', shiftTo: 'rp', guide: 'Take American words into RP: delete the /r/ unless a vowel follows (and let the vowel lengthen or centre), broaden BATH words from /æ/ to /ɑː/, round LOT to /ɒ/, and start GOAT at schwa: /əʊ/. Your r-colored /ɝ ɚ/ lose their hooks: /ɜː ə/.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ', 'əʊ', 'ə'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'sh-3', title: 'Shift into American', shiftTo: 'nam', guide: 'Now the other direction: restore every written r — bare after vowels (car /kɑr/), hooked in NURSE and lettER (/ɝ ɚ/). Flatten BATH back to /æ/, unround LOT to /ɑ/, and start GOAT back and rounded: /oʊ/.', phonemes: ['ɑ', 'ɝ', 'ɚ', 'æ', 'oʊ'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'sh-4', title: 'Round trip', guide: 'Both directions, mixed and at speed — plus your ear keeping you honest. This is the drill that makes an accent a switch you flip, not a costume you put on slowly.', phonemes: ['ɑː', 'ɑ', 'ɝ', 'ɜː', 'oʊ', 'əʊ', 'æ'], types: ['shiftChoice', 'shiftBuild', 'accentEar'] },
+    ],
+  },
+  {
     id: 'rp',
     title: 'RP: Received Pronunciation',
     color: '#2b70c9',
@@ -121,6 +134,15 @@ export const TRACKS = [
     accent: true,
     blurb: 'Standard British for classical text — non-rhotic, broad BATH, centring diphthongs.',
     unitIds: ['rp'],
+  },
+  {
+    id: 'shift',
+    title: 'Accent Shift Drills',
+    icon: '⇄',
+    color: '#7c3aed',
+    drills: true,
+    blurb: 'Transform words between Neutral American and RP on command — both directions, plus ear training.',
+    unitIds: ['shift'],
   },
 ];
 

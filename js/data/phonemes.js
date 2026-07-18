@@ -103,6 +103,11 @@ export const WORDS = [
   { word: 'zoo', ipa: ['z', 'uː'] },
   { word: 'tour', ipa: ['t', 'ʊə'] },
   { word: 'pure', ipa: ['p', 'j', 'ʊə'] },
+  { word: 'lot', ipa: ['l', 'ɒ', 't'] },
+  { word: 'stop', ipa: ['s', 't', 'ɒ', 'p'] },
+  { word: 'home', ipa: ['h', 'əʊ', 'm'] },
+  { word: 'soap', ipa: ['s', 'əʊ', 'p'] },
+  { word: 'father', ipa: ['f', 'ɑː', 'ð', 'ə'] },
   // RP-specific: non-rhotic + BATH/PALM words
   { word: 'car', ipa: ['k', 'ɑː'], accent: 'rp', note: 'non-rhotic: no /r/ at the end' },
   { word: 'start', ipa: ['s', 't', 'ɑː', 't'], accent: 'rp', note: 'non-rhotic: /r/ before a consonant is dropped' },

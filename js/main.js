@@ -38,7 +38,7 @@ function renderHome() {
       <button class="track-card" data-track="${t.id}" style="--track-color:${t.color}">
         <div class="track-glyph">${t.icon}</div>
         <div class="track-info">
-          <h2>${esc(t.title)}${t.accent ? ' <span class="badge badge-dark">DIALECT</span>' : ''}</h2>
+          <h2>${esc(t.title)}${t.accent ? ' <span class="badge badge-dark">DIALECT</span>' : ''}${t.drills ? ' <span class="badge badge-dark">DRILLS</span>' : ''}</h2>
           <p>${esc(t.blurb)}</p>
           <div class="track-progress">
             <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
@@ -222,12 +222,16 @@ function audioButton(ex) {
     : '';
 }
 
+function exLang(s, ex) {
+  return ex.lang ?? langFor(s.lesson);
+}
+
 function wireAudio(s, ex, onFirstPlay) {
   const btn = document.getElementById('speaker');
   if (!btn) return;
   let played = false;
   btn.addEventListener('click', () => {
-    speak(ex.audioText, { lang: langFor(s.lesson) });
+    speak(ex.audioText, { lang: exLang(s, ex) });
     if (!played) { played = true; onFirstPlay?.(); }
   });
 }
@@ -273,7 +277,7 @@ function renderChoice(s, ex) {
     document.querySelectorAll('.choice').forEach(b => (b.disabled = false));
     document.getElementById('choices')?.classList.remove('gated');
   });
-  if (ex.audioText && !gated) setTimeout(() => speak(ex.audioText, { lang: langFor(s.lesson) }), 300);
+  if (ex.audioText && !gated) setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex) }), 300);
 
   document.querySelectorAll('.choice').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -344,7 +348,7 @@ function renderBuild(s, ex) {
     <button class="btn btn-primary" id="check" disabled>Check</button>`);
 
   wireAudio(s, ex);
-  setTimeout(() => speak(ex.audioText, { lang: langFor(s.lesson) }), 300);
+  setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex) }), 300);
 
   const chosen = [];
   const answerEl = document.getElementById('answer');

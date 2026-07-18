@@ -17,6 +17,16 @@ const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p =>
 
 const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American' };
 
+// Word pairs that exist in both accents: the raw material for shift
+// drills. The RP form is the rp-tagged entry, or the untagged one
+// (core transcriptions use RP as the reference accent).
+const SHIFT_PAIRS = WORDS.filter(w => w.accent === 'nam')
+  .map(nam => {
+    const rp = WORDS.find(x => x.word === nam.word && (x.accent === 'rp' || !x.accent));
+    return rp ? { word: nam.word, rp, nam } : null;
+  })
+  .filter(Boolean);
+
 // ── Individual generators ─────────────────────────────────────
 
 function genSymbolToWord(target, accent) {
@@ -176,6 +186,76 @@ function genAccentFact(accent) {
   };
 }
 
+// ── Shift drills: transform a word between accents ────────────
+
+const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US' };
+
+function genShiftChoice(to) {
+  const from = to === 'rp' ? 'nam' : 'rp';
+  const pair = pick(SHIFT_PAIRS);
+  const src = pair[from].ipa;
+  const target = pair[to].ipa;
+  const wrongs = ACCENT_ERRORS[to].map(fn => fn(target));
+  // the untransformed source form is the most tempting distractor
+  wrongs.unshift(src);
+  const uniqueWrongs = [...new Map(wrongs.map(w => [w.join(''), w])).values()]
+    .filter(w => w.join('') !== target.join(''))
+    .slice(0, 3);
+  if (uniqueWrongs.length < 2) return null;
+  const choices = shuffle([
+    { label: '/' + target.join('') + '/', ok: true },
+    ...uniqueWrongs.map(w => ({ label: '/' + w.join('') + '/' })),
+  ]);
+  return {
+    type: 'choice',
+    prompt: `In ${ACCENT_NAMES[from]}, “${pair.word}” is /${src.join('')}/. How does ${ACCENT_NAMES[to]} say it?`,
+    display: pair.word,
+    audioText: pair.word,
+    lang: ACCENT_TTS_LANG[to],
+    choices,
+    explain: `${ACCENT_NAMES[to]}: /${target.join('')}/${pair[to].note ? ` — ${pair[to].note}` : ''}`,
+  };
+}
+
+function genShiftBuild(to) {
+  const from = to === 'rp' ? 'nam' : 'rp';
+  const pair = pick(SHIFT_PAIRS.filter(p => p[to].ipa.length <= 5));
+  const target = pair[to].ipa;
+  // distractor tiles: segments from the source form the learner must NOT
+  // carry over, plus a couple of random others
+  const sourceOnly = pair[from].ipa.filter(p => !target.includes(p));
+  const filler = shuffle(Object.keys(PHONEMES).filter(p => !target.includes(p) && !sourceOnly.includes(p))).slice(0, 2);
+  return {
+    type: 'build',
+    prompt: `“${pair.word}” is /${pair[from].ipa.join('')}/ in ${ACCENT_NAMES[from]}. Build it in ${ACCENT_NAMES[to]}.`,
+    audioText: pair.word,
+    lang: ACCENT_TTS_LANG[to],
+    display: pair.word,
+    target: [...target],
+    tiles: shuffle([...target].concat(sourceOnly, filler)),
+    explain: `${ACCENT_NAMES[to]}: /${target.join('')}/${pair[to].note ? ` — ${pair[to].note}` : ''}`,
+  };
+}
+
+function genAccentEar() {
+  const pair = pick(SHIFT_PAIRS);
+  const said = pick(['rp', 'nam']);
+  const choices = shuffle(['rp', 'nam'].map(a => ({
+    label: ACCENT_NAMES[a],
+    sub: '/' + pair[a].ipa.join('') + '/',
+    ok: a === said,
+  })));
+  return {
+    type: 'choice',
+    prompt: `Listen to “${pair.word}”. Which accent did you hear?`,
+    audioText: pair.word,
+    lang: ACCENT_TTS_LANG[said],
+    hideUntilPlayed: true,
+    choices,
+    explain: `That was ${ACCENT_NAMES[said]}: /${pair[said].ipa.join('')}/.`,
+  };
+}
+
 // ── Lesson assembly ───────────────────────────────────────────
 
 const GENERATORS = {
@@ -186,6 +266,9 @@ const GENERATORS = {
   build: l => genBuild(l.phonemes, { accent: l.accent }),
   minimalPair: () => genMinimalPair(),
   accentFact: l => genAccentFact(l.accent),
+  shiftChoice: l => genShiftChoice(l.shiftTo ?? pick(['rp', 'nam'])),
+  shiftBuild: l => genShiftBuild(l.shiftTo ?? pick(['rp', 'nam'])),
+  accentEar: () => genAccentEar(),
 };
 
 export function generateLesson(lesson) {
