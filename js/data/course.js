@@ -65,8 +65,18 @@ export const COURSE = [
     ],
   },
   {
+    id: 'nam-intro',
+    title: 'Stage 1 · Orientation',
+    color: '#c0392b',
+    icon: '📍',
+    blurb: 'What Neutral American is, and why actors start here.',
+    lessons: [
+      { id: 'nam-0', title: 'Meet the accent', accent: 'nam', guide: 'Neutral American is the actor’s home base: American speech with the regional fingerprints sanded off — nobody can place you in Boston, Texas, or Chicago. It’s rhotic (every r is spoken), BATH words stay flat /æ/, LOT opens to /ɑ/, and GOAT starts back and rounded at /oʊ/. Directors reach for it whenever the script doesn’t say otherwise, which is why it’s the standard every other accent gets measured against. This first lesson is a gentle tour — the stages after it go deep.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'æ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+    ],
+  },
+  {
     id: 'nam',
-    title: 'Neutral American',
+    title: 'Stage 2 · The Sounds',
     color: '#c0392b',
     icon: '🇺🇸',
     accent: true,
@@ -76,6 +86,27 @@ export const COURSE = [
       { id: 'nam-2', title: 'Flat BATH, open LOT', accent: 'nam', guide: 'Two vowels separate American from British at a glance. BATH words keep flat /æ/ — bath, dance, grass, ask — where RP broadens to /ɑː/. And LOT words open and unround to /ɑ/ — lot, stop, father — where RP keeps rounded /ɒ/.', phonemes: ['æ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
       { id: 'nam-3', title: 'The American GOAT', accent: 'nam', guide: 'The GOAT diphthong starts differently on each side of the Atlantic. American /oʊ/ begins back and rounded (go, home, soap); RP /əʊ/ begins at the neutral schwa. Your ear will catch it faster than your eye.', phonemes: ['oʊ', 'ɑ', 'ɚ'], types: ['accentFact', 'soundToSymbol', 'build'] },
       { id: 'nam-4', title: 'Transcribe American', accent: 'nam', guide: 'Full Neutral American transcriptions. Keep every /r/, keep BATH flat at /æ/, open LOT to /ɑ/, start GOAT at /oʊ/, and give r-colored vowels their hooks: /ɝ/ stressed, /ɚ/ unstressed.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ'], types: ['build', 'accentFact', 'soundToSymbol'] },
+    ],
+  },
+  {
+    id: 'nam-shift',
+    title: 'Stage 3 · Shift Work',
+    color: '#c0392b',
+    icon: '🔧',
+    blurb: 'Arriving at Neutral American from British forms — the actor’s transformation skill.',
+    lessons: [
+      { id: 'nam-s1', title: 'Into American I', shiftTo: 'nam', guide: 'You know the sounds; now practice arriving at them. Given the British form of a word, produce the American one: restore the r’s, flatten BATH to /æ/, unround LOT to /ɑ/. The wrong answers will tempt you with the form you started from — that’s the trap your mouth sets on stage too.', phonemes: ['ɑ', 'ɝ', 'ɚ', 'æ'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'nam-s2', title: 'Into American II', shiftTo: 'nam', guide: 'Same skill, harder mix — building transcriptions from the British form and checking your ear between rounds. By the end of this stage the shift should feel like flipping a switch.', phonemes: ['ɑ', 'ɝ', 'ɚ', 'oʊ', 'æ'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
+    ],
+  },
+  {
+    id: 'nam-mastery',
+    title: 'Stage 4 · Mastery',
+    color: '#c0392b',
+    icon: '🏆',
+    blurb: 'The final: everything from every stage, mixed and at speed.',
+    lessons: [
+      { id: 'nam-final', title: 'Neutral American final', accent: 'nam', shiftTo: 'nam', count: 12, guide: 'Twelve questions, every exercise type, everything the course taught: the r-colored vowels, flat BATH, open LOT, American GOAT, full transcriptions, shifts from British forms, and your ear. Pass this and Neutral American is yours — the course is complete.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'æ'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
     ],
   },
   {
@@ -92,8 +123,18 @@ export const COURSE = [
     ],
   },
   {
+    id: 'rp-intro',
+    title: 'Stage 1 · Orientation',
+    color: '#2b70c9',
+    icon: '📍',
+    blurb: 'What RP is, and where it lives in classical theatre.',
+    lessons: [
+      { id: 'rp-0', title: 'Meet the accent', accent: 'rp', guide: 'Received Pronunciation is the prestige British accent of the classical stage — Shakespeare, Wilde, Shaw, and every butler ever written. Its signature moves: the written r goes silent unless a vowel follows (car /kɑː/), BATH words broaden to /ɑː/, LOT stays rounded /ɒ/, and GOAT starts at the neutral schwa: /əʊ/. Where an r vanished, a long vowel or centring diphthong stands in its place. This lesson is the guided tour; the stages after it build the accent piece by piece.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ', 'əʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+    ],
+  },
+  {
     id: 'rp',
-    title: 'RP: Received Pronunciation',
+    title: 'Stage 2 · The Sounds',
     color: '#2b70c9',
     icon: '🇬🇧',
     accent: true,
@@ -102,6 +143,27 @@ export const COURSE = [
       { id: 'rp-1', title: 'Where did the R go?', accent: 'rp', guide: 'RP is non-rhotic: /r/ is only pronounced before a vowel. Everywhere else it vanished, leaving a long vowel or centring diphthong behind — car /kɑː/, north /nɔːθ/, word /wɜːd/, here /hɪə/.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['accentFact', 'build', 'soundToSymbol'] },
       { id: 'rp-2', title: 'The BATH split', accent: 'rp', guide: 'In RP, a set of words spelled with \'a\' — bath, dance, grass, ask — take long /ɑː/ instead of flat /æ/. This BATH split is one of the sharpest dividers between RP and most other accents.', phonemes: ['ɑː', 'æ'], types: ['accentFact', 'build', 'minimalPair'] },
       { id: 'rp-3', title: 'Transcribe like the BBC', accent: 'rp', guide: 'Everything together: transcribe full words the way an RP speaker says them. Remember — no /r/ unless a vowel follows, BATH words take /ɑː/, and unstressed syllables collapse to schwa.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'accentFact', 'soundToSymbol'] },
+    ],
+  },
+  {
+    id: 'rp-shift',
+    title: 'Stage 3 · Shift Work',
+    color: '#2b70c9',
+    icon: '🔧',
+    blurb: 'Arriving at RP from American forms — the transformation drilled both ways.',
+    lessons: [
+      { id: 'rp-s1', title: 'Into RP I', shiftTo: 'rp', guide: 'Given the American form, produce the RP one: delete the r unless a vowel follows and let the vowel lengthen or centre in its place, broaden BATH to /ɑː/, round LOT to /ɒ/. Watch for the trap answers — they’re the American habits you’re leaving behind.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'rp-s2', title: 'Into RP II', shiftTo: 'rp', guide: 'Heavier building work, plus ear checks: hear a word cold and know instantly whether it’s RP. The hooks come off the r-colored vowels — /ɝ/ becomes /ɜː/, /ɚ/ becomes plain schwa.', phonemes: ['ɑː', 'ɜː', 'ə', 'əʊ', 'ɪə'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
+    ],
+  },
+  {
+    id: 'rp-mastery',
+    title: 'Stage 4 · Mastery',
+    color: '#2b70c9',
+    icon: '🏆',
+    blurb: 'The final: the whole accent, mixed and at speed.',
+    lessons: [
+      { id: 'rp-final', title: 'RP final', accent: 'rp', shiftTo: 'rp', count: 12, guide: 'Twelve questions across every exercise type: silent r’s, broad BATH, rounded LOT, centring diphthongs, full transcriptions, shifts from American forms, and ear checks. Pass it and the course is complete — RP earned, not worn.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ', 'əʊ', 'ɪə'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
     ],
   },
 ];
@@ -123,8 +185,8 @@ export const TRACKS = [
     icon: '🇺🇸',
     color: '#c0392b',
     accent: true,
-    blurb: 'The baseline stage accent for American actors — rhotic, flat BATH, open LOT.',
-    unitIds: ['nam'],
+    blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
+    unitIds: ['nam-intro', 'nam', 'nam-shift', 'nam-mastery'],
   },
   {
     id: 'rp',
@@ -132,8 +194,8 @@ export const TRACKS = [
     icon: '🇬🇧',
     color: '#2b70c9',
     accent: true,
-    blurb: 'Standard British for classical text — non-rhotic, broad BATH, centring diphthongs.',
-    unitIds: ['rp'],
+    blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
+    unitIds: ['rp-intro', 'rp', 'rp-shift', 'rp-mastery'],
   },
   {
     id: 'shift',

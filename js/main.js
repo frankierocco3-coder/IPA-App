@@ -29,6 +29,26 @@ function trackProgress(track) {
   return { done: chain.filter(l => store.isCompleted(l.id)).length, total: chain.length };
 }
 
+const TRACK_ACCENT = { nam: 'nam', rp: 'rp' };
+
+// A synthetic lesson drawing on everything the track teaches.
+function practiceLesson(track) {
+  const chain = TRACK_LESSONS[track.id];
+  const phonemes = [...new Set(chain.flatMap(l => l.phonemes ?? []))];
+  const types = [...new Set(chain.flatMap(l => l.types ?? []))];
+  if (!types.includes('fillBlank') && track.id !== 'shift') types.push('fillBlank');
+  return {
+    id: 'practice-' + track.id,
+    title: track.title + ' — practice',
+    practice: true,
+    accent: TRACK_ACCENT[track.id],
+    shiftTo: TRACK_ACCENT[track.id],
+    phonemes,
+    types,
+    track,
+  };
+}
+
 // ── Home: track picker ────────────────────────────────────────
 
 function renderHome() {
@@ -38,7 +58,7 @@ function renderHome() {
       <button class="track-card" data-track="${t.id}" style="--track-color:${t.color}">
         <div class="track-glyph">${t.icon}</div>
         <div class="track-info">
-          <h2>${esc(t.title)}${t.accent ? ' <span class="badge badge-dark">DIALECT</span>' : ''}${t.drills ? ' <span class="badge badge-dark">DRILLS</span>' : ''}</h2>
+          <h2>${esc(t.title)}${t.accent ? ' <span class="badge badge-dark">DIALECT</span>' : ''}${t.drills ? ' <span class="badge badge-dark">DRILLS</span>' : ''}${trackProgress(t).done === trackProgress(t).total ? ' <span class="badge badge-gold">🎓 MASTERED</span>' : ''}</h2>
           <p>${esc(t.blurb)}</p>
           <div class="track-progress">
             <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
@@ -111,10 +131,14 @@ function renderTrack(track) {
     </header>
     <main class="tree">
       <p class="track-blurb">${esc(track.blurb)}</p>
+      <div class="practice-row">
+        <button class="btn btn-practice" id="practice">🎯 Practice — mixed review, no hearts lost</button>
+      </div>
       ${units}
     </main>`;
 
   document.getElementById('back').addEventListener('click', renderHome);
+  document.getElementById('practice').addEventListener('click', () => startLesson(practiceLesson(track)));
   app.querySelectorAll('.node[data-lesson]').forEach(btn =>
     btn.addEventListener('click', () => {
       const lesson = TRACK_LESSONS[track.id].find(l => l.id === btn.dataset.lesson);
@@ -246,7 +270,7 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true } = {}) {
     </div>
     <button class="btn continue ${ok ? '' : 'btn-red'}" id="continue">Continue</button>`;
   if (!ok) {
-    if (penalty) s.hearts--;
+    if (penalty && !s.lesson.practice) s.hearts--;
     s.mistakes++;
     if (requeue && s.hearts > 0) s.queue.push({ ...ex });
   }
@@ -387,12 +411,32 @@ function renderBuild(s, ex) {
 
 function renderResults(s) {
   const perfect = s.mistakes === 0;
+  if (s.lesson.practice) {
+    const xp = 5 + (perfect ? 2 : 0);
+    store.addXp(xp);
+    app.innerHTML = `
+      <main class="end-screen">
+        <div class="end-emoji">🎯</div>
+        <h1>${perfect ? 'Flawless practice!' : 'Practice complete!'}</h1>
+        <p class="end-xp">+${xp} XP</p>
+        <div class="end-actions">
+          <button class="btn btn-primary" id="again">Practice again</button>
+          <button class="btn" id="home">Done</button>
+        </div>
+      </main>`;
+    document.getElementById('again').addEventListener('click', () => startLesson(practiceLesson(s.lesson.track)));
+    document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
+    return;
+  }
   const xp = 10 + (perfect ? 5 : 0);
   store.recordLesson(s.lesson.id, xp);
+  const { done, total } = trackProgress(s.lesson.track);
+  const mastered = done === total;
   app.innerHTML = `
     <main class="end-screen">
-      <div class="end-emoji">${perfect ? '🏆' : '🎉'}</div>
-      <h1>${perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
+      <div class="end-emoji">${mastered ? '🎓' : perfect ? '🏆' : '🎉'}</div>
+      <h1>${mastered ? 'Course complete!' : perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
+      ${mastered ? `<p>${esc(s.lesson.track.title)} — mastered, start to finish.</p>` : ''}
       <p class="end-xp">+${xp} XP${perfect ? ' (perfect bonus)' : ''}</p>
       <button class="btn btn-primary" id="home">Continue</button>
     </main>`;

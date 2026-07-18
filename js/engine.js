@@ -186,6 +186,36 @@ function genAccentFact(accent) {
   };
 }
 
+// Fill in the blank: one segment of a transcription is missing.
+function genFillBlank(lessonPhonemes, accent) {
+  const pool = (accent ? WORDS.filter(w => w.accent === accent) : poolFor(null))
+    .filter(w => w.ipa.length >= 2);
+  const preferred = pool.filter(w => w.ipa.some(p => lessonPhonemes.includes(p)));
+  const entry = pick(preferred.length ? preferred : pool);
+  const targetable = entry.ipa
+    .map((p, i) => ({ p, i }))
+    .filter(x => lessonPhonemes.includes(x.p));
+  const { p: target, i: blankAt } = targetable.length ? pick(targetable)
+    : { p: entry.ipa[0], i: 0 };
+  const pattern = entry.ipa.map((p, i) => (i === blankAt ? ' _ ' : p)).join('');
+  const sameType = q => PHONEMES[q]?.type === PHONEMES[target]?.type;
+  const distractors = shuffle(Object.keys(PHONEMES).filter(q =>
+    q !== target && sameType(q) &&
+    entry.ipa.map((p, i) => (i === blankAt ? q : p)).join('') !== entry.ipa.join('')
+  )).slice(0, 3);
+  if (distractors.length < 3) return null;
+  const choices = shuffle([{ label: target, ok: true }, ...distractors.map(d => ({ label: d }))]);
+  return {
+    type: 'choice',
+    prompt: `Fill in the blank: complete the transcription of “${entry.word}”.`,
+    display: `/${pattern}/`,
+    audioText: entry.word,
+    lang: accent ? ACCENT_TTS_LANG[accent] : undefined,
+    choices,
+    explain: `“${entry.word}” = ${ipaString(entry)}${entry.note ? ` — ${entry.note}` : ''}`,
+  };
+}
+
 // ── Shift drills: transform a word between accents ────────────
 
 const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US' };
@@ -269,13 +299,15 @@ const GENERATORS = {
   shiftChoice: l => genShiftChoice(l.shiftTo ?? pick(['rp', 'nam'])),
   shiftBuild: l => genShiftBuild(l.shiftTo ?? pick(['rp', 'nam'])),
   accentEar: () => genAccentEar(),
+  fillBlank: l => genFillBlank(l.phonemes, l.accent),
 };
 
 export function generateLesson(lesson) {
+  const count = lesson.count ?? EXERCISES_PER_LESSON;
   const exercises = [];
   const seen = new Set();
   let guard = 0;
-  while (exercises.length < EXERCISES_PER_LESSON && guard++ < 300) {
+  while (exercises.length < count && guard++ < 400) {
     // Rotate through types; the guard offset means an exhausted type
     // (no fresh material left) falls through to the others.
     const type = lesson.types[(exercises.length + Math.floor(guard / 15)) % lesson.types.length];

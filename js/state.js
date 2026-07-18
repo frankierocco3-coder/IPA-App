@@ -18,6 +18,15 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function touchStreak(s) {
+  const today = todayStr();
+  if (s.lastPlayed !== today) {
+    const yesterday = new Date(Date.now() - 86400e3).toISOString().slice(0, 10);
+    s.streak = s.lastPlayed === yesterday ? (s.streak ?? 0) + 1 : 1;
+    s.lastPlayed = today;
+  }
+}
+
 export const store = {
   get xp() { return load().xp ?? 0; },
   get streak() { return load().streak ?? 0; },
@@ -29,13 +38,15 @@ export const store = {
     const s = load();
     s.xp = (s.xp ?? 0) + xpEarned;
     s.completed = [...new Set([...(s.completed ?? []), lessonId])];
+    touchStreak(s);
+    save(s);
+  },
 
-    const today = todayStr();
-    if (s.lastPlayed !== today) {
-      const yesterday = new Date(Date.now() - 86400e3).toISOString().slice(0, 10);
-      s.streak = s.lastPlayed === yesterday ? (s.streak ?? 0) + 1 : 1;
-      s.lastPlayed = today;
-    }
+  // Practice sessions: XP and streak, but no lesson gets marked complete.
+  addXp(xpEarned) {
+    const s = load();
+    s.xp = (s.xp ?? 0) + xpEarned;
+    touchStreak(s);
     save(s);
   },
 
