@@ -1,7 +1,7 @@
 // Exercise generator. Everything is derived from PHONEMES/WORDS so that
 // distractors are provably wrong (checked against real transcriptions).
 
-import { PHONEMES, WORDS, MINIMAL_PAIRS } from './data/phonemes.js';
+import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
 import { EXERCISES_PER_LESSON } from './data/course.js';
 
 const shuffle = arr => arr.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
@@ -216,6 +216,133 @@ function genFillBlank(lessonPhonemes, accent) {
   };
 }
 
+// ── Reading & writing: spelling ↔ transcription ───────────────
+
+const refEntry = w => WORDS.find(x => x.word === w && !x.accent) ?? WORDS.find(x => x.word === w);
+const wordIpa = w => refEntry(w).ipa;
+const sentenceIpa = words => words.map(w => wordIpa(w).join('')).join(' ');
+const MP_PARTNER = Object.fromEntries(MINIMAL_PAIRS.flatMap(([a, b]) => [[a, b], [b, a]]));
+
+// Show a transcription; the learner types the English spelling.
+function genTypeWord() {
+  const entry = pick(poolFor(null).filter(w => w.ipa.length >= 2 && w.word.length >= 3));
+  return {
+    type: 'typein',
+    prompt: 'Read the IPA. Type the English spelling.',
+    display: ipaString(entry),
+    answer: entry.word,
+    explain: `${ipaString(entry)} spells “${entry.word}”.`,
+  };
+}
+
+// Show a transcription; the English spelling has missing letters.
+function genSpellBlank() {
+  const entry = pick(poolFor(null).filter(w => w.word.length >= 3));
+  const word = entry.word;
+  const len = Math.min(1 + Math.floor(Math.random() * 2), word.length - 1);
+  const start = 1 + Math.floor(Math.random() * (word.length - len));
+  const chunk = word.slice(start, start + len);
+  const pattern = word.slice(0, start) + '_'.repeat(len) + word.slice(start + len);
+  const chunkPool = [...new Set(
+    poolFor(null).flatMap(w => {
+      const s = w.word;
+      const out = [];
+      for (let i = 0; i + len <= s.length; i++) out.push(s.slice(i, i + len));
+      return out;
+    })
+  )].filter(c => c !== chunk && word.slice(0, start) + c + word.slice(start + len) !== word);
+  const distractors = shuffle(chunkPool).slice(0, 3);
+  if (distractors.length < 3) return null;
+  const choices = shuffle([{ label: chunk, ok: true }, ...distractors.map(d => ({ label: d }))]);
+  return {
+    type: 'choice',
+    prompt: 'Complete the English spelling of this word.',
+    display: `${ipaString(entry)}  →  ${pattern}`,
+    smallDisplay: true,
+    choices,
+    explain: `${ipaString(entry)} spells “${word}”.`,
+  };
+}
+
+// A transcription with several gaps, filled from tiles.
+function genGapBuild(lessonPhonemes) {
+  const entry = pick(poolFor(null).filter(w => w.ipa.length >= 3));
+  const idxs = shuffle(entry.ipa.map((_, i) => i));
+  const preferred = idxs.filter(i => lessonPhonemes.includes(entry.ipa[i]));
+  const gapCount = Math.min(2, entry.ipa.length - 1);
+  const gaps = [...new Set([...preferred, ...idxs])].slice(0, gapCount).sort((a, b) => a - b);
+  const answers = gaps.map(i => entry.ipa[i]);
+  const distractorTiles = shuffle(Object.keys(PHONEMES).filter(p => !entry.ipa.includes(p))).slice(0, 3);
+  return {
+    type: 'gapbuild',
+    prompt: `Fill the gaps in the transcription of “${entry.word}”.`,
+    audioText: entry.word,
+    display: entry.word,
+    pattern: entry.ipa.map((p, i) => (gaps.includes(i) ? null : p)),
+    answers,
+    tiles: shuffle(answers.concat(distractorTiles)),
+    explain: `“${entry.word}” = ${ipaString(entry)}`,
+  };
+}
+
+// Distractor sentences: swap one word for its minimal pair (or another word).
+function sentenceVariants(words, n) {
+  const out = [];
+  const guardLimit = 40;
+  let guard = 0;
+  while (out.length < n && guard++ < guardLimit) {
+    const copy = [...words];
+    const swapIdxs = shuffle(copy.map((_, i) => i));
+    const mpIdx = swapIdxs.find(i => MP_PARTNER[copy[i]]);
+    if (mpIdx !== undefined && Math.random() < 0.7) {
+      copy[mpIdx] = MP_PARTNER[copy[mpIdx]];
+    } else {
+      const i = swapIdxs[0];
+      const alt = pick(poolFor(null).filter(w => w.word !== copy[i] && w.word.length >= 3));
+      copy[i] = alt.word;
+    }
+    const text = copy.join(' ');
+    if (text !== words.join(' ') && !out.includes(text)) out.push(text);
+  }
+  return out;
+}
+
+function genSentenceToEnglish() {
+  const words = pick(SENTENCES);
+  const distractors = sentenceVariants(words, 3);
+  if (distractors.length < 2) return null;
+  const choices = shuffle([
+    { label: words.join(' '), ok: true },
+    ...distractors.map(d => ({ label: d })),
+  ]);
+  return {
+    type: 'choice',
+    prompt: 'Read the IPA sentence. What does it say?',
+    display: `/${sentenceIpa(words)}/`,
+    smallDisplay: true,
+    choices,
+    explain: `/${sentenceIpa(words)}/ = “${words.join(' ')}”`,
+  };
+}
+
+function genEnglishToIpa() {
+  const words = pick(SENTENCES);
+  const distractors = sentenceVariants(words, 3).map(v => '/' + sentenceIpa(v.split(' ')) + '/');
+  if (distractors.length < 2) return null;
+  const choices = shuffle([
+    { label: '/' + sentenceIpa(words) + '/', ok: true },
+    ...distractors.map(d => ({ label: d })),
+  ]);
+  return {
+    type: 'choice',
+    prompt: `Which is the correct transcription of: “${words.join(' ')}”?`,
+    display: words.join(' '),
+    smallDisplay: true,
+    choices,
+    explain: `“${words.join(' ')}” = /${sentenceIpa(words)}/`,
+  };
+}
+
 // ── Shift drills: transform a word between accents ────────────
 
 const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US' };
@@ -300,6 +427,11 @@ const GENERATORS = {
   shiftBuild: l => genShiftBuild(l.shiftTo ?? pick(['rp', 'nam'])),
   accentEar: () => genAccentEar(),
   fillBlank: l => genFillBlank(l.phonemes, l.accent),
+  typeWord: () => genTypeWord(),
+  spellBlank: () => genSpellBlank(),
+  gapBuild: l => genGapBuild(l.phonemes),
+  sentenceToEnglish: () => genSentenceToEnglish(),
+  englishToIpa: () => genEnglishToIpa(),
 };
 
 export function generateLesson(lesson) {

@@ -108,6 +108,22 @@ export const WORDS = [
   { word: 'home', ipa: ['h', 'əʊ', 'm'] },
   { word: 'soap', ipa: ['s', 'əʊ', 'p'] },
   { word: 'father', ipa: ['f', 'ɑː', 'ð', 'ə'] },
+  // Function words & sentence glue (RP reference forms)
+  { word: 'the', ipa: ['ð', 'ə'] },
+  { word: 'is', ipa: ['ɪ', 'z'] },
+  { word: 'a', ipa: ['ə'] },
+  { word: 'on', ipa: ['ɒ', 'n'] },
+  { word: 'in', ipa: ['ɪ', 'n'] },
+  { word: 'at', ipa: ['æ', 't'] },
+  { word: 'my', ipa: ['m', 'aɪ'] },
+  { word: 'we', ipa: ['w', 'iː'] },
+  { word: 'you', ipa: ['j', 'uː'] },
+  { word: 'i', ipa: ['aɪ'] },
+  { word: 'can', ipa: ['k', 'æ', 'n'] },
+  { word: 'say', ipa: ['s', 'eɪ'] },
+  { word: 'see', ipa: ['s', 'iː'] },
+  { word: 'was', ipa: ['w', 'ɒ', 'z'] },
+  { word: 'big', ipa: ['b', 'ɪ', 'g'] },
   // RP-specific: non-rhotic + BATH/PALM words
   { word: 'car', ipa: ['k', 'ɑː'], accent: 'rp', note: 'non-rhotic: no /r/ at the end' },
   { word: 'start', ipa: ['s', 't', 'ɑː', 't'], accent: 'rp', note: 'non-rhotic: /r/ before a consonant is dropped' },
@@ -145,4 +161,23 @@ export const WORDS = [
 export const MINIMAL_PAIRS = [
   ['ship', 'sheep'], ['cat', 'cut'], ['bed', 'bad'],
   ['full', 'fool'], ['thin', 'this'], ['chip', 'ship'],
+];
+
+// Original practice sentences for reading exercises. Every word must
+// have an untagged (RP-reference) entry in WORDS.
+export const SENTENCES = [
+  ['the', 'cat', 'is', 'on', 'the', 'bed'],
+  ['the', 'ship', 'is', 'big'],
+  ['the', 'sheep', 'is', 'big'],
+  ['this', 'jam', 'is', 'bad'],
+  ['we', 'see', 'the', 'zoo', 'now'],
+  ['my', 'teacher', 'can', 'sing'],
+  ['the', 'boy', 'is', 'at', 'home'],
+  ['i', 'think', 'about', 'the', 'day'],
+  ['the', 'nurse', 'can', 'go', 'now'],
+  ['we', 'wash', 'the', 'yellow', 'sofa'],
+  ['the', 'fool', 'is', 'full'],
+  ['you', 'can', 'say', 'yes'],
+  ['my', 'father', 'was', 'at', 'the', 'zoo'],
+  ['the', 'thin', 'boy', 'can', 'think'],
 ];

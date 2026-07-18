@@ -227,6 +227,22 @@ body {
 .tile { font-size: 22px; min-width: 54px; }
 .tile.placed { background: #e3f4ff; border-color: #1cb0f6; }
 
+/* ── Type-in & gap-fill ── */
+.type-input {
+  font: inherit; font-size: 22px; font-weight: 700; text-align: center;
+  border: 2px solid var(--line); border-radius: 14px; padding: 12px 18px;
+  width: 100%; max-width: 340px; outline: none;
+}
+.type-input:focus { border-color: #1cb0f6; }
+.type-input.right { border-color: var(--green); background: #eaffd6; }
+.type-input.wrong { border-color: var(--red); background: #ffe3e3; }
+.gap-row { border-bottom: none; }
+.fixed-seg { font-size: 22px; font-weight: 800; padding: 0 2px; }
+.tile.slot {
+  min-width: 46px; min-height: 46px; border-style: dashed; color: var(--muted);
+}
+.tile.slot.filled { border-style: solid; background: #e3f4ff; border-color: #1cb0f6; color: var(--ink); }
+
 /* ── Feedback bar ── */
 .feedback {
   position: fixed; bottom: 0; left: 0; right: 0;

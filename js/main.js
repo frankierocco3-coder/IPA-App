@@ -237,6 +237,8 @@ function renderExercise(s) {
   const ex = s.queue[s.index];
   if (ex.type === 'match') renderMatch(s, ex);
   else if (ex.type === 'build') renderBuild(s, ex);
+  else if (ex.type === 'gapbuild') renderGapBuild(s, ex);
+  else if (ex.type === 'typein') renderTypein(s, ex);
   else renderChoice(s, ex);
 }
 
@@ -402,6 +404,85 @@ function renderBuild(s, ex) {
 
   checkBtn.addEventListener('click', () => {
     const ok = chosen.map(c => c.t).join(' ') === ex.target.join(' ');
+    checkBtn.disabled = true;
+    showFeedback(s, ok, ex);
+  });
+}
+
+function renderTypein(s, ex) {
+  lessonChrome(s, `
+    <h1 class="prompt">${esc(ex.prompt)}</h1>
+    <div class="display-card">${audioButton(ex)}<span>${esc(ex.display)}</span></div>
+    <input class="type-input" id="answer-input" type="text" autocomplete="off"
+           autocapitalize="none" spellcheck="false" placeholder="type the word…" />
+    <button class="btn btn-primary" id="check" disabled>Check</button>`);
+
+  wireAudio(s, ex);
+  const input = document.getElementById('answer-input');
+  const checkBtn = document.getElementById('check');
+  input.focus();
+  input.addEventListener('input', () => { checkBtn.disabled = !input.value.trim(); });
+  const submit = () => {
+    if (!input.value.trim()) return;
+    input.disabled = true;
+    checkBtn.disabled = true;
+    const ok = input.value.trim().toLowerCase() === ex.answer.toLowerCase();
+    input.classList.add(ok ? 'right' : 'wrong');
+    showFeedback(s, ok, ex);
+  };
+  checkBtn.addEventListener('click', submit);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+}
+
+function renderGapBuild(s, ex) {
+  const slotRow = ex.pattern.map((p, i) =>
+    p === null
+      ? `<button class="btn tile slot" data-slot="${i}"></button>`
+      : `<span class="fixed-seg">${esc(p)}</span>`
+  ).join('');
+  lessonChrome(s, `
+    <h1 class="prompt">${esc(ex.prompt)}</h1>
+    <div class="display-card">${audioButton(ex)}<span>${esc(ex.display)}</span></div>
+    <div class="answer-row gap-row" id="answer"><span class="slash">/</span>${slotRow}<span class="slash">/</span></div>
+    <div class="tile-bank" id="bank">
+      ${ex.tiles.map((t, i) => `<button class="btn tile" data-t="${esc(t)}" data-i="${i}">${esc(t)}</button>`).join('')}
+    </div>
+    <button class="btn btn-primary" id="check" disabled>Check</button>`);
+
+  wireAudio(s, ex);
+  setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex) }), 300);
+
+  const slots = [...document.querySelectorAll('.slot')];
+  const checkBtn = document.getElementById('check');
+  const filled = {}; // slot index -> {t, bankBtn}
+
+  const refresh = () => { checkBtn.disabled = slots.some(sl => !filled[sl.dataset.slot]); };
+
+  document.querySelectorAll('#bank .tile').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const empty = slots.find(sl => !filled[sl.dataset.slot]);
+      if (!empty) return;
+      filled[empty.dataset.slot] = { t: btn.dataset.t, bankBtn: btn };
+      empty.textContent = btn.dataset.t;
+      empty.classList.add('filled');
+      btn.disabled = true;
+      refresh();
+    })
+  );
+  slots.forEach(sl =>
+    sl.addEventListener('click', () => {
+      const f = filled[sl.dataset.slot];
+      if (!f) return;
+      f.bankBtn.disabled = false;
+      delete filled[sl.dataset.slot];
+      sl.textContent = '';
+      sl.classList.remove('filled');
+      refresh();
+    })
+  );
+  checkBtn.addEventListener('click', () => {
+    const gapIdxs = ex.pattern.map((p, i) => (p === null ? i : -1)).filter(i => i >= 0);
+    const ok = gapIdxs.every((slotIdx, k) => filled[slotIdx]?.t === ex.answers[k]);
     checkBtn.disabled = true;
     showFeedback(s, ok, ex);
   });

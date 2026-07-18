@@ -65,6 +65,19 @@ export const COURSE = [
     ],
   },
   {
+    id: 'reading',
+    title: 'Reading & Writing IPA',
+    color: '#0d9488',
+    icon: '✍️',
+    blurb: 'Sight-reading fluency: spelling to transcription and back, words to full sentences.',
+    lessons: [
+      { id: 'r-1', title: 'Decode the word', guide: 'Sight-reading starts here: look at a transcription and know the word — no sounding out, no hesitation. Then the reverse: see the IPA, supply the missing English letters. Remember that English spelling lies; the IPA never does.', phonemes: ['ɪ', 'iː', 'æ', 'e', 'ʃ', 'tʃ'], types: ['typeWord', 'spellBlank'] },
+      { id: 'r-2', title: 'Mind the gaps', guide: 'Transcriptions with holes in them. One or more symbols are missing — hear the word, feel the sounds in order, and fill every gap. This is where symbol knowledge becomes muscle memory.', phonemes: ['ɪ', 'iː', 'æ', 'ʌ', 'ʃ', 'θ', 'ð', 'ŋ'], types: ['gapBuild', 'fillBlank'] },
+      { id: 'r-3', title: 'Read the sentence', guide: 'Whole sentences now. Read a full line of IPA and say what it means, then flip it: pick the correct transcription of an English sentence. The wrong answers differ by a single sound — ship for sheep, bed for bad — so read every symbol.', phonemes: ['ɪ', 'iː', 'æ', 'e', 'ð', 'ə'], types: ['sentenceToEnglish', 'englishToIpa'] },
+      { id: 'r-4', title: 'Reading round-up', guide: 'Everything at once: type spellings from IPA, fill transcription gaps, and read full sentences in both directions. Fluency is when none of this feels like translation anymore.', phonemes: ['ɪ', 'iː', 'æ', 'ʃ', 'tʃ', 'θ', 'ð', 'ə'], types: ['typeWord', 'gapBuild', 'sentenceToEnglish', 'englishToIpa', 'spellBlank'] },
+    ],
+  },
+  {
     id: 'nam-intro',
     title: 'Stage 1 · Orientation',
     color: '#c0392b',
@@ -176,8 +189,8 @@ export const TRACKS = [
     title: 'IPA Foundations',
     icon: 'ʃə',
     color: '#58cc02',
-    blurb: 'The alphabet itself — every English sound from schwa to /ʒ/. Start here.',
-    unitIds: ['vowels-1', 'vowels-2', 'diphthongs', 'consonants-1', 'consonants-2'],
+    blurb: 'The alphabet itself — every English sound, then reading and writing it fluently.',
+    unitIds: ['vowels-1', 'vowels-2', 'diphthongs', 'consonants-1', 'consonants-2', 'reading'],
   },
   {
     id: 'nam',
