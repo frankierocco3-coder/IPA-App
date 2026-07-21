@@ -113,6 +113,14 @@ function renderHome() {
         </div>
         <div class="track-arrow">›</div>
       </button>
+      <button class="track-card chart-entry" id="chart-entry" style="--track-color:#64748b">
+        <div class="track-glyph">📖</div>
+        <div class="track-info">
+          <h2>The IPA Chart</h2>
+          <p>Every symbol, its sound, and example words — tap any to hear it.</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>
     </main>`;
 
   document.getElementById('freeplay').addEventListener('click', () => {
@@ -120,6 +128,7 @@ function renderHome() {
     renderHome();
   });
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
+  document.getElementById('chart-entry').addEventListener('click', renderChart);
   app.querySelectorAll('.track-card:not(.arcade-entry)').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
   );
@@ -149,6 +158,53 @@ function renderArcade() {
   document.getElementById('back').addEventListener('click', renderHome);
   app.querySelectorAll('.mode-card').forEach(btn =>
     btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
+  );
+}
+
+// ── The IPA chart: a reference to browse ──────────────────────
+
+function renderChart() {
+  const syms = Object.entries(PHONEMES);
+  const groups = [
+    { title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the schwa /ə/.',
+      items: syms.filter(([, p]) => p.type === 'vowel') },
+    { title: 'Diphthongs', note: 'Vowels that glide from one position to another.',
+      items: syms.filter(([, p]) => p.type === 'diphthong') },
+    { title: 'Consonants', note: 'The consonant sounds of English.',
+      items: syms.filter(([, p]) => p.type === 'consonant') },
+  ];
+
+  const section = g => `
+    <section class="chart-section">
+      <h2 class="chart-h">${esc(g.title)} <span>${g.items.length}</span></h2>
+      <p class="chart-note">${esc(g.note)}</p>
+      <div class="chart-grid">
+        ${g.items.map(([sym, p]) => `
+          <button class="chart-chip" data-say="${esc(p.examples[0])}" title="Hear “${esc(p.examples[0])}”">
+            <span class="chart-sym">${esc(sym)}</span>
+            <span class="chart-meta">
+              <span class="chart-name">${esc(p.name)}</span>
+              <span class="chart-eg">${p.examples.slice(0, 2).map(w => `<b>${esc(w)}</b>`).join(', ')}</span>
+            </span>
+            <span class="chart-play">🔊</span>
+          </button>`).join('')}
+      </div>
+    </section>`;
+
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="back" id="back" title="Home">‹</button>
+      <div class="track-title" style="color:#64748b">📖 The IPA Chart</div>
+      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+    </header>
+    <main class="tree chart-page">
+      <p class="track-blurb">The full alphabet of sounds. Tap any symbol to hear a word that uses it.</p>
+      ${groups.map(section).join('')}
+    </main>`;
+
+  document.getElementById('back').addEventListener('click', renderHome);
+  app.querySelectorAll('.chart-chip').forEach(btn =>
+    btn.addEventListener('click', () => speak(btn.dataset.say))
   );
 }
 
