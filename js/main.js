@@ -1,4 +1,4 @@
-import { COURSE, TRACKS, MODES } from './data/course.js';
+import { COURSE, TRACKS, MODES, BOARDS } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson } from './engine.js';
 import { store } from './state.js';
@@ -31,6 +31,7 @@ function trackProgress(track) {
 
 // Where a finished/quit lesson returns to.
 function exitLesson(lesson) {
+  if (lesson.board) return renderBoard(lesson.board);
   if (lesson.arcade) return renderArcade();
   if (lesson.track) return renderTrack(lesson.track);
   return renderHome();
@@ -113,6 +114,14 @@ function renderHome() {
         </div>
         <div class="track-arrow">›</div>
       </button>
+      <button class="track-card quest-entry" id="quest-entry" style="--track-color:#e11d48">
+        <div class="track-glyph">🗺️</div>
+        <div class="track-info">
+          <h2>Quest Mode <span class="badge badge-dark">GAME</span></h2>
+          <p>Roll across the board, beat each tile’s challenge, clear the map.</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>
       <button class="track-card chart-entry" id="chart-entry" style="--track-color:#64748b">
         <div class="track-glyph">📖</div>
         <div class="track-info">
@@ -128,6 +137,7 @@ function renderHome() {
     renderHome();
   });
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
+  document.getElementById('quest-entry').addEventListener('click', renderQuestPicker);
   document.getElementById('chart-entry').addEventListener('click', renderChart);
   app.querySelectorAll('.track-card:not(.arcade-entry)').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
@@ -206,6 +216,203 @@ function renderChart() {
   app.querySelectorAll('.chart-chip').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say))
   );
+}
+
+// ── Quest Mode: board game ────────────────────────────────────
+
+let questState = null; // { board, pos, rolling }
+
+function boardUnlocked(board) {
+  if (store.freePlay) return true;
+  const i = BOARDS.findIndex(b => b.id === board.id);
+  return i === 0 || store.isBoardDone(BOARDS[i - 1].id);
+}
+
+function boardTiles(board) {
+  const n = board.tiles;
+  return Array.from({ length: n }, (_, i) => {
+    if (i === 0) return { i, kind: 'start' };
+    if (i === n - 1) return { i, kind: 'goal' };
+    if (i === n - 2) return { i, kind: 'boss' };
+    if (i % 4 === 0) return { i, kind: 'bonus' };
+    return { i, kind: 'challenge' };
+  });
+}
+
+function tilePool(board, i) {
+  const frac = i / (board.tiles - 1);
+  const tier = frac < 0.34 ? 0 : frac < 0.67 ? 1 : 2;
+  return board.tiers[Math.min(tier, board.tiers.length - 1)];
+}
+
+const TILE_ICON = { start: '🏳️', goal: '🏁', boss: '👑', bonus: '💎', challenge: '' };
+
+function renderQuestPicker() {
+  const cards = BOARDS.map(b => {
+    const unlocked = boardUnlocked(b);
+    const done = store.isBoardDone(b.id);
+    return `
+      <button class="track-card ${unlocked ? '' : 'locked-card'}" data-board="${b.id}"
+              style="--track-color:${b.color}" ${unlocked ? '' : 'disabled'}>
+        <div class="track-glyph">${unlocked ? b.icon : '🔒'}</div>
+        <div class="track-info">
+          <h2>${esc(b.title)}${done ? ' <span class="badge badge-gold">🏆 CLEARED</span>' : ''}</h2>
+          <p>${esc(b.blurb)}</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>`;
+  }).join('');
+
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="back" id="back" title="Home">‹</button>
+      <div class="track-title" style="color:#e11d48">🗺️ Quest Mode</div>
+      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+    </header>
+    <main class="track-list">
+      <p class="track-blurb">Pick a board. Roll to move, beat each tile’s challenge, reach the flag. Clear a board to unlock the next.</p>
+      ${cards}
+    </main>`;
+
+  document.getElementById('back').addEventListener('click', renderHome);
+  app.querySelectorAll('.track-card[data-board]:not(.locked-card)').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const board = BOARDS.find(b => b.id === btn.dataset.board);
+      questState = { board, pos: 0, rolling: false };
+      renderBoard(board);
+    })
+  );
+}
+
+function renderBoard(board) {
+  const tiles = boardTiles(board);
+  const cols = 4;
+  const cells = tiles.map(t => {
+    const r = Math.floor(t.i / cols);
+    const c = r % 2 === 0 ? t.i % cols : cols - 1 - (t.i % cols);
+    const here = t.i === questState.pos;
+    const passed = t.i < questState.pos;
+    return `
+      <div class="qtile ${t.kind} ${here ? 'here' : ''} ${passed ? 'passed' : ''}"
+           style="grid-row:${r + 1}; grid-column:${c + 1}; --tile-color:${board.color}">
+        <span class="qtile-face">${here ? '🎭' : (TILE_ICON[t.kind] || '·')}</span>
+      </div>`;
+  }).join('');
+
+  const atGoal = questState.pos >= board.tiles - 1;
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="back" id="back" title="Quests">‹</button>
+      <div class="track-title" style="color:${board.color}">${board.icon} ${esc(board.title)}</div>
+      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+    </header>
+    <main class="board-page">
+      <div class="board" style="grid-template-columns:repeat(${cols}, 1fr)">${cells}</div>
+      <div class="board-controls">
+        <div class="die" id="die">🎲</div>
+        <button class="btn btn-primary" id="roll" ${atGoal ? 'disabled' : ''}>Roll</button>
+      </div>
+      <p class="board-hint" id="hint">Tile ${questState.pos + 1} of ${board.tiles}. Roll to move.</p>
+    </main>`;
+
+  document.getElementById('back').addEventListener('click', renderQuestPicker);
+  const rollBtn = document.getElementById('roll');
+  if (rollBtn && !atGoal) rollBtn.addEventListener('click', () => rollDice(board, tiles));
+}
+
+function rollDice(board, tiles) {
+  if (questState.rolling) return;
+  questState.rolling = true;
+  const die = 1 + Math.floor(Math.random() * 3);
+  const dieEl = document.getElementById('die');
+  const hint = document.getElementById('hint');
+  const rollBtn = document.getElementById('roll');
+  if (rollBtn) rollBtn.disabled = true;
+  if (dieEl) dieEl.textContent = ['⚀', '⚁', '⚂'][die - 1];
+  if (hint) hint.textContent = `Rolled ${die}!`;
+  const target = Math.min(questState.pos + die, board.tiles - 1);
+
+  const hop = () => {
+    if (questState.pos < target) {
+      questState.pos++;
+      redrawTokenOnly(board);
+      setTimeout(hop, 240);
+    } else {
+      questState.rolling = false;
+      onLand(board, tiles[questState.pos]);
+    }
+  };
+  setTimeout(hop, 240);
+}
+
+// Lightweight token move without rebuilding controls (keeps die visible).
+function redrawTokenOnly(board) {
+  const tiles = boardTiles(board);
+  const cols = 4;
+  document.querySelectorAll('.qtile').forEach((el, i) => {
+    const t = tiles[i];
+    const here = t.i === questState.pos;
+    el.classList.toggle('here', here);
+    el.classList.toggle('passed', t.i < questState.pos);
+    el.querySelector('.qtile-face').textContent = here ? '🎭' : (TILE_ICON[t.kind] || '·');
+  });
+}
+
+function onLand(board, tile) {
+  if (tile.kind === 'goal') return finishBoard(board);
+  if (tile.kind === 'bonus') {
+    store.addXp(5);
+    const hint = document.getElementById('hint');
+    if (hint) hint.textContent = '💎 Bonus! +5 XP. Roll again.';
+    const rollBtn = document.getElementById('roll');
+    if (rollBtn) rollBtn.disabled = false;
+    return;
+  }
+  // challenge or boss → run the tile's challenge
+  const boss = tile.kind === 'boss';
+  startLesson({
+    id: 'challenge-' + board.id + '-' + tile.i,
+    title: boss ? 'Boss challenge' : 'Challenge',
+    challenge: true,
+    board,
+    boss,
+    accent: null,
+    phonemes: board.phonemes,
+    types: tilePool(board, tile.i),
+    count: boss ? 3 : 1,
+    onResult: passed => {
+      if (!passed) {
+        questState.pos = Math.max(0, questState.pos - (boss ? 2 : 1));
+      }
+      questState.rolling = false;
+      renderBoard(board);
+      const hint = document.getElementById('hint');
+      if (hint) hint.textContent = passed
+        ? (boss ? '👑 Boss beaten! The flag is close.' : '✓ Cleared! Roll again.')
+        : (boss ? '💥 The boss knocked you back. Try again.' : '✗ Missed — knocked back a tile.');
+    },
+  });
+}
+
+function finishBoard(board) {
+  const already = store.isBoardDone(board.id);
+  const xp = already ? 10 : 30;
+  store.completeBoard(board.id, xp);
+  const i = BOARDS.findIndex(b => b.id === board.id);
+  const next = BOARDS[i + 1];
+  app.innerHTML = `
+    <main class="end-screen">
+      <div class="end-emoji">🏆</div>
+      <h1>${esc(board.title)} cleared!</h1>
+      <p class="end-xp">+${xp} XP</p>
+      ${next && !already ? `<p>Unlocked: <b>${esc(next.title)}</b></p>` : ''}
+      <div class="end-actions">
+        <button class="btn btn-primary" id="more">More quests</button>
+        <button class="btn" id="home">Home</button>
+      </div>
+    </main>`;
+  document.getElementById('more').addEventListener('click', renderQuestPicker);
+  document.getElementById('home').addEventListener('click', renderHome);
 }
 
 // ── Track page: that dialect's units & lessons ────────────────
@@ -386,9 +593,9 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true } = {}) {
     </div>
     <button class="btn continue ${ok ? '' : 'btn-red'}" id="continue">Continue</button>`;
   if (!ok) {
-    if (penalty && !s.lesson.practice) s.hearts--;
+    if (penalty && !s.lesson.practice && !s.lesson.challenge) s.hearts--;
     s.mistakes++;
-    if (requeue && s.hearts > 0) s.queue.push({ ...ex });
+    if (requeue && !s.lesson.challenge && s.hearts > 0) s.queue.push({ ...ex });
   }
   document.getElementById('continue').addEventListener('click', () => {
     s.index++;
@@ -456,7 +663,7 @@ function renderMatch(s, ex) {
       [l, r].forEach(b => { b.classList.remove('sel'); b.classList.add('solved'); b.disabled = true; });
       if (++solved === ex.pairs.length) {
         showFeedback(s, !hadMistake, { explain: hadMistake ? 'All matched — but with slips. One more pass later.' : 'All pairs matched.' }, { requeue: false, penalty: false });
-        if (hadMistake) s.queue.push({ ...ex });
+        if (hadMistake && !s.lesson.challenge) s.queue.push({ ...ex });
       }
     } else {
       hadMistake = true;
@@ -606,6 +813,7 @@ function renderGapBuild(s, ex) {
 
 function renderResults(s) {
   const perfect = s.mistakes === 0;
+  if (s.lesson.challenge) { s.lesson.onResult(perfect); return; }
   if (s.lesson.practice) {
     const xp = 5 + (perfect ? 2 : 0);
     store.addXp(xp);
