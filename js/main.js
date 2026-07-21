@@ -452,31 +452,59 @@ function finishBoard(board) {
 
 // ── Track page: that dialect's units & lessons ────────────────
 
+// A representative icon for a lesson node, from its content.
+function lessonNodeIcon(lesson) {
+  const id = lesson.id;
+  if (/final|mastery/.test(id) || (lesson.count && lesson.count >= 12)) return '👑';
+  if (/-0$/.test(id) || /intro/.test(id)) return '📘';
+  const t = (lesson.types || [])[0];
+  const byType = {
+    match: '🃏', build: '🔨', gapBuild: '🧩', soundToSymbol: '🎧', symbolToWord: '🔍',
+    description: '💬', fillBlank: '⬜', minimalPair: '👂', typeWord: '🔡', spellBlank: '✏️',
+    sentenceToEnglish: '📖', englishToIpa: '📝', shiftChoice: '⇄', shiftBuild: '⇄',
+    accentEar: '🌍', accentFact: '🎙️',
+  };
+  return byType[t] || '⭐';
+}
+
+// Winding path, Duolingo-style skeleton: sequential nodes zig-zagging down,
+// one active "START" node with a mascot, sticky unit banners.
+const PATH_OFFSETS = [0, 48, 70, 48, 0, -48, -70, -48];
+
 function renderTrack(track) {
-  const units = track.unitIds.map(uid => {
+  const chain = TRACK_LESSONS[track.id];
+  const active = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l));
+  let gi = 0;
+
+  const unitsHtml = track.unitIds.map((uid, ui) => {
     const unit = unitById[uid];
-    const nodes = unit.lessons.map(raw => {
-      const l = TRACK_LESSONS[track.id].find(x => x.id === raw.id);
+    const rows = unit.lessons.map(raw => {
+      const l = chain.find(x => x.id === raw.id);
       const done = store.isCompleted(l.id);
+      const isActive = active && l.id === active.id;
       const unlocked = isUnlocked(l);
-      const cls = done ? 'done' : unlocked ? 'open' : 'locked';
+      const state = done ? 'done' : isActive ? 'active' : unlocked ? 'open' : 'locked';
+      const dx = PATH_OFFSETS[gi % PATH_OFFSETS.length];
+      gi++;
+      const icon = done ? '✓' : unlocked ? lessonNodeIcon(l) : '🔒';
+      const mascotSide = dx <= 0 ? 1 : -1;
       return `
-        <button class="node ${cls}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
-                style="${done || unlocked ? `--node-color:${unit.color}` : ''}">
-          <span class="node-icon">${done ? '✓' : unlocked ? '★' : '🔒'}</span>
-          <span class="node-title">${esc(l.title)}</span>
-        </button>`;
+        <div class="path-row">
+          <button class="path-node ${state}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
+                  style="--dx:${dx}px; --node-color:${unit.color}" title="${esc(l.title)}">
+            ${isActive ? '<span class="start-flag">START</span>' : ''}
+            <span class="path-icon">${icon}</span>
+          </button>
+          ${isActive ? `<div class="path-mascot" style="left:calc(50% + ${dx + mascotSide * 78}px)">🎭</div>` : ''}
+          <span class="path-label" style="transform:translateX(${dx}px)">${esc(l.title)}</span>
+        </div>`;
     }).join('');
-    // Single-unit tracks don't need a second header repeating the track name.
-    const header = track.unitIds.length > 1 ? `
-      <header class="unit-header" style="--unit-color:${unit.color}">
-        <div class="unit-glyph">${unit.icon}</div>
-        <div>
-          <h2>${esc(unit.title)}</h2>
-          <p>${esc(unit.blurb)}</p>
-        </div>
-      </header>` : '';
-    return `<section class="unit">${header}<div class="nodes">${nodes}</div></section>`;
+    return `
+      <div class="unit-banner" style="--unit-color:${unit.color}">
+        <div class="unit-banner-label">${esc(track.title)} · Unit ${ui + 1}</div>
+        <div class="unit-banner-title">${esc(unit.title)}</div>
+      </div>
+      <div class="path">${rows}</div>`;
   }).join('');
 
   app.innerHTML = `
@@ -485,21 +513,17 @@ function renderTrack(track) {
       <div class="track-title" style="color:${track.color}">${track.icon} ${esc(track.title)}</div>
       <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
     </header>
-    <main class="tree">
-      <p class="track-blurb">${esc(track.blurb)}</p>
+    <main class="track-scroll">
       <div class="practice-row">
         <button class="btn btn-practice" id="practice">🎯 Practice — mixed review, no hearts lost</button>
       </div>
-      ${units}
+      ${unitsHtml}
     </main>`;
 
   document.getElementById('back').addEventListener('click', renderHome);
   document.getElementById('practice').addEventListener('click', () => startLesson(practiceLesson(track)));
-  app.querySelectorAll('.node[data-lesson]').forEach(btn =>
-    btn.addEventListener('click', () => {
-      const lesson = TRACK_LESSONS[track.id].find(l => l.id === btn.dataset.lesson);
-      renderGuide(lesson);
-    })
+  app.querySelectorAll('.path-node[data-lesson]:not([disabled])').forEach(btn =>
+    btn.addEventListener('click', () => renderGuide(chain.find(l => l.id === btn.dataset.lesson)))
   );
 }
 
