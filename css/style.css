@@ -102,24 +102,73 @@ body {
 /* ── Quest board ── */
 .quest-entry { border-left-color: #e11d48; }
 .locked-card { opacity: 0.55; cursor: default; }
-.board-page { flex: 1; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 20px; }
-.board {
-  display: grid; gap: 10px; width: 100%; max-width: 420px;
-  background: #f7f7f7; border: 2px solid var(--line); border-radius: 18px; padding: 14px;
+.board-page { flex: 1; padding: 16px 16px 30px; display: flex; flex-direction: column; align-items: center; gap: 18px; }
+
+/* 3D tilted board */
+.board3d-wrap { width: 100%; max-width: 440px; perspective: 720px; padding: 30px 0 46px; }
+.board3d {
+  position: relative; width: 100%; transform: rotateX(52deg);
+  transform-style: preserve-3d; border-radius: 22px;
+  box-shadow: 0 30px 40px rgba(0,0,0,0.22);
 }
-.qtile {
-  aspect-ratio: 1; border-radius: 50%; display: grid; place-items: center;
-  font-size: 20px; background: #fff; border: 2px solid var(--line);
-  transition: transform 0.15s;
+.ground-valley { background: repeating-linear-gradient(45deg, #7ed957 0 18px, #74cf4d 18px 36px); }
+.ground-city  { background: repeating-linear-gradient(45deg, #ffb84d 0 18px, #ffae38 18px 36px); }
+.ground-summit { background: repeating-linear-gradient(45deg, #b79cff 0 18px, #ac8dff 18px 36px); }
+
+.route { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.route path { fill: none; stroke: rgba(255,255,255,0.7); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 0.1 6; }
+
+/* Tiles lie flat on the ground, raised with a stacked-shadow "thickness" */
+.qtile3d {
+  position: absolute; width: 17%; aspect-ratio: 1; transform: translate(-50%, -50%);
+  border-radius: 50%; background: #fff; display: grid; place-items: center;
+  font-size: 13px; font-weight: 800; color: var(--muted);
+  box-shadow: 0 5px 0 rgba(0,0,0,0.18); border: 2px solid rgba(0,0,0,0.06);
 }
-.qtile.challenge { border-color: var(--tile-color); }
-.qtile.bonus { background: #fff8e0; border-color: #ffcf33; }
-.qtile.boss { background: #f3e8ff; border-color: #a855f7; }
-.qtile.start { background: #eaffd6; }
-.qtile.goal { background: #ffe9ec; border-color: #e11d48; }
-.qtile.passed { opacity: 0.4; }
-.qtile.here { transform: scale(1.18); box-shadow: 0 0 0 3px var(--tile-color); z-index: 2; }
-.qtile-face { line-height: 1; }
+.qtile3d.challenge { border-color: var(--tile-color); }
+.qtile3d.bonus { background: #fff2c2; box-shadow: 0 5px 0 #d9a900; }
+.qtile3d.boss  { background: #efdbff; box-shadow: 0 5px 0 #7c3aed; }
+.qtile3d.start { background: #d7ffb8; }
+.qtile3d.goal  { background: #ffd7dd; box-shadow: 0 5px 0 #e11d48; }
+.qtile3d.passed { filter: brightness(0.9) saturate(0.7); }
+.qtile3d.here { box-shadow: 0 5px 0 rgba(0,0,0,0.18), 0 0 0 3px var(--tile-color); }
+.qtile-num { transform: none; }
+
+/* The walking character — a billboarded game pawn standing up off the board */
+.pawn {
+  position: absolute; width: 0; height: 0; z-index: 20;
+  transition: left 0.4s ease, top 0.4s ease;
+}
+.pawn-shadow {
+  position: absolute; left: 50%; top: 50%; width: 40px; height: 40px;
+  transform: translate(-50%, -50%); background: radial-gradient(rgba(0,0,0,0.34), transparent 66%);
+}
+.pawn-figure {
+  position: absolute; left: 50%; bottom: 50%;
+  transform: translateX(-50%) rotateX(-52deg); transform-origin: bottom center;
+  display: flex; flex-direction: column; align-items: center;
+  filter: drop-shadow(0 3px 2px rgba(0,0,0,0.3));
+}
+.pawn.walking .pawn-figure { animation: pawn-bob 0.2s infinite alternate; }
+.pawn-head {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff, var(--pawn) 78%);
+  border: 2px solid rgba(0,0,0,0.22); position: relative; z-index: 2;
+}
+.pawn-head::before, .pawn-head::after {
+  content: ''; position: absolute; top: 42%; width: 3px; height: 4px;
+  background: #333; border-radius: 50%;
+}
+.pawn-head::before { left: 32%; }
+.pawn-head::after { right: 32%; }
+.pawn-body {
+  width: 34px; height: 32px; margin-top: -5px;
+  border-radius: 50% 50% 46% 46% / 66% 66% 34% 34%;
+  background: linear-gradient(var(--pawn), rgba(0,0,0,0.28));
+  border: 2px solid rgba(0,0,0,0.22);
+}
+@keyframes pawn-bob { from { transform: translateX(-50%) rotateX(-52deg) translateY(0); } to { transform: translateX(-50%) rotateX(-52deg) translateY(-6px); } }
+
 .board-controls { display: flex; align-items: center; gap: 18px; }
 .die { font-size: 40px; min-width: 44px; text-align: center; }
 .board-hint { color: var(--muted); font-size: 14px; text-align: center; min-height: 20px; }

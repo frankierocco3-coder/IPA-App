@@ -246,6 +246,17 @@ function tilePool(board, i) {
 }
 
 const TILE_ICON = { start: '🏳️', goal: '🏁', boss: '👑', bonus: '💎', challenge: '' };
+const BOARD_COLS = 4;
+
+// Tile positions as percentages on the board plane (serpentine path).
+function tileLayout(board) {
+  const rows = Math.ceil(board.tiles / BOARD_COLS);
+  return boardTiles(board).map(t => {
+    const r = Math.floor(t.i / BOARD_COLS);
+    const c = r % 2 === 0 ? t.i % BOARD_COLS : BOARD_COLS - 1 - (t.i % BOARD_COLS);
+    return { ...t, row: r, x: (c + 0.5) / BOARD_COLS * 100, y: (r + 0.5) / rows * 100 };
+  });
+}
 
 function renderQuestPicker() {
   const cards = BOARDS.map(b => {
@@ -286,16 +297,20 @@ function renderQuestPicker() {
 
 function renderBoard(board) {
   const tiles = boardTiles(board);
-  const cols = 4;
-  const cells = tiles.map(t => {
-    const r = Math.floor(t.i / cols);
-    const c = r % 2 === 0 ? t.i % cols : cols - 1 - (t.i % cols);
+  const layout = tileLayout(board);
+  const rows = Math.ceil(board.tiles / BOARD_COLS);
+  const cur = layout[questState.pos];
+
+  // The route drawn point-to-point through every tile centre.
+  const route = 'M ' + layout.map(t => `${t.x.toFixed(1)} ${t.y.toFixed(1)}`).join(' L ');
+
+  const tileEls = layout.map(t => {
     const here = t.i === questState.pos;
     const passed = t.i < questState.pos;
     return `
-      <div class="qtile ${t.kind} ${here ? 'here' : ''} ${passed ? 'passed' : ''}"
-           style="grid-row:${r + 1}; grid-column:${c + 1}; --tile-color:${board.color}">
-        <span class="qtile-face">${here ? '🎭' : (TILE_ICON[t.kind] || '·')}</span>
+      <div class="qtile3d ${t.kind} ${here ? 'here' : ''} ${passed ? 'passed' : ''}"
+           style="left:${t.x}%; top:${t.y}%; --tile-color:${board.color}" data-i="${t.i}">
+        <span class="qtile-num">${TILE_ICON[t.kind] || (t.i + 1)}</span>
       </div>`;
   }).join('');
 
@@ -307,7 +322,21 @@ function renderBoard(board) {
       <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
     </header>
     <main class="board-page">
-      <div class="board" style="grid-template-columns:repeat(${cols}, 1fr)">${cells}</div>
+      <div class="board3d-wrap">
+        <div class="board3d ground-${board.id}" style="aspect-ratio:${BOARD_COLS} / ${rows}">
+          <svg class="route" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path d="${route}" />
+          </svg>
+          ${tileEls}
+          <div class="pawn" id="pawn" style="left:${cur.x}%; top:${cur.y}%">
+            <div class="pawn-shadow"></div>
+            <div class="pawn-figure" style="--pawn:${board.color}">
+              <div class="pawn-head"></div>
+              <div class="pawn-body"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="board-controls">
         <div class="die" id="die">🎲</div>
         <button class="btn btn-primary" id="roll" ${atGoal ? 'disabled' : ''}>Roll</button>
@@ -345,16 +374,22 @@ function rollDice(board, tiles) {
   setTimeout(hop, 240);
 }
 
-// Lightweight token move without rebuilding controls (keeps die visible).
+// Walk the character to its new tile without rebuilding the board.
 function redrawTokenOnly(board) {
-  const tiles = boardTiles(board);
-  const cols = 4;
-  document.querySelectorAll('.qtile').forEach((el, i) => {
-    const t = tiles[i];
-    const here = t.i === questState.pos;
-    el.classList.toggle('here', here);
-    el.classList.toggle('passed', t.i < questState.pos);
-    el.querySelector('.qtile-face').textContent = here ? '🎭' : (TILE_ICON[t.kind] || '·');
+  const layout = tileLayout(board);
+  const cur = layout[questState.pos];
+  const pawn = document.getElementById('pawn');
+  if (pawn) {
+    pawn.style.left = cur.x + '%';
+    pawn.style.top = cur.y + '%';
+    pawn.classList.add('walking');
+    clearTimeout(pawn._walkT);
+    pawn._walkT = setTimeout(() => pawn.classList.remove('walking'), 400);
+  }
+  document.querySelectorAll('.qtile3d').forEach(el => {
+    const i = +el.dataset.i;
+    el.classList.toggle('here', i === questState.pos);
+    el.classList.toggle('passed', i < questState.pos);
   });
 }
 
