@@ -222,3 +222,30 @@ export const TRACKS = [
 ];
 
 export const EXERCISES_PER_LESSON = 8;
+
+// Arcade: every exercise type, playable on its own as an endless game.
+// `phonemes` seeds the generators that need a target pool; the broad set
+// is the full RP-reference inventory (all have untagged words).
+const BROAD = [
+  'ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə', 'iː', 'ɑː', 'ɔː', 'uː', 'ɜː',
+  'eɪ', 'aɪ', 'ɔɪ', 'əʊ', 'aʊ', 'ɪə', 'eə', 'ʊə',
+  'p', 'b', 't', 'd', 'k', 'g', 'm', 'n', 'ŋ', 'f', 'v', 'θ', 'ð',
+  's', 'z', 'ʃ', 'ʒ', 'h', 'tʃ', 'dʒ', 'l', 'r', 'w', 'j',
+];
+
+export const MODES = [
+  { id: 'match', title: 'Matching', icon: '🃏', type: 'match', phonemes: BROAD, blurb: 'Match symbols to words.' },
+  { id: 'decode', title: 'Decode the Word', icon: '🔡', type: 'typeWord', blurb: 'Read IPA, type the word.' },
+  { id: 'spell', title: 'Spell It', icon: '✏️', type: 'spellBlank', blurb: 'Fill the missing letters.' },
+  { id: 'gaps', title: 'Fill the Gaps', icon: '🧩', type: 'gapBuild', phonemes: BROAD, blurb: 'Complete the transcription.' },
+  { id: 'build', title: 'Build a Word', icon: '🔨', type: 'build', phonemes: BROAD, blurb: 'Assemble it from tiles.' },
+  { id: 'listen', title: 'Listen & Choose', icon: '🎧', type: 'soundToSymbol', phonemes: BROAD, blurb: 'Hear it, pick the symbol.' },
+  { id: 'find', title: 'Find the Word', icon: '🔍', type: 'symbolToWord', phonemes: BROAD, blurb: 'Which word has this sound?' },
+  { id: 'name', title: 'Name That Sound', icon: '💬', type: 'description', phonemes: BROAD, blurb: 'Match the description.' },
+  { id: 'missing', title: 'Missing Symbol', icon: '⬜', type: 'fillBlank', phonemes: BROAD, blurb: 'One symbol is missing.' },
+  { id: 'pairs', title: 'Minimal Pairs', icon: '👂', type: 'minimalPair', blurb: 'Which word did you hear?' },
+  { id: 'readsent', title: 'Read a Sentence', icon: '📖', type: 'sentenceToEnglish', blurb: 'Decode a full IPA line.' },
+  { id: 'writesent', title: 'Transcribe a Sentence', icon: '📝', type: 'englishToIpa', blurb: 'Pick the right transcription.' },
+  { id: 'shift', title: 'Accent Shift', icon: '⇄', type: 'shiftChoice', blurb: 'Transform between accents.' },
+  { id: 'earacc', title: 'Name the Accent', icon: '🌍', type: 'accentEar', blurb: 'RP or American?' },
+];

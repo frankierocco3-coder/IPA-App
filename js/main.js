@@ -1,4 +1,4 @@
-import { COURSE, TRACKS } from './data/course.js';
+import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson } from './engine.js';
 import { store } from './state.js';
@@ -27,6 +27,28 @@ function isUnlocked(lesson) {
 function trackProgress(track) {
   const chain = TRACK_LESSONS[track.id];
   return { done: chain.filter(l => store.isCompleted(l.id)).length, total: chain.length };
+}
+
+// Where a finished/quit lesson returns to.
+function exitLesson(lesson) {
+  if (lesson.arcade) return renderArcade();
+  if (lesson.track) return renderTrack(lesson.track);
+  return renderHome();
+}
+
+// A single-mode arcade session: one exercise type, played on its own.
+function modeLesson(mode) {
+  return {
+    id: 'mode-' + mode.id,
+    title: mode.title,
+    practice: true,
+    arcade: true,
+    mode,
+    phonemes: mode.phonemes ?? [],
+    types: [mode.type],
+    count: 10,
+    track: null,
+  };
 }
 
 const TRACK_ACCENT = { nam: 'nam', rp: 'rp' };
@@ -83,14 +105,50 @@ function renderHome() {
     <main class="track-list">
       <h1 class="home-heading">Choose your track</h1>
       ${cards}
+      <button class="track-card arcade-entry" id="arcade-entry" style="--track-color:#f59e0b">
+        <div class="track-glyph">🕹️</div>
+        <div class="track-info">
+          <h2>Arcade</h2>
+          <p>Every game and exercise on its own — pick one and just play.</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>
     </main>`;
 
   document.getElementById('freeplay').addEventListener('click', () => {
     store.freePlay = !store.freePlay;
     renderHome();
   });
-  app.querySelectorAll('.track-card').forEach(btn =>
+  document.getElementById('arcade-entry').addEventListener('click', renderArcade);
+  app.querySelectorAll('.track-card:not(.arcade-entry)').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
+  );
+}
+
+// ── Arcade: single-mode games ─────────────────────────────────
+
+function renderArcade() {
+  const cards = MODES.map(m => `
+    <button class="mode-card" data-mode="${m.id}">
+      <span class="mode-icon">${m.icon}</span>
+      <span class="mode-title">${esc(m.title)}</span>
+      <span class="mode-blurb">${esc(m.blurb)}</span>
+    </button>`).join('');
+
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="back" id="back" title="Home">‹</button>
+      <div class="track-title" style="color:#f59e0b">🕹️ Arcade</div>
+      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+    </header>
+    <main class="track-list">
+      <p class="track-blurb">Pick a game. Endless rounds, no hearts lost — just practice.</p>
+      <div class="mode-grid">${cards}</div>
+    </main>`;
+
+  document.getElementById('back').addEventListener('click', renderHome);
+  app.querySelectorAll('.mode-card').forEach(btn =>
+    btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
   );
 }
 
@@ -224,11 +282,11 @@ function lessonChrome(s, body) {
     <header class="lesson-top">
       <button class="quit" id="quit">✕</button>
       <div class="progress"><div class="progress-fill" style="width:${progressPct(s)}%"></div></div>
-      <div class="hearts">${'❤️'.repeat(s.hearts)}${'🖤'.repeat(3 - s.hearts)}</div>
+      <div class="hearts">${s.lesson.practice ? '♾️' : '❤️'.repeat(s.hearts) + '🖤'.repeat(3 - s.hearts)}</div>
     </header>
     <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback"></footer>`;
-  document.getElementById('quit').addEventListener('click', () => renderTrack(s.lesson.track));
+  document.getElementById('quit').addEventListener('click', () => exitLesson(s.lesson));
 }
 
 function renderExercise(s) {
@@ -495,18 +553,20 @@ function renderResults(s) {
   if (s.lesson.practice) {
     const xp = 5 + (perfect ? 2 : 0);
     store.addXp(xp);
+    const arcade = s.lesson.arcade;
     app.innerHTML = `
       <main class="end-screen">
-        <div class="end-emoji">🎯</div>
-        <h1>${perfect ? 'Flawless practice!' : 'Practice complete!'}</h1>
+        <div class="end-emoji">${arcade ? s.lesson.mode.icon : '🎯'}</div>
+        <h1>${perfect ? (arcade ? 'Flawless round!' : 'Flawless practice!') : (arcade ? 'Round complete!' : 'Practice complete!')}</h1>
         <p class="end-xp">+${xp} XP</p>
         <div class="end-actions">
-          <button class="btn btn-primary" id="again">Practice again</button>
+          <button class="btn btn-primary" id="again">${arcade ? 'Play again' : 'Practice again'}</button>
           <button class="btn" id="home">Done</button>
         </div>
       </main>`;
-    document.getElementById('again').addEventListener('click', () => startLesson(practiceLesson(s.lesson.track)));
-    document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
+    document.getElementById('again').addEventListener('click', () =>
+      startLesson(arcade ? modeLesson(s.lesson.mode) : practiceLesson(s.lesson.track)));
+    document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
     return;
   }
   const xp = 10 + (perfect ? 5 : 0);
@@ -521,7 +581,7 @@ function renderResults(s) {
       <p class="end-xp">+${xp} XP${perfect ? ' (perfect bonus)' : ''}</p>
       <button class="btn btn-primary" id="home">Continue</button>
     </main>`;
-  document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
+  document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
 }
 
 function renderFail(s) {
