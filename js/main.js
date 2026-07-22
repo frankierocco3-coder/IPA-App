@@ -11,9 +11,41 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;'
 
 // Each track has its own unlock chain, independent of the others.
 const unitById = Object.fromEntries(COURSE.map(u => [u.id, u]));
+
+// Mini-game checkpoints woven between lessons: after every 2 lessons in
+// a unit, a short review game covering everything the unit taught so far.
+function expandUnit(unit) {
+  const out = [];
+  const covered = [];
+  unit.lessons.forEach((l, i) => {
+    out.push(l);
+    covered.push(l);
+    if ((i + 1) % 2 === 0 && unit.lessons.length > 1) {
+      const phonemes = [...new Set(covered.flatMap(x => x.phonemes ?? []))];
+      const types = [...new Set(covered.flatMap(x => x.types ?? []))];
+      const accent = covered.find(x => x.accent)?.accent;
+      const shiftTo = covered.find(x => x.shiftTo)?.shiftTo;
+      // sprinkle in extra game-y types that fit the material
+      const extras = accent || shiftTo ? ['fillBlank'] : ['match', 'fillBlank', 'gapBuild'];
+      out.push({
+        id: `chk-${unit.id}-${(i + 1) / 2}`,
+        title: 'Checkpoint game',
+        checkpoint: true,
+        phonemes,
+        types: [...new Set([...types, ...extras])],
+        accent,
+        shiftTo,
+        count: 5,
+      });
+    }
+  });
+  return out;
+}
+
+const UNIT_EXPANDED = Object.fromEntries(COURSE.map(u => [u.id, expandUnit(u)]));
 const TRACK_LESSONS = Object.fromEntries(TRACKS.map(t => [
   t.id,
-  t.unitIds.flatMap(uid => unitById[uid].lessons.map(l => ({ ...l, unit: unitById[uid], track: t }))),
+  t.unitIds.flatMap(uid => UNIT_EXPANDED[uid].map(l => ({ ...l, unit: unitById[uid], track: t }))),
 ]));
 const ALL_LESSONS = Object.values(TRACK_LESSONS).flat();
 
@@ -455,6 +487,7 @@ function finishBoard(board) {
 // A representative icon for a lesson node, from its content.
 function lessonNodeIcon(lesson) {
   const id = lesson.id;
+  if (lesson.checkpoint) return '🎲';
   if (/final|mastery/.test(id) || (lesson.count && lesson.count >= 12)) return '👑';
   if (/-0$/.test(id) || /intro/.test(id)) return '📘';
   const t = (lesson.types || [])[0];
@@ -478,7 +511,7 @@ function renderTrack(track) {
 
   const unitsHtml = track.unitIds.map((uid, ui) => {
     const unit = unitById[uid];
-    const rows = unit.lessons.map(raw => {
+    const rows = UNIT_EXPANDED[uid].map(raw => {
       const l = chain.find(x => x.id === raw.id);
       const done = store.isCompleted(l.id);
       const isActive = active && l.id === active.id;
@@ -490,13 +523,13 @@ function renderTrack(track) {
       const mascotSide = dx <= 0 ? 1 : -1;
       return `
         <div class="path-row">
-          <button class="path-node ${state}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
+          <button class="path-node ${state} ${l.checkpoint ? 'checkpoint' : ''}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
                   style="--dx:${dx}px; --node-color:${unit.color}" title="${esc(l.title)}">
             ${isActive ? '<span class="start-flag">START</span>' : ''}
             <span class="path-icon">${icon}</span>
           </button>
           ${isActive ? `<div class="path-mascot" style="left:calc(50% + ${dx + mascotSide * 78}px)">🎭</div>` : ''}
-          <span class="path-label" style="transform:translateX(${dx}px)">${esc(l.title)}</span>
+          <span class="path-label ${l.checkpoint ? 'checkpoint-label' : ''}" style="transform:translateX(${dx}px)">${esc(l.title)}</span>
         </div>`;
     }).join('');
     return `
@@ -523,7 +556,12 @@ function renderTrack(track) {
   document.getElementById('back').addEventListener('click', renderHome);
   document.getElementById('practice').addEventListener('click', () => startLesson(practiceLesson(track)));
   app.querySelectorAll('.path-node[data-lesson]:not([disabled])').forEach(btn =>
-    btn.addEventListener('click', () => renderGuide(chain.find(l => l.id === btn.dataset.lesson)))
+    btn.addEventListener('click', () => {
+      const lesson = chain.find(l => l.id === btn.dataset.lesson);
+      // Checkpoint games jump straight in — no guide page.
+      if (lesson.checkpoint) startLesson(lesson);
+      else renderGuide(lesson);
+    })
   );
 }
 
@@ -896,10 +934,11 @@ function renderResults(s) {
   store.recordLesson(s.lesson.id, xp);
   const { done, total } = trackProgress(s.lesson.track);
   const mastered = done === total;
+  const chk = s.lesson.checkpoint;
   app.innerHTML = `
     <main class="end-screen">
-      <div class="end-emoji">${mastered ? '🎓' : perfect ? '🏆' : '🎉'}</div>
-      <h1>${mastered ? 'Course complete!' : perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
+      <div class="end-emoji">${mastered ? '🎓' : chk ? '🎲' : perfect ? '🏆' : '🎉'}</div>
+      <h1>${mastered ? 'Course complete!' : chk ? 'Checkpoint cleared!' : perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
       ${mastered ? `<p>${esc(s.lesson.track.title)} — mastered, start to finish.</p>` : ''}
       <p class="end-xp">+${xp} XP${perfect ? ' (perfect bonus)' : ''}</p>
       <button class="btn btn-primary" id="home">Continue</button>

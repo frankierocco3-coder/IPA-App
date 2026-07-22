@@ -254,6 +254,11 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   50% { box-shadow: 0 8px 0 rgba(59,64,52,0.2), 0 0 0 9px rgba(111,134,87,0.12); }
 }
 .path-icon { line-height: 1; }
+.path-node.checkpoint {
+  width: 58px; height: 52px; font-size: 22px; border-radius: 18px;
+  outline: 2px dashed rgba(59, 64, 52, 0.28); outline-offset: 4px;
+}
+.checkpoint-label { font-style: italic; }
 .start-flag {
   position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
   background: var(--panel); color: var(--green); font-size: 11px; font-weight: 800;
