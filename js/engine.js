@@ -129,13 +129,15 @@ function genMinimalPair() {
   const ea = WORDS.find(w => w.word === a);
   const eb = WORDS.find(w => w.word === b);
   const said = pick([ea, eb]);
+  // Choices show IPA only — reading the transcription is the skill under
+  // test. The feedback below reveals the word.
   const choices = shuffle([
-    { label: ea.word, sub: ipaString(ea), ok: said === ea },
-    { label: eb.word, sub: ipaString(eb), ok: said === eb },
+    { label: ipaString(ea), ok: said === ea },
+    { label: ipaString(eb), ok: said === eb },
   ]);
   return {
     type: 'choice',
-    prompt: 'Listen carefully. Which word did you hear?',
+    prompt: 'Listen carefully. Which did you hear?',
     audioText: said.word,
     hideUntilPlayed: true,
     choices,
