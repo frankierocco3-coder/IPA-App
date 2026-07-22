@@ -9,6 +9,20 @@ const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 const app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
+// Speechcraft emblem — winged staff + open book, encircled. Brand mark.
+const EMBLEM = `<svg viewBox="0 0 100 104" class="emblem" aria-hidden="true">
+  <circle cx="50" cy="45" r="32" fill="none" stroke="#2f3a2e" stroke-width="2"/>
+  <line x1="50" y1="20" x2="50" y2="70" stroke="#2f3a2e" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="50" cy="17" r="4.6" fill="#a99bc4"/>
+  <path d="M49 31 C40 25 30 27 24 33 C33 33 41 35 49 39 Z" fill="#8d997d"/>
+  <path d="M51 31 C60 25 70 27 76 33 C67 33 59 35 51 39 Z" fill="#8d997d"/>
+  <path d="M49 40 C42 36 34 37 29 41 C37 41 43 43 49 46 Z" fill="#8d997d" opacity="0.72"/>
+  <path d="M51 40 C58 36 66 37 71 41 C63 41 57 43 51 46 Z" fill="#8d997d" opacity="0.72"/>
+  <path d="M50 44 C44 49 56 54 50 59 C44 64 56 68 50 72" fill="none" stroke="#6f8657" stroke-width="2" stroke-linecap="round"/>
+  <path d="M50 64 C42 58 30 58 22 62 L22 84 C30 80 42 80 50 86 C58 80 70 80 78 84 L78 62 C70 58 58 58 50 64 Z" fill="#f6f1e8" stroke="#2f3a2e" stroke-width="2" stroke-linejoin="round"/>
+  <line x1="50" y1="64" x2="50" y2="86" stroke="#2f3a2e" stroke-width="1.6"/>
+</svg>`;
+
 // Each track has its own unlock chain, independent of the others.
 const unitById = Object.fromEntries(COURSE.map(u => [u.id, u]));
 
@@ -126,7 +140,7 @@ function renderHome() {
 
   app.innerHTML = `
     <header class="topbar">
-      <div class="brand">ʃə<span>Speechcraft</span></div>
+      <div class="brand">${EMBLEM}<span>Speechcraft</span></div>
       <div class="stats">
         <span class="stat">🔥 ${store.displayStreak}</span>
         <span class="stat">⚡ ${store.xp} XP</span>
@@ -134,6 +148,7 @@ function renderHome() {
                 title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>
       </div>
     </header>
+    <p class="brand-tagline">Speak · Learn · Connect</p>
     ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
     <main class="track-list">
       <h1 class="home-heading">Choose your track</h1>

@@ -8,15 +8,17 @@
   --green-dark: #596f44;
   --red: #c0604a;        /* soft terracotta */
   --red-dark: #a34c38;
-  --ink: #3b4034;        /* dark olive-grey text */
-  --muted: #8f8a79;      /* warm grey */
-  --line: #ddd7c6;       /* soft border */
-  --bg: #efece1;         /* warm cream page */
-  --panel: #faf8f0;      /* card cream */
-  --panel-2: #f1eee3;    /* pressed / sunken */
+  --ink: #2f3a2e;        /* deep olive (brand) */
+  --muted: #8b8874;      /* warm grey */
+  --line: #ddd6c4;       /* soft border */
+  --bg: #efe9dc;         /* warm cream page */
+  --panel: #f6f1e8;      /* warm cream (brand) */
+  --panel-2: #ece5d6;    /* pressed / sunken */
   --glow: rgba(111, 134, 87, 0.0);
-  --accent-tint: #e8ecdd; /* sage tint */
-  --bad-tint: #f6e3dd;    /* terracotta tint */
+  --sage: #8d997d;       /* brand sage */
+  --lavender: #a99bc4;   /* brand muted lavender */
+  --accent-tint: #e6ebdd; /* sage tint */
+  --bad-tint: #f2e3dc;    /* terracotta tint */
   --gold: #c9a24b;
   --serif: "Iowan Old Style", "Palatino", "Georgia", serif;
 }
@@ -57,8 +59,13 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   padding: 16px 20px; border-bottom: 2px solid var(--line);
   position: sticky; top: 0; background: var(--bg); z-index: 5;
 }
-.brand { font-size: 22px; color: var(--green-dark); }
+.brand { font-size: 24px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
 .brand span { color: var(--ink); }
+.emblem { width: 30px; height: 31px; flex: none; }
+.brand-tagline {
+  text-align: center; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--sage); font-weight: 700; padding: 8px 0 2px;
+}
 .stats { display: flex; gap: 14px; font-weight: 800; align-items: center; }
 
 .freeplay {
@@ -97,7 +104,7 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .badge-gold { background: var(--gold); color: #fdfcf7; }
 
 .practice-row { display: flex; justify-content: center; margin-bottom: -8px; }
-.btn-practice { font-size: 14px; border-color: #8a7aad; color: #8a7aad; }
+.btn-practice { font-size: 14px; border-color: var(--lavender); color: #7a6d97; }
 
 /* ── Arcade ── */
 .arcade-entry { border-left-color: #c99e58; }
