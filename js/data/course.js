@@ -5,7 +5,7 @@ export const COURSE = [
   {
     id: 'vowels-1',
     title: 'Short Vowels',
-    color: '#58cc02',
+    color: '#6f8657',
     icon: 'ɪ',
     blurb: 'The six short vowels of English, plus the humble schwa.',
     lessons: [
@@ -18,7 +18,7 @@ export const COURSE = [
   {
     id: 'vowels-2',
     title: 'Long Vowels',
-    color: '#1cb0f6',
+    color: '#7191a8',
     icon: 'iː',
     blurb: 'Five long vowels — the length mark ː is your friend.',
     lessons: [
@@ -30,7 +30,7 @@ export const COURSE = [
   {
     id: 'diphthongs',
     title: 'Diphthongs',
-    color: '#ce82ff',
+    color: '#9d8bb0',
     icon: 'aɪ',
     blurb: 'Vowels that travel — eight glides from one position to another.',
     lessons: [
@@ -42,7 +42,7 @@ export const COURSE = [
   {
     id: 'consonants-1',
     title: 'Stops & Nasals',
-    color: '#ff9600',
+    color: '#c99e58',
     icon: 'ŋ',
     blurb: 'Familiar friends — plus /ŋ/, the sound at the end of “sing”.',
     lessons: [
@@ -54,7 +54,7 @@ export const COURSE = [
   {
     id: 'consonants-2',
     title: 'Fricatives & Friends',
-    color: '#ff4b4b',
+    color: '#b96a56',
     icon: 'θ',
     blurb: 'Where IPA earns its keep: θ, ð, ʃ, ʒ and company.',
     lessons: [
@@ -67,7 +67,7 @@ export const COURSE = [
   {
     id: 'reading',
     title: 'Reading & Writing IPA',
-    color: '#0d9488',
+    color: '#6e9187',
     icon: '✍️',
     blurb: 'Sight-reading fluency: spelling to transcription and back, words to full sentences.',
     lessons: [
@@ -80,7 +80,7 @@ export const COURSE = [
   {
     id: 'nam-intro',
     title: 'Stage 1 · Orientation',
-    color: '#c0392b',
+    color: '#b05f4d',
     icon: '📍',
     blurb: 'What Neutral American is, and why actors start here.',
     lessons: [
@@ -90,7 +90,7 @@ export const COURSE = [
   {
     id: 'nam',
     title: 'Stage 2 · The Sounds',
-    color: '#c0392b',
+    color: '#b05f4d',
     icon: '🇺🇸',
     accent: true,
     blurb: 'The baseline stage accent for American actors — rhotic, flat BATH, open LOT.',
@@ -104,7 +104,7 @@ export const COURSE = [
   {
     id: 'nam-shift',
     title: 'Stage 3 · Shift Work',
-    color: '#c0392b',
+    color: '#b05f4d',
     icon: '🔧',
     blurb: 'Arriving at Neutral American from British forms — the actor’s transformation skill.',
     lessons: [
@@ -115,7 +115,7 @@ export const COURSE = [
   {
     id: 'nam-mastery',
     title: 'Stage 4 · Mastery',
-    color: '#c0392b',
+    color: '#b05f4d',
     icon: '🏆',
     blurb: 'The final: everything from every stage, mixed and at speed.',
     lessons: [
@@ -125,7 +125,7 @@ export const COURSE = [
   {
     id: 'shift',
     title: 'Accent Shift Drills',
-    color: '#7c3aed',
+    color: '#8a7aad',
     icon: '⇄',
     blurb: 'The working actor’s skill: transform a word between accents on command.',
     lessons: [
@@ -138,7 +138,7 @@ export const COURSE = [
   {
     id: 'rp-intro',
     title: 'Stage 1 · Orientation',
-    color: '#2b70c9',
+    color: '#6b7fa3',
     icon: '📍',
     blurb: 'What RP is, and where it lives in classical theatre.',
     lessons: [
@@ -148,7 +148,7 @@ export const COURSE = [
   {
     id: 'rp',
     title: 'Stage 2 · The Sounds',
-    color: '#2b70c9',
+    color: '#6b7fa3',
     icon: '🇬🇧',
     accent: true,
     blurb: 'The classic “BBC English” accent — non-rhoticity, the BATH split, and full transcriptions.',
@@ -161,7 +161,7 @@ export const COURSE = [
   {
     id: 'rp-shift',
     title: 'Stage 3 · Shift Work',
-    color: '#2b70c9',
+    color: '#6b7fa3',
     icon: '🔧',
     blurb: 'Arriving at RP from American forms — the transformation drilled both ways.',
     lessons: [
@@ -172,7 +172,7 @@ export const COURSE = [
   {
     id: 'rp-mastery',
     title: 'Stage 4 · Mastery',
-    color: '#2b70c9',
+    color: '#6b7fa3',
     icon: '🏆',
     blurb: 'The final: the whole accent, mixed and at speed.',
     lessons: [
@@ -188,7 +188,7 @@ export const TRACKS = [
     id: 'core',
     title: 'IPA Foundations',
     icon: 'ʃə',
-    color: '#58cc02',
+    color: '#6f8657',
     blurb: 'The alphabet itself — every English sound, then reading and writing it fluently.',
     unitIds: ['vowels-1', 'vowels-2', 'diphthongs', 'consonants-1', 'consonants-2', 'reading'],
   },
@@ -196,7 +196,7 @@ export const TRACKS = [
     id: 'nam',
     title: 'Neutral American',
     icon: '🇺🇸',
-    color: '#c0392b',
+    color: '#b05f4d',
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
     unitIds: ['nam-intro', 'nam', 'nam-shift', 'nam-mastery'],
@@ -205,7 +205,7 @@ export const TRACKS = [
     id: 'rp',
     title: 'RP · Received Pronunciation',
     icon: '🇬🇧',
-    color: '#2b70c9',
+    color: '#6b7fa3',
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
     unitIds: ['rp-intro', 'rp', 'rp-shift', 'rp-mastery'],
@@ -214,7 +214,7 @@ export const TRACKS = [
     id: 'shift',
     title: 'Accent Shift Drills',
     icon: '⇄',
-    color: '#7c3aed',
+    color: '#8a7aad',
     drills: true,
     blurb: 'Transform words between Neutral American and RP on command — both directions, plus ear training.',
     unitIds: ['shift'],
@@ -238,19 +238,19 @@ const BROAD = [
 // `tiers` = exercise-type pools from easy → hard, chosen by tile depth.
 export const BOARDS = [
   {
-    id: 'valley', title: 'Vowel Valley', icon: '🌿', color: '#58cc02',
+    id: 'valley', title: 'Vowel Valley', icon: '🌿', color: '#6f8657',
     blurb: 'Your first quest — recognize vowels, then start building them.',
     tiles: 12, phonemes: BROAD,
     tiers: [['match', 'symbolToWord'], ['soundToSymbol', 'fillBlank'], ['build', 'gapBuild']],
   },
   {
-    id: 'city', title: 'Consonant City', icon: '🏙️', color: '#ff9600',
+    id: 'city', title: 'Consonant City', icon: '🏙️', color: '#c99e58',
     blurb: 'Harder terrain — descriptions, gaps, and reading real words.',
     tiles: 14, phonemes: BROAD,
     tiers: [['soundToSymbol', 'description'], ['fillBlank', 'gapBuild'], ['typeWord', 'sentenceToEnglish']],
   },
   {
-    id: 'summit', title: 'Dialect Summit', icon: '🏔️', color: '#7c3aed',
+    id: 'summit', title: 'Dialect Summit', icon: '🏔️', color: '#8a7aad',
     blurb: 'The final climb — hear the accent and shift on command.',
     tiles: 16, phonemes: BROAD,
     tiers: [['accentEar', 'shiftChoice'], ['shiftChoice', 'shiftBuild'], ['shiftBuild', 'englishToIpa']],

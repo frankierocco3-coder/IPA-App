@@ -106,7 +106,7 @@ function renderHome() {
     <main class="track-list">
       <h1 class="home-heading">Choose your track</h1>
       ${cards}
-      <button class="track-card arcade-entry" id="arcade-entry" style="--track-color:#f59e0b">
+      <button class="track-card arcade-entry" id="arcade-entry" style="--track-color:#c99e58">
         <div class="track-glyph">🕹️</div>
         <div class="track-info">
           <h2>Arcade</h2>
@@ -114,7 +114,7 @@ function renderHome() {
         </div>
         <div class="track-arrow">›</div>
       </button>
-      <button class="track-card quest-entry" id="quest-entry" style="--track-color:#e11d48">
+      <button class="track-card quest-entry" id="quest-entry" style="--track-color:#b3596e">
         <div class="track-glyph">🗺️</div>
         <div class="track-info">
           <h2>Quest Mode <span class="badge badge-dark">GAME</span></h2>
@@ -157,7 +157,7 @@ function renderArcade() {
   app.innerHTML = `
     <header class="topbar">
       <button class="back" id="back" title="Home">‹</button>
-      <div class="track-title" style="color:#f59e0b">🕹️ Arcade</div>
+      <div class="track-title" style="color:#c99e58">🕹️ Arcade</div>
       <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
     </header>
     <main class="track-list">
@@ -277,7 +277,7 @@ function renderQuestPicker() {
   app.innerHTML = `
     <header class="topbar">
       <button class="back" id="back" title="Home">‹</button>
-      <div class="track-title" style="color:#e11d48">🗺️ Quest Mode</div>
+      <div class="track-title" style="color:#b3596e">🗺️ Quest Mode</div>
       <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
     </header>
     <main class="track-list">
