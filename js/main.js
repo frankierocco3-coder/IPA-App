@@ -94,7 +94,7 @@ function renderHome() {
 
   app.innerHTML = `
     <header class="topbar">
-      <div class="brand">ʃə<span>Phoneme</span></div>
+      <div class="brand">ʃə<span>Speechcraft</span></div>
       <div class="stats">
         <span class="stat">🔥 ${store.displayStreak}</span>
         <span class="stat">⚡ ${store.xp} XP</span>
