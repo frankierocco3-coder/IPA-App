@@ -61,7 +61,7 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 }
 .brand { font-size: 24px; color: var(--ink); display: flex; align-items: center; gap: 8px; }
 .brand span { color: var(--ink); }
-.emblem { width: 46px; height: 48px; flex: none; }
+.emblem { width: 68px; height: 71px; flex: none; }
 .brand-tagline {
   text-align: center; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
   color: var(--sage); font-weight: 700; padding: 8px 0 2px;
