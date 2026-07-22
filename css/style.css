@@ -59,14 +59,14 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   padding: 16px 20px; border-bottom: 2px solid var(--line);
   position: sticky; top: 0; background: var(--bg); z-index: 5;
 }
-.brand { font-size: 32px; color: var(--ink); display: flex; align-items: center; gap: 12px; }
+.brand { font-size: 46px; color: var(--ink); display: flex; align-items: center; gap: 16px; }
 .brand span { color: var(--ink); }
 .brand-btn { background: none; border: none; padding: 0; cursor: pointer; font: inherit; font-family: var(--serif); }
 .back-link {
   background: none; border: none; color: var(--muted); font: inherit;
   font-weight: 700; cursor: pointer; padding: 4px 2px; align-self: flex-start;
 }
-.emblem { width: 118px; height: 123px; flex: none; }
+.emblem { width: 170px; height: 177px; flex: none; }
 .brand-tagline {
   text-align: center; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
   color: var(--sage); font-weight: 700; padding: 8px 0 2px;
@@ -76,8 +76,8 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 
 @media (max-width: 560px) {
   .topbar { padding: 12px 14px; gap: 10px; flex-wrap: nowrap; }
-  .brand { font-size: 22px; gap: 8px; min-width: 0; }
-  .emblem { width: 76px; height: 79px; }
+  .brand { font-size: 30px; gap: 10px; min-width: 0; }
+  .emblem { width: 108px; height: 113px; }
   .stats { gap: 9px; font-size: 14px; }
   .topbar .track-title { display: none; }
 }
