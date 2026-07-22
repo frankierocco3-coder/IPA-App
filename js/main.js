@@ -23,8 +23,9 @@ const EMBLEM = `<svg viewBox="0 0 100 104" class="emblem" aria-hidden="true">
   <line x1="50" y1="64" x2="50" y2="86" stroke="#2f3a2e" stroke-width="1.6"/>
 </svg>`;
 
-// Clickable brand — appears in every page header and returns home.
-const BRAND_BTN = `<button class="brand brand-btn" id="brand-home">${EMBLEM}<span>Speechcraft</span></button>`;
+// Clickable brand lockup — emblem + wordmark stacked over the tagline.
+// Appears in every page header and returns home.
+const BRAND_BTN = `<button class="brand brand-btn" id="brand-home">${EMBLEM}<span class="brand-text"><span class="brand-name">Speechcraft</span><span class="brand-sub">Speak · Learn · Connect</span></span></button>`;
 
 // Standard header for a sub-page: brand (→ home) + centered title + stats.
 function pageTopbar(title, color) {
@@ -165,7 +166,6 @@ function renderHome() {
                 title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>
       </div>
     </header>
-    <p class="brand-tagline">Speak · Learn · Connect</p>
     ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
     <main class="track-list">
       <h1 class="home-heading">Choose your track</h1>
