@@ -67,6 +67,14 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   color: var(--sage); font-weight: 700; padding: 8px 0 2px;
 }
 .stats { display: flex; gap: 14px; font-weight: 800; align-items: center; }
+.stat { white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
+
+@media (max-width: 560px) {
+  .topbar { padding: 12px 14px; gap: 10px; flex-wrap: nowrap; }
+  .brand { font-size: 18px; gap: 6px; min-width: 0; }
+  .emblem { width: 44px; height: 46px; }
+  .stats { gap: 9px; font-size: 14px; }
+}
 
 .freeplay {
   font-size: 17px; background: var(--panel); border: 2px solid var(--line);
