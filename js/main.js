@@ -23,6 +23,23 @@ const EMBLEM = `<svg viewBox="0 0 100 104" class="emblem" aria-hidden="true">
   <line x1="50" y1="64" x2="50" y2="86" stroke="#2f3a2e" stroke-width="1.6"/>
 </svg>`;
 
+// Clickable brand — appears in every page header and returns home.
+const BRAND_BTN = `<button class="brand brand-btn" id="brand-home">${EMBLEM}<span>Speechcraft</span></button>`;
+
+// Standard header for a sub-page: brand (→ home) + centered title + stats.
+function pageTopbar(title, color) {
+  return `
+    <header class="topbar">
+      ${BRAND_BTN}
+      <div class="track-title" style="color:${color}">${title}</div>
+      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+    </header>`;
+}
+
+function wireBrandHome() {
+  document.getElementById('brand-home')?.addEventListener('click', renderHome);
+}
+
 // Each track has its own unlock chain, independent of the others.
 const unitById = Object.fromEntries(COURSE.map(u => [u.id, u]));
 
@@ -140,7 +157,7 @@ function renderHome() {
 
   app.innerHTML = `
     <header class="topbar">
-      <div class="brand">${EMBLEM}<span>Speechcraft</span></div>
+      ${BRAND_BTN}
       <div class="stats">
         <span class="stat">🔥 ${store.displayStreak}</span>
         <span class="stat">⚡ ${store.xp} XP</span>
@@ -179,6 +196,7 @@ function renderHome() {
       </button>
     </main>`;
 
+  wireBrandHome();
   document.getElementById('freeplay').addEventListener('click', () => {
     store.freePlay = !store.freePlay;
     renderHome();
@@ -202,17 +220,13 @@ function renderArcade() {
     </button>`).join('');
 
   app.innerHTML = `
-    <header class="topbar">
-      <button class="back" id="back" title="Home">‹</button>
-      <div class="track-title" style="color:#c99e58">🕹️ Arcade</div>
-      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
-    </header>
+    ${pageTopbar('🕹️ Arcade', '#c99e58')}
     <main class="track-list">
       <p class="track-blurb">Pick a game. Endless rounds, no hearts lost — just practice.</p>
       <div class="mode-grid">${cards}</div>
     </main>`;
 
-  document.getElementById('back').addEventListener('click', renderHome);
+  wireBrandHome();
   app.querySelectorAll('.mode-card').forEach(btn =>
     btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
   );
@@ -249,17 +263,13 @@ function renderChart() {
     </section>`;
 
   app.innerHTML = `
-    <header class="topbar">
-      <button class="back" id="back" title="Home">‹</button>
-      <div class="track-title" style="color:#64748b">📖 The IPA Chart</div>
-      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
-    </header>
+    ${pageTopbar('📖 The IPA Chart', '#64748b')}
     <main class="tree chart-page">
       <p class="track-blurb">The full alphabet of sounds. Tap any symbol to hear a word that uses it.</p>
       ${groups.map(section).join('')}
     </main>`;
 
-  document.getElementById('back').addEventListener('click', renderHome);
+  wireBrandHome();
   app.querySelectorAll('.chart-chip').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say))
   );
@@ -322,17 +332,13 @@ function renderQuestPicker() {
   }).join('');
 
   app.innerHTML = `
-    <header class="topbar">
-      <button class="back" id="back" title="Home">‹</button>
-      <div class="track-title" style="color:#b3596e">🗺️ Quest Mode</div>
-      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
-    </header>
+    ${pageTopbar('🗺️ Quest Mode', '#b3596e')}
     <main class="track-list">
       <p class="track-blurb">Pick a board. Roll to move, beat each tile’s challenge, reach the flag. Clear a board to unlock the next.</p>
       ${cards}
     </main>`;
 
-  document.getElementById('back').addEventListener('click', renderHome);
+  wireBrandHome();
   app.querySelectorAll('.track-card[data-board]:not(.locked-card)').forEach(btn =>
     btn.addEventListener('click', () => {
       const board = BOARDS.find(b => b.id === btn.dataset.board);
@@ -363,12 +369,9 @@ function renderBoard(board) {
 
   const atGoal = questState.pos >= board.tiles - 1;
   app.innerHTML = `
-    <header class="topbar">
-      <button class="back" id="back" title="Quests">‹</button>
-      <div class="track-title" style="color:${board.color}">${board.icon} ${esc(board.title)}</div>
-      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
-    </header>
+    ${pageTopbar(`${board.icon} ${esc(board.title)}`, board.color)}
     <main class="board-page">
+      <button class="back-link" id="to-boards">‹ All boards</button>
       <div class="board3d-wrap">
         <div class="board3d ground-${board.id}" style="aspect-ratio:${BOARD_COLS} / ${rows}">
           <svg class="route" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -391,7 +394,8 @@ function renderBoard(board) {
       <p class="board-hint" id="hint">Tile ${questState.pos + 1} of ${board.tiles}. Roll to move.</p>
     </main>`;
 
-  document.getElementById('back').addEventListener('click', renderQuestPicker);
+  wireBrandHome();
+  document.getElementById('to-boards')?.addEventListener('click', renderQuestPicker);
   const rollBtn = document.getElementById('roll');
   if (rollBtn && !atGoal) rollBtn.addEventListener('click', () => rollDice(board, tiles));
 }
@@ -550,11 +554,7 @@ function renderTrack(track) {
   }).join('');
 
   app.innerHTML = `
-    <header class="topbar">
-      <button class="back" id="back" title="All tracks">‹</button>
-      <div class="track-title" style="color:${track.color}">${track.icon} ${esc(track.title)}</div>
-      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
-    </header>
+    ${pageTopbar(`${track.icon} ${esc(track.title)}`, track.color)}
     <main class="track-scroll">
       <div class="practice-row">
         <button class="btn btn-practice" id="practice">🎯 Practice — mixed review, no hearts lost</button>
@@ -562,7 +562,7 @@ function renderTrack(track) {
       ${unitsHtml}
     </main>`;
 
-  document.getElementById('back').addEventListener('click', renderHome);
+  wireBrandHome();
   document.getElementById('practice').addEventListener('click', () => startLesson(practiceLesson(track)));
   app.querySelectorAll('.path-node[data-lesson]:not([disabled])').forEach(btn =>
     btn.addEventListener('click', () => {
