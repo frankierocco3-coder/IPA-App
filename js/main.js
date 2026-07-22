@@ -484,20 +484,15 @@ function finishBoard(board) {
 
 // ── Track page: that dialect's units & lessons ────────────────
 
-// A representative icon for a lesson node, from its content.
+// The face of a lesson node: the IPA it teaches (checkpoints keep the
+// dice, mastery finals the crown).
 function lessonNodeIcon(lesson) {
-  const id = lesson.id;
-  if (lesson.checkpoint) return '🎲';
-  if (/final|mastery/.test(id) || (lesson.count && lesson.count >= 12)) return '👑';
-  if (/-0$/.test(id) || /intro/.test(id)) return '📘';
-  const t = (lesson.types || [])[0];
-  const byType = {
-    match: '🃏', build: '🔨', gapBuild: '🧩', soundToSymbol: '🎧', symbolToWord: '🔍',
-    description: '💬', fillBlank: '⬜', minimalPair: '👂', typeWord: '🔡', spellBlank: '✏️',
-    sentenceToEnglish: '📖', englishToIpa: '📝', shiftChoice: '⇄', shiftBuild: '⇄',
-    accentEar: '🌍', accentFact: '🎙️',
-  };
-  return byType[t] || '⭐';
+  if (lesson.checkpoint) return { text: '🎲', ipa: false };
+  if (/final|mastery/.test(lesson.id) || (lesson.count && lesson.count >= 12)) return { text: '👑', ipa: false };
+  const phs = lesson.phonemes || [];
+  if (!phs.length) return { text: '⭐', ipa: false };
+  const two = phs.slice(0, 2).join(' ');
+  return { text: two.length <= 5 ? two : phs[0], ipa: true };
 }
 
 // Winding path, Duolingo-style skeleton: sequential nodes zig-zagging down,
@@ -519,17 +514,16 @@ function renderTrack(track) {
       const state = done ? 'done' : isActive ? 'active' : unlocked ? 'open' : 'locked';
       const dx = PATH_OFFSETS[gi % PATH_OFFSETS.length];
       gi++;
-      const icon = done ? '✓' : unlocked ? lessonNodeIcon(l) : '🔒';
+      const face = done ? { text: '✓', ipa: false } : unlocked ? lessonNodeIcon(l) : { text: '🔒', ipa: false };
       const mascotSide = dx <= 0 ? 1 : -1;
       return `
         <div class="path-row">
           <button class="path-node ${state} ${l.checkpoint ? 'checkpoint' : ''}" data-lesson="${l.id}" ${unlocked ? '' : 'disabled'}
                   style="--dx:${dx}px; --node-color:${unit.color}" title="${esc(l.title)}">
             ${isActive ? '<span class="start-flag">START</span>' : ''}
-            <span class="path-icon">${icon}</span>
+            <span class="path-icon ${face.ipa ? 'ipa' : ''}">${esc(face.text)}</span>
           </button>
           ${isActive ? `<div class="path-mascot" style="left:calc(50% + ${dx + mascotSide * 78}px)">🎭</div>` : ''}
-          <span class="path-label ${l.checkpoint ? 'checkpoint-label' : ''}" style="transform:translateX(${dx}px)">${esc(l.title)}</span>
         </div>`;
     }).join('');
     return `

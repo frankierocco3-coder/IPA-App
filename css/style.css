@@ -254,11 +254,14 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   50% { box-shadow: 0 8px 0 rgba(59,64,52,0.2), 0 0 0 9px rgba(111,134,87,0.12); }
 }
 .path-icon { line-height: 1; }
+.path-icon.ipa {
+  font-family: var(--serif); font-size: 25px; font-weight: 600;
+  color: #fdfcf7; white-space: nowrap;
+}
 .path-node.checkpoint {
   width: 58px; height: 52px; font-size: 22px; border-radius: 18px;
   outline: 2px dashed rgba(59, 64, 52, 0.28); outline-offset: 4px;
 }
-.checkpoint-label { font-style: italic; }
 .start-flag {
   position: absolute; top: -20px; left: 50%; transform: translateX(-50%);
   background: var(--panel); color: var(--green); font-size: 11px; font-weight: 800;
@@ -269,19 +272,11 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   content: ''; position: absolute; bottom: -5px; left: 50%; transform: translateX(-50%);
   border: 5px solid transparent; border-top-color: var(--panel); border-bottom: 0;
 }
-.path-label {
-  margin-top: 8px; font-size: 12px; font-weight: 700; color: var(--muted);
-  max-width: 140px; text-align: center;
-}
 .path-mascot {
   position: absolute; top: 4px; transform: translateX(-50%);
   font-size: 46px; pointer-events: none; animation: mascot-bob 1.8s infinite ease-in-out;
 }
 @keyframes mascot-bob { 0%, 100% { top: 4px; } 50% { top: -4px; } }
-
-@media (prefers-color-scheme: dark) {
-  .path-label { color: #9aa0a6; }
-}
 
 .unit-header {
   display: flex; gap: 14px; align-items: center;
