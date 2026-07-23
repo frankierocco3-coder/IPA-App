@@ -233,30 +233,6 @@ const BROAD = [
   's', 'z', 'ʃ', 'ʒ', 'h', 'tʃ', 'dʒ', 'l', 'r', 'w', 'j',
 ];
 
-// Quest boards: a Mario-Party-style path where each tile you land on
-// throws a challenge, and challenges get harder the deeper you go.
-// `tiers` = exercise-type pools from easy → hard, chosen by tile depth.
-export const BOARDS = [
-  {
-    id: 'valley', title: 'Vowel Valley', icon: '🌿', color: '#6f8657',
-    blurb: 'Your first quest — recognize vowels, then start building them.',
-    tiles: 12, phonemes: BROAD,
-    tiers: [['match', 'symbolToWord'], ['soundToSymbol', 'fillBlank'], ['build', 'gapBuild']],
-  },
-  {
-    id: 'city', title: 'Consonant City', icon: '🏙️', color: '#c99e58',
-    blurb: 'Harder terrain — descriptions, gaps, and reading real words.',
-    tiles: 14, phonemes: BROAD,
-    tiers: [['soundToSymbol', 'description'], ['fillBlank', 'gapBuild'], ['typeWord', 'sentenceToEnglish']],
-  },
-  {
-    id: 'summit', title: 'Dialect Summit', icon: '🏔️', color: '#8a7aad',
-    blurb: 'The final climb — hear the accent and shift on command.',
-    tiles: 16, phonemes: BROAD,
-    tiers: [['accentEar', 'shiftChoice'], ['shiftChoice', 'shiftBuild'], ['shiftBuild', 'englishToIpa']],
-  },
-];
-
 export const MODES = [
   { id: 'match', title: 'Matching', icon: '🃏', type: 'match', phonemes: BROAD, blurb: 'Match symbols to words.' },
   { id: 'decode', title: 'Decode the Word', icon: '🔡', type: 'typeWord', blurb: 'Read IPA, type the word.' },

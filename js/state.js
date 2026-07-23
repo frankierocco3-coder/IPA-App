@@ -50,23 +50,6 @@ export const store = {
     save(s);
   },
 
-  get completedBoards() { return new Set(load().boards ?? []); },
-  isBoardDone(id) { return this.completedBoards.has(id); },
-  completeBoard(id, xpEarned) {
-    const s = load();
-    s.boards = [...new Set([...(s.boards ?? []), id])];
-    s.xp = (s.xp ?? 0) + xpEarned;
-    touchStreak(s);
-    save(s);
-  },
-
-  get freePlay() { return load().freePlay ?? false; },
-  set freePlay(on) {
-    const s = load();
-    s.freePlay = on;
-    save(s);
-  },
-
   // Streak shown on the home screen: 0 if the chain is broken.
   get displayStreak() {
     const s = load();

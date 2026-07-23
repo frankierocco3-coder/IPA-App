@@ -1,4 +1,4 @@
-import { COURSE, TRACKS, MODES, BOARDS } from './data/course.js';
+import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson } from './engine.js';
 import { store } from './state.js';
@@ -95,7 +95,6 @@ function trackProgress(track) {
 
 // Where a finished/quit lesson returns to.
 function exitLesson(lesson) {
-  if (lesson.board) return renderBoard(lesson.board);
   if (lesson.arcade) return renderArcade();
   if (lesson.track) return renderTrack(lesson.track);
   return renderHome();
@@ -178,14 +177,6 @@ function renderHome() {
         </div>
         <div class="track-arrow">›</div>
       </button>
-      <button class="track-card quest-entry" id="quest-entry" style="--track-color:#b3596e">
-        <div class="track-glyph">🗺️</div>
-        <div class="track-info">
-          <h2>Quest Mode <span class="badge badge-dark">GAME</span></h2>
-          <p>Roll across the board, beat each tile’s challenge, clear the map.</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>
       <button class="track-card chart-entry" id="chart-entry" style="--track-color:#64748b">
         <div class="track-glyph">📖</div>
         <div class="track-info">
@@ -202,7 +193,6 @@ function renderHome() {
     renderHome();
   });
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
-  document.getElementById('quest-entry').addEventListener('click', renderQuestPicker);
   document.getElementById('chart-entry').addEventListener('click', renderChart);
   app.querySelectorAll('.track-card:not(.arcade-entry)').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
@@ -273,232 +263,6 @@ function renderChart() {
   app.querySelectorAll('.chart-chip').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say))
   );
-}
-
-// ── Quest Mode: board game ────────────────────────────────────
-
-let questState = null; // { board, pos, rolling }
-
-function boardUnlocked(board) {
-  if (store.freePlay) return true;
-  const i = BOARDS.findIndex(b => b.id === board.id);
-  return i === 0 || store.isBoardDone(BOARDS[i - 1].id);
-}
-
-function boardTiles(board) {
-  const n = board.tiles;
-  return Array.from({ length: n }, (_, i) => {
-    if (i === 0) return { i, kind: 'start' };
-    if (i === n - 1) return { i, kind: 'goal' };
-    if (i === n - 2) return { i, kind: 'boss' };
-    if (i % 4 === 0) return { i, kind: 'bonus' };
-    return { i, kind: 'challenge' };
-  });
-}
-
-function tilePool(board, i) {
-  const frac = i / (board.tiles - 1);
-  const tier = frac < 0.34 ? 0 : frac < 0.67 ? 1 : 2;
-  return board.tiers[Math.min(tier, board.tiers.length - 1)];
-}
-
-const TILE_ICON = { start: '🏳️', goal: '🏁', boss: '👑', bonus: '💎', challenge: '' };
-const BOARD_COLS = 4;
-
-// Tile positions as percentages on the board plane (serpentine path).
-function tileLayout(board) {
-  const rows = Math.ceil(board.tiles / BOARD_COLS);
-  return boardTiles(board).map(t => {
-    const r = Math.floor(t.i / BOARD_COLS);
-    const c = r % 2 === 0 ? t.i % BOARD_COLS : BOARD_COLS - 1 - (t.i % BOARD_COLS);
-    return { ...t, row: r, x: (c + 0.5) / BOARD_COLS * 100, y: (r + 0.5) / rows * 100 };
-  });
-}
-
-function renderQuestPicker() {
-  const cards = BOARDS.map(b => {
-    const unlocked = boardUnlocked(b);
-    const done = store.isBoardDone(b.id);
-    return `
-      <button class="track-card ${unlocked ? '' : 'locked-card'}" data-board="${b.id}"
-              style="--track-color:${b.color}" ${unlocked ? '' : 'disabled'}>
-        <div class="track-glyph">${unlocked ? b.icon : '🔒'}</div>
-        <div class="track-info">
-          <h2>${esc(b.title)}${done ? ' <span class="badge badge-gold">🏆 CLEARED</span>' : ''}</h2>
-          <p>${esc(b.blurb)}</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>`;
-  }).join('');
-
-  app.innerHTML = `
-    ${pageTopbar('🗺️ Quest Mode', '#b3596e')}
-    <main class="track-list">
-      <p class="track-blurb">Pick a board. Roll to move, beat each tile’s challenge, reach the flag. Clear a board to unlock the next.</p>
-      ${cards}
-    </main>`;
-
-  wireBrandHome();
-  app.querySelectorAll('.track-card[data-board]:not(.locked-card)').forEach(btn =>
-    btn.addEventListener('click', () => {
-      const board = BOARDS.find(b => b.id === btn.dataset.board);
-      questState = { board, pos: 0, rolling: false };
-      renderBoard(board);
-    })
-  );
-}
-
-function renderBoard(board) {
-  const tiles = boardTiles(board);
-  const layout = tileLayout(board);
-  const rows = Math.ceil(board.tiles / BOARD_COLS);
-  const cur = layout[questState.pos];
-
-  // The route drawn point-to-point through every tile centre.
-  const route = 'M ' + layout.map(t => `${t.x.toFixed(1)} ${t.y.toFixed(1)}`).join(' L ');
-
-  const tileEls = layout.map(t => {
-    const here = t.i === questState.pos;
-    const passed = t.i < questState.pos;
-    return `
-      <div class="qtile3d ${t.kind} ${here ? 'here' : ''} ${passed ? 'passed' : ''}"
-           style="left:${t.x}%; top:${t.y}%; --tile-color:${board.color}" data-i="${t.i}">
-        <span class="qtile-num">${TILE_ICON[t.kind] || (t.i + 1)}</span>
-      </div>`;
-  }).join('');
-
-  const atGoal = questState.pos >= board.tiles - 1;
-  app.innerHTML = `
-    ${pageTopbar(`${board.icon} ${esc(board.title)}`, board.color)}
-    <main class="board-page">
-      <button class="back-link" id="to-boards">‹ All boards</button>
-      <div class="board3d-wrap">
-        <div class="board3d ground-${board.id}" style="aspect-ratio:${BOARD_COLS} / ${rows}">
-          <svg class="route" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path d="${route}" />
-          </svg>
-          ${tileEls}
-          <div class="pawn" id="pawn" style="left:${cur.x}%; top:${cur.y}%">
-            <div class="pawn-shadow"></div>
-            <div class="pawn-figure" style="--pawn:${board.color}">
-              <div class="pawn-head"></div>
-              <div class="pawn-body"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="board-controls">
-        <div class="die" id="die">🎲</div>
-        <button class="btn btn-primary" id="roll" ${atGoal ? 'disabled' : ''}>Roll</button>
-      </div>
-      <p class="board-hint" id="hint">Tile ${questState.pos + 1} of ${board.tiles}. Roll to move.</p>
-    </main>`;
-
-  wireBrandHome();
-  document.getElementById('to-boards')?.addEventListener('click', renderQuestPicker);
-  const rollBtn = document.getElementById('roll');
-  if (rollBtn && !atGoal) rollBtn.addEventListener('click', () => rollDice(board, tiles));
-}
-
-function rollDice(board, tiles) {
-  if (questState.rolling) return;
-  questState.rolling = true;
-  const die = 1 + Math.floor(Math.random() * 3);
-  const dieEl = document.getElementById('die');
-  const hint = document.getElementById('hint');
-  const rollBtn = document.getElementById('roll');
-  if (rollBtn) rollBtn.disabled = true;
-  if (dieEl) dieEl.textContent = ['⚀', '⚁', '⚂'][die - 1];
-  if (hint) hint.textContent = `Rolled ${die}!`;
-  const target = Math.min(questState.pos + die, board.tiles - 1);
-
-  const hop = () => {
-    if (questState.pos < target) {
-      questState.pos++;
-      redrawTokenOnly(board);
-      setTimeout(hop, 240);
-    } else {
-      questState.rolling = false;
-      onLand(board, tiles[questState.pos]);
-    }
-  };
-  setTimeout(hop, 240);
-}
-
-// Walk the character to its new tile without rebuilding the board.
-function redrawTokenOnly(board) {
-  const layout = tileLayout(board);
-  const cur = layout[questState.pos];
-  const pawn = document.getElementById('pawn');
-  if (pawn) {
-    pawn.style.left = cur.x + '%';
-    pawn.style.top = cur.y + '%';
-    pawn.classList.add('walking');
-    clearTimeout(pawn._walkT);
-    pawn._walkT = setTimeout(() => pawn.classList.remove('walking'), 400);
-  }
-  document.querySelectorAll('.qtile3d').forEach(el => {
-    const i = +el.dataset.i;
-    el.classList.toggle('here', i === questState.pos);
-    el.classList.toggle('passed', i < questState.pos);
-  });
-}
-
-function onLand(board, tile) {
-  if (tile.kind === 'goal') return finishBoard(board);
-  if (tile.kind === 'bonus') {
-    store.addXp(5);
-    const hint = document.getElementById('hint');
-    if (hint) hint.textContent = '💎 Bonus! +5 XP. Roll again.';
-    const rollBtn = document.getElementById('roll');
-    if (rollBtn) rollBtn.disabled = false;
-    return;
-  }
-  // challenge or boss → run the tile's challenge
-  const boss = tile.kind === 'boss';
-  startLesson({
-    id: 'challenge-' + board.id + '-' + tile.i,
-    title: boss ? 'Boss challenge' : 'Challenge',
-    challenge: true,
-    board,
-    boss,
-    accent: null,
-    phonemes: board.phonemes,
-    types: tilePool(board, tile.i),
-    count: boss ? 3 : 1,
-    onResult: passed => {
-      if (!passed) {
-        questState.pos = Math.max(0, questState.pos - (boss ? 2 : 1));
-      }
-      questState.rolling = false;
-      renderBoard(board);
-      const hint = document.getElementById('hint');
-      if (hint) hint.textContent = passed
-        ? (boss ? '👑 Boss beaten! The flag is close.' : '✓ Cleared! Roll again.')
-        : (boss ? '💥 The boss knocked you back. Try again.' : '✗ Missed — knocked back a tile.');
-    },
-  });
-}
-
-function finishBoard(board) {
-  const already = store.isBoardDone(board.id);
-  const xp = already ? 10 : 30;
-  store.completeBoard(board.id, xp);
-  const i = BOARDS.findIndex(b => b.id === board.id);
-  const next = BOARDS[i + 1];
-  app.innerHTML = `
-    <main class="end-screen">
-      <div class="end-emoji">🏆</div>
-      <h1>${esc(board.title)} cleared!</h1>
-      <p class="end-xp">+${xp} XP</p>
-      ${next && !already ? `<p>Unlocked: <b>${esc(next.title)}</b></p>` : ''}
-      <div class="end-actions">
-        <button class="btn btn-primary" id="more">More quests</button>
-        <button class="btn" id="home">Home</button>
-      </div>
-    </main>`;
-  document.getElementById('more').addEventListener('click', renderQuestPicker);
-  document.getElementById('home').addEventListener('click', renderHome);
 }
 
 // ── Track page: that dialect's units & lessons ────────────────
