@@ -16,8 +16,9 @@ const ipaString = entry => '/' + entry.ipa.join('') + '/';
 // Symbols a dialect never uses: a shared word carrying one of these has
 // no valid form in that dialect, so it's dropped rather than taught wrong.
 const ACCENT_FOREIGN = {
-  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə'],
-  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ'],
+  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː'],
+  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː'],
+  aus: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ʌ', 'ɑː', 'eɪ', 'aɪ', 'aʊ', 'əʊ', 'uː'],
 };
 
 const poolFor = accent => {
@@ -41,17 +42,33 @@ export const phonemesForAccent = accent =>
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
-const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American' };
+const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American', aus: 'Australian' };
 
 // Word pairs that exist in both accents: the raw material for shift
 // drills. The RP form is the rp-tagged entry, or the untagged one
 // (core transcriptions use RP as the reference accent).
-const SHIFT_PAIRS = WORDS.filter(w => w.accent === 'nam')
-  .map(nam => {
-    const rp = WORDS.find(x => x.word === nam.word && (x.accent === 'rp' || !x.accent));
-    return rp ? { word: nam.word, rp, nam } : null;
-  })
-  .filter(Boolean);
+// A word's form in a given dialect. RP falls back to the untagged
+// (reference) entry, since the core course transcribes in RP.
+const formFor = (word, accent) =>
+  WORDS.find(x => x.word === word && x.accent === accent) ??
+  (accent === 'rp' ? WORDS.find(x => x.word === word && !x.accent) : undefined);
+
+// Words that exist in both dialects and actually differ — the raw
+// material for shift drills between any pair of accents.
+const shiftPairsCache = {};
+function shiftPairs(from, to) {
+  const key = from + '>' + to;
+  if (shiftPairsCache[key]) return shiftPairsCache[key];
+  const words = [...new Set(WORDS.map(w => w.word))];
+  const pairs = words.map(word => {
+    const a = formFor(word, from);
+    const b = formFor(word, to);
+    if (!a || !b || a.ipa.join('') === b.ipa.join('')) return null;
+    return { word, [from]: a, [to]: b };
+  }).filter(Boolean);
+  shiftPairsCache[key] = pairs;
+  return pairs;
+}
 
 // ── Individual generators ─────────────────────────────────────
 
@@ -189,6 +206,14 @@ const ACCENT_ERRORS = {
     ipa => ipa.map(p => (p === 'æ' ? 'ɑː' : p === 'ɑ' ? 'ɒ' : p === 'oʊ' ? 'əʊ' : p)),
     // r-coloring slip: plain vowel + r instead of ɝ/ɚ
     ipa => ipa.flatMap(p => (p === 'ɝ' ? ['ɜː', 'r'] : p === 'ɚ' ? ['ə', 'r'] : [p])),
+  ],
+  aus: [
+    // under-shifted: leaving the RP diphthongs and vowels in place
+    ipa => ipa.map(p => ({ 'æɪ': 'eɪ', 'ɑɪ': 'aɪ', 'æɔ': 'aʊ', 'əʉ': 'əʊ', 'ʉː': 'uː', 'ɐ': 'ʌ', 'ɐː': 'ɑː' }[p] ?? p)),
+    // rhotic error: sounding the /r/ Australian drops
+    ipa => ipa.flatMap(p => (['ɐː', 'ɔː', 'ɜː', 'ɪə'].includes(p) ? [p, 'r'] : [p])),
+    // over-shooting the vowel shift in the wrong direction
+    ipa => ipa.map(p => ({ 'æɪ': 'ɑɪ', 'ɑɪ': 'æɪ', 'əʉ': 'æɔ', 'æɔ': 'əʉ', 'ɐː': 'ɐ' }[p] ?? p)),
   ],
 };
 
@@ -373,11 +398,17 @@ function genEnglishToIpa() {
 
 // ── Shift drills: transform a word between accents ────────────
 
-const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US' };
+const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };
 
-function genShiftChoice(to) {
-  const from = to === 'rp' ? 'nam' : 'rp';
-  const pair = pick(SHIFT_PAIRS);
+// The dialect a shift drill starts from, when not stated: RP is the
+// reference baseline, so anything else shifts from RP.
+const defaultSource = to => (to === 'rp' ? 'nam' : 'rp');
+
+function genShiftChoice(to, fromAccent) {
+  const from = fromAccent ?? defaultSource(to);
+  const pairs = shiftPairs(from, to);
+  if (!pairs.length) return null;
+  const pair = pick(pairs);
   const src = pair[from].ipa;
   const target = pair[to].ipa;
   const wrongs = ACCENT_ERRORS[to].map(fn => fn(target));
@@ -402,9 +433,11 @@ function genShiftChoice(to) {
   };
 }
 
-function genShiftBuild(to) {
-  const from = to === 'rp' ? 'nam' : 'rp';
-  const pair = pick(SHIFT_PAIRS.filter(p => p[to].ipa.length <= 5));
+function genShiftBuild(to, fromAccent) {
+  const from = fromAccent ?? defaultSource(to);
+  const candidates = shiftPairs(from, to).filter(p => p[to].ipa.length <= 5);
+  if (!candidates.length) return null;
+  const pair = pick(candidates);
   const target = pair[to].ipa;
   // distractor tiles: segments from the source form the learner must NOT
   // carry over, plus a couple of random others
@@ -422,10 +455,14 @@ function genShiftBuild(to) {
   };
 }
 
-function genAccentEar() {
-  const pair = pick(SHIFT_PAIRS);
-  const said = pick(['rp', 'nam']);
-  const choices = shuffle(['rp', 'nam'].map(a => ({
+function genAccentEar(to, fromAccent) {
+  const a1 = fromAccent ?? defaultSource(to ?? 'nam');
+  const a2 = to ?? 'nam';
+  const pairs = shiftPairs(a1, a2);
+  if (!pairs.length) return null;
+  const pair = pick(pairs);
+  const said = pick([a1, a2]);
+  const choices = shuffle([a1, a2].map(a => ({
     label: ACCENT_NAMES[a],
     sub: '/' + pair[a].ipa.join('') + '/',
     ok: a === said,
@@ -451,9 +488,9 @@ const GENERATORS = {
   build: l => genBuild(l.phonemes, { accent: l.accent }),
   minimalPair: () => genMinimalPair(),
   accentFact: l => genAccentFact(l.accent),
-  shiftChoice: l => genShiftChoice(l.shiftTo ?? pick(['rp', 'nam'])),
-  shiftBuild: l => genShiftBuild(l.shiftTo ?? pick(['rp', 'nam'])),
-  accentEar: () => genAccentEar(),
+  shiftChoice: l => genShiftChoice(l.shiftTo ?? pick(['rp', 'nam']), l.shiftFrom),
+  shiftBuild: l => genShiftBuild(l.shiftTo ?? pick(['rp', 'nam']), l.shiftFrom),
+  accentEar: l => genAccentEar(l.shiftTo, l.shiftFrom),
   fillBlank: l => genFillBlank(l.phonemes, l.accent),
   typeWord: () => genTypeWord(),
   spellBlank: () => genSpellBlank(),

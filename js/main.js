@@ -105,6 +105,7 @@ const ARCADE_DIALECTS = [
   { id: null, label: 'Core IPA', icon: 'ʃə' },
   { id: 'nam', label: 'Neutral American', icon: '🇺🇸' },
   { id: 'rp', label: 'RP', icon: '🇬🇧' },
+  { id: 'aus', label: 'Australian', icon: '🇦🇺' },
 ];
 let arcadeAccent = null;
 
@@ -126,7 +127,7 @@ function modeLesson(mode) {
   };
 }
 
-const TRACK_ACCENT = { nam: 'nam', rp: 'rp' };
+const TRACK_ACCENT = { nam: 'nam', rp: 'rp', aus: 'aus' };
 
 // A synthetic lesson drawing on everything the track teaches.
 function practiceLesson(track) {

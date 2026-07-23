@@ -40,4 +40,4 @@ export function speak(text, { rate = 0.85, lang = 'en-GB' } = {}) {
 }
 
 // Map an accent id to the TTS language that should voice it.
-export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US' };
+export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };

@@ -123,6 +123,51 @@ export const COURSE = [
     ],
   },
   {
+    id: 'aus-intro',
+    title: 'Stage 1 · Orientation',
+    color: '#5f8a86',
+    icon: '📍',
+    blurb: 'What Australian English is, and how it sits beside RP.',
+    lessons: [
+      { id: 'aus-0', title: 'Meet the accent', accent: 'aus', guide: 'Australian English is non-rhotic like RP — the written r goes silent unless a vowel follows — but its vowels have shifted noticeably. The long vowels move toward the centre (PALM and BATH become /ɐː/, STRUT becomes /ɐ/, GOOSE fronts to /ʉː/), and the diphthongs start from wider, lower positions than their British counterparts. Learn the shifts and the accent falls into place quickly.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'æɪ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+    ],
+  },
+  {
+    id: 'aus',
+    title: 'Stage 2 · The Sounds',
+    color: '#5f8a86',
+    icon: '🇦🇺',
+    accent: true,
+    blurb: 'Central vowels, fronted GOOSE, and the four shifted diphthongs.',
+    lessons: [
+      { id: 'aus-1', title: 'Central vowels', accent: 'aus', guide: 'Australian pulls its open vowels toward the centre of the mouth. STRUT is /ɐ/ (cup, love, blood) and PALM/BATH lengthen to /ɐː/ (car, father, bath, dance). Both sit further forward than the RP /ʌ/ and /ɑː/ they replace — the difference an ear notices first.', phonemes: ['ɐ', 'ɐː'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'aus-2', title: 'The fronted GOOSE', accent: 'aus', guide: 'GOOSE moves a long way forward: /ʉː/, a close central rounded vowel, not the back /uː/ of RP. Say “two, blue, goose” with your tongue high and forward and the accent arrives on its own. Non-rhoticity still applies throughout — no /r/ unless a vowel follows.', phonemes: ['ʉː', 'ɜː', 'ɔː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'aus-3', title: 'The shifted diphthongs', accent: 'aus', guide: 'Four diphthongs distinguish Australian at a glance. FACE opens to /æɪ/ (day, rain), PRICE retracts to /ɑɪ/ (high, my), MOUTH becomes /æɔ/ (now, mouth), and GOAT glides toward that fronted /ʉ/: /əʉ/ (go, home, soap). Each starts from a wider or lower position than its RP counterpart.', phonemes: ['æɪ', 'ɑɪ', 'æɔ', 'əʉ'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'aus-4', title: 'Transcribe Australian', accent: 'aus', guide: 'Full Australian transcriptions. Keep it non-rhotic, centralise STRUT and PALM to /ɐ ɐː/, front GOOSE to /ʉː/, and give the diphthongs their shifted starting points: /æɪ ɑɪ æɔ əʉ/.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'], types: ['build', 'accentFact', 'soundToSymbol'] },
+    ],
+  },
+  {
+    id: 'aus-shift',
+    title: 'Stage 3 · Shift Work',
+    color: '#5f8a86',
+    icon: '🔧',
+    blurb: 'Arriving at Australian from RP — the transformation on command.',
+    lessons: [
+      { id: 'aus-s1', title: 'Into Australian I', shiftTo: 'aus', shiftFrom: 'rp', guide: 'Given the RP form, produce the Australian one: centralise /ʌ/ to /ɐ/ and /ɑː/ to /ɐː/, front /uː/ to /ʉː/. Non-rhoticity carries over unchanged — that part you already have. The trap answers are the RP forms you are moving away from.', phonemes: ['ɐ', 'ɐː', 'ʉː'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'aus-s2', title: 'Into Australian II', shiftTo: 'aus', shiftFrom: 'rp', guide: 'Now the diphthongs, which carry most of the accent: /eɪ/→/æɪ/, /aɪ/→/ɑɪ/, /aʊ/→/æɔ/, /əʊ/→/əʉ/. Build them from tiles, then let your ear confirm which accent you are hearing.', phonemes: ['æɪ', 'ɑɪ', 'æɔ', 'əʉ'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
+    ],
+  },
+  {
+    id: 'aus-mastery',
+    title: 'Stage 4 · Mastery',
+    color: '#5f8a86',
+    icon: '🏆',
+    blurb: 'The final: the whole accent, mixed and at speed.',
+    lessons: [
+      { id: 'aus-final', title: 'Australian final', accent: 'aus', shiftTo: 'aus', shiftFrom: 'rp', count: 12, guide: 'Twelve questions across everything the course taught: central /ɐ ɐː/, fronted /ʉː/, the four shifted diphthongs, full transcriptions, shifts from RP, and ear checks. Pass it and Australian is yours.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
+    ],
+  },
+  {
     id: 'shift',
     title: 'Accent Shift Drills',
     color: '#8a7aad',
@@ -209,6 +254,15 @@ export const TRACKS = [
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
     unitIds: ['rp-intro', 'rp', 'rp-shift', 'rp-mastery'],
+  },
+  {
+    id: 'aus',
+    title: 'Australian',
+    icon: '🇦🇺',
+    color: '#5f8a86',
+    accent: true,
+    blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
+    unitIds: ['aus-intro', 'aus', 'aus-shift', 'aus-mastery'],
   },
   {
     id: 'shift',
