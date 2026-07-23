@@ -1,6 +1,6 @@
 import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
-import { generateLesson } from './engine.js';
+import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
 import { speak, ACCENT_LANG } from './audio.js';
 
@@ -100,15 +100,26 @@ function exitLesson(lesson) {
   return renderHome();
 }
 
-// A single-mode arcade session: one exercise type, played on its own.
+// Which dialect the arcade games draw their words from (null = core IPA).
+const ARCADE_DIALECTS = [
+  { id: null, label: 'Core IPA', icon: 'ʃə' },
+  { id: 'nam', label: 'Neutral American', icon: '🇺🇸' },
+  { id: 'rp', label: 'RP', icon: '🇬🇧' },
+];
+let arcadeAccent = null;
+
+// A single-mode arcade session: one exercise type, played on its own,
+// in whichever dialect is currently selected.
 function modeLesson(mode) {
   return {
-    id: 'mode-' + mode.id,
+    id: 'mode-' + mode.id + (arcadeAccent ? '-' + arcadeAccent : ''),
     title: mode.title,
     practice: true,
     arcade: true,
     mode,
-    phonemes: mode.phonemes ?? [],
+    accent: arcadeAccent,
+    shiftTo: arcadeAccent ?? undefined,
+    phonemes: arcadeAccent ? phonemesForAccent(arcadeAccent) : (mode.phonemes ?? []),
     types: [mode.type],
     count: 10,
     track: null,
@@ -209,14 +220,31 @@ function renderArcade() {
       <span class="mode-blurb">${esc(m.blurb)}</span>
     </button>`).join('');
 
+  const chips = ARCADE_DIALECTS.map(d => `
+    <button class="dialect-chip ${d.id === arcadeAccent ? 'on' : ''}" data-dialect="${d.id ?? ''}">
+      <span class="dialect-icon">${d.icon}</span>${esc(d.label)}
+    </button>`).join('');
+  const current = ARCADE_DIALECTS.find(d => d.id === arcadeAccent);
+
   app.innerHTML = `
     ${pageTopbar('🕹️ Arcade', '#c99e58')}
     <main class="track-list">
       <p class="track-blurb">Pick a game. Endless rounds, no hearts lost — just practice.</p>
+      <div class="dialect-picker">
+        <span class="dialect-label">Practise in</span>
+        <div class="dialect-chips">${chips}</div>
+      </div>
+      <p class="dialect-note">Games use <b>${esc(current.label)}</b> transcriptions.</p>
       <div class="mode-grid">${cards}</div>
     </main>`;
 
   wireBrandHome();
+  app.querySelectorAll('.dialect-chip').forEach(btn =>
+    btn.addEventListener('click', () => {
+      arcadeAccent = btn.dataset.dialect || null;
+      renderArcade();
+    })
+  );
   app.querySelectorAll('.mode-card').forEach(btn =>
     btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
   );

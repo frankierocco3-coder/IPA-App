@@ -9,9 +9,35 @@ const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const contains = (entry, ph) => entry.ipa.includes(ph);
 const ipaString = entry => '/' + entry.ipa.join('') + '/';
 
-// The core course uses RP as its reference accent, so untagged and
-// RP-tagged words form the default pool; other accents get their own.
-const poolFor = accent => WORDS.filter(w => !w.accent || w.accent === (accent ?? 'rp'));
+// The word pool for a dialect: shared (untagged) words plus that
+// dialect's own forms. Where a word exists both ways (nurse is /nɜːs/
+// untagged but /nɝs/ in American), the dialect-specific form wins so a
+// dialect never gets served another accent's transcription.
+// Symbols a dialect never uses: a shared word carrying one of these has
+// no valid form in that dialect, so it's dropped rather than taught wrong.
+const ACCENT_FOREIGN = {
+  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə'],
+  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ'],
+};
+
+const poolFor = accent => {
+  const target = accent ?? 'rp';
+  const foreign = ACCENT_FOREIGN[target] ?? [];
+  const byWord = new Map();
+  for (const w of WORDS) {
+    if (w.accent && w.accent !== target) continue;
+    // shared words that use sounds this dialect lacks aren't valid here
+    if (!w.accent && foreign.some(p => w.ipa.includes(p))) continue;
+    const seen = byWord.get(w.word);
+    if (!seen || (w.accent && !seen.accent)) byWord.set(w.word, w);
+  }
+  return [...byWord.values()];
+};
+
+// Every phoneme that actually occurs in a dialect's words — used to aim
+// exercises at the right inventory when practising that dialect.
+export const phonemesForAccent = accent =>
+  [...new Set(poolFor(accent).flatMap(w => w.ipa))];
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
@@ -106,7 +132,7 @@ function genMatch(lessonPhonemes, accent) {
 }
 
 function genBuild(lessonPhonemes, { accent = null } = {}) {
-  const pool = (accent ? WORDS.filter(w => w.accent === accent) : poolFor(null)).filter(w =>
+  const pool = poolFor(accent).filter(w =>
     w.ipa.length >= 2 && w.ipa.length <= 5 &&
     w.ipa.some(p => lessonPhonemes.includes(p))
   );
