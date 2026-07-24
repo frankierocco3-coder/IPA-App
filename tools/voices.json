@@ -1,7 +1,7 @@
 {
   "_comment": "accent -> voice key -> voice id (or {id, stability, similarity_boost, style, speed}). Keys 'm'/'f' become audio/<accent>/<key>/<word>.mp3 and the app picks between them at random.",
   "rp": {
-    "m": "onwK4e9ZLuTAKqWW03F9"
+    "m": { "id": "onwK4e9ZLuTAKqWW03F9", "speed": 0.85 }
   },
   "nam": {
     "m": "cjVigY5qzO86Huf0OWal"

@@ -3,6 +3,7 @@ import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
 import { speak, ACCENT_LANG } from './audio.js';
+import { articulationSVG } from './diagram.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -270,13 +271,13 @@ function renderChart() {
       <p class="chart-note">${esc(g.note)}</p>
       <div class="chart-grid">
         ${g.items.map(([sym, p]) => `
-          <button class="chart-chip" data-say="${esc(p.examples[0])}" title="Hear “${esc(p.examples[0])}”">
+          <button class="chart-chip" data-sym="${esc(sym)}" title="How “${esc(sym)}” is made">
             <span class="chart-sym">${esc(sym)}</span>
             <span class="chart-meta">
               <span class="chart-name">${esc(p.name)}</span>
               <span class="chart-eg">${p.examples.slice(0, 2).map(w => `<b>${esc(w)}</b>`).join(', ')}</span>
             </span>
-            <span class="chart-play">🔊</span>
+            <span class="chart-play">›</span>
           </button>`).join('')}
       </div>
     </section>`;
@@ -284,14 +285,48 @@ function renderChart() {
   app.innerHTML = `
     ${pageTopbar('📖 The IPA Chart', '#64748b')}
     <main class="tree chart-page">
-      <p class="track-blurb">The full alphabet of sounds. Tap any symbol to hear a word that uses it.</p>
+      <p class="track-blurb">The full alphabet of sounds. Tap any symbol to see how it’s made and hear it.</p>
       ${groups.map(section).join('')}
     </main>`;
 
   wireBrandHome();
   app.querySelectorAll('.chart-chip').forEach(btn =>
-    btn.addEventListener('click', () => speak(btn.dataset.say))
+    btn.addEventListener('click', () => renderSoundDetail(btn.dataset.sym))
   );
+}
+
+// Detail for one sound: articulation diagram, description, example words.
+function renderSoundDetail(sym) {
+  const p = PHONEMES[sym];
+  if (!p) return renderChart();
+  const diagram = articulationSVG(sym);
+  const lang = ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
+    ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'].includes(sym) ? 'en-AU' : 'en-GB');
+  const isVowel = p.type !== 'consonant';
+  const chips = p.examples.map(w =>
+    `<button class="word-chip" data-say="${esc(w)}">🔊 ${esc(w)}</button>`).join('');
+
+  app.innerHTML = `
+    ${pageTopbar(`/${esc(sym)}/`, '#64748b')}
+    <main class="guide sound-detail">
+      <div class="sound-hero">
+        <button class="sound-big" id="say-sym" title="Hear it">/${esc(sym)}/</button>
+        <div>
+          <h1>${esc(p.name)}</h1>
+          <p class="guide-text">${esc(p.hint)}.</p>
+        </div>
+      </div>
+      ${diagram ? `<div class="artic-wrap">${diagram}
+        <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''}
+      <h2 class="guide-heading">Hear it in words</h2>
+      <div class="chips">${chips}</div>
+    </main>`;
+
+  wireBrandHome();
+  const say = () => speak(p.examples[0], { lang });
+  document.getElementById('say-sym').addEventListener('click', say);
+  app.querySelectorAll('[data-say]').forEach(b =>
+    b.addEventListener('click', () => speak(b.dataset.say, { lang })));
 }
 
 // ── Track page: that dialect's units & lessons ────────────────
