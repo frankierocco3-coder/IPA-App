@@ -97,7 +97,10 @@ def voice_map() -> dict:
             f"Missing {VOICES_JSON.relative_to(ROOT)}. Run --list-voices, then "
             'create it like: {"rp": "<id>", "nam": "<id>", "aus": "<id>"}'
         )
-    voices = json.loads(VOICES_JSON.read_text())
+    voices = {
+        k: v for k, v in json.loads(VOICES_JSON.read_text()).items()
+        if not k.startswith("_")  # allow comment keys in the config
+    }
     unknown = [a for a in voices if a not in ACCENTS]
     if unknown:
         sys.exit(f"Unknown accent(s) in voices.json: {', '.join(unknown)}")
@@ -128,6 +131,19 @@ def clip_name(word):
 DEFAULT_SETTINGS = {"stability": 0.8, "similarity_boost": 0.75, "style": 0.0}
 
 
+def voice_variants(value):
+    """An accent's value -> {voice key: spec}.
+
+    Accepts a single voice (string id, or an object with "id") for accents
+    with one voice, or a map like {"m": ..., "f": ...} for several.
+    """
+    if isinstance(value, str):
+        return {"m": value}
+    if "id" in value or "voice_id" in value:
+        return {"m": value}
+    return {k: v for k, v in value.items() if not k.startswith("_")}
+
+
 def voice_entry(value):
     """Accept either "<id>" or {"id": ..., <voice settings>}."""
     if isinstance(value, str):
@@ -147,15 +163,26 @@ def synthesize(text, voice_id, settings):
 
 
 def write_index() -> None:
+    """audio/index.json = {accent: {voice key: [words]}}"""
     index = {}
+    total = 0
     for accent in ACCENTS:
         folder = AUDIO / accent
-        if folder.is_dir():
-            index[accent] = sorted(p.stem for p in folder.glob("*.mp3"))
+        if not folder.is_dir():
+            continue
+        variants = {}
+        for sub in sorted(folder.iterdir()):
+            if sub.is_dir():
+                clips = sorted(p.stem for p in sub.glob("*.mp3"))
+                if clips:
+                    variants[sub.name] = clips
+                    total += len(clips)
+        if variants:
+            index[accent] = variants
     AUDIO.mkdir(exist_ok=True)
     (AUDIO / "index.json").write_text(json.dumps(index, indent=1))
-    total = sum(len(v) for v in index.values())
-    print(f"\nWrote audio/index.json — {total} clip(s) across {len(index)} accent(s).")
+    shape = ", ".join(f"{a}({'+'.join(v)})" for a, v in index.items())
+    print(f"\nWrote audio/index.json — {total} clip(s): {shape}")
 
 
 def main() -> None:
@@ -182,26 +209,27 @@ def main() -> None:
     for accent in targets:
         raw = voices.get(accent)
         if not raw:
-            print(f"! no voice id for '{accent}', skipping")
+            print(f"! no voice for '{accent}', skipping")
             continue
-        voice_id, settings = voice_entry(raw)
-        if not voice_id:
-            print(f"! no voice id for '{accent}', skipping")
-            continue
-        folder = AUDIO / accent
-        folder.mkdir(parents=True, exist_ok=True)
-        print(f"\n{accent}: {len(all_words)} word(s) → {folder.relative_to(ROOT)}")
-        for word in all_words:
-            if args.limit is not None and made >= args.limit:
-                print("  (limit reached)")
-                break
-            dest = folder / f"{clip_name(word)}.mp3"
-            if dest.exists() and not args.force:
-                skipped += 1
+        for vkey, spec in voice_variants(raw).items():
+            voice_id, settings = voice_entry(spec)
+            if not voice_id:
+                print(f"! no voice id for '{accent}/{vkey}', skipping")
                 continue
-            dest.write_bytes(synthesize(word, voice_id, settings))
-            made += 1
-            print(f"  ✓ {word}")
+            folder = AUDIO / accent / vkey
+            folder.mkdir(parents=True, exist_ok=True)
+            print(f"\n{accent}/{vkey}: {len(all_words)} word(s) → {folder.relative_to(ROOT)}")
+            for word in all_words:
+                if args.limit is not None and made >= args.limit:
+                    print("  (limit reached)")
+                    break
+                dest = folder / f"{clip_name(word)}.mp3"
+                if dest.exists() and not args.force:
+                    skipped += 1
+                    continue
+                dest.write_bytes(synthesize(word, voice_id, settings))
+                made += 1
+                print(f"  ✓ {word}")
 
     print(f"\nGenerated {made} clip(s); skipped {skipped} already present.")
     write_index()

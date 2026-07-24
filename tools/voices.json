@@ -1,5 +1,13 @@
 {
-  "rp": "onwK4e9ZLuTAKqWW03F9",
-  "nam": "cjVigY5qzO86Huf0OWal",
-  "aus": "IKne3meq5aSn9XLyUdCD"
+  "_comment": "accent -> voice key -> voice id (or {id, stability, similarity_boost, style, speed}). Keys 'm'/'f' become audio/<accent>/<key>/<word>.mp3 and the app picks between them at random.",
+  "rp": {
+    "m": "onwK4e9ZLuTAKqWW03F9"
+  },
+  "nam": {
+    "m": "cjVigY5qzO86Huf0OWal"
+  },
+  "aus": {
+    "m": { "id": "YLbQE9U7P1K6rBNJWNSv", "stability": 0.85 },
+    "f": { "id": "Rpg8Sn3cVL1f8658yYm2", "stability": 0.85 }
+  }
 }

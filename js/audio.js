@@ -38,8 +38,11 @@ export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };
 // …and back again, so a spoken language picks the right clip folder.
 const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
 
-// Which words have a recorded clip, per accent. Loaded once; until it
-// arrives (or if it never does) every word simply uses device TTS.
+// Which words have a recorded clip: {accent: {voice key: [words]}}. Each
+// accent can have several voices (male/female); we pick between them at
+// random so an accent is heard from more than one speaker — that's how you
+// learn to recognise the accent itself rather than one person's voice.
+// Until the index loads (or if it never does) every word uses device TTS.
 let clipIndex = null;
 fetch('audio/index.json')
   .then(r => (r.ok ? r.json() : null))
@@ -48,14 +51,22 @@ fetch('audio/index.json')
 
 const clipName = word => word.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
+// Voice keys for this accent that actually have this word recorded.
+function voicesWith(dir, word) {
+  const variants = clipIndex?.[dir];
+  if (!variants) return [];
+  const name = clipName(word);
+  return Object.keys(variants).filter(v => variants[v].includes(name));
+}
+
 let current = null;
 
-function playClip(dir, word) {
-  const el = new Audio(`audio/${dir}/${clipName(word)}.mp3`);
+function playClip(dir, voice, word, fallback) {
+  const el = new Audio(`audio/${dir}/${voice}/${clipName(word)}.mp3`);
   current = el;
   // If the file turns out to be missing or unplayable, fall back to TTS.
-  el.addEventListener('error', () => deviceSpeak(word, {}), { once: true });
-  el.play().catch(() => deviceSpeak(word, {}));
+  el.addEventListener('error', () => deviceSpeak(word, fallback), { once: true });
+  el.play().catch(() => deviceSpeak(word, fallback));
 }
 
 function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
@@ -74,6 +85,10 @@ export function speak(text, { rate = 0.85, lang = 'en-GB' } = {}) {
   if (current) { current.pause(); current = null; }
 
   const dir = LANG_DIR[lang] ?? 'rp';
-  if (clipIndex?.[dir]?.includes(clipName(text))) return playClip(dir, text);
+  const options = voicesWith(dir, text);
+  if (options.length) {
+    const voice = options[Math.floor(Math.random() * options.length)];
+    return playClip(dir, voice, text, { rate, lang });
+  }
   deviceSpeak(text, { rate, lang });
 }
