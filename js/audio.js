@@ -1,7 +1,11 @@
-// TTS via the Web Speech API. Picks the highest-quality voice the device
-// offers for the requested language (enhanced/premium first), so RP content
-// speaks British and Neutral American content speaks American.
-// Swappable later for recorded audio files.
+// Audio for Speechcraft.
+//
+// Prefers pre-generated voice clips (audio/<accent>/<word>.mp3, made by
+// tools/generate_voices.py with ElevenLabs) and falls back to the device's
+// own TTS for anything not yet recorded — so the app keeps working with no
+// clips at all, and improves word by word as clips are added.
+//
+// Clips are static files: no API key ever ships in the app.
 
 const voiceCache = {};
 
@@ -28,7 +32,33 @@ function pickVoice(lang) {
 
 speechSynthesis.onvoiceschanged = () => { Object.keys(voiceCache).forEach(k => delete voiceCache[k]); };
 
-export function speak(text, { rate = 0.85, lang = 'en-GB' } = {}) {
+// Map an accent id to the TTS language that should voice it.
+export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };
+
+// …and back again, so a spoken language picks the right clip folder.
+const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
+
+// Which words have a recorded clip, per accent. Loaded once; until it
+// arrives (or if it never does) every word simply uses device TTS.
+let clipIndex = null;
+fetch('audio/index.json')
+  .then(r => (r.ok ? r.json() : null))
+  .then(idx => { if (idx) clipIndex = idx; })
+  .catch(() => {});
+
+const clipName = word => word.toLowerCase().replace(/[^a-z0-9]+/g, '_');
+
+let current = null;
+
+function playClip(dir, word) {
+  const el = new Audio(`audio/${dir}/${clipName(word)}.mp3`);
+  current = el;
+  // If the file turns out to be missing or unplayable, fall back to TTS.
+  el.addEventListener('error', () => deviceSpeak(word, {}), { once: true });
+  el.play().catch(() => deviceSpeak(word, {}));
+}
+
+function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   if (!voiceCache[lang]) voiceCache[lang] = pickVoice(lang);
@@ -39,5 +69,11 @@ export function speak(text, { rate = 0.85, lang = 'en-GB' } = {}) {
   speechSynthesis.speak(u);
 }
 
-// Map an accent id to the TTS language that should voice it.
-export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };
+export function speak(text, { rate = 0.85, lang = 'en-GB' } = {}) {
+  speechSynthesis.cancel();
+  if (current) { current.pause(); current = null; }
+
+  const dir = LANG_DIR[lang] ?? 'rp';
+  if (clipIndex?.[dir]?.includes(clipName(text))) return playClip(dir, text);
+  deviceSpeak(text, { rate, lang });
+}

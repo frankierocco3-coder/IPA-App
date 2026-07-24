@@ -1,2 +1,6 @@
 .DS_Store
 .claude/
+
+# ElevenLabs API key — must never be committed (this repo is public)
+tools/.elevenlabs_key
+.env

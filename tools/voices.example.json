@@ -1,0 +1,6 @@
+{
+  "_comment": "Copy this file to voices.json and fill in real voice ids from `python3 tools/generate_voices.py --list-voices`. Match the accent: British voice for rp, American for nam, Australian for aus.",
+  "rp": "PUT_A_BRITISH_VOICE_ID_HERE",
+  "nam": "PUT_AN_AMERICAN_VOICE_ID_HERE",
+  "aus": "PUT_AN_AUSTRALIAN_VOICE_ID_HERE"
+}
