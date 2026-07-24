@@ -121,13 +121,27 @@ def clip_name(word):
     return re.sub(r"[^a-z0-9]+", "_", word.lower())
 
 
-def synthesize(text, voice_id):
+# Isolated words read better with high stability — expressive swing makes a
+# single word sound performed rather than modelled. Override per accent in
+# voices.json by using an object instead of a bare id, e.g.
+#   "aus": {"id": "<voice id>", "stability": 0.85, "style": 0.0}
+DEFAULT_SETTINGS = {"stability": 0.8, "similarity_boost": 0.75, "style": 0.0}
+
+
+def voice_entry(value):
+    """Accept either "<id>" or {"id": ..., <voice settings>}."""
+    if isinstance(value, str):
+        return value, dict(DEFAULT_SETTINGS)
+    value = dict(value)
+    vid = value.pop("id", None) or value.pop("voice_id", None)
+    settings = dict(DEFAULT_SETTINGS)
+    settings.update({k: v for k, v in value.items() if not k.startswith("_")})
+    return vid, settings
+
+
+def synthesize(text, voice_id, settings):
     payload = json.dumps(
-        {
-            "text": text,
-            "model_id": MODEL,
-            "voice_settings": {"stability": 0.5, "similarity_boost": 0.75},
-        }
+        {"text": text, "model_id": MODEL, "voice_settings": settings}
     ).encode()
     return request(f"/text-to-speech/{voice_id}", data=payload, raw=True)
 
@@ -166,7 +180,11 @@ def main() -> None:
     all_words = words()
     made = skipped = 0
     for accent in targets:
-        voice_id = voices.get(accent)
+        raw = voices.get(accent)
+        if not raw:
+            print(f"! no voice id for '{accent}', skipping")
+            continue
+        voice_id, settings = voice_entry(raw)
         if not voice_id:
             print(f"! no voice id for '{accent}', skipping")
             continue
@@ -181,7 +199,7 @@ def main() -> None:
             if dest.exists() and not args.force:
                 skipped += 1
                 continue
-            dest.write_bytes(synthesize(word, voice_id))
+            dest.write_bytes(synthesize(word, voice_id, settings))
             made += 1
             print(f"  ✓ {word}")
 
