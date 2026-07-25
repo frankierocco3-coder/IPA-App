@@ -570,10 +570,8 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .tw-words { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 2px 6px; }
 .tw { display: inline-flex; flex-direction: column; align-items: center; }
 .tw-word {
-  font: inherit; font-family: var(--serif); font-size: 17px; background: none; border: none;
-  cursor: pointer; color: var(--ink); padding: 0 2px; border-radius: 5px; line-height: 1.2;
+  font-family: var(--serif); font-size: 17px; color: var(--ink); padding: 0 2px; line-height: 1.2;
 }
-.tw-word.known:active { background: var(--panel-2); }
 .tw-ipa { font-size: 12px; color: #8a6d3b; line-height: 1.1; }
 .tw-ipa.tw-miss { color: var(--muted); opacity: 0.6; }
 .approx { font-style: italic; color: var(--muted); font-size: 0.92em; }

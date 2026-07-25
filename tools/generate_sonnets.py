@@ -41,7 +41,18 @@ def load_voices():
 
 
 def voice_for(voices, dialect):
-    """First voice id + settings for a dialect from voices.json."""
+    """Voice id + settings for a dialect's sonnet narration.
+
+    Prefers a dedicated narrator under "_sonnets" (separate from the drill
+    voices), else falls back to the dialect's first voice.
+    """
+    override = (voices.get("_sonnets") or {}).get(dialect)
+    if override:
+        if isinstance(override, str):
+            return override, {}
+        vid = override.get("id")
+        settings = {k: override[k] for k in ("stability", "similarity_boost", "style", "speed") if k in override}
+        return vid, settings
     entry = voices.get(dialect)
     if not entry:
         sys.exit(f"No voice configured for dialect '{dialect}' in voices.json")

@@ -486,9 +486,9 @@ function renderReader({ label, lines, accent, prev, next, editor, clip }) {
     <main class="guide sonnet-view">
       <div class="dialect-picker reader-dialects"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="rd-dialects"></div></div>
       <div class="sonnet-tabs">
-        <button class="son-tab on" data-mode="speak">🔊 Speak</button>
+        <button class="son-tab on" data-mode="speak">🔊 Listen</button>
         <button class="son-tab" data-mode="scan">📐 Scan</button>
-        <button class="son-tab" data-mode="transcribe">🔤 Sound</button>
+        <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
@@ -566,23 +566,20 @@ async function fillSound(lines, accent, pane) {
     pane.innerHTML = `<p class="pane-note">Couldn’t load the pronunciation dictionary — check your connection and reopen this tab.</p>`;
     return;
   }
-  const lang = dialectLang(accent);
   let approxSeen = false, miss = 0;
   const linesHtml = lines.map((ln, i) => {
     const toks = ln.split(/(\s+)/).map(tok => {
       if (/^\s*$/.test(tok)) return tok === '' ? '' : '<span class="scan-sp"> </span>';
       const r = ipaFor(tok, accent);
-      if (!r) { miss++; return `<span class="tw"><button class="tw-word" data-say="${esc(tok)}">${esc(tok)}</button><span class="tw-ipa tw-miss">—</span></span>`; }
+      if (!r) { miss++; return `<span class="tw"><span class="tw-word">${esc(tok)}</span><span class="tw-ipa tw-miss">—</span></span>`; }
       if (r.approx) approxSeen = true;
-      return `<span class="tw"><button class="tw-word known" data-say="${esc(tok)}">${esc(tok)}</button><span class="tw-ipa">/${esc(r.ipa)}/</span></span>`;
+      return `<span class="tw"><span class="tw-word">${esc(tok)}</span><span class="tw-ipa">/${esc(r.ipa)}/</span></span>`;
     }).join('');
     return `<div class="tw-line"><span class="ln-num">${i + 1}</span><span class="tw-words">${toks}</span></div>`;
   }).join('');
   pane.innerHTML = `
-    <p class="pane-note">Every word transcribed in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived</span>' : ''}. Tap a word to hear it.${miss ? ` <span class="approx">${miss} not in the dictionary (—).</span>` : ''}</p>
+    <p class="pane-note">Every word transcribed in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived</span>' : ''}.${miss ? ` <span class="approx">${miss} not in the dictionary (—).</span>` : ''}</p>
     <div class="son-transcribe">${linesHtml}</div>`;
-  pane.querySelectorAll('.tw-word').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.say, { lang, device: true })));
 }
 
 // ── The IPA chart: a reference to browse ──────────────────────
