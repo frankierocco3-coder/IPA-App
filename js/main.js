@@ -6,6 +6,7 @@ import { speak, ACCENT_LANG } from './audio.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { scanLine } from './scan.js';
+import { loadPron, ipaFor } from './pron.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -358,33 +359,29 @@ function renderVowelMap() {
 
 // ── Text & Delivery: speak real text aloud ────────────────────
 
-// Fast word → IPA lookup drawn from the exercise lexicon (partial coverage;
-// most sonnet words aren't in it yet — see the note in Transcribe mode).
-const IPA_LOOKUP = (() => {
-  const m = {};
-  for (const w of WORDS) {
-    const key = (w.word || '').toLowerCase();
-    const ipa = Array.isArray(w.ipa) ? w.ipa.join('') : w.ipa;
-    if (key && ipa && !m[key]) m[key] = ipa;
-  }
-  return m;
-})();
-const cleanWord = s => s.toLowerCase().replace(/[^a-z’']/g, '');
+// Dialects you can read/scan/transcribe any text in.
+const TEXT_DIALECTS = [
+  { id: 'nam', label: 'American', lang: 'en-US' },
+  { id: 'rp', label: 'RP', lang: 'en-GB' },
+  { id: 'aus', label: 'Australian', lang: 'en-AU' },
+];
+const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;
+const dialectName = id => (TEXT_DIALECTS.find(d => d.id === id) || {}).label || '';
 
 function renderTextLibrary() {
   record(renderTextLibrary);
   const cards = [
     { id: 'sonnets', icon: '📜', title: 'Shakespeare’s Sonnets', on: true,
-      blurb: `All 154 — speak them, scan the metre, study the sounds.` },
-    { id: 'monologues', icon: '🎭', title: 'Monologues', on: false,
-      blurb: 'Classical and contemporary speeches for the stage — coming soon.' },
-    { id: 'speeches', icon: '🎙️', title: 'Speeches & Rhetoric', on: false,
-      blurb: 'Great public address, built for delivery — coming soon.' },
+      blurb: 'All 154 — speak them, scan the metre, study the sounds.' },
+    { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
+      blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
+    { id: 'monologues', icon: '🎭', title: 'Monologue Library', on: false,
+      blurb: 'A curated shelf of classical and modern speeches — coming soon.' },
   ];
   app.innerHTML = `
     ${pageTopbar('📜 Text & Delivery', '#8a6d3b')}
     <main class="track-list">
-      <p class="track-blurb">Take the sounds off the chart and onto real text. Speak it aloud, feel the metre, study the pronunciation.</p>
+      <p class="track-blurb">Take the sounds off the chart and onto real text. Speak it aloud, feel the metre, study the pronunciation — in whatever dialect you’re working in.</p>
       ${cards.map(c => `
         <button class="track-card text-card ${c.on ? '' : 'soon'}" data-lib="${c.id}" ${c.on ? '' : 'disabled'} style="--track-color:#8a6d3b">
           <div class="track-glyph">${c.icon}</div>
@@ -394,6 +391,7 @@ function renderTextLibrary() {
     </main>`;
   wireBrandHome();
   app.querySelector('.text-card[data-lib="sonnets"]')?.addEventListener('click', renderSonnetList);
+  app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
 }
 
 function renderSonnetList() {
@@ -428,58 +426,114 @@ function renderSonnetList() {
   });
 }
 
-// One sonnet, three ways: Speak (delivery), Scan (metre), Transcribe (sound).
+// Paste any monologue / speech / scene and open it in the reader.
+function renderCustomText() {
+  record(renderCustomText);
+  const saved = store.customText || {};
+  let accent = saved.accent || 'nam';
+  app.innerHTML = `
+    ${pageTopbar('✍️ Train Any Text', '#8a6d3b')}
+    <main class="track-list custom-editor">
+      <p class="track-blurb">Paste any monologue, speech, or scene — one line per line. Then speak it aloud, scan its rhythm, and study every word’s pronunciation in the dialect you’re working in.</p>
+      <input class="sonnet-search" id="ct-title" placeholder="Title (optional) — e.g. “Hamlet 3.1”" value="${esc(saved.title || '')}">
+      <textarea class="ct-area" id="ct-body" placeholder="Paste your text here…">${esc(saved.body || '')}</textarea>
+      <div class="dialect-picker"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="ct-dialects"></div></div>
+      <button class="btn btn-practice" id="ct-go">Open in trainer →</button>
+    </main>`;
+  wireBrandHome();
+  const chipsEl = document.getElementById('ct-dialects');
+  const draw = () => chipsEl.innerHTML = TEXT_DIALECTS.map(d =>
+    `<button class="dialect-chip ${d.id === accent ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">🗣️</span>${d.label}</button>`).join('');
+  draw();
+  chipsEl.addEventListener('click', e => {
+    const b = e.target.closest('.dialect-chip'); if (!b) return;
+    accent = b.dataset.d; draw();
+  });
+  document.getElementById('ct-go').addEventListener('click', () => {
+    const title = document.getElementById('ct-title').value.trim();
+    const body = document.getElementById('ct-body').value;
+    const lines = body.split(/\n/).map(l => l.replace(/\s+$/, '')).filter(l => l.trim() !== '');
+    if (!lines.length) { document.getElementById('ct-body').focus(); return; }
+    store.saveCustomText({ title, body, accent });
+    renderReader({ label: title || 'Your text', lines, accent, editor: true });
+  });
+}
+
+// One sonnet, opened in the reader (defaults to RP; dialect is switchable).
 function renderSonnet(n) {
   record(() => renderSonnet(n));
   const s = SONNETS.find(x => x.n === n);
   if (!s) return renderSonnetList();
   const idx = SONNETS.findIndex(x => x.n === n);
   const prev = SONNETS[idx - 1], next = SONNETS[idx + 1];
+  renderReader({
+    label: `Sonnet ${n}`, lines: s.lines, accent: 'rp',
+    prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
+    next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
+  });
+}
 
+// The reader: any text, three ways (Speak / Scan / Sound), any dialect.
+function renderReader({ label, lines, accent, prev, next, editor }) {
   app.innerHTML = `
-    ${pageTopbar(`📜 Sonnet ${n}`, '#8a6d3b')}
+    ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
     <main class="guide sonnet-view">
-      <div class="sonnet-tabs" id="sonnet-tabs">
+      <div class="dialect-picker reader-dialects"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="rd-dialects"></div></div>
+      <div class="sonnet-tabs">
         <button class="son-tab on" data-mode="speak">🔊 Speak</button>
         <button class="son-tab" data-mode="scan">📐 Scan</button>
         <button class="son-tab" data-mode="transcribe">🔤 Sound</button>
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
-        ${prev ? `<button class="btn-lite" id="son-prev">‹ Sonnet ${prev.n}</button>` : '<span></span>'}
-        ${next ? `<button class="btn-lite" id="son-next">Sonnet ${next.n} ›</button>` : '<span></span>'}
+        ${editor ? '<button class="btn-lite" id="rd-edit">‹ Edit text</button>'
+          : (prev ? `<button class="btn-lite" id="rd-prev">${esc(prev.label)}</button>` : '<span></span>')}
+        ${next ? `<button class="btn-lite" id="rd-next">${esc(next.label)}</button>` : '<span></span>'}
       </div>
     </main>`;
   wireBrandHome();
 
+  let cur = accent, mode = 'speak';
   const pane = document.getElementById('sonnet-pane');
-  const panes = {
-    speak: () => speakPane(s),
-    scan: () => scanPane(s),
-    transcribe: () => transcribePane(s),
+  const drawDialects = () => document.getElementById('rd-dialects').innerHTML =
+    TEXT_DIALECTS.map(d => `<button class="dialect-chip ${d.id === cur ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">🗣️</span>${d.label}</button>`).join('');
+  const show = m => {
+    mode = m;
+    app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
+    if (m === 'speak') { pane.innerHTML = speakPane(lines); wireSpeak(lines, cur, pane); }
+    else if (m === 'scan') { pane.innerHTML = scanPane(lines); }
+    else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
-  const show = mode => {
-    pane.innerHTML = panes[mode]();
-    wirePane(mode, s, pane);
-    app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === mode));
-  };
+  drawDialects();
+  document.getElementById('rd-dialects').addEventListener('click', e => {
+    const b = e.target.closest('.dialect-chip'); if (!b) return;
+    cur = b.dataset.d; drawDialects(); show(mode);
+  });
   app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
-  document.getElementById('son-prev')?.addEventListener('click', () => renderSonnet(prev.n));
-  document.getElementById('son-next')?.addEventListener('click', () => renderSonnet(next.n));
+  document.getElementById('rd-edit')?.addEventListener('click', renderCustomText);
+  document.getElementById('rd-prev')?.addEventListener('click', () => prev.go());
+  document.getElementById('rd-next')?.addEventListener('click', () => next.go());
   show('speak');
 }
 
-function speakPane(s) {
-  const lines = s.lines.map((ln, i) =>
+function speakPane(lines) {
+  const html = lines.map((ln, i) =>
     `<button class="poem-line" data-say="${esc(ln)}"><span class="ln-num">${i + 1}</span><span class="ln-text">${esc(ln)}</span></button>`).join('');
   return `
-    <p class="pane-note">Tap any line to hear it read aloud, or read the whole sonnet through. Let the punctuation set your breath — commas are quick lifts, the line-ends and colons are the real breaths.</p>
-    <button class="btn btn-practice sonnet-play" id="say-all">🔊 Read the whole sonnet</button>
-    <div class="poem">${lines}</div>`;
+    <p class="pane-note">Tap any line to hear it, or read the whole thing through. Let the punctuation set your breath — commas are quick lifts, line-ends and colons the real breaths.</p>
+    <button class="btn btn-practice sonnet-play" id="say-all">🔊 Read it all aloud</button>
+    <div class="poem">${html}</div>`;
 }
 
-function scanPane(s) {
-  const linesHtml = s.lines.map((ln) => {
+function wireSpeak(lines, accent, pane) {
+  const lang = dialectLang(accent);
+  pane.querySelector('#say-all')?.addEventListener('click', () => speak(lines.join(' '), { lang, device: true }));
+  pane.querySelectorAll('.poem-line').forEach(b =>
+    b.addEventListener('click', () => speak(b.dataset.say, { lang, device: true })));
+}
+
+function scanPane(lines) {
+  const linesHtml = lines.map((ln) => {
     const { words, count, regular } = scanLine(ln);
     const syls = words.map(w => {
       if (w.space) return '<span class="scan-sp"> </span>';
@@ -492,42 +546,34 @@ function scanPane(s) {
     </div>`;
   }).join('');
   return `
-    <p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where Shakespeare bends the rule — a feminine ending, an extra foot, a headless line. Those are the moments to notice, not fix.</p>
-    <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree.</p>
+    <p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>
+    <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree. (Prose won’t be pentameter — the counts just show syllables.)</p>
     <div class="scan">${linesHtml}</div>`;
 }
 
-function transcribePane(s) {
-  const linesHtml = s.lines.map((ln, i) => {
-    const words = ln.split(/(\s+)/).map(tok => {
-      if (/^\s*$/.test(tok)) return tok === '' ? '' : ' ';
-      const key = cleanWord(tok);
-      const ipa = IPA_LOOKUP[key];
-      return `<button class="son-word ${ipa ? 'known' : ''}" data-say="${esc(tok)}"${ipa ? ` data-ipa="/${esc(ipa)}/"` : ''}>${esc(tok)}</button>`;
+async function fillSound(lines, accent, pane) {
+  try { await loadPron(); }
+  catch {
+    pane.innerHTML = `<p class="pane-note">Couldn’t load the pronunciation dictionary — check your connection and reopen this tab.</p>`;
+    return;
+  }
+  const lang = dialectLang(accent);
+  let approxSeen = false, miss = 0;
+  const linesHtml = lines.map((ln, i) => {
+    const toks = ln.split(/(\s+)/).map(tok => {
+      if (/^\s*$/.test(tok)) return tok === '' ? '' : '<span class="scan-sp"> </span>';
+      const r = ipaFor(tok, accent);
+      if (!r) { miss++; return `<span class="tw"><button class="tw-word" data-say="${esc(tok)}">${esc(tok)}</button><span class="tw-ipa tw-miss">—</span></span>`; }
+      if (r.approx) approxSeen = true;
+      return `<span class="tw"><button class="tw-word known" data-say="${esc(tok)}">${esc(tok)}</button><span class="tw-ipa">/${esc(r.ipa)}/</span></span>`;
     }).join('');
-    return `<div class="son-tline"><span class="ln-num">${i + 1}</span><span class="son-twords">${words}</span></div>`;
+    return `<div class="tw-line"><span class="ln-num">${i + 1}</span><span class="tw-words">${toks}</span></div>`;
   }).join('');
-  return `
-    <p class="pane-note">Tap any word to hear it. Words the trainer already knows show their IPA — a bridge from the chart to real text.</p>
-    <p class="pane-note pane-caveat">Full line-by-line transcription of every word needs a pronunciation dictionary the app doesn’t bundle yet — that’s the next build. For now this is a sound study.</p>
-    <div class="son-transcribe">${linesHtml}</div>
-    <div class="son-ipa-out" id="son-ipa-out"></div>`;
-}
-
-function wirePane(mode, s, pane) {
-  if (mode === 'speak') {
-    pane.querySelector('#say-all')?.addEventListener('click', () => speak(s.lines.join(' '), { lang: 'en-GB' }));
-    pane.querySelectorAll('.poem-line').forEach(b =>
-      b.addEventListener('click', () => speak(b.dataset.say, { lang: 'en-GB' })));
-  }
-  if (mode === 'transcribe') {
-    const out = pane.querySelector('#son-ipa-out');
-    pane.querySelectorAll('.son-word').forEach(b =>
-      b.addEventListener('click', () => {
-        speak(b.dataset.say, { lang: 'en-GB' });
-        if (out) out.textContent = b.dataset.ipa ? `${b.textContent.trim()}  ${b.dataset.ipa}` : `${b.textContent.trim()} — not in the lexicon yet`;
-      }));
-  }
+  pane.innerHTML = `
+    <p class="pane-note">Every word transcribed in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived</span>' : ''}. Tap a word to hear it.${miss ? ` <span class="approx">${miss} not in the dictionary (—).</span>` : ''}</p>
+    <div class="son-transcribe">${linesHtml}</div>`;
+  pane.querySelectorAll('.tw-word').forEach(b =>
+    b.addEventListener('click', () => speak(b.dataset.say, { lang, device: true })));
 }
 
 // ── The IPA chart: a reference to browse ──────────────────────

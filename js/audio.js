@@ -80,15 +80,20 @@ function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
   speechSynthesis.speak(u);
 }
 
-export function speak(text, { rate = 0.85, lang = 'en-GB' } = {}) {
+// `device: true` skips the pre-baked ElevenLabs clips and always uses the
+// browser voice — used for running text (sonnets, monologues), where only a
+// few words would have clips and the mix of clip/robot voices is jarring.
+export function speak(text, { rate = 0.85, lang = 'en-GB', device = false } = {}) {
   speechSynthesis.cancel();
   if (current) { current.pause(); current = null; }
 
-  const dir = LANG_DIR[lang] ?? 'rp';
-  const options = voicesWith(dir, text);
-  if (options.length) {
-    const voice = options[Math.floor(Math.random() * options.length)];
-    return playClip(dir, voice, text, { rate, lang });
+  if (!device) {
+    const dir = LANG_DIR[lang] ?? 'rp';
+    const options = voicesWith(dir, text);
+    if (options.length) {
+      const voice = options[Math.floor(Math.random() * options.length)];
+      return playClip(dir, voice, text, { rate, lang });
+    }
   }
   deviceSpeak(text, { rate, lang });
 }

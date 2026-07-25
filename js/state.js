@@ -58,4 +58,8 @@ export const store = {
     const yesterday = new Date(Date.now() - 86400e3).toISOString().slice(0, 10);
     return (s.lastPlayed === today || s.lastPlayed === yesterday) ? (s.streak ?? 0) : 0;
   },
+
+  // Last text pasted into "Train Any Text" — { title, body, accent }.
+  get customText() { return load().customText ?? null; },
+  saveCustomText(v) { const s = load(); s.customText = v; save(s); },
 };
