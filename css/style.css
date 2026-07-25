@@ -60,6 +60,15 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   position: sticky; top: 0; background: var(--bg); z-index: 5;
 }
 .stats { flex: none; }
+.backbtn {
+  flex: none; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 3px;
+  color: var(--ink); font-size: 26px; line-height: 1; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  padding: 0 2px 3px 0;
+}
+.backbtn:hover { background: var(--panel-2); }
+.backbtn:active { transform: translateY(1px); border-bottom-width: 2px; }
 .brand { color: var(--ink); display: flex; align-items: center; gap: 16px; }
 .brand-btn { background: none; border: none; padding: 0; cursor: pointer; text-align: left; }
 .brand-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.02; }

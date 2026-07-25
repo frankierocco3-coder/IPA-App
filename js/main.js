@@ -28,10 +28,30 @@ const EMBLEM = `<svg viewBox="0 0 100 104" class="emblem" aria-hidden="true">
 // Appears in every page header and returns home.
 const BRAND_BTN = `<button class="brand brand-btn" id="brand-home">${EMBLEM}<span class="brand-text"><span class="brand-name">Speechcraft</span><span class="brand-sub">Speak · Learn · Connect</span></span></button>`;
 
-// Standard header for a sub-page: brand (→ home) + centered title + stats.
+// ── Navigation history: the back button walks this stack ──────
+// Each sub-page records a thunk that re-renders it; goBack() pops the
+// current page and re-runs the one beneath. Home is the root (empty stack).
+let navStack = [];
+let navRestoring = false;
+
+function record(thunk) {
+  if (navRestoring) { navRestoring = false; return; }
+  if (navStack[navStack.length - 1] === thunk) return; // ignore same-page re-render
+  navStack.push(thunk);
+}
+
+function goBack() {
+  navStack.pop();                                // drop the current page
+  const prev = navStack[navStack.length - 1];
+  navRestoring = true;                           // prev's record() shouldn't re-push
+  if (prev) prev(); else renderHome();
+}
+
+// Standard header for a sub-page: back + brand (→ home) + centered title + stats.
 function pageTopbar(title, color) {
   return `
     <header class="topbar">
+      <button class="backbtn" id="nav-back" aria-label="Back" title="Back">‹</button>
       ${BRAND_BTN}
       <div class="track-title" style="color:${color}">${title}</div>
       <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
@@ -40,6 +60,7 @@ function pageTopbar(title, color) {
 
 function wireBrandHome() {
   document.getElementById('brand-home')?.addEventListener('click', renderHome);
+  document.getElementById('nav-back')?.addEventListener('click', goBack);
 }
 
 // Each track has its own unlock chain, independent of the others.
@@ -151,6 +172,8 @@ function practiceLesson(track) {
 // ── Home: track picker ────────────────────────────────────────
 
 function renderHome() {
+  navStack = [];              // home is the root of the back stack
+  navRestoring = false;
   const cards = TRACKS.map(t => {
     const { done, total } = trackProgress(t);
     return `
@@ -207,7 +230,7 @@ function renderHome() {
   });
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
   document.getElementById('chart-entry').addEventListener('click', renderHandbook);
-  app.querySelectorAll('.track-card:not(.arcade-entry)').forEach(btn =>
+  app.querySelectorAll('.track-card[data-track]').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
   );
 }
@@ -215,6 +238,7 @@ function renderHome() {
 // ── Arcade: single-mode games ─────────────────────────────────
 
 function renderArcade() {
+  record(renderArcade);
   const cards = MODES.map(m => `
     <button class="mode-card" data-mode="${m.id}">
       <span class="mode-icon">${m.icon}</span>
@@ -255,6 +279,7 @@ function renderArcade() {
 // ── The IPA Handbook: the reference shelf ─────────────────────
 
 function renderHandbook() {
+  record(renderHandbook);
   const cards = [
     { id: 'chart', icon: '📖', title: 'The IPA Chart',
       blurb: 'Every symbol, its sound, and example words — tap any to hear it and see how it’s made.' },
@@ -284,6 +309,7 @@ function renderHandbook() {
 
 // "Your Instrument": labelled vocal-tract anatomy.
 function renderInstrument() {
+  record(renderInstrument);
   const parts = [
     ['Lips', 'round, spread, or pressed together — every /p b m w/ and the shape of your vowels.'],
     ['Teeth', 'the top teeth meet the lip for /f v/ and the tongue for /θ ð/.'],
@@ -308,6 +334,7 @@ function renderInstrument() {
 
 // "The Vowel Map": every vowel on the quadrilateral.
 function renderVowelMap() {
+  record(renderVowelMap);
   app.innerHTML = `
     ${pageTopbar('📐 The Vowel Map', '#64748b')}
     <main class="guide vowel-map">
@@ -321,6 +348,7 @@ function renderVowelMap() {
 // ── The IPA chart: a reference to browse ──────────────────────
 
 function renderChart() {
+  record(renderChart);
   const syms = Object.entries(PHONEMES);
   const groups = [
     { title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the schwa /ə/.',
@@ -365,6 +393,7 @@ function renderChart() {
 function renderSoundDetail(sym) {
   const p = PHONEMES[sym];
   if (!p) return renderChart();
+  record(() => renderSoundDetail(sym));
   const diagram = articulationSVG(sym);
   const lang = ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
     ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'].includes(sym) ? 'en-AU' : 'en-GB');
@@ -413,6 +442,7 @@ function lessonNodeIcon(lesson) {
 const PATH_OFFSETS = [0, 48, 70, 48, 0, -48, -70, -48];
 
 function renderTrack(track) {
+  record(() => renderTrack(track));
   const chain = TRACK_LESSONS[track.id];
   const active = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l));
   let gi = 0;
