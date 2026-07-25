@@ -2,7 +2,7 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
-import { speak, ACCENT_LANG } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, ACCENT_LANG } from './audio.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { scanLine } from './scan.js';
@@ -468,13 +468,19 @@ function renderSonnet(n) {
   const prev = SONNETS[idx - 1], next = SONNETS[idx + 1];
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: 'rp',
+    // Pre-generated ElevenLabs clip for a given 1-based line + dialect, if any.
+    clip: (i, acc) => SONNET_CLIP_DIALECTS.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
   });
 }
 
+// Dialects that have any pre-generated sonnet audio (missing files fall back
+// to the device voice, so partial coverage is fine).
+const SONNET_CLIP_DIALECTS = ['rp'];
+
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, editor }) {
+function renderReader({ label, lines, accent, prev, next, editor, clip }) {
   app.innerHTML = `
     ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
     <main class="guide sonnet-view">
@@ -498,9 +504,10 @@ function renderReader({ label, lines, accent, prev, next, editor }) {
   const drawDialects = () => document.getElementById('rd-dialects').innerHTML =
     TEXT_DIALECTS.map(d => `<button class="dialect-chip ${d.id === cur ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">🗣️</span>${d.label}</button>`).join('');
   const show = m => {
+    stopSpeech();
     mode = m;
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
-    if (m === 'speak') { pane.innerHTML = speakPane(lines); wireSpeak(lines, cur, pane); }
+    if (m === 'speak') { pane.innerHTML = speakPane(lines); wireSpeak(lines, cur, pane, clip); }
     else if (m === 'scan') { pane.innerHTML = scanPane(lines); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
@@ -510,26 +517,28 @@ function renderReader({ label, lines, accent, prev, next, editor }) {
     cur = b.dataset.d; drawDialects(); show(mode);
   });
   app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
-  document.getElementById('rd-edit')?.addEventListener('click', renderCustomText);
-  document.getElementById('rd-prev')?.addEventListener('click', () => prev.go());
-  document.getElementById('rd-next')?.addEventListener('click', () => next.go());
+  document.getElementById('rd-edit')?.addEventListener('click', () => { stopSpeech(); renderCustomText(); });
+  document.getElementById('rd-prev')?.addEventListener('click', () => { stopSpeech(); prev.go(); });
+  document.getElementById('rd-next')?.addEventListener('click', () => { stopSpeech(); next.go(); });
   show('speak');
 }
 
 function speakPane(lines) {
   const html = lines.map((ln, i) =>
-    `<button class="poem-line" data-say="${esc(ln)}"><span class="ln-num">${i + 1}</span><span class="ln-text">${esc(ln)}</span></button>`).join('');
+    `<button class="poem-line" data-idx="${i + 1}" data-say="${esc(ln)}"><span class="ln-num">${i + 1}</span><span class="ln-text">${esc(ln)}</span></button>`).join('');
   return `
     <p class="pane-note">Tap any line to hear it, or read the whole thing through. Let the punctuation set your breath — commas are quick lifts, line-ends and colons the real breaths.</p>
     <button class="btn btn-practice sonnet-play" id="say-all">🔊 Read it all aloud</button>
     <div class="poem">${html}</div>`;
 }
 
-function wireSpeak(lines, accent, pane) {
+function wireSpeak(lines, accent, pane, clip) {
   const lang = dialectLang(accent);
-  pane.querySelector('#say-all')?.addEventListener('click', () => speak(lines.join(' '), { lang, device: true }));
+  const clipFor = i => (clip ? clip(i, accent) : null);
+  pane.querySelector('#say-all')?.addEventListener('click', () =>
+    speakSequence(lines.map((t, i) => ({ text: t, clipUrl: clipFor(i + 1) })), { lang }));
   pane.querySelectorAll('.poem-line').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.say, { lang, device: true })));
+    b.addEventListener('click', () => speakLine(b.dataset.say, { lang, clipUrl: clipFor(+b.dataset.idx) })));
 }
 
 function scanPane(lines) {

@@ -64,9 +64,12 @@ let current = null;
 function playClip(dir, voice, word, fallback) {
   const el = new Audio(`audio/${dir}/${voice}/${clipName(word)}.mp3`);
   current = el;
-  // If the file turns out to be missing or unplayable, fall back to TTS.
-  el.addEventListener('error', () => deviceSpeak(word, fallback), { once: true });
-  el.play().catch(() => deviceSpeak(word, fallback));
+  // A 404 fires both 'error' and a play() rejection — guard so TTS fallback
+  // runs only once.
+  let handled = false;
+  const fall = () => { if (handled) return; handled = true; deviceSpeak(word, fallback); };
+  el.addEventListener('error', fall, { once: true });
+  el.play().catch(fall);
 }
 
 // Browsers gate speechSynthesis behind a user gesture and won't speak until
@@ -119,4 +122,69 @@ export function speak(text, { rate = 0.85, lang = 'en-GB', device = false } = {}
     }
   }
   deviceSpeak(text, { rate, lang });
+}
+
+// Speak a device utterance and call `done` when it finishes (or errors).
+function deviceSpeakThen(text, lang, done) {
+  if (!('speechSynthesis' in window)) { done(); return; }
+  const u = new SpeechSynthesisUtterance(text);
+  if (!voiceCache[lang]) voiceCache[lang] = pickVoice(lang);
+  const v = voiceCache[lang];
+  if (v) u.voice = v;
+  u.lang = v?.lang ?? lang;
+  u.rate = 0.85;
+  u.addEventListener('end', done, { once: true });
+  u.addEventListener('error', done, { once: true });
+  speechSynthesis.speak(u);
+  setTimeout(() => { try { if (speechSynthesis.speaking) speechSynthesis.resume(); } catch {} }, 80);
+}
+
+let seqCancel = null;
+
+export function stopSpeech() {
+  if (current) { current.pause(); current = null; }
+  if (seqCancel) { seqCancel(); seqCancel = null; }
+  try { speechSynthesis.cancel(); } catch {}
+}
+
+// Read one line: play a pre-generated clip if given, else the device voice;
+// a missing/failed clip falls straight back to the device voice.
+export function speakLine(text, { lang = 'en-GB', clipUrl = null } = {}) {
+  stopSpeech();
+  if (clipUrl) {
+    const el = new Audio(clipUrl);
+    current = el;
+    let handled = false;
+    const fall = () => { if (handled) return; handled = true; deviceSpeak(text, { lang }); };
+    el.addEventListener('error', fall, { once: true });
+    el.play().catch(fall);
+  } else {
+    deviceSpeak(text, { lang });
+  }
+}
+
+// Read a whole passage line by line, each line using its clip when present
+// and the device voice otherwise, chained so it flows as one reading.
+export function speakSequence(items /* [{ text, clipUrl }] */, { lang = 'en-GB' } = {}) {
+  stopSpeech();
+  let i = 0, cancelled = false;
+  seqCancel = () => { cancelled = true; };
+  const step = () => {
+    if (cancelled || i >= items.length) return;
+    const { text, clipUrl } = items[i];
+    const next = () => { i++; step(); };
+    if (clipUrl) {
+      const el = new Audio(clipUrl);
+      current = el;
+      let handled = false;
+      const advance = () => { if (handled) return; handled = true; next(); };
+      const fail = () => { if (handled) return; handled = true; deviceSpeakThen(text, lang, next); };
+      el.addEventListener('ended', advance, { once: true });
+      el.addEventListener('error', fail, { once: true });
+      el.play().catch(fail);
+    } else {
+      deviceSpeakThen(text, lang, next);
+    }
+  };
+  step();
 }
