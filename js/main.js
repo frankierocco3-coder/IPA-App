@@ -4,6 +4,8 @@ import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
 import { speak, ACCENT_LANG } from './audio.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
+import { SONNETS } from './data/sonnets.js';
+import { scanLine } from './scan.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -221,6 +223,14 @@ function renderHome() {
         </div>
         <div class="track-arrow">›</div>
       </button>
+      <button class="track-card text-entry" id="text-entry" style="--track-color:#8a6d3b">
+        <div class="track-glyph">📜</div>
+        <div class="track-info">
+          <h2>Text &amp; Delivery</h2>
+          <p>Speak real text aloud — Shakespeare’s sonnets, with metre and sound.</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>
     </main>`;
 
   wireBrandHome();
@@ -230,6 +240,7 @@ function renderHome() {
   });
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
   document.getElementById('chart-entry').addEventListener('click', renderHandbook);
+  document.getElementById('text-entry').addEventListener('click', renderTextLibrary);
   app.querySelectorAll('.track-card[data-track]').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
   );
@@ -343,6 +354,180 @@ function renderVowelMap() {
       <p class="artic-cap">Tap any symbol in <b>The IPA Chart</b> to hear it and see its own diagram.</p>
     </main>`;
   wireBrandHome();
+}
+
+// ── Text & Delivery: speak real text aloud ────────────────────
+
+// Fast word → IPA lookup drawn from the exercise lexicon (partial coverage;
+// most sonnet words aren't in it yet — see the note in Transcribe mode).
+const IPA_LOOKUP = (() => {
+  const m = {};
+  for (const w of WORDS) {
+    const key = (w.word || '').toLowerCase();
+    const ipa = Array.isArray(w.ipa) ? w.ipa.join('') : w.ipa;
+    if (key && ipa && !m[key]) m[key] = ipa;
+  }
+  return m;
+})();
+const cleanWord = s => s.toLowerCase().replace(/[^a-z’']/g, '');
+
+function renderTextLibrary() {
+  record(renderTextLibrary);
+  const cards = [
+    { id: 'sonnets', icon: '📜', title: 'Shakespeare’s Sonnets', on: true,
+      blurb: `All 154 — speak them, scan the metre, study the sounds.` },
+    { id: 'monologues', icon: '🎭', title: 'Monologues', on: false,
+      blurb: 'Classical and contemporary speeches for the stage — coming soon.' },
+    { id: 'speeches', icon: '🎙️', title: 'Speeches & Rhetoric', on: false,
+      blurb: 'Great public address, built for delivery — coming soon.' },
+  ];
+  app.innerHTML = `
+    ${pageTopbar('📜 Text & Delivery', '#8a6d3b')}
+    <main class="track-list">
+      <p class="track-blurb">Take the sounds off the chart and onto real text. Speak it aloud, feel the metre, study the pronunciation.</p>
+      ${cards.map(c => `
+        <button class="track-card text-card ${c.on ? '' : 'soon'}" data-lib="${c.id}" ${c.on ? '' : 'disabled'} style="--track-color:#8a6d3b">
+          <div class="track-glyph">${c.icon}</div>
+          <div class="track-info"><h2>${esc(c.title)}${c.on ? '' : ' <span class="badge badge-dark">SOON</span>'}</h2><p>${esc(c.blurb)}</p></div>
+          <div class="track-arrow">›</div>
+        </button>`).join('')}
+    </main>`;
+  wireBrandHome();
+  app.querySelector('.text-card[data-lib="sonnets"]')?.addEventListener('click', renderSonnetList);
+}
+
+function renderSonnetList() {
+  record(renderSonnetList);
+  const rows = SONNETS.map(s => `
+    <button class="sonnet-row" data-n="${s.n}" data-search="${esc((s.n + ' ' + s.lines[0]).toLowerCase())}">
+      <span class="sonnet-num">${s.n}</span>
+      <span class="sonnet-open">${esc(s.lines[0])}</span>
+      <span class="track-arrow">›</span>
+    </button>`).join('');
+  app.innerHTML = `
+    ${pageTopbar('📜 Shakespeare’s Sonnets', '#8a6d3b')}
+    <main class="track-list sonnet-list">
+      <input class="sonnet-search" id="sonnet-search" type="search" placeholder="Search by number or opening line…" autocomplete="off">
+      <p class="sonnet-hint" id="sonnet-hint">154 sonnets · public domain</p>
+      <div class="sonnet-rows" id="sonnet-rows">${rows}</div>
+    </main>`;
+  wireBrandHome();
+  const rowsEl = app.querySelectorAll('.sonnet-row');
+  rowsEl.forEach(r => r.addEventListener('click', () => renderSonnet(+r.dataset.n)));
+  const search = document.getElementById('sonnet-search');
+  const hint = document.getElementById('sonnet-hint');
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    rowsEl.forEach(r => {
+      const hit = !q || r.dataset.search.includes(q);
+      r.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : '154 sonnets · public domain';
+  });
+}
+
+// One sonnet, three ways: Speak (delivery), Scan (metre), Transcribe (sound).
+function renderSonnet(n) {
+  record(() => renderSonnet(n));
+  const s = SONNETS.find(x => x.n === n);
+  if (!s) return renderSonnetList();
+  const idx = SONNETS.findIndex(x => x.n === n);
+  const prev = SONNETS[idx - 1], next = SONNETS[idx + 1];
+
+  app.innerHTML = `
+    ${pageTopbar(`📜 Sonnet ${n}`, '#8a6d3b')}
+    <main class="guide sonnet-view">
+      <div class="sonnet-tabs" id="sonnet-tabs">
+        <button class="son-tab on" data-mode="speak">🔊 Speak</button>
+        <button class="son-tab" data-mode="scan">📐 Scan</button>
+        <button class="son-tab" data-mode="transcribe">🔤 Sound</button>
+      </div>
+      <div class="sonnet-pane" id="sonnet-pane"></div>
+      <div class="sonnet-nav">
+        ${prev ? `<button class="btn-lite" id="son-prev">‹ Sonnet ${prev.n}</button>` : '<span></span>'}
+        ${next ? `<button class="btn-lite" id="son-next">Sonnet ${next.n} ›</button>` : '<span></span>'}
+      </div>
+    </main>`;
+  wireBrandHome();
+
+  const pane = document.getElementById('sonnet-pane');
+  const panes = {
+    speak: () => speakPane(s),
+    scan: () => scanPane(s),
+    transcribe: () => transcribePane(s),
+  };
+  const show = mode => {
+    pane.innerHTML = panes[mode]();
+    wirePane(mode, s, pane);
+    app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === mode));
+  };
+  app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
+  document.getElementById('son-prev')?.addEventListener('click', () => renderSonnet(prev.n));
+  document.getElementById('son-next')?.addEventListener('click', () => renderSonnet(next.n));
+  show('speak');
+}
+
+function speakPane(s) {
+  const lines = s.lines.map((ln, i) =>
+    `<button class="poem-line" data-say="${esc(ln)}"><span class="ln-num">${i + 1}</span><span class="ln-text">${esc(ln)}</span></button>`).join('');
+  return `
+    <p class="pane-note">Tap any line to hear it read aloud, or read the whole sonnet through. Let the punctuation set your breath — commas are quick lifts, the line-ends and colons are the real breaths.</p>
+    <button class="btn btn-practice sonnet-play" id="say-all">🔊 Read the whole sonnet</button>
+    <div class="poem">${lines}</div>`;
+}
+
+function scanPane(s) {
+  const linesHtml = s.lines.map((ln) => {
+    const { words, count, regular } = scanLine(ln);
+    const syls = words.map(w => {
+      if (w.space) return '<span class="scan-sp"> </span>';
+      return `<span class="scan-word">${w.syllables.map(sy =>
+        `<span class="syl ${sy.stress}"><span class="syl-mark">${sy.stress === 'strong' ? '´' : '˘'}</span><span class="syl-txt">${esc(sy.text)}</span></span>`).join('')}</span>`;
+    }).join('');
+    return `<div class="scan-line">
+      <div class="scan-syls">${syls}</div>
+      <span class="scan-count ${regular ? '' : 'off'}">${count}${regular ? '' : ' ⚠'}</span>
+    </div>`;
+  }).join('');
+  return `
+    <p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where Shakespeare bends the rule — a feminine ending, an extra foot, a headless line. Those are the moments to notice, not fix.</p>
+    <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree.</p>
+    <div class="scan">${linesHtml}</div>`;
+}
+
+function transcribePane(s) {
+  const linesHtml = s.lines.map((ln, i) => {
+    const words = ln.split(/(\s+)/).map(tok => {
+      if (/^\s*$/.test(tok)) return tok === '' ? '' : ' ';
+      const key = cleanWord(tok);
+      const ipa = IPA_LOOKUP[key];
+      return `<button class="son-word ${ipa ? 'known' : ''}" data-say="${esc(tok)}"${ipa ? ` data-ipa="/${esc(ipa)}/"` : ''}>${esc(tok)}</button>`;
+    }).join('');
+    return `<div class="son-tline"><span class="ln-num">${i + 1}</span><span class="son-twords">${words}</span></div>`;
+  }).join('');
+  return `
+    <p class="pane-note">Tap any word to hear it. Words the trainer already knows show their IPA — a bridge from the chart to real text.</p>
+    <p class="pane-note pane-caveat">Full line-by-line transcription of every word needs a pronunciation dictionary the app doesn’t bundle yet — that’s the next build. For now this is a sound study.</p>
+    <div class="son-transcribe">${linesHtml}</div>
+    <div class="son-ipa-out" id="son-ipa-out"></div>`;
+}
+
+function wirePane(mode, s, pane) {
+  if (mode === 'speak') {
+    pane.querySelector('#say-all')?.addEventListener('click', () => speak(s.lines.join(' '), { lang: 'en-GB' }));
+    pane.querySelectorAll('.poem-line').forEach(b =>
+      b.addEventListener('click', () => speak(b.dataset.say, { lang: 'en-GB' })));
+  }
+  if (mode === 'transcribe') {
+    const out = pane.querySelector('#son-ipa-out');
+    pane.querySelectorAll('.son-word').forEach(b =>
+      b.addEventListener('click', () => {
+        speak(b.dataset.say, { lang: 'en-GB' });
+        if (out) out.textContent = b.dataset.ipa ? `${b.textContent.trim()}  ${b.dataset.ipa}` : `${b.textContent.trim()} — not in the lexicon yet`;
+      }));
+  }
 }
 
 // ── The IPA chart: a reference to browse ──────────────────────
