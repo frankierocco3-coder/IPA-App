@@ -426,15 +426,25 @@ function renderSoundDetail(sym) {
 
 // ── Track page: that dialect's units & lessons ────────────────
 
-// The face of a lesson node: the IPA it teaches (checkpoints keep the
-// dice, mastery finals the crown).
+// The face of a lesson node reflects what kind of lesson it is, like the
+// Duolingo path: 📖 reading, 🎧 listening, ⭐ a plain level not yet beaten
+// (checkpoints keep the dice, mastery finals the crown, done → ✓).
+const LISTEN_TYPES = ['soundToSymbol', 'accentEar', 'minimalPair'];
+const READ_TYPES = ['symbolToWord', 'typeWord', 'spellBlank', 'sentenceToEnglish', 'englishToIpa', 'gapBuild', 'fillBlank', 'build'];
+
+function lessonKindEmoji(lesson) {
+  const t = lesson.types || [];
+  const listen = t.some(x => LISTEN_TYPES.includes(x));
+  const read = t.some(x => READ_TYPES.includes(x));
+  if (read && !listen) return '📖';   // sight-reading transcriptions
+  if (listen && !read) return '🎧';   // ear-training / audio
+  return '⭐';                          // mixed or teaching → a plain level
+}
+
 function lessonNodeIcon(lesson) {
   if (lesson.checkpoint) return { text: '🎲', ipa: false };
   if (/final|mastery/.test(lesson.id) || (lesson.count && lesson.count >= 12)) return { text: '👑', ipa: false };
-  const phs = lesson.phonemes || [];
-  if (!phs.length) return { text: '⭐', ipa: false };
-  const two = phs.slice(0, 2).join(' ');
-  return { text: two.length <= 5 ? two : phs[0], ipa: true };
+  return { text: lessonKindEmoji(lesson), ipa: false };
 }
 
 // Winding path, Duolingo-style skeleton: sequential nodes zig-zagging down,
@@ -457,7 +467,7 @@ function renderTrack(track) {
       const state = done ? 'done' : isActive ? 'active' : unlocked ? 'open' : 'locked';
       const dx = PATH_OFFSETS[gi % PATH_OFFSETS.length];
       gi++;
-      const face = done ? { text: '✓', ipa: false } : unlocked ? lessonNodeIcon(l) : { text: '🔒', ipa: false };
+      const face = done ? { text: '✓', ipa: false } : lessonNodeIcon(l);
       const mascotSide = dx <= 0 ? 1 : -1;
       return `
         <div class="path-row">
