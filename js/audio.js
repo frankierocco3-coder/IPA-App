@@ -69,8 +69,29 @@ function playClip(dir, voice, word, fallback) {
   el.play().catch(() => deviceSpeak(word, fallback));
 }
 
+// Browsers gate speechSynthesis behind a user gesture and won't speak until
+// the engine is "unlocked" by a first utterance inside one. Prime it on the
+// very first pointer/key interaction so later taps actually produce sound.
+let ttsUnlocked = false;
+function unlockTTS() {
+  if (ttsUnlocked) return;
+  ttsUnlocked = true;
+  try {
+    const u = new SpeechSynthesisUtterance(' ');
+    u.volume = 0;
+    speechSynthesis.speak(u);
+  } catch { /* no TTS here */ }
+}
+if (typeof window !== 'undefined') {
+  ['pointerdown', 'keydown', 'touchstart'].forEach(ev =>
+    window.addEventListener(ev, unlockTTS, { once: true, capture: true }));
+}
+
 function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
-  speechSynthesis.cancel();
+  if (!('speechSynthesis' in window)) return;
+  // Only cancel when something is actually queued — a bare cancel() on an idle
+  // engine can leave Chrome stuck and swallow the next utterance.
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   if (!voiceCache[lang]) voiceCache[lang] = pickVoice(lang);
   const voice = voiceCache[lang];
@@ -78,14 +99,16 @@ function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
   u.lang = voice?.lang ?? lang;
   u.rate = rate;
   speechSynthesis.speak(u);
+  // Chrome frequently stalls right after speak(); a resume() kick unsticks it.
+  setTimeout(() => { try { if (speechSynthesis.speaking) speechSynthesis.resume(); } catch {} }, 80);
 }
 
 // `device: true` skips the pre-baked ElevenLabs clips and always uses the
 // browser voice — used for running text (sonnets, monologues), where only a
 // few words would have clips and the mix of clip/robot voices is jarring.
 export function speak(text, { rate = 0.85, lang = 'en-GB', device = false } = {}) {
-  speechSynthesis.cancel();
   if (current) { current.pause(); current = null; }
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 
   if (!device) {
     const dir = LANG_DIR[lang] ?? 'rp';
