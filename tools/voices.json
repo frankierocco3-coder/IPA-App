@@ -1,8 +1,8 @@
 {
   "_comment": "accent -> voice key -> voice id (or {id, stability, similarity_boost, style, speed}). Keys 'm'/'f' become audio/<accent>/<key>/<word>.mp3 and the app picks between them at random.",
   "rp": {
-    "_note": "m = Talkative Joe, f = Penelope (both British RP), chosen 2026-07-25",
-    "m": { "id": "aFyw0oiXW7dzKF4o7woX", "speed": 0.85 },
+    "_note": "m = Mark (replaced Talkative Joe 2026-07-25), f = Penelope. Both British RP.",
+    "m": { "id": "jgzHfSd2o0L7p0de3yr0", "speed": 0.85 },
     "f": { "id": "d4qSO7iUHJlgeOqVMeIf", "speed": 0.85 }
   },
   "nam": {
@@ -13,7 +13,8 @@
     "f": { "id": "Rpg8Sn3cVL1f8658yYm2", "stability": 0.85 }
   },
   "_sonnets": {
-    "_note": "single narrator voice for the sonnet reader, per dialect (separate from the drill voices). rp = Mark, chosen 2026-07-25.",
-    "rp": "jgzHfSd2o0L7p0de3yr0"
+    "_note": "single narrator voice for the sonnet reader, per dialect. rp = Mark, aus = Jimbo. Chosen 2026-07-25.",
+    "rp": "jgzHfSd2o0L7p0de3yr0",
+    "aus": "YLbQE9U7P1K6rBNJWNSv"
   }
 }
