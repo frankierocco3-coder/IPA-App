@@ -207,6 +207,23 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .artic-svg { width: 100%; max-width: 320px; height: auto; }
 .artic-cap { font-size: 12px; color: var(--muted); margin-top: 4px; }
 .artic-lbl { font-size: 8.5px; font-weight: 700; fill: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.vs-sym { font-family: var(--serif); font-size: 12px; font-weight: 600; }
+
+/* ── Your Instrument / anatomy ── */
+.anat-wrap {
+  background: var(--panel); border: 2px solid var(--line); border-radius: 16px;
+  padding: 12px; margin: 8px 0 14px; text-align: center;
+}
+.anat-svg { width: 100%; max-width: 440px; height: auto; }
+.anat-lbl { font-size: 10px; font-weight: 600; fill: var(--ink); font-family: var(--serif); }
+.anat-lead { stroke: var(--muted); stroke-width: 1; opacity: 0.55; }
+.anat-dot { fill: var(--green); }
+.anat-list { display: grid; gap: 10px; margin: 4px 0 8px; }
+.anat-list div {
+  border: 2px solid var(--line); border-radius: 14px; padding: 10px 14px; background: var(--panel);
+}
+.anat-list dt { font-family: var(--serif); font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.anat-list dd { margin: 0; font-size: 14px; color: var(--muted); line-height: 1.4; }
 
 /* ── Track page ── */
 .back {

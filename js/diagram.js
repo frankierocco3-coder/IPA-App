@@ -104,3 +104,93 @@ export function articulationSVG(sym) {
   if (CONS[sym]) return consonantDiagram(sym);
   return '';
 }
+
+// ── "Your Instrument": a labelled sagittal of the vocal tract ──
+// Original drawing of standard anatomy (facts, not a copied illustration).
+export function vocalTractSVG() {
+  const lbl = (text, tx, ty, px, py, anchor = 'start') =>
+    `<line x1="${anchor === 'end' ? tx - 4 : tx + 4}" y1="${ty - 3}" x2="${px}" y2="${py}" class="anat-lead"/>
+     <circle cx="${px}" cy="${py}" r="2.6" class="anat-dot"/>
+     <text x="${tx}" y="${ty}" text-anchor="${anchor}" class="anat-lbl">${text}</text>`;
+  return `<svg viewBox="0 0 460 380" class="anat-svg" role="img" aria-label="Side view of the vocal tract">
+    <!-- head / soft-tissue silhouette, a left-facing profile: forehead, nose, lips, chin, throat -->
+    <path d="M330 22 Q180 16 156 58 Q146 92 118 120 Q100 140 106 156
+             Q118 162 122 170 Q110 180 110 192 Q114 206 130 216
+             Q146 238 172 250 Q214 266 240 292 L240 372 L330 372 Z"
+          fill="#f0e7d6" stroke="var(--line)" stroke-width="2"/>
+    <!-- bone: upper jaw + hard palate mass (speckled) -->
+    <path d="M330 40 Q210 34 168 66 Q144 86 138 148 L250 152 Q300 150 316 132 L330 120 Z"
+          fill="#e7ddc6" stroke="#cfc3a4" stroke-width="1.4"/>
+    <circle cx="210" cy="78" r="1.4" fill="#cfc3a4"/><circle cx="245" cy="92" r="1.4" fill="#cfc3a4"/>
+    <circle cx="278" cy="80" r="1.4" fill="#cfc3a4"/><circle cx="230" cy="108" r="1.4" fill="#cfc3a4"/>
+    <circle cx="268" cy="112" r="1.4" fill="#cfc3a4"/><circle cx="295" cy="100" r="1.4" fill="#cfc3a4"/>
+    <!-- nasal cavity opening -->
+    <path d="M172 92 Q225 84 278 92 Q262 116 218 120 Q192 120 172 112 Z"
+          fill="var(--panel)" stroke="#cfc3a4" stroke-width="1.2"/>
+    <!-- hard palate underside (arched roof of the mouth) -->
+    <path d="M132 152 Q170 146 250 150 Q248 158 210 160 Q160 160 140 168 Q132 160 132 152 Z"
+          fill="#efe6d2" stroke="#cfc3a4" stroke-width="1"/>
+    <!-- soft palate (velum) + uvula, hanging at the back -->
+    <path d="M250 150 Q276 150 280 176 Q278 198 262 200 Q252 194 252 172 Q250 160 250 150 Z"
+          fill="#d8a3a0" stroke="#bd8380" stroke-width="1.4"/>
+    <!-- upper + lower teeth -->
+    <rect x="124" y="152" width="7" height="12" rx="2" fill="#fbfaf4" stroke="#d8d0bb" stroke-width="1"/>
+    <rect x="124" y="200" width="7" height="12" rx="2" fill="#fbfaf4" stroke="#d8d0bb" stroke-width="1"/>
+    <!-- lips -->
+    <path d="M108 156 Q98 178 110 200 Q120 190 120 178 Q120 166 108 156 Z"
+          fill="#c88f7b" stroke="#a86a56" stroke-width="1.4"/>
+    <!-- tongue: humped body sitting on the mouth floor -->
+    <path d="M132 208 Q138 186 172 180 Q212 174 244 186 Q274 198 282 228
+             Q286 258 268 280 Q240 292 206 288 Q164 284 146 262 Q134 238 132 208 Z"
+          fill="#d69a86" stroke="#b87b66" stroke-width="1.6"/>
+    <path d="M172 184 Q182 236 232 280" fill="none" stroke="#b87b66" stroke-width="1" stroke-dasharray="3 3" opacity="0.65"/>
+    <path d="M214 178 Q224 232 262 278" fill="none" stroke="#b87b66" stroke-width="1" stroke-dasharray="3 3" opacity="0.65"/>
+    <!-- pharynx back wall -->
+    <path d="M300 150 L300 296" fill="none" stroke="#cfc3a4" stroke-width="2"/>
+    <!-- epiglottis + larynx + vocal folds -->
+    <path d="M272 288 Q286 296 284 312" fill="none" stroke="#bd8380" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="282" cy="326" rx="15" ry="11" fill="#e7ddc6" stroke="#cfc3a4" stroke-width="1.4"/>
+    <line x1="271" y1="326" x2="293" y2="326" stroke="#bd8380" stroke-width="3"/>
+    <!-- trachea -->
+    <path d="M271 340 L271 366 M293 340 L293 366" stroke="#cfc3a4" stroke-width="1.5"/>
+
+    <!-- LEFT labels -->
+    ${lbl('Nasal cavity', 40, 74, 200, 104)}
+    ${lbl('Hard palate', 40, 118, 185, 152)}
+    ${lbl('Alveolar ridge', 40, 150, 134, 154)}
+    ${lbl('Teeth', 40, 180, 126, 160)}
+    ${lbl('Lips', 40, 210, 106, 182)}
+    ${lbl('Tongue tip', 40, 244, 150, 196)}
+    ${lbl('Tongue front', 40, 274, 195, 186)}
+    <!-- RIGHT labels -->
+    ${lbl('Soft palate (velum)', 420, 118, 266, 168, 'end')}
+    ${lbl('Uvula', 420, 152, 266, 194, 'end')}
+    ${lbl('Tongue back', 420, 206, 274, 216, 'end')}
+    ${lbl('Pharynx', 420, 248, 300, 240, 'end')}
+    ${lbl('Epiglottis', 420, 294, 280, 300, 'end')}
+    ${lbl('Vocal folds (glottis)', 420, 328, 282, 326, 'end')}
+    ${lbl('Trachea', 420, 362, 282, 356, 'end')}
+  </svg>`;
+}
+
+// All the vowels plotted on the quadrilateral — the classic reference.
+export function vowelSpaceSVG() {
+  const dots = Object.entries(VOWELS)
+    .filter(([, v]) => !v.r) // skip the rhotic duplicates
+    .map(([sym, v]) => {
+      const [x, y] = vowelPoint(v);
+      return `<g><circle cx="${x}" cy="${y}" r="${v.round ? 11 : 7}" fill="${v.round ? 'none' : 'var(--green)'}"
+        stroke="${v.round ? 'var(--lavender)' : 'none'}" stroke-width="2.5"/>
+        <text x="${x}" y="${y + 4.5}" text-anchor="middle" class="vs-sym" fill="${v.round ? 'var(--ink)' : '#fff'}">${sym}</text></g>`;
+    }).join('');
+  return `<svg viewBox="0 0 300 220" class="artic-svg" role="img" aria-label="Vowel space chart">
+    <polygon points="70,40 230,40 205,190 100,190" fill="var(--panel-2)" stroke="var(--line)" stroke-width="2"/>
+    <line x1="150" y1="40" x2="152" y2="190" stroke="var(--line)" stroke-dasharray="3 3"/>
+    <text x="64" y="36" class="artic-lbl" text-anchor="end">close</text>
+    <text x="96" y="205" class="artic-lbl">open</text>
+    <text x="70" y="26" class="artic-lbl">front</text>
+    <text x="230" y="26" class="artic-lbl" text-anchor="end">back</text>
+    <text x="152" y="26" class="artic-lbl" text-anchor="middle">central</text>
+    ${dots}
+  </svg>`;
+}

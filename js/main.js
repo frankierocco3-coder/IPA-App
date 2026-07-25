@@ -3,7 +3,7 @@ import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
 import { speak, ACCENT_LANG } from './audio.js';
-import { articulationSVG } from './diagram.js';
+import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -193,8 +193,8 @@ function renderHome() {
       <button class="track-card chart-entry" id="chart-entry" style="--track-color:#64748b">
         <div class="track-glyph">📖</div>
         <div class="track-info">
-          <h2>The IPA Chart</h2>
-          <p>Every symbol, its sound, and example words — tap any to hear it.</p>
+          <h2>The IPA Handbook</h2>
+          <p>The chart, your instrument, and the vowel map — the reference shelf.</p>
         </div>
         <div class="track-arrow">›</div>
       </button>
@@ -206,7 +206,7 @@ function renderHome() {
     renderHome();
   });
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
-  document.getElementById('chart-entry').addEventListener('click', renderChart);
+  document.getElementById('chart-entry').addEventListener('click', renderHandbook);
   app.querySelectorAll('.track-card:not(.arcade-entry)').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
   );
@@ -250,6 +250,72 @@ function renderArcade() {
   app.querySelectorAll('.mode-card').forEach(btn =>
     btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
   );
+}
+
+// ── The IPA Handbook: the reference shelf ─────────────────────
+
+function renderHandbook() {
+  const cards = [
+    { id: 'chart', icon: '📖', title: 'The IPA Chart',
+      blurb: 'Every symbol, its sound, and example words — tap any to hear it and see how it’s made.' },
+    { id: 'instrument', icon: '🎭', title: 'Your Instrument',
+      blurb: 'A tour of the vocal tract — the parts you shape every sound with.' },
+    { id: 'vowels', icon: '📐', title: 'The Vowel Map',
+      blurb: 'Where every vowel sits in the mouth — high to low, front to back.' },
+  ];
+  app.innerHTML = `
+    ${pageTopbar('📚 The IPA Handbook', '#64748b')}
+    <main class="track-list">
+      <p class="track-blurb">Your reference shelf — the alphabet of sounds and the instrument that makes them.</p>
+      ${cards.map(c => `
+        <button class="track-card handbook-entry" data-page="${c.id}" style="--track-color:#64748b">
+          <div class="track-glyph">${c.icon}</div>
+          <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
+          <div class="track-arrow">›</div>
+        </button>`).join('')}
+    </main>`;
+
+  wireBrandHome();
+  const go = { chart: renderChart, instrument: renderInstrument, vowels: renderVowelMap };
+  app.querySelectorAll('.handbook-entry').forEach(btn =>
+    btn.addEventListener('click', () => go[btn.dataset.page]())
+  );
+}
+
+// "Your Instrument": labelled vocal-tract anatomy.
+function renderInstrument() {
+  const parts = [
+    ['Lips', 'round, spread, or pressed together — every /p b m w/ and the shape of your vowels.'],
+    ['Teeth', 'the top teeth meet the lip for /f v/ and the tongue for /θ ð/.'],
+    ['Alveolar ridge', 'the bump behind your top teeth — home base for /t d n s z l/.'],
+    ['Hard palate', 'the bony roof; the tongue arches toward it for /j/ and “ee”.'],
+    ['Soft palate (velum)', 'raises to seal the nose, or lowers for the nasals /m n ŋ/.'],
+    ['Tongue', 'the star of the show — tip, front, and back each carve different sounds.'],
+    ['Pharynx', 'the throat cavity; its size colours the vowel.'],
+    ['Vocal folds (glottis)', 'buzz for voiced sounds, open for voiceless — and make /h/.'],
+  ];
+  app.innerHTML = `
+    ${pageTopbar('🎭 Your Instrument', '#64748b')}
+    <main class="guide instrument">
+      <p class="track-blurb">You don’t play the voice — you <b>are</b> the instrument. Here’s the workshop.</p>
+      <div class="anat-wrap">${vocalTractSVG()}</div>
+      <dl class="anat-list">
+        ${parts.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}
+      </dl>
+    </main>`;
+  wireBrandHome();
+}
+
+// "The Vowel Map": every vowel on the quadrilateral.
+function renderVowelMap() {
+  app.innerHTML = `
+    ${pageTopbar('📐 The Vowel Map', '#64748b')}
+    <main class="guide vowel-map">
+      <p class="track-blurb">Every vowel is just a tongue position. Height runs top (close) to bottom (open); the horizontal is front to back. Rounded vowels are ringed.</p>
+      <div class="anat-wrap">${vowelSpaceSVG()}</div>
+      <p class="artic-cap">Tap any symbol in <b>The IPA Chart</b> to hear it and see its own diagram.</p>
+    </main>`;
+  wireBrandHome();
 }
 
 // ── The IPA chart: a reference to browse ──────────────────────
