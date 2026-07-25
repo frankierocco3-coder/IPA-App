@@ -2,7 +2,7 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
-import { speak, speakLine, speakSequence, stopSpeech, ACCENT_LANG } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG } from './audio.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { scanLine } from './scan.js';
@@ -38,12 +38,14 @@ let navStack = [];
 let navRestoring = false;
 
 function record(thunk) {
+  stopSpeech();                                  // leaving/entering a page stops any reading
   if (navRestoring) { navRestoring = false; return; }
   if (navStack[navStack.length - 1] === thunk) return; // ignore same-page re-render
   navStack.push(thunk);
 }
 
 function goBack() {
+  stopSpeech();
   navStack.pop();                                // drop the current page
   const prev = navStack[navStack.length - 1];
   navRestoring = true;                           // prev's record() shouldn't re-push
@@ -175,6 +177,7 @@ function practiceLesson(track) {
 // ── Home: track picker ────────────────────────────────────────
 
 function renderHome() {
+  stopSpeech();
   navStack = [];              // home is the root of the back stack
   navRestoring = false;
   const cards = TRACKS.map(t => {
@@ -535,8 +538,22 @@ function speakPane(lines) {
 function wireSpeak(lines, accent, pane, clip) {
   const lang = dialectLang(accent);
   const clipFor = i => (clip ? clip(i, accent) : null);
-  pane.querySelector('#say-all')?.addEventListener('click', () =>
-    speakSequence(lines.map((t, i) => ({ text: t, clipUrl: clipFor(i + 1) })), { lang }));
+  const btn = pane.querySelector('#say-all');
+  let state = 'idle';                                   // idle | playing | paused
+  const setBtn = () => {
+    btn.textContent = state === 'playing' ? '⏸ Pause reading'
+      : state === 'paused' ? '▶ Resume reading'
+      : '🔊 Read it all aloud';
+  };
+  setSpeechListener(s => {
+    state = (s === 'playing' || s === 'paused') ? s : 'idle';
+    setBtn();
+  });
+  btn.addEventListener('click', () => {
+    if (state === 'playing') pauseSpeech();
+    else if (state === 'paused') resumeSpeech();
+    else speakSequence(lines.map((t, i) => ({ text: t, clipUrl: clipFor(i + 1) })), { lang });
+  });
   pane.querySelectorAll('.poem-line').forEach(b =>
     b.addEventListener('click', () => speakLine(b.dataset.say, { lang, clipUrl: clipFor(+b.dataset.idx) })));
 }

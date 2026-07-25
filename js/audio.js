@@ -139,16 +139,42 @@ function deviceSpeakThen(text, lang, done) {
   setTimeout(() => { try { if (speechSynthesis.speaking) speechSynthesis.resume(); } catch {} }, 80);
 }
 
-let seqCancel = null;
+// ── Controllable reading (play / pause / resume / stop) ───────
+// A single "reading" at a time: a sequence of lines, each a clip or the
+// device voice. Listeners hear state changes so a play/pause button can track
+// it. `seq` is null when nothing is reading.
+let seq = null;
+let onState = null;
+
+export function setSpeechListener(fn) { onState = fn; }
+function emit(state) { try { onState?.(state); } catch {} }
 
 export function stopSpeech() {
+  const wasReading = seq != null || (current != null) || speechSynthesis.speaking;
+  if (seq) seq.cancelled = true;
+  seq = null;
   if (current) { current.pause(); current = null; }
-  if (seqCancel) { seqCancel(); seqCancel = null; }
   try { speechSynthesis.cancel(); } catch {}
+  if (wasReading) emit('stopped');
 }
 
-// Read one line: play a pre-generated clip if given, else the device voice;
-// a missing/failed clip falls straight back to the device voice.
+export function pauseSpeech() {
+  if (!seq || seq.paused) return;
+  seq.paused = true;
+  if (seq.el && !seq.el.paused) seq.el.pause();
+  if (seq.tts) { try { speechSynthesis.pause(); } catch {} }
+  emit('paused');
+}
+
+export function resumeSpeech() {
+  if (!seq || !seq.paused) return;
+  seq.paused = false;
+  if (seq.el) seq.el.play().catch(() => {});
+  if (seq.tts) { try { speechSynthesis.resume(); } catch {} }
+  emit('playing');
+}
+
+// Read one line: a clip if given, else the device voice (with fallback).
 export function speakLine(text, { lang = 'en-GB', clipUrl = null } = {}) {
   stopSpeech();
   if (clipUrl) {
@@ -163,28 +189,40 @@ export function speakLine(text, { lang = 'en-GB', clipUrl = null } = {}) {
   }
 }
 
-// Read a whole passage line by line, each line using its clip when present
-// and the device voice otherwise, chained so it flows as one reading.
+// Read a whole passage line by line — each line uses its clip when present,
+// the device voice otherwise, chained into one flowing reading that can be
+// paused and resumed.
 export function speakSequence(items /* [{ text, clipUrl }] */, { lang = 'en-GB' } = {}) {
   stopSpeech();
-  let i = 0, cancelled = false;
-  seqCancel = () => { cancelled = true; };
-  const step = () => {
-    if (cancelled || i >= items.length) return;
-    const { text, clipUrl } = items[i];
-    const next = () => { i++; step(); };
-    if (clipUrl) {
-      const el = new Audio(clipUrl);
-      current = el;
-      let handled = false;
-      const advance = () => { if (handled) return; handled = true; next(); };
-      const fail = () => { if (handled) return; handled = true; deviceSpeakThen(text, lang, next); };
-      el.addEventListener('ended', advance, { once: true });
-      el.addEventListener('error', fail, { once: true });
-      el.play().catch(fail);
-    } else {
-      deviceSpeakThen(text, lang, next);
-    }
-  };
-  step();
+  seq = { items, i: 0, lang, cancelled: false, paused: false, el: null, tts: false };
+  emit('playing');
+  stepSeq();
+}
+
+function stepSeq() {
+  if (!seq || seq.cancelled) return;
+  if (seq.i >= seq.items.length) { emit('ended'); seq = null; return; }
+  const { text, clipUrl } = seq.items[seq.i];
+  const next = () => { if (seq && !seq.cancelled) { seq.i++; stepSeq(); } };
+  seq.el = null;
+  seq.tts = false;
+  if (clipUrl) {
+    const el = new Audio(clipUrl);
+    seq.el = el;
+    current = el;
+    let handled = false;
+    const advance = () => { if (handled) return; handled = true; next(); };
+    const fail = () => { if (handled) return; handled = true; seq.el = null; playTtsLine(text, next); };
+    el.addEventListener('ended', advance, { once: true });
+    el.addEventListener('error', fail, { once: true });
+    if (!seq.paused) el.play().catch(fail);
+  } else {
+    playTtsLine(text, next);
+  }
+}
+
+function playTtsLine(text, next) {
+  if (!seq) return;
+  seq.tts = true;
+  deviceSpeakThen(text, seq.lang, () => { if (seq) seq.tts = false; next(); });
 }
