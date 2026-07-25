@@ -6,7 +6,9 @@
     "f": { "id": "d4qSO7iUHJlgeOqVMeIf", "speed": 0.85 }
   },
   "nam": {
-    "m": "cjVigY5qzO86Huf0OWal"
+    "_note": "m = American Bass, f = Mid-30s Female. Chosen 2026-07-25 (replaced single Eric voice).",
+    "m": { "id": "lP1EpPqqTU5DCn2ga6OD" },
+    "f": { "id": "xYa75LlayhWHCRl1yJSH" }
   },
   "aus": {
     "m": { "id": "YLbQE9U7P1K6rBNJWNSv", "stability": 0.85 },

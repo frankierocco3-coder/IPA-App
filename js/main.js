@@ -364,9 +364,9 @@ function renderVowelMap() {
 
 // Dialects you can read/scan/transcribe any text in.
 const TEXT_DIALECTS = [
-  { id: 'nam', label: 'American', lang: 'en-US' },
-  { id: 'rp', label: 'RP', lang: 'en-GB' },
-  { id: 'aus', label: 'Australian', lang: 'en-AU' },
+  { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
+  { id: 'rp', label: 'RP', lang: 'en-GB', flag: '🇬🇧' },
+  { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;
 const dialectName = id => (TEXT_DIALECTS.find(d => d.id === id) || {}).label || '';
@@ -446,7 +446,7 @@ function renderCustomText() {
   wireBrandHome();
   const chipsEl = document.getElementById('ct-dialects');
   const draw = () => chipsEl.innerHTML = TEXT_DIALECTS.map(d =>
-    `<button class="dialect-chip ${d.id === accent ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">🗣️</span>${d.label}</button>`).join('');
+    `<button class="dialect-chip ${d.id === accent ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">${d.flag}</span>${d.label}</button>`).join('');
   draw();
   chipsEl.addEventListener('click', e => {
     const b = e.target.closest('.dialect-chip'); if (!b) return;
@@ -505,7 +505,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip }) {
   let cur = accent, mode = 'speak';
   const pane = document.getElementById('sonnet-pane');
   const drawDialects = () => document.getElementById('rd-dialects').innerHTML =
-    TEXT_DIALECTS.map(d => `<button class="dialect-chip ${d.id === cur ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">🗣️</span>${d.label}</button>`).join('');
+    TEXT_DIALECTS.map(d => `<button class="dialect-chip ${d.id === cur ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">${d.flag}</span>${d.label}</button>`).join('');
   const show = m => {
     stopSpeech();
     mode = m;
