@@ -480,7 +480,7 @@ function renderSonnet(n) {
 
 // Dialects that have any pre-generated sonnet audio (missing files fall back
 // to the device voice, so partial coverage is fine).
-const SONNET_CLIP_DIALECTS = ['rp', 'aus'];
+const SONNET_CLIP_DIALECTS = ['nam', 'rp', 'aus'];
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
 function renderReader({ label, lines, accent, prev, next, editor, clip }) {
