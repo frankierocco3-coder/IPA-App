@@ -6,6 +6,7 @@ import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech,
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
+import { ONEILL } from './data/oneill.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 
@@ -379,6 +380,8 @@ function renderTextLibrary() {
       blurb: 'All 154 — speak them, scan the metre, study the sounds.' },
     { id: 'chekhov', icon: '🎭', title: 'Chekhov · Monologues', on: true,
       blurb: '35 speeches from eight plays — audition pieces, timed and tagged.' },
+    { id: 'oneill', icon: '⚓', title: 'O’Neill · Monologues', on: true,
+      blurb: '35 speeches from nine plays — American voices, dialect and status work.' },
     { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
       blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
   ];
@@ -396,6 +399,7 @@ function renderTextLibrary() {
   wireBrandHome();
   app.querySelector('.text-card[data-lib="sonnets"]')?.addEventListener('click', renderSonnetList);
   app.querySelector('.text-card[data-lib="chekhov"]')?.addEventListener('click', renderChekhovList);
+  app.querySelector('.text-card[data-lib="oneill"]')?.addEventListener('click', renderOneillList);
   app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
 }
 
@@ -502,6 +506,71 @@ function renderChekhov(id) {
   });
 }
 
+// ── O'Neill: 35 curated speeches, grouped by play ─────────────
+
+function renderOneillList() {
+  record(renderOneillList);
+  const plays = [...new Set(ONEILL.map(s => s.work))];
+  const groups = plays.map(work => {
+    const rows = ONEILL.filter(s => s.work === work).map(s => `
+      <button class="sonnet-row chek-row" data-id="${esc(s.id)}"
+              data-search="${esc(`${s.work} ${s.character} ${s.title} ${s.tone.join(' ')} ${s.skills.join(' ')}`.toLowerCase())}">
+        <span class="chek-meta">
+          <span class="chek-char">${esc(s.character)}</span>
+          <span class="chek-title">${esc(s.title)}</span>
+          <span class="chek-sub">${s.act ? `Act ${esc(s.act)} · ` : ''}${s.words} words · ~${mmss(s.secs)}${s.note ? ' · ⚠ content note' : ''}</span>
+        </span>
+        <span class="track-arrow">›</span>
+      </button>`).join('');
+    return `<section class="chek-group"><h2 class="chart-h">${esc(work)}</h2>${rows}</section>`;
+  }).join('');
+
+  app.innerHTML = `
+    ${pageTopbar('⚓ O’Neill · Monologues', '#8a6d3b')}
+    <main class="track-list sonnet-list">
+      <input class="sonnet-search" id="on-search" type="search" placeholder="Search by character, play, title or tone…" autocomplete="off">
+      <p class="sonnet-hint" id="on-hint">${ONEILL.length} speeches · 9 plays · public domain in the US</p>
+      <div id="on-rows">${groups}</div>
+    </main>`;
+  wireBrandHome();
+
+  const rows = app.querySelectorAll('.chek-row');
+  rows.forEach(r => r.addEventListener('click', () => renderOneill(r.dataset.id)));
+  const search = document.getElementById('on-search');
+  const hint = document.getElementById('on-hint');
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    rows.forEach(r => {
+      const hit = !q || r.dataset.search.includes(q);
+      r.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    app.querySelectorAll('.chek-group').forEach(g => {
+      g.style.display = [...g.querySelectorAll('.chek-row')].some(r => r.style.display !== 'none') ? '' : 'none';
+    });
+    hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : `${ONEILL.length} speeches · 9 plays · public domain in the US`;
+  });
+}
+
+function renderOneill(id) {
+  record(() => renderOneill(id));
+  const s = ONEILL.find(x => x.id === id);
+  if (!s) return renderOneillList();
+  const i = ONEILL.findIndex(x => x.id === id);
+  const prev = ONEILL[i - 1], next = ONEILL[i + 1];
+  renderReader({
+    label: s.character,
+    lines: s.lines,
+    accent: 'nam',                    // O'Neill is American; start there
+    verse: false,
+    meta: s,
+    clip: (i2, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/oneill/${acc}/${s.id}-${i2}.mp3` : null,
+    prev: prev ? { label: '‹ Previous', go: () => renderOneill(prev.id) } : null,
+    next: next ? { label: 'Next ›', go: () => renderOneill(next.id) } : null,
+  });
+}
+
 // Paste any monologue / speech / scene and open it in the reader.
 function renderCustomText() {
   record(renderCustomText);
@@ -561,12 +630,15 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
   const metaHtml = meta ? `
     <div class="piece-meta">
       <h1 class="piece-title">${esc(meta.title)}</h1>
-      <p class="piece-source">${esc(meta.character)} · <i>${esc(meta.work)}</i> · Act ${esc(meta.act)}</p>
-      <p class="piece-stats">${meta.words} words · ~${mmss(meta.secs)} at performance pace · tr. ${esc(meta.translator)}</p>
+      <p class="piece-source">${esc(meta.character)} · <i>${esc(meta.work)}</i>${meta.act ? ` · Act ${esc(meta.act)}` : ''}</p>
+      ${meta.scene ? `<p class="piece-scene">${esc(meta.scene)}</p>` : ''}
+      <p class="piece-stats">${meta.words} words · ~${mmss(meta.secs)} at performance pace${meta.translator ? ` · tr. ${esc(meta.translator)}` : ''}</p>
       <div class="piece-tags">
-        ${meta.themes.map(t => `<span class="tag">${esc(t)}</span>`).join('')}
-        ${meta.skills.map(t => `<span class="tag tag-skill">${esc(t)}</span>`).join('')}
+        ${(meta.themes ?? meta.tone ?? []).map(t => `<span class="tag">${esc(t)}</span>`).join('')}
+        ${(meta.skills ?? []).map(t => `<span class="tag tag-skill">${esc(t)}</span>`).join('')}
+        ${(meta.dialects ?? []).map(t => `<span class="tag tag-dialect">🗣 ${esc(t)}</span>`).join('')}
       </div>
+      ${meta.note ? `<p class="content-note"><b>Content note:</b> ${esc(meta.note)}</p>` : ''}
     </div>` : '';
   app.innerHTML = `
     ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
