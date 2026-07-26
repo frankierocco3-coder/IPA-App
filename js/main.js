@@ -5,6 +5,7 @@ import { store } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG } from './audio.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
+import { CHEKHOV } from './data/chekhov.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 
@@ -376,10 +377,10 @@ function renderTextLibrary() {
   const cards = [
     { id: 'sonnets', icon: '📜', title: 'Shakespeare’s Sonnets', on: true,
       blurb: 'All 154 — speak them, scan the metre, study the sounds.' },
+    { id: 'chekhov', icon: '🎭', title: 'Chekhov · Monologues', on: true,
+      blurb: '35 speeches from eight plays — audition pieces, timed and tagged.' },
     { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
       blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
-    { id: 'monologues', icon: '🎭', title: 'Monologue Library', on: false,
-      blurb: 'A curated shelf of classical and modern speeches — coming soon.' },
   ];
   app.innerHTML = `
     ${pageTopbar('📜 Text & Delivery', '#8a6d3b')}
@@ -394,6 +395,7 @@ function renderTextLibrary() {
     </main>`;
   wireBrandHome();
   app.querySelector('.text-card[data-lib="sonnets"]')?.addEventListener('click', renderSonnetList);
+  app.querySelector('.text-card[data-lib="chekhov"]')?.addEventListener('click', renderChekhovList);
   app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
 }
 
@@ -426,6 +428,75 @@ function renderSonnetList() {
       if (hit) shown++;
     });
     hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : '154 sonnets · public domain';
+  });
+}
+
+// ── Chekhov: 35 curated speeches, grouped by play ─────────────
+
+// Stage directions like "[Looking at his watch]" are shown but never spoken.
+const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
+const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+
+function renderChekhovList() {
+  record(renderChekhovList);
+  const plays = [...new Set(CHEKHOV.map(s => s.work))];
+  const groups = plays.map(work => {
+    const rows = CHEKHOV.filter(s => s.work === work).map(s => `
+      <button class="sonnet-row chek-row" data-id="${esc(s.id)}"
+              data-search="${esc(`${s.work} ${s.character} ${s.title} ${s.themes.join(' ')}`.toLowerCase())}">
+        <span class="chek-meta">
+          <span class="chek-char">${esc(s.character)}</span>
+          <span class="chek-title">${esc(s.title)}</span>
+          <span class="chek-sub">Act ${esc(s.act)} · ${s.words} words · ~${mmss(s.secs)}</span>
+        </span>
+        <span class="track-arrow">›</span>
+      </button>`).join('');
+    return `<section class="chek-group"><h2 class="chart-h">${esc(work)}</h2>${rows}</section>`;
+  }).join('');
+
+  app.innerHTML = `
+    ${pageTopbar('🎭 Chekhov · Monologues', '#8a6d3b')}
+    <main class="track-list sonnet-list">
+      <input class="sonnet-search" id="chek-search" type="search" placeholder="Search by character, play, title or theme…" autocomplete="off">
+      <p class="sonnet-hint" id="chek-hint">${CHEKHOV.length} speeches · 8 plays · public domain</p>
+      <div id="chek-rows">${groups}</div>
+    </main>`;
+  wireBrandHome();
+
+  const rows = app.querySelectorAll('.chek-row');
+  rows.forEach(r => r.addEventListener('click', () => renderChekhov(r.dataset.id)));
+  const search = document.getElementById('chek-search');
+  const hint = document.getElementById('chek-hint');
+  search.addEventListener('input', () => {
+    const q = search.value.trim().toLowerCase();
+    let shown = 0;
+    rows.forEach(r => {
+      const hit = !q || r.dataset.search.includes(q);
+      r.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    // hide a play heading when nothing under it matches
+    app.querySelectorAll('.chek-group').forEach(g => {
+      g.style.display = [...g.querySelectorAll('.chek-row')].some(r => r.style.display !== 'none') ? '' : 'none';
+    });
+    hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : `${CHEKHOV.length} speeches · 8 plays · public domain`;
+  });
+}
+
+function renderChekhov(id) {
+  record(() => renderChekhov(id));
+  const s = CHEKHOV.find(x => x.id === id);
+  if (!s) return renderChekhovList();
+  const i = CHEKHOV.findIndex(x => x.id === id);
+  const prev = CHEKHOV[i - 1], next = CHEKHOV[i + 1];
+  renderReader({
+    label: s.character,
+    lines: s.lines,
+    accent: 'rp',
+    verse: false,                     // prose — no pentameter framing
+    meta: s,
+    prev: prev ? { label: '‹ Previous', go: () => renderChekhov(prev.id) } : null,
+    next: next ? { label: 'Next ›', go: () => renderChekhov(next.id) } : null,
   });
 }
 
@@ -483,10 +554,22 @@ function renderSonnet(n) {
 const SONNET_CLIP_DIALECTS = ['nam', 'rp', 'aus'];
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, editor, clip }) {
+function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null }) {
+  // Header for a curated piece: where it's from, how long it runs, what it asks of you.
+  const metaHtml = meta ? `
+    <div class="piece-meta">
+      <h1 class="piece-title">${esc(meta.title)}</h1>
+      <p class="piece-source">${esc(meta.character)} · <i>${esc(meta.work)}</i> · Act ${esc(meta.act)}</p>
+      <p class="piece-stats">${meta.words} words · ~${mmss(meta.secs)} at performance pace · tr. ${esc(meta.translator)}</p>
+      <div class="piece-tags">
+        ${meta.themes.map(t => `<span class="tag">${esc(t)}</span>`).join('')}
+        ${meta.skills.map(t => `<span class="tag tag-skill">${esc(t)}</span>`).join('')}
+      </div>
+    </div>` : '';
   app.innerHTML = `
     ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
     <main class="guide sonnet-view">
+      ${metaHtml}
       <div class="dialect-picker reader-dialects"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="rd-dialects"></div></div>
       <div class="sonnet-tabs">
         <button class="son-tab on" data-mode="speak">🔊 Listen</button>
@@ -511,7 +594,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip }) {
     mode = m;
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
     if (m === 'speak') { pane.innerHTML = speakPane(lines); wireSpeak(lines, cur, pane, clip); }
-    else if (m === 'scan') { pane.innerHTML = scanPane(lines); }
+    else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
   drawDialects();
@@ -526,11 +609,16 @@ function renderReader({ label, lines, accent, prev, next, editor, clip }) {
   show('speak');
 }
 
+// Render a line with any [stage direction] set apart from the spoken words.
+function lineHtml(ln) {
+  return esc(ln).replace(/\[[^\]]*\]/g, m => `<i class="stage-dir">${m}</i>`);
+}
+
 function speakPane(lines) {
   const html = lines.map((ln, i) =>
-    `<button class="poem-line" data-idx="${i + 1}" data-say="${esc(ln)}"><span class="ln-num">${i + 1}</span><span class="ln-text">${esc(ln)}</span></button>`).join('');
+    `<button class="poem-line" data-idx="${i + 1}" data-say="${esc(stripStage(ln))}"><span class="ln-num">${i + 1}</span><span class="ln-text">${lineHtml(ln)}</span></button>`).join('');
   return `
-    <p class="pane-note">Tap any line to hear it, or read the whole thing through. Let the punctuation set your breath — commas are quick lifts, line-ends and colons the real breaths.</p>
+    <p class="pane-note">Tap any line to hear it, or read the whole thing through. Let the punctuation set your breath — commas are quick lifts, line-ends and colons the real breaths. <i>Stage directions are shown but never spoken.</i></p>
     <button class="btn btn-practice sonnet-play" id="say-all">🔊 Read it all aloud</button>
     <div class="poem">${html}</div>`;
 }
@@ -552,15 +640,15 @@ function wireSpeak(lines, accent, pane, clip) {
   btn.addEventListener('click', () => {
     if (state === 'playing') pauseSpeech();
     else if (state === 'paused') resumeSpeech();
-    else speakSequence(lines.map((t, i) => ({ text: t, clipUrl: clipFor(i + 1) })), { lang });
+    else speakSequence(lines.map((t, i) => ({ text: stripStage(t), clipUrl: clipFor(i + 1) })), { lang });
   });
   pane.querySelectorAll('.poem-line').forEach(b =>
     b.addEventListener('click', () => speakLine(b.dataset.say, { lang, clipUrl: clipFor(+b.dataset.idx) })));
 }
 
-function scanPane(lines) {
+function scanPane(lines, verse = true) {
   const linesHtml = lines.map((ln) => {
-    const { words, count, regular } = scanLine(ln);
+    const { words, count, regular } = scanLine(stripStage(ln));
     const syls = words.map(w => {
       if (w.space) return '<span class="scan-sp"> </span>';
       return `<span class="scan-word">${w.syllables.map(sy =>
@@ -568,12 +656,15 @@ function scanPane(lines) {
     }).join('');
     return `<div class="scan-line">
       <div class="scan-syls">${syls}</div>
-      <span class="scan-count ${regular ? '' : 'off'}">${count}${regular ? '' : ' ⚠'}</span>
+      <span class="scan-count ${verse && !regular ? 'off' : ''}">${count}${verse && !regular ? ' ⚠' : ''}</span>
     </div>`;
   }).join('');
+  const intro = verse
+    ? `<p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>`
+    : `<p class="pane-note">This is <b>prose</b>, so there’s no fixed metre to hit — nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
   return `
-    <p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>
-    <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree. (Prose won’t be pentameter — the counts just show syllables.)</p>
+    ${intro}
+    <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree.</p>
     <div class="scan">${linesHtml}</div>`;
 }
 
@@ -585,7 +676,7 @@ async function fillSound(lines, accent, pane) {
   }
   let approxSeen = false, miss = 0;
   const linesHtml = lines.map((ln, i) => {
-    const toks = ln.split(/(\s+)/).map(tok => {
+    const toks = stripStage(ln).split(/(\s+)/).map(tok => {
       if (/^\s*$/.test(tok)) return tok === '' ? '' : '<span class="scan-sp"> </span>';
       const r = ipaFor(tok, accent);
       if (!r) { miss++; return `<span class="tw"><span class="tw-word">${esc(tok)}</span><span class="tw-ipa tw-miss">—</span></span>`; }
