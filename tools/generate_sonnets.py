@@ -130,11 +130,24 @@ def main():
                 made += 1
                 print(f"  {n}-{i}  {line[:48]}")
                 time.sleep(0.2)
+            except urllib.error.HTTPError as e:  # noqa: PERF203
+                # ElevenLabs returns 401 for BOTH a bad key and an exhausted
+                # quota — the difference is only in the body, so read it.
+                body = ""
+                try:
+                    body = e.read().decode("utf-8", "replace")
+                except Exception:  # noqa: BLE001
+                    pass
+                failed += 1
+                print(f"  !! {n}-{i} failed: HTTP {e.code} {body[:200]}", file=sys.stderr)
+                if "quota_exceeded" in body:
+                    sys.exit("QUOTA EXHAUSTED — top up or wait for the monthly reset, "
+                             "then re-run; existing clips are skipped.")
+                if e.code in (401, 403, 429):
+                    sys.exit(f"Auth/rate error (HTTP {e.code}) — stopping.")
             except Exception as e:  # noqa: BLE001
                 failed += 1
                 print(f"  !! {n}-{i} failed: {e}", file=sys.stderr)
-                if "401" in str(e) or "429" in str(e):
-                    sys.exit("Auth/quota error — stopping.")
     print(f"done: {made} made, {skipped} skipped, {failed} failed → {out_dir}")
 
 
