@@ -14,8 +14,8 @@
     "m": { "id": "YLbQE9U7P1K6rBNJWNSv", "stability": 0.85 },
     "f": { "id": "Rpg8Sn3cVL1f8658yYm2", "stability": 0.85 }
   },
-  "_sonnets": {
-    "_note": "single narrator voice for the sonnet reader, per dialect. nam = American Bass, rp = Mark, aus = Jimbo. Chosen 2026-07-25.",
+  "_narrators": {
+    "_note": "single narrator voice per dialect for ALL curated text (sonnets + Chekhov). nam = American Bass, rp = Mark, aus = Jimbo. Chosen 2026-07-25.",
     "nam": "lP1EpPqqTU5DCn2ga6OD",
     "rp": "jgzHfSd2o0L7p0de3yr0",
     "aus": "YLbQE9U7P1K6rBNJWNSv"

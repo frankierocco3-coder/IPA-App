@@ -495,6 +495,8 @@ function renderChekhov(id) {
     accent: 'rp',
     verse: false,                     // prose — no pentameter framing
     meta: s,
+    // Same narrator voices as the sonnets; missing clips fall back to device TTS.
+    clip: (i, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/chekhov/${acc}/${s.id}-${i}.mp3` : null,
     prev: prev ? { label: '‹ Previous', go: () => renderChekhov(prev.id) } : null,
     next: next ? { label: 'Next ›', go: () => renderChekhov(next.id) } : null,
   });
@@ -543,7 +545,7 @@ function renderSonnet(n) {
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: 'rp',
     // Pre-generated ElevenLabs clip for a given 1-based line + dialect, if any.
-    clip: (i, acc) => SONNET_CLIP_DIALECTS.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
+    clip: (i, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
   });
@@ -551,7 +553,7 @@ function renderSonnet(n) {
 
 // Dialects that have any pre-generated sonnet audio (missing files fall back
 // to the device voice, so partial coverage is fine).
-const SONNET_CLIP_DIALECTS = ['nam', 'rp', 'aus'];
+const CURATED_CLIP_DIALECTS = ['nam', 'rp', 'aus'];
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
 function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null }) {

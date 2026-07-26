@@ -1,18 +1,24 @@
 #!/usr/bin/env python3
-"""Pre-generate ElevenLabs audio for the sonnets, one MP3 per line.
+"""Pre-generate ElevenLabs audio for a text library, one MP3 per line.
 
-Clips land in audio/sonnets/<dialect>/<n>-<lineIndex>.mp3 (lineIndex 1-based).
+Sources:
+  sonnets  → audio/sonnets/<dialect>/<n>-<line>.mp3       (n = sonnet number)
+  chekhov  → audio/chekhov/<dialect>/<CHEK-nnn>-<line>.mp3
+
 The app tries these first and falls back to the device voice if a file is
 missing, so partial generation is fine — generate a few, hear them, generate
-the rest later.
+the rest later. Existing files are skipped, so a run resumes cleanly.
+
+Stage directions in [brackets] are stripped before synthesis: they are shown
+on screen but never spoken.
 
 The API key is read from tools/.elevenlabs_key (gitignored) or the
 ELEVENLABS_API_KEY env var — it never ships in the app.
 
 Usage:
-  python3 tools/generate_sonnets.py --dialect rp --only 18,29,116   # pilot
-  python3 tools/generate_sonnets.py --dialect rp --all              # full run
-  python3 tools/generate_sonnets.py --dialect rp --all --dry-run    # count cost
+  python3 tools/generate_sonnets.py --dialect rp --only 18,29,116
+  python3 tools/generate_sonnets.py --source chekhov --dialect rp --all
+  python3 tools/generate_sonnets.py --source chekhov --dialect rp --all --dry-run
 """
 import argparse
 import json
@@ -46,7 +52,7 @@ def voice_for(voices, dialect):
     Prefers a dedicated narrator under "_sonnets" (separate from the drill
     voices), else falls back to the dialect's first voice.
     """
-    override = (voices.get("_sonnets") or {}).get(dialect)
+    override = ((voices.get("_narrators") or voices.get("_sonnets") or {})).get(dialect)
     if override:
         if isinstance(override, str):
             return override, {}
@@ -67,6 +73,11 @@ def voice_for(voices, dialect):
     sys.exit(f"No usable voice under dialect '{dialect}'")
 
 
+def strip_stage(text):
+    """Stage directions are shown on screen but never spoken."""
+    return re.sub(r"\s+", " ", re.sub(r"\[[^\]]*\]", " ", text)).strip()
+
+
 def parse_sonnets():
     """Pull [(n, [lines])] out of js/data/sonnets.js without executing it."""
     src = open(os.path.join(ROOT, "js", "data", "sonnets.js"), encoding="utf-8").read()
@@ -74,8 +85,24 @@ def parse_sonnets():
     for m in re.finditer(r"\{\s*n:\s*(\d+),\s*lines:\s*\[(.*?)\]\s*\}", src, re.S):
         n = int(m.group(1))
         lines = [json.loads(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', m.group(2))]
-        out.append((n, lines))
+        out.append((str(n), lines))
     return out
+
+
+def parse_chekhov():
+    """Pull [(id, [lines])] out of js/data/chekhov.js without executing it."""
+    src = open(os.path.join(ROOT, "js", "data", "chekhov.js"), encoding="utf-8").read()
+    out = []
+    for m in re.finditer(r'id: "(CHEK-\d+)".*?lines: \[(.*?)\n    \],', src, re.S):
+        lines = [json.loads(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', m.group(2))]
+        out.append((m.group(1), lines))
+    return out
+
+
+SOURCES = {
+    "sonnets": parse_sonnets,
+    "chekhov": parse_chekhov,
+}
 
 
 def synth(text, voice_id, settings, key):
@@ -92,33 +119,41 @@ def synth(text, voice_id, settings, key):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--source", default="sonnets", choices=sorted(SOURCES),
+                    help="which text library to voice (default: sonnets)")
     ap.add_argument("--dialect", required=True, help="rp | nam | aus")
-    ap.add_argument("--only", help="comma-separated sonnet numbers")
+    ap.add_argument("--only", help="comma-separated ids (sonnet numbers, or CHEK-001)")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="count lines + characters, generate nothing")
     args = ap.parse_args()
 
-    sonnets = parse_sonnets()
+    pieces = SOURCES[args.source]()
     if args.only:
-        want = {int(x) for x in args.only.split(",")}
-        sonnets = [(n, ls) for n, ls in sonnets if n in want]
+        want = {x.strip().upper() for x in args.only.split(",")}
+        pieces = [(pid, ls) for pid, ls in pieces if pid.upper() in want]
+        if not pieces:
+            sys.exit(f"No {args.source} pieces matched --only {args.only}")
     elif not args.all and not args.dry_run:
-        sys.exit("Pass --only <nums> or --all")
+        sys.exit("Pass --only <ids> or --all")
 
-    total_lines = sum(len(ls) for _, ls in sonnets)
-    total_chars = sum(len(l) for _, ls in sonnets for l in ls)
-    print(f"{len(sonnets)} sonnets · {total_lines} lines · {total_chars} characters "
-          f"· dialect {args.dialect}")
+    # Speech text only — stage directions are never voiced.
+    pieces = [(pid, [strip_stage(l) for l in ls]) for pid, ls in pieces]
+    pieces = [(pid, [l for l in ls if l]) for pid, ls in pieces]
+
+    total_lines = sum(len(ls) for _, ls in pieces)
+    total_chars = sum(len(l) for _, ls in pieces for l in ls)
+    print(f"{len(pieces)} {args.source} · {total_lines} lines · {total_chars} characters "
+          f"(≈ credits) · dialect {args.dialect}")
     if args.dry_run:
         return
 
     key = read_key()
     vid, settings = voice_for(load_voices(), args.dialect)
-    out_dir = os.path.join(ROOT, "audio", "sonnets", args.dialect)
+    out_dir = os.path.join(ROOT, "audio", args.source, args.dialect)
     os.makedirs(out_dir, exist_ok=True)
 
     made = skipped = failed = 0
-    for n, lines in sonnets:
+    for n, lines in pieces:
         for i, line in enumerate(lines, 1):
             path = os.path.join(out_dir, f"{n}-{i}.mp3")
             if os.path.exists(path):
