@@ -8,6 +8,7 @@ import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
 import { ONEILL } from './data/oneill.js';
 import { WILDE } from './data/wilde.js';
+import { PIRANDELLO } from './data/pirandello.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 
@@ -385,6 +386,8 @@ function renderTextLibrary() {
       blurb: '35 speeches from nine plays — American voices, dialect and status work.' },
     { id: 'wilde', icon: '🎩', title: 'Wilde · Monologues', on: true,
       blurb: '36 speeches from nine plays — RP wit, status and comic timing.' },
+    { id: 'pirandello', icon: '🎪', title: 'Pirandello · Monologues', on: true,
+      blurb: '36 speeches from three plays — identity, illusion, long-form build.' },
     { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
       blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
   ];
@@ -404,6 +407,7 @@ function renderTextLibrary() {
   app.querySelector('.text-card[data-lib="chekhov"]')?.addEventListener('click', () => renderLibraryList('chekhov'));
   app.querySelector('.text-card[data-lib="oneill"]')?.addEventListener('click', () => renderLibraryList('oneill'));
   app.querySelector('.text-card[data-lib="wilde"]')?.addEventListener('click', () => renderLibraryList('wilde'));
+  app.querySelector('.text-card[data-lib="pirandello"]')?.addEventListener('click', () => renderLibraryList('pirandello'));
   app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
 }
 
@@ -454,6 +458,8 @@ const LIBRARIES = {
              note: 'public domain in the US' },
   wilde:   { data: WILDE,   icon: '🎩', title: 'Wilde · Monologues',   accent: 'rp',
              note: 'public domain' },
+  pirandello: { data: PIRANDELLO, icon: '🎪', title: 'Pirandello · Monologues', accent: 'rp',
+             note: 'public domain in the US · tr. Storer & Livingston' },
 };
 
 function renderLibraryList(key) {

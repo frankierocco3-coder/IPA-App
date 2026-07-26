@@ -109,6 +109,16 @@ def parse_wilde():
     return out
 
 
+def parse_pirandello():
+    """Pull [(id, [lines])] out of js/data/pirandello.js without executing it."""
+    src = open(os.path.join(ROOT, "js", "data", "pirandello.js"), encoding="utf-8").read()
+    out = []
+    for m in re.finditer(r'id: "(PIRANDELLO-\d+)".*?lines: \[(.*?)\n    \],', src, re.S):
+        lines = [json.loads(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', m.group(2))]
+        out.append((m.group(1), lines))
+    return out
+
+
 def parse_chekhov():
     """Pull [(id, [lines])] out of js/data/chekhov.js without executing it."""
     src = open(os.path.join(ROOT, "js", "data", "chekhov.js"), encoding="utf-8").read()
@@ -124,6 +134,7 @@ SOURCES = {
     "chekhov": parse_chekhov,
     "oneill": parse_oneill,
     "wilde": parse_wilde,
+    "pirandello": parse_pirandello,
 }
 
 
