@@ -7,6 +7,7 @@ import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
 import { ONEILL } from './data/oneill.js';
+import { WILDE } from './data/wilde.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 
@@ -382,6 +383,8 @@ function renderTextLibrary() {
       blurb: '35 speeches from eight plays — audition pieces, timed and tagged.' },
     { id: 'oneill', icon: '⚓', title: 'O’Neill · Monologues', on: true,
       blurb: '35 speeches from nine plays — American voices, dialect and status work.' },
+    { id: 'wilde', icon: '🎩', title: 'Wilde · Monologues', on: true,
+      blurb: '36 speeches from nine plays — RP wit, status and comic timing.' },
     { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
       blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
   ];
@@ -398,8 +401,9 @@ function renderTextLibrary() {
     </main>`;
   wireBrandHome();
   app.querySelector('.text-card[data-lib="sonnets"]')?.addEventListener('click', renderSonnetList);
-  app.querySelector('.text-card[data-lib="chekhov"]')?.addEventListener('click', renderChekhovList);
-  app.querySelector('.text-card[data-lib="oneill"]')?.addEventListener('click', renderOneillList);
+  app.querySelector('.text-card[data-lib="chekhov"]')?.addEventListener('click', () => renderLibraryList('chekhov'));
+  app.querySelector('.text-card[data-lib="oneill"]')?.addEventListener('click', () => renderLibraryList('oneill'));
+  app.querySelector('.text-card[data-lib="wilde"]')?.addEventListener('click', () => renderLibraryList('wilde'));
   app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
 }
 
@@ -435,86 +439,33 @@ function renderSonnetList() {
   });
 }
 
-// ── Chekhov: 35 curated speeches, grouped by play ─────────────
+// ── Curated speech libraries (Chekhov, O'Neill, Wilde) ────────
+// All three share one browser and one reader; they differ only in their data,
+// their icon, and the dialect a piece is most naturally played in.
 
 // Stage directions like "[Looking at his watch]" are shown but never spoken.
 const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
 const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
 
-function renderChekhovList() {
-  record(renderChekhovList);
-  const plays = [...new Set(CHEKHOV.map(s => s.work))];
+const LIBRARIES = {
+  chekhov: { data: CHEKHOV, icon: '🎭', title: 'Chekhov · Monologues', accent: 'rp',
+             note: 'public domain · tr. Fell & West' },
+  oneill:  { data: ONEILL,  icon: '⚓', title: 'O’Neill · Monologues', accent: 'nam',
+             note: 'public domain in the US' },
+  wilde:   { data: WILDE,   icon: '🎩', title: 'Wilde · Monologues',   accent: 'rp',
+             note: 'public domain' },
+};
+
+function renderLibraryList(key) {
+  record(() => renderLibraryList(key));
+  const lib = LIBRARIES[key];
+  const plays = [...new Set(lib.data.map(s => s.work))];
+  const summary = `${lib.data.length} speeches · ${plays.length} plays · ${lib.note}`;
+
   const groups = plays.map(work => {
-    const rows = CHEKHOV.filter(s => s.work === work).map(s => `
+    const rows = lib.data.filter(s => s.work === work).map(s => `
       <button class="sonnet-row chek-row" data-id="${esc(s.id)}"
-              data-search="${esc(`${s.work} ${s.character} ${s.title} ${s.themes.join(' ')}`.toLowerCase())}">
-        <span class="chek-meta">
-          <span class="chek-char">${esc(s.character)}</span>
-          <span class="chek-title">${esc(s.title)}</span>
-          <span class="chek-sub">Act ${esc(s.act)} · ${s.words} words · ~${mmss(s.secs)}</span>
-        </span>
-        <span class="track-arrow">›</span>
-      </button>`).join('');
-    return `<section class="chek-group"><h2 class="chart-h">${esc(work)}</h2>${rows}</section>`;
-  }).join('');
-
-  app.innerHTML = `
-    ${pageTopbar('🎭 Chekhov · Monologues', '#8a6d3b')}
-    <main class="track-list sonnet-list">
-      <input class="sonnet-search" id="chek-search" type="search" placeholder="Search by character, play, title or theme…" autocomplete="off">
-      <p class="sonnet-hint" id="chek-hint">${CHEKHOV.length} speeches · 8 plays · public domain</p>
-      <div id="chek-rows">${groups}</div>
-    </main>`;
-  wireBrandHome();
-
-  const rows = app.querySelectorAll('.chek-row');
-  rows.forEach(r => r.addEventListener('click', () => renderChekhov(r.dataset.id)));
-  const search = document.getElementById('chek-search');
-  const hint = document.getElementById('chek-hint');
-  search.addEventListener('input', () => {
-    const q = search.value.trim().toLowerCase();
-    let shown = 0;
-    rows.forEach(r => {
-      const hit = !q || r.dataset.search.includes(q);
-      r.style.display = hit ? '' : 'none';
-      if (hit) shown++;
-    });
-    // hide a play heading when nothing under it matches
-    app.querySelectorAll('.chek-group').forEach(g => {
-      g.style.display = [...g.querySelectorAll('.chek-row')].some(r => r.style.display !== 'none') ? '' : 'none';
-    });
-    hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : `${CHEKHOV.length} speeches · 8 plays · public domain`;
-  });
-}
-
-function renderChekhov(id) {
-  record(() => renderChekhov(id));
-  const s = CHEKHOV.find(x => x.id === id);
-  if (!s) return renderChekhovList();
-  const i = CHEKHOV.findIndex(x => x.id === id);
-  const prev = CHEKHOV[i - 1], next = CHEKHOV[i + 1];
-  renderReader({
-    label: s.character,
-    lines: s.lines,
-    accent: 'rp',
-    verse: false,                     // prose — no pentameter framing
-    meta: s,
-    // Same narrator voices as the sonnets; missing clips fall back to device TTS.
-    clip: (i, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/chekhov/${acc}/${s.id}-${i}.mp3` : null,
-    prev: prev ? { label: '‹ Previous', go: () => renderChekhov(prev.id) } : null,
-    next: next ? { label: 'Next ›', go: () => renderChekhov(next.id) } : null,
-  });
-}
-
-// ── O'Neill: 35 curated speeches, grouped by play ─────────────
-
-function renderOneillList() {
-  record(renderOneillList);
-  const plays = [...new Set(ONEILL.map(s => s.work))];
-  const groups = plays.map(work => {
-    const rows = ONEILL.filter(s => s.work === work).map(s => `
-      <button class="sonnet-row chek-row" data-id="${esc(s.id)}"
-              data-search="${esc(`${s.work} ${s.character} ${s.title} ${s.tone.join(' ')} ${s.skills.join(' ')}`.toLowerCase())}">
+              data-search="${esc(`${s.work} ${s.character} ${s.title} ${(s.themes ?? s.tone ?? []).join(' ')} ${(s.skills ?? []).join(' ')}`.toLowerCase())}">
         <span class="chek-meta">
           <span class="chek-char">${esc(s.character)}</span>
           <span class="chek-title">${esc(s.title)}</span>
@@ -526,18 +477,18 @@ function renderOneillList() {
   }).join('');
 
   app.innerHTML = `
-    ${pageTopbar('⚓ O’Neill · Monologues', '#8a6d3b')}
+    ${pageTopbar(`${lib.icon} ${esc(lib.title)}`, '#8a6d3b')}
     <main class="track-list sonnet-list">
-      <input class="sonnet-search" id="on-search" type="search" placeholder="Search by character, play, title or tone…" autocomplete="off">
-      <p class="sonnet-hint" id="on-hint">${ONEILL.length} speeches · 9 plays · public domain in the US</p>
-      <div id="on-rows">${groups}</div>
+      <input class="sonnet-search" id="lib-search" type="search" placeholder="Search by character, play, title or tone…" autocomplete="off">
+      <p class="sonnet-hint" id="lib-hint">${esc(summary)}</p>
+      <div id="lib-rows">${groups}</div>
     </main>`;
   wireBrandHome();
 
   const rows = app.querySelectorAll('.chek-row');
-  rows.forEach(r => r.addEventListener('click', () => renderOneill(r.dataset.id)));
-  const search = document.getElementById('on-search');
-  const hint = document.getElementById('on-hint');
+  rows.forEach(r => r.addEventListener('click', () => renderPiece(key, r.dataset.id)));
+  const search = document.getElementById('lib-search');
+  const hint = document.getElementById('lib-hint');
   search.addEventListener('input', () => {
     const q = search.value.trim().toLowerCase();
     let shown = 0;
@@ -549,28 +500,29 @@ function renderOneillList() {
     app.querySelectorAll('.chek-group').forEach(g => {
       g.style.display = [...g.querySelectorAll('.chek-row')].some(r => r.style.display !== 'none') ? '' : 'none';
     });
-    hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : `${ONEILL.length} speeches · 9 plays · public domain in the US`;
+    hint.textContent = q ? `${shown} match${shown === 1 ? '' : 'es'}` : summary;
   });
 }
 
-function renderOneill(id) {
-  record(() => renderOneill(id));
-  const s = ONEILL.find(x => x.id === id);
-  if (!s) return renderOneillList();
-  const i = ONEILL.findIndex(x => x.id === id);
-  const prev = ONEILL[i - 1], next = ONEILL[i + 1];
+function renderPiece(key, id) {
+  record(() => renderPiece(key, id));
+  const lib = LIBRARIES[key];
+  const s = lib.data.find(x => x.id === id);
+  if (!s) return renderLibraryList(key);
+  const i = lib.data.findIndex(x => x.id === id);
+  const prev = lib.data[i - 1], next = lib.data[i + 1];
   renderReader({
     label: s.character,
     lines: s.lines,
-    accent: 'nam',                    // O'Neill is American; start there
-    verse: false,
+    accent: lib.accent,
+    verse: false,                     // prose — no pentameter framing
     meta: s,
-    clip: (i2, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/oneill/${acc}/${s.id}-${i2}.mp3` : null,
-    prev: prev ? { label: '‹ Previous', go: () => renderOneill(prev.id) } : null,
-    next: next ? { label: 'Next ›', go: () => renderOneill(next.id) } : null,
+    // Same narrator voices as the sonnets; missing clips fall back to device TTS.
+    clip: (n, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
+    prev: prev ? { label: '‹ Previous', go: () => renderPiece(key, prev.id) } : null,
+    next: next ? { label: 'Next ›', go: () => renderPiece(key, next.id) } : null,
   });
 }
-
 // Paste any monologue / speech / scene and open it in the reader.
 function renderCustomText() {
   record(renderCustomText);

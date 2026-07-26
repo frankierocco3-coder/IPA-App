@@ -99,6 +99,16 @@ def parse_oneill():
     return out
 
 
+def parse_wilde():
+    """Pull [(id, [lines])] out of js/data/wilde.js without executing it."""
+    src = open(os.path.join(ROOT, "js", "data", "wilde.js"), encoding="utf-8").read()
+    out = []
+    for m in re.finditer(r'id: "(WILDE-\d+)".*?lines: \[(.*?)\n    \],', src, re.S):
+        lines = [json.loads(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', m.group(2))]
+        out.append((m.group(1), lines))
+    return out
+
+
 def parse_chekhov():
     """Pull [(id, [lines])] out of js/data/chekhov.js without executing it."""
     src = open(os.path.join(ROOT, "js", "data", "chekhov.js"), encoding="utf-8").read()
@@ -113,6 +123,7 @@ SOURCES = {
     "sonnets": parse_sonnets,
     "chekhov": parse_chekhov,
     "oneill": parse_oneill,
+    "wilde": parse_wilde,
 }
 
 
