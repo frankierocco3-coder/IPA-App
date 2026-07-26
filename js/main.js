@@ -766,10 +766,12 @@ function renderTrack(track) {
 
 function renderGuide(lesson) {
   const unit = lesson.unit;
-  const phonemeCards = lesson.phonemes.map(ph => {
+  const phonemeCards = lesson.phonemes.map((ph, i) => {
     const p = PHONEMES[ph];
     const chips = p.examples.map(w =>
       `<button class="word-chip" data-say="${esc(w)}">🔊 ${esc(w)}</button>`).join('');
+    const diagram = articulationSVG(ph);
+    const isVowel = p.type !== 'consonant';
     return `
       <div class="guide-card">
         <button class="guide-symbol" data-say="${esc(p.examples[0])}" title="Hear “${esc(p.examples[0])}”">/${ph}/</button>
@@ -777,8 +779,12 @@ function renderGuide(lesson) {
           <h3>${esc(p.name)}</h3>
           <p>${esc(p.hint)}</p>
           <div class="chips">${chips}</div>
+          ${diagram ? `<button class="diagram-toggle" data-target="dia-${i}" aria-expanded="false">📐 See tongue placement</button>` : ''}
         </div>
-      </div>`;
+      </div>
+      ${diagram ? `<div class="guide-diagram" id="dia-${i}" hidden>
+        <div class="artic-wrap">${diagram}<p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>
+      </div>` : ''}`;
   }).join('');
 
   const accentName = { rp: 'RP', nam: 'Neutral American' }[lesson.accent] ?? '';
@@ -812,6 +818,15 @@ function renderGuide(lesson) {
   document.getElementById('start').addEventListener('click', () => startLesson(lesson));
   app.querySelectorAll('[data-say]').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson) }))
+  );
+  app.querySelectorAll('.diagram-toggle').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const panel = document.getElementById(btn.dataset.target);
+      const open = panel.hidden;
+      panel.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.textContent = open ? '📐 Hide tongue placement' : '📐 See tongue placement';
+    })
   );
 }
 

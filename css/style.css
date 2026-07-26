@@ -504,6 +504,16 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .end-xp { font-size: 20px; font-weight: 800; color: var(--green-dark); }
 .end-actions { display: flex; gap: 12px; }
 
+/* ── Per-sound diagram inside a lesson guide ── */
+.diagram-toggle {
+  margin-top: 8px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 999px;
+  padding: 6px 14px; color: var(--muted);
+}
+.diagram-toggle:hover { background: var(--panel-2); color: var(--ink); }
+.guide-diagram { margin: 0 0 14px; }
+.guide-diagram .artic-wrap { margin-top: 0; }
+
 /* ── Text & Delivery ── */
 .text-card.soon { opacity: 0.6; cursor: default; }
 .sonnet-list { gap: 0; }
