@@ -451,16 +451,23 @@ function renderSonnetList() {
 const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
 const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
 
+// `accent` is the dialect a collection opens in; `narrated` lists the dialects
+// that actually have recorded narrator audio. Every dialect stays playable —
+// the rest simply read in the device voice — but we only look for clip files
+// where they exist, and we say so rather than leaving the change unexplained.
 const LIBRARIES = {
   chekhov: { data: CHEKHOV, icon: '🎭', title: 'Chekhov · Monologues', accent: 'rp',
-             note: 'public domain · tr. Fell & West' },
+             narrated: ['rp'], note: 'public domain · tr. Fell & West' },
   oneill:  { data: ONEILL,  icon: '⚓', title: 'O’Neill · Monologues', accent: 'nam',
-             note: 'public domain in the US' },
+             narrated: ['nam'], note: 'public domain in the US' },
   wilde:   { data: WILDE,   icon: '🎩', title: 'Wilde · Monologues',   accent: 'rp',
-             note: 'public domain' },
+             narrated: ['rp'], note: 'public domain' },
   pirandello: { data: PIRANDELLO, icon: '🎪', title: 'Pirandello · Monologues', accent: 'rp',
-             note: 'public domain in the US · tr. Storer & Livingston' },
+             narrated: ['rp'], note: 'public domain in the US · tr. Storer & Livingston' },
 };
+
+// Which narrator voice reads each dialect, for the "you're hearing X" note.
+const NARRATOR_NAMES = { nam: 'American Bass', rp: 'Mark', aus: 'Jimbo' };
 
 function renderLibraryList(key) {
   record(() => renderLibraryList(key));
@@ -524,7 +531,8 @@ function renderPiece(key, id) {
     verse: false,                     // prose — no pentameter framing
     meta: s,
     // Same narrator voices as the sonnets; missing clips fall back to device TTS.
-    clip: (n, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
+    clip: (n, acc) => lib.narrated.includes(acc) ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
+    narrated: lib.narrated,
     prev: prev ? { label: '‹ Previous', go: () => renderPiece(key, prev.id) } : null,
     next: next ? { label: 'Next ›', go: () => renderPiece(key, next.id) } : null,
   });
@@ -572,7 +580,8 @@ function renderSonnet(n) {
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: 'rp',
     // Pre-generated ElevenLabs clip for a given 1-based line + dialect, if any.
-    clip: (i, acc) => CURATED_CLIP_DIALECTS.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
+    clip: (i, acc) => SONNET_NARRATED.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
+    narrated: SONNET_NARRATED,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
   });
@@ -580,10 +589,12 @@ function renderSonnet(n) {
 
 // Dialects that have any pre-generated sonnet audio (missing files fall back
 // to the device voice, so partial coverage is fine).
-const CURATED_CLIP_DIALECTS = ['nam', 'rp', 'aus'];
+// Sonnets were generated in all three; Australian is only partial, and any
+// ungenerated line falls back to the device voice per line.
+const SONNET_NARRATED = ['nam', 'rp', 'aus'];
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null }) {
+function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null, narrated = [] }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -625,7 +636,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
     stopSpeech();
     mode = m;
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
-    if (m === 'speak') { pane.innerHTML = speakPane(lines); wireSpeak(lines, cur, pane, clip); }
+    if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
@@ -646,11 +657,17 @@ function lineHtml(ln) {
   return esc(ln).replace(/\[[^\]]*\]/g, m => `<i class="stage-dir">${m}</i>`);
 }
 
-function speakPane(lines) {
+function speakPane(lines, accent = null, narrated = []) {
+  // Say plainly whose voice this is, so switching dialect is never a mystery.
+  const voiceNote = !narrated.length ? ''
+    : narrated.includes(accent)
+      ? `<p class="voice-note">🎙 Read by <b>${esc(NARRATOR_NAMES[accent] ?? 'the narrator')}</b>.</p>`
+      : `<p class="voice-note voice-note-fallback">🔈 Reading in your device voice. This collection’s recorded narrator is <b>${esc(NARRATOR_NAMES[narrated[0]] ?? '—')}</b> — switch to <b>${esc(dialectName(narrated[0]))}</b> to hear it.</p>`;
   const html = lines.map((ln, i) =>
     `<button class="poem-line" data-idx="${i + 1}" data-say="${esc(stripStage(ln))}"><span class="ln-num">${i + 1}</span><span class="ln-text">${lineHtml(ln)}</span></button>`).join('');
   return `
     <p class="pane-note">Tap any line to hear it, or read the whole thing through. Let the punctuation set your breath — commas are quick lifts, line-ends and colons the real breaths. <i>Stage directions are shown but never spoken.</i></p>
+    ${voiceNote}
     <button class="btn btn-practice sonnet-play" id="say-all">🔊 Read it all aloud</button>
     <div class="poem">${html}</div>`;
 }

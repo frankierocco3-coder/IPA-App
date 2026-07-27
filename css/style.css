@@ -567,6 +567,13 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 /* Stage directions: shown, never spoken */
 .stage-dir { color: var(--muted); font-size: 0.92em; }
 
+/* Whose voice you're hearing */
+.voice-note {
+  margin: 0 0 10px; font-size: 12.5px; line-height: 1.45; color: #55683f;
+  background: rgba(111,134,87,0.12); border-radius: 8px; padding: 7px 11px;
+}
+.voice-note-fallback { color: var(--muted); background: var(--panel-2); }
+
 .sonnet-view { max-width: 640px; }
 .sonnet-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
 .son-tab {
