@@ -119,6 +119,16 @@ def parse_pirandello():
     return out
 
 
+def parse_ibsen():
+    """Pull [(id, [lines])] out of js/data/ibsen.js without executing it."""
+    src = open(os.path.join(ROOT, "js", "data", "ibsen.js"), encoding="utf-8").read()
+    out = []
+    for m in re.finditer(r'id: "(IBSEN-\d+)".*?lines: \[(.*?)\n    \],', src, re.S):
+        lines = [json.loads(s) for s in re.findall(r'"(?:[^"\\]|\\.)*"', m.group(2))]
+        out.append((m.group(1), lines))
+    return out
+
+
 def parse_chekhov():
     """Pull [(id, [lines])] out of js/data/chekhov.js without executing it."""
     src = open(os.path.join(ROOT, "js", "data", "chekhov.js"), encoding="utf-8").read()
@@ -135,6 +145,7 @@ SOURCES = {
     "oneill": parse_oneill,
     "wilde": parse_wilde,
     "pirandello": parse_pirandello,
+    "ibsen": parse_ibsen,
 }
 
 

@@ -9,6 +9,7 @@ import { CHEKHOV } from './data/chekhov.js';
 import { ONEILL } from './data/oneill.js';
 import { WILDE } from './data/wilde.js';
 import { PIRANDELLO } from './data/pirandello.js';
+import { IBSEN } from './data/ibsen.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 
@@ -388,6 +389,8 @@ function renderTextLibrary() {
       blurb: '36 speeches from nine plays — RP wit, status and comic timing.' },
     { id: 'pirandello', icon: '🎪', title: 'Pirandello · Monologues', on: true,
       blurb: '36 speeches from three plays — identity, illusion, long-form build.' },
+    { id: 'ibsen', icon: '🕯️', title: 'Ibsen · Monologues', on: true,
+      blurb: '36 speeches from nine plays — realism, confession, moral reckoning.' },
     { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
       blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
   ];
@@ -408,6 +411,7 @@ function renderTextLibrary() {
   app.querySelector('.text-card[data-lib="oneill"]')?.addEventListener('click', () => renderLibraryList('oneill'));
   app.querySelector('.text-card[data-lib="wilde"]')?.addEventListener('click', () => renderLibraryList('wilde'));
   app.querySelector('.text-card[data-lib="pirandello"]')?.addEventListener('click', () => renderLibraryList('pirandello'));
+  app.querySelector('.text-card[data-lib="ibsen"]')?.addEventListener('click', () => renderLibraryList('ibsen'));
   app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
 }
 
@@ -464,6 +468,8 @@ const LIBRARIES = {
              narrated: ['rp'], note: 'public domain' },
   pirandello: { data: PIRANDELLO, icon: '🎪', title: 'Pirandello · Monologues', accent: 'rp',
              narrated: ['rp'], note: 'public domain in the US · tr. Storer & Livingston' },
+  ibsen:   { data: IBSEN,   icon: '🕯️', title: 'Ibsen · Monologues', accent: 'rp',
+             narrated: ['rp'], note: 'public domain · tr. Archer, Gosse, Sharp & Marx Aveling' },
 };
 
 // Which narrator voice reads each dialect, for the "you're hearing X" note.
