@@ -20,6 +20,9 @@ import { recordingSupported, startRecording, stopRecording, cancelRecording,
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor } from './recordings.js';
 import { dbSupported } from './db.js';
+import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePersonal,
+         listPersonal, exportPersonal, importPersonal, setProjectWordOverride,
+         setOccurrenceOverride, clearOverridesFor, normWord } from './overrides.js';
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE, confidenceOf } from './analytics.js';
 
@@ -335,6 +338,8 @@ function renderHandbook() {
       blurb: 'Every symbol, its sound, and example words — tap any to hear it and see how it’s made.' },
     { id: 'instrument', icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract — the parts you shape every sound with.' },
+    { id: 'dictionary', icon: '📕', title: 'Personal Dictionary',
+      blurb: 'Pronunciations you’ve corrected — searchable, editable, exportable.' },
     { id: 'vowels', icon: '📐', title: 'The Vowel Map',
       blurb: 'Where every vowel sits in the mouth — high to low, front to back.' },
   ];
@@ -351,7 +356,7 @@ function renderHandbook() {
     </main>`;
 
   wireBrandHome();
-  const go = { chart: renderChart, instrument: renderInstrument, vowels: renderVowelMap };
+  const go = { chart: renderChart, instrument: renderInstrument, vowels: renderVowelMap, dictionary: renderDictionary };
   app.querySelectorAll('.handbook-entry').forEach(btn =>
     btn.addEventListener('click', () => go[btn.dataset.page]())
   );
@@ -1544,20 +1549,286 @@ async function fillSound(lines, accent, pane, opts = {}) {
     pane.innerHTML = `<p class="pane-note">Couldn’t load the pronunciation dictionary — check your connection and reopen this tab.</p>`;
     return;
   }
-  let approxSeen = false, miss = 0;
-  const linesHtml = lines.map((ln, i) => {
-    const toks = stripStage(ln).split(/(\s+)/).map(tok => {
-      if (/^\s*$/.test(tok)) return tok === '' ? '' : '<span class="scan-sp"> </span>';
-      const r = ipaFor(tok, accent);
-      if (!r) { miss++; return `<span class="tw"><span class="tw-word">${esc(tok)}</span><span class="tw-ipa tw-miss">—</span></span>`; }
-      if (r.approx) approxSeen = true;
-      return `<span class="tw"><span class="tw-word">${esc(tok)}</span><span class="tw-ipa">/${esc(r.ipa)}/</span></span>`;
+  const projectId = opts.projectId ?? null;
+  let project = projectId ? await getProject(projectId) : null;
+
+  const draw = () => {
+    let approxSeen = false, miss = 0, edited = 0;
+    const linesHtml = lines.map((ln, i) => {
+      const toks = stripStage(ln).split(/(\s+)/);
+      let wordIdx = -1;
+      const html = toks.map(tok => {
+        if (/^\s*$/.test(tok)) return tok === '' ? '' : '<span class="scan-sp"> </span>';
+        wordIdx++;
+        const base = ipaFor(tok, accent);
+        const res = resolvePronunciation({
+          word: tok, accent, project, lineIdx: i, wordIdx, base,
+        });
+        const editable = `data-word="${esc(tok)}" data-line="${i}" data-widx="${wordIdx}"`;
+        if (!res) {
+          miss++;
+          return `<span class="tw"><button class="tw-word" type="button" ${editable}>${esc(tok)}</button><span class="tw-ipa tw-miss">—</span></span>`;
+        }
+        if (res.source === 'dictionary' && res.approx) approxSeen = true;
+        const custom = res.source !== 'dictionary';
+        if (custom) edited++;
+        return `<span class="tw"><button class="tw-word ${custom ? 'is-custom' : ''}" type="button" ${editable}>${esc(tok)}</button>` +
+               `<span class="tw-ipa ${custom ? 'is-custom' : ''}" title="${custom ? esc(res.source) + ' override' : ''}">/${esc(res.ipa)}/</span></span>`;
+      }).join('');
+      return `<div class="tw-line"><span class="ln-num">${i + 1}</span><span class="tw-words">${html}</span></div>`;
     }).join('');
-    return `<div class="tw-line"><span class="ln-num">${i + 1}</span><span class="tw-words">${toks}</span></div>`;
-  }).join('');
-  pane.innerHTML = `
-    <p class="pane-note">Every word transcribed in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived</span>' : ''}.${miss ? ` <span class="approx">${miss} not in the dictionary (—).</span>` : ''}</p>
-    <div class="son-transcribe">${linesHtml}</div>`;
+
+    pane.innerHTML = `
+      <p class="pane-note">Every word transcribed in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived</span>' : ''}.${miss ? ` <span class="approx">${miss} not in the dictionary (—).</span>` : ''}
+        Tap any word to correct its pronunciation.${edited ? ` <span class="approx">${edited} customised.</span>` : ''}</p>
+      <div class="son-transcribe">${linesHtml}</div>`;
+
+    pane.querySelectorAll('.tw-word').forEach(b =>
+      b.addEventListener('click', () => openWordEditor({
+        word: b.dataset.word, accent, project, projectId,
+        lineIdx: +b.dataset.line, wordIdx: +b.dataset.widx,
+        onSaved: async () => { if (projectId) project = await getProject(projectId); draw(); },
+      })));
+  };
+  draw();
+}
+
+// ── Word pronunciation editor (modal) ─────────────────────────
+
+function openWordEditor({ word, accent, project, projectId, lineIdx, wordIdx, onSaved }) {
+  const base = ipaFor(word, accent);
+  const current = resolvePronunciation({ word, accent, project, lineIdx, wordIdx, base });
+  const generated = base?.ipa ?? '';
+  // Alternates the built-in data can offer: the same word read in the other dialects.
+  const alts = ['nam', 'rp', 'aus']
+    .filter(a => a !== accent)
+    .map(a => ({ accent: a, ipa: ipaFor(word, a)?.ipa }))
+    .filter(a => a.ipa && a.ipa !== generated);
+
+  const scopeOpts = [
+    ['occurrence', 'This occurrence only', !projectId],
+    ['project', 'All matching words in this project', !projectId],
+    ['personal', 'Save to my personal dictionary', false],
+  ];
+
+  openModal({
+    title: `Pronunciation of “${word}”`,
+    body: `
+      <dl class="we-facts">
+        <div><dt>Word</dt><dd>${esc(word)}</dd></div>
+        <div><dt>Dialect</dt><dd>${esc(dialectName(accent) || accent)}</dd></div>
+        <div><dt>Generated</dt><dd>${generated ? `/${esc(generated)}/` : '<i>not in the dictionary</i>'}</dd></div>
+        ${current && current.source !== 'dictionary' ? `<div><dt>Now using</dt><dd class="is-custom">/${esc(current.ipa)}/ <span class="src-tag">${esc(current.source)}</span></dd></div>` : ''}
+      </dl>
+      ${alts.length ? `<div class="we-alts"><span class="field-label">Alternates</span>${alts.map(a =>
+        `<button class="chip-pick ipa" type="button" data-alt="${esc(a.ipa)}">/${esc(a.ipa)}/ <span class="alt-src">${esc(dialectName(a.accent) || a.accent)}</span></button>`).join('')}</div>` : ''}
+      <label class="field"><span class="field-label" id="we-ipa-label">IPA</span>
+        <input class="input-text ipa-input" id="we-ipa" aria-labelledby="we-ipa-label" value="${esc(current?.ipa ?? generated)}" placeholder="e.g. ˈaɪðər" autocomplete="off"></label>
+      <p class="we-warn" id="we-warn" role="alert" hidden></p>
+      <label class="field"><span class="field-label">Note (optional)</span>
+        <input class="input-text" id="we-note" maxlength="140" value="${esc(current?.note ?? '')}" placeholder="e.g. director wants the British form"></label>
+      <fieldset class="field"><legend class="field-label">Apply to</legend>
+        ${scopeOpts.map(([v, l, dis], i) => `
+          <label class="we-scope ${dis ? 'is-off' : ''}">
+            <input type="radio" name="we-scope" value="${v}" ${i === (projectId ? 0 : 2) ? 'checked' : ''} ${dis ? 'disabled' : ''}>
+            <span>${l}${dis ? ' <i>(open from a project)</i>' : ''}</span>
+          </label>`).join('')}
+      </fieldset>`,
+    actions: `
+      <button class="btn btn-lite" id="we-reset" type="button">Reset to generated</button>
+      <button class="btn btn-primary" id="we-save" type="button">Save</button>`,
+    onMount: (root, close) => {
+      const ipaInput = root.querySelector('#we-ipa');
+      const warn = root.querySelector('#we-warn');
+      root.querySelectorAll('[data-alt]').forEach(b =>
+        b.addEventListener('click', () => { ipaInput.value = b.dataset.alt; ipaInput.focus(); }));
+
+      root.querySelector('#we-save').addEventListener('click', async () => {
+        const check = validateIpa(ipaInput.value);
+        if (!check.ok) { warn.hidden = false; warn.textContent = check.error; return; }
+        if (check.warning) { warn.hidden = false; warn.textContent = check.warning; }
+        const scope = root.querySelector('input[name="we-scope"]:checked')?.value ?? 'personal';
+        const note = root.querySelector('#we-note').value.trim();
+        try {
+          if (scope === 'personal') {
+            setPersonal({ word, accent, ipa: check.ipa, note });
+          } else if (projectId) {
+            let p = await getProject(projectId);
+            p = scope === 'occurrence'
+              ? setOccurrenceOverride(p, { lineIdx, wordIdx, ipa: check.ipa, note })
+              : setProjectWordOverride(p, { word, accent, ipa: check.ipa, note });
+            await saveProject(p);
+          }
+          close();
+          onSaved?.();
+        } catch (err) {
+          warn.hidden = false; warn.textContent = 'Could not save that override.';
+          console.warn(err);
+        }
+      });
+
+      root.querySelector('#we-reset').addEventListener('click', async () => {
+        if (!confirm('Reset this word to the generated pronunciation?')) return;
+        deletePersonal(word, accent);
+        if (projectId) {
+          let p = await getProject(projectId);
+          p = clearOverridesFor(p, { word, accent, lineIdx, wordIdx });
+          await saveProject(p);
+        }
+        close();
+        onSaved?.();
+      });
+    },
+  });
+}
+
+// ── Accessible modal ──────────────────────────────────────────
+// Focus is trapped inside while open, Escape closes, and focus returns to
+// whatever opened it.
+
+function openModal({ title, body, actions = '', onMount }) {
+  const prev = document.activeElement;
+  const wrap = document.createElement('div');
+  wrap.className = 'modal-wrap';
+  wrap.innerHTML = `
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <div class="modal-head">
+        <h2>${esc(title)}</h2>
+        <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">${body}</div>
+      <div class="modal-actions">${actions}</div>
+    </div>`;
+  document.body.appendChild(wrap);
+  document.body.classList.add('modal-open');
+
+  const close = () => {
+    wrap.remove();
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', onKey, true);
+    prev?.focus?.();
+  };
+  const focusables = () => [...wrap.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled);
+
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    const f = focusables();
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener('keydown', onKey, true);
+  wrap.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
+
+  onMount?.(wrap, close);
+  (wrap.querySelector('input, button:not([data-close])') ?? wrap.querySelector('button'))?.focus();
+  return close;
+}
+
+// ── Personal Pronunciation Dictionary ─────────────────────────
+
+let dictFilter = 'all';
+let dictQuery = '';
+
+function renderDictionary() {
+  record(renderDictionary);
+  const draw = () => {
+    let rows = listPersonal();
+    if (dictFilter !== 'all') rows = rows.filter(e => e.accent === dictFilter);
+    const q = dictQuery.trim().toLowerCase();
+    if (q) rows = rows.filter(e => e.word.includes(q) || e.ipa.includes(q) || (e.note ?? '').toLowerCase().includes(q));
+
+    const list = document.getElementById('dict-list');
+    if (!list) return;
+    if (!listPersonal().length) {
+      list.innerHTML = `
+        <div class="empty-state">
+          <p class="empty-emoji">📕</p>
+          <h2>No saved pronunciations yet</h2>
+          <p>Open any text's <b>IPA</b> tab and tap a word to correct how it's transcribed. Save it here and it applies everywhere in that dialect.</p>
+        </div>`;
+      return;
+    }
+    list.innerHTML = rows.length ? rows.map(e => `
+      <div class="dict-row" data-w="${esc(e.word)}" data-a="${esc(e.accent)}">
+        <div class="dict-main">
+          <span class="dict-word">${esc(e.display || e.word)}</span>
+          <span class="dict-ipa">/${esc(e.ipa)}/</span>
+          ${e.note ? `<span class="dict-note">${esc(e.note)}</span>` : ''}
+        </div>
+        <span class="tag">${esc(dialectName(e.accent) || e.accent)}</span>
+        <div class="dict-actions">
+          <button class="btn-lite" type="button" data-act="edit">Edit</button>
+          <button class="btn-lite btn-danger" type="button" data-act="del">Delete</button>
+        </div>
+      </div>`).join('') : '<p class="pane-note">No entries match that search.</p>';
+
+    list.querySelectorAll('.dict-row').forEach(row => {
+      row.addEventListener('click', e => {
+        const b = e.target.closest('button[data-act]'); if (!b) return;
+        const word = row.dataset.w, accent = row.dataset.a;
+        if (b.dataset.act === 'del') {
+          if (!confirm(`Delete the saved pronunciation for “${word}”?`)) return;
+          deletePersonal(word, accent);
+          draw();
+        } else {
+          openWordEditor({ word, accent, project: null, projectId: null, lineIdx: null, wordIdx: null, onSaved: draw });
+        }
+      });
+    });
+  };
+
+  app.innerHTML = `
+    ${pageTopbar('📕 Personal Dictionary', '#8a6d3b')}
+    <main class="track-list">
+      <p class="track-blurb">Pronunciations you've corrected. These apply everywhere in the app, for the dialect you saved them in.</p>
+      <input class="sonnet-search" id="dict-search" type="search" placeholder="Search word, IPA or note…" value="${esc(dictQuery)}" autocomplete="off">
+      <div class="proj-tools">
+        <label class="field-label" for="dict-filter">Dialect</label>
+        <select class="input-sel" id="dict-filter" aria-label="Filter by dialect">
+          <option value="all">All dialects</option>
+          ${TEXT_DIALECTS.map(d => `<option value="${d.id}">${d.flag} ${d.label}</option>`).join('')}
+        </select>
+        <button class="btn btn-lite" id="dict-export" type="button">Export</button>
+        <button class="btn btn-lite" id="dict-import" type="button">Import</button>
+      </div>
+      <div id="dict-list"></div>
+    </main>
+    <input type="file" id="dict-file" accept="application/json" hidden>`;
+  wireBrandHome();
+
+  document.getElementById('dict-filter').value = dictFilter;
+  document.getElementById('dict-search').addEventListener('input', e => { dictQuery = e.target.value; draw(); });
+  document.getElementById('dict-filter').addEventListener('change', e => { dictFilter = e.target.value; draw(); });
+  document.getElementById('dict-export').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(exportPersonal(), null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'speechcraft-dictionary.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  });
+  const file = document.getElementById('dict-file');
+  document.getElementById('dict-import').addEventListener('click', () => file.click());
+  file.addEventListener('change', async () => {
+    const f = file.files?.[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const replace = listPersonal().length
+        ? confirm('Replace your existing entries?\n\nOK = replace everything, Cancel = merge with what you have.')
+        : false;
+      const n = importPersonal(data, { replace });
+      alert(`Imported ${n} entr${n === 1 ? 'y' : 'ies'}.`);
+      draw();
+    } catch (err) {
+      alert(`That file could not be imported.\n\n${err.message}`);
+    } finally { file.value = ''; }
+  });
+  draw();
 }
 
 // ── The IPA chart: a reference to browse ──────────────────────

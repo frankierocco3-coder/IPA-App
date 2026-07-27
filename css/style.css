@@ -796,3 +796,55 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   .stat-sym { min-width: 64px; font-size: 15px; }
   .stat-bar { display: none; }
 }
+
+/* ── Word editor / modal / dictionary ── */
+.tw-word { background: none; border: none; cursor: pointer; }
+.tw-word:hover { background: var(--panel-2); border-radius: 5px; }
+.tw-word.is-custom, .tw-ipa.is-custom { color: #6f8657; }
+.tw-ipa.is-custom { font-weight: 700; }
+.tw-word.is-custom { border-bottom: 2px dotted #6f8657; }
+
+body.modal-open { overflow: hidden; }
+.modal-wrap { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: 16px; }
+.modal-backdrop { position: absolute; inset: 0; background: rgba(47,58,46,0.45); }
+.modal {
+  position: relative; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto;
+  background: var(--bg); border: 2px solid var(--line); border-radius: 18px;
+  box-shadow: 0 12px 40px rgba(47,58,46,0.25);
+}
+.modal-head { display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 14px 16px; border-bottom: 2px solid var(--line); position: sticky; top: 0; background: var(--bg); }
+.modal-head h2 { font-size: 18px; }
+.modal-x { background: none; border: none; font-size: 17px; cursor: pointer; color: var(--muted); padding: 4px 8px; border-radius: 8px; }
+.modal-x:hover { background: var(--panel-2); color: var(--ink); }
+.modal-body { padding: 14px 16px; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; padding: 12px 16px; border-top: 2px solid var(--line); flex-wrap: wrap; }
+.we-facts { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+.we-facts > div { display: flex; gap: 8px; align-items: baseline; }
+.we-facts dt { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); font-weight: 800; min-width: 84px; }
+.we-facts dd { font-family: var(--serif); font-size: 16px; }
+.we-facts dd.is-custom { color: #6f8657; font-weight: 700; }
+.src-tag { font-family: inherit; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px;
+  background: rgba(111,134,87,0.16); color: #4d6138; border-radius: 999px; padding: 2px 7px; margin-left: 4px; }
+.we-alts { margin-bottom: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.we-alts .field-label { width: 100%; margin-bottom: 2px; }
+.alt-src { font-family: -apple-system, system-ui, sans-serif; font-size: 10px; color: var(--muted); }
+.ipa-input { font-family: var(--serif); font-size: 18px; }
+.we-warn { font-size: 12.5px; color: #7a5a2e; background: rgba(201,162,75,0.15); border-radius: 8px; padding: 7px 10px; margin-bottom: 10px; }
+.we-scope { display: flex; align-items: flex-start; gap: 8px; padding: 6px 0; font-size: 14px; cursor: pointer; }
+.we-scope.is-off { color: var(--muted); cursor: default; }
+.we-scope input { margin-top: 3px; }
+
+.dict-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 11px 14px; margin-bottom: 8px; }
+.dict-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dict-word { font-family: var(--serif); font-size: 16px; font-weight: 700; }
+.dict-ipa { font-family: var(--serif); font-size: 15px; color: #6f8657; }
+.dict-note { font-size: 12px; color: var(--muted); font-style: italic; }
+.dict-actions { display: flex; gap: 6px; }
+@media (max-width: 560px) {
+  .modal { max-width: 100%; }
+  .modal-actions .btn { flex: 1; }
+  .dict-actions { width: 100%; }
+  .dict-actions .btn-lite { flex: 1; min-height: 40px; }
+}
