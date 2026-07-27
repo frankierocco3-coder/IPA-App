@@ -759,3 +759,40 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   .proj-tools .input-sel, .proj-tools .btn { width: 100%; }
   .form-grid { grid-template-columns: 1fr; }
 }
+
+/* ── Weak Sounds / Today's Rehearsal ── */
+.today-card {
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-left: 6px solid var(--green); border-radius: 18px; padding: 16px 18px;
+}
+.today-title { font-size: 17px; margin-bottom: 10px; }
+.today-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 12px; }
+.today-list li { display: flex; flex-direction: column; gap: 1px; }
+.today-item { font-family: var(--serif); font-size: 16px; font-weight: 600; color: var(--ink); }
+.today-why { font-size: 12.5px; color: var(--muted); }
+.summary-row { display: flex; gap: 10px; margin-bottom: 4px; }
+.summary-card {
+  flex: 1; background: var(--panel); border: 2px solid var(--line); border-radius: 14px;
+  padding: 12px 10px; text-align: center; display: flex; flex-direction: column; gap: 2px;
+}
+.summary-n { font-family: var(--serif); font-size: 24px; font-weight: 700; color: var(--ink); }
+.summary-l { font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); font-weight: 700; }
+.stat-block { margin-top: 6px; }
+.stat-block .chart-h { margin: 14px 0 8px; }
+.stat-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 12px; margin-bottom: 6px;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 10px;
+}
+.stat-sym { font-family: var(--serif); font-size: 16px; font-weight: 600; min-width: 84px; }
+.stat-name { flex: 1; font-size: 14px; }
+.stat-bar { flex: 1; height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; min-width: 40px; }
+.stat-bar span { display: block; height: 100%; background: var(--green); border-radius: 4px; }
+.stat-val { font-size: 12.5px; font-weight: 700; color: var(--ink); white-space: nowrap; }
+.stat-val.thin { color: var(--muted); font-weight: 600; font-style: italic; }
+.danger-zone { margin-top: 26px; padding-top: 16px; border-top: 2px solid var(--line); }
+@media (max-width: 560px) {
+  .summary-row { flex-wrap: wrap; }
+  .summary-card { min-width: 30%; }
+  .stat-sym { min-width: 64px; font-size: 15px; }
+  .stat-bar { display: none; }
+}

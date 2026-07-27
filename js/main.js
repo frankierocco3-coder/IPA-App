@@ -20,6 +20,8 @@ import { recordingSupported, startRecording, stopRecording, cancelRecording,
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor } from './recordings.js';
 import { dbSupported } from './db.js';
+import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
+         resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE, confidenceOf } from './analytics.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -222,6 +224,7 @@ function renderHome() {
     </header>
     ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
     <main class="track-list">
+      ${dailyRehearsalCard()}
       <h1 class="home-heading">Choose your track</h1>
       ${cards}
       <button class="track-card arcade-entry" id="arcade-entry" style="--track-color:#c99e58">
@@ -237,6 +240,14 @@ function renderHome() {
         <div class="track-info">
           <h2>The IPA Handbook</h2>
           <p>The chart, your instrument, and the vowel map — the reference shelf.</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>
+      <button class="track-card" id="weak-entry" style="--track-color:#6f8657">
+        <div class="track-glyph">📊</div>
+        <div class="track-info">
+          <h2>Weak Sounds</h2>
+          <p>What's landing and what isn't — and the pairs you mix up.</p>
         </div>
         <div class="track-arrow">›</div>
       </button>
@@ -267,6 +278,8 @@ function renderHome() {
   document.getElementById('chart-entry').addEventListener('click', renderHandbook);
   document.getElementById('text-entry').addEventListener('click', renderTextLibrary);
   document.getElementById('projects-entry').addEventListener('click', renderProjects);
+  document.getElementById('weak-entry').addEventListener('click', renderWeakSounds);
+  document.getElementById('today-start')?.addEventListener('click', startDailyRehearsal);
   app.querySelectorAll('.track-card[data-track]').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
   );
@@ -464,6 +477,111 @@ function renderSonnetList() {
   });
 }
 
+
+
+// ── Weak Sounds + Today's Rehearsal ───────────────────────────
+// Everything here is derived from analytics.js, which only observes the
+// exercises the app already scores.
+
+function renderWeakSounds() {
+  record(renderWeakSounds);
+  const b = symbolBreakdown();
+  const pairs = confusionPairs(5);
+  const t = totals();
+
+  const symRow = (r, extra = '') => `
+    <div class="stat-row">
+      <span class="stat-sym">/${esc(r.sym)}/</span>
+      <span class="stat-bar" aria-hidden="true"><span style="width:${Math.round(r.accuracy * 100)}%"></span></span>
+      <span class="stat-val ${r.tier === CONFIDENCE.NONE ? 'thin' : ''}">${esc(extra || r.label)}</span>
+    </div>`;
+
+  const section = (title, rows, empty) => `
+    <section class="stat-block">
+      <h2 class="chart-h">${title}</h2>
+      ${rows.length ? rows : `<p class="pane-note">${empty}</p>`}
+    </section>`;
+
+  app.innerHTML = `
+    ${pageTopbar('📊 Weak Sounds', '#6f8657')}
+    <main class="track-list">
+      ${!t.attempts ? `
+        <div class="empty-state">
+          <p class="empty-emoji">📊</p>
+          <h2>No practice data yet</h2>
+          <p>Play a lesson or an Arcade game and this fills in — which sounds you're solid on, which ones keep slipping, and which pairs you mix up.</p>
+        </div>` : `
+        <div class="summary-row">
+          <div class="summary-card"><span class="summary-n">${t.attempts}</span><span class="summary-l">attempts</span></div>
+          <div class="summary-card"><span class="summary-n">${t.attempts >= 5 ? Math.round(t.accuracy * 100) + '%' : '—'}</span><span class="summary-l">accuracy</span></div>
+          <div class="summary-card"><span class="summary-n">${t.daysPractised}</span><span class="summary-l">days practised</span></div>
+        </div>
+        ${b.thin ? `<p class="pane-note">${b.thin} sound${b.thin === 1 ? '' : 's'} still need more attempts before a percentage means anything.</p>` : ''}
+
+        ${section('Weakest sounds', b.weakest.map(r => symRow(r)).join(''), 'Not enough data yet.')}
+        ${section('Strongest sounds', b.strongest.map(r => symRow(r)).join(''), 'Not enough data yet.')}
+        ${section('Recently improved', b.improving.map(r => symRow(r, `↑ ${Math.round(r.recentAccuracy * 100)}% recently`)).join(''), 'Nothing has moved enough to call it improvement yet.')}
+        ${section('Not practised lately', b.stale.map(r => symRow(r, `${Math.round(r.days)} days ago`)).join(''), 'Everything has been practised in the last week.')}
+        ${section('Commonly confused', pairs.map(p => `
+          <div class="stat-row">
+            <span class="stat-sym">/${esc(p.right)}/ vs /${esc(p.wrong)}/</span>
+            <span class="stat-val">${p.count} mix-up${p.count === 1 ? '' : 's'}</span>
+          </div>`).join(''), 'No repeated mix-ups yet.')}
+        ${section('By exercise type', t.byType.sort((x, y) => x.accuracy - y.accuracy).map(r => `
+          <div class="stat-row"><span class="stat-name">${esc(r.type)}</span>
+            <span class="stat-val ${confidenceOf(r.attempts) === CONFIDENCE.NONE ? 'thin' : ''}">${esc(r.label)}</span></div>`).join(''), '')}
+        ${section('By dialect', t.byDialect.map(r => `
+          <div class="stat-row"><span class="stat-name">${esc(dialectName(r.id) || r.id)}</span>
+            <span class="stat-val ${confidenceOf(r.attempts) === CONFIDENCE.NONE ? 'thin' : ''}">${esc(r.label)}</span></div>`).join(''), '')}
+
+        <div class="danger-zone">
+          <button class="btn btn-lite btn-danger" id="an-reset" type="button">Reset practice analytics</button>
+          <p class="pane-note">Clears only this page's data. Your XP, streak, completed lessons, projects and recordings are not affected.</p>
+        </div>`}
+    </main>`;
+  wireBrandHome();
+  document.getElementById('an-reset')?.addEventListener('click', () => {
+    if (!confirm('Reset practice analytics?\n\nThis clears weak-sound tracking only. XP, streaks, lessons, projects and recordings are kept.')) return;
+    resetAnalytics();
+    renderWeakSounds();
+  });
+}
+
+/** The home-screen card. Returns '' when there's nothing honest to say yet. */
+function dailyRehearsalCard() {
+  if (!hasEnoughData()) return '';
+  const picks = dailyRehearsal(4);
+  if (!picks.length) return '';
+  return `
+    <section class="today-card">
+      <h2 class="today-title">Today’s 5-Minute Rehearsal</h2>
+      <ul class="today-list">
+        ${picks.map(p => `
+          <li>
+            <span class="today-item">${esc(p.title)}${p.review ? ' <span class="tag tag-skill">review</span>' : ''}</span>
+            <span class="today-why">${esc(p.why)}</span>
+          </li>`).join('')}
+      </ul>
+      <button class="btn btn-primary" id="today-start" type="button">Start rehearsal</button>
+    </section>`;
+}
+
+/** Build a lesson out of today's picks using the existing exercise formats. */
+function startDailyRehearsal() {
+  const picks = dailyRehearsal(4);
+  const phonemes = [...new Set(picks.flatMap(p => p.phonemes))].filter(p => PHONEMES[p]);
+  if (!phonemes.length) return;
+  startLesson({
+    id: 'daily-rehearsal',
+    title: 'Today’s Rehearsal',
+    practice: true,                 // no hearts lost, like other practice
+    phonemes,
+    types: ['soundToSymbol', 'symbolToWord', 'minimalPair', 'description', 'fillBlank'],
+    count: 8,
+    unit: { title: 'Today’s Rehearsal', color: '#6f8657' },
+    track: null,
+  });
+}
 
 // ── My Texts: rehearsal projects ──────────────────────────────
 // A project is a saved role: its text, dialect, notes, difficult words and
@@ -1705,6 +1823,7 @@ function lessonChrome(s, body) {
 }
 
 function renderExercise(s) {
+  s.shownAt = Date.now();          // for analytics response time
   if (s.hearts === 0) return renderFail(s);
   if (s.index >= s.queue.length) return renderResults(s);
   const ex = s.queue[s.index];
@@ -1735,7 +1854,12 @@ function wireAudio(s, ex, onFirstPlay) {
   });
 }
 
-function showFeedback(s, ok, ex, { requeue = true, penalty = true } = {}) {
+function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null } = {}) {
+  // Analytics only observes — it never alters the verdict above.
+  try {
+    recordAttempt({ ex, ok, chose, ms: s.shownAt ? Date.now() - s.shownAt : null,
+                    accent: s.lesson?.accent ?? s.lesson?.shiftTo ?? null });
+  } catch (err) { console.warn('analytics skipped', err); }
   const fb = document.getElementById('feedback');
   fb.className = `feedback show ${ok ? 'good' : 'bad'}`;
   fb.innerHTML = `
@@ -1786,7 +1910,7 @@ function renderChoice(s, ex) {
         b.disabled = true;
         if (ex.choices[i].ok) b.classList.add('right');
       });
-      showFeedback(s, ok, ex);
+      showFeedback(s, ok, ex, { chose: ex.choices[+btn.dataset.i].label });
     })
   );
 }
