@@ -12,6 +12,14 @@ import { PIRANDELLO } from './data/pirandello.js';
 import { IBSEN } from './data/ibsen.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
+import { migrateLegacyCustomText, listProjects, getProject, saveProject, createProject,
+         duplicateProject, deleteProject, emptyProject, touchRehearsed, sortProjects,
+         searchProjects, STATUSES, splitLines } from './projects.js';
+import { recordingSupported, startRecording, stopRecording, cancelRecording,
+         isRecording, micErrorMessage, formatMs, MAX_RECORDING_MS } from './perform.js';
+import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
+         releaseAllUrls, playUrl, RATINGS, deleteTakesFor } from './recordings.js';
+import { dbSupported } from './db.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -232,6 +240,14 @@ function renderHome() {
         </div>
         <div class="track-arrow">›</div>
       </button>
+      <button class="track-card text-entry" id="projects-entry" style="--track-color:#8a6d3b">
+        <div class="track-glyph">🎬</div>
+        <div class="track-info">
+          <h2>My Texts</h2>
+          <p>Your rehearsal projects — saved roles, notes, and recorded takes.</p>
+        </div>
+        <div class="track-arrow">›</div>
+      </button>
       <button class="track-card text-entry" id="text-entry" style="--track-color:#8a6d3b">
         <div class="track-glyph">📜</div>
         <div class="track-info">
@@ -250,6 +266,7 @@ function renderHome() {
   document.getElementById('arcade-entry').addEventListener('click', renderArcade);
   document.getElementById('chart-entry').addEventListener('click', renderHandbook);
   document.getElementById('text-entry').addEventListener('click', renderTextLibrary);
+  document.getElementById('projects-entry').addEventListener('click', renderProjects);
   app.querySelectorAll('.track-card[data-track]').forEach(btn =>
     btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
   );
@@ -447,6 +464,375 @@ function renderSonnetList() {
   });
 }
 
+
+// ── My Texts: rehearsal projects ──────────────────────────────
+// A project is a saved role: its text, dialect, notes, difficult words and
+// every take recorded against it.
+
+const STATUS_CLASS = {
+  'Not Started': 'st-new', 'In Rehearsal': 'st-work',
+  'Performance Ready': 'st-ready', 'Archived': 'st-arch',
+};
+
+let projectSort = 'rehearsed';
+let projectQuery = '';
+
+async function renderProjects() {
+  record(renderProjects);
+  app.innerHTML = `
+    ${pageTopbar('🎬 My Texts', '#8a6d3b')}
+    <main class="track-list">
+      <p class="track-blurb">Your rehearsal projects — a saved role with its text, dialect, notes and recordings, all kept on this device.</p>
+      <div class="proj-toolbar">
+        <input class="sonnet-search" id="proj-search" type="search" placeholder="Search title, character, source…" value="${esc(projectQuery)}" autocomplete="off">
+        <div class="proj-tools">
+          <label class="field-label" for="proj-sort">Sort</label>
+          <select class="input-sel" id="proj-sort" aria-label="Sort projects">
+            <option value="rehearsed">Recently rehearsed</option>
+            <option value="updated">Recently edited</option>
+            <option value="created">Date created</option>
+            <option value="title">Title</option>
+            <option value="character">Character</option>
+          </select>
+          <button class="btn btn-lite" id="proj-import" type="button">Import</button>
+          <button class="btn btn-primary" id="proj-new" type="button">+ New project</button>
+        </div>
+      </div>
+      <div id="proj-list"><p class="pane-note">Loading…</p></div>
+    </main>
+    <input type="file" id="proj-file" accept="application/json" hidden>`;
+  wireBrandHome();
+
+  const listEl = document.getElementById('proj-list');
+  const sortSel = document.getElementById('proj-sort');
+  sortSel.value = projectSort;
+
+  async function draw() {
+    if (!dbSupported()) {
+      listEl.innerHTML = '<p class="pane-note pane-warn">Projects need local storage, which this browser has disabled (private mode often does). Everything else still works.</p>';
+      return;
+    }
+    let all = [];
+    try { all = await listProjects(); }
+    catch { listEl.innerHTML = '<p class="pane-note pane-warn">Could not open local storage.</p>'; return; }
+
+    const rows = sortProjects(searchProjects(all, projectQuery), projectSort);
+    if (!all.length) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <p class="empty-emoji">🎬</p>
+          <h2>No projects yet</h2>
+          <p>Create one for a piece you're working on — an audition speech, a scene, a monologue. You'll get the text, its IPA, scansion, and a place to record and compare takes.</p>
+          <p class="pane-note">Example: <b>Stanley Audition</b> — A Streetcar Named Desire · Stanley Kowalski · Act II · General American</p>
+        </div>`;
+      return;
+    }
+    if (!rows.length) { listEl.innerHTML = '<p class="pane-note">No projects match that search.</p>'; return; }
+
+    listEl.innerHTML = rows.map(p => `
+      <div class="proj-card" data-id="${p.id}">
+        <button class="proj-open" type="button" data-act="open">
+          <span class="proj-main">
+            <span class="proj-title">${esc(p.title || 'Untitled project')}</span>
+            <span class="proj-sub">${esc([p.character, p.source].filter(Boolean).join(' · ') || 'No source yet')}</span>
+            <span class="proj-meta">
+              <span class="tag ${STATUS_CLASS[p.status] || ''}">${esc(p.status)}</span>
+              <span class="tag">${esc(dialectName(p.accent) || p.accent)}</span>
+              <span class="proj-when">${p.rehearsedAt ? `Rehearsed ${relDate(p.rehearsedAt)}` : `Created ${relDate(p.createdAt)}`}</span>
+            </span>
+          </span>
+          <span class="track-arrow">›</span>
+        </button>
+        <div class="proj-actions">
+          <button class="btn-lite" type="button" data-act="dup">Duplicate</button>
+          <button class="btn-lite" type="button" data-act="export">Export</button>
+          <button class="btn-lite btn-danger" type="button" data-act="del">Delete</button>
+        </div>
+      </div>`).join('');
+
+    listEl.querySelectorAll('.proj-card').forEach(card => {
+      card.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const id = card.dataset.id;
+        const act = btn.dataset.act;
+        if (act === 'open') renderProject(id);
+        else if (act === 'dup') { await duplicateProject(id); draw(); }
+        else if (act === 'export') exportProject(id);
+        else if (act === 'del') {
+          const p = await getProject(id);
+          if (!confirm(`Delete “${p?.title || 'Untitled'}”?\n\nThis also deletes its saved recordings. This cannot be undone.`)) return;
+          await deleteTakesFor(id);
+          await deleteProject(id);
+          draw();
+        }
+      });
+    });
+  }
+
+  document.getElementById('proj-search').addEventListener('input', e => { projectQuery = e.target.value; draw(); });
+  sortSel.addEventListener('change', e => { projectSort = e.target.value; draw(); });
+  document.getElementById('proj-new').addEventListener('click', async () => {
+    const p = await createProject({ title: 'Untitled project' });
+    renderProject(p.id);
+  });
+  const fileInput = document.getElementById('proj-file');
+  document.getElementById('proj-import').addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const f = fileInput.files?.[0]; if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const created = await importProjects(data);
+      alert(`Imported ${created} project${created === 1 ? '' : 's'}.`);
+      draw();
+    } catch (err) {
+      alert(`That file could not be imported.\n\n${err.message}`);
+    } finally { fileInput.value = ''; }
+  });
+
+  draw();
+}
+
+function relDate(ts) {
+  if (!ts) return '—';
+  const days = Math.floor((Date.now() - ts) / 86400e3);
+  if (days <= 0) return 'today';
+  if (days === 1) return 'yesterday';
+  if (days < 30) return `${days} days ago`;
+  return new Date(ts).toLocaleDateString();
+}
+
+// ── Project detail ────────────────────────────────────────────
+
+async function renderProject(id, tab = 'text') {
+  record(() => renderProject(id, tab));
+  const p = await getProject(id);
+  if (!p) return renderProjects();
+
+  app.innerHTML = `
+    ${pageTopbar('🎬 ' + esc(p.title || 'Untitled'), '#8a6d3b')}
+    <main class="guide sonnet-view">
+      <div class="piece-meta">
+        <h1 class="piece-title">${esc(p.title || 'Untitled project')}</h1>
+        <p class="piece-source">${esc([p.character, p.source, p.scene].filter(Boolean).join(' · ') || 'Add a source below')}</p>
+        <div class="piece-tags">
+          <span class="tag ${STATUS_CLASS[p.status] || ''}">${esc(p.status)}</span>
+          <span class="tag tag-dialect">🗣 ${esc(dialectName(p.accent) || p.accent)}</span>
+          ${p.lines.length ? `<span class="tag">${p.lines.length} lines</span>` : ''}
+        </div>
+      </div>
+      <div class="sonnet-tabs proj-tabs">
+        ${[['text', '📄 Text'], ['ipa', '🔤 IPA'], ['scan', '📐 Scan'], ['perform', '🎙 Perform'], ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']]
+          .map(([k, l]) => `<button class="son-tab ${k === tab ? 'on' : ''}" data-tab="${k}" type="button">${l}</button>`).join('')}
+      </div>
+      <div id="proj-pane" class="sonnet-pane"></div>
+    </main>`;
+  wireBrandHome();
+
+  const pane = document.getElementById('proj-pane');
+  app.querySelectorAll('.proj-tabs .son-tab').forEach(b =>
+    b.addEventListener('click', () => { stopSpeech(); renderProject(id, b.dataset.tab); }));
+
+  const fresh = async () => getProject(id);
+
+  if (tab === 'text') paneText(pane, p, id);
+  else if (tab === 'notes') paneNotes(pane, p, id);
+  else if (tab === 'words') paneWords(pane, p, id);
+  else if (tab === 'scan') pane.innerHTML = p.lines.length ? scanPane(p.lines, false) : emptyText();
+  else if (tab === 'ipa') {
+    if (!p.lines.length) pane.innerHTML = emptyText();
+    else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(p.lines, p.accent, pane, { projectId: id }); }
+  }
+  else if (tab === 'perform') {
+    if (!p.lines.length) pane.innerHTML = emptyText();
+    else {
+      await touchRehearsed(id);
+      renderPerformPane(pane, { lines: p.lines, accent: p.accent, clip: null, scopeId: null, projectId: id });
+    }
+  }
+}
+
+const emptyText = () => '<p class="pane-note">Add the text on the <b>Text</b> tab first.</p>';
+
+function paneText(pane, p, id) {
+  pane.innerHTML = `
+    <div class="proj-form">
+      <div class="form-grid">
+        <label class="field"><span class="field-label">Project title</span>
+          <input class="input-text" id="f-title" value="${esc(p.title)}" placeholder="Stanley Audition"></label>
+        <label class="field"><span class="field-label">Source</span>
+          <input class="input-text" id="f-source" value="${esc(p.source)}" placeholder="A Streetcar Named Desire"></label>
+        <label class="field"><span class="field-label">Author</span>
+          <input class="input-text" id="f-author" value="${esc(p.author)}" placeholder="Tennessee Williams"></label>
+        <label class="field"><span class="field-label">Character</span>
+          <input class="input-text" id="f-character" value="${esc(p.character)}" placeholder="Stanley Kowalski"></label>
+        <label class="field"><span class="field-label">Scene</span>
+          <input class="input-text" id="f-scene" value="${esc(p.scene)}" placeholder="Act II confrontation"></label>
+        <label class="field"><span class="field-label">Dialect</span>
+          <select class="input-sel" id="f-accent">
+            ${TEXT_DIALECTS.map(d => `<option value="${d.id}" ${d.id === p.accent ? 'selected' : ''}>${d.flag} ${d.label}</option>`).join('')}
+          </select></label>
+        <label class="field"><span class="field-label">Status</span>
+          <select class="input-sel" id="f-status">
+            ${STATUSES.map(s => `<option value="${esc(s)}" ${s === p.status ? 'selected' : ''}>${esc(s)}</option>`).join('')}
+          </select></label>
+      </div>
+      <label class="field"><span class="field-label">Text</span>
+        <textarea class="ct-area" id="f-text" placeholder="Paste the speech here — one line per line.">${esc(p.text)}</textarea></label>
+      <p class="pane-note" id="f-warn" hidden></p>
+      <div class="form-actions">
+        <button class="btn btn-primary" id="f-save" type="button">Save</button>
+        <span class="save-state" id="f-state" role="status" aria-live="polite"></span>
+      </div>
+    </div>`;
+
+  const textEl = pane.querySelector('#f-text');
+  const warn = pane.querySelector('#f-warn');
+  const originalLineCount = p.lines.length;
+
+  // Changing the text can orphan line-numbered takes — say so before saving.
+  textEl.addEventListener('input', () => {
+    const next = splitLines(textEl.value).length;
+    if (originalLineCount && next !== originalLineCount) {
+      warn.hidden = false;
+      warn.className = 'pane-note pane-warn';
+      warn.innerHTML = `⚠ The line count changes from ${originalLineCount} to ${next}. Saved takes and notes are kept, but takes recorded against a line number may no longer line up.`;
+    } else warn.hidden = true;
+  });
+
+  pane.querySelector('#f-save').addEventListener('click', async () => {
+    const patch = {
+      ...p,
+      title: pane.querySelector('#f-title').value.trim(),
+      source: pane.querySelector('#f-source').value.trim(),
+      author: pane.querySelector('#f-author').value.trim(),
+      character: pane.querySelector('#f-character').value.trim(),
+      scene: pane.querySelector('#f-scene').value.trim(),
+      accent: pane.querySelector('#f-accent').value,
+      status: pane.querySelector('#f-status').value,
+      text: textEl.value,
+    };
+    await saveProject(patch);
+    pane.querySelector('#f-state').textContent = 'Saved.';
+    setTimeout(() => renderProject(id, 'text'), 350);
+  });
+}
+
+function paneNotes(pane, p, id) {
+  pane.innerHTML = `
+    <label class="field"><span class="field-label">Personal notes</span>
+      <textarea class="ct-area" id="n-notes" placeholder="Blocking, intention, breath, what the director said…">${esc(p.notes)}</textarea></label>
+    <label class="field"><span class="field-label">Pronunciation notes</span>
+      <textarea class="ct-area short" id="n-pron" placeholder="e.g. keep the r's; BATH stays flat…">${esc(p.pronunciationNotes)}</textarea></label>
+    <div class="form-actions">
+      <button class="btn btn-primary" id="n-save" type="button">Save notes</button>
+      <span class="save-state" id="n-state" role="status" aria-live="polite"></span>
+    </div>`;
+  pane.querySelector('#n-save').addEventListener('click', async () => {
+    await saveProject({ ...p, notes: pane.querySelector('#n-notes').value, pronunciationNotes: pane.querySelector('#n-pron').value });
+    pane.querySelector('#n-state').textContent = 'Saved.';
+  });
+}
+
+function paneWords(pane, p, id) {
+  const draw = (list) => list.length
+    ? list.map((w, i) => `
+        <div class="word-card">
+          <div><b>${esc(w.word)}</b>${w.note ? `<span class="word-note"> — ${esc(w.note)}</span>` : ''}</div>
+          <button class="btn-lite btn-danger" type="button" data-del="${i}">Remove</button>
+        </div>`).join('')
+    : '<p class="pane-note">No difficult words yet. Add the ones that keep tripping you up.</p>';
+
+  pane.innerHTML = `
+    <div class="word-add">
+      <input class="input-text" id="w-word" placeholder="Word or phrase" aria-label="Word">
+      <input class="input-text" id="w-note" placeholder="Note (optional)" aria-label="Note">
+      <button class="btn btn-primary" id="w-add" type="button">Add</button>
+    </div>
+    <div id="w-list">${draw(p.difficultWords ?? [])}</div>`;
+
+  const listEl = pane.querySelector('#w-list');
+  const refresh = async () => {
+    const cur = await getProject(id);
+    listEl.innerHTML = draw(cur.difficultWords ?? []);
+  };
+  pane.querySelector('#w-add').addEventListener('click', async () => {
+    const word = pane.querySelector('#w-word').value.trim();
+    if (!word) return;
+    const cur = await getProject(id);
+    cur.difficultWords = [...(cur.difficultWords ?? []), { word, note: pane.querySelector('#w-note').value.trim() }];
+    await saveProject(cur);
+    pane.querySelector('#w-word').value = ''; pane.querySelector('#w-note').value = '';
+    refresh();
+  });
+  listEl.addEventListener('click', async e => {
+    const b = e.target.closest('button[data-del]'); if (!b) return;
+    const cur = await getProject(id);
+    cur.difficultWords = (cur.difficultWords ?? []).filter((_, i) => i !== +b.dataset.del);
+    await saveProject(cur);
+    refresh();
+  });
+}
+
+// ── Export / import ───────────────────────────────────────────
+
+async function exportProject(id) {
+  const p = await getProject(id);
+  if (!p) return;
+  const takes = await listTakes({ projectId: id });
+  const payload = {
+    format: 'speechcraft-project',
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    // Audio itself is NOT included — recordings stay on the device that made them.
+    audioIncluded: false,
+    projects: [{
+      ...p,
+      recordings: takes.map(t => ({ id: t.id, level: t.level, ref: t.ref, label: t.label, rating: t.rating, note: t.note, durationMs: t.durationMs, createdAt: t.createdAt })),
+    }],
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase()}.speechcraft.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+/** Validate and import. Throws a readable error for malformed files. */
+async function importProjects(data) {
+  if (!data || typeof data !== 'object') throw new Error('Not a JSON object.');
+  if (data.format !== 'speechcraft-project') throw new Error('This is not a Speechcraft project file.');
+  const list = Array.isArray(data.projects) ? data.projects : null;
+  if (!list?.length) throw new Error('No projects found in the file.');
+
+  let n = 0;
+  for (const raw of list) {
+    if (typeof raw?.text !== 'string' && typeof raw?.title !== 'string') continue;
+    const base = emptyProject();
+    await saveProject({
+      ...base,
+      title: String(raw.title ?? 'Imported project').slice(0, 120),
+      source: String(raw.source ?? '').slice(0, 200),
+      author: String(raw.author ?? '').slice(0, 120),
+      character: String(raw.character ?? '').slice(0, 120),
+      scene: String(raw.scene ?? '').slice(0, 200),
+      accent: ['rp', 'nam', 'aus'].includes(raw.accent) ? raw.accent : 'rp',
+      text: String(raw.text ?? ''),
+      notes: String(raw.notes ?? ''),
+      pronunciationNotes: String(raw.pronunciationNotes ?? ''),
+      difficultWords: Array.isArray(raw.difficultWords)
+        ? raw.difficultWords.filter(w => w && typeof w.word === 'string').map(w => ({ word: String(w.word), note: String(w.note ?? '') }))
+        : [],
+      overrides: (raw.overrides && typeof raw.overrides === 'object') ? raw.overrides : {},
+      status: STATUSES.includes(raw.status) ? raw.status : 'Not Started',
+    });
+    n++;
+  }
+  if (!n) throw new Error('No valid projects in the file.');
+  return n;
+}
+
 // ── Curated speech libraries (Chekhov, O'Neill, Wilde) ────────
 // All three share one browser and one reader; they differ only in their data,
 // their icon, and the dialect a piece is most naturally played in.
@@ -539,6 +925,7 @@ function renderPiece(key, id) {
     // Same narrator voices as the sonnets; missing clips fall back to device TTS.
     clip: (n, acc) => lib.narrated.includes(acc) ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
     narrated: lib.narrated,
+    scopeId: `${key}:${s.id}`,
     prev: prev ? { label: '‹ Previous', go: () => renderPiece(key, prev.id) } : null,
     next: next ? { label: 'Next ›', go: () => renderPiece(key, next.id) } : null,
   });
@@ -588,6 +975,7 @@ function renderSonnet(n) {
     // Pre-generated ElevenLabs clip for a given 1-based line + dialect, if any.
     clip: (i, acc) => SONNET_NARRATED.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
     narrated: SONNET_NARRATED,
+    scopeId: `sonnet:${n}`,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
   });
@@ -600,7 +988,7 @@ function renderSonnet(n) {
 const SONNET_NARRATED = ['nam', 'rp', 'aus'];
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null, narrated = [] }) {
+function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null, narrated = [], scopeId = null, projectId = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -624,6 +1012,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
         <button class="son-tab on" data-mode="speak">🔊 Listen</button>
         <button class="son-tab" data-mode="scan">📐 Scan</button>
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
+        <button class="son-tab" data-mode="perform">🎙 Perform</button>
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
@@ -644,6 +1033,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
     if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
+    else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
   drawDialects();
@@ -656,6 +1046,313 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
   document.getElementById('rd-prev')?.addEventListener('click', () => { stopSpeech(); prev.go(); });
   document.getElementById('rd-next')?.addEventListener('click', () => { stopSpeech(); next.go(); });
   show('speak');
+}
+
+
+// ── Perform: record yourself, compare against the model ───────
+// Three levels of target: a whole line, a word from it, or a sound. The
+// model side reuses the existing clip/TTS pipeline, so Perform works
+// everywhere the Listen tab does.
+
+let performState = null;   // { level, ref, label, lastTake } for the open pane
+
+function announce(msg) {
+  const el = document.getElementById('perform-live');
+  if (el) el.textContent = msg;
+}
+
+function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }) {
+  const lang = dialectLang(accent);
+  const canRecord = recordingSupported();
+  const canStore = dbSupported();
+
+  // Default target: the first line.
+  performState = performState && performState.scopeId === (scopeId ?? projectId)
+    ? performState
+    : { scopeId: scopeId ?? projectId, level: 'line', ref: 0, label: lines[0] ?? '', lastTake: null };
+
+  const lineOptions = lines.map((ln, i) =>
+    `<option value="${i}" ${performState.ref === i && performState.level === 'line' ? 'selected' : ''}>${esc(`${i + 1}. ${stripStage(ln).slice(0, 60)}`)}</option>`).join('');
+
+  pane.innerHTML = `
+    <div id="perform-live" class="sr-only" role="status" aria-live="polite"></div>
+
+    ${!canRecord ? `<p class="pane-note pane-warn">🎙 Recording isn’t available in this browser${!window.isSecureContext ? ' (it needs a secure https connection)' : ''}. Everything else on this page still works.</p>` : ''}
+    ${canRecord && !canStore ? `<p class="pane-note pane-warn">Takes can’t be saved in this browser’s private mode — you can still record and compare within this visit.</p>` : ''}
+
+    <div class="perform-target">
+      <label class="field-label" for="perf-level">Rehearse</label>
+      <div class="perform-target-row">
+        <select id="perf-level" class="input-sel" aria-label="What to rehearse">
+          <option value="line" ${performState.level === 'line' ? 'selected' : ''}>A line</option>
+          <option value="word" ${performState.level === 'word' ? 'selected' : ''}>A word</option>
+          <option value="sound" ${performState.level === 'sound' ? 'selected' : ''}>A sound</option>
+        </select>
+        <select id="perf-line" class="input-sel grow" aria-label="Which line">${lineOptions}</select>
+      </div>
+      <div id="perf-sub" class="perform-sub"></div>
+      <p class="perform-current" id="perf-current"></p>
+    </div>
+
+    <div class="perform-controls">
+      <button class="btn btn-lite" id="perf-model" type="button">🔊 Listen to model</button>
+      <button class="btn btn-record" id="perf-rec" type="button" ${canRecord ? '' : 'disabled'}>⏺ Record</button>
+      <span class="perform-timer" id="perf-timer" hidden aria-hidden="true">00:00</span>
+    </div>
+    <p class="pane-note perform-limit">Recordings stop automatically at ${Math.round(MAX_RECORDING_MS / 60000)} minutes.</p>
+    <p class="perform-error" id="perf-error" role="alert" hidden></p>
+
+    <div class="perform-take" id="perf-take" hidden>
+      <h3 class="guide-heading">Your take</h3>
+      <div class="perform-controls">
+        <button class="btn btn-lite" id="perf-play" type="button">▶ Play mine</button>
+        <button class="btn btn-lite" id="perf-compare" type="button">⇄ Compare</button>
+        <button class="btn btn-lite btn-danger" id="perf-discard" type="button">Delete</button>
+      </div>
+      <fieldset class="rating-set">
+        <legend class="field-label">Self-rating</legend>
+        ${RATINGS.map(r => `<button class="btn btn-lite rating" type="button" data-rating="${r.id}" aria-pressed="false">${r.label}</button>`).join('')}
+      </fieldset>
+      <label class="field-label" for="perf-note">Notes</label>
+      <input class="input-text" id="perf-note" type="text" maxlength="140" placeholder="e.g. dropped the final consonant">
+      <button class="btn btn-primary" id="perf-save" type="button">Save take</button>
+    </div>
+
+    <h3 class="guide-heading">Saved takes</h3>
+    <div id="perf-takes" class="takes-list"><p class="pane-note">Loading…</p></div>`;
+
+  // ── target selection ───────────────────────────────────────
+  const levelSel = pane.querySelector('#perf-level');
+  const lineSel = pane.querySelector('#perf-line');
+  const subWrap = pane.querySelector('#perf-sub');
+  const current = pane.querySelector('#perf-current');
+
+  const currentLine = () => lines[+lineSel.value] ?? '';
+
+  const drawSub = () => {
+    const level = levelSel.value;
+    if (level === 'line') { subWrap.innerHTML = ''; return; }
+    const spoken = stripStage(currentLine());
+    if (level === 'word') {
+      const words = [...new Set(spoken.split(/\s+/).map(w => w.replace(/[^\p{L}\p{N}'’-]/gu, '')).filter(Boolean))];
+      subWrap.innerHTML = `<div class="chip-row">${words.map(w =>
+        `<button class="chip-pick" type="button" data-pick="${esc(w)}">${esc(w)}</button>`).join('')}</div>`;
+    } else {
+      // Sounds present in this line, from the phoneme inventory the app teaches.
+      const syms = Object.keys(PHONEMES);
+      subWrap.innerHTML = `<div class="chip-row">${syms.map(sym =>
+        `<button class="chip-pick ipa" type="button" data-pick="${esc(sym)}">/${esc(sym)}/</button>`).join('')}</div>`;
+    }
+  };
+
+  const syncTarget = () => {
+    const level = levelSel.value;
+    if (level === 'line') {
+      performState = { ...performState, level, ref: +lineSel.value, label: stripStage(currentLine()) };
+    } else if (!performState.label || performState.level !== level) {
+      performState = { ...performState, level, ref: null, label: '' };
+    }
+    current.textContent = performState.label
+      ? performState.label
+      : level === 'word' ? 'Pick a word above.' : 'Pick a sound above.';
+    current.classList.toggle('is-empty', !performState.label);
+  };
+
+  levelSel.addEventListener('change', () => { drawSub(); syncTarget(); });
+  lineSel.addEventListener('change', () => { drawSub(); syncTarget(); });
+  subWrap.addEventListener('click', e => {
+    const b = e.target.closest('.chip-pick'); if (!b) return;
+    subWrap.querySelectorAll('.chip-pick').forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+    performState = { ...performState, ref: b.dataset.pick, label: b.dataset.pick };
+    syncTarget();
+  });
+  drawSub(); syncTarget();
+
+  // ── model playback ─────────────────────────────────────────
+  const modelText = () => performState.level === 'line' ? stripStage(currentLine()) : performState.label;
+  const modelClip = () => (performState.level === 'line' && clip) ? clip(+lineSel.value + 1, accent) : null;
+
+  pane.querySelector('#perf-model').addEventListener('click', () => {
+    const text = modelText();
+    if (!text) { announce('Choose something to rehearse first.'); return; }
+    speakLine(text, { lang, clipUrl: modelClip() });
+  });
+
+  // ── recording ──────────────────────────────────────────────
+  const recBtn = pane.querySelector('#perf-rec');
+  const timer = pane.querySelector('#perf-timer');
+  const errEl = pane.querySelector('#perf-error');
+  const takeBox = pane.querySelector('#perf-take');
+  const noteInput = pane.querySelector('#perf-note');
+  let pending = null;          // { blob, mimeType, durationMs, url }
+  let rating = null;
+
+  const showError = msg => { errEl.textContent = msg; errEl.hidden = false; announce(msg); };
+  const clearError = () => { errEl.hidden = true; errEl.textContent = ''; };
+
+  const releasePending = () => {
+    if (pending?.url) URL.revokeObjectURL(pending.url);
+    pending = null;
+  };
+
+  const resetTakeBox = () => {
+    releasePending();
+    rating = null;
+    takeBox.hidden = true;
+    noteInput.value = '';
+    pane.querySelectorAll('.rating').forEach(b => { b.classList.remove('on'); b.setAttribute('aria-pressed', 'false'); });
+  };
+
+  const finishRecording = async () => {
+    recBtn.classList.remove('recording');
+    recBtn.textContent = '⏺ Record';
+    timer.hidden = true;
+    try {
+      const out = await stopRecording();
+      if (!out || !out.blob?.size) { showError('Nothing was captured. Try again.'); return; }
+      releasePending();
+      pending = { ...out, url: URL.createObjectURL(out.blob) };
+      takeBox.hidden = false;
+      announce(`Recording stopped, ${formatMs(out.durationMs)}. Review your take.`);
+    } catch (err) {
+      showError('Could not finish the recording.');
+      console.warn(err);
+    }
+  };
+
+  recBtn.addEventListener('click', async () => {
+    clearError();
+    if (isRecording()) { await finishRecording(); return; }
+    if (!performState.label) { showError('Choose a line, word or sound to rehearse first.'); return; }
+    try {
+      await startRecording({
+        onTick: ms => { timer.textContent = formatMs(ms); },
+        onAutoStop: () => { announce('Recording limit reached.'); finishRecording(); },
+      });
+      recBtn.classList.add('recording');
+      recBtn.textContent = '⏹ Stop';
+      timer.hidden = false;
+      timer.textContent = '00:00';
+      announce('Recording started.');
+    } catch (err) {
+      showError(micErrorMessage(err));
+    }
+  });
+
+  pane.querySelector('#perf-play').addEventListener('click', () => {
+    if (pending?.url) playUrl(pending.url);
+  });
+
+  pane.querySelector('#perf-compare').addEventListener('click', async () => {
+    if (!pending?.url) return;
+    announce('Playing model, then your take.');
+    const url = modelClip();
+    if (url) {
+      await playUrl(url);
+    } else {
+      await new Promise(res => { speakLine(modelText(), { lang }); setTimeout(res, Math.min(6000, 800 + modelText().length * 60)); });
+    }
+    await new Promise(r => setTimeout(r, 250));
+    await playUrl(pending.url);
+  });
+
+  pane.querySelector('#perf-discard').addEventListener('click', () => {
+    resetTakeBox();
+    announce('Take deleted.');
+  });
+
+  pane.querySelectorAll('.rating').forEach(b =>
+    b.addEventListener('click', () => {
+      rating = b.dataset.rating;
+      pane.querySelectorAll('.rating').forEach(x => {
+        const on = x === b;
+        x.classList.toggle('on', on);
+        x.setAttribute('aria-pressed', String(on));
+      });
+    }));
+
+  pane.querySelector('#perf-save').addEventListener('click', async () => {
+    if (!pending) return;
+    if (!dbSupported()) { showError('This browser can’t save takes locally.'); return; }
+    try {
+      await saveTake({
+        projectId, scopeId,
+        target: { level: performState.level, ref: performState.ref, label: performState.label },
+        blob: pending.blob, mimeType: pending.mimeType, durationMs: pending.durationMs,
+        rating, note: noteInput.value.trim(),
+      });
+      resetTakeBox();
+      announce('Take saved.');
+      if (projectId) touchRehearsed(projectId);
+      drawTakes();
+    } catch (err) {
+      showError('Could not save that take.');
+      console.warn(err);
+    }
+  });
+
+  // ── saved takes list ───────────────────────────────────────
+  const takesEl = pane.querySelector('#perf-takes');
+
+  async function drawTakes() {
+    if (!dbSupported()) { takesEl.innerHTML = '<p class="pane-note">Saving is unavailable in this browser.</p>'; return; }
+    let takes = [];
+    try { takes = await listTakes({ projectId, scopeId }); }
+    catch { takesEl.innerHTML = '<p class="pane-note">Could not load saved takes.</p>'; return; }
+
+    if (!takes.length) {
+      takesEl.innerHTML = '<p class="pane-note">No takes yet. Record one above and it will be saved on this device.</p>';
+      return;
+    }
+    const project = projectId ? await getProject(projectId) : null;
+    takesEl.innerHTML = takes.map((t, i) => {
+      const isBest = project && project.bestTakeId === t.id;
+      const rate = RATINGS.find(r => r.id === t.rating);
+      return `
+        <div class="take-card ${isBest ? 'is-best' : ''}" data-take="${t.id}">
+          <div class="take-head">
+            <span class="take-name">Take ${takes.length - i}</span>
+            ${rate ? `<span class="tag take-rate rate-${t.rating}">${esc(rate.label)}</span>` : ''}
+            ${isBest ? '<span class="tag tag-skill">★ Best Take</span>' : ''}
+          </div>
+          <p class="take-meta">${esc(t.label || '')} · ${formatMs(t.durationMs || 0)} · ${new Date(t.createdAt).toLocaleDateString()}</p>
+          ${t.note ? `<p class="take-note">${esc(t.note)}</p>` : ''}
+          <div class="take-actions">
+            <button class="btn-lite" type="button" data-act="play">▶ Play</button>
+            <button class="btn-lite" type="button" data-act="compare">⇄ Compare</button>
+            ${projectId ? `<button class="btn-lite" type="button" data-act="best">${isBest ? 'Unset best' : '★ Best Take'}</button>` : ''}
+            <button class="btn-lite btn-danger" type="button" data-act="del">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+
+    takesEl.querySelectorAll('.take-card').forEach(card => {
+      const id = card.dataset.take;
+      card.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const act = btn.dataset.act;
+        if (act === 'play') { playUrl(await takeUrl(id)); }
+        else if (act === 'compare') {
+          const meta = takes.find(t => t.id === id);
+          announce('Playing model, then your take.');
+          const mUrl = (meta.level === 'line' && clip) ? clip((meta.ref ?? 0) + 1, accent) : null;
+          if (mUrl) await playUrl(mUrl);
+          else await new Promise(res => { speakLine(meta.label, { lang }); setTimeout(res, Math.min(6000, 800 + (meta.label?.length ?? 0) * 60)); });
+          await new Promise(r => setTimeout(r, 250));
+          playUrl(await takeUrl(id));
+        }
+        else if (act === 'best') { await setBestTake(projectId, id); drawTakes(); }
+        else if (act === 'del') {
+          if (!confirm('Delete this take? This cannot be undone.')) return;
+          await deleteTake(id);
+          announce('Take deleted.');
+          drawTakes();
+        }
+      });
+    });
+  }
+  drawTakes();
 }
 
 // Render a line with any [stage direction] set apart from the spoken words.
@@ -723,7 +1420,7 @@ function scanPane(lines, verse = true) {
     <div class="scan">${linesHtml}</div>`;
 }
 
-async function fillSound(lines, accent, pane) {
+async function fillSound(lines, accent, pane, opts = {}) {
   try { await loadPron(); }
   catch {
     pane.innerHTML = `<p class="pane-note">Couldn’t load the pronunciation dictionary — check your connection and reopen this tab.</p>`;
@@ -1318,5 +2015,12 @@ function renderFail(s) {
   document.getElementById('retry').addEventListener('click', () => startLesson(s.lesson));
   document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
 }
+
+// One-time: turn any old "Train Any Text" draft into a real project. The
+// original localStorage value is left untouched as a backup.
+migrateLegacyCustomText().catch(err => console.warn('migration skipped:', err));
+
+// Recorded-take object URLs are per-session; let them go on unload.
+window.addEventListener('pagehide', () => { try { releaseAllUrls(); cancelRecording(); } catch {} });
 
 renderHome();
