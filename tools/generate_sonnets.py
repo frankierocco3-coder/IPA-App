@@ -26,6 +26,8 @@ import os
 import re
 import sys
 import time
+import urllib.error
+import urllib.parse
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -149,10 +151,18 @@ SOURCES = {
 }
 
 
+# The only endpoint this tool may ever call. If a future edit points it
+# somewhere else, abort rather than send text (and credits) to a new host.
+ALLOWED_API_HOST = "api.elevenlabs.io"
+
+
 def synth(text, voice_id, settings, key):
     payload = json.dumps({"text": text, "model_id": MODEL, "voice_settings": settings or {}}).encode()
+    url = f"https://{ALLOWED_API_HOST}/v1/text-to-speech/{voice_id}"
+    if urllib.parse.urlparse(url).hostname != ALLOWED_API_HOST:
+        sys.exit(f"Refusing to call an unexpected host: {url}")
     req = urllib.request.Request(
-        f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}",
+        url,
         data=payload,
         headers={"xi-api-key": key, "Content-Type": "application/json"},
         method="POST",
@@ -169,6 +179,12 @@ def main():
     ap.add_argument("--only", help="comma-separated ids (sonnet numbers, or CHEK-001)")
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--dry-run", action="store_true", help="count lines + characters, generate nothing")
+    ap.add_argument("--max-calls", type=int, default=2500,
+                    help="hard ceiling on API calls this run (default 2500)")
+    ap.add_argument("--yes", action="store_true",
+                    help="skip the confirmation prompt (for unattended runs)")
+    ap.add_argument("--confirm-threshold", type=int, default=200,
+                    help="ask before generating more than this many clips (default 200)")
     args = ap.parse_args()
 
     pieces = SOURCES[args.source]()
@@ -196,7 +212,36 @@ def main():
     out_dir = os.path.join(ROOT, "audio", args.source, args.dialect)
     os.makedirs(out_dir, exist_ok=True)
 
+    # How many calls will this ACTUALLY make? Existing files are skipped, so
+    # quote the real number, not the total.
+    todo = [(n, i, line)
+            for n, lines in pieces
+            for i, line in enumerate(lines, 1)
+            if not os.path.exists(os.path.join(out_dir, f"{n}-{i}.mp3"))]
+    todo_chars = sum(len(line) for _, _, line in todo)
+
+    if not todo:
+        print("Nothing to generate — every clip already exists.")
+        return
+
+    print(f"\nAbout to make {len(todo)} API call(s), ~{todo_chars:,} characters "
+          f"(≈ credits), voice {vid[:8]}…, into {os.path.relpath(out_dir, ROOT)}")
+
+    if len(todo) > args.max_calls:
+        sys.exit(f"Refusing: {len(todo)} calls exceeds --max-calls={args.max_calls}. "
+                 f"Raise it deliberately, or narrow the run with --only.")
+
+    if len(todo) > args.confirm_threshold and not args.yes:
+        # Interactive confirmation for anything large. Non-interactive runs
+        # must pass --yes explicitly, so a stray cron can't spend silently.
+        if not sys.stdin.isatty():
+            sys.exit("Large batch and no TTY — re-run with --yes if this is intended.")
+        reply = input(f"Generate {len(todo)} clips (~{todo_chars:,} credits)? [y/N] ").strip().lower()
+        if reply not in ("y", "yes"):
+            sys.exit("Cancelled — nothing was generated and no credits were spent.")
+
     made = skipped = failed = 0
+    consecutive_failures = 0
     for n, lines in pieces:
         for i, line in enumerate(lines, 1):
             path = os.path.join(out_dir, f"{n}-{i}.mp3")
@@ -207,6 +252,11 @@ def main():
                 data = synth(line, vid, settings, key)
                 open(path, "wb").write(data)
                 made += 1
+                consecutive_failures = 0
+                if made >= args.max_calls:
+                    print(f"\nReached --max-calls={args.max_calls}; stopping.")
+                    print(f"\nGenerated {made} clip(s); skipped {skipped}; failed {failed}.")
+                    return
                 print(f"  {n}-{i}  {line[:48]}")
                 time.sleep(0.2)
             except urllib.error.HTTPError as e:  # noqa: PERF203
@@ -222,8 +272,15 @@ def main():
                 if "quota_exceeded" in body:
                     sys.exit("QUOTA EXHAUSTED — top up or wait for the monthly reset, "
                              "then re-run; existing clips are skipped.")
-                if e.code in (401, 403, 429):
-                    sys.exit(f"Auth/rate error (HTTP {e.code}) — stopping.")
+                if e.code in (401, 403):
+                    sys.exit(f"Auth error (HTTP {e.code}) — stopping. No retry: a repeated "
+                             f"call could be billable.")
+                if e.code == 429:
+                    sys.exit("Rate limited (HTTP 429) — stopping rather than retrying. "
+                             "Re-run later; existing clips are skipped.")
+                consecutive_failures += 1
+                if consecutive_failures >= 3:
+                    sys.exit("Three consecutive failures — stopping to avoid burning credits.")
             except Exception as e:  # noqa: BLE001
                 failed += 1
                 print(f"  !! {n}-{i} failed: {e}", file=sys.stderr)

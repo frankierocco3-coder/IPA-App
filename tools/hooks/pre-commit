@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Speechcraft pre-commit credential guard.
+#
+# Install:   bash tools/install-hooks.sh
+# Bypass:    git commit --no-verify   (only when you are certain)
+#
+# Scans STAGED content only, so it is fast enough to run on every commit.
+
+set -uo pipefail
+ROOT="$(git rev-parse --show-toplevel)"
+
+if ! command -v python3 >/dev/null 2>&1; then
+  echo "pre-commit: python3 not found; skipping credential scan." >&2
+  exit 0
+fi
+
+python3 "$ROOT/tools/scan_secrets.py" --staged --quiet
+status=$?
+
+if [ $status -eq 1 ]; then
+  cat >&2 <<'MSG'
+
+────────────────────────────────────────────────────────────
+COMMIT BLOCKED — a probable credential is staged.
+
+If it is real:
+  1. REVOKE it at the provider first. Committing is not required
+     for a key to be compromised — assume it already is.
+  2. Remove it from the staged files and store it outside the repo
+     (tools/.elevenlabs_key or an environment variable — both ignored).
+  3. Commit again.
+
+If it is a false positive, add the exact literal to ALLOW_LITERALS in
+tools/scan_secrets.py, or bypass once with:  git commit --no-verify
+────────────────────────────────────────────────────────────
+MSG
+  exit 1
+fi
+exit 0

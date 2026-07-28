@@ -34,6 +34,9 @@ jobs:
       - name: Security audit
         run: python3 tools/security_audit.py
 
+      - name: Credential scan (working tree + full git history)
+        run: python3 tools/scan_secrets.py --worktree --history
+
   deploy:
     needs: audit
     runs-on: ubuntu-latest
@@ -57,10 +60,19 @@ jobs:
         with:
           enablement: true
 
+      # Publish an allow-listed build, not the whole repository. This keeps
+      # tools/, docs/, tests/ and .github/ off the public site, and makes it
+      # structurally impossible for a stray credential file to be served.
+      - name: Build deploy artifact
+        run: python3 tools/build_artifact.py _site
+
+      - name: Scan the exact files about to be published
+        run: python3 tools/scan_secrets.py --artifact _site
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
-          path: .
+          path: _site
 
       - name: Deploy
         id: deployment
