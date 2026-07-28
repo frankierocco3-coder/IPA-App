@@ -19,7 +19,9 @@ import { recordingSupported, startRecording, stopRecording, cancelRecording,
          isRecording, micErrorMessage, formatMs, MAX_RECORDING_MS } from './perform.js';
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor } from './recordings.js';
-import { dbSupported } from './db.js';
+import { dbSupported, STORES, idbClear } from './db.js';
+import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
+         ValidationError, LIMITS } from './validate.js';
 import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePersonal,
          listPersonal, exportPersonal, importPersonal, setProjectWordOverride,
          setOccurrenceOverride, clearOverridesFor, normWord } from './overrides.js';
@@ -338,6 +340,8 @@ function renderHandbook() {
       blurb: 'Every symbol, its sound, and example words — tap any to hear it and see how it’s made.' },
     { id: 'instrument', icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract — the parts you shape every sound with.' },
+    { id: 'privacy', icon: '🔒', title: 'Privacy & Data',
+      blurb: 'What’s stored on this device, and how to delete it.' },
     { id: 'dictionary', icon: '📕', title: 'Personal Dictionary',
       blurb: 'Pronunciations you’ve corrected — searchable, editable, exportable.' },
     { id: 'vowels', icon: '📐', title: 'The Vowel Map',
@@ -356,7 +360,7 @@ function renderHandbook() {
     </main>`;
 
   wireBrandHome();
-  const go = { chart: renderChart, instrument: renderInstrument, vowels: renderVowelMap, dictionary: renderDictionary };
+  const go = { chart: renderChart, instrument: renderInstrument, vowels: renderVowelMap, dictionary: renderDictionary, privacy: renderPrivacy };
   app.querySelectorAll('.handbook-entry').forEach(btn =>
     btn.addEventListener('click', () => go[btn.dataset.page]())
   );
@@ -483,6 +487,74 @@ function renderSonnetList() {
 }
 
 
+
+
+// ── Privacy: delete everything this app stored on this device ─
+// Course progress is deleted separately and explicitly, so someone clearing
+// recordings does not silently lose months of lesson history.
+
+async function wipeLocalData({ includeProgress }) {
+  const report = [];
+  if (dbSupported()) {
+    try {
+      releaseAllUrls();
+      for (const s of [STORES.blobs, STORES.recordings, STORES.projects, STORES.meta]) {
+        await idbClear(s);
+        report.push(s);
+      }
+    } catch (err) { console.warn('wipe: indexeddb', err); }
+  }
+  try { resetAnalytics(); report.push('analytics'); } catch { /* ignore */ }
+  try { clearPersonal(); report.push('personal dictionary'); } catch { /* ignore */ }
+  if (includeProgress) {
+    try { localStorage.removeItem('ipa-trainer-v1'); report.push('course progress'); } catch { /* ignore */ }
+  }
+  return report;
+}
+
+function renderPrivacy() {
+  record(renderPrivacy);
+  app.innerHTML = `
+    ${pageTopbar('🔒 Privacy & Data', '#8a6d3b')}
+    <main class="track-list">
+      <p class="track-blurb">Everything Speechcraft stores stays in this browser on this device. Nothing you record, write or practise is ever sent anywhere.</p>
+
+      <section class="stat-block">
+        <h2 class="chart-h">What is stored here</h2>
+        <div class="stat-row"><span class="stat-name">Rehearsal projects &amp; notes</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Audio recordings</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Practice analytics</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Personal dictionary</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
+        <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
+      </section>
+
+      <section class="stat-block">
+        <h2 class="chart-h">Microphone</h2>
+        <p class="pane-note">Permission is requested only when you press Record, never on load. Recordings are written straight to local storage and are never uploaded. Exported project files never contain audio.</p>
+      </section>
+
+      <div class="danger-zone">
+        <h2 class="chart-h">Delete local data</h2>
+        <p class="pane-note">This cannot be undone. Export anything you want to keep first.</p>
+        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, recordings, analytics &amp; dictionary</button>
+        <button class="btn btn-lite btn-danger" id="wipe-all" type="button">Delete everything, including course progress</button>
+        <p class="save-state" id="wipe-state" role="status" aria-live="polite"></p>
+      </div>
+    </main>`;
+  wireBrandHome();
+
+  const run = async (includeProgress, label) => {
+    if (!confirm(`${label}\n\nThis permanently deletes that data from this device and cannot be undone.\n\nContinue?`)) return;
+    if (!confirm('Last check — really delete? Export first if you want a copy.')) return;
+    const done = await wipeLocalData({ includeProgress });
+    document.getElementById('wipe-state').textContent = `Deleted: ${done.join(', ')}.`;
+  };
+  document.getElementById('wipe-content').addEventListener('click', () =>
+    run(false, 'Delete all projects, recordings, analytics and personal dictionary entries?\n\nYour XP, streak and completed lessons are KEPT.'));
+  document.getElementById('wipe-all').addEventListener('click', () =>
+    run(true, 'Delete EVERYTHING, including your XP, streak and completed lessons?'));
+}
 
 // ── Weak Sounds + Today's Rehearsal ───────────────────────────
 // Everything here is derived from analytics.js, which only observes the
@@ -703,12 +775,10 @@ async function renderProjects() {
   fileInput.addEventListener('change', async () => {
     const f = fileInput.files?.[0]; if (!f) return;
     try {
-      const data = JSON.parse(await f.text());
-      const created = await importProjects(data);
-      alert(`Imported ${created} project${created === 1 ? '' : 's'}.`);
-      draw();
+      const created = await importProjectFile(f);
+      if (created) { alert(`Imported ${created} project${created === 1 ? '' : 's'}.`); draw(); }
     } catch (err) {
-      alert(`That file could not be imported.\n\n${err.message}`);
+      alert(`That file could not be imported.\n\n${err instanceof ValidationError ? err.message : 'The file could not be read.'}`);
     } finally { fileInput.value = ''; }
   });
 
@@ -902,57 +972,70 @@ async function exportProject(id) {
   const p = await getProject(id);
   if (!p) return;
   const takes = await listTakes({ projectId: id });
+  // Explicit allow-list: only these fields are ever written to a shared file.
+  // No internal database ids, no object URLs, no device information.
   const payload = {
     format: 'speechcraft-project',
     formatVersion: 1,
     exportedAt: new Date().toISOString(),
-    // Audio itself is NOT included — recordings stay on the device that made them.
     audioIncluded: false,
+    note: 'Audio is never included. Recordings stay on the device that made them.',
     projects: [{
-      ...p,
-      recordings: takes.map(t => ({ id: t.id, level: t.level, ref: t.ref, label: t.label, rating: t.rating, note: t.note, durationMs: t.durationMs, createdAt: t.createdAt })),
+      title: p.title, source: p.source, author: p.author,
+      character: p.character, scene: p.scene, accent: p.accent,
+      text: p.text, notes: p.notes, pronunciationNotes: p.pronunciationNotes,
+      difficultWords: (p.difficultWords ?? []).map(w => ({ word: w.word, note: w.note ?? '' })),
+      overrides: {
+        words: p.overrides?.words ?? {},
+        occurrence: p.overrides?.occurrence ?? {},
+      },
+      status: p.status,
+      createdAt: p.createdAt,
+      // Metadata only, and deliberately without blob ids: a file cannot claim
+      // audio it does not carry.
+      recordings: takes.map(t => ({
+        level: t.level, label: t.label, rating: t.rating,
+        note: t.note, durationMs: t.durationMs, createdAt: t.createdAt,
+      })),
     }],
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase()}.speechcraft.json`;
+  a.download = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase().slice(0, 60)}.speechcraft.json`;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** Validate and import. Throws a readable error for malformed files. */
-async function importProjects(data) {
-  if (!data || typeof data !== 'object') throw new Error('Not a JSON object.');
-  if (data.format !== 'speechcraft-project') throw new Error('This is not a Speechcraft project file.');
-  const list = Array.isArray(data.projects) ? data.projects : null;
-  if (!list?.length) throw new Error('No projects found in the file.');
+/**
+ * Import projects from an untrusted file.
+ * Nothing from the file is merged into existing state: it is validated
+ * against js/validate.js, rebuilt as fresh plain objects with new ids, and
+ * only then written. Existing projects are never overwritten or replaced.
+ */
+async function importProjectFile(file) {
+  const raw = await readJsonFile(file);
+  const projects = validateProjectBundle(raw, { newId: () => emptyProject().id });
+
+  const dropped = projects.reduce((n, p) => n + (p.droppedRecordings || 0), 0);
+  const summary = [
+    `Import ${projects.length} project${projects.length === 1 ? '' : 's'}?`,
+    '',
+    ...projects.slice(0, 8).map(p => `  \u2022 ${p.title}`),
+    projects.length > 8 ? `  \u2026and ${projects.length - 8} more` : '',
+    '',
+    'These are added alongside your existing projects \u2014 nothing is replaced.',
+    dropped ? `Audio is never included in project files, so ${dropped} recording reference${dropped === 1 ? '' : 's'} will be skipped.` : '',
+  ].filter(Boolean).join('\n');
+  if (!confirm(summary)) return 0;
 
   let n = 0;
-  for (const raw of list) {
-    if (typeof raw?.text !== 'string' && typeof raw?.title !== 'string') continue;
-    const base = emptyProject();
-    await saveProject({
-      ...base,
-      title: String(raw.title ?? 'Imported project').slice(0, 120),
-      source: String(raw.source ?? '').slice(0, 200),
-      author: String(raw.author ?? '').slice(0, 120),
-      character: String(raw.character ?? '').slice(0, 120),
-      scene: String(raw.scene ?? '').slice(0, 200),
-      accent: ['rp', 'nam', 'aus'].includes(raw.accent) ? raw.accent : 'rp',
-      text: String(raw.text ?? ''),
-      notes: String(raw.notes ?? ''),
-      pronunciationNotes: String(raw.pronunciationNotes ?? ''),
-      difficultWords: Array.isArray(raw.difficultWords)
-        ? raw.difficultWords.filter(w => w && typeof w.word === 'string').map(w => ({ word: String(w.word), note: String(w.note ?? '') }))
-        : [],
-      overrides: (raw.overrides && typeof raw.overrides === 'object') ? raw.overrides : {},
-      status: STATUSES.includes(raw.status) ? raw.status : 'Not Started',
-    });
+  for (const p of projects) {
+    const { droppedRecordings, ...clean } = p;
+    await saveProject(clean);
     n++;
   }
-  if (!n) throw new Error('No valid projects in the file.');
   return n;
 }
 
@@ -1817,15 +1900,16 @@ function renderDictionary() {
   file.addEventListener('change', async () => {
     const f = file.files?.[0]; if (!f) return;
     try {
-      const data = JSON.parse(await f.text());
+      const raw = await readJsonFile(f);
+      const entries = validateDictionaryBundle(raw);
       const replace = listPersonal().length
-        ? confirm('Replace your existing entries?\n\nOK = replace everything, Cancel = merge with what you have.')
+        ? confirm(`Import ${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}.\n\nOK = replace everything you have now\nCancel = merge with your existing entries`)
         : false;
-      const n = importPersonal(data, { replace });
+      const n = importPersonal({ format: 'speechcraft-dictionary', formatVersion: 1, entries }, { replace });
       alert(`Imported ${n} entr${n === 1 ? 'y' : 'ies'}.`);
       draw();
     } catch (err) {
-      alert(`That file could not be imported.\n\n${err.message}`);
+      alert(`That file could not be imported.\n\n${err instanceof ValidationError ? err.message : 'The file could not be read.'}`);
     } finally { file.value = ''; }
   });
   draw();
@@ -2409,6 +2493,40 @@ function renderFail(s) {
     </main>`;
   document.getElementById('retry').addEventListener('click', () => startLesson(s.lesson));
   document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
+}
+
+// ── Defence in depth ──────────────────────────────────────────
+// GitHub Pages cannot send frame-ancestors or X-Frame-Options headers, and a
+// <meta> CSP ignores frame-ancestors, so this is the only clickjacking
+// mitigation available on this host. It is a fallback, not a guarantee — a
+// sandboxed iframe can suppress navigation. The optional host configs in
+// deploy/ set the real header.
+if (window.top !== window.self) {
+  try { window.top.location = window.self.location; }
+  catch { document.documentElement.textContent = 'Speechcraft cannot be embedded in another page.'; }
+}
+
+// Development-only network guard: this app is designed to make no external
+// requests at all. In dev, warn loudly if anything ever tries. Production
+// behaviour is unchanged.
+if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+  const sameOrigin = (url) => {
+    try { return new URL(url, location.href).origin === location.origin; }
+    catch { return true; }                       // relative/blob/data — fine
+  };
+  const origFetch = window.fetch;
+  window.fetch = function (input, init) {
+    const url = typeof input === 'string' ? input : input?.url;
+    if (url && !/^(blob:|data:)/.test(url) && !sameOrigin(url))
+      console.error('[network guard] blocked-by-policy external fetch:', url);
+    return origFetch.call(this, input, init);
+  };
+  const origOpen = XMLHttpRequest.prototype.open;
+  XMLHttpRequest.prototype.open = function (method, url, ...rest) {
+    if (url && !/^(blob:|data:)/.test(url) && !sameOrigin(url))
+      console.error('[network guard] blocked-by-policy external XHR:', url);
+    return origOpen.call(this, method, url, ...rest);
+  };
 }
 
 // One-time: turn any old "Train Any Text" draft into a real project. The

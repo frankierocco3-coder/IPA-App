@@ -5,28 +5,63 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Read-only by default. Only the job that actually publishes asks for more.
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages
   cancel-in-progress: true
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
+  # Blocks the deploy if a credential-looking string, an external script
+  # reference, or an unsafe JS construct is about to be published.
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - name: Security audit
+        run: python3 tools/security_audit.py
+
   deploy:
+    needs: audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
+    permissions:
+      contents: read      # read the repository being published
+      pages: write        # create and publish the Pages deployment
+      id-token: write     # OIDC token that deploy-pages exchanges with Pages
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/configure-pages@v4
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 1              # no history needed to publish
+          persist-credentials: false  # don't leave a usable token on disk
+
+      - name: Configure Pages
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
         with:
           enablement: true
-      - uses: actions/upload-pages-artifact@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
         with:
           path: .
-      - id: deployment
-        uses: actions/deploy-pages@v4
+
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5

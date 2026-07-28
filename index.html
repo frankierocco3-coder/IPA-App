@@ -2,6 +2,32 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+  <!--
+    Content Security Policy — placed first so it governs everything below.
+
+    Derived from an inventory of what this app actually loads: its own
+    stylesheet, its own ES modules, its own audio files, its own JSON
+    dictionaries, and blob: URLs for microphone recordings. It makes no
+    external requests at all, so every fetch directive is locked to 'self'.
+
+    What a <meta> CSP cannot do — these need real HTTP response headers,
+    which GitHub Pages does not let us set. See docs/SECURITY_CHECKLIST.md
+    and the optional host configs in deploy/:
+      • frame-ancestors (clickjacking) — ignored in meta; partially
+        mitigated by the frame-buster in js/main.js
+      • report-to / report-uri — ignored in meta
+      • sandbox — ignored in meta
+
+    style-src-attr 'unsafe-inline' is required and deliberately narrow: the
+    app sets CSS custom properties through style="" attributes
+    (--track-color, --dx, progress widths). Those values are always
+    app-generated numbers or palette colours, never user input. Scoping it
+    to style-src-attr means inline <style> blocks stay blocked. Removing it
+    entirely would require pre-generating a class for every dynamic colour
+    and offset — tracked in docs/SECURITY_CHECKLIST.md.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; child-src 'none'; upgrade-insecure-requests" />
+  <meta name="referrer" content="no-referrer" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Speechcraft — learn the IPA</title>
   <link rel="manifest" href="manifest.json" />

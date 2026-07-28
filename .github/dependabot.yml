@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # Actions are pinned to commit SHAs, which never float. Dependabot is what
+  # tells us a pinned SHA has a newer release worth moving to.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci(security)"
+    labels: [security, dependencies]

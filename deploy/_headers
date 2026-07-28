@@ -1,0 +1,13 @@
+# Cloudflare Pages / Netlify response headers.
+# Not used by GitHub Pages — see deploy/README.md.
+
+/*
+  # Full CSP, including the directives a <meta> tag cannot carry.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'; child-src 'none'; frame-ancestors 'none'; upgrade-insecure-requests
+  # Clickjacking — the real fix the frame-buster only approximates.
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  # Microphone for this origin only; everything else off.
+  Permissions-Policy: microphone=(self), camera=(), geolocation=(), payment=(), usb=(), midi=(), magnetometer=(), gyroscope=(), accelerometer=(), bluetooth=(), serial=(), hid=(), display-capture=(), interest-cohort=()
+  Cross-Origin-Resource-Policy: same-origin
