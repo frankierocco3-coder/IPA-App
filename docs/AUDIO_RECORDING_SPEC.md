@@ -54,10 +54,15 @@ by ear in `#audit`.
 | `audio/nam/f/care.mp3` | rejected in the 2026-07-30 ear-check | /ker/ |
 | `audio/nam/f/was.mp3` | rejected in the 2026-07-30 ear-check | /wʌz/ |
 | `audio/nam/m/law.mp3` | rejected in the 2026-07-30 ear-check | /lɔː/ |
+| `audio/nam/m/strut.mp3` | rejected in the 2026-07-30 ear-check | /strʌt/ |
+| `audio/nam/m/car.mp3` | rejected in the 2026-07-30 ear-check | /kɑr/, American approximant |
 
-Each of these words still has one un-flagged voice variant carrying it, so
-playback stays on real clips (no TTS fallback engaged). `nam/m/strut` and
-`nam/m/car` were not flagged in the 2026-07-30 review.
+**Both** Neutral American voices fail "strut" and "car" — the words, not a
+single voice, are the problem, so regeneration for these should use
+pronunciation-guided synthesis (phonetic respelling / SSML-style hints),
+not a plain retry. Until then those two words fall back to the device's
+US voice — the explicit, documented word-level fallback ("care" and "was"
+still play the male clip; "law" the female).
 
 ## Approval workflow
 

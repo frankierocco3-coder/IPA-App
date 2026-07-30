@@ -11,8 +11,13 @@ export const KNOWN_BAD = [
   'nam/f/care',    // rejected in the 2026-07-30 ear-check
   'nam/f/strut',   // vowel drifts toward "stroot" — not /strʌt/
   'nam/f/was',     // rejected in the 2026-07-30 ear-check
+  'nam/m/car',     // rejected in the 2026-07-30 ear-check — BOTH nam voices fail this word
   'nam/m/law',     // rejected in the 2026-07-30 ear-check
+  'nam/m/strut',   // rejected in the 2026-07-30 ear-check — BOTH nam voices fail this word
 ];
+// With every variant of nam "strut" and nam "car" rejected, those two words
+// fall back to the device voice (words may; phonemes never) until they are
+// regenerated and re-approved.
 
 // Isolated-phoneme clips approved by ear. A phoneme control only plays
 // when its clip is listed here — generated-but-unheard candidates never

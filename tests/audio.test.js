@@ -24,16 +24,18 @@ export async function run() {
   check('flags: nam/f/strut quarantined', KNOWN_BAD.includes('nam/f/strut'));
   check('flags: nam/f/car quarantined', KNOWN_BAD.includes('nam/f/car'));
 
-  // …and are excluded from voice selection (index loads async — wait).
+  // …and are excluded from voice selection (index loads async — wait on an
+  // unflagged word).
   let tries = 0;
-  while (voicesWith('nam', 'strut').length === 0 && tries++ < 50) {
+  while (voicesWith('nam', 'ship').length === 0 && tries++ < 50) {
     await new Promise(r => setTimeout(r, 100));
   }
-  const strutVoices = voicesWith('nam', 'strut');
-  const carVoices = voicesWith('nam', 'car');
-  check('voicesWith: nam strut skips f', strutVoices.length > 0 && !strutVoices.includes('f'));
-  check('voicesWith: nam car skips f', carVoices.length > 0 && !carVoices.includes('f'));
+  check('voicesWith: nam strut fully quarantined (device fallback)', voicesWith('nam', 'strut').length === 0);
+  check('voicesWith: nam car fully quarantined (device fallback)', voicesWith('nam', 'car').length === 0);
+  check('voicesWith: nam care keeps only m', String(voicesWith('nam', 'care')) === 'm');
+  check('voicesWith: nam law keeps only f', String(voicesWith('nam', 'law')) === 'f');
   check('voicesWith: unflagged word keeps both voices', voicesWith('nam', 'ship').length === 2);
+  check('voicesWith: rp car untouched', voicesWith('rp', 'car').length === 2);
 
   // Phoneme requests: unapproved → unavailable, never a word, never TTS
   check('hasPhonemeClip: none approved yet',
