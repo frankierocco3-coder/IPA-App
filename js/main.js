@@ -405,8 +405,10 @@ function renderGuidebook(unit, track) {
       ${sections}
     </main>`;
   wireBrandHome();
+  // Speak in the course's own voices — a NAM guidebook must never sound RP.
+  const lang = ACCENT_LANG[TRACK_ACCENT[track?.id]] ?? 'en-GB';
   app.querySelectorAll('.word-chip[data-sym]').forEach(b => {
-    b.addEventListener('click', () => speak(b.dataset.say, { lang: 'en-GB' }));
+    b.addEventListener('click', () => speak(b.dataset.say, { lang }));
   });
 }
 
@@ -693,7 +695,7 @@ function hubHandbook(hub, d, track) {
         </div>
       </section>`).join('')}`;
   hub.querySelectorAll('.chart-chip').forEach(b =>
-    b.addEventListener('click', () => renderSoundDetail(b.dataset.sym)));
+    b.addEventListener('click', () => renderSoundDetail(b.dataset.sym, d)));
 }
 
 function hubIdiom(hub, d, track) {
@@ -726,6 +728,10 @@ function hubIdiom(hub, d, track) {
         <p class="idiom-meaning">${esc(e.meaning)}</p>
         ${e.example ? `<p class="idiom-example">“${esc(e.example)}”</p>` : ''}
         ${e.note ? `<p class="idiom-note">${esc(e.note)}</p>` : ''}
+        <div class="idiom-listen">
+          <button class="word-chip" data-say="${esc(e.term)}" type="button" aria-label="Hear “${esc(e.term)}”">🔊 Hear it</button>
+          ${e.example ? `<button class="word-chip" data-say="${esc(e.example)}" type="button" aria-label="Hear the example sentence">🔊 In a sentence</button>` : ''}
+        </div>
       </div>`).join('')
       : '<p class="pane-note">Nothing matches that filter.</p>';
   };
@@ -775,6 +781,12 @@ function hubIdiom(hub, d, track) {
     </details>`;
 
   hub.querySelector('#idiom-drill').addEventListener('click', () => startLesson(idiomLesson(d, track)));
+  // One delegated listener survives every draw(); everything speaks in this
+  // dialect's own voices (device fallback until idiom clips are generated).
+  hub.querySelector('#idiom-list').addEventListener('click', ev => {
+    const b = ev.target.closest('button[data-say]');
+    if (b) speak(b.dataset.say, { lang: ACCENT_LANG[d] });
+  });
   hub.querySelector('#idiom-q').addEventListener('input', e => { idiomFilters.q = e.target.value; draw(); });
   hub.querySelector('#idiom-flagged').addEventListener('change', e => { idiomFilters.flagged = e.target.checked; draw(); });
   [['#idiom-era', 'era'], ['#idiom-type', 'type']].forEach(([sel, key]) =>
@@ -2379,12 +2391,16 @@ function renderChart() {
 }
 
 // Detail for one sound: articulation diagram, description, example words.
-function renderSoundDetail(sym) {
+// `accent` is the dialect context the page was opened from — inside a course
+// everything speaks that course's voices. Without one (the full Foundations
+// chart) fall back to guessing from dialect-exclusive symbols.
+function renderSoundDetail(sym, accent) {
   const p = PHONEMES[sym];
   if (!p) return renderChart();
-  record(() => renderSoundDetail(sym));
+  record(() => renderSoundDetail(sym, accent));
   const diagram = articulationSVG(sym);
-  const lang = ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
+  const lang = ACCENT_LANG[accent]
+    ?? ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
     ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'].includes(sym) ? 'en-AU' : 'en-GB');
   const isVowel = p.type !== 'consonant';
   const chips = p.examples.map(w =>

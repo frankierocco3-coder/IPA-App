@@ -124,6 +124,32 @@ def clip_name(word):
     return re.sub(r"[^a-z0-9]+", "_", word.lower())
 
 
+IDIOM_JS = ROOT / "js" / "data" / "idiom.js"
+
+
+def idiom_texts():
+    """{accent: [texts]} — every idiom term and example, per its own dialect.
+
+    Each entry is only ever spoken in the dialect it belongs to. Flagged
+    (vulgar/dated) terms are included: they exist because scripts use them,
+    and the reference pages have listen buttons; drills still never use them.
+    """
+    src = IDIOM_JS.read_text()
+    field = r"'((?:[^'\\]|\\.)*)'"
+    dialects = re.findall(r"dialect:\s*" + field, src)
+    terms = re.findall(r"term:\s*" + field, src)
+    examples = re.findall(r"example:\s*(?:" + field + r"|null)", src)
+    if not (len(dialects) == len(terms) == len(examples)):
+        sys.exit("idiom.js parse mismatch — dialect/term/example counts differ")
+    unescape = lambda s: s.replace("\\'", "'").replace("\\\\", "\\")
+    out = {a: set() for a in ACCENTS}
+    for d, t, e in zip(dialects, terms, examples):
+        out[d].add(unescape(t))
+        if e:
+            out[d].add(unescape(e))
+    return {a: sorted(v) for a, v in out.items()}
+
+
 # Isolated words read better with high stability — expressive swing makes a
 # single word sound performed rather than modelled. Override per accent in
 # voices.json by using an object instead of a bare id, e.g.
@@ -192,6 +218,10 @@ def main() -> None:
     ap.add_argument("--limit", type=int, help="stop after N clips (trial run)")
     ap.add_argument("--force", action="store_true", help="regenerate existing clips")
     ap.add_argument("--index-only", action="store_true", help="just rebuild index.json")
+    ap.add_argument("--idioms", action="store_true",
+                    help="generate idiom terms + examples (each in its own dialect only)")
+    ap.add_argument("--dry-run", action="store_true",
+                    help="report clip counts and character cost; spend nothing")
     args = ap.parse_args()
 
     if args.list_voices:
@@ -205,31 +235,46 @@ def main() -> None:
         sys.exit("No accents to generate — add voice ids to tools/voices.json.")
 
     all_words = words()
+    per_accent = idiom_texts() if args.idioms else None
     made = skipped = 0
+    dry_chars = 0
     for accent in targets:
         raw = voices.get(accent)
         if not raw:
             print(f"! no voice for '{accent}', skipping")
             continue
+        texts = per_accent[accent] if per_accent is not None else all_words
         for vkey, spec in voice_variants(raw).items():
             voice_id, settings = voice_entry(spec)
             if not voice_id:
                 print(f"! no voice id for '{accent}/{vkey}', skipping")
                 continue
             folder = AUDIO / accent / vkey
+            if args.dry_run:
+                todo = [t for t in texts
+                        if args.force or not (folder / f"{clip_name(t)}.mp3").exists()]
+                chars = sum(len(t) for t in todo)
+                dry_chars += chars
+                print(f"{accent}/{vkey}: {len(todo)} clip(s) to make, {chars} characters")
+                continue
             folder.mkdir(parents=True, exist_ok=True)
-            print(f"\n{accent}/{vkey}: {len(all_words)} word(s) → {folder.relative_to(ROOT)}")
-            for word in all_words:
+            print(f"\n{accent}/{vkey}: {len(texts)} clip(s) → {folder.relative_to(ROOT)}")
+            for text in texts:
                 if args.limit is not None and made >= args.limit:
                     print("  (limit reached)")
                     break
-                dest = folder / f"{clip_name(word)}.mp3"
+                dest = folder / f"{clip_name(text)}.mp3"
                 if dest.exists() and not args.force:
                     skipped += 1
                     continue
-                dest.write_bytes(synthesize(word, voice_id, settings))
+                dest.write_bytes(synthesize(text, voice_id, settings))
                 made += 1
-                print(f"  ✓ {word}")
+                print(f"  ✓ {text}")
+
+    if args.dry_run:
+        print(f"\nDRY RUN — nothing generated. Total: ~{dry_chars} characters "
+              f"(≈ {dry_chars} ElevenLabs credits at 1/char).")
+        return
 
     print(f"\nGenerated {made} clip(s); skipped {skipped} already present.")
     write_index()

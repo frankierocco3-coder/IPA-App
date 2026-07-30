@@ -43,6 +43,7 @@ python3 tools/build_artifact.py _site              # exactly what Pages publishe
 
 # audio generation (offline, spends money — ALWAYS --dry-run first)
 python3 tools/generate_sonnets.py --source ibsen --dialect rp --all --dry-run
+python3 tools/generate_voices.py --idioms --dry-run  # idiom clips, ~15k credits pending
 ```
 
 In the browser console, with the app running:
@@ -126,7 +127,14 @@ Idioms (dialects only, card wears the dialect's flag; 224 entries in
 js/data/idiom.js — flagged terms hidden by default and NEVER drilled),
 Texts & Speeches (full page; no longer a sidebar item), Your Instrument,
 The Vowel Map. Idiom filters reset to All on every visit (Frankie's call —
-a persisted filter reads as missing content). Deep-page topbar titles stay
+a persisted filter reads as missing content). Idiom cards have listen
+buttons (term + example) speaking in the entry's own dialect — device-voice
+fallback until clips are generated (`--idioms` mode in generate_voices.py,
+~15k credits, blocked on the ElevenLabs quota).
+Spoken audio ALWAYS follows the dialect context: guidebooks and
+renderSoundDetail take the course accent (Frankie's rule — inside a course,
+only that dialect's two voices are ever heard). The symbol-based lang guess
+survives only for the Foundations full chart. Deep-page topbar titles stay
 short ("🗣 Native Idioms", "📖 IPA") — long ones wrap badly beside the
 brand. The standalone Accent Shift Drills track is removed from the UI
 (Frankie's call); Stage 3 shift lessons inside each course and the two
