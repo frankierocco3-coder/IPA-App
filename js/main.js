@@ -463,9 +463,12 @@ function textbookMain(el, course) {
     { icon: '📜', title: 'Texts & Speeches',
       blurb: 'Sonnets, monologues, and your own pieces.',
       go: renderTextsPage },
-    { icon: '📊', title: 'Weak Sounds',
-      blurb: 'What keeps slipping — ranked from your real answers.',
-      go: renderWeakSounds },
+    { icon: '🎭', title: 'Your Instrument',
+      blurb: 'A tour of the vocal tract.',
+      go: renderInstrument },
+    { icon: '📐', title: 'The Vowel Map',
+      blurb: 'Where every vowel sits in the mouth.',
+      go: renderVowelMap },
   ].filter(Boolean);
   el.innerHTML = cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${track.color}">
@@ -492,7 +495,7 @@ function renderTextsPage() {
 function renderInventory(d) {
   record(() => renderInventory(d));
   app.innerHTML = `
-    ${pageTopbar(`📖 ${esc(dialectName(d))} sounds`, trackFor(d).color)}
+    ${pageTopbar('📖 IPA', trackFor(d).color)}
     <main class="track-list" id="inv-pane"></main>`;
   wireBrandHome();
   hubHandbook(document.getElementById('inv-pane'), d, trackFor(d));
@@ -500,8 +503,10 @@ function renderInventory(d) {
 
 function renderIdioms(d) {
   record(() => renderIdioms(d));
+  // Fresh filters every visit — landing on a pre-filtered list reads as missing content.
+  Object.assign(idiomFilters, { q: '', era: 'all', type: 'all', flagged: false });
   app.innerHTML = `
-    ${pageTopbar(`🗣 ${esc(dialectName(d))} Native Idioms`, trackFor(d).color)}
+    ${pageTopbar('🗣 Native Idioms', trackFor(d).color)}
     <main class="track-list" id="idiom-page"></main>`;
   wireBrandHome();
   hubIdiom(document.getElementById('idiom-page'), d, trackFor(d));
@@ -642,8 +647,7 @@ function profileMain(el) {
 function moreMain(el) {
   const cards = [
     { icon: '📖', title: 'The IPA Chart', blurb: 'All 55 sounds — tap any to see how it’s made and hear it.', go: renderChart, color: '#64748b' },
-    { icon: '🎭', title: 'Your Instrument', blurb: 'A tour of the vocal tract.', go: renderInstrument, color: '#64748b' },
-    { icon: '📐', title: 'The Vowel Map', blurb: 'Where every vowel sits in the mouth.', go: renderVowelMap, color: '#64748b' },
+    { icon: '📊', title: 'Weak Sounds', blurb: 'What keeps slipping — ranked from your real answers.', go: renderWeakSounds, color: '#6f8657' },
     { icon: '🎬', title: 'My Texts', blurb: 'Your rehearsal projects — roles, notes, recorded takes.', go: renderProjects, color: '#8a6d3b' },
     { icon: '📕', title: 'Personal Dictionary', blurb: 'Pronunciations you’ve corrected.', go: renderDictionary, color: '#8a6d3b' },
     { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
@@ -661,26 +665,6 @@ function moreMain(el) {
 }
 
 const idiomFilters = { q: '', era: 'all', type: 'all', flagged: false };
-
-// Weak-sounds slice for one dialect: this dialect's inventory only, ranked
-// from the same global analytics. Honest about thin data, like the full page.
-function hubWeakPanel(el, d) {
-  const inventory = new Set(phonemesForAccent(d));
-  const rows = symbolBreakdown().all
-    .filter(r => inventory.has(r.sym) && r.tier !== CONFIDENCE.NONE)
-    .sort((a, b) => a.accuracy - b.accuracy)
-    .slice(0, 4);
-  el.innerHTML = `
-    ${rows.length ? rows.map(r => `
-      <div class="stat-row">
-        <span class="stat-sym">/${esc(r.sym)}/</span>
-        <span class="stat-bar" aria-hidden="true"><span style="width:${Math.round(r.accuracy * 100)}%"></span></span>
-        <span class="stat-val">${esc(r.label)}</span>
-      </div>`).join('')
-      : '<p class="pane-note">Not enough data yet — play a few games above and this fills in.</p>'}
-    <button class="btn-lite" id="hub-weak-full" type="button">Full report — all dialects ›</button>`;
-  el.querySelector('#hub-weak-full').addEventListener('click', renderWeakSounds);
-}
 
 // This dialect's own sound handbook: its inventory only, each sound opening
 // the tongue-placement diagram page.

@@ -124,15 +124,19 @@ Rehearsal + mixed review + the games ONLY. Text Book = the reference shelf,
 course-aware, in this order: IPA (the course's sound inventory), Native
 Idioms (dialects only, card wears the dialect's flag; 224 entries in
 js/data/idiom.js — flagged terms hidden by default and NEVER drilled),
-Texts & Speeches (full page; no longer a sidebar item), Weak Sounds. The
-standalone Accent Shift Drills track is removed from the UI (Frankie's
-call); Stage 3 shift lessons inside each course and the two shift games
-remain.
+Texts & Speeches (full page; no longer a sidebar item), Your Instrument,
+The Vowel Map. Idiom filters reset to All on every visit (Frankie's call —
+a persisted filter reads as missing content). Deep-page topbar titles stay
+short ("🗣 Native Idioms", "📖 IPA") — long ones wrap badly beside the
+brand. The standalone Accent Shift Drills track is removed from the UI
+(Frankie's call); Stage 3 shift lessons inside each course and the two
+shift games remain.
 Economy: gems (lessons +10/+15, quest claims), persistent 5 hearts (regen
 1/4h, mixed review earns one, gems refill), streak freezes (max 2), 15-min
 double-XP boost — all in js/state.js; daily quests in js/quests.js hook
 onLessonFinished() in renderResults. No leaderboards (no accounts — decided,
-not forgotten). More = chart/anatomy/vowel map/My Texts/dictionary/privacy.
+not forgotten). More = IPA chart / Weak Sounds (the full report lives here —
+its analytics still feed Today's Rehearsal) / My Texts / dictionary / privacy.
 Plus: 5 tracks / 77 lessons, 16+1 exercise generators, 332 curated pieces,
 Perform mode, rehearsal projects, analytics, pronunciation overrides.
 
