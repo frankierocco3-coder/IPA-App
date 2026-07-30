@@ -303,9 +303,10 @@ function drawStatsbar(course, section) {
   const earned = store.hasEarnedAnything;
   bar.innerHTML = `
     <button class="stat-chip course-chip" id="course-chip" type="button"
-            aria-haspopup="menu" aria-expanded="false" title="Switch course">
-      <span class="course-icon">${course.icon}</span>
-      <span class="course-name">${esc(course.label)}</span> ▾
+            aria-haspopup="menu" aria-expanded="false" title="Switch course"
+            aria-label="Change course. Current course: ${esc(course.label)}.">
+      <span class="course-icon" aria-hidden="true">${course.icon}</span>
+      <span class="course-name" aria-hidden="true">${esc(course.label)}</span> <span aria-hidden="true">▾</span>
     </button>
     ${earned ? `
     <span class="stat-chip" title="Streak"><span aria-hidden="true">🔥</span> ${store.displayStreak}<span class="sr-only"> day streak</span></span>
@@ -439,7 +440,9 @@ function learnMain(el, course) {
   const cc = continueCard(track, course);
   const path = buildTrackPath(track, { guidebook: true, labels: true });
   el.innerHTML = `
+    <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
     ${cc.html}
+    ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
       <div class="track-progress">
         <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
@@ -448,6 +451,7 @@ function learnMain(el, course) {
     </div>
     <div class="track-scroll hub-scroll">${path.html}</div>`;
   cc.wire(el);
+  wireWhatIsIpaCard(el);
   path.wire(el);
 }
 
@@ -512,20 +516,22 @@ function practiceMain(el, course) {
     </button>`;
 
   el.innerHTML = `
+    <h1 class="page-h">Practice</h1>
     <h2 class="chart-h">Recommended for you</h2>
     <section class="continue-card quick-card" aria-label="Quick practice">
       <div class="cc-info">
-        <span class="cc-stage">🎯 Quick Practice · never costs hearts</span>
+        <span class="cc-stage">🎯 ${targeted ? 'Quick Practice' : 'Quick Practice · Mixed review'} · never costs hearts · earns ❤️ back</span>
         <h2>${targeted ? 'Rehearse your weak sounds' : 'Mixed review'}</h2>
         <p class="cc-meta">${quickWhy} ~4 min.</p>
       </div>
       <button class="btn btn-primary cc-go" id="quick-practice" type="button">Start</button>
     </section>
-    ${dailyRehearsalCard()}
+    ${targeted ? `
     <div class="practice-row">
-      <button class="btn btn-practice" id="hub-mixed" type="button">🎯 Mixed review — earns a heart back</button>
-    </div>
-    <p class="pane-note">Practice never costs hearts — mixed review even earns one back. Real lessons on the Learn path are where hearts are at stake.</p>
+      <button class="btn-lite" id="hub-mixed" type="button">Prefer the full spread? Full-course mixed review — everything ${esc(name)} has taught, not just weak sounds ›</button>
+    </div>` : ''}
+    ${dailyRehearsalCard()}
+    <p class="pane-note">Practice never costs hearts — mixed review and rehearsal even earn one back. Real lessons on the Learn path are where hearts are at stake.</p>
     ${PRACTICE_GROUPS.map(g => `
       <h2 class="chart-h">${esc(g.title)} <span>in ${esc(name)}</span></h2>
       <div class="mode-grid">
@@ -541,7 +547,7 @@ function practiceMain(el, course) {
 
   el.querySelector('#quick-practice').addEventListener('click', () =>
     targeted ? startDailyRehearsal() : startLesson(practiceLesson(track)));
-  el.querySelector('#hub-mixed').addEventListener('click', () => startLesson(practiceLesson(track)));
+  el.querySelector('#hub-mixed')?.addEventListener('click', () => startLesson(practiceLesson(track)));
   el.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
   el.querySelector('#hub-idiom-drill')?.addEventListener('click', () => startLesson(idiomLesson(d, track)));
   el.querySelectorAll('.mode-card[data-mode]').forEach(b =>
@@ -576,7 +582,7 @@ function libraryMain(el, course) {
       blurb: 'Pronunciations you’ve corrected.',
       go: renderDictionary },
   ].filter(Boolean);
-  el.innerHTML = cards.map((c, i) => `
+  el.innerHTML = `<h1 class="page-h">Library</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${track.color}">
       <div class="track-glyph">${c.icon}</div>
       <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
@@ -602,8 +608,12 @@ function renderInventory(d) {
   record(() => renderInventory(d));
   app.innerHTML = `
     ${pageTopbar('📖 IPA', trackFor(d).color)}
-    <main class="track-list" id="inv-pane"></main>`;
+    <main class="track-list">
+      ${whatIsIpaCard()}
+      <div id="inv-pane"></div>
+    </main>`;
   wireBrandHome();
+  wireWhatIsIpaCard(app);
   hubHandbook(document.getElementById('inv-pane'), d, trackFor(d));
 }
 
@@ -635,6 +645,32 @@ function achievementRows() {
 }
 
 function progressMain(el) {
+  // Before anything is earned there is nothing to chart — say so on purpose
+  // instead of showing a dashboard of zeroes.
+  if (!store.hasEarnedAnything) {
+    el.innerHTML = `
+      <section class="quest-banner">
+        <div><h1>Complete your first lesson to activate Progress</h1>
+        <p>One lesson is all it takes — then this page starts keeping score.</p></div>
+        <span class="quest-banner-emoji">📈</span>
+      </section>
+      <h2 class="chart-h">What will appear here</h2>
+      ${[
+        ['🔥', 'Streak', 'consecutive days of practice'],
+        ['⚡', 'XP and gems', 'earned by lessons, games and quests'],
+        ['🏆', 'Daily quests', 'three small targets that reset at midnight'],
+        ['📊', 'Weak sounds', 'the symbols that keep slipping, ranked from your real answers'],
+        ['🎓', 'Achievements', 'long-run milestones'],
+      ].map(([icon, t, blurb]) => `
+        <div class="ach-row">
+          <span class="ach-icon is-locked" aria-hidden="true">${icon}</span>
+          <div class="ach-info"><span class="ach-name">${t} <span class="tag">Inactive</span></span>
+            <p class="pane-note">${blurb}</p></div>
+        </div>`).join('')}
+      <button class="btn btn-primary" id="prog-go-learn" type="button">Go to your first lesson</button>`;
+    el.querySelector('#prog-go-learn').addEventListener('click', () => goSection('learn'));
+    return;
+  }
   const rows = questRows();
   const doneCount = rows.filter(r => r.complete).length;
   const t = totals();
@@ -766,6 +802,243 @@ function profileMain(el) {
     store.saveProfile({ name: e.target.value.trim() || 'Actor' }));
   el.querySelectorAll('[data-av]').forEach(b =>
     b.addEventListener('click', () => { store.saveProfile({ avatar: b.dataset.av }); renderShell('profile'); }));
+}
+
+// ── "What Is IPA?": a 3-minute interactive introduction ───────
+// A standalone stepped module on the guide chrome. Never required — it is
+// reachable from Library → IPA, the Foundations path, and core lesson
+// guides. Completion is a badge in the store; deliberately no XP or gems.
+
+const WII_QUESTIONS = 5;   // ship-symbol + same-sound pair + 3 classifications
+
+function whatIsIpaCard() {
+  const w = store.whatIsIpa;
+  return `
+    <button class="track-card wii-card" data-open-wii type="button" style="--track-color:#64748b">
+      <div class="track-glyph" aria-hidden="true">💡</div>
+      <div class="track-info">
+        <h2>What Is IPA? ${w.done ? '<span class="tag tag-skill">✓ completed</span>' : ''}</h2>
+        <p>Meet the alphabet of sounds — what it represents, why actors and language learners use it, and how to turn symbols into speech.</p>
+        <p class="mode-meta">3-minute introduction · interactive${w.done ? ` · ${w.correct}/${WII_QUESTIONS} answered right` : ''}</p>
+      </div>
+      <div class="track-arrow">›</div>
+    </button>`;
+}
+
+function wireWhatIsIpaCard(container) {
+  container.querySelectorAll('[data-open-wii]').forEach(b =>
+    b.addEventListener('click', openWhatIsIpa));
+}
+
+function openWhatIsIpa() {
+  record(openWhatIsIpa);
+  drawWhatIsIpa(0, { answered: {}, revealed: false });
+}
+
+// A word row with its transcription and a listen button.
+const wiiWordRow = (word, ipa, note = '') => `
+  <div class="guide-word">
+    <button class="word-chip" data-say="${esc(word)}" type="button">🔊 ${esc(word)}</button>
+    <span class="guide-ipa">${esc(ipa)}</span>
+    ${note ? `<span class="guide-note">${esc(note)}</span>` : ''}
+  </div>`;
+
+// A tappable sound chip: symbol + example, speaks the example.
+const wiiSoundChip = ph => {
+  const p = PHONEMES[ph];
+  return `<button class="word-chip" data-say="${esc(p.examples[0])}" type="button"
+    aria-label="Sound ${esc(ph)}, as in ${esc(p.examples[0])}">/${esc(ph)}/ ${esc(p.examples[0])}</button>`;
+};
+
+// One-tap mini question. `key` tracks the answer in the module state so a
+// question stays answered (and scored once) across Back/Continue.
+function wiiQuestion(st, key, prompt, options) {
+  const answered = st.answered[key];
+  return `
+    <div class="mini-check" data-q="${key}">
+      <p class="mini-prompt">${prompt}</p>
+      <div class="mini-opts" role="group" aria-label="${esc(prompt.replace(/<[^>]+>/g, ''))}">
+        ${options.map(o => `
+          <button class="btn mini-opt ${answered !== undefined && o.ok ? 'right' : ''}" type="button"
+            data-ok="${o.ok ? 1 : 0}" ${answered !== undefined ? 'disabled' : ''}>${o.label}</button>`).join('')}
+      </div>
+      <p class="mini-result" role="status">${answered === true ? '✓ Correct.' : answered === false ? 'Not quite — the marked answer is right.' : ''}</p>
+    </div>`;
+}
+
+function wireWiiQuestions(container, st, redraw) {
+  container.querySelectorAll('.mini-check').forEach(box => {
+    const key = box.dataset.q;
+    box.querySelectorAll('.mini-opt').forEach(btn =>
+      btn.addEventListener('click', () => {
+        if (st.answered[key] !== undefined) return;
+        const ok = btn.dataset.ok === '1';
+        st.answered[key] = ok;
+        btn.classList.add(ok ? 'right' : 'wrong');
+        box.querySelectorAll('.mini-opt').forEach(b => {
+          b.disabled = true;
+          if (b.dataset.ok === '1') b.classList.add('right');
+        });
+        box.querySelector('.mini-result').textContent =
+          ok ? '✓ Correct.' : 'Not quite — the marked answer is right.';
+      }));
+  });
+}
+
+function wiiStepHtml(step, st) {
+  switch (step) {
+    case 0: return `
+      <h1>What is IPA?</h1>
+      <p class="guide-text">The International Phonetic Alphabet, or IPA, is a system for writing sounds. Unlike ordinary spelling, each symbol tells you what sound to make — not how a word happens to be spelled.</p>
+      ${wiiWordRow('cat', '/kæt/', 'three letters, three sounds')}
+      ${wiiWordRow('enough', '/ɪˈnʌf/', 'six letters, four sounds')}
+      ${wiiWordRow('though', '/ðoʊ/', 'six letters, two sounds')}
+      <p class="pane-note">These transcriptions are accent-aware — this is the Neutral American reading, and other accents can differ.</p>`;
+    case 1: return `
+      <h1>Why is it useful?</h1>
+      <div class="guide-word"><span class="wii-who">🎭 Actors</span><span class="guide-note">learn an accent without depending on imitation alone</span></div>
+      <div class="guide-word"><span class="wii-who">🌍 Language learners</span><span class="guide-note">see how a word is actually pronounced</span></div>
+      <div class="guide-word"><span class="wii-who">🎵 Singers</span><span class="guide-note">identify vowels and consonants precisely</span></div>
+      <div class="guide-word"><span class="wii-who">🎓 Teachers & coaches</span><span class="guide-note">communicate pronunciation consistently</span></div>
+      <div class="guide-word"><span class="wii-who">🔬 Linguists</span><span class="guide-note">record and compare human speech</span></div>
+      <p class="wii-callout">IPA gives you a map. Audio lets you hear the destination; IPA shows you how to find it again.</p>`;
+    case 2: return `
+      <h1>One symbol, one sound</h1>
+      <p class="guide-text">Every symbol always means the same sound. Tap to hear each one in a word:</p>
+      <div class="chips">${['iː', 'æ', 'ɑ', 'ʃ', 'θ', 'ð', 'ŋ'].map(wiiSoundChip).join('')}</div>
+      ${wiiQuestion(st, 'ship', 'Which symbol represents the <b>first sound</b> in “ship”?', [
+        { label: '/s/', ok: false }, { label: '/ʃ/', ok: true }, { label: '/ɪ/', ok: false }, { label: '/θ/', ok: false },
+      ])}`;
+    case 3: return `
+      <h1>IPA versus spelling</h1>
+      <p class="guide-text">Spelling is a poor guide to sound:</p>
+      <div class="guide-word"><span class="wii-who">c</span><span class="guide-note">“cat” /k/ and “city” /s/ — one letter, two sounds</span></div>
+      <div class="guide-word"><span class="wii-who">ough</span><span class="guide-note">“though”, “thought”, “enough” — one spelling, three sounds</span></div>
+      <div class="guide-word"><span class="wii-who">/iː/</span><span class="guide-note">“see”, “sea”, “scene” — one sound, three spellings</span></div>
+      <p class="wii-callout">IPA describes pronunciation directly, without asking spelling for permission.</p>
+      ${wiiQuestion(st, 'pair', 'Tap the pair that <b>starts with the same sound</b>:', [
+        { label: 'cat · city', ok: false }, { label: 'city · sea', ok: true }, { label: 'cat · ship', ok: false },
+      ])}`;
+    case 4: return `
+      <h1>How to read a transcription</h1>
+      <div class="guide-word"><span class="wii-who">/ /</span><span class="guide-note">slashes surround a broad pronunciation</span></div>
+      <div class="guide-word"><span class="wii-who">ˈ</span><span class="guide-note">marks the syllable with primary stress — /ɪˈnʌf/</span></div>
+      <div class="guide-word"><span class="wii-who">symbols</span><span class="guide-note">represent sounds, never letters</span></div>
+      <div class="guide-word"><span class="wii-who">accents</span><span class="guide-note">the same word can transcribe differently</span></div>
+      <p class="guide-text">The same word, two accents — listen to both:</p>
+      <div class="guide-word">
+        <button class="word-chip" data-say="car" data-lang="en-US" type="button">🔊 car 🇺🇸</button>
+        <span class="guide-ipa">/kɑr/</span><span class="guide-note">Neutral American — the r is spoken</span>
+      </div>
+      <div class="guide-word">
+        <button class="word-chip" data-say="car" data-lang="en-GB" type="button">🔊 car 🇬🇧</button>
+        <span class="guide-ipa">/kɑː/</span><span class="guide-note">RP — the r becomes vowel length</span>
+      </div>
+      <details class="idiom-extra"><summary>Advanced detail — narrow transcription</summary>
+        <p class="pane-note">Square brackets [ ] mark a <i>narrow</i> transcription: exactly what a speaker did, with diacritics for fine detail — [kʰɑːˑ] notes aspiration and length. Speechcraft teaches broad transcription; narrow can wait.</p>
+      </details>`;
+    case 5: return `
+      <h1>How sounds are organized</h1>
+      <div class="guide-word"><span class="wii-who">Vowels</span><span class="guide-note">airflow stays open; tongue and lip position shape the sound</span></div>
+      <div class="guide-word"><span class="wii-who">Consonants</span><span class="guide-note">airflow is narrowed or stopped somewhere in the mouth</span></div>
+      <div class="guide-word"><span class="wii-who">Diphthongs</span><span class="guide-note">the mouth glides from one vowel position toward another</span></div>
+      <p class="guide-text">Sort these three — tap a category for each sound:</p>
+      ${[['æ', 'trap', 'Vowel'], ['ʃ', 'ship', 'Consonant'], ['aɪ', 'price', 'Diphthong']].map(([ph, w, right]) => `
+        <div class="mini-check wii-classify" data-q="cls-${ph}">
+          <p class="mini-prompt"><button class="word-chip" data-say="${esc(PHONEMES[ph].examples[0])}" type="button">🔊 /${esc(ph)}/ ${esc(w)}</button></p>
+          <div class="mini-opts" role="group" aria-label="Classify /${esc(ph)}/">
+            ${['Vowel', 'Consonant', 'Diphthong'].map(c => `
+              <button class="btn mini-opt ${st.answered['cls-' + ph] !== undefined && c === right ? 'right' : ''}" type="button"
+                data-ok="${c === right ? 1 : 0}" ${st.answered['cls-' + ph] !== undefined ? 'disabled' : ''}>${c}</button>`).join('')}
+          </div>
+          <p class="mini-result" role="status">${st.answered['cls-' + ph] === true ? '✓ Correct.' : st.answered['cls-' + ph] === false ? 'Not quite — the marked answer is right.' : ''}</p>
+        </div>`).join('')}
+      <p class="pane-note">The full landscape lives in the Library: the IPA Chart, the Vowel Map, and Your Instrument (the vocal tract) — every sound with tongue placement and audio.</p>`;
+    case 6: return `
+      <h1>How to use IPA</h1>
+      <ol class="wii-steps-list">
+        <li>Find the word’s transcription.</li>
+        <li>Identify each sound.</li>
+        <li>Listen to the symbols and example words.</li>
+        <li>Examine tongue and lip placement.</li>
+        <li>Say the sounds separately.</li>
+        <li>Blend them into the word.</li>
+        <li>Record yourself (Library → Texts &amp; Speeches → My Texts has a real recorder).</li>
+        <li>Compare, adjust, repeat.</li>
+      </ol>
+      <p class="guide-text">Try it on one word:</p>
+      <div class="wii-demo">
+        <div class="wii-demo-word">ship
+          <button class="word-chip" data-say="ship" type="button" aria-label="Hear the word ship">🔊 hear it</button>
+        </div>
+        ${st.revealed ? `
+          <div class="chips" id="wii-demo-syms">
+            <button class="word-chip" data-say="ship" type="button" title="as in ship">/ʃ/</button>
+            <button class="word-chip" data-say="kit" type="button" title="as in kit">/ɪ/</button>
+            <button class="word-chip" data-say="pen" type="button" title="as in pen">/p/</button>
+          </div>
+          <button class="btn-lite" data-sound-detail="ʃ" type="button">📐 See /ʃ/ tongue placement ›</button>`
+        : '<button class="btn" id="wii-reveal" type="button">Reveal the transcription</button>'}
+      </div>`;
+  }
+  // completion
+  const correct = Object.values(st.answered).filter(Boolean).length;
+  const course = COURSES.find(c => c.id === activeCourse());
+  return `
+    <h1>That’s the whole idea</h1>
+    <p class="guide-text">You do not need to memorize the entire IPA chart. Start by learning the symbols used in your course, one sound at a time.</p>
+    <div class="end-summary">
+      <div class="end-block"><span class="end-block-l">Questions</span><span class="end-block-v">${correct}/${WII_QUESTIONS} correct</span></div>
+      <div class="end-block"><span class="end-block-l">Covered</span><span class="end-block-v">symbols · stress · accents · vowel/consonant/diphthong · the workflow</span></div>
+      <div class="end-block"><span class="end-block-l">Next</span><span class="end-block-v">${correct >= 4 ? 'jump into a course' : 'the IPA Chart is a good slow tour'}</span></div>
+    </div>
+    <div class="ob-actions ob-actions-col">
+      <button class="btn btn-primary" id="wii-foundations" type="button">Start IPA Foundations</button>
+      <button class="btn" id="wii-chart" type="button">Explore the IPA Chart</button>
+      ${course.id !== 'core' ? `<button class="btn" id="wii-course" type="button">Continue ${esc(course.label)}</button>` : ''}
+    </div>`;
+}
+
+function drawWhatIsIpa(step, st) {
+  stopSpeech();
+  const total = 7;
+  const isEnd = step >= total;
+  app.innerHTML = `
+    <header class="lesson-top">
+      <button class="quit" id="quit" aria-label="Exit What Is IPA">✕</button>
+      <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="${total}"
+           aria-valuenow="${Math.min(step + 1, total)}" aria-label="What Is IPA — step ${Math.min(step + 1, total)} of ${total}">
+        <div class="progress-fill" style="width:${Math.round(Math.min(step + 1, total) / total * 100)}%"></div></div>
+      <span class="step-count">${isEnd ? '✓' : `${step + 1} of ${total}`}</span>
+    </header>
+    <main class="guide guide-stepped">
+      <div class="guide-title-bar" style="--unit-color:#64748b">💡 What Is IPA?</div>
+      <section class="guide-step">${wiiStepHtml(step, st)}</section>
+      ${isEnd ? '' : `
+      <div class="guide-nav">
+        ${step > 0 ? '<button class="btn" id="g-back" type="button">‹ Back</button>' : '<span></span>'}
+        <button class="btn btn-primary" id="g-next" type="button">${step === total - 1 ? 'Finish' : 'Continue'}</button>
+      </div>`}
+    </main>`;
+
+  document.getElementById('quit').addEventListener('click', goBack);
+  document.getElementById('g-back')?.addEventListener('click', () => drawWhatIsIpa(step - 1, st));
+  document.getElementById('g-next')?.addEventListener('click', () => {
+    const to = step + 1;
+    if (to >= total) store.markWhatIsIpa(Object.values(st.answered).filter(Boolean).length);
+    drawWhatIsIpa(to, st);
+  });
+  app.querySelectorAll('[data-say]').forEach(b =>
+    b.addEventListener('click', () => speak(b.dataset.say, { lang: b.dataset.lang ?? 'en-US' })));
+  app.querySelector('[data-sound-detail]')?.addEventListener('click', e =>
+    renderSoundDetail(e.currentTarget.dataset.soundDetail, 'nam'));
+  document.getElementById('wii-reveal')?.addEventListener('click', () => { st.revealed = true; drawWhatIsIpa(step, st); });
+  document.getElementById('wii-foundations')?.addEventListener('click', () => { setCourse('core'); goSection('learn'); });
+  document.getElementById('wii-chart')?.addEventListener('click', () => renderChart());
+  document.getElementById('wii-course')?.addEventListener('click', () => goSection('learn'));
+  wireWiiQuestions(app, st);
+  const h = app.querySelector('.guide-step h1');
+  if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
 }
 
 // ── Onboarding: the first-session walk-in ─────────────────────
@@ -946,7 +1219,7 @@ function moreMain(el) {
     { icon: '⚙️', title: 'Preferences', blurb: 'Your goal, course, and first-run choices.', go: renderPreferences, color: '#64748b' },
     { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
   ];
-  el.innerHTML = cards.map((c, i) => `
+  el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
       <div class="track-glyph">${c.icon}</div>
       <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
@@ -2671,10 +2944,12 @@ function renderChart() {
     ${pageTopbar('📖 The IPA Chart', '#64748b')}
     <main class="tree chart-page">
       <p class="track-blurb">The full alphabet of sounds. Tap any symbol to see how it’s made and hear it.</p>
+      ${whatIsIpaCard()}
       ${groups.map(section).join('')}
     </main>`;
 
   wireBrandHome();
+  wireWhatIsIpaCard(app);
   app.querySelectorAll('.chart-chip').forEach(btn =>
     btn.addEventListener('click', () => renderSoundDetail(btn.dataset.sym))
   );
@@ -2747,20 +3022,35 @@ function lessonNodeIcon(lesson) {
 const PATH_OFFSETS = [0, 48, 70, 48, 0, -48, -70, -48];
 
 // Tapping a locked node explains the prerequisite instead of doing nothing.
+// A compact dialog: focus moves in, Esc/outside/✕ closes, focus returns to
+// the node that opened it.
 function showLockPop(btn, lesson, prev) {
   document.querySelectorAll('.path-pop').forEach(p => p.remove());
+  const first = String(lesson.guide ?? '').split('. ')[0];
+  const teaches = first ? (first.endsWith('.') ? first : first + '.').slice(0, 110) : '';
   const pop = document.createElement('div');
   pop.className = 'path-pop';
-  pop.setAttribute('role', 'status');
-  pop.innerHTML = `<b>🔒 ${esc(lesson.title)}</b>
-    <span>Finish “${esc(prev?.title ?? 'the lesson before')}” to unlock this one
-    — ${esc(lessonKindName(lesson).toLowerCase())}, ~${estMinutes(lesson)} min.</span>`;
+  pop.setAttribute('role', 'dialog');
+  pop.setAttribute('aria-label', `${lesson.title} — locked`);
+  pop.setAttribute('tabindex', '-1');
+  pop.innerHTML = `
+    <div class="path-pop-head"><b>🔒 ${esc(lesson.title)}</b>
+      <button class="path-pop-close" type="button" aria-label="Close">✕</button></div>
+    <span>${esc(lessonKindName(lesson))} · ~${estMinutes(lesson)} min · +10 XP</span>
+    ${teaches ? `<span>${esc(teaches)}${teaches.length === 110 ? '…' : ''}</span>` : ''}
+    <span>Locked — finish “${esc(prev?.title ?? 'the lesson before')}” first.</span>`;
   btn.closest('.path-row').appendChild(pop);
-  const dismiss = () => { pop.remove(); document.removeEventListener('click', onDoc, true); document.removeEventListener('keydown', onKey); };
+  const dismiss = () => {
+    pop.remove();
+    document.removeEventListener('click', onDoc, true);
+    document.removeEventListener('keydown', onKey);
+    btn.focus();
+  };
   const onDoc = e => { if (!pop.contains(e.target) && e.target !== btn) dismiss(); };
   const onKey = e => { if (e.key === 'Escape') dismiss(); };
+  pop.querySelector('.path-pop-close').addEventListener('click', dismiss);
   setTimeout(() => { document.addEventListener('click', onDoc, true); document.addEventListener('keydown', onKey); }, 0);
-  setTimeout(dismiss, 6000);
+  pop.focus();
 }
 
 // Build a track's winding lesson path. Shared by the full-page view
@@ -2801,6 +3091,7 @@ function buildTrackPath(track, opts = {}) {
             <span class="path-icon ${face.ipa ? 'ipa' : ''}">${esc(face.text)}</span>
           </button>
           ${label}
+          ${opts.labels && !done ? `<span class="path-mtitle" aria-hidden="true" style="--dx:${dx}px">${esc(l.title)}</span>` : ''}
           ${isActive ? `<div class="path-mascot" style="left:calc(50% + ${dx + mascotSide * 78}px)">🎭</div>` : ''}
         </div>`;
     }).join('');
@@ -2867,13 +3158,14 @@ function guideSteps(lesson) {
   return steps;
 }
 
-function guideStepHtml(lesson, s) {
+function guideStepHtml(lesson, s, st) {
   if (s.kind === 'overview') {
     const n = (lesson.phonemes ?? []).filter(ph => PHONEMES[ph]).length;
     return `
       <h1>${esc(lesson.title)}</h1>
       <p class="guide-text">${esc(lesson.guide ?? '')}</p>
-      ${n ? `<p class="pane-note">${n} sound${n === 1 ? '' : 's'} ahead — one per step, each with audio and tongue placement.</p>` : ''}`;
+      ${n ? `<p class="pane-note">${n} sound${n === 1 ? '' : 's'} ahead — one per step, each with audio and tongue placement.</p>` : ''}
+      ${lesson.track?.id === 'core' ? '<button class="btn-lite" id="wii-link" type="button">New to IPA? Take the 3-minute introduction ›</button>' : ''}`;
   }
   if (s.kind === 'phoneme') {
     const p = PHONEMES[s.ph];
@@ -2881,6 +3173,15 @@ function guideStepHtml(lesson, s) {
       `<button class="word-chip" data-say="${esc(w)}" type="button">🔊 ${esc(w)}</button>`).join('');
     const diagram = articulationSVG(s.ph);
     const isVowel = p.type !== 'consonant';
+    // One-tap check so the step ends with doing, not just reading. Distractor
+    // symbols come from this lesson where possible, so the check reinforces
+    // exactly what the path is teaching.
+    const others = (lesson.phonemes ?? []).filter(x => x !== s.ph && PHONEMES[x]);
+    const pool = others.length >= 2 ? others
+      : Object.keys(PHONEMES).filter(x => x !== s.ph && PHONEMES[x].type === p.type);
+    const distractors = [...pool].sort(() => Math.random() - 0.5).slice(0, 2);
+    const opts = [{ label: `/${s.ph}/`, ok: true }, ...distractors.map(x => ({ label: `/${x}/`, ok: false }))]
+      .sort(() => Math.random() - 0.5);
     return `
       <h1 class="guide-step-sym">/${esc(s.ph)}/ · ${esc(p.name)}</h1>
       <div class="guide-card">
@@ -2894,17 +3195,37 @@ function guideStepHtml(lesson, s) {
       </div>
       ${diagram ? `<div class="guide-diagram" id="dia-step" hidden>
         <div class="artic-wrap">${diagram}<p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>
-      </div>` : ''}`;
+      </div>` : ''}
+      ${wiiQuestion(st, 'gq-' + s.ph, `Quick check — which symbol is the sound in “<b>${esc(p.examples[0])}</b>”?`, opts)}`;
   }
   if (s.kind === 'words') {
+    const row = w => `
+      <div class="guide-word">
+        <button class="word-chip" data-say="${esc(w.word)}" type="button">🔊 ${esc(w.word)}</button>
+        <span class="guide-ipa">/${w.ipa.join('')}/</span>
+        <span class="guide-note">${esc(w.note ?? '')}</span>
+      </div>`;
+    // Grouped by the sound that makes each word worth knowing, a few at a
+    // time — every word and its audio is still here, behind "show more".
+    const used = new Set();
+    const groups = [];
+    for (const ph of (lesson.phonemes ?? [])) {
+      if (!PHONEMES[ph]) continue;
+      const g = s.words.filter(w => !used.has(w.word) && w.ipa.includes(ph));
+      g.forEach(w => used.add(w.word));
+      if (g.length) groups.push({ label: `/${ph}/ · ${PHONEMES[ph].name}`, words: g });
+    }
+    const rest = s.words.filter(w => !used.has(w.word));
+    if (rest.length) groups.push({ label: 'More words', words: rest });
     return `
       <h1>${esc(dialectName(lesson.accent))} words to know</h1>
-      ${s.words.map(w => `
-        <div class="guide-word">
-          <button class="word-chip" data-say="${esc(w.word)}" type="button">🔊 ${esc(w.word)}</button>
-          <span class="guide-ipa">/${w.ipa.join('')}/</span>
-          <span class="guide-note">${esc(w.note ?? '')}</span>
-        </div>`).join('')}`;
+      ${groups.map(g => `
+        <h2 class="guide-heading">${esc(g.label)}</h2>
+        ${g.words.slice(0, 3).map(row).join('')}
+        ${g.words.length > 3 ? `
+          <details class="idiom-extra guide-more"><summary>Show ${g.words.length - 3} more</summary>
+            ${g.words.slice(3).map(row).join('')}
+          </details>` : ''}`).join('')}`;
   }
   // ready
   const syms = (lesson.phonemes ?? []).filter(ph => PHONEMES[ph]);
@@ -2916,7 +3237,7 @@ function guideStepHtml(lesson, s) {
       You can reopen this guide from the path any time.</p>`;
 }
 
-function renderGuide(lesson, step = 0) {
+function renderGuide(lesson, step = 0, st = { answered: {} }) {
   const unit = lesson.unit;
   const steps = guideSteps(lesson);
   const n = steps.length;
@@ -2930,7 +3251,7 @@ function renderGuide(lesson, step = 0) {
     </header>
     <main class="guide guide-stepped">
       <div class="guide-title-bar" style="--unit-color:${unit.color}">${esc(unit.title)} · ${esc(lesson.title)}</div>
-      <section class="guide-step">${guideStepHtml(lesson, steps[step])}</section>
+      <section class="guide-step">${guideStepHtml(lesson, steps[step], st)}</section>
       <div class="guide-nav">
         ${step > 0 ? '<button class="btn" id="g-back" type="button">‹ Back</button>' : '<span></span>'}
         ${last ? '<button class="btn btn-primary" id="start" type="button">Start lesson</button>'
@@ -2939,9 +3260,11 @@ function renderGuide(lesson, step = 0) {
     </main>`;
 
   document.getElementById('quit').addEventListener('click', () => renderTrack(lesson.track));
-  document.getElementById('g-back')?.addEventListener('click', () => renderGuide(lesson, step - 1));
-  document.getElementById('g-next')?.addEventListener('click', () => renderGuide(lesson, step + 1));
+  document.getElementById('g-back')?.addEventListener('click', () => renderGuide(lesson, step - 1, st));
+  document.getElementById('g-next')?.addEventListener('click', () => renderGuide(lesson, step + 1, st));
   document.getElementById('start')?.addEventListener('click', () => startLesson(lesson));
+  document.getElementById('wii-link')?.addEventListener('click', openWhatIsIpa);
+  wireWiiQuestions(app, st);
   app.querySelectorAll('[data-say]').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson) }))
   );

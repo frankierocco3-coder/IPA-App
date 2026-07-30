@@ -151,6 +151,16 @@ export const store = {
   // Hearts, gems, streaks and quests stay quiet until something is earned.
   get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
 
+  // ── "What Is IPA?" intro module ─────────────────────────────
+  // Completion badge only — deliberately no XP or gems, so "Progress
+  // activates after your first lesson" stays true for fresh users.
+  get whatIsIpa() { return load().whatIsIpa ?? { done: false, correct: 0 }; },
+  markWhatIsIpa(correct) {
+    const s = load();
+    s.whatIsIpa = { done: true, correct, at: Date.now() };
+    save(s);
+  },
+
   // ── Local profile ───────────────────────────────────────────
   get profile() {
     const s = load();

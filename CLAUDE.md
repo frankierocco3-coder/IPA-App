@@ -141,8 +141,20 @@ Progress = stats, daily quests (claiming), top weak sounds + full report,
 achievements. Profile is just name/avatar now.
 Lesson guides are STEPPED (guideSteps/renderGuide: overview → one sound per
 step → words → ready; Back/Continue, step count, focus lands on each step's
-h1). Results screen shows accuracy, covered symbols, missed symbols
-(s.missedSyms, collected in showFeedback), and a Next-lesson button.
+h1). Each sound step ends in a one-tap symbol check (wiiQuestion helpers,
+answers persist across Back/Continue); the words step is grouped by target
+sound with show-more disclosures. Results screen shows accuracy, covered
+symbols, missed symbols (s.missedSyms), and a Next-lesson button.
+"What Is IPA?" (openWhatIsIpa, 7 steps + completion, 5 scored questions) is
+the beginner intro module — reachable from Library → IPA pages, the
+Foundations Learn view, and core lesson guides; NEVER a required step and
+deliberately pays no XP/gems (store.whatIsIpa badge only) so first-lesson
+Progress activation stays true. Progress shows a purposeful starter state
+until store.hasEarnedAnything. Locked path nodes open a focus-managed
+dialog popover (what it teaches, why locked); mobile shows compact title
+pills under upcoming nodes. Practice's top is ONE Quick Practice card
+(mixed or weak-sound rehearsal) with a renamed full-course mixed link only
+when they differ.
 Spoken audio ALWAYS follows the dialect context (Frankie's rule — inside a
 course, only that dialect's two voices are heard); the symbol-based lang
 guess survives only for the Foundations full chart. Idiom listen buttons
