@@ -901,3 +901,162 @@ body.modal-open { overflow: hidden; }
   .home-tab-label { white-space: nowrap; }
   .hub-subs .son-tab { font-size: 11.5px; padding: 7px 6px; }
 }
+
+/* ══ Duolingo-style shell, Speechcraft skin ═══════════════════ */
+#app:has(.shell) { max-width: none; }
+.shell {
+  display: grid; grid-template-columns: 216px minmax(0, 620px) 330px;
+  gap: 28px; justify-content: center; padding: 0 16px 40px; width: 100%;
+}
+
+/* Sidebar */
+.side-nav {
+  position: sticky; top: 0; align-self: start; height: 100vh;
+  padding: 22px 0 20px; display: flex; flex-direction: column; gap: 18px;
+  border-right: 2px solid var(--line);
+}
+.side-brand { background: none; border: none; cursor: pointer; text-align: left; padding: 0 14px; }
+.side-brand-name { display: block; font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); }
+.side-brand-sub { display: block; font-size: 8.5px; letter-spacing: 2.2px; color: var(--sage); font-weight: 700; margin-top: 2px; }
+.side-nav nav { display: flex; flex-direction: column; gap: 4px; padding-right: 14px; }
+.side-item {
+  font: inherit; font-weight: 800; font-size: 13px; letter-spacing: 0.8px; text-transform: uppercase;
+  color: var(--muted); display: flex; align-items: center; gap: 12px; cursor: pointer;
+  background: none; border: 2px solid transparent; border-radius: 12px; padding: 10px 12px; text-align: left;
+}
+.side-item:hover { background: var(--panel); }
+.side-item.on { background: var(--accent-tint); border-color: var(--green); color: var(--green-dark); }
+.side-icon { font-size: 20px; width: 24px; text-align: center; }
+
+/* Main column + stats bar */
+.main-col { min-width: 0; padding-top: 18px; }
+.statsbar { position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.stat-chip {
+  display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: 14px;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 7px 11px;
+}
+.stat-chip.chip-empty { color: #a4503c; }
+.stat-chip.chip-boost { color: #7a5a2e; background: rgba(201,162,75,0.18); }
+.course-chip { font: inherit; cursor: pointer; font-weight: 800; }
+.course-chip:hover { background: var(--panel-2); }
+.course-icon { font-size: 17px; font-family: var(--serif); }
+.course-menu {
+  position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 260px;
+  background: var(--bg); border: 2px solid var(--line); border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(47,58,46,0.18); padding: 8px;
+}
+.course-menu-h { font-size: 11px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); padding: 6px 10px 4px; }
+.course-row {
+  font: inherit; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: none; border: none; border-radius: 10px; padding: 9px 10px; cursor: pointer; color: var(--ink);
+}
+.course-row:hover { background: var(--panel); }
+.course-row.on { background: var(--accent-tint); }
+.course-row-info { flex: 1; display: flex; flex-direction: column; }
+.course-row-info small { color: var(--muted); font-size: 11.5px; }
+.course-check { color: var(--green-dark); font-weight: 800; }
+
+/* Right rail */
+.right-rail { position: sticky; top: 0; align-self: start; padding-top: 18px; display: flex; flex-direction: column; gap: 14px; }
+.rail-card { background: var(--panel); border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; }
+.rail-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.rail-head h2 { font-size: 16px; }
+
+/* Quests */
+.quest-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+  background: var(--accent-tint); border: 2px solid var(--green); border-radius: 18px;
+  padding: 18px 20px; margin-bottom: 14px;
+}
+.quest-banner h1 { font-size: 20px; margin-bottom: 4px; }
+.quest-banner p { font-size: 13px; color: var(--green-dark); }
+.quest-banner-emoji { font-size: 34px; font-weight: 800; white-space: nowrap; }
+.shop-banner { background: rgba(201,162,75,0.14); border-color: var(--gold); }
+.shop-banner p { color: #7a5a2e; }
+.quest-row {
+  display: flex; align-items: center; gap: 12px; background: var(--panel);
+  border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+}
+.quest-row.mini { border: none; padding: 6px 0; margin-bottom: 2px; background: none; }
+.quest-icon { font-size: 22px; flex: none; }
+.quest-info { flex: 1; min-width: 0; }
+.quest-title { font-weight: 700; font-size: 14px; display: block; margin-bottom: 5px; }
+.quest-bar { position: relative; height: 14px; background: var(--panel-2); border-radius: 7px; overflow: hidden; }
+.quest-row.mini .quest-bar { height: 11px; }
+.quest-bar > div { height: 100%; background: var(--gold); border-radius: 7px; }
+.quest-count {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-size: 9.5px; font-weight: 800; color: var(--ink); letter-spacing: 0.5px;
+}
+.quest-reward { font-weight: 800; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.quest-claim { padding: 8px 12px; font-size: 13px; white-space: nowrap; }
+.quest-done { color: var(--green-dark); font-weight: 800; font-size: 18px; }
+.quest-chest { font-size: 18px; }
+
+/* Shop */
+.shop-item {
+  display: flex; align-items: center; gap: 14px; background: var(--panel);
+  border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; margin-bottom: 10px;
+}
+.shop-icon { font-size: 30px; flex: none; }
+.shop-info { flex: 1; }
+.shop-info h2 { font-size: 16px; margin-bottom: 3px; }
+.shop-info p { font-size: 13px; color: var(--muted); }
+.shop-price.is-off { font-weight: 800; font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.shop-buy { white-space: nowrap; font-weight: 800; }
+
+/* Profile */
+.profile-head { display: flex; align-items: center; gap: 16px; margin-bottom: 10px; }
+.profile-avatar {
+  font-size: 44px; width: 84px; height: 84px; flex: none; display: grid; place-items: center;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 50%;
+}
+.profile-id { flex: 1; min-width: 0; }
+.profile-name { font-family: var(--serif); font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+.avatar-row { margin-bottom: 10px; }
+.ach-row {
+  display: flex; align-items: center; gap: 12px; background: var(--panel);
+  border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px;
+}
+.ach-icon {
+  font-size: 24px; width: 48px; height: 48px; flex: none; display: grid; place-items: center;
+  background: rgba(201,162,75,0.18); border-radius: 12px;
+}
+.ach-icon.is-locked { filter: grayscale(1); opacity: 0.55; background: var(--panel-2); }
+.ach-info { flex: 1; min-width: 0; }
+.ach-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 7px; margin-bottom: 5px; }
+
+/* Unit banner: room for the guidebook button */
+.unit-banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.unit-banner-info { min-width: 0; }
+.guidebook-btn {
+  font: inherit; font-weight: 800; font-size: 13px; color: #fff; cursor: pointer;
+  background: rgba(255,255,255,0.16); border: 2px solid rgba(255,255,255,0.45);
+  border-radius: 12px; padding: 8px 12px; white-space: nowrap; flex: none;
+}
+.guidebook-btn:hover { background: rgba(255,255,255,0.26); }
+.gb-lesson { margin-bottom: 22px; }
+.gb-lesson h2 { font-size: 18px; margin-bottom: 6px; }
+
+/* Bottom nav (mobile) */
+.bottom-nav { display: none; }
+
+@media (max-width: 979px) {
+  .shell { grid-template-columns: minmax(0, 1fr); padding: 0 14px 86px; }
+  .side-nav, .right-rail { display: none; }
+  .bottom-nav {
+    display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+    background: var(--bg); border-top: 2px solid var(--line);
+    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+  }
+  .bn-item {
+    font: inherit; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: none; border: none; border-radius: 10px; padding: 6px 2px; cursor: pointer;
+    color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .bn-icon { font-size: 20px; }
+  .bn-item.on { color: var(--green-dark); background: var(--accent-tint); }
+  .course-name { display: none; }
+  .statsbar { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 10px 0; margin: 0 0 8px; }
+  .guidebook-btn span { display: none; }
+}

@@ -115,18 +115,21 @@ tests/              security.test.js (browser-run)
 
 ## Current state
 
-**Working:** dialect-first home — a tab strip (Neutral American / RP /
-Australian / Text & Speech / IPA Handbook) that reopens on the last tab used.
-Each dialect tab holds five sub-tabs: Lessons (track path), Practice (games
-locked to the dialect + idiom drill + weak-sounds slice), Handbook (that
-dialect's sound inventory → tongue placement), Slang & Idiom (224-entry
-reference from js/data/idiom.js; flagged terms hidden by default and NEVER
-drilled; U/non-U for RP, -o/-ie patterns for AUS, false friends everywhere),
-and Texts (jumps to Text & Speech). IPA Foundations, Core IPA Arcade, chart,
-anatomy, vowel map, personal dictionary and privacy live in the IPA Handbook
-tab. Plus: 5 tracks / 77 lessons, 16+1 exercise generators ('idiom' is
-term↔meaning choice), 332 curated pieces, Perform mode, rehearsal projects,
-weak-sound analytics, pronunciation overrides.
+**Working:** Duolingo-style shell (Speechcraft skin): left sidebar
+(Learn/Practice/Texts/Quests/Shop/Profile/More; bottom nav on mobile), stats
+bar (course chip + 🔥/💎/❤️), right rail (quests + today's rehearsal). You are
+always "in" one course — 🇺🇸/🇬🇧/🇦🇺/ʃə Foundations — switched via the course
+chip menu. Learn = the course's path with per-unit 📘 Guidebooks. Practice =
+games locked to the course, mixed review, and collections: Weak Sounds,
+Native Idioms (224 entries, js/data/idiom.js — flagged terms hidden by
+default and NEVER drilled), Sound Handbook, Shift Drills (nam/rp), Texts.
+Economy: gems (lessons +10/+15, quest claims), persistent 5 hearts (regen
+1/4h, mixed review earns one, gems refill), streak freezes (max 2), 15-min
+double-XP boost — all in js/state.js; daily quests in js/quests.js hook
+onLessonFinished() in renderResults. No leaderboards (no accounts — decided,
+not forgotten). More = chart/anatomy/vowel map/My Texts/dictionary/privacy.
+Plus: 5 tracks / 77 lessons, 16+1 exercise generators, 332 curated pieces,
+Perform mode, rehearsal projects, analytics, pronunciation overrides.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

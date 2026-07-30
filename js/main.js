@@ -1,7 +1,7 @@
 import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
-import { store } from './state.js';
+import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG } from './audio.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
@@ -21,6 +21,7 @@ import { recordingSupported, startRecording, stopRecording, cancelRecording,
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor } from './recordings.js';
 import { dbSupported, STORES, idbClear } from './db.js';
+import { questRows, claimQuest, onLessonFinished } from './quests.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
          ValidationError, LIMITS } from './validate.js';
 import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePersonal,
@@ -143,23 +144,16 @@ function trackProgress(track) {
 
 // Where a finished/quit lesson returns to.
 function exitLesson(lesson) {
-  if (lesson.arcade) return renderArcade();
+  if (lesson.arcade) return goSection('practice');
   if (lesson.track) return renderTrack(lesson.track);
   return renderHome();
 }
 
 // Which dialect the arcade games draw their words from (null = core IPA).
-const ARCADE_DIALECTS = [
-  { id: null, label: 'Core IPA', icon: 'ʃə' },
-  { id: 'nam', label: 'Neutral American', icon: '🇺🇸' },
-  { id: 'rp', label: 'RP', icon: '🇬🇧' },
-  { id: 'aus', label: 'Australian', icon: '🇦🇺' },
-];
-let arcadeAccent = null;
 
 // A single-mode arcade session: one exercise type, played on its own,
 // in whichever dialect is currently selected.
-function modeLesson(mode, accent = arcadeAccent) {
+function modeLesson(mode, accent = null) {
   return {
     id: 'mode-' + mode.id + (accent ? '-' + accent : ''),
     title: mode.title,
@@ -195,121 +189,191 @@ function practiceLesson(track) {
   };
 }
 
-// ── Home: dialect-first tabs ──────────────────────────────────
-// The home screen is a tab strip: the three dialects, Text & Speech, and the
-// IPA Handbook. Everything for a role lives inside its dialect's tab —
-// lessons, practice, its own sound handbook, its slang. The app reopens on
-// whichever tab (and sub-tab) you were last working in.
+// ── App shell: Duolingo-style layout, Speechcraft skin ────────
+// A persistent sidebar (bottom nav on mobile), a main column, and a right
+// rail with stats, quests and today's rehearsal. You are always "in" one
+// course — a dialect, or IPA Foundations — switched from the flag chip,
+// exactly like switching languages. Leaderboards are deliberately absent:
+// there are no accounts, so there is nobody real to rank against.
 
-const HOME_TABS = [
+const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
   { id: 'rp', icon: '🇬🇧', label: 'RP' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
-  { id: 'texts', icon: '📜', label: 'Text & Speech' },
-  { id: 'handbook', icon: '📖', label: 'IPA Handbook' },
+  { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
-const HUB_SUBS = [
-  { id: 'lessons', label: '🎓 Lessons' },
-  { id: 'practice', label: '🎯 Practice' },
-  { id: 'handbook', label: '📖 Handbook' },
-  { id: 'idiom', label: '🗣 Slang & Idiom' },
-  { id: 'texts', label: '📜 Texts' },
+const SECTIONS = [
+  { id: 'learn', icon: '🏠', label: 'Learn' },
+  { id: 'practice', icon: '🎯', label: 'Practice' },
+  { id: 'texts', icon: '📜', label: 'Texts' },
+  { id: 'quests', icon: '🏆', label: 'Quests' },
+  { id: 'shop', icon: '🛍️', label: 'Shop' },
+  { id: 'profile', icon: '👤', label: 'Profile' },
+  { id: 'more', icon: '⋯', label: 'More' },
 ];
 
-const homeTab = () => {
-  const t = localStorage.getItem('speechcraft-home-tab');
-  return HOME_TABS.some(x => x.id === t) ? t : 'nam';
+const activeCourse = () => {
+  const c = localStorage.getItem('speechcraft-course');
+  return COURSES.some(x => x.id === c) ? c : 'nam';
 };
-const setHomeTab = t => { try { localStorage.setItem('speechcraft-home-tab', t); } catch {} };
-const hubSub = d => {
-  try {
-    const t = JSON.parse(localStorage.getItem('speechcraft-hub-sub') || '{}')[d];
-    return HUB_SUBS.some(x => x.id === t) && t !== 'texts' ? t : 'lessons';
-  } catch { return 'lessons'; }
+const setCourse = c => { try { localStorage.setItem('speechcraft-course', c); } catch {} };
+const activeSection = () => {
+  const s = localStorage.getItem('speechcraft-section');
+  return SECTIONS.some(x => x.id === s) ? s : 'learn';
 };
-const setHubSub = (d, s) => {
-  try {
-    const m = JSON.parse(localStorage.getItem('speechcraft-hub-sub') || '{}');
-    m[d] = s;
-    localStorage.setItem('speechcraft-hub-sub', JSON.stringify(m));
-  } catch {}
-};
+const setSection = s => { try { localStorage.setItem('speechcraft-section', s); } catch {} };
 
 const trackFor = d => TRACKS.find(t => t.id === d);
 
 function renderHome() {
+  renderShell(activeSection());
+}
+
+function goSection(id) {
+  setSection(id);
+  renderShell(id);
+}
+
+function renderShell(section) {
   stopSpeech();
-  navStack = [];              // home is the root of the back stack
+  navStack = [];
   navRestoring = false;
-  const tab = homeTab();
+  setSection(section);
+  const course = COURSES.find(c => c.id === activeCourse());
 
   app.innerHTML = `
-    <header class="topbar">
-      ${BRAND_BTN}
-      <div class="stats">
-        <span class="stat">🔥 ${store.displayStreak}</span>
-        <span class="stat">⚡ ${store.xp} XP</span>
-        <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay"
-                title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>
+    <div class="shell">
+      <aside class="side-nav">
+        <button class="side-brand" id="brand-home" type="button">
+          <span class="side-brand-name">Speechcraft</span>
+          <span class="side-brand-sub">SPEAK · LEARN · CONNECT</span>
+        </button>
+        <nav aria-label="Sections">
+          ${SECTIONS.map(s => `
+            <button class="side-item ${s.id === section ? 'on' : ''}" data-sec="${s.id}" type="button">
+              <span class="side-icon">${s.icon}</span><span class="side-label">${s.label}</span>
+            </button>`).join('')}
+        </nav>
+      </aside>
+      <div class="main-col">
+        <div class="statsbar" id="statsbar"></div>
+        ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
+        <div id="shell-main"></div>
       </div>
-    </header>
-    ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
-    <main class="track-list home-main">
-      ${dailyRehearsalCard()}
-      <nav class="home-tabs" role="tablist" aria-label="Sections">
-        ${HOME_TABS.map(t => `
-          <button class="home-tab ${t.id === tab ? 'on' : ''}" role="tab"
-                  aria-selected="${t.id === tab}" data-tab="${t.id}" type="button">
-            <span class="home-tab-icon">${t.icon}</span><span class="home-tab-label">${esc(t.label)}</span>
-          </button>`).join('')}
-      </nav>
-      <div id="home-pane"></div>
-    </main>`;
-
-  wireBrandHome();
-  document.getElementById('freeplay').addEventListener('click', () => {
-    store.freePlay = !store.freePlay;
-    renderHome();
-  });
-  document.getElementById('today-start')?.addEventListener('click', startDailyRehearsal);
-  app.querySelectorAll('.home-tab').forEach(b =>
-    b.addEventListener('click', () => { setHomeTab(b.dataset.tab); renderHome(); }));
-
-  const pane = document.getElementById('home-pane');
-  if (tab === 'texts') textSpeechPane(pane);
-  else if (tab === 'handbook') handbookPane(pane);
-  else dialectHub(pane, tab);
-}
-
-// ── A dialect's hub: Lessons · Practice · Handbook · Idiom · Texts ──
-
-function dialectHub(pane, d) {
-  const track = trackFor(d);
-  const sub = hubSub(d);
-  pane.innerHTML = `
-    <div class="sonnet-tabs hub-subs">
-      ${HUB_SUBS.map(s => `
-        <button class="son-tab ${s.id === sub ? 'on' : ''}" data-sub="${s.id}" type="button">${s.label}</button>`).join('')}
+      <aside class="right-rail">
+        <div id="rail-quests"></div>
+        <div id="rail-today"></div>
+      </aside>
     </div>
-    <div id="hub-pane"></div>`;
-  pane.querySelectorAll('.hub-subs .son-tab').forEach(b =>
-    b.addEventListener('click', () => {
-      if (b.dataset.sub === 'texts') { setHomeTab('texts'); renderHome(); return; }
-      setHubSub(d, b.dataset.sub);
-      dialectHub(pane, d);
-    }));
+    <nav class="bottom-nav" aria-label="Sections">
+      ${['learn', 'practice', 'texts', 'quests', 'more'].map(id => {
+        const s = SECTIONS.find(x => x.id === id);
+        return `<button class="bn-item ${id === section ? 'on' : ''}" data-sec="${id}" type="button">
+          <span class="bn-icon">${s.icon}</span><span class="bn-label">${s.label}</span></button>`;
+      }).join('')}
+    </nav>`;
 
-  const hub = pane.querySelector('#hub-pane');
-  if (sub === 'lessons') hubLessons(hub, track);
-  else if (sub === 'practice') hubPractice(hub, d, track);
-  else if (sub === 'handbook') hubHandbook(hub, d, track);
-  else if (sub === 'idiom') hubIdiom(hub, d, track);
+  document.getElementById('brand-home').addEventListener('click', () => goSection('learn'));
+  app.querySelectorAll('[data-sec]').forEach(b =>
+    b.addEventListener('click', () => goSection(b.dataset.sec)));
+
+  drawStatsbar(course, section);
+  drawRail(section);
+
+  const main = document.getElementById('shell-main');
+  if (section === 'learn') learnMain(main, course);
+  else if (section === 'practice') practiceMain(main, course);
+  else if (section === 'texts') textSpeechPane(main);
+  else if (section === 'quests') questsMain(main);
+  else if (section === 'shop') shopMain(main);
+  else if (section === 'profile') profileMain(main);
+  else moreMain(main);
 }
 
-function hubLessons(hub, track) {
+// ── Stats bar: course chip + streak / gems / hearts ───────────
+
+function drawStatsbar(course, section) {
+  const bar = document.getElementById('statsbar');
+  const hearts = store.hearts;
+  bar.innerHTML = `
+    <button class="stat-chip course-chip" id="course-chip" type="button"
+            aria-haspopup="menu" aria-expanded="false" title="Switch course">
+      <span class="course-icon">${course.icon}</span>
+      <span class="course-name">${esc(course.label)}</span> ▾
+    </button>
+    <span class="stat-chip" title="Streak">🔥 ${store.displayStreak}</span>
+    <span class="stat-chip" title="Gems">💎 ${store.gems}</span>
+    <span class="stat-chip ${hearts === 0 ? 'chip-empty' : ''}" title="Hearts">❤️ ${hearts}</span>
+    ${store.boostActive ? '<span class="stat-chip chip-boost" title="Double XP active">⚡×2</span>' : ''}
+    <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay"
+            title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>
+    <div class="course-menu" id="course-menu" role="menu" hidden>
+      <p class="course-menu-h">My courses</p>
+      ${COURSES.map(c => {
+        const t = trackFor(c.id);
+        const { done, total } = trackProgress(t);
+        return `<button class="course-row ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
+          <span class="course-icon">${c.icon}</span>
+          <span class="course-row-info"><b>${esc(c.label)}</b><small>${done}/${total} lessons</small></span>
+          ${c.id === course.id ? '<span class="course-check">✓</span>' : ''}
+        </button>`;
+      }).join('')}
+    </div>`;
+
+  const chip = bar.querySelector('#course-chip');
+  const menu = bar.querySelector('#course-menu');
+  const close = () => { menu.hidden = true; chip.setAttribute('aria-expanded', 'false'); };
+  chip.addEventListener('click', e => {
+    e.stopPropagation();
+    menu.hidden = !menu.hidden;
+    chip.setAttribute('aria-expanded', String(!menu.hidden));
+  });
+  document.addEventListener('click', close, { once: true });
+  document.addEventListener('keydown', function onKey(e) {
+    if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
+  });
+  menu.querySelectorAll('.course-row').forEach(b =>
+    b.addEventListener('click', () => { setCourse(b.dataset.course); renderShell(activeSection()); }));
+  bar.querySelector('#freeplay').addEventListener('click', () => {
+    store.freePlay = !store.freePlay;
+    renderShell(activeSection());
+  });
+}
+
+// ── Right rail: quests mini-panel + today's rehearsal ─────────
+
+function drawRail(section) {
+  const q = document.getElementById('rail-quests');
+  const rows = questRows();
+  q.innerHTML = `
+    <section class="rail-card">
+      <div class="rail-head"><h2>Daily Quests</h2>
+        <button class="btn-lite" id="rail-quests-all" type="button">View all</button></div>
+      ${rows.map(r => `
+        <div class="quest-row mini">
+          <span class="quest-icon">${r.icon}</span>
+          <div class="quest-info">
+            <span class="quest-title">${esc(r.title)}</span>
+            <div class="quest-bar"><div style="width:${Math.round(r.done / r.target * 100)}%"></div>
+              <span class="quest-count">${r.done}/${r.target}</span></div>
+          </div>
+          ${r.complete ? (r.claimed ? '<span class="quest-done">✓</span>' : '<span class="quest-chest">🎁</span>') : ''}
+        </div>`).join('')}
+    </section>`;
+  q.querySelector('#rail-quests-all').addEventListener('click', () => goSection('quests'));
+
+  const t = document.getElementById('rail-today');
+  t.innerHTML = section === 'practice' ? '' : dailyRehearsalCard();
+  t.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
+}
+
+// ── Learn ─────────────────────────────────────────────────────
+
+function learnMain(el, course) {
+  const track = trackFor(course.id);
   const { done, total } = trackProgress(track);
-  const path = buildTrackPath(track);
-  hub.innerHTML = `
+  const path = buildTrackPath(track, { guidebook: true });
+  el.innerHTML = `
     <div class="hub-progress">
       <div class="track-progress">
         <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
@@ -317,12 +381,43 @@ function hubLessons(hub, track) {
       </div>
     </div>
     <div class="track-scroll hub-scroll">${path.html}</div>`;
-  path.wire(hub);
+  path.wire(el);
 }
 
-function hubPractice(hub, d, track) {
-  const name = dialectName(d);
+// Per-unit guidebook: what the unit teaches, in one readable page.
+function renderGuidebook(unit, track) {
+  record(() => renderGuidebook(unit, track));
+  const sections = unit.lessons.map(l => {
+    const chips = (l.phonemes ?? []).map(ph => PHONEMES[ph] ? `
+      <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(PHONEMES[ph].examples[0])}"
+              title="${esc(PHONEMES[ph].name)}">/${esc(ph)}/</button>` : '').join('');
+    return `
+      <section class="gb-lesson">
+        <h2>${esc(l.title)}</h2>
+        ${l.guide ? `<p class="guide-text">${esc(l.guide)}</p>` : ''}
+        ${chips ? `<div class="chips">${chips}</div>` : ''}
+      </section>`;
+  }).join('');
+  app.innerHTML = `
+    ${pageTopbar(`📘 ${esc(unit.title)}`, unit.color)}
+    <main class="guide">
+      <p class="pane-note">The guidebook for <b>${esc(unit.title)}</b> — every sound and idea this unit teaches. Tap a symbol to hear it; open its diagram from the IPA chart any time.</p>
+      ${sections}
+    </main>`;
+  wireBrandHome();
+  app.querySelectorAll('.word-chip[data-sym]').forEach(b => {
+    b.addEventListener('click', () => speak(b.dataset.say, { lang: 'en-GB' }));
+  });
+}
+
+// ── Practice hub ──────────────────────────────────────────────
+
+function practiceMain(el, course) {
+  const d = course.id === 'core' ? null : course.id;
+  const track = trackFor(course.id);
   const shiftTrack = (d === 'nam' || d === 'rp') ? TRACKS.find(t => t.id === 'shift') : null;
+  const name = d ? dialectName(d) : 'Core IPA';
+
   const modeCards = MODES.map(m => `
     <button class="mode-card" data-mode="${m.id}" type="button">
       <span class="mode-icon">${m.icon}</span>
@@ -330,36 +425,226 @@ function hubPractice(hub, d, track) {
       <span class="mode-blurb">${esc(m.blurb)}</span>
     </button>`).join('');
 
-  hub.innerHTML = `
+  const collections = [
+    { id: 'weak', icon: '📊', title: 'Weak Sounds', blurb: 'What keeps slipping — ranked from your real answers.' },
+    d ? { id: 'idioms', icon: '🗣', title: 'Native Idioms', blurb: `The words that carry the ${name} voice.` } : null,
+    { id: 'inventory', icon: '📖', title: 'Sound Handbook', blurb: d ? `${name}’s sounds and tongue placement.` : 'All 55 sounds and how they’re made.' },
+    shiftTrack ? { id: 'shift', icon: '⇄', title: 'Accent Shift Drills', blurb: 'Transform words between American and RP.' } : null,
+    { id: 'gotexts', icon: '📜', title: 'Texts & Speeches', blurb: 'Sonnets, monologues, and your own pieces.' },
+  ].filter(Boolean);
+
+  el.innerHTML = `
+    ${dailyRehearsalCard()}
     <div class="practice-row">
-      <button class="btn btn-practice" id="hub-mixed" type="button">🎯 Mixed review — everything this track teaches, no hearts lost</button>
+      <button class="btn btn-practice" id="hub-mixed" type="button">🎯 Mixed review — no hearts lost, earns one back</button>
     </div>
     <h2 class="chart-h">Games <span>in ${esc(name)}</span></h2>
     <div class="mode-grid">
-      <button class="mode-card idiom-mode" id="hub-idiom-drill" type="button">
+      ${d ? `<button class="mode-card idiom-mode" id="hub-idiom-drill" type="button">
         <span class="mode-icon">🗣</span>
-        <span class="mode-title">Slang &amp; Idiom</span>
+        <span class="mode-title">Native Idioms</span>
         <span class="mode-blurb">The words, not just the sounds.</span>
-      </button>
+      </button>` : ''}
       ${modeCards}
     </div>
-    ${shiftTrack ? `
-      <h2 class="chart-h">Shift work</h2>
-      <button class="track-card" id="hub-shift" type="button" style="--track-color:${shiftTrack.color}">
-        <div class="track-glyph">⇄</div>
-        <div class="track-info"><h2>Accent Shift Drills</h2><p>Transform words between American and RP on command.</p></div>
+    <h2 class="chart-h">Your collections</h2>
+    ${collections.map(c => `
+      <button class="track-card" data-coll="${c.id}" type="button" style="--track-color:${track.color}">
+        <div class="track-glyph">${c.icon}</div>
+        <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
         <div class="track-arrow">›</div>
-      </button>` : ''}
-    <h2 class="chart-h">Weak sounds <span>in ${esc(name)}</span></h2>
-    <div id="hub-weak"></div>`;
+      </button>`).join('')}`;
 
-  hub.querySelector('#hub-mixed').addEventListener('click', () => startLesson(practiceLesson(track)));
-  hub.querySelector('#hub-idiom-drill').addEventListener('click', () => startLesson(idiomLesson(d, track)));
-  hub.querySelector('#hub-shift')?.addEventListener('click', () => renderTrack(shiftTrack));
-  hub.querySelectorAll('.mode-card[data-mode]').forEach(b =>
+  el.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
+  el.querySelector('#hub-mixed').addEventListener('click', () => startLesson(practiceLesson(track)));
+  el.querySelector('#hub-idiom-drill')?.addEventListener('click', () => startLesson(idiomLesson(d, track)));
+  el.querySelectorAll('.mode-card[data-mode]').forEach(b =>
     b.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === b.dataset.mode), d))));
-  hubWeakPanel(hub.querySelector('#hub-weak'), d);
+  el.querySelectorAll('[data-coll]').forEach(b =>
+    b.addEventListener('click', () => {
+      const id = b.dataset.coll;
+      if (id === 'weak') renderWeakSounds();
+      else if (id === 'idioms') renderIdioms(d);
+      else if (id === 'inventory') d ? renderInventory(d) : renderChart();
+      else if (id === 'shift') renderTrack(shiftTrack);
+      else if (id === 'gotexts') goSection('texts');
+    }));
 }
+
+// Full-page wrappers for the dialect panes, so collections open like any
+// other page with a back button.
+function renderInventory(d) {
+  record(() => renderInventory(d));
+  app.innerHTML = `
+    ${pageTopbar(`📖 ${esc(dialectName(d))} sounds`, trackFor(d).color)}
+    <main class="track-list" id="inv-pane"></main>`;
+  wireBrandHome();
+  hubHandbook(document.getElementById('inv-pane'), d, trackFor(d));
+}
+
+function renderIdioms(d) {
+  record(() => renderIdioms(d));
+  app.innerHTML = `
+    ${pageTopbar(`🗣 ${esc(dialectName(d))} Native Idioms`, trackFor(d).color)}
+    <main class="track-list" id="idiom-page"></main>`;
+  wireBrandHome();
+  hubIdiom(document.getElementById('idiom-page'), d, trackFor(d));
+}
+
+// ── Quests ────────────────────────────────────────────────────
+
+function questsMain(el) {
+  const rows = questRows();
+  const doneCount = rows.filter(r => r.complete).length;
+  el.innerHTML = `
+    <section class="quest-banner">
+      <div><h1>Earn gems with quests</h1>
+      <p>You’ve completed ${doneCount} of ${rows.length} quests today. They reset at midnight.</p></div>
+      <span class="quest-banner-emoji">🏆</span>
+    </section>
+    <h2 class="chart-h">Daily Quests</h2>
+    ${rows.map(r => `
+      <div class="quest-row">
+        <span class="quest-icon">${r.icon}</span>
+        <div class="quest-info">
+          <span class="quest-title">${esc(r.title)}</span>
+          <div class="quest-bar"><div style="width:${Math.round(r.done / r.target * 100)}%"></div>
+            <span class="quest-count">${r.done}/${r.target}</span></div>
+        </div>
+        ${r.claimed ? '<span class="quest-done" title="Claimed">✓</span>'
+          : r.complete ? `<button class="btn btn-primary quest-claim" data-q="${r.id}" type="button">🎁 +${r.reward}💎</button>`
+          : `<span class="quest-reward">💎 ${r.reward}</span>`}
+      </div>`).join('')}
+    <p class="pane-note">Gems buy heart refills, streak freezes and XP boosts in the Shop.</p>`;
+  el.querySelectorAll('.quest-claim').forEach(b =>
+    b.addEventListener('click', () => {
+      claimQuest(b.dataset.q);
+      renderShell('quests');
+    }));
+}
+
+// ── Shop ──────────────────────────────────────────────────────
+
+function shopMain(el) {
+  const hearts = store.hearts;
+  const freezes = store.freezes;
+  const boostActive = store.boostActive;
+  const boostMins = boostActive ? Math.ceil((store.boostUntil - Date.now()) / 60000) : 0;
+  const item = (icon, title, blurb, action) => `
+    <div class="shop-item">
+      <span class="shop-icon">${icon}</span>
+      <div class="shop-info"><h2>${title}</h2><p>${blurb}</p></div>
+      ${action}
+    </div>`;
+  el.innerHTML = `
+    <section class="quest-banner shop-banner">
+      <div><h1>Shop</h1><p>Everything costs gems earned by practising. Nothing here ever costs real money.</p></div>
+      <span class="quest-banner-emoji">💎 ${store.gems}</span>
+    </section>
+    <h2 class="chart-h">Hearts</h2>
+    ${item('❤️', 'Refill Hearts', `Back to ${HEART_MAX} hearts instantly. One regenerates every 4 hours on its own, and mixed review earns one back.`,
+      hearts >= HEART_MAX ? '<span class="shop-price is-off">FULL</span>'
+        : `<button class="btn btn-lite shop-buy" data-item="refill" type="button">💎 350</button>`)}
+    <h2 class="chart-h">Power-ups</h2>
+    ${item('🧊', 'Streak Freeze', `Protects your streak for one missed day. Equipped: ${freezes}/2.`,
+      freezes >= 2 ? '<span class="shop-price is-off">MAX</span>'
+        : `<button class="btn btn-lite shop-buy" data-item="freeze" type="button">💎 200</button>`)}
+    ${item('⚡', 'Double XP', boostActive ? `Active — ${boostMins} min left.` : 'Every lesson pays double XP for 15 minutes.',
+      boostActive ? '<span class="shop-price is-off">ACTIVE</span>'
+        : `<button class="btn btn-lite shop-buy" data-item="boost" type="button">💎 150</button>`)}`;
+  el.querySelectorAll('.shop-buy').forEach(b =>
+    b.addEventListener('click', () => {
+      const prices = { refill: 350, freeze: 200, boost: 150 };
+      const it = b.dataset.item;
+      if (!store.spendGems(prices[it])) { alert(`Not enough gems — that costs ${prices[it]} 💎. Quests and lessons earn more.`); return; }
+      if (it === 'refill') store.refillHearts();
+      else if (it === 'freeze') store.addFreeze();
+      else store.startBoost(15);
+      renderShell('shop');
+    }));
+}
+
+// ── Profile ───────────────────────────────────────────────────
+
+const AVATARS = ['🎭', '🎤', '🎩', '🌟', '🦘', '🦅', '🌹', '🎬', '📜', '🔥'];
+
+function profileMain(el) {
+  const p = store.profile;
+  const t = totals();
+  const ach = [
+    { icon: '🔥', name: 'Wildfire', what: 'day streak', tiers: [3, 7, 30], value: store.streak },
+    { icon: '🧙', name: 'Sage', what: 'XP earned', tiers: [100, 500, 2000], value: store.xp },
+    { icon: '🎓', name: 'Scholar', what: 'lessons completed', tiers: [10, 30, 77], value: store.completed.size },
+    { icon: '🗣', name: 'Wordsmith', what: 'days practised', tiers: [3, 10, 30], value: t.daysPractised },
+  ].map(a => {
+    const level = a.tiers.filter(x => a.value >= x).length;
+    const next = a.tiers[level] ?? a.tiers[a.tiers.length - 1];
+    return { ...a, level, next, pct: Math.min(100, Math.round(a.value / next * 100)) };
+  });
+
+  el.innerHTML = `
+    <section class="profile-head">
+      <span class="profile-avatar" id="profile-avatar">${esc(p.avatar)}</span>
+      <div class="profile-id">
+        <input class="input-text profile-name" id="profile-name" value="${esc(p.name)}" maxlength="40" aria-label="Your name">
+        <p class="pane-note">Joined ${new Date(p.firstSeen).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })} · everything here stays on this device</p>
+      </div>
+    </section>
+    <div class="chip-row avatar-row" id="avatar-row">
+      ${AVATARS.map(a => `<button class="chip-pick ${a === p.avatar ? 'on' : ''}" data-av="${a}" type="button">${a}</button>`).join('')}
+    </div>
+    <h2 class="chart-h">Statistics</h2>
+    <div class="summary-row">
+      <div class="summary-card"><span class="summary-n">🔥 ${store.displayStreak}</span><span class="summary-l">day streak</span></div>
+      <div class="summary-card"><span class="summary-n">⚡ ${store.xp}</span><span class="summary-l">total XP</span></div>
+      <div class="summary-card"><span class="summary-n">💎 ${store.gems}</span><span class="summary-l">gems</span></div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-card"><span class="summary-n">${store.completed.size}</span><span class="summary-l">lessons done</span></div>
+      <div class="summary-card"><span class="summary-n">${t.daysPractised}</span><span class="summary-l">days practised</span></div>
+      <div class="summary-card"><span class="summary-n">${t.attempts}</span><span class="summary-l">answers given</span></div>
+    </div>
+    <h2 class="chart-h">Achievements</h2>
+    ${ach.map(a => `
+      <div class="ach-row">
+        <span class="ach-icon ${a.level ? '' : 'is-locked'}">${a.icon}</span>
+        <div class="ach-info">
+          <span class="ach-name">${a.name} <span class="tag">${a.level ? `Level ${a.level}` : 'Locked'}</span></span>
+          <div class="quest-bar"><div style="width:${a.pct}%"></div>
+            <span class="quest-count">${a.value}/${a.next} ${a.what}</span></div>
+        </div>
+      </div>`).join('')}`;
+
+  el.querySelector('#profile-name').addEventListener('change', e =>
+    store.saveProfile({ name: e.target.value.trim() || 'Actor' }));
+  el.querySelectorAll('[data-av]').forEach(b =>
+    b.addEventListener('click', () => { store.saveProfile({ avatar: b.dataset.av }); renderShell('profile'); }));
+}
+
+// ── More: the reference shelf ─────────────────────────────────
+
+function moreMain(el) {
+  const cards = [
+    { icon: '📖', title: 'The IPA Chart', blurb: 'All 55 sounds — tap any to see how it’s made and hear it.', go: renderChart, color: '#64748b' },
+    { icon: '🎭', title: 'Your Instrument', blurb: 'A tour of the vocal tract.', go: renderInstrument, color: '#64748b' },
+    { icon: '📐', title: 'The Vowel Map', blurb: 'Where every vowel sits in the mouth.', go: renderVowelMap, color: '#64748b' },
+    { icon: '🎬', title: 'My Texts', blurb: 'Your rehearsal projects — roles, notes, recorded takes.', go: renderProjects, color: '#8a6d3b' },
+    { icon: '📕', title: 'Personal Dictionary', blurb: 'Pronunciations you’ve corrected.', go: renderDictionary, color: '#8a6d3b' },
+    { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
+    { icon: '👤', title: 'Profile', blurb: 'Your stats and achievements.', go: () => goSection('profile'), color: '#6f8657' },
+    { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
+  ];
+  el.innerHTML = cards.map((c, i) => `
+    <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
+      <div class="track-glyph">${c.icon}</div>
+      <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
+      <div class="track-arrow">›</div>
+    </button>`).join('');
+  el.querySelectorAll('.track-card').forEach(b =>
+    b.addEventListener('click', () => cards[+b.dataset.i].go()));
+}
+
+const idiomFilters = { q: '', era: 'all', type: 'all', flagged: false };
 
 // Weak-sounds slice for one dialect: this dialect's inventory only, ranked
 // from the same global analytics. Honest about thin data, like the full page.
@@ -409,24 +694,6 @@ function hubHandbook(hub, d, track) {
       </section>`).join('')}`;
   hub.querySelectorAll('.chart-chip').forEach(b =>
     b.addEventListener('click', () => renderSoundDetail(b.dataset.sym)));
-}
-
-// ── Slang & Idiom: the browsable reference ────────────────────
-
-const idiomFilters = { q: '', era: 'all', type: 'all', flagged: false };
-
-function idiomLesson(d, track) {
-  return {
-    id: 'idiom-' + d,
-    title: `${dialectName(d)} slang & idiom`,
-    practice: true,
-    accent: d,
-    phonemes: [],
-    types: ['idiom'],
-    count: 10,
-    unit: { title: 'Slang & Idiom', color: track?.color ?? '#8a6d3b' },
-    track: null,
-  };
 }
 
 function hubIdiom(hub, d, track) {
@@ -520,7 +787,19 @@ function hubIdiom(hub, d, track) {
   draw();
 }
 
-// ── Text & Speech tab ─────────────────────────────────────────
+function idiomLesson(d, track) {
+  return {
+    id: 'idiom-' + d,
+    title: `${dialectName(d)} slang & idiom`,
+    practice: true,
+    accent: d,
+    phonemes: [],
+    types: ['idiom'],
+    count: 10,
+    unit: { title: 'Slang & Idiom', color: track?.color ?? '#8a6d3b' },
+    track: null,
+  };
+}
 
 function textSpeechPane(pane) {
   const libs = Object.entries(LIBRARIES).map(([key, lib]) => ({
@@ -544,70 +823,6 @@ function textSpeechPane(pane) {
     b.addEventListener('click', () => cards[+b.dataset.i].go()));
 }
 
-// ── IPA Handbook tab: the IPA itself — learn it, reference it ─
-
-function handbookPane(pane) {
-  const core = TRACKS.find(t => t.id === 'core');
-  const { done, total } = trackProgress(core);
-  const cards = [
-    { icon: 'ʃə', title: 'IPA Foundations', blurb: `Learn the alphabet itself — ${done}/${total} lessons done.`, go: () => renderTrack(core), color: core.color },
-    { icon: '🕹️', title: 'Core IPA Arcade', blurb: 'Every game on the full inventory, no dialect.', go: renderArcade, color: '#c99e58' },
-    { icon: '📖', title: 'The IPA Chart', blurb: 'All 55 sounds — tap any to see how it’s made and hear it.', go: renderChart, color: '#64748b' },
-    { icon: '🎭', title: 'Your Instrument', blurb: 'A tour of the vocal tract — the parts you shape every sound with.', go: renderInstrument, color: '#64748b' },
-    { icon: '📐', title: 'The Vowel Map', blurb: 'Where every vowel sits in the mouth.', go: renderVowelMap, color: '#64748b' },
-    { icon: '📕', title: 'Personal Dictionary', blurb: 'Pronunciations you’ve corrected — searchable, editable, exportable.', go: renderDictionary, color: '#8a6d3b' },
-    { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
-  ];
-  pane.innerHTML = cards.map((c, i) => `
-    <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
-      <div class="track-glyph">${c.icon}</div>
-      <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
-      <div class="track-arrow">›</div>
-    </button>`).join('');
-  pane.querySelectorAll('.track-card').forEach(b =>
-    b.addEventListener('click', () => cards[+b.dataset.i].go()));
-}
-
-// ── Arcade: single-mode games ─────────────────────────────────
-
-function renderArcade() {
-  record(renderArcade);
-  const cards = MODES.map(m => `
-    <button class="mode-card" data-mode="${m.id}">
-      <span class="mode-icon">${m.icon}</span>
-      <span class="mode-title">${esc(m.title)}</span>
-      <span class="mode-blurb">${esc(m.blurb)}</span>
-    </button>`).join('');
-
-  const chips = ARCADE_DIALECTS.map(d => `
-    <button class="dialect-chip ${d.id === arcadeAccent ? 'on' : ''}" data-dialect="${d.id ?? ''}">
-      <span class="dialect-icon">${d.icon}</span>${esc(d.label)}
-    </button>`).join('');
-  const current = ARCADE_DIALECTS.find(d => d.id === arcadeAccent);
-
-  app.innerHTML = `
-    ${pageTopbar('🕹️ Arcade', '#c99e58')}
-    <main class="track-list">
-      <p class="track-blurb">Pick a game. Endless rounds, no hearts lost — just practice.</p>
-      <div class="dialect-picker">
-        <span class="dialect-label">Practise in</span>
-        <div class="dialect-chips">${chips}</div>
-      </div>
-      <p class="dialect-note">Games use <b>${esc(current.label)}</b> transcriptions.</p>
-      <div class="mode-grid">${cards}</div>
-    </main>`;
-
-  wireBrandHome();
-  app.querySelectorAll('.dialect-chip').forEach(btn =>
-    btn.addEventListener('click', () => {
-      arcadeAccent = btn.dataset.dialect || null;
-      renderArcade();
-    })
-  );
-  app.querySelectorAll('.mode-card').forEach(btn =>
-    btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
-  );
-}
 
 // "Your Instrument": labelled vocal-tract anatomy.
 function renderInstrument() {
@@ -2227,7 +2442,7 @@ const PATH_OFFSETS = [0, 48, 70, 48, 0, -48, -70, -48];
 
 // Build a track's winding lesson path. Shared by the full-page view
 // (renderTrack) and the Lessons tab inside a dialect hub.
-function buildTrackPath(track) {
+function buildTrackPath(track, opts = {}) {
   const chain = TRACK_LESSONS[track.id];
   const active = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l));
   let gi = 0;
@@ -2256,13 +2471,18 @@ function buildTrackPath(track) {
     }).join('');
     return `
       <div class="unit-banner" style="--unit-color:${unit.color}">
-        <div class="unit-banner-label">${esc(track.title)} · Unit ${ui + 1}</div>
-        <div class="unit-banner-title">${esc(unit.title)}</div>
+        <div class="unit-banner-info">
+          <div class="unit-banner-label">${esc(track.title)} · Unit ${ui + 1}</div>
+          <div class="unit-banner-title">${esc(unit.title)}</div>
+        </div>
+        ${opts.guidebook ? `<button class="guidebook-btn" data-unit="${esc(uid)}" type="button" title="Unit guidebook">📘<span> Guidebook</span></button>` : ''}
       </div>
       <div class="path">${rows}</div>`;
   }).join('');
 
   const wire = (container) => {
+    container.querySelectorAll('.guidebook-btn').forEach(btn =>
+      btn.addEventListener('click', () => renderGuidebook(unitById[btn.dataset.unit], track)));
     container.querySelectorAll('.path-node[data-lesson]:not([disabled])').forEach(btn =>
       btn.addEventListener('click', () => {
         const lesson = chain.find(l => l.id === btn.dataset.lesson);
@@ -2363,11 +2583,13 @@ function renderGuide(lesson) {
 // ── Lesson session ────────────────────────────────────────────
 
 function startLesson(lesson) {
+  const free = lesson.practice || lesson.challenge;
+  if (!free && store.hearts <= 0) return renderNoHearts(lesson);
   const session = {
     lesson,
     queue: generateLesson(lesson),
     index: 0,
-    hearts: 3,
+    hearts: free ? Infinity : store.hearts,
     mistakes: 0,
     total: 0,
   };
@@ -2384,7 +2606,7 @@ function lessonChrome(s, body) {
     <header class="lesson-top">
       <button class="quit" id="quit">✕</button>
       <div class="progress"><div class="progress-fill" style="width:${progressPct(s)}%"></div></div>
-      <div class="hearts">${s.lesson.practice ? '♾️' : '❤️'.repeat(s.hearts) + '🖤'.repeat(3 - s.hearts)}</div>
+      <div class="hearts">${s.lesson.practice || s.lesson.challenge ? '♾️' : '❤️'.repeat(Math.max(0, Math.min(s.hearts, HEART_MAX))) + '🖤'.repeat(Math.max(0, HEART_MAX - s.hearts))}</div>
     </header>
     <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback"></footer>`;
@@ -2438,7 +2660,7 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null 
     </div>
     <button class="btn continue ${ok ? '' : 'btn-red'}" id="continue">Continue</button>`;
   if (!ok) {
-    if (penalty && !s.lesson.practice && !s.lesson.challenge) s.hearts--;
+    if (penalty && !s.lesson.practice && !s.lesson.challenge) { s.hearts--; store.loseHeart(); }
     s.mistakes++;
     if (requeue && !s.lesson.challenge && s.hearts > 0) s.queue.push({ ...ex });
   }
@@ -2662,24 +2884,31 @@ function renderResults(s) {
   if (s.lesson.practice) {
     const xp = 5 + (perfect ? 2 : 0);
     store.addXp(xp);
+    const heartBefore = store.hearts;
+    const heartAfter = s.lesson.arcade ? heartBefore : store.gainHeart();  // mixed review earns a heart
+    try { onLessonFinished({ xp, perfect, isGame: true }); } catch { /* quests are best-effort */ }
+    const earnedHeart = heartAfter > heartBefore;
     const arcade = s.lesson.arcade;
     app.innerHTML = `
       <main class="end-screen">
         <div class="end-emoji">${arcade ? s.lesson.mode.icon : '🎯'}</div>
         <h1>${perfect ? (arcade ? 'Flawless round!' : 'Flawless practice!') : (arcade ? 'Round complete!' : 'Practice complete!')}</h1>
-        <p class="end-xp">+${xp} XP</p>
+        <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''}${typeof earnedHeart !== 'undefined' && earnedHeart ? ' · +1 ❤️' : ''}</p>
         <div class="end-actions">
           <button class="btn btn-primary" id="again">${arcade ? 'Play again' : 'Practice again'}</button>
           <button class="btn" id="home">Done</button>
         </div>
       </main>`;
     document.getElementById('again').addEventListener('click', () =>
-      startLesson(arcade ? modeLesson(s.lesson.mode) : practiceLesson(s.lesson.track)));
+      startLesson(arcade ? modeLesson(s.lesson.mode, s.lesson.accent) : practiceLesson(s.lesson.track)));
     document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
     return;
   }
   const xp = 10 + (perfect ? 5 : 0);
   store.recordLesson(s.lesson.id, xp);
+  const gems = perfect ? 15 : 10;
+  store.addGems(gems);
+  try { onLessonFinished({ xp, perfect, isGame: false }); } catch { /* quests are best-effort */ }
   const { done, total } = trackProgress(s.lesson.track);
   const mastered = done === total;
   const chk = s.lesson.checkpoint;
@@ -2688,25 +2917,36 @@ function renderResults(s) {
       <div class="end-emoji">${mastered ? '🎓' : chk ? '🎲' : perfect ? '🏆' : '🎉'}</div>
       <h1>${mastered ? 'Course complete!' : chk ? 'Checkpoint cleared!' : perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
       ${mastered ? `<p>${esc(s.lesson.track.title)} — mastered, start to finish.</p>` : ''}
-      <p class="end-xp">+${xp} XP${perfect ? ' (perfect bonus)' : ''}</p>
+      <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''} · +${gems} 💎${perfect ? ' (perfect bonus)' : ''}</p>
       <button class="btn btn-primary" id="home">Continue</button>
     </main>`;
   document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
 }
 
 function renderFail(s) {
+  renderNoHearts(s.lesson, { failed: true });
+}
+
+// Shown when a lesson ends (or can't start) because the heart pool is empty.
+function renderNoHearts(lesson, { failed = false } = {}) {
+  const next = store.nextHeartMs;
+  const mins = next ? Math.ceil(next / 60000) : 0;
+  const wait = next ? (mins >= 60 ? `${Math.ceil(mins / 60)} h` : `${mins} min`) : '';
   app.innerHTML = `
     <main class="end-screen">
       <div class="end-emoji">💔</div>
-      <h1>Out of hearts</h1>
-      <p>No XP this time — but the sounds are still there. Go again.</p>
+      <h1>${failed ? 'Out of hearts' : 'No hearts left'}</h1>
+      <p>${failed ? 'No XP this time — but the sounds are still there.' : ''}
+         Mixed review earns a heart back${wait ? `, or the next one regenerates in ~${wait}` : ''}.</p>
       <div class="end-actions">
-        <button class="btn btn-primary" id="retry">Try again</button>
-        <button class="btn" id="home">Back to course</button>
+        ${lesson.track ? '<button class="btn btn-primary" id="nh-practice">🎯 Practice for a heart</button>' : ''}
+        <button class="btn" id="nh-shop">💎 Shop</button>
+        <button class="btn" id="nh-home">Done</button>
       </div>
     </main>`;
-  document.getElementById('retry').addEventListener('click', () => startLesson(s.lesson));
-  document.getElementById('home').addEventListener('click', () => renderTrack(s.lesson.track));
+  document.getElementById('nh-practice')?.addEventListener('click', () => startLesson(practiceLesson(lesson.track)));
+  document.getElementById('nh-shop').addEventListener('click', () => goSection('shop'));
+  document.getElementById('nh-home').addEventListener('click', () => exitLesson(lesson));
 }
 
 // ── Defence in depth ──────────────────────────────────────────
