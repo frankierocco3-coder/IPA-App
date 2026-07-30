@@ -79,7 +79,9 @@ tests/              security.test.js (browser-run)
 
 * **Routing is function-based**, not URL-based. `render*()` replaces `#app`
   contents. `navStack` (thunks) powers the back button. Call `record(fn)` at the
-  top of a view so back works.
+  top of a view so back works. Home is the stack root and remembers its active
+  tab/sub-tab in localStorage (`speechcraft-home-tab`, `speechcraft-hub-sub`),
+  so goBack() from a deep page lands on the tab you left.
 * **Rendering is template strings → `innerHTML`.** Every user-controlled value
   MUST pass through `esc()`. Treat project titles, notes, IPA, filenames,
   dictionary entries, imported fields, localStorage and IndexedDB as untrusted.
@@ -113,9 +115,18 @@ tests/              security.test.js (browser-run)
 
 ## Current state
 
-**Working:** 5 tracks / 77 lessons, 14 Arcade modes, IPA Handbook (55
-phonemes + diagrams), 332 curated pieces across 6 libraries, Perform mode,
-rehearsal projects, weak-sound analytics, pronunciation overrides.
+**Working:** dialect-first home — a tab strip (Neutral American / RP /
+Australian / Text & Speech / IPA Handbook) that reopens on the last tab used.
+Each dialect tab holds five sub-tabs: Lessons (track path), Practice (games
+locked to the dialect + idiom drill + weak-sounds slice), Handbook (that
+dialect's sound inventory → tongue placement), Slang & Idiom (224-entry
+reference from js/data/idiom.js; flagged terms hidden by default and NEVER
+drilled; U/non-U for RP, -o/-ie patterns for AUS, false friends everywhere),
+and Texts (jumps to Text & Speech). IPA Foundations, Core IPA Arcade, chart,
+anatomy, vowel map, personal dictionary and privacy live in the IPA Handbook
+tab. Plus: 5 tracks / 77 lessons, 16+1 exercise generators ('idiom' is
+term↔meaning choice), 332 curated pieces, Perform mode, rehearsal projects,
+weak-sound analytics, pronunciation overrides.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
