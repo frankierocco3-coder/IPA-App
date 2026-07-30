@@ -1054,10 +1054,107 @@ body.modal-open { overflow: hidden; }
     font: inherit; flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
     background: none; border: none; border-radius: 10px; padding: 6px 2px; cursor: pointer;
     color: var(--muted); font-size: 10px; font-weight: 800; letter-spacing: 0.4px; text-transform: uppercase;
+    min-height: 48px; justify-content: center;    /* comfortable touch target */
   }
   .bn-icon { font-size: 20px; }
   .bn-item.on { color: var(--green-dark); background: var(--accent-tint); }
   .course-name { display: none; }
   .statsbar { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 10px 0; margin: 0 0 8px; }
   .guidebook-btn span { display: none; }
+}
+
+/* ── Onboarding: the first-session walk-in ─────────────────── */
+.onboard { max-width: 560px; margin: 0 auto; padding: 44px 20px 56px; display: flex; flex-direction: column; gap: 18px; min-height: 88vh; }
+.ob-dots { display: flex; gap: 8px; justify-content: center; }
+.ob-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); }
+.ob-dot.on { background: var(--green); border-color: var(--green-dark); }
+.ob-emblem { display: flex; justify-content: center; }
+.ob-emblem .emblem { width: 96px; height: auto; }
+.onboard h1 { text-align: center; }
+.onboard h1:focus { outline: none; }
+.ob-lede { text-align: center; color: var(--muted); margin: 0 auto; max-width: 42ch; }
+.ob-options { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+.ob-option-row { display: flex; gap: 8px; align-items: stretch; }
+.ob-option-row .ob-option { flex: 1; }
+.ob-option { display: flex; gap: 12px; align-items: center; text-align: left; width: 100%;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px; cursor: pointer;
+  font: inherit; color: inherit; min-height: 44px; }
+.ob-option:hover { background: var(--panel-2); }
+.ob-option.on { border-color: var(--green); background: var(--accent-tint); }
+.ob-opt-icon { font-size: 26px; min-width: 34px; text-align: center; }
+.ob-opt-text { display: flex; flex-direction: column; gap: 2px; }
+.ob-opt-text small { color: var(--muted); }
+.ob-sample { align-self: center; white-space: nowrap; }
+.ob-actions { display: flex; justify-content: center; margin-top: 10px; }
+.ob-actions-col { flex-direction: column; gap: 10px; align-items: stretch; }
+.ob-footer { margin-top: auto; display: flex; }
+.ob-back { align-self: flex-start; }
+
+/* Visually hidden, still read by screen readers. */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* ── Continue-learning card: the dominant action on Learn ──── */
+.continue-card {
+  display: flex; align-items: center; gap: 16px; justify-content: space-between;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 16px;
+  padding: 16px 18px; margin-bottom: 14px;
+}
+.cc-stage { font-size: 12.5px; font-weight: 700; letter-spacing: 0.4px; color: var(--muted); text-transform: uppercase; }
+.continue-card h2 { font-family: var(--serif); font-size: 24px; margin: 3px 0 2px; }
+.cc-meta { color: var(--muted); font-size: 13.5px; margin: 0; }
+.cc-go { white-space: nowrap; min-height: 44px; }
+
+/* ── Path labels: what each node is, without opening it ────── */
+.path-label {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  width: 168px; display: none; flex-direction: column; gap: 1px; pointer-events: none;
+}
+.path-label b { font-size: 13.5px; line-height: 1.25; }
+.path-label small { color: var(--muted); font-size: 11.5px; }
+.path-label.side-r { left: calc(50% + var(--dx) + 56px); text-align: left; }
+.path-label.side-l { right: calc(50% - var(--dx) + 56px); text-align: right; align-items: flex-end; }
+@media (min-width: 980px) { .path-label { display: flex; } }
+
+/* Locked-node explanation (also the mobile answer to a dead tap). */
+.path-pop {
+  position: absolute; top: calc(100% - 6px); left: 50%; transform: translateX(-50%);
+  z-index: 30; width: min(300px, 86vw);
+  background: var(--ink); color: var(--panel); border-radius: 12px; padding: 10px 13px;
+  display: flex; flex-direction: column; gap: 3px; font-size: 13px;
+  box-shadow: 0 8px 22px rgba(0,0,0,0.28);
+}
+.path-pop b { font-size: 13.5px; }
+.path-node.locked { cursor: pointer; }               /* it explains itself now */
+.path-node.locked:hover { background: #d2ccbb; color: #8d8672; }
+
+/* Practice card metadata line (duration / audio requirement). */
+.mode-meta { color: var(--muted); font-size: 11.5px; margin-top: 4px; }
+
+/* ── Stepped guide + completion summary ─────────────────────── */
+.step-count { color: var(--muted); font-size: 13px; white-space: nowrap; min-width: 52px; text-align: right; }
+.guide-stepped .guide-step { min-height: 220px; }
+.guide-step h1:focus { outline: none; }
+.guide-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; }
+.guide-step-sym { font-family: var(--serif); }
+.end-summary { display: flex; flex-direction: column; gap: 8px; margin: 14px auto 4px; max-width: 380px; width: 100%; }
+.end-block { display: flex; justify-content: space-between; gap: 14px; background: var(--panel);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 9px 14px; text-align: left; }
+.end-block-l { color: var(--muted); font-size: 13px; }
+.end-block-v { font-weight: 700; }
+.end-syms { font-family: var(--serif); letter-spacing: 1px; }
+
+/* ── Accessibility polish ───────────────────────────────────── */
+/* One visible focus ring everywhere, only for keyboard focus. */
+:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; border-radius: 6px; }
+.path-node:focus-visible { outline-offset: 4px; border-radius: 50%; }
+
+/* Locked path nodes: readable, but unmistakably not active. */
+.path-node.locked { color: #6e6a5c; }
+.path-node.locked .path-icon { opacity: 0.65; }
+
+/* Honour reduced-motion preferences: no pulsing, no press-travel. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+  .path-node.active { animation: none; }
 }

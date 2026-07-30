@@ -138,6 +138,19 @@ export const store = {
   get boostUntil() { return load().boostUntil ?? 0; },
   startBoost(minutes = 15) { const s = load(); s.boostUntil = Date.now() + minutes * 60000; save(s); },
 
+  // ── Onboarding / preferences ────────────────────────────────
+  // { done, goal, accent, diagnostic } — goal is one of GOALS' ids. Users
+  // whose progress predates onboarding are marked done on first load so
+  // they are never funnelled through it.
+  get onboarding() { return load().onboarding ?? { done: false, goal: null, accent: null }; },
+  saveOnboarding(patch) {
+    const s = load();
+    s.onboarding = { ...(s.onboarding ?? { done: false, goal: null, accent: null }), ...patch };
+    save(s);
+  },
+  // Hearts, gems, streaks and quests stay quiet until something is earned.
+  get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
+
   // ── Local profile ───────────────────────────────────────────
   get profile() {
     const s = load();

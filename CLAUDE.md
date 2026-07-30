@@ -117,34 +117,48 @@ tests/              security.test.js (browser-run)
 ## Current state
 
 **Working:** Duolingo-style shell (Speechcraft skin): left sidebar
-(Learn/Practice/Text Book/Quests/Shop/Profile/More; bottom nav on mobile), stats
-bar (course chip + 🔥/💎/❤️), right rail (quests + today's rehearsal). You are
-always "in" one course — 🇺🇸/🇬🇧/🇦🇺/ʃə Foundations — switched via the course
-chip menu. Learn = the course's path with per-unit 📘 Guidebooks. Practice = Today's
-Rehearsal + mixed review + the games ONLY. Text Book = the reference shelf,
-course-aware, in this order: IPA (the course's sound inventory), Native
-Idioms (dialects only, card wears the dialect's flag; 224 entries in
-js/data/idiom.js — flagged terms hidden by default and NEVER drilled),
-Texts & Speeches (full page; no longer a sidebar item), Your Instrument,
-The Vowel Map. Idiom filters reset to All on every visit (Frankie's call —
-a persisted filter reads as missing content). Idiom cards have listen
-buttons (term + example) speaking in the entry's own dialect — device-voice
-fallback until clips are generated (`--idioms` mode in generate_voices.py,
-~15k credits, blocked on the ElevenLabs quota).
-Spoken audio ALWAYS follows the dialect context: guidebooks and
-renderSoundDetail take the course accent (Frankie's rule — inside a course,
-only that dialect's two voices are ever heard). The symbol-based lang guess
-survives only for the Foundations full chart. Deep-page topbar titles stay
-short ("🗣 Native Idioms", "📖 IPA") — long ones wrap badly beside the
-brand. The standalone Accent Shift Drills track is removed from the UI
-(Frankie's call); Stage 3 shift lessons inside each course and the two
-shift games remain.
+**Learn / Practice / Library / Progress / More** (same five on the mobile
+bottom nav; Shop and Profile live under More but are still shell sections;
+LEGACY_SECTIONS maps old saved 'textbook'/'quests' states). You are always
+"in" one course — 🇺🇸/🇬🇧/🇦🇺/ʃə Foundations — switched via the course chip.
+First run: 4-step onboarding (welcome → goal → accent with 🔊 samples →
+begin-or-diagnostic); prefs in store.onboarding; users with prior progress
+are auto-marked done; revisit via More → Preferences. Until the first
+lesson pays out (store.hasEarnedAnything) the stats bar shows only the
+course chip and the rail hides quests.
+Learn = "Continue learning" card (next lesson, type, ~min, primary action)
+above the winding path; desktop nodes carry side labels (title · type ·
+~min · XP); tapping a locked node opens a popover naming the prerequisite.
+Practice = Quick Practice (weak-sound rehearsal when analytics has data,
+honest mixed review otherwise) + Today's Rehearsal + mixed review + games
+grouped Listening / Reading IPA / Transcription / Accent & Vocabulary, with
+~min and 🎧-audio badges. Practice never costs hearts.
+Library = IPA (course inventory), Native Idioms (dialects only, dialect's
+flag, listen buttons per card; 224 entries, flagged hidden by default and
+NEVER drilled), Texts & Speeches, Your Instrument, The Vowel Map, Personal
+Dictionary. Idiom filters reset to All on every visit.
+Progress = stats, daily quests (claiming), top weak sounds + full report,
+achievements. Profile is just name/avatar now.
+Lesson guides are STEPPED (guideSteps/renderGuide: overview → one sound per
+step → words → ready; Back/Continue, step count, focus lands on each step's
+h1). Results screen shows accuracy, covered symbols, missed symbols
+(s.missedSyms, collected in showFeedback), and a Next-lesson button.
+Spoken audio ALWAYS follows the dialect context (Frankie's rule — inside a
+course, only that dialect's two voices are heard); the symbol-based lang
+guess survives only for the Foundations full chart. Idiom listen buttons
+fall back to device voice until clips are generated (`--idioms` mode in
+generate_voices.py, ~15k credits, blocked on the ElevenLabs quota).
+Deep-page topbar titles stay short — long ones wrap beside the brand. The
+standalone Accent Shift Drills track stays removed (Frankie's call); Stage
+3 shift lessons and the two shift games remain.
 Economy: gems (lessons +10/+15, quest claims), persistent 5 hearts (regen
 1/4h, mixed review earns one, gems refill), streak freezes (max 2), 15-min
 double-XP boost — all in js/state.js; daily quests in js/quests.js hook
 onLessonFinished() in renderResults. No leaderboards (no accounts — decided,
-not forgotten). More = IPA chart / Weak Sounds (the full report lives here —
-its analytics still feed Today's Rehearsal) / My Texts / dictionary / privacy.
+not forgotten).
+A11y: global :focus-visible ring, reduced-motion support, aria-labels on
+icon-only controls (guidebook/speaker/freeplay), aria-live lesson feedback,
+#shell-main is a <main>, 48px bottom-nav targets.
 Plus: 5 tracks / 77 lessons, 16+1 exercise generators, 332 curated pieces,
 Perform mode, rehearsal projects, analytics, pronunciation overrides.
 
