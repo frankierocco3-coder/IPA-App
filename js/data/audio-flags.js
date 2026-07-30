@@ -7,8 +7,11 @@
 // Clips rejected by ear. Playback skips these; they are queued for
 // regeneration. Format: '<dialect>/<voice>/<clip-name>' (no extension).
 export const KNOWN_BAD = [
-  'nam/f/strut',   // vowel drifts toward "stroot" — not /strʌt/
   'nam/f/car',     // uvular/French-sounding R — must be American approximant
+  'nam/f/care',    // rejected in the 2026-07-30 ear-check
+  'nam/f/strut',   // vowel drifts toward "stroot" — not /strʌt/
+  'nam/f/was',     // rejected in the 2026-07-30 ear-check
+  'nam/m/law',     // rejected in the 2026-07-30 ear-check
 ];
 
 // Isolated-phoneme clips approved by ear. A phoneme control only plays

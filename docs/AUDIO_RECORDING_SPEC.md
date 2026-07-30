@@ -51,10 +51,13 @@ by ear in `#audit`.
 | --- | --- | --- |
 | `audio/nam/f/strut.mp3` | vowel drifts toward "stroot" | /strʌt/ |
 | `audio/nam/f/car.mp3` | uvular/French-sounding R | /kɑr/, American approximant |
+| `audio/nam/f/care.mp3` | rejected in the 2026-07-30 ear-check | /ker/ |
+| `audio/nam/f/was.mp3` | rejected in the 2026-07-30 ear-check | /wʌz/ |
+| `audio/nam/m/law.mp3` | rejected in the 2026-07-30 ear-check | /lɔː/ |
 
-`audio/nam/m/strut.mp3` and `audio/nam/m/car.mp3` currently carry these
-words alone — **they need an ear-check** (they may be fine, or the same
-voice-level problem). Review in `#audit`, then export.
+Each of these words still has one un-flagged voice variant carrying it, so
+playback stays on real clips (no TTS fallback engaged). `nam/m/strut` and
+`nam/m/car` were not flagged in the 2026-07-30 review.
 
 ## Approval workflow
 
