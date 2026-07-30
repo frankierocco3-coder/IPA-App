@@ -22,7 +22,7 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Top-level files that ship.
-FILES = ['index.html', 'manifest.json', 'icon-180.png', 'icon-512.png']
+FILES = ['index.html', 'manifest.json', 'icon-180.png', 'icon-512.png', 'favicon.svg']
 
 # Directories that ship, and the extensions allowed inside them.
 DIRS = {
