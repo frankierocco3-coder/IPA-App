@@ -205,7 +205,7 @@ const COURSES = [
 const SECTIONS = [
   { id: 'learn', icon: '🏠', label: 'Learn' },
   { id: 'practice', icon: '🎯', label: 'Practice' },
-  { id: 'texts', icon: '📜', label: 'Texts' },
+  { id: 'textbook', icon: '📚', label: 'Text Book' },
   { id: 'quests', icon: '🏆', label: 'Quests' },
   { id: 'shop', icon: '🛍️', label: 'Shop' },
   { id: 'profile', icon: '👤', label: 'Profile' },
@@ -266,7 +266,7 @@ function renderShell(section) {
       </aside>
     </div>
     <nav class="bottom-nav" aria-label="Sections">
-      ${['learn', 'practice', 'texts', 'quests', 'more'].map(id => {
+      ${['learn', 'practice', 'textbook', 'quests', 'more'].map(id => {
         const s = SECTIONS.find(x => x.id === id);
         return `<button class="bn-item ${id === section ? 'on' : ''}" data-sec="${id}" type="button">
           <span class="bn-icon">${s.icon}</span><span class="bn-label">${s.label}</span></button>`;
@@ -283,7 +283,7 @@ function renderShell(section) {
   const main = document.getElementById('shell-main');
   if (section === 'learn') learnMain(main, course);
   else if (section === 'practice') practiceMain(main, course);
-  else if (section === 'texts') textSpeechPane(main);
+  else if (section === 'textbook') textbookMain(main, course);
   else if (section === 'quests') questsMain(main);
   else if (section === 'shop') shopMain(main);
   else if (section === 'profile') profileMain(main);
@@ -415,7 +415,6 @@ function renderGuidebook(unit, track) {
 function practiceMain(el, course) {
   const d = course.id === 'core' ? null : course.id;
   const track = trackFor(course.id);
-  const shiftTrack = (d === 'nam' || d === 'rp') ? TRACKS.find(t => t.id === 'shift') : null;
   const name = d ? dialectName(d) : 'Core IPA';
 
   const modeCards = MODES.map(m => `
@@ -424,14 +423,6 @@ function practiceMain(el, course) {
       <span class="mode-title">${esc(m.title)}</span>
       <span class="mode-blurb">${esc(m.blurb)}</span>
     </button>`).join('');
-
-  const collections = [
-    { id: 'weak', icon: '📊', title: 'Weak Sounds', blurb: 'What keeps slipping — ranked from your real answers.' },
-    d ? { id: 'idioms', icon: '🗣', title: 'Native Idioms', blurb: `The words that carry the ${name} voice.` } : null,
-    { id: 'inventory', icon: '📖', title: 'Sound Handbook', blurb: d ? `${name}’s sounds and tongue placement.` : 'All 55 sounds and how they’re made.' },
-    shiftTrack ? { id: 'shift', icon: '⇄', title: 'Accent Shift Drills', blurb: 'Transform words between American and RP.' } : null,
-    { id: 'gotexts', icon: '📜', title: 'Texts & Speeches', blurb: 'Sonnets, monologues, and your own pieces.' },
-  ].filter(Boolean);
 
   el.innerHTML = `
     ${dailyRehearsalCard()}
@@ -446,29 +437,54 @@ function practiceMain(el, course) {
         <span class="mode-blurb">The words, not just the sounds.</span>
       </button>` : ''}
       ${modeCards}
-    </div>
-    <h2 class="chart-h">Your collections</h2>
-    ${collections.map(c => `
-      <button class="track-card" data-coll="${c.id}" type="button" style="--track-color:${track.color}">
-        <div class="track-glyph">${c.icon}</div>
-        <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
-        <div class="track-arrow">›</div>
-      </button>`).join('')}`;
+    </div>`;
 
   el.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
   el.querySelector('#hub-mixed').addEventListener('click', () => startLesson(practiceLesson(track)));
   el.querySelector('#hub-idiom-drill')?.addEventListener('click', () => startLesson(idiomLesson(d, track)));
   el.querySelectorAll('.mode-card[data-mode]').forEach(b =>
     b.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === b.dataset.mode), d))));
-  el.querySelectorAll('[data-coll]').forEach(b =>
-    b.addEventListener('click', () => {
-      const id = b.dataset.coll;
-      if (id === 'weak') renderWeakSounds();
-      else if (id === 'idioms') renderIdioms(d);
-      else if (id === 'inventory') d ? renderInventory(d) : renderChart();
-      else if (id === 'shift') renderTrack(shiftTrack);
-      else if (id === 'gotexts') goSection('texts');
-    }));
+}
+
+// ── Text Book: the reference shelf for the active course ─────
+// IPA (the course's sound inventory), Native Idioms (dialects only, wearing
+// the dialect's flag), Texts & Speeches, then Weak Sounds — in that order.
+
+function textbookMain(el, course) {
+  const d = course.id === 'core' ? null : course.id;
+  const track = trackFor(course.id);
+  const cards = [
+    { icon: '📖', title: 'IPA',
+      blurb: d ? `${dialectName(d)}’s sounds and tongue placement.` : 'All 55 sounds and how they’re made.',
+      go: () => (d ? renderInventory(d) : renderChart()) },
+    d ? { icon: course.icon, title: 'Native Idioms',
+      blurb: `The words that carry the ${dialectName(d)} voice.`,
+      go: () => renderIdioms(d) } : null,
+    { icon: '📜', title: 'Texts & Speeches',
+      blurb: 'Sonnets, monologues, and your own pieces.',
+      go: renderTextsPage },
+    { icon: '📊', title: 'Weak Sounds',
+      blurb: 'What keeps slipping — ranked from your real answers.',
+      go: renderWeakSounds },
+  ].filter(Boolean);
+  el.innerHTML = cards.map((c, i) => `
+    <button class="track-card" data-i="${i}" type="button" style="--track-color:${track.color}">
+      <div class="track-glyph">${c.icon}</div>
+      <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
+      <div class="track-arrow">›</div>
+    </button>`).join('');
+  el.querySelectorAll('.track-card').forEach(b =>
+    b.addEventListener('click', () => cards[+b.dataset.i].go()));
+}
+
+// Texts & Speeches as a full page (it left the sidebar for the Text Book).
+function renderTextsPage() {
+  record(renderTextsPage);
+  app.innerHTML = `
+    ${pageTopbar('📜 Texts & Speeches', '#8a6d3b')}
+    <main class="track-list" id="texts-page"></main>`;
+  wireBrandHome();
+  textSpeechPane(document.getElementById('texts-page'));
 }
 
 // Full-page wrappers for the dialect panes, so collections open like any
