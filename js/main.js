@@ -2,7 +2,8 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
-import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip } from './audio.js';
+import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
@@ -31,6 +32,11 @@ import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE, confidenceOf } from './analytics.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
+
+// File slug for a phoneme's isolated clip: derived from its display name,
+// same transform the word clips use ("STRUT vowel" → strut_vowel).
+const phonemeSlug = sym =>
+  PHONEMES[sym] ? PHONEMES[sym].name.toLowerCase().replace(/[^a-z0-9]+/g, '_') : null;
 
 const app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -461,7 +467,8 @@ function renderGuidebook(unit, track) {
   const sections = unit.lessons.map(l => {
     const chips = (l.phonemes ?? []).map(ph => PHONEMES[ph] ? `
       <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(PHONEMES[ph].examples[0])}"
-              title="${esc(PHONEMES[ph].name)}">/${esc(ph)}/</button>` : '').join('');
+              aria-label="Hear ${esc(ph)} in the word “${esc(PHONEMES[ph].examples[0])}”"
+              title="${esc(PHONEMES[ph].name)} — hear it in “${esc(PHONEMES[ph].examples[0])}”">/${esc(ph)}/</button>` : '').join('');
     return `
       <section class="gb-lesson">
         <h2>${esc(l.title)}</h2>
@@ -843,11 +850,21 @@ const wiiWordRow = (word, ipa, note = '') => `
     ${note ? `<span class="guide-note">${esc(note)}</span>` : ''}
   </div>`;
 
-// A tappable sound chip: symbol + example, speaks the example.
+// A tappable sound chip: symbol + example word. Plays the WORD (labelled as
+// such); flips to the isolated phoneme automatically once one is approved.
 const wiiSoundChip = ph => {
   const p = PHONEMES[ph];
+  const slug = phonemeSlug(ph);
+  if (hasPhonemeClip(slug, 'nam')) {
+    return `<span class="wii-sound-pair">
+      <button class="word-chip" data-phoneme="${esc(slug)}" type="button"
+        aria-label="Hear the isolated sound ${esc(ph)}">🔊 /${esc(ph)}/</button>
+      <button class="word-chip" data-say="${esc(p.examples[0])}" type="button"
+        aria-label="Hear the word “${esc(p.examples[0])}”">${esc(p.examples[0])}</button>
+    </span>`;
+  }
   return `<button class="word-chip" data-say="${esc(p.examples[0])}" type="button"
-    aria-label="Sound ${esc(ph)}, as in ${esc(p.examples[0])}">/${esc(ph)}/ ${esc(p.examples[0])}</button>`;
+    aria-label="Hear the word “${esc(p.examples[0])}”, which contains ${esc(ph)}">/${esc(ph)}/ in “${esc(p.examples[0])}”</button>`;
 };
 
 // One-tap mini question. `key` tracks the answer in the module state so a
@@ -904,8 +921,11 @@ function wiiStepHtml(step, st) {
       <p class="wii-callout">IPA gives you a map. Audio lets you hear the destination; IPA shows you how to find it again.</p>`;
     case 2: return `
       <h1>One symbol, one sound</h1>
-      <p class="guide-text">Every symbol always means the same sound. Tap to hear each one in a word:</p>
+      <p class="guide-text">Every symbol always means the same sound. Tap to hear each one inside a word${
+        hasPhonemeClip(phonemeSlug('ʃ'), 'nam') ? ' — or tap the symbol to hear the bare sound by itself' : ''}:</p>
       <div class="chips">${['iː', 'æ', 'ɑ', 'ʃ', 'θ', 'ð', 'ŋ'].map(wiiSoundChip).join('')}</div>
+      ${hasPhonemeClip(phonemeSlug('ʃ'), 'nam') ? ''
+        : '<p class="pane-note">Isolated recordings of each bare sound are on the way — until then, every button plays the sound inside its word.</p>'}
       ${wiiQuestion(st, 'ship', 'Which symbol represents the <b>first sound</b> in “ship”?', [
         { label: '/s/', ok: false }, { label: '/ʃ/', ok: true }, { label: '/ɪ/', ok: false }, { label: '/θ/', ok: false },
       ])}`;
@@ -973,10 +993,18 @@ function wiiStepHtml(step, st) {
         </div>
         ${st.revealed ? `
           <div class="chips" id="wii-demo-syms">
-            <button class="word-chip" data-say="ship" type="button" title="as in ship">/ʃ/</button>
-            <button class="word-chip" data-say="kit" type="button" title="as in kit">/ɪ/</button>
-            <button class="word-chip" data-say="pen" type="button" title="as in pen">/p/</button>
+            ${[['ʃ', 'ship'], ['ɪ', 'kit'], ['p', 'pen']].map(([ph, w]) => {
+              const slug = phonemeSlug(ph);
+              return hasPhonemeClip(slug, 'nam')
+                ? `<button class="word-chip" data-phoneme="${esc(slug)}" type="button"
+                     aria-label="Hear the isolated sound ${esc(ph)}">🔊 /${esc(ph)}/</button>`
+                : `<button class="word-chip" data-say="${esc(w)}" type="button"
+                     aria-label="Hear the word “${esc(w)}”, home of ${esc(ph)}">/${esc(ph)}/ in “${esc(w)}”</button>`;
+            }).join('')}
           </div>
+          <p class="pane-note">${hasPhonemeClip(phonemeSlug('ʃ'), 'nam')
+            ? 'Tap a symbol to hear the sound by itself; tap 🔊 above to hear the whole word.'
+            : 'Each symbol button plays its home word for now — isolated recordings are coming.'}</p>
           <button class="btn-lite" data-sound-detail="ʃ" type="button">📐 See /ʃ/ tongue placement ›</button>`
         : '<button class="btn" id="wii-reveal" type="button">Reveal the transcription</button>'}
       </div>`;
@@ -1030,6 +1058,8 @@ function drawWhatIsIpa(step, st) {
   });
   app.querySelectorAll('[data-say]').forEach(b =>
     b.addEventListener('click', () => speak(b.dataset.say, { lang: b.dataset.lang ?? 'en-US' })));
+  app.querySelectorAll('[data-phoneme]').forEach(b =>
+    b.addEventListener('click', () => playPhoneme(b.dataset.phoneme, 'nam')));
   app.querySelector('[data-sound-detail]')?.addEventListener('click', e =>
     renderSoundDetail(e.currentTarget.dataset.soundDetail, 'nam'));
   document.getElementById('wii-reveal')?.addEventListener('click', () => { st.revealed = true; drawWhatIsIpa(step, st); });
@@ -1208,6 +1238,144 @@ function renderPreferences() {
   app.querySelectorAll('[data-course]').forEach(b =>
     b.addEventListener('click', () => { setCourse(b.dataset.course); renderPreferences(); }));
   document.getElementById('pref-rerun').addEventListener('click', () => renderOnboarding());
+}
+
+// ── Audio audit: the owner's ear-check grid (#audit) ──────────
+// Dev-facing, reached only by adding #audit to the URL — never in any nav.
+// Every clip playable in two taps, markable good/bad, and exportable as a
+// fresh js/data/audio-flags.js to commit. Plays files DIRECTLY (even
+// quarantined ones) — the whole point is re-listening.
+
+const AUDIT_KEY = 'speechcraft-audio-audit-v1';
+const auditVerdicts = () => { try { return JSON.parse(localStorage.getItem(AUDIT_KEY)) ?? {}; } catch { return {}; } };
+const saveVerdict = (id, v) => {
+  const all = auditVerdicts();
+  if (v) all[id] = v; else delete all[id];
+  try { localStorage.setItem(AUDIT_KEY, JSON.stringify(all)); } catch {}
+};
+
+async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', status: 'all' }) {
+  stopSpeech();
+  let index = {};
+  try { index = await (await fetch('audio/index.json')).json(); } catch { /* rows empty */ }
+  const verdicts = auditVerdicts();
+  KNOWN_BAD_LIST.forEach(id => { if (!verdicts[id]) verdicts[id] = 'bad'; });
+
+  const rows = [];
+  for (const d of Object.keys(index)) {
+    for (const v of Object.keys(index[d])) {
+      for (const clip of index[d][v]) {
+        rows.push({ id: `${d}/${v}/${clip}`, d, v, clip, kind: 'word', path: `audio/${d}/${v}/${clip}.mp3` });
+      }
+    }
+  }
+  for (const d of ['nam', 'rp', 'aus']) {
+    for (const sym of phonemesForAccent(d)) {
+      const slug = phonemeSlug(sym);
+      for (const v of ['f', 'm']) {
+        rows.push({ id: `${d}/${v}/${slug}`, d, v, clip: `/${sym}/`, kind: 'phoneme',
+          path: `audio/phonemes/${d}/${v}/${slug}.mp3`,
+          missing: !hasPhonemeClip(slug, d) });
+      }
+    }
+  }
+
+  const f = filters;
+  const shown = rows.filter(r =>
+    (f.d === 'all' || r.d === f.d) &&
+    (f.v === 'all' || r.v === f.v) &&
+    (f.kind === 'all' || r.kind === f.kind) &&
+    (f.status === 'all'
+      || (f.status === 'missing' && r.missing)
+      || (f.status === 'bad' && verdicts[r.id] === 'bad')
+      || (f.status === 'good' && verdicts[r.id] === 'good')
+      || (f.status === 'unreviewed' && !r.missing && !verdicts[r.id])));
+  const CAP = 300;
+
+  const sel = (id, opts, cur) => `
+    <select id="${id}" class="input-text audit-sel">
+      ${opts.map(o => `<option value="${o}" ${o === cur ? 'selected' : ''}>${o}</option>`).join('')}
+    </select>`;
+
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="backbtn" id="audit-exit" aria-label="Back to the app" title="Back to the app">‹</button>
+      <div class="track-title" style="color:#64748b">🎧 Audio audit</div>
+      <div class="stats"><span class="stat">${shown.length} clips</span></div>
+    </header>
+    <main class="guide audit-page">
+      <p class="pane-note">Owner tool. Play each clip, mark it — <b>Good</b> means a learner may hear it, <b>Bad</b> quarantines it. Export writes a new <code>js/data/audio-flags.js</code> to commit.</p>
+      <div class="audit-filters">
+        ${sel('af-d', ['all', 'nam', 'rp', 'aus'], f.d)}
+        ${sel('af-v', ['all', 'f', 'm'], f.v)}
+        ${sel('af-kind', ['all', 'word', 'phoneme'], f.kind)}
+        ${sel('af-status', ['all', 'unreviewed', 'good', 'bad', 'missing'], f.status)}
+        <button class="btn" id="audit-export" type="button">Export flags</button>
+      </div>
+      <textarea id="audit-out" class="input-text audit-out" hidden rows="10" aria-label="Exported audio-flags.js"></textarea>
+      <div class="audit-rows">
+        ${shown.slice(0, CAP).map(r => `
+          <div class="audit-row ${verdicts[r.id] ?? ''}" data-id="${esc(r.id)}">
+            ${r.missing ? '<span class="audit-play is-off" title="No clip yet">∅</span>'
+              : `<button class="audit-play" data-path="${esc(r.path)}" type="button" aria-label="Play ${esc(r.id)}">▶</button>`}
+            <span class="audit-name">${esc(r.clip)}</span>
+            <span class="audit-meta">${r.d}/${r.v} · ${r.kind}${r.missing ? ' · missing' : ''}</span>
+            ${r.missing ? '' : `
+              <span class="audit-verdict">
+                <button class="btn-lite av-good" type="button" aria-pressed="${verdicts[r.id] === 'good'}">Good</button>
+                <button class="btn-lite av-bad" type="button" aria-pressed="${verdicts[r.id] === 'bad'}">Bad</button>
+              </span>`}
+          </div>`).join('')}
+        ${shown.length > CAP ? `<p class="pane-note">Showing ${CAP} of ${shown.length} — narrow the filters.</p>` : ''}
+      </div>
+    </main>`;
+
+  document.getElementById('audit-exit').addEventListener('click', () => {
+    history.replaceState(null, '', location.pathname);
+    renderHome();
+  });
+  [['af-d', 'd'], ['af-v', 'v'], ['af-kind', 'kind'], ['af-status', 'status']].forEach(([id, key]) =>
+    document.getElementById(id).addEventListener('change', e =>
+      renderAudioAudit({ ...f, [key]: e.target.value })));
+
+  let playing = null;
+  app.querySelectorAll('.audit-play[data-path]').forEach(b =>
+    b.addEventListener('click', () => {
+      if (playing) playing.pause();
+      playing = new Audio(b.dataset.path);
+      playing.play().catch(() => { b.textContent = '✗'; b.title = 'File failed to load'; });
+    }));
+
+  app.querySelectorAll('.audit-row').forEach(row => {
+    const id = row.dataset.id;
+    row.querySelector('.av-good')?.addEventListener('click', () => {
+      const cur = auditVerdicts()[id];
+      saveVerdict(id, cur === 'good' ? null : 'good');
+      renderAudioAudit(f);
+    });
+    row.querySelector('.av-bad')?.addEventListener('click', () => {
+      const cur = auditVerdicts()[id];
+      saveVerdict(id, cur === 'bad' ? null : 'bad');
+      renderAudioAudit(f);
+    });
+  });
+
+  document.getElementById('audit-export').addEventListener('click', () => {
+    const all = auditVerdicts();
+    KNOWN_BAD_LIST.forEach(id => { if (!all[id]) all[id] = 'bad'; });
+    const bad = Object.keys(all).filter(k => all[k] === 'bad').sort();
+    const phonemeIds = new Set(rows.filter(r => r.kind === 'phoneme').map(r => r.id));
+    const approved = Object.keys(all).filter(k => all[k] === 'good' && phonemeIds.has(k)).sort();
+    const out = document.getElementById('audit-out');
+    out.hidden = false;
+    out.value = [
+      '// Generated by the #audit page on ' + new Date().toISOString().slice(0, 10) + ' — review, then replace js/data/audio-flags.js.',
+      'export const KNOWN_BAD = [', ...bad.map(x => `  '${x}',`), '];', '',
+      'export const APPROVED_PHONEMES = [', ...approved.map(x => `  '${x}',`), '];', '',
+    ].join('\n');
+    out.focus();
+    out.select();
+  });
 }
 
 // ── More: the reference shelf ─────────────────────────────────
@@ -2967,15 +3135,26 @@ function renderSoundDetail(sym, accent) {
   const lang = ACCENT_LANG[accent]
     ?? ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
     ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'].includes(sym) ? 'en-AU' : 'en-GB');
+  const acc = accent ?? ({ 'en-US': 'nam', 'en-GB': 'rp', 'en-AU': 'aus' })[lang];
   const isVowel = p.type !== 'consonant';
+  // The big symbol plays the ISOLATED sound only when an ear-approved clip
+  // exists. Until then it is an explicit word control — labelled as such,
+  // never pretending a word is the phoneme.
+  const slug = phonemeSlug(sym);
+  const hasIso = hasPhonemeClip(slug, acc);
   const chips = p.examples.map(w =>
-    `<button class="word-chip" data-say="${esc(w)}">🔊 ${esc(w)}</button>`).join('');
+    `<button class="word-chip" data-say="${esc(w)}" aria-label="Hear the word “${esc(w)}”">🔊 ${esc(w)}</button>`).join('');
 
   app.innerHTML = `
     ${pageTopbar(`/${esc(sym)}/`, '#64748b')}
     <main class="guide sound-detail">
       <div class="sound-hero">
-        <button class="sound-big" id="say-sym" title="Hear it">/${esc(sym)}/</button>
+        <div class="sound-big-wrap">
+          <button class="sound-big" id="say-sym"
+            aria-label="${hasIso ? `Hear the isolated sound ${esc(sym)}` : `Hear the word “${esc(p.examples[0])}” — an isolated recording of ${esc(sym)} is not available yet`}"
+            title="${hasIso ? 'Hear the sound' : `Hear it in “${esc(p.examples[0])}”`}">/${esc(sym)}/</button>
+          <span class="sound-big-cap">${hasIso ? '🔊 Hear the sound' : `🔊 in “${esc(p.examples[0])}”`}</span>
+        </div>
         <div>
           <h1>${esc(p.name)}</h1>
           <p class="guide-text">${esc(p.hint)}.</p>
@@ -2988,7 +3167,9 @@ function renderSoundDetail(sym, accent) {
     </main>`;
 
   wireBrandHome();
-  const say = () => speak(p.examples[0], { lang });
+  // Two distinct controls, never cross-substituted: a phoneme request plays
+  // the phoneme or nothing; the word-mode control is explicitly a word.
+  const say = () => { if (hasIso) playPhoneme(slug, acc); else speak(p.examples[0], { lang }); };
   document.getElementById('say-sym').addEventListener('click', say);
   app.querySelectorAll('[data-say]').forEach(b =>
     b.addEventListener('click', () => speak(b.dataset.say, { lang })));
@@ -3186,7 +3367,7 @@ function guideStepHtml(lesson, s, st) {
       <h1 class="guide-step-sym">/${esc(s.ph)}/ · ${esc(p.name)}</h1>
       <div class="guide-card">
         <button class="guide-symbol" data-say="${esc(p.examples[0])}" type="button"
-                aria-label="Hear “${esc(p.examples[0])}”">/${esc(s.ph)}/</button>
+                aria-label="Hear ${esc(s.ph)} in the word “${esc(p.examples[0])}”">/${esc(s.ph)}/</button>
         <div class="guide-info">
           <p>${esc(p.hint)}</p>
           <div class="chips">${chips}</div>
@@ -3726,5 +3907,12 @@ migrateLegacyCustomText().catch(err => console.warn('migration skipped:', err));
 // Recorded-take object URLs are per-session; let them go on unload.
 window.addEventListener('pagehide', () => { try { releaseAllUrls(); cancelRecording(); } catch {} });
 
-if (needsOnboarding()) renderOnboarding();
+if (location.hash === '#audit') renderAudioAudit();   // owner ear-check tool
+else if (needsOnboarding()) renderOnboarding();
 else renderHome();
+
+// Typing #audit into the address bar mid-session works too — a bare hash
+// change doesn't reload the page, so the boot check alone would miss it.
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#audit') renderAudioAudit();
+});

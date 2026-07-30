@@ -34,6 +34,9 @@ jobs:
       - name: Security audit
         run: python3 tools/security_audit.py
 
+      - name: Audio integrity (index ↔ files ↔ quality flags)
+        run: python3 tools/audit_audio.py
+
       - name: Credential scan (working tree + full git history)
         run: python3 tools/scan_secrets.py --worktree --history
 

@@ -1202,3 +1202,26 @@ body.modal-open { overflow: hidden; }
 
 /* Page-level headings for shell sections. */
 .page-h { font-family: var(--serif); font-size: 26px; margin: 2px 0 12px; }
+
+/* Sound-detail hero: the big symbol plus what tapping it actually plays. */
+.sound-big-wrap { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.sound-big-cap { font-size: 11.5px; color: var(--muted); font-weight: 700; white-space: nowrap; }
+.wii-sound-pair { display: inline-flex; gap: 4px; align-items: center; }
+
+/* ── #audit: the owner's clip review grid ───────────────────── */
+.audit-page { max-width: 720px; }
+.audit-filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 14px; }
+.audit-sel { width: auto; padding: 6px 10px; }
+.audit-out { width: 100%; font-family: monospace; font-size: 12px; margin-bottom: 12px; }
+.audit-rows { display: flex; flex-direction: column; gap: 4px; }
+.audit-row { display: flex; align-items: center; gap: 10px; background: var(--panel);
+  border: 1.5px solid var(--line); border-radius: 10px; padding: 6px 10px; }
+.audit-row.good { border-color: var(--green); }
+.audit-row.bad { border-color: var(--red); background: var(--bad-tint); }
+.audit-play { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--line);
+  background: var(--panel-2); cursor: pointer; font-size: 13px; }
+.audit-play.is-off { display: grid; place-items: center; color: var(--muted); cursor: default; }
+.audit-name { font-weight: 700; min-width: 110px; }
+.audit-meta { color: var(--muted); font-size: 12px; flex: 1; }
+.audit-verdict { display: flex; gap: 6px; }
+.audit-verdict [aria-pressed="true"] { background: var(--accent-tint); border-color: var(--green); }

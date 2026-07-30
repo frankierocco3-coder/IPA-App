@@ -38,6 +38,7 @@ python3 serve.py                                   # dev server → localhost:41
 bash tools/install-hooks.sh                        # pre-commit secret scan (once)
 
 python3 tools/security_audit.py                    # static checks
+python3 tools/audit_audio.py                       # audio index/files/flags integrity
 python3 tools/scan_secrets.py --worktree --history # credential scan
 python3 tools/build_artifact.py _site              # exactly what Pages publishes
 
@@ -173,6 +174,19 @@ icon-only controls (guidebook/speaker/freeplay), aria-live lesson feedback,
 #shell-main is a <main>, 48px bottom-nav targets.
 Plus: 5 tracks / 77 lessons, 16+1 exercise generators, 332 curated pieces,
 Perform mode, rehearsal projects, analytics, pronunciation overrides.
+
+Audio model: WORDS (speak(), audio/<d>/<v>/, TTS fallback) and ISOLATED
+PHONEMES (playPhoneme(), audio/phonemes/, NO fallback of any kind) are
+separate and never cross-substituted; speak() refuses bare-IPA text.
+js/data/audio-flags.js is the quality gate: KNOWN_BAD clips are skipped by
+playback (nam/f/strut and nam/f/car quarantined by Frankie's ear,
+2026-07); phoneme clips play ONLY when in APPROVED_PHONEMES (none exist
+yet — production is the next milestone, spec in
+docs/AUDIO_RECORDING_SPEC.md). Until then, symbol controls are explicit,
+labelled word controls ("Hear it in 'strut'"), never dead buttons. The
+owner ear-checks clips at #audit (hash-gated grid, exports a fresh flags
+file); tools/audit_audio.py enforces index↔files↔flags integrity in the
+deploy gate; tests/audio.test.js (browser) covers the contract.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

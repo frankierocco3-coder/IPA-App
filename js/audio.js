@@ -6,6 +6,14 @@
 // clips at all, and improves word by word as clips are added.
 //
 // Clips are static files: no API key ever ships in the app.
+//
+// Two kinds of audio, never interchangeable:
+//   speak(word)            — a WORD, from audio/<accent>/<voice>/, TTS fallback
+//   playPhoneme(slug, acc) — an ISOLATED SOUND, from audio/phonemes/, no
+//                            fallback of any kind: a word is not a phoneme,
+//                            and TTS cannot say a bare IPA character.
+
+import { KNOWN_BAD, APPROVED_PHONEMES } from './data/audio-flags.js';
 
 const voiceCache = {};
 
@@ -51,12 +59,50 @@ fetch('audio/index.json')
 
 const clipName = word => word.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
-// Voice keys for this accent that actually have this word recorded.
-function voicesWith(dir, word) {
+// Voice keys for this accent that actually have this word recorded —
+// excluding clips a human ear has rejected (see data/audio-flags.js).
+const badSet = new Set(KNOWN_BAD);
+// (exported for tests/audio.test.js — not part of the app-facing API)
+export function voicesWith(dir, word) {
   const variants = clipIndex?.[dir];
   if (!variants) return [];
   const name = clipName(word);
-  return Object.keys(variants).filter(v => variants[v].includes(name));
+  return Object.keys(variants).filter(v =>
+    variants[v].includes(name) && !badSet.has(`${dir}/${v}/${name}`));
+}
+
+// True when `text` is speakable prose (a word/sentence), not a bare IPA
+// string. speak() refuses IPA-only input — device TTS mangles it. A single
+// ASCII letter alone ("a", "I") is a real word; "ʃɪp" (only its p is ASCII)
+// is not.
+export const isWordText = text => {
+  const t = String(text ?? '').trim();
+  return /^[a-zA-Z]$/.test(t) || /[a-zA-Z]{2,}/.test(t);
+};
+
+// ── Isolated phonemes ─────────────────────────────────────────
+// Clips live in audio/phonemes/<accent>/<voice>/<slug>.mp3 and play ONLY
+// when listed in APPROVED_PHONEMES — candidates that nobody has listened
+// to never reach a learner. No word fallback, no TTS fallback, ever.
+const approvedSet = new Set(APPROVED_PHONEMES);
+
+function phonemeVariants(slug, accent) {
+  return ['f', 'm'].filter(v => approvedSet.has(`${accent}/${v}/${slug}`));
+}
+
+export const hasPhonemeClip = (slug, accent) => phonemeVariants(slug, accent).length > 0;
+
+/** Play an approved isolated-phoneme clip. Returns false when none exists. */
+export function playPhoneme(slug, accent) {
+  const options = phonemeVariants(slug, accent);
+  if (!options.length) return false;
+  if (current) { current.pause(); current = null; }
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+  const voice = options[Math.floor(Math.random() * options.length)];
+  const el = new Audio(`audio/phonemes/${accent}/${voice}/${slug}.mp3`);
+  current = el;
+  el.play().catch(() => {});   // a missing approved file stays silent — never a word, never TTS
+  return true;
 }
 
 let current = null;
@@ -110,6 +156,7 @@ function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
 // browser voice — used for running text (sonnets, monologues), where only a
 // few words would have clips and the mix of clip/robot voices is jarring.
 export function speak(text, { rate = 0.85, lang = 'en-GB', device = false } = {}) {
+  if (!isWordText(text)) return;   // bare IPA is playPhoneme's job, never TTS's
   if (current) { current.pause(); current = null; }
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 
