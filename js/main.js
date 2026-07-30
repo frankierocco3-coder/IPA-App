@@ -10,6 +10,7 @@ import { ONEILL } from './data/oneill.js';
 import { WILDE } from './data/wilde.js';
 import { PIRANDELLO } from './data/pirandello.js';
 import { IBSEN } from './data/ibsen.js';
+import { IDIOM, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS } from './data/idiom.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 import { migrateLegacyCustomText, listProjects, getProject, saveProject, createProject,
@@ -158,16 +159,16 @@ let arcadeAccent = null;
 
 // A single-mode arcade session: one exercise type, played on its own,
 // in whichever dialect is currently selected.
-function modeLesson(mode) {
+function modeLesson(mode, accent = arcadeAccent) {
   return {
-    id: 'mode-' + mode.id + (arcadeAccent ? '-' + arcadeAccent : ''),
+    id: 'mode-' + mode.id + (accent ? '-' + accent : ''),
     title: mode.title,
     practice: true,
     arcade: true,
     mode,
-    accent: arcadeAccent,
-    shiftTo: arcadeAccent ?? undefined,
-    phonemes: arcadeAccent ? phonemesForAccent(arcadeAccent) : (mode.phonemes ?? []),
+    accent,
+    shiftTo: accent ?? undefined,
+    phonemes: accent ? phonemesForAccent(accent) : (mode.phonemes ?? []),
     types: [mode.type],
     count: 10,
     track: null,
@@ -194,28 +195,53 @@ function practiceLesson(track) {
   };
 }
 
-// ── Home: track picker ────────────────────────────────────────
+// ── Home: dialect-first tabs ──────────────────────────────────
+// The home screen is a tab strip: the three dialects, Text & Speech, and the
+// IPA Handbook. Everything for a role lives inside its dialect's tab —
+// lessons, practice, its own sound handbook, its slang. The app reopens on
+// whichever tab (and sub-tab) you were last working in.
+
+const HOME_TABS = [
+  { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
+  { id: 'rp', icon: '🇬🇧', label: 'RP' },
+  { id: 'aus', icon: '🇦🇺', label: 'Australian' },
+  { id: 'texts', icon: '📜', label: 'Text & Speech' },
+  { id: 'handbook', icon: '📖', label: 'IPA Handbook' },
+];
+const HUB_SUBS = [
+  { id: 'lessons', label: '🎓 Lessons' },
+  { id: 'practice', label: '🎯 Practice' },
+  { id: 'handbook', label: '📖 Handbook' },
+  { id: 'idiom', label: '🗣 Slang & Idiom' },
+  { id: 'texts', label: '📜 Texts' },
+];
+
+const homeTab = () => {
+  const t = localStorage.getItem('speechcraft-home-tab');
+  return HOME_TABS.some(x => x.id === t) ? t : 'nam';
+};
+const setHomeTab = t => { try { localStorage.setItem('speechcraft-home-tab', t); } catch {} };
+const hubSub = d => {
+  try {
+    const t = JSON.parse(localStorage.getItem('speechcraft-hub-sub') || '{}')[d];
+    return HUB_SUBS.some(x => x.id === t) && t !== 'texts' ? t : 'lessons';
+  } catch { return 'lessons'; }
+};
+const setHubSub = (d, s) => {
+  try {
+    const m = JSON.parse(localStorage.getItem('speechcraft-hub-sub') || '{}');
+    m[d] = s;
+    localStorage.setItem('speechcraft-hub-sub', JSON.stringify(m));
+  } catch {}
+};
+
+const trackFor = d => TRACKS.find(t => t.id === d);
 
 function renderHome() {
   stopSpeech();
   navStack = [];              // home is the root of the back stack
   navRestoring = false;
-  const cards = TRACKS.map(t => {
-    const { done, total } = trackProgress(t);
-    return `
-      <button class="track-card" data-track="${t.id}" style="--track-color:${t.color}">
-        <div class="track-glyph">${t.icon}</div>
-        <div class="track-info">
-          <h2>${esc(t.title)}${t.accent ? ' <span class="badge badge-dark">DIALECT</span>' : ''}${t.drills ? ' <span class="badge badge-dark">DRILLS</span>' : ''}${trackProgress(t).done === trackProgress(t).total ? ' <span class="badge badge-gold">🎓 MASTERED</span>' : ''}</h2>
-          <p>${esc(t.blurb)}</p>
-          <div class="track-progress">
-            <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
-            <span>${done}/${total}</span>
-          </div>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>`;
-  }).join('');
+  const tab = homeTab();
 
   app.innerHTML = `
     <header class="topbar">
@@ -228,50 +254,16 @@ function renderHome() {
       </div>
     </header>
     ${store.freePlay ? '<p class="freeplay-note">Free play is on — every lesson is unlocked.</p>' : ''}
-    <main class="track-list">
+    <main class="track-list home-main">
       ${dailyRehearsalCard()}
-      <h1 class="home-heading">Choose your track</h1>
-      ${cards}
-      <button class="track-card arcade-entry" id="arcade-entry" style="--track-color:#c99e58">
-        <div class="track-glyph">🕹️</div>
-        <div class="track-info">
-          <h2>Arcade</h2>
-          <p>Every game and exercise on its own — pick one and just play.</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>
-      <button class="track-card chart-entry" id="chart-entry" style="--track-color:#64748b">
-        <div class="track-glyph">📖</div>
-        <div class="track-info">
-          <h2>The IPA Handbook</h2>
-          <p>The chart, your instrument, and the vowel map — the reference shelf.</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>
-      <button class="track-card" id="weak-entry" style="--track-color:#6f8657">
-        <div class="track-glyph">📊</div>
-        <div class="track-info">
-          <h2>Weak Sounds</h2>
-          <p>What's landing and what isn't — and the pairs you mix up.</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>
-      <button class="track-card text-entry" id="projects-entry" style="--track-color:#8a6d3b">
-        <div class="track-glyph">🎬</div>
-        <div class="track-info">
-          <h2>My Texts</h2>
-          <p>Your rehearsal projects — saved roles, notes, and recorded takes.</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>
-      <button class="track-card text-entry" id="text-entry" style="--track-color:#8a6d3b">
-        <div class="track-glyph">📜</div>
-        <div class="track-info">
-          <h2>Text &amp; Delivery</h2>
-          <p>Speak real text aloud — Shakespeare’s sonnets, with metre and sound.</p>
-        </div>
-        <div class="track-arrow">›</div>
-      </button>
+      <nav class="home-tabs" role="tablist" aria-label="Sections">
+        ${HOME_TABS.map(t => `
+          <button class="home-tab ${t.id === tab ? 'on' : ''}" role="tab"
+                  aria-selected="${t.id === tab}" data-tab="${t.id}" type="button">
+            <span class="home-tab-icon">${t.icon}</span><span class="home-tab-label">${esc(t.label)}</span>
+          </button>`).join('')}
+      </nav>
+      <div id="home-pane"></div>
     </main>`;
 
   wireBrandHome();
@@ -279,15 +271,301 @@ function renderHome() {
     store.freePlay = !store.freePlay;
     renderHome();
   });
-  document.getElementById('arcade-entry').addEventListener('click', renderArcade);
-  document.getElementById('chart-entry').addEventListener('click', renderHandbook);
-  document.getElementById('text-entry').addEventListener('click', renderTextLibrary);
-  document.getElementById('projects-entry').addEventListener('click', renderProjects);
-  document.getElementById('weak-entry').addEventListener('click', renderWeakSounds);
   document.getElementById('today-start')?.addEventListener('click', startDailyRehearsal);
-  app.querySelectorAll('.track-card[data-track]').forEach(btn =>
-    btn.addEventListener('click', () => renderTrack(TRACKS.find(t => t.id === btn.dataset.track)))
-  );
+  app.querySelectorAll('.home-tab').forEach(b =>
+    b.addEventListener('click', () => { setHomeTab(b.dataset.tab); renderHome(); }));
+
+  const pane = document.getElementById('home-pane');
+  if (tab === 'texts') textSpeechPane(pane);
+  else if (tab === 'handbook') handbookPane(pane);
+  else dialectHub(pane, tab);
+}
+
+// ── A dialect's hub: Lessons · Practice · Handbook · Idiom · Texts ──
+
+function dialectHub(pane, d) {
+  const track = trackFor(d);
+  const sub = hubSub(d);
+  pane.innerHTML = `
+    <div class="sonnet-tabs hub-subs">
+      ${HUB_SUBS.map(s => `
+        <button class="son-tab ${s.id === sub ? 'on' : ''}" data-sub="${s.id}" type="button">${s.label}</button>`).join('')}
+    </div>
+    <div id="hub-pane"></div>`;
+  pane.querySelectorAll('.hub-subs .son-tab').forEach(b =>
+    b.addEventListener('click', () => {
+      if (b.dataset.sub === 'texts') { setHomeTab('texts'); renderHome(); return; }
+      setHubSub(d, b.dataset.sub);
+      dialectHub(pane, d);
+    }));
+
+  const hub = pane.querySelector('#hub-pane');
+  if (sub === 'lessons') hubLessons(hub, track);
+  else if (sub === 'practice') hubPractice(hub, d, track);
+  else if (sub === 'handbook') hubHandbook(hub, d, track);
+  else if (sub === 'idiom') hubIdiom(hub, d, track);
+}
+
+function hubLessons(hub, track) {
+  const { done, total } = trackProgress(track);
+  const path = buildTrackPath(track);
+  hub.innerHTML = `
+    <div class="hub-progress">
+      <div class="track-progress">
+        <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
+        <span>${done}/${total}${done === total && total ? ' · 🎓 mastered' : ''}</span>
+      </div>
+    </div>
+    <div class="track-scroll hub-scroll">${path.html}</div>`;
+  path.wire(hub);
+}
+
+function hubPractice(hub, d, track) {
+  const name = dialectName(d);
+  const shiftTrack = (d === 'nam' || d === 'rp') ? TRACKS.find(t => t.id === 'shift') : null;
+  const modeCards = MODES.map(m => `
+    <button class="mode-card" data-mode="${m.id}" type="button">
+      <span class="mode-icon">${m.icon}</span>
+      <span class="mode-title">${esc(m.title)}</span>
+      <span class="mode-blurb">${esc(m.blurb)}</span>
+    </button>`).join('');
+
+  hub.innerHTML = `
+    <div class="practice-row">
+      <button class="btn btn-practice" id="hub-mixed" type="button">🎯 Mixed review — everything this track teaches, no hearts lost</button>
+    </div>
+    <h2 class="chart-h">Games <span>in ${esc(name)}</span></h2>
+    <div class="mode-grid">
+      <button class="mode-card idiom-mode" id="hub-idiom-drill" type="button">
+        <span class="mode-icon">🗣</span>
+        <span class="mode-title">Slang &amp; Idiom</span>
+        <span class="mode-blurb">The words, not just the sounds.</span>
+      </button>
+      ${modeCards}
+    </div>
+    ${shiftTrack ? `
+      <h2 class="chart-h">Shift work</h2>
+      <button class="track-card" id="hub-shift" type="button" style="--track-color:${shiftTrack.color}">
+        <div class="track-glyph">⇄</div>
+        <div class="track-info"><h2>Accent Shift Drills</h2><p>Transform words between American and RP on command.</p></div>
+        <div class="track-arrow">›</div>
+      </button>` : ''}
+    <h2 class="chart-h">Weak sounds <span>in ${esc(name)}</span></h2>
+    <div id="hub-weak"></div>`;
+
+  hub.querySelector('#hub-mixed').addEventListener('click', () => startLesson(practiceLesson(track)));
+  hub.querySelector('#hub-idiom-drill').addEventListener('click', () => startLesson(idiomLesson(d, track)));
+  hub.querySelector('#hub-shift')?.addEventListener('click', () => renderTrack(shiftTrack));
+  hub.querySelectorAll('.mode-card[data-mode]').forEach(b =>
+    b.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === b.dataset.mode), d))));
+  hubWeakPanel(hub.querySelector('#hub-weak'), d);
+}
+
+// Weak-sounds slice for one dialect: this dialect's inventory only, ranked
+// from the same global analytics. Honest about thin data, like the full page.
+function hubWeakPanel(el, d) {
+  const inventory = new Set(phonemesForAccent(d));
+  const rows = symbolBreakdown().all
+    .filter(r => inventory.has(r.sym) && r.tier !== CONFIDENCE.NONE)
+    .sort((a, b) => a.accuracy - b.accuracy)
+    .slice(0, 4);
+  el.innerHTML = `
+    ${rows.length ? rows.map(r => `
+      <div class="stat-row">
+        <span class="stat-sym">/${esc(r.sym)}/</span>
+        <span class="stat-bar" aria-hidden="true"><span style="width:${Math.round(r.accuracy * 100)}%"></span></span>
+        <span class="stat-val">${esc(r.label)}</span>
+      </div>`).join('')
+      : '<p class="pane-note">Not enough data yet — play a few games above and this fills in.</p>'}
+    <button class="btn-lite" id="hub-weak-full" type="button">Full report — all dialects ›</button>`;
+  el.querySelector('#hub-weak-full').addEventListener('click', renderWeakSounds);
+}
+
+// This dialect's own sound handbook: its inventory only, each sound opening
+// the tongue-placement diagram page.
+function hubHandbook(hub, d, track) {
+  const syms = phonemesForAccent(d);
+  const groups = [
+    { title: 'Vowels', items: syms.filter(s => PHONEMES[s]?.type === 'vowel') },
+    { title: 'Diphthongs', items: syms.filter(s => PHONEMES[s]?.type === 'diphthong') },
+    { title: 'Consonants', items: syms.filter(s => PHONEMES[s]?.type === 'consonant') },
+  ].filter(g => g.items.length);
+  hub.innerHTML = `
+    <p class="pane-note">The ${esc(dialectName(d))} sound inventory — tap any symbol for its tongue placement, how it’s made, and example words.</p>
+    ${groups.map(g => `
+      <section class="chart-section">
+        <h2 class="chart-h">${g.title} <span>${g.items.length}</span></h2>
+        <div class="chart-grid">
+          ${g.items.map(sym => `
+            <button class="chart-chip" data-sym="${esc(sym)}" type="button" title="How “${esc(sym)}” is made">
+              <span class="chart-sym">${esc(sym)}</span>
+              <span class="chart-meta">
+                <span class="chart-name">${esc(PHONEMES[sym].name)}</span>
+                <span class="chart-eg">${PHONEMES[sym].examples.slice(0, 2).map(w => `<b>${esc(w)}</b>`).join(', ')}</span>
+              </span>
+              <span class="chart-play">›</span>
+            </button>`).join('')}
+        </div>
+      </section>`).join('')}`;
+  hub.querySelectorAll('.chart-chip').forEach(b =>
+    b.addEventListener('click', () => renderSoundDetail(b.dataset.sym)));
+}
+
+// ── Slang & Idiom: the browsable reference ────────────────────
+
+const idiomFilters = { q: '', era: 'all', type: 'all', flagged: false };
+
+function idiomLesson(d, track) {
+  return {
+    id: 'idiom-' + d,
+    title: `${dialectName(d)} slang & idiom`,
+    practice: true,
+    accent: d,
+    phonemes: [],
+    types: ['idiom'],
+    count: 10,
+    unit: { title: 'Slang & Idiom', color: track?.color ?? '#8a6d3b' },
+    track: null,
+  };
+}
+
+function hubIdiom(hub, d, track) {
+  const name = dialectName(d);
+
+  const draw = () => {
+    const f = idiomFilters;
+    const rows = IDIOM.filter(e => {
+      if (e.dialect !== d) return false;
+      if (e.flag && !f.flagged) return false;
+      if (f.era !== 'all' && e.era !== f.era && e.era !== 'both') return false;
+      if (f.type !== 'all' && e.type !== f.type) return false;
+      if (f.q) {
+        const q = f.q.toLowerCase();
+        if (![e.term, e.meaning, e.example].some(v => (v || '').toLowerCase().includes(q))) return false;
+      }
+      return true;
+    });
+    const list = hub.querySelector('#idiom-list');
+    hub.querySelector('#idiom-count').textContent =
+      `${rows.length} entr${rows.length === 1 ? 'y' : 'ies'}${f.flagged ? '' : ' · flagged terms hidden'}`;
+    list.innerHTML = rows.length ? rows.map(e => `
+      <div class="idiom-card ${e.flag ? 'is-flagged' : ''}">
+        <div class="idiom-head">
+          <span class="idiom-term">${esc(e.term)}</span>
+          <span class="tag">${esc(e.era)}</span>
+          <span class="tag">${esc(e.type)}</span>
+          ${e.flag ? `<span class="tag tag-flag">${esc(e.flag)}</span>` : ''}
+        </div>
+        <p class="idiom-meaning">${esc(e.meaning)}</p>
+        ${e.example ? `<p class="idiom-example">“${esc(e.example)}”</p>` : ''}
+        ${e.note ? `<p class="idiom-note">${esc(e.note)}</p>` : ''}
+      </div>`).join('')
+      : '<p class="pane-note">Nothing matches that filter.</p>';
+  };
+
+  const chip = (group, value, label, on) =>
+    `<button class="dialect-chip ${on ? 'on' : ''}" data-g="${group}" data-v="${value}" type="button">${label}</button>`;
+
+  hub.innerHTML = `
+    <p class="pane-note">The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.</p>
+    <div class="practice-row"><button class="btn btn-practice" id="idiom-drill" type="button">🗣 Drill these — no hearts lost</button></div>
+    <input class="sonnet-search" id="idiom-q" type="search" placeholder="Search term, meaning or example…" autocomplete="off">
+    <div class="dialect-picker"><span class="dialect-label">Era</span><div class="dialect-chips" id="idiom-era">
+      ${chip('era', 'all', 'All', idiomFilters.era === 'all')}
+      ${chip('era', 'period', 'Period', idiomFilters.era === 'period')}
+      ${chip('era', 'contemporary', 'Contemporary', idiomFilters.era === 'contemporary')}
+    </div></div>
+    <div class="dialect-picker"><span class="dialect-label">Type</span><div class="dialect-chips" id="idiom-type">
+      ${chip('type', 'all', 'All', idiomFilters.type === 'all')}
+      ${chip('type', 'word', 'Words', idiomFilters.type === 'word')}
+      ${chip('type', 'phrase', 'Phrases', idiomFilters.type === 'phrase')}
+      ${chip('type', 'saying', 'Sayings', idiomFilters.type === 'saying')}
+    </div></div>
+    <label class="idiom-flag-toggle">
+      <input type="checkbox" id="idiom-flagged" ${idiomFilters.flagged ? 'checked' : ''}>
+      <span>Show flagged terms (vulgar / dated) — they exist because scripts use them; they never appear in drills</span>
+    </label>
+    <p class="sonnet-hint" id="idiom-count"></p>
+    <div id="idiom-list"></div>
+    ${d === 'aus' ? `
+      <details class="idiom-extra"><summary>The productive patterns — how Australian makes these words</summary>
+        ${AUS_PATTERNS.map(p => `<div class="idiom-card"><div class="idiom-head"><span class="idiom-term">${esc(p.pattern)}</span></div><p class="idiom-meaning">${esc(p.rule)}</p><p class="idiom-example">${esc(p.examples)}</p></div>`).join('')}
+      </details>` : ''}
+    ${d === 'rp' ? `
+      <details class="idiom-extra"><summary>U and non-U — the sharpest class tell you have</summary>
+        <p class="pane-note">Mitford’s 1954 upper vs aspirational-middle pairs. Getting one backwards reads instantly false, however good the vowels. A 1954 snapshot — some has softened.</p>
+        <table class="unu-table"><thead><tr><th>U (upper)</th><th>non-U (middle)</th></tr></thead>
+        <tbody>${U_NON_U.map(u => `<tr><td>${esc(u.u)}</td><td>${esc(u.nonU)}</td></tr>`).join('')}</tbody></table>
+      </details>` : ''}
+    <details class="idiom-extra"><summary>Cross-dialect false friends — the fastest way to break the accent</summary>
+      <p class="pane-note">The same word meaning different things. Includes vulgar senses deliberately — the trap is the point. Reference only; never drilled.</p>
+      ${FALSE_FRIENDS.map(f => `
+        <div class="idiom-card"><div class="idiom-head"><span class="idiom-term">${esc(f.word)}</span></div>
+          <p class="idiom-meaning"><b>RP:</b> ${esc(f.rp)}</p>
+          <p class="idiom-meaning"><b>American:</b> ${esc(f.nam)}</p>
+          <p class="idiom-meaning"><b>Australian:</b> ${esc(f.aus)}</p>
+        </div>`).join('')}
+    </details>`;
+
+  hub.querySelector('#idiom-drill').addEventListener('click', () => startLesson(idiomLesson(d, track)));
+  hub.querySelector('#idiom-q').addEventListener('input', e => { idiomFilters.q = e.target.value; draw(); });
+  hub.querySelector('#idiom-flagged').addEventListener('change', e => { idiomFilters.flagged = e.target.checked; draw(); });
+  [['#idiom-era', 'era'], ['#idiom-type', 'type']].forEach(([sel, key]) =>
+    hub.querySelector(sel).addEventListener('click', e => {
+      const b = e.target.closest('.dialect-chip'); if (!b) return;
+      idiomFilters[key] = b.dataset.v;
+      hub.querySelector(sel).querySelectorAll('.dialect-chip').forEach(x => x.classList.toggle('on', x === b));
+      draw();
+    }));
+  draw();
+}
+
+// ── Text & Speech tab ─────────────────────────────────────────
+
+function textSpeechPane(pane) {
+  const libs = Object.entries(LIBRARIES).map(([key, lib]) => ({
+    key, icon: lib.icon, title: lib.title,
+    blurb: `${lib.data.length} speeches · ${esc(lib.note)}`,
+    go: () => renderLibraryList(key),
+  }));
+  const cards = [
+    { icon: '🎬', title: 'My Texts', blurb: 'Your rehearsal projects — saved roles, notes, and recorded takes.', go: renderProjects },
+    { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
+    ...libs,
+    { icon: '✍️', title: 'Train Any Text', blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.', go: renderCustomText },
+  ];
+  pane.innerHTML = cards.map((c, i) => `
+    <button class="track-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
+      <div class="track-glyph">${c.icon}</div>
+      <div class="track-info"><h2>${c.title}</h2><p>${c.blurb}</p></div>
+      <div class="track-arrow">›</div>
+    </button>`).join('');
+  pane.querySelectorAll('.track-card').forEach(b =>
+    b.addEventListener('click', () => cards[+b.dataset.i].go()));
+}
+
+// ── IPA Handbook tab: the IPA itself — learn it, reference it ─
+
+function handbookPane(pane) {
+  const core = TRACKS.find(t => t.id === 'core');
+  const { done, total } = trackProgress(core);
+  const cards = [
+    { icon: 'ʃə', title: 'IPA Foundations', blurb: `Learn the alphabet itself — ${done}/${total} lessons done.`, go: () => renderTrack(core), color: core.color },
+    { icon: '🕹️', title: 'Core IPA Arcade', blurb: 'Every game on the full inventory, no dialect.', go: renderArcade, color: '#c99e58' },
+    { icon: '📖', title: 'The IPA Chart', blurb: 'All 55 sounds — tap any to see how it’s made and hear it.', go: renderChart, color: '#64748b' },
+    { icon: '🎭', title: 'Your Instrument', blurb: 'A tour of the vocal tract — the parts you shape every sound with.', go: renderInstrument, color: '#64748b' },
+    { icon: '📐', title: 'The Vowel Map', blurb: 'Where every vowel sits in the mouth.', go: renderVowelMap, color: '#64748b' },
+    { icon: '📕', title: 'Personal Dictionary', blurb: 'Pronunciations you’ve corrected — searchable, editable, exportable.', go: renderDictionary, color: '#8a6d3b' },
+    { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
+  ];
+  pane.innerHTML = cards.map((c, i) => `
+    <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
+      <div class="track-glyph">${c.icon}</div>
+      <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
+      <div class="track-arrow">›</div>
+    </button>`).join('');
+  pane.querySelectorAll('.track-card').forEach(b =>
+    b.addEventListener('click', () => cards[+b.dataset.i].go()));
 }
 
 // ── Arcade: single-mode games ─────────────────────────────────
@@ -328,41 +606,6 @@ function renderArcade() {
   );
   app.querySelectorAll('.mode-card').forEach(btn =>
     btn.addEventListener('click', () => startLesson(modeLesson(MODES.find(m => m.id === btn.dataset.mode))))
-  );
-}
-
-// ── The IPA Handbook: the reference shelf ─────────────────────
-
-function renderHandbook() {
-  record(renderHandbook);
-  const cards = [
-    { id: 'chart', icon: '📖', title: 'The IPA Chart',
-      blurb: 'Every symbol, its sound, and example words — tap any to hear it and see how it’s made.' },
-    { id: 'instrument', icon: '🎭', title: 'Your Instrument',
-      blurb: 'A tour of the vocal tract — the parts you shape every sound with.' },
-    { id: 'privacy', icon: '🔒', title: 'Privacy & Data',
-      blurb: 'What’s stored on this device, and how to delete it.' },
-    { id: 'dictionary', icon: '📕', title: 'Personal Dictionary',
-      blurb: 'Pronunciations you’ve corrected — searchable, editable, exportable.' },
-    { id: 'vowels', icon: '📐', title: 'The Vowel Map',
-      blurb: 'Where every vowel sits in the mouth — high to low, front to back.' },
-  ];
-  app.innerHTML = `
-    ${pageTopbar('📚 The IPA Handbook', '#64748b')}
-    <main class="track-list">
-      <p class="track-blurb">Your reference shelf — the alphabet of sounds and the instrument that makes them.</p>
-      ${cards.map(c => `
-        <button class="track-card handbook-entry" data-page="${c.id}" style="--track-color:#64748b">
-          <div class="track-glyph">${c.icon}</div>
-          <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
-          <div class="track-arrow">›</div>
-        </button>`).join('')}
-    </main>`;
-
-  wireBrandHome();
-  const go = { chart: renderChart, instrument: renderInstrument, vowels: renderVowelMap, dictionary: renderDictionary, privacy: renderPrivacy };
-  app.querySelectorAll('.handbook-entry').forEach(btn =>
-    btn.addEventListener('click', () => go[btn.dataset.page]())
   );
 }
 
@@ -414,45 +657,6 @@ const TEXT_DIALECTS = [
 ];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;
 const dialectName = id => (TEXT_DIALECTS.find(d => d.id === id) || {}).label || '';
-
-function renderTextLibrary() {
-  record(renderTextLibrary);
-  const cards = [
-    { id: 'sonnets', icon: '📜', title: 'Shakespeare’s Sonnets', on: true,
-      blurb: 'All 154 — speak them, scan the metre, study the sounds.' },
-    { id: 'chekhov', icon: '🎭', title: 'Chekhov · Monologues', on: true,
-      blurb: '35 speeches from eight plays — audition pieces, timed and tagged.' },
-    { id: 'oneill', icon: '⚓', title: 'O’Neill · Monologues', on: true,
-      blurb: '35 speeches from nine plays — American voices, dialect and status work.' },
-    { id: 'wilde', icon: '🎩', title: 'Wilde · Monologues', on: true,
-      blurb: '36 speeches from nine plays — RP wit, status and comic timing.' },
-    { id: 'pirandello', icon: '🎪', title: 'Pirandello · Monologues', on: true,
-      blurb: '36 speeches from three plays — identity, illusion, long-form build.' },
-    { id: 'ibsen', icon: '🕯️', title: 'Ibsen · Monologues', on: true,
-      blurb: '36 speeches from nine plays — realism, confession, moral reckoning.' },
-    { id: 'custom', icon: '✍️', title: 'Train Any Text', on: true,
-      blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.' },
-  ];
-  app.innerHTML = `
-    ${pageTopbar('📜 Text & Delivery', '#8a6d3b')}
-    <main class="track-list">
-      <p class="track-blurb">Take the sounds off the chart and onto real text. Speak it aloud, feel the metre, study the pronunciation — in whatever dialect you’re working in.</p>
-      ${cards.map(c => `
-        <button class="track-card text-card ${c.on ? '' : 'soon'}" data-lib="${c.id}" ${c.on ? '' : 'disabled'} style="--track-color:#8a6d3b">
-          <div class="track-glyph">${c.icon}</div>
-          <div class="track-info"><h2>${esc(c.title)}${c.on ? '' : ' <span class="badge badge-dark">SOON</span>'}</h2><p>${esc(c.blurb)}</p></div>
-          <div class="track-arrow">›</div>
-        </button>`).join('')}
-    </main>`;
-  wireBrandHome();
-  app.querySelector('.text-card[data-lib="sonnets"]')?.addEventListener('click', renderSonnetList);
-  app.querySelector('.text-card[data-lib="chekhov"]')?.addEventListener('click', () => renderLibraryList('chekhov'));
-  app.querySelector('.text-card[data-lib="oneill"]')?.addEventListener('click', () => renderLibraryList('oneill'));
-  app.querySelector('.text-card[data-lib="wilde"]')?.addEventListener('click', () => renderLibraryList('wilde'));
-  app.querySelector('.text-card[data-lib="pirandello"]')?.addEventListener('click', () => renderLibraryList('pirandello'));
-  app.querySelector('.text-card[data-lib="ibsen"]')?.addEventListener('click', () => renderLibraryList('ibsen'));
-  app.querySelector('.text-card[data-lib="custom"]')?.addEventListener('click', renderCustomText);
-}
 
 function renderSonnetList() {
   record(renderSonnetList);
@@ -2021,13 +2225,14 @@ function lessonNodeIcon(lesson) {
 // one active "START" node with a mascot, sticky unit banners.
 const PATH_OFFSETS = [0, 48, 70, 48, 0, -48, -70, -48];
 
-function renderTrack(track) {
-  record(() => renderTrack(track));
+// Build a track's winding lesson path. Shared by the full-page view
+// (renderTrack) and the Lessons tab inside a dialect hub.
+function buildTrackPath(track) {
   const chain = TRACK_LESSONS[track.id];
   const active = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l));
   let gi = 0;
 
-  const unitsHtml = track.unitIds.map((uid, ui) => {
+  const html = track.unitIds.map((uid, ui) => {
     const unit = unitById[uid];
     const rows = UNIT_EXPANDED[uid].map(raw => {
       const l = chain.find(x => x.id === raw.id);
@@ -2057,25 +2262,34 @@ function renderTrack(track) {
       <div class="path">${rows}</div>`;
   }).join('');
 
+  const wire = (container) => {
+    container.querySelectorAll('.path-node[data-lesson]:not([disabled])').forEach(btn =>
+      btn.addEventListener('click', () => {
+        const lesson = chain.find(l => l.id === btn.dataset.lesson);
+        // Checkpoint games jump straight in — no guide page.
+        if (lesson.checkpoint) startLesson(lesson);
+        else renderGuide(lesson);
+      })
+    );
+  };
+  return { html, wire };
+}
+
+function renderTrack(track) {
+  record(() => renderTrack(track));
+  const path = buildTrackPath(track);
   app.innerHTML = `
     ${pageTopbar(`${track.icon} ${esc(track.title)}`, track.color)}
     <main class="track-scroll">
       <div class="practice-row">
         <button class="btn btn-practice" id="practice">🎯 Practice — mixed review, no hearts lost</button>
       </div>
-      ${unitsHtml}
+      ${path.html}
     </main>`;
 
   wireBrandHome();
   document.getElementById('practice').addEventListener('click', () => startLesson(practiceLesson(track)));
-  app.querySelectorAll('.path-node[data-lesson]:not([disabled])').forEach(btn =>
-    btn.addEventListener('click', () => {
-      const lesson = chain.find(l => l.id === btn.dataset.lesson);
-      // Checkpoint games jump straight in — no guide page.
-      if (lesson.checkpoint) startLesson(lesson);
-      else renderGuide(lesson);
-    })
-  );
+  path.wire(app);
 }
 
 // ── Lesson guide (the teaching page before the exercises) ─────

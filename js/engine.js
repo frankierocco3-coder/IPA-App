@@ -3,6 +3,7 @@
 
 import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
 import { EXERCISES_PER_LESSON } from './data/course.js';
+import { IDIOM } from './data/idiom.js';
 
 const shuffle = arr => arr.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -480,7 +481,49 @@ function genAccentEar(to, fromAccent) {
 
 // ── Lesson assembly ───────────────────────────────────────────
 
+
+// ── Idiom drills ──────────────────────────────────────────────
+// Vocabulary is dialect work too: the right vowel with the wrong word still
+// breaks the illusion. Drills draw only on unflagged entries — vulgar and
+// dated-offensive terms stay in the browsable reference, behind its toggle,
+// and are never served as an exercise.
+
+function idiomPool(accent) {
+  return IDIOM.filter(e => e.dialect === accent && !e.flag);
+}
+
+function genIdiom(accent) {
+  const pool = idiomPool(accent);
+  if (pool.length < 4) return null;
+  const entry = pick(pool);
+  const name = ACCENT_NAMES[accent];
+  const others = shuffle(pool.filter(e => e.id !== entry.id)).slice(0, 3);
+  const eraTag = entry.era === 'period' ? ' (period)' : '';
+
+  if (Math.random() < 0.5) {
+    // term → meaning
+    return {
+      type: 'choice',
+      prompt: `In ${name}, what does “${entry.term}” mean?`,
+      display: entry.term,
+      smallDisplay: true,
+      choices: shuffle([{ label: entry.meaning, ok: true },
+                        ...others.map(o => ({ label: o.meaning }))]),
+      explain: `“${entry.term}” — ${entry.meaning}${eraTag}.${entry.example ? ` As in: “${entry.example}”` : ''}`,
+    };
+  }
+  // meaning → term
+  return {
+    type: 'choice',
+    prompt: `Which ${name} ${entry.type === 'word' ? 'word' : 'phrase'} means “${entry.meaning}”?`,
+    choices: shuffle([{ label: entry.term, ok: true },
+                      ...others.map(o => ({ label: o.term }))]),
+    explain: `“${entry.term}”${eraTag}.${entry.example ? ` As in: “${entry.example}”` : ''}${entry.note ? ` ${entry.note}` : ''}`,
+  };
+}
+
 const GENERATORS = {
+  idiom: l => genIdiom(l.accent ?? 'rp'),
   symbolToWord: l => genSymbolToWord(pick(l.phonemes), l.accent),
   soundToSymbol: l => genSoundToSymbol(pick(l.phonemes), l.phonemes, l.accent),
   description: l => genDescription(pick(l.phonemes), l.phonemes),

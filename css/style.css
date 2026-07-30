@@ -848,3 +848,56 @@ body.modal-open { overflow: hidden; }
   .dict-actions { width: 100%; }
   .dict-actions .btn-lite { flex: 1; min-height: 40px; }
 }
+
+/* ── Dialect-first home: tab strip + hubs ── */
+.home-tabs {
+  display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 4px;
+}
+.home-tab {
+  font: inherit; font-weight: 700; font-size: 14px; color: var(--muted); cursor: pointer;
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 10px 14px; flex: 1 1 auto; justify-content: center;
+}
+.home-tab:active { transform: translateY(2px); border-bottom-width: 2px; }
+.home-tab.on {
+  background: var(--accent-tint); border-color: var(--green); color: var(--green-dark);
+}
+.home-tab-icon { font-size: 17px; }
+.hub-subs { flex-wrap: wrap; margin-bottom: 12px; }
+.hub-subs .son-tab { flex: 1 1 auto; padding: 8px 10px; font-size: 13px; }
+.hub-progress { margin: 0 4px 10px; }
+.hub-scroll { padding-bottom: 40px; }
+.chart-h span { color: var(--muted); font-size: 0.75em; font-weight: 600; }
+
+/* ── Slang & Idiom ── */
+.idiom-card {
+  background: var(--panel); border: 2px solid var(--line); border-radius: 12px;
+  padding: 11px 14px; margin-bottom: 8px;
+}
+.idiom-card.is-flagged { border-left: 4px solid var(--gold); }
+.idiom-head { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 3px; }
+.idiom-term { font-family: var(--serif); font-size: 17px; font-weight: 700; color: var(--ink); }
+.idiom-meaning { font-size: 14px; margin: 2px 0; }
+.idiom-example { font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--muted); margin: 3px 0 0; }
+.idiom-note { font-size: 12.5px; color: #7a5a2e; background: rgba(201,162,75,0.12); border-radius: 8px; padding: 6px 9px; margin: 6px 0 0; }
+.tag-flag { background: rgba(201,162,75,0.25); color: #7a5a2e; }
+.idiom-flag-toggle {
+  display: flex; align-items: flex-start; gap: 8px; font-size: 12.5px; color: var(--muted);
+  margin: 10px 2px; cursor: pointer; line-height: 1.4;
+}
+.idiom-flag-toggle input { margin-top: 2px; }
+.idiom-extra { margin: 14px 0; background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 10px 14px; }
+.idiom-extra summary { font-weight: 700; cursor: pointer; font-size: 14px; padding: 2px 0; }
+.idiom-extra summary:focus-visible { outline: 3px solid rgba(138,109,59,0.5); outline-offset: 2px; }
+.idiom-extra > *:not(summary) { margin-top: 10px; }
+.unu-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.unu-table th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); padding: 4px 8px; }
+.unu-table td { padding: 6px 8px; border-top: 1px solid var(--line); font-family: var(--serif); }
+.idiom-mode { border-left: 4px solid #8a6d3b; }
+
+@media (max-width: 560px) {
+  .home-tab { padding: 8px 9px; font-size: 12px; gap: 5px; }
+  .home-tab-label { white-space: nowrap; }
+  .hub-subs .son-tab { font-size: 11.5px; padding: 7px 6px; }
+}
