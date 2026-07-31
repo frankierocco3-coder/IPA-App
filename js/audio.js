@@ -136,12 +136,21 @@ if (typeof window !== 'undefined') {
     window.addEventListener(ev, unlockTTS, { once: true, capture: true }));
 }
 
+// Held so Chrome cannot garbage-collect an utterance mid-speech — a real
+// bug that manifests as random total silence.
+let liveUtterance = null;
+
 function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
   if (!('speechSynthesis' in window)) return;
   // Only cancel when something is actually queued — a bare cancel() on an idle
   // engine can leave Chrome stuck and swallow the next utterance.
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+  // A stale paused engine silently queues everything forever — always clear
+  // the paused state before speaking.
+  try { speechSynthesis.resume(); } catch {}
   const u = new SpeechSynthesisUtterance(text);
+  liveUtterance = u;
+  u.addEventListener('end', () => { if (liveUtterance === u) liveUtterance = null; }, { once: true });
   if (!voiceCache[lang]) voiceCache[lang] = pickVoice(lang);
   const voice = voiceCache[lang];
   if (voice) u.voice = voice;
@@ -174,7 +183,9 @@ export function speak(text, { rate = 0.85, lang = 'en-GB', device = false } = {}
 // Speak a device utterance and call `done` when it finishes (or errors).
 function deviceSpeakThen(text, lang, done) {
   if (!('speechSynthesis' in window)) { done(); return; }
+  try { speechSynthesis.resume(); } catch {}
   const u = new SpeechSynthesisUtterance(text);
+  liveUtterance = u;
   if (!voiceCache[lang]) voiceCache[lang] = pickVoice(lang);
   const v = voiceCache[lang];
   if (v) u.voice = v;
