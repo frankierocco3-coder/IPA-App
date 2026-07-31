@@ -3,7 +3,7 @@
 
 import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
 import { EXERCISES_PER_LESSON } from './data/course.js';
-import { IDIOM } from './data/idiom.js';
+import { IDIOM, IDIOM_DIALOGUES, IDIOM_SITUATIONS, IDIOM_LITERAL } from './data/idiom.js';
 
 const shuffle = arr => arr.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -46,7 +46,7 @@ export const phonemesForAccent = accent =>
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
-const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'Contemporary British' };
+const ACCENT_NAMES = { rp: 'Traditional RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'Standard British' };
 
 // Word pairs that exist in both accents: the raw material for shift
 // drills. The RP form is the rp-tagged entry, or the untagged one
@@ -537,8 +537,81 @@ function genIdiom(accent) {
   };
 }
 
+// ── Authored idiom exercises (Standard British) ───────────────
+// The banks live in data/idiom.js. These are recognition-focused; the
+// register question is the only one that surfaces flagged terms, because
+// knowing an expression is rude IS the lesson there.
+
+function genIdiomSituation() {
+  const q = pick(IDIOM_SITUATIONS);
+  return {
+    type: 'choice',
+    prompt: `When would you naturally say “${q.term}”?`,
+    display: q.term,
+    smallDisplay: true,
+    choices: shuffle([{ label: q.ok, ok: true }, ...q.wrong.map(w => ({ label: w }))]),
+    explain: `“${q.term}” fits: ${q.ok}.`,
+  };
+}
+
+// How an expression lands, derived from its flag and strength note.
+function idiomRegisterOf(e) {
+  if (e.flag === 'dated-offensive') return 'Offensive';
+  if (e.flag === 'vulgar' || e.flag === 'vulgar-mild') return 'Rude';
+  const note = (e.note ?? '').toLowerCase();
+  if (/affection|warm|playful|friendly/.test(note)) return 'Friendly';
+  return 'Informal';
+}
+
+function genIdiomRegister(accent) {
+  const pool = IDIOM.filter(e => e.dialect === (accent ?? 'ssbe'));
+  if (pool.length < 4) return null;
+  const entry = pick(pool);
+  const right = idiomRegisterOf(entry);
+  return {
+    type: 'choice',
+    prompt: `How does “${entry.term}” land?`,
+    display: entry.term,
+    smallDisplay: true,
+    choices: shuffle(['Friendly', 'Informal', 'Rude', 'Offensive'].map(r =>
+      ({ label: r, ok: r === right }))),
+    explain: `“${entry.term}” — ${entry.meaning}. ${right}${entry.note ? ` (${entry.note})` : ''}.`,
+  };
+}
+
+function genIdiomLiteral() {
+  const q = pick(IDIOM_LITERAL);
+  return {
+    type: 'choice',
+    prompt: 'Literal, or idiomatic?',
+    display: q.text,
+    smallDisplay: true,
+    choices: shuffle([
+      { label: 'Idiomatic', ok: q.idiomatic },
+      { label: 'Literal', ok: !q.idiomatic },
+    ]),
+    explain: q.explain,
+  };
+}
+
+function genIdiomDialogue() {
+  const q = pick(IDIOM_DIALOGUES);
+  return {
+    type: 'choice',
+    prompt: 'Complete the exchange — pick the natural response.',
+    display: `“${q.a}”`,
+    smallDisplay: true,
+    choices: shuffle([{ label: q.ok, ok: true }, ...q.wrong.map(w => ({ label: w }))]),
+    explain: `“${q.a}” → “${q.ok}”`,
+  };
+}
+
 const GENERATORS = {
   idiom: l => genIdiom(l.accent ?? 'rp'),
+  idiomSituation: () => genIdiomSituation(),
+  idiomRegister: l => genIdiomRegister(l.accent ?? 'ssbe'),
+  idiomLiteral: () => genIdiomLiteral(),
+  idiomDialogue: () => genIdiomDialogue(),
   symbolToWord: l => genSymbolToWord(pick(l.phonemes), l.accent),
   soundToSymbol: l => genSoundToSymbol(pick(l.phonemes), l.phonemes, l.accent),
   description: l => genDescription(pick(l.phonemes), l.phonemes),

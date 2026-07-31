@@ -49,11 +49,19 @@ def main():
     index = json.loads((AUDIO / "index.json").read_text(encoding="utf-8"))
     known_bad, approved = parse_flags()
 
-    # 1 + 5: index entries exist and never reach into phonemes/
+    # Voice keys are course-bound: named speakers for ssbe, f/m elsewhere.
+    COURSE_VOICES = {"rp": {"f", "m"}, "nam": {"f", "m"}, "aus": {"f", "m"},
+                     "ssbe": {"alyx", "peach"}}
+
+    # 1 + 5: index entries exist, never reach into phonemes/, and only use
+    # that course's own approved voice keys (no silent cross-course voices)
     for d, variants in index.items():
         if d not in WORD_DIALECTS:
             fail("index.json: unexpected dialect key '%s'" % d)
             continue
+        for v in variants:
+            if v not in COURSE_VOICES[d]:
+                fail("index.json: %s uses a voice key that is not that course's: %s" % (d, v))
         for v, clips in variants.items():
             for clip in clips:
                 if "phonemes" in clip:

@@ -161,6 +161,14 @@ export const store = {
     save(s);
   },
 
+  // ── One-time course introductions ───────────────────────────
+  get introsSeen() { return load().courseIntros ?? {}; },
+  markIntroSeen(courseId) {
+    const s = load();
+    s.courseIntros = { ...(s.courseIntros ?? {}), [courseId]: true };
+    save(s);
+  },
+
   // ── Local profile ───────────────────────────────────────────
   get profile() {
     const s = load();

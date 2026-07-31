@@ -1554,3 +1554,71 @@ export const MLE = [
   { term: 'mazza', meaning: 'A wild or chaotic situation' },
   { term: 'paigon', meaning: 'Enemy, rival, or fake friend' },
 ];
+
+// ── Authored idiom exercise banks (Standard British) ─────────
+// Deterministic lesson material — see the ssbe lesson type lists.
+// Two-line exchanges: pick the natural response.
+export const IDIOM_DIALOGUES = [
+  { a: 'You alright?', ok: 'Yeah, you?', wrong: ['I am quite well, thank you for enquiring.', 'Alright what?'] },
+  { a: 'Fancy a cheeky pint after work?', ok: 'Go on then — just the one.', wrong: ['I fancy no beverages.', 'A pint of what, exactly, and why is it cheeky?'] },
+  { a: 'It\'s your round, mate.', ok: 'Fair enough — same again?', wrong: ['A round of what shape?', 'I dispute this allocation.'] },
+  { a: 'I\'m absolutely knackered.', ok: 'Get an early night, yeah?', wrong: ['Knackered is not a word.', 'You should exercise more discipline.'] },
+  { a: 'He\'s only gone and pulled.', ok: 'No way — the jammy sod!', wrong: ['Pulled what, a muscle?', 'That seems medically inadvisable.'] },
+  { a: 'The gig was banging last night.', ok: 'Gutted I missed it.', wrong: ['Banging against what?', 'Noise complaints are a serious matter.'] },
+  { a: 'Give us a bell when you\'re outside.', ok: 'Will do.', wrong: ['I do not own a bell.', 'Us? How many of you are there?'] },
+  { a: 'I could murder a curry.', ok: 'Same — shall we get one in?', wrong: ['I must report this threat.', 'Curry cannot be murdered, it is inanimate.'] },
+  { a: 'That\'s well out of order.', ok: 'Yeah, someone should have a word.', wrong: ['The order was alphabetical.', 'I shall re-sort it presently.'] },
+  { a: 'Can\'t be arsed to cook tonight.', ok: 'Chippy it is, then.', wrong: ['Cooking requires no such anatomy.', 'Your commitment is disappointing.'] },
+  { a: 'You having a laugh?', ok: 'Deadly serious, mate.', wrong: ['I was not laughing at this time.', 'Laughter is scheduled for later.'] },
+  { a: 'My shout — what are you having?', ok: 'Cheers! Pint of the pale, ta.', wrong: ['Please do not shout indoors.', 'I shall have silence.'] },
+  { a: 'It\'s all gone a bit pear-shaped.', ok: 'What happened this time?', wrong: ['Pears are a nutritious fruit.', 'Geometry was never my strong suit.'] },
+  { a: 'Nice one for sorting the tickets.', ok: 'No worries — see you there.', wrong: ['One what, precisely?', 'Your gratitude is noted and filed.'] },
+  { a: 'He bottled it at the last minute.', ok: 'Typical — he always does.', wrong: ['Bottled what, the beer?', 'Recycling is commendable.'] },
+  { a: 'Don\'t wind him up, he\'s stressed.', ok: 'Fine, I\'ll leave it.', wrong: ['He is not a clockwork device.', 'Stress is a modern invention.'] },
+  { a: 'Fancy it, Friday? Big sesh.', ok: 'Go on then, I\'m in.', wrong: ['I fancy nothing and no one.', 'Sessions require prior written notice.'] },
+  { a: 'She\'s proper chuffed with the review.', ok: 'So she should be — it\'s glowing.', wrong: ['Chuffed is not in my dictionary.', 'Reviews are subjective and meaningless.'] },
+  { a: 'Lend us a fiver till payday?', ok: 'Go on — but I want it back.', wrong: ['Us? You are one person.', 'I only lend in multiples of seven.'] },
+  { a: 'The wifi\'s gone again. Nightmare.', ok: 'Router\'s in the bin at this point, surely.', wrong: ['Nightmares occur during sleep.', 'Have you considered carrier pigeons?'] },
+  { a: 'Good shout getting here early.', ok: 'Yeah, look at the queue now.', wrong: ['I did not shout.', 'Punctuality is its own reward.'] },
+  { a: 'He was three hours late. Taking the piss.', ok: 'Honestly, have a word with him.', wrong: ['Taking it where?', 'Lateness is a social construct.'] },
+  { a: 'I pulled a sickie for the festival.', ok: 'You absolute legend. Worth it?', wrong: ['You should see a doctor immediately.', 'Fraud is a serious offence.'] },
+  { a: 'That new curry place is well dodgy.', ok: 'Yeah? The chippy it is, then.', wrong: ['Dodging is an Olympic skill.', 'I shall inspect their certificates.'] },
+  { a: 'Bob\'s your uncle — done.', ok: 'That easy? Nice one.', wrong: ['My uncle is called Terry.', 'Please introduce me to this Bob.'] },
+  { a: 'I\'m skint till Friday.', ok: 'No worries — my shout tonight.', wrong: ['Skint is a type of fabric.', 'Fiscal planning prevents this.'] },
+  { a: 'Keep your hair on, we\'re only five minutes late.', ok: 'Fine — but we\'re leaving NOW.', wrong: ['My hair is firmly attached.', 'Punctuality matters more than hair.'] },
+  { a: 'The rehearsal was a total shambles.', ok: 'Tomorrow can only be better.', wrong: ['A shambles is a meat market, historically.', 'Perhaps consider a different career.'] },
+  { a: 'Get in! We got the venue!', ok: 'Yes! Buzzing for this.', wrong: ['Get in where?', 'Venues are overrated.'] },
+  { a: 'It\'s not my cup of tea, opera.', ok: 'Fair enough — more tickets for me.', wrong: ['But you are drinking coffee.', 'Your taste requires improvement.'] },
+];
+
+// When would you naturally say it?
+export const IDIOM_SITUATIONS = [
+  { term: 'cheers', ok: 'A mate holds the door for you', wrong: ['You are opening a formal board meeting', 'A stranger insults your coat'] },
+  { term: 'sorted', ok: 'Your friend confirms the tickets are booked', wrong: ['You are describing a messy room', 'You are ordering dessert'] },
+  { term: 'gutted', ok: 'Your show closed a week early', wrong: ['You just won the raffle', 'You are mildly peckish'] },
+  { term: 'chuffed', ok: 'Your first review is a rave', wrong: ['Your train is delayed again', 'You lost your keys'] },
+  { term: 'skint', ok: 'Declining a night out three days before payday', wrong: ['Describing a sharp knife', 'Complimenting someone\'s outfit'] },
+  { term: 'dodgy', ok: 'Warning a mate off a suspicious kebab shop', wrong: ['Praising a brilliant performance', 'Describing a sunny afternoon'] },
+  { term: 'cheeky', ok: 'Suggesting a quick unplanned pint', wrong: ['Delivering a eulogy', 'Filing your taxes'] },
+  { term: 'faff', ok: 'Describing a booking system with nine steps', wrong: ['Describing a smooth checkout', 'Complimenting the chef'] },
+  { term: 'mare', ok: 'Your entire morning went wrong', wrong: ['Describing a lovely stroll', 'Greeting your landlord'] },
+  { term: 'sound', ok: 'Vouching for a mate someone\'s unsure about', wrong: ['Describing a broken speaker', 'Complaining about the volume'] },
+  { term: 'nice one', ok: 'A mate fixed your bike unasked', wrong: ['Someone stepped on your foot', 'You are reading the news headlines'] },
+  { term: 'fair play', ok: 'A rival learned the part in a week and nailed it', wrong: ['Someone pushed into the queue', 'The bus is late again'] },
+  { term: 'my shout', ok: 'You\'re at the bar with mates and it\'s your turn', wrong: ['You are alone in a library', 'You are writing a complaint letter'] },
+  { term: 'having a word', ok: 'The sound guy keeps missing cues', wrong: ['Everything is going perfectly', 'You are ordering a coffee'] },
+];
+
+// Literal or idiomatic?
+export const IDIOM_LITERAL = [
+  { text: 'The tour planning has gone completely pear-shaped.', idiomatic: true, explain: 'Nothing is shaped like a pear — plans have gone wrong.' },
+  { text: 'This pear is a bit pear-shaped, as pears tend to be.', idiomatic: false, explain: 'An actual pear, actually pear-shaped.' },
+  { text: 'He threw his toys out of the pram in the production meeting.', idiomatic: true, explain: 'A grown adult reacting childishly — no pram involved.' },
+  { text: 'The baby threw her toys out of the pram onto the pavement.', idiomatic: false, explain: 'A literal baby, a literal pram, literal toys.' },
+  { text: 'Someone put a spanner in the works the day before opening night.', idiomatic: true, explain: 'A plan was disrupted — no actual spanner.' },
+  { text: 'The mechanic left a spanner in the works of the engine.', idiomatic: false, explain: 'An actual tool, actually inside machinery.' },
+  { text: 'I could murder a curry right now.', idiomatic: true, explain: 'Intense craving — no crime is planned.' },
+  { text: 'The detective investigated a murder in Curry Street.', idiomatic: false, explain: 'An actual crime, an actual street.' },
+  { text: 'He\'s full of beans this morning — three laps before breakfast.', idiomatic: true, explain: 'Energetic, not full of legumes.' },
+  { text: 'This burrito is genuinely full of beans.', idiomatic: false, explain: 'A burrito, containing beans, as advertised.' },
+];

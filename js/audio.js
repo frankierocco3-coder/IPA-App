@@ -44,29 +44,14 @@ speechSynthesis.onvoiceschanged = () => { Object.keys(voiceCache).forEach(k => d
 export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-GB' };
 
 // …and back again, so a spoken language picks the right clip folder. Two
-// accents can share a TTS language (RP and Contemporary British are both
+// accents can share a TTS language (Traditional RP and Standard British are both
 // en-GB), so callers with a known accent pass it explicitly — the lang
 // mapping is only the fallback.
 const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
 
-// ── Per-course voice preference ───────────────────────────────
-// Courses with named speakers (Contemporary British: Alyx and Peach) pin
-// one voice instead of alternating randomly. Stored by voice KEY.
-const PREFS_KEY = 'speechcraft-voice-prefs';
-export function voicePref(dir) {
-  try { return (JSON.parse(localStorage.getItem(PREFS_KEY)) ?? {})[dir] ?? null; } catch { return null; }
-}
-export function setVoicePref(dir, key) {
-  try {
-    const p = JSON.parse(localStorage.getItem(PREFS_KEY)) ?? {};
-    p[dir] = key;
-    localStorage.setItem(PREFS_KEY, JSON.stringify(p));
-  } catch { /* preference is a nicety */ }
-}
-// Voice keys that have ANY clips for a dialect — drives selector states.
-export function voicesAvailable(dir) {
-  return Object.keys(clipIndex?.[dir] ?? {});
-}
+// (An earlier build stored a per-course voice preference under
+// 'speechcraft-voice-prefs'. It is deliberately ignored now — playback is
+// random across a course's approved voices — and a stale key is harmless.)
 
 // Which words have a recorded clip: {accent: {voice key: [words]}}. Each
 // accent can have several voices (male/female); we pick between them at
@@ -205,13 +190,9 @@ export function speak(text, { rate = 0.85, lang = 'en-GB', device = false, accen
     const dir = accent ?? LANG_DIR[lang] ?? 'rp';
     const options = voicesWith(dir, text);
     if (options.length) {
-      // A pinned voice (named speakers) always wins; without one, pick at
-      // random so the accent is heard from more than one person.
-      const pref = voicePref(dir);
-      const voice = pref && options.includes(pref)
-        ? pref
-        : pref ? options[0]   // pinned voice lacks this clip: deterministic stand-in, never random
-        : options[Math.floor(Math.random() * options.length)];
+      // Random per playback across the dialect's approved voices — Alyx or
+      // Peach for Standard British, f/m elsewhere. Repeats are fine.
+      const voice = options[Math.floor(Math.random() * options.length)];
       return playClip(dir, voice, text, { rate, lang });
     }
   }

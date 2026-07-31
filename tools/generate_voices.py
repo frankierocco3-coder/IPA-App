@@ -52,7 +52,7 @@ ACCENTS = ["rp", "nam", "aus", "ssbe"]
 REVIEW_BATCH = {
     "ssbe": [
         # course sample sentence (also the voice-selector sample line)
-        "Alright? Welcome to Contemporary British - let's get you sounding like Britain now.",
+        "Alright? Welcome to Standard British - let's get you sounding like Britain now.",
         # diagnostic vowel words
         "bath", "trap", "strut", "lot", "thought", "goose", "goat", "face",
         "car", "near", "square",
@@ -176,6 +176,11 @@ def idiom_texts():
     and the reference pages have listen buttons; drills still never use them.
     """
     src = IDIOM_JS.read_text()
+    # Parse only the IDIOM array — the authored exercise banks further down
+    # the file have term: fields with no dialect:/example: and skew counts.
+    start = src.index("export const IDIOM = [")
+    end = src.index("\n];", start)
+    src = src[start:end]
     field = r"'((?:[^'\\]|\\.)*)'"
     dialects = re.findall(r"dialect:\s*" + field, src)
     terms = re.findall(r"term:\s*" + field, src)
@@ -263,6 +268,8 @@ def main() -> None:
                     help="generate idiom terms + examples (each in its own dialect only)")
     ap.add_argument("--review-batch", action="store_true",
                     help="generate the SSBE diagnostic review set (owner ear-check gate)")
+    ap.add_argument("--idiom-pilot", action="store_true",
+                    help="generate the 19-idiom Standard British pilot (review content)")
     ap.add_argument("--dry-run", action="store_true",
                     help="report clip counts and character cost; spend nothing")
     args = ap.parse_args()
@@ -281,6 +288,33 @@ def main() -> None:
     per_accent = idiom_texts() if args.idioms else (REVIEW_BATCH if args.review_batch else None)
     if args.review_batch:
         targets = [a for a in targets if a in REVIEW_BATCH]
+    if args.idiom_pilot:
+        # Review content for the Standard British idiom pilot: the 19
+        # agreed terms plus their example sentences, Alyx and Peach only.
+        PILOT = ["innit", "mate", "cheers", "proper", "sorted", "knackered",
+                 "gutted", "chuffed", "buzzing", "skint", "dodgy", "cheeky",
+                 "Are you taking the piss?", "You having a laugh?",
+                 "It\u2019s doing my head in", "git", "prat", "muppet", "slag"]
+        src = IDIOM_JS.read_text()
+        start = src.index("export const IDIOM = [")
+        src_i = src[start:src.index("\n];", start)]
+        field = r"'((?:[^'\\]|\\.)*)'"
+        un = lambda x: x.replace("\\'", "'").replace("\\\\", "\\")
+        pairs = {}
+        for m in re.finditer(r"dialect: 'ssbe', term: " + field + r", meaning: " + field
+                             + r", example: (?:" + field + r"|null)", src_i):
+            pairs[un(m.group(1))] = un(m.group(3)) if m.group(3) else None
+        chosen = []
+        for term in PILOT:
+            t = term.encode().decode("unicode_escape")
+            if t not in pairs:
+                print("! pilot term not found in idiom data: %s" % t)
+                continue
+            chosen.append(t)
+            if pairs[t]:
+                chosen.append(pairs[t])
+        per_accent = {"ssbe": sorted(set(chosen))}
+        targets = ["ssbe"]
     if (args.idioms or not per_accent) and "ssbe" in targets:
         # Structural gate, not just policy: no full ssbe generation of any
         # kind until the Alyx/Peach review batch has been ear-approved.

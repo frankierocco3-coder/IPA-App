@@ -162,18 +162,27 @@ survives only for the Foundations full chart. speak() takes an `accent`
 option because rp and ssbe share en-GB — lang alone cannot pick the clip
 folder. Idiom clips EXIST for rp/nam/aus (856 generated 2026-07-30) — the
 listen buttons play real native voices there.
-COURSE #5: Contemporary British (id 'ssbe', SSBE) — a first-class course
-fully separate from RP: own track (4 stages, 14 nodes), inventory adds
-/ɛː/ /ʔ/ /i/, rp-tagged "from" words power RP↔SSBE shift drills, 181 ssbe
-idioms + MLE as a separately-labelled reference collection (never drilled,
-never generic-British). Voices are NAMED SPEAKERS Alyx (m) and Peach (f):
-js/data/voices.js is browser-safe metadata; provider voice ids live ONLY in
-gitignored tools/voices.json. No random alternation — a per-course voice
-preference (speechcraft-voice-prefs, set via the Learn/Preferences chooser)
-pins one speaker. ssbe bulk generation is STRUCTURALLY blocked in
-generate_voices.py until Frankie ear-approves the Alyx/Peach review batch
-(86 clips in audio/ssbe/, review at #audit; RP-side comparison lines in
-audio/rp/).
+COURSE #5: Standard British (internal id 'ssbe' — that name NEVER appears
+learner-facing, nor do Contemporary British / SSBE / Standard Southern /
+"educated southern"; RP's label is now Traditional RP). First-class course
+separate from Traditional RP: 4-stage track (ssbe-0 'Hear Standard
+British' is a real lesson; the course INTRO is a one-time overlay on first
+Learn visit — store.introsSeen — revisitable via Library → About Standard
+British). Copy labels features honestly: Core target / Common contemporary
+/ Relaxed-speech option / Variable. Inventory adds /ɛː/ /ʔ/ /i/; rp-tagged
+words power RP↔SSBE shifts. NO voice selector: playback picks Alyx/Peach
+randomly PER ACTIVATION (stale speechcraft-voice-prefs key is ignored).
+Idiom exercises are DETERMINISTIC course content: 'idiom' in ssbe-3,
+'idiomSituation' in ssbe-6, 'idiomRegister' in ssbe-s2 + all ssbe
+checkpoints, 'idiomDialogue'+'idiomLiteral' in the final — authored banks
+(30 dialogues, 14 situations, 10 literal pairs) live in js/data/idiom.js;
+register derives from flags (flagged terms appear ONLY there, recognition
+not celebration). ssbe idiom page defaults era=Contemporary. Audio state:
+86-clip review batch + 19-idiom pilot (both voices) generated in
+audio/ssbe/ awaiting Frankie's ear at #audit; bulk ssbe generation
+structurally blocked until approved; strict no-TTS for ssbe deliberately
+DEFERRED until clips exist (review-first sequencing, Frankie's call).
+tools/audit_audio.py enforces course-bound voice keys (ssbe=alyx/peach).
 Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.

@@ -4,7 +4,6 @@ import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip } from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
-import { voicePref, setVoicePref, voicesAvailable, indexReady, clipIndexLoaded } from './audio.js';
 import { voicesForCourse } from './data/voices.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
@@ -116,6 +115,9 @@ function expandUnit(unit) {
       const shiftTo = covered.find(x => x.shiftTo)?.shiftTo;
       // sprinkle in extra game-y types that fit the material
       const extras = accent || shiftTo ? ['fillBlank'] : ['match', 'fillBlank', 'gapBuild'];
+      // Standard British checkpoints always carry idiom material — meaning
+      // questions early, register questions too (deterministic via rotation).
+      if ((accent ?? shiftTo) === 'ssbe') extras.push('idiom', 'idiomRegister');
       out.push({
         id: `chk-${unit.id}-${(i + 1) / 2}`,
         title: 'Checkpoint game',
@@ -206,8 +208,8 @@ function practiceLesson(track) {
 
 const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
-  { id: 'rp', icon: '🇬🇧', label: 'RP' },
-  { id: 'ssbe', icon: '🎧', label: 'Contemporary British', sub: 'Standard Southern British English' },
+  { id: 'rp', icon: '🇬🇧', label: 'Traditional RP' },
+  { id: 'ssbe', icon: '🎧', label: 'Standard British' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
@@ -443,52 +445,60 @@ function continueCard(track, course) {
   };
 }
 
-// Named-speaker chooser for courses that pin a voice (Contemporary
-// British: Alyx / Peach). Samples appear only when real clips exist —
-// device TTS is never passed off as a named speaker.
-function voiceChooser(course) {
-  const voices = voicesForCourse(course.id);
-  if (!voices.length) return { html: '', wire: () => {} };
-  const cur = voicePref(course.id) ?? voices[0].id;
-  const avail = voicesAvailable(course.id);
-  const anyPending = voices.some(v => v.reviewStatus !== 'approved');
-  return {
-    html: `
-    <section class="continue-card voice-card" aria-label="Choose your voice">
-      <div class="cc-info">
-        <span class="cc-stage">🎙 Choose your voice</span>
-        <div class="chip-row">
-          ${voices.map(v => `
-            <button class="chip-pick ${v.id === cur ? 'on' : ''}" data-voice="${esc(v.id)}" type="button"
-                    aria-pressed="${v.id === cur}">${esc(v.displayName)} <small>${esc(v.presentation)}</small></button>`).join('')}
-          ${voices.map(v => avail.includes(v.id) ? `
-            <button class="word-chip" data-voice-sample="${esc(v.id)}" type="button"
-                    aria-label="Play a sample of ${esc(v.displayName)}">🔊 ${esc(v.displayName)} sample</button>` : '').join('')}
-        </div>
-        <p class="cc-meta">${!avail.length
-          ? 'Alyx and Peach are being recorded — their clips arrive once the review batch is approved. Until then this course uses the device’s British voice.'
-          : anyPending
-            ? 'Sample recordings are in — still under review, so most of the course uses the device’s British voice for now.'
-            : 'Everything in this course speaks in your chosen voice.'}</p>
+// ── Standard British: one-time introduction ───────────────────
+// Shown automatically on the FIRST visit to the course's Learn view, then
+// never again; permanently revisitable from Library → About Standard
+// British (which never touches first-run state or progress).
+
+function ssbeIntroBody() {
+  return `
+    <p class="guide-text">Standard British is a modern pronunciation target for present-day British roles and conversation. It keeps core British features while including common present-day patterns — and because real speakers vary by age, region and situation, the course labels each feature honestly:</p>
+    <div class="guide-word"><span class="wii-who">Core target</span><span class="guide-note">non-rhotic, broad BATH /ɑː/, rounded LOT /ɒ/, steady SQUARE /ɛː/, fronted GOOSE, happY /i/</span></div>
+    <div class="guide-word"><span class="wii-who">Common contemporary</span><span class="guide-note">glottal stop for non-initial /t/ (better /beʔə/), fused yods (tune /tʃuːn/)</span></div>
+    <div class="guide-word"><span class="wii-who">Variable / relaxed</span><span class="guide-note">NEAR smoothing, heavier glottalling in casual speech — options, not rules</span></div>
+    <p class="guide-text">Where Traditional RP glides, holds its /t/ and keeps its yods, this course targets the modern forms — and trains your ear to tell the two apart.</p>`;
+}
+
+function showSsbeIntro(course) {
+  if (document.querySelector('.intro-overlay')) return;
+  const chain = TRACK_LESSONS[course.id];
+  const ov = document.createElement('div');
+  ov.className = 'intro-overlay';
+  ov.innerHTML = `
+    <div class="intro-card" role="dialog" aria-modal="true" aria-label="Meet Standard British" tabindex="-1">
+      <button class="quit intro-close" aria-label="Close introduction" type="button">✕</button>
+      <h1>Meet Standard British</h1>
+      ${ssbeIntroBody()}
+      <div class="ob-actions ob-actions-col">
+        <button class="btn btn-primary" id="intro-begin" type="button">Begin Standard British</button>
+        <button class="btn-lite" id="intro-skip" type="button">Not now — just look around</button>
       </div>
-    </section>`,
-    wire: el => {
-      // The clip index loads async — if it wasn't ready when this drew,
-      // redraw once so the sample buttons appear.
-      if (!avail.length && !clipIndexLoaded()) {
-        indexReady.then(() => {
-          if (document.querySelector('.shell .voice-card')) renderShell(activeSection());
-        });
-      }
-      el.querySelectorAll('[data-voice]').forEach(b =>
-        b.addEventListener('click', () => { setVoicePref(course.id, b.dataset.voice); renderShell(activeSection()); }));
-      el.querySelectorAll('[data-voice-sample]').forEach(b =>
-        b.addEventListener('click', () => {
-          const a = new Audio(`audio/${course.id}/${b.dataset.voiceSample}/square.mp3`);
-          a.play().catch(() => {});
-        }));
-    },
-  };
+      <p class="pane-note">You can reread this any time: Library → About Standard British.</p>
+    </div>`;
+  document.body.appendChild(ov);
+  const done = () => { store.markIntroSeen(course.id); ov.remove(); };
+  ov.querySelector('.intro-close').addEventListener('click', done);
+  ov.querySelector('#intro-skip').addEventListener('click', done);
+  ov.querySelector('#intro-begin').addEventListener('click', () => {
+    done();
+    const first = chain.find(l => !store.isCompleted(l.id)) ?? chain[0];
+    first.checkpoint ? startLesson(first) : renderGuide(first);
+  });
+  ov.addEventListener('keydown', e => { if (e.key === 'Escape') done(); });
+  ov.querySelector('.intro-card').focus();
+}
+
+function renderAboutSsbe() {
+  record(renderAboutSsbe);
+  app.innerHTML = `
+    ${pageTopbar('🎧 About Standard British', '#7d6b9e')}
+    <main class="guide">
+      <h1>Standard British</h1>
+      ${ssbeIntroBody()}
+      <div class="guide-start"><button class="btn btn-primary" id="about-go" type="button">Go to the course</button></div>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('about-go').addEventListener('click', () => { setCourse('ssbe'); goSection('learn'); });
 }
 
 function learnMain(el, course) {
@@ -496,11 +506,9 @@ function learnMain(el, course) {
   const { done, total } = trackProgress(track);
   const cc = continueCard(track, course);
   const path = buildTrackPath(track, { guidebook: true, labels: true });
-  const vc = voiceChooser(course);
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
     ${cc.html}
-    ${vc.html}
     ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
       <div class="track-progress">
@@ -510,9 +518,9 @@ function learnMain(el, course) {
     </div>
     <div class="track-scroll hub-scroll">${path.html}</div>`;
   cc.wire(el);
-  vc.wire(el);
   wireWhatIsIpaCard(el);
   path.wire(el);
+  if (course.id === 'ssbe' && !store.introsSeen.ssbe) showSsbeIntro(course);
 }
 
 // Per-unit guidebook: what the unit teaches, in one readable page.
@@ -624,6 +632,9 @@ function libraryMain(el, course) {
   const d = course.id === 'core' ? null : course.id;
   const track = trackFor(course.id);
   const cards = [
+    d === 'ssbe' ? { icon: '🎧', title: 'About Standard British',
+      blurb: 'Revisit the course introduction, its core sound patterns and how it differs from Traditional RP.',
+      go: renderAboutSsbe } : null,
     { icon: '📖', title: 'IPA',
       blurb: d ? `${dialectName(d)}’s sounds and tongue placement.` : 'All 55 sounds and how they’re made.',
       go: () => (d ? renderInventory(d) : renderChart()) },
@@ -680,8 +691,10 @@ function renderInventory(d) {
 
 function renderIdioms(d) {
   record(() => renderIdioms(d));
-  // Fresh filters every visit — landing on a pre-filtered list reads as missing content.
-  Object.assign(idiomFilters, { q: '', era: 'all', type: 'all', flagged: false });
+  // Fresh filters every visit — landing on a pre-filtered list reads as
+  // missing content. Standard British defaults to Contemporary: its period
+  // material is reference, not the point.
+  Object.assign(idiomFilters, { q: '', era: d === 'ssbe' ? 'contemporary' : 'all', type: 'all', flagged: false });
   app.innerHTML = `
     ${pageTopbar('🗣 Native Idioms', trackFor(d).color)}
     <main class="track-list" id="idiom-page"></main>`;
@@ -1139,8 +1152,8 @@ const GOALS = [
 
 const ONBOARD_ACCENTS = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American', blurb: 'The screen standard — every R spoken, flat BATH, open LOT.', sample: true },
-  { id: 'rp', icon: '🇬🇧', label: 'Received Pronunciation', blurb: 'The British stage standard — non-rhotic, broad BATH.', sample: true },
-  { id: 'ssbe', icon: '🎧', label: 'Contemporary British', blurb: 'Standard Southern British English — Britain now: glottal stops, easy vowels, no stuffiness.', sample: false },
+  { id: 'rp', icon: '🇬🇧', label: 'Traditional RP', blurb: 'The classic British stage standard — non-rhotic, broad BATH.', sample: true },
+  { id: 'ssbe', icon: '🎧', label: 'Standard British', blurb: 'A modern British target for present-day roles and conversation.', sample: false },
   { id: 'aus', icon: '🇦🇺', label: 'Australian', blurb: 'Forward vowels and a rising line — the hardest to fake.', sample: true },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations', blurb: 'Start with the alphabet of sounds, no accent attached.', sample: false },
 ];
@@ -1283,16 +1296,11 @@ function renderPreferences() {
         ${COURSES.map(c => `<button class="chip-pick ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" type="button"
           aria-pressed="${c.id === course.id}">${c.icon} ${esc(c.label)}</button>`).join('')}
       </div>
-      <h2 class="guide-heading">Contemporary British voice</h2>
-      <div id="pref-voice"></div>
       <h2 class="guide-heading">First-run setup</h2>
       <p class="pane-note">Runs the welcome flow again. Your progress is untouched.</p>
       <button class="btn" id="pref-rerun" type="button">Run setup again</button>
     </main>`;
   wireBrandHome();
-  const pv = voiceChooser(COURSES.find(c => c.id === 'ssbe'));
-  document.getElementById('pref-voice').innerHTML = pv.html;
-  pv.wire(document.getElementById('pref-voice'));
   app.querySelectorAll('[data-goal]').forEach(b =>
     b.addEventListener('click', () => { store.saveOnboarding({ goal: b.dataset.goal }); renderPreferences(); }));
   app.querySelectorAll('[data-course]').forEach(b =>
@@ -1547,7 +1555,9 @@ function hubIdiom(hub, d, track) {
     `<button class="dialect-chip ${on ? 'on' : ''}" data-g="${group}" data-v="${value}" type="button">${label}</button>`;
 
   hub.innerHTML = `
-    <p class="pane-note">The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.</p>
+    <p class="pane-note">${d === 'ssbe'
+      ? `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. Contemporary usage is the default view; use the Era filter for older material.`
+      : `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.`}</p>
     <div class="practice-row"><button class="btn btn-practice" id="idiom-drill" type="button">🗣 Drill these — no hearts lost</button></div>
     <input class="sonnet-search" id="idiom-q" type="search" placeholder="Search term, meaning or example…" autocomplete="off">
     <div class="dialect-picker"><span class="dialect-label">Era</span><div class="dialect-chips" id="idiom-era">
@@ -1573,7 +1583,7 @@ function hubIdiom(hub, d, track) {
       </details>` : ''}
     ${d === 'ssbe' ? `
       <details class="idiom-extra"><summary>London &amp; Multicultural London English — a separate register</summary>
-        <p class="pane-note">MLE is its own living variety, not generic British slang — these are labelled separately on purpose. Demonstrated in a Contemporary British accent here, but the words belong to London’s multicultural speech community. Reference only; never drilled.</p>
+        <p class="pane-note">MLE is its own living variety, not generic British slang — these are labelled separately on purpose. Demonstrated in a Standard British accent here, but the words belong to London’s multicultural speech community. Reference only; never drilled.</p>
         ${MLE.map(m => `<div class="idiom-card"><div class="idiom-head"><span class="idiom-term">${esc(m.term)}</span><span class="tag">MLE</span></div><p class="idiom-meaning">${esc(m.meaning)}</p></div>`).join('')}
       </details>` : ''}
     ${d === 'rp' ? `
@@ -1691,8 +1701,8 @@ function renderVowelMap() {
 // Dialects you can read/scan/transcribe any text in.
 const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
-  { id: 'rp', label: 'RP', lang: 'en-GB', flag: '🇬🇧' },
-  { id: 'ssbe', label: 'Contemporary British', lang: 'en-GB', flag: '🎧' },
+  { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🇬🇧' },
+  { id: 'ssbe', label: 'Standard British', lang: 'en-GB', flag: '🎧' },
   { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;

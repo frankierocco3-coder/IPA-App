@@ -246,9 +246,9 @@ export const COURSE = [
     title: 'Stage 1 · Orientation',
     color: '#7d6b9e',
     icon: '📍',
-    blurb: 'What Contemporary British is, and how it differs from its parent, RP.',
+    blurb: 'What Standard British is, and how it differs from Traditional RP.',
     lessons: [
-      { id: 'ssbe-0', title: 'Meet the accent', accent: 'ssbe', guide: 'Contemporary British — Standard Southern British English — is how educated southern Britain actually speaks now: RP’s grandchild, casual where RP is formal. It keeps the classic skeleton (non-rhotic, broad BATH /ɑː/, rounded LOT /ɒ/) but the flesh has changed: /t/ between vowels closes into a glottal stop (better /beʔə/), SQUARE flattens from a glide to a long steady /ɛː/ (square /skwɛː/), tune fuses to “choon” /tʃuːn/, and GOOSE slides far forward in the mouth. Directors ask for this when a script says “British, but a real person”.', phonemes: ['ɛː', 'ʔ', 'ɑː', 'ɒ', 'əʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+      { id: 'ssbe-0', title: 'Hear Standard British', accent: 'ssbe', guide: 'Standard British is a modern pronunciation target for present-day British roles and conversation. Its CORE TARGET keeps the classic skeleton — non-rhotic, broad BATH /ɑː/, rounded LOT /ɒ/. On top of that sit COMMON CONTEMPORARY FEATURES many speakers use — a glottal stop for non-initial /t/, a steady SQUARE vowel /ɛː/, fused yods in tune and duty. Real speakers vary by age, region and setting, so this course labels what is core, what is common, and what is a relaxed-speech option — and trains your ear to hear the difference from Traditional RP.', phonemes: ['ɛː', 'ʔ', 'ɑː', 'ɒ', 'əʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
     ],
   },
   {
@@ -257,14 +257,14 @@ export const COURSE = [
     color: '#7d6b9e',
     icon: '🎧',
     accent: true,
-    blurb: 'The living London-and-south standard — glottal stops, coalesced yods, fronted vowels.',
+    blurb: 'The modern sound system — glottal stops, coalesced yods, fronted vowels — with variation labelled honestly.',
     lessons: [
-      { id: 'ssbe-1', title: 'The glottal stop', accent: 'ssbe', guide: 'The signature of contemporary speech: /t/ between vowels or at a word’s end closes into a glottal stop /ʔ/ — the vocal folds simply shut and release. Better /beʔə/, water /wɔːʔə/, got /gɒʔ/, quite /kwaɪʔ/. It is not lazy and not Cockney any more; newsreaders do it. The /t/ at the START of a word never glottals — tea is still /tiː/.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
-      { id: 'ssbe-2', title: 'SQUARE goes steady', accent: 'ssbe', guide: 'Where RP glides /eə/, the contemporary accent holds one long open-mid front vowel: /ɛː/. Square /skwɛː/, fair /fɛː/, there /ðɛː/, care /kɛː/. Hold the position — any drift toward schwa sounds a generation older. NEAR is starting the same journey (/ɪə/ smoothing toward /ɪː/), but SQUARE has finished it.', phonemes: ['ɛː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'build'] },
-      { id: 'ssbe-3', title: 'Choon and joo-ty', accent: 'ssbe', guide: 'Yod-coalescence: /tj/ and /dj/ fuse into /tʃ/ and /dʒ/. Tune becomes “choon” /tʃuːn/, Tuesday “choose-day” /tʃuːzdeɪ/, duty “joo-ty” /dʒuːti/, due sounds like Jew /dʒuː/. RP keeps the two sounds separate — /tjuːn/ — and that separation now reads as distinctly formal or old-fashioned.', phonemes: ['tʃ', 'dʒ', 'uː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
-      { id: 'ssbe-4', title: 'The moving vowels', accent: 'ssbe', guide: 'Three vowels have drifted since RP was codified. GOOSE /uː/ has moved far forward — say goose with the tongue almost at /iː/ position, lips barely rounded. TRAP /æ/ has opened and lowered, nearly to /a/. And the final vowel of happy, city, coffee is now tense /i/, not the lax /ɪ/ old RP taught — happY tensing.', phonemes: ['uː', 'æ', 'i', 'ɪ'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'minimalPair'] },
-      { id: 'ssbe-5', title: 'What stayed classic', accent: 'ssbe', guide: 'The skeleton is still southern British: no /r/ unless a vowel follows (car /kɑː/), BATH words broaden to /ɑː/, LOT stays rounded /ɒ/, GOAT still starts at schwa /əʊ/. If you already carry RP, keep all of this — the contemporary accent is a set of updates, not a new operating system.', phonemes: ['ɑː', 'ɒ', 'əʊ', 'ɔː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
-      { id: 'ssbe-6', title: 'Reading the accent', accent: 'ssbe', guide: 'Full transcriptions in the contemporary accent — glottal stops, steady SQUARE, coalesced yods and all. Read them cold, type the words, and transcribe back the other way. This is where the accent stops being a list of features and becomes a system.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'əʊ'], types: ['typeWord', 'symbolToWord', 'gapBuild', 'fillBlank'] },
+      { id: 'ssbe-1', title: 'The glottal stop', accent: 'ssbe', guide: 'COMMON CONTEMPORARY FEATURE. Between vowels and at word ends, many speakers close /t/ into a glottal stop /ʔ/ — the vocal folds shut and release. Better /beʔə/, water /wɔːʔə/, got /gɒʔ/. It is common in relaxed speech and increasingly standard, but it is variable: careful or formal speech often keeps a light /t/. The /t/ at the START of a word never glottals — tea is still /tiː/.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'ssbe-2', title: 'SQUARE goes steady', accent: 'ssbe', guide: 'CORE TARGET. Where Traditional RP glides /eə/, the modern target holds one long open-mid front vowel: /ɛː/. Square /skwɛː/, fair /fɛː/, there /ðɛː/, care /kɛː/. Hold the position — drifting toward schwa reads as a generation older. NEAR is a VARIABLE FEATURE: some speakers smooth /ɪə/ toward a long /ɪː/, others keep the glide.', phonemes: ['ɛː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'build'] },
+      { id: 'ssbe-3', title: 'Yod coalescence: tune and duty', accent: 'ssbe', guide: 'COMMON CONTEMPORARY FEATURE. /tj/ and /dj/ fuse into /tʃ/ and /dʒ/ for most present-day speakers: tune /tʃuːn/ (a listening cue: “choon”), Tuesday /tʃuːzdeɪ/, duty /dʒuːti/, due /dʒuː/. Traditional RP keeps the sounds separate — /tjuːn/ — which now reads as notably formal. Both are real; this course drills the fused form as its target.', phonemes: ['tʃ', 'dʒ', 'uː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank', 'idiom'] },
+      { id: 'ssbe-4', title: 'The moving vowels', accent: 'ssbe', guide: 'CORE TARGET, all three. GOOSE /uː/ sits far forward — tongue almost at /iː/ position, lips barely rounded. TRAP /æ/ is open and lowered, close to /a/. And the final vowel of happy, city, coffee is tense /i/ — happY tensing — where classic RP taught lax /ɪ/. These are the quiet tells that separate a modern speaker from a period one.', phonemes: ['uː', 'æ', 'i', 'ɪ'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'minimalPair'] },
+      { id: 'ssbe-5', title: 'What stayed classic', accent: 'ssbe', guide: 'CORE TARGET — the stable skeleton. No /r/ unless a vowel follows (car /kɑː/), BATH words broaden to /ɑː/, LOT stays rounded /ɒ/, GOAT starts at schwa /əʊ/. If you already carry Traditional RP, keep all of this: Standard British is a set of updates on that base, not a new operating system.', phonemes: ['ɑː', 'ɒ', 'əʊ', 'ɔː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
+      { id: 'ssbe-6', title: 'Reading the accent', accent: 'ssbe', guide: 'Full Standard British transcriptions — glottal stops, steady SQUARE, coalesced yods and all. Read them cold, type the words, transcribe back the other way, and handle the conversational expressions that carry the accent in real speech. This is where it stops being a list of features and becomes a system.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'əʊ'], types: ['typeWord', 'symbolToWord', 'gapBuild', 'fillBlank', 'idiomSituation'] },
     ],
   },
   {
@@ -272,10 +272,10 @@ export const COURSE = [
     title: 'Stage 3 · Shift Work',
     color: '#7d6b9e',
     icon: '🔧',
-    blurb: 'RP to Contemporary and back — one generation of change, drilled both directions.',
+    blurb: 'Traditional RP to Standard British and back — one generation of change, drilled both ways.',
     lessons: [
-      { id: 'ssbe-s1', title: 'One generation on', shiftTo: 'ssbe', guide: 'Given the RP form, produce the contemporary one: glottal the non-initial /t/, flatten SQUARE to /ɛː/, fuse the yods. The traps are your RP habits — /betə/, /skweə/ and /tjuːn/ are all exactly one feature out of date.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ'], types: ['shiftChoice', 'shiftBuild'] },
-      { id: 'ssbe-s2', title: 'Placing the speaker', shiftTo: 'ssbe', guide: 'Ear work: hear a form cold and place it — traditional RP or contemporary? The tells are tiny and reliable: one glottal stop, one steady /ɛː/, one “choon”. An actor who can hear the difference can dial a character’s age and formality by degrees.', phonemes: ['ʔ', 'ɛː', 'ɪə', 'uː'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
+      { id: 'ssbe-s1', title: 'One generation on', shiftTo: 'ssbe', guide: 'Given the Traditional RP form, produce the Standard British one: glottal the non-initial /t/, flatten SQUARE to /ɛː/, fuse the yods. The traps are RP habits — /betə/, /skweə/ and /tjuːn/ are each exactly one feature out of date for this target.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'ssbe-s2', title: 'Placing the speaker', shiftTo: 'ssbe', guide: 'Ear work: hear a form cold and place it — Traditional RP or Standard British? The tells are small and reliable: one glottal stop, one steady /ɛː/, one fused yod. An actor who hears the difference can dial a character’s age and formality by degrees. A register question rides along — knowing WHEN an expression lands rude matters as much as the vowels.', phonemes: ['ʔ', 'ɛː', 'ɪə', 'uː'], types: ['shiftBuild', 'shiftChoice', 'accentEar', 'idiomRegister'] },
     ],
   },
   {
@@ -285,7 +285,7 @@ export const COURSE = [
     icon: '🏆',
     blurb: 'The final: the whole contemporary accent, mixed and at speed.',
     lessons: [
-      { id: 'ssbe-final', title: 'Contemporary British final', accent: 'ssbe', shiftTo: 'ssbe', count: 12, guide: 'Twelve questions across everything: glottal stops, steady SQUARE, coalesced yods, fronted GOOSE, happY tensing, the classic RP skeleton underneath, shifts from RP forms, and ear checks. Pass it and you can sound like Britain now, not Britain then.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'ɒ', 'əʊ', 'uː'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
+      { id: 'ssbe-final', title: 'Standard British final', accent: 'ssbe', shiftTo: 'ssbe', count: 12, guide: 'Twelve questions across everything: glottal stops, steady SQUARE, coalesced yods, fronted GOOSE, happY tensing, the classic skeleton underneath, shifts from Traditional RP forms, ear checks — and the conversational expressions in short exchanges, because an accent lives in dialogue, not word lists.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'ɒ', 'əʊ', 'uː'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar', 'idiomDialogue', 'idiomLiteral'] },
     ],
   },
 ];
@@ -312,7 +312,7 @@ export const TRACKS = [
   },
   {
     id: 'rp',
-    title: 'RP · Received Pronunciation',
+    title: 'Traditional RP',
     icon: '🇬🇧',
     color: '#6b7fa3',
     accent: true,
@@ -330,11 +330,11 @@ export const TRACKS = [
   },
   {
     id: 'ssbe',
-    title: 'Contemporary British',
+    title: 'Standard British',
     icon: '🎧',
     color: '#7d6b9e',
     accent: true,
-    blurb: 'Standard Southern British English — how the south of Britain actually speaks now.',
+    blurb: 'A modern British target for contemporary characters, conversation, film and TV.',
     unitIds: ['ssbe-intro', 'ssbe', 'ssbe-shift', 'ssbe-mastery'],
   },
   {
