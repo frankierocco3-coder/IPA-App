@@ -157,10 +157,23 @@ pills under upcoming nodes. Practice's top is ONE Quick Practice card
 (mixed or weak-sound rehearsal) with a renamed full-course mixed link only
 when they differ.
 Spoken audio ALWAYS follows the dialect context (Frankie's rule — inside a
-course, only that dialect's two voices are heard); the symbol-based lang
-guess survives only for the Foundations full chart. Idiom listen buttons
-fall back to device voice until clips are generated (`--idioms` mode in
-generate_voices.py, ~15k credits, blocked on the ElevenLabs quota).
+course, only that dialect's voices are heard); the symbol-based lang guess
+survives only for the Foundations full chart. speak() takes an `accent`
+option because rp and ssbe share en-GB — lang alone cannot pick the clip
+folder. Idiom clips EXIST for rp/nam/aus (856 generated 2026-07-30) — the
+listen buttons play real native voices there.
+COURSE #5: Contemporary British (id 'ssbe', SSBE) — a first-class course
+fully separate from RP: own track (4 stages, 14 nodes), inventory adds
+/ɛː/ /ʔ/ /i/, rp-tagged "from" words power RP↔SSBE shift drills, 181 ssbe
+idioms + MLE as a separately-labelled reference collection (never drilled,
+never generic-British). Voices are NAMED SPEAKERS Alyx (m) and Peach (f):
+js/data/voices.js is browser-safe metadata; provider voice ids live ONLY in
+gitignored tools/voices.json. No random alternation — a per-course voice
+preference (speechcraft-voice-prefs, set via the Learn/Preferences chooser)
+pins one speaker. ssbe bulk generation is STRUCTURALLY blocked in
+generate_voices.py until Frankie ear-approves the Alyx/Peach review batch
+(86 clips in audio/ssbe/, review at #audit; RP-side comparison lines in
+audio/rp/).
 Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.

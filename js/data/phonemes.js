@@ -27,6 +27,9 @@ export const PHONEMES = {
   'aʊ': { type: 'diphthong', name: 'MOUTH diphthong', hint: 'glides from open toward close back', examples: ['mouth', 'now', 'out', 'crowd'] },
   'ɪə': { type: 'diphthong', name: 'NEAR diphthong', hint: 'glides from close front toward schwa', examples: ['near', 'here', 'beer', 'idea'] },
   'eə': { type: 'diphthong', name: 'SQUARE diphthong', hint: 'glides from mid front toward schwa', examples: ['square', 'fair', 'there', 'care'] },
+  'ɛː': { type: 'vowel', name: 'contemporary SQUARE', hint: 'a long steady open-mid front vowel — where older RP glided /eə/, modern British holds one position', examples: ['square', 'fair', 'there', 'care'] },
+  'i': { type: 'vowel', name: 'happY vowel', hint: 'the short-but-tense vowel ending happy, city, coffee — /iː/ quality without its length', examples: ['happy', 'city', 'duty'] },
+  'ʔ': { type: 'consonant', name: 'glottal stop', hint: 'the vocal folds close and release — contemporary British replaces /t/ with it between vowels and at word ends', examples: ['better', 'water', 'got', 'butter'] },
   'ʊə': { type: 'diphthong', name: 'CURE diphthong', hint: 'glides from close back toward schwa', examples: ['cure', 'tour', 'pure', 'jury'] },
 
   // ── Neutral American vowels (accent-track symbols) ─────────
@@ -204,6 +207,66 @@ export const WORDS = [
   { word: 'this', ipa: ['ð', 'ɪ', 's'], accent: 'aus' },
   { word: 'yes', ipa: ['j', 'e', 's'], accent: 'aus' },
   { word: 'teacher', ipa: ['t', 'iː', 'tʃ', 'ə'], accent: 'aus', note: 'non-rhotic: plain schwa ending' },
+
+  // ── Traditional RP forms of the contemporary-shift words ────
+  // The "from" side of RP ↔ Contemporary British drills: true /t/, glided
+  // SQUARE /eə/, separate yods, lax happY /ɪ/.
+  { word: 'square', ipa: ['s', 'k', 'w', 'eə'], accent: 'rp', note: 'RP glides SQUARE: /eə/' },
+  { word: 'fair', ipa: ['f', 'eə'], accent: 'rp' },
+  { word: 'there', ipa: ['ð', 'eə'], accent: 'rp' },
+  { word: 'hair', ipa: ['h', 'eə'], accent: 'rp' },
+  { word: 'better', ipa: ['b', 'e', 't', 'ə'], accent: 'rp', note: 'a clean articulated /t/ — no glottal stop in RP' },
+  { word: 'water', ipa: ['w', 'ɔː', 't', 'ə'], accent: 'rp', note: 'true /t/, non-rhotic ending' },
+  { word: 'butter', ipa: ['b', 'ʌ', 't', 'ə'], accent: 'rp' },
+  { word: 'got', ipa: ['g', 'ɒ', 't'], accent: 'rp', note: 'the final /t/ is released, not swallowed' },
+  { word: 'quite', ipa: ['k', 'w', 'aɪ', 't'], accent: 'rp' },
+  { word: 'little', ipa: ['l', 'ɪ', 't', 'ə', 'l'], accent: 'rp' },
+  { word: 'tune', ipa: ['t', 'j', 'uː', 'n'], accent: 'rp', note: 'RP keeps the yod: /tj/ stays two sounds' },
+  { word: 'Tuesday', ipa: ['t', 'j', 'uː', 'z', 'd', 'eɪ'], accent: 'rp' },
+  { word: 'duty', ipa: ['d', 'j', 'uː', 't', 'ɪ'], accent: 'rp', note: 'yod kept, and classic RP ends happY words lax: /ɪ/' },
+  { word: 'due', ipa: ['d', 'j', 'uː'], accent: 'rp' },
+  { word: 'student', ipa: ['s', 't', 'j', 'uː', 'd', 'ə', 'n', 't'], accent: 'rp' },
+  { word: 'happy', ipa: ['h', 'æ', 'p', 'ɪ'], accent: 'rp', note: 'classic RP: lax /ɪ/ ending' },
+  { word: 'city', ipa: ['s', 'ɪ', 't', 'ɪ'], accent: 'rp' },
+  { word: 'thought', ipa: ['θ', 'ɔː', 't'], accent: 'rp' },
+  { word: 'near', ipa: ['n', 'ɪə'], accent: 'rp', note: 'the full centring glide /ɪə/' },
+  { word: 'goat', ipa: ['g', 'əʊ', 't'], accent: 'rp' },
+  { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'rp' },
+
+  // ── Contemporary British (SSBE) ─────────────────────────────
+  // Standard Southern British English: RP's system, one generation on.
+  // Untagged (RP-reference) words carry over; these entries mark where the
+  // contemporary accent genuinely differs — monophthong SQUARE /ɛː/,
+  // the glottal stop for non-initial /t/, and yod-coalescence.
+  { word: 'square', ipa: ['s', 'k', 'w', 'ɛː'], accent: 'ssbe', note: 'SQUARE is a long steady /ɛː/ — no glide, unlike RP /eə/' },
+  { word: 'fair', ipa: ['f', 'ɛː'], accent: 'ssbe', note: 'monophthong SQUARE — hold one vowel position' },
+  { word: 'there', ipa: ['ð', 'ɛː'], accent: 'ssbe', note: 'monophthong SQUARE' },
+  { word: 'care', ipa: ['k', 'ɛː'], accent: 'ssbe', note: 'monophthong SQUARE' },
+  { word: 'hair', ipa: ['h', 'ɛː'], accent: 'ssbe', note: 'monophthong SQUARE' },
+  { word: 'parents', ipa: ['p', 'ɛː', 'r', 'ə', 'n', 't', 's'], accent: 'ssbe', note: 'SQUARE before r keeps the steady /ɛː/' },
+  { word: 'better', ipa: ['b', 'e', 'ʔ', 'ə'], accent: 'ssbe', note: 'the between-vowel /t/ becomes a glottal stop — casual and completely standard now' },
+  { word: 'water', ipa: ['w', 'ɔː', 'ʔ', 'ə'], accent: 'ssbe', note: 'glottal /t/, non-rhotic schwa ending' },
+  { word: 'butter', ipa: ['b', 'ʌ', 'ʔ', 'ə'], accent: 'ssbe', note: 'glottal /t/' },
+  { word: 'got', ipa: ['g', 'ɒ', 'ʔ'], accent: 'ssbe', note: 'word-final /t/ closes to a glottal stop' },
+  { word: 'quite', ipa: ['k', 'w', 'aɪ', 'ʔ'], accent: 'ssbe', note: 'final glottal /t/' },
+  { word: 'little', ipa: ['l', 'ɪ', 'ʔ', 'ə', 'l'], accent: 'ssbe', note: 'glottal /t/ before the final syllable' },
+  { word: 'tune', ipa: ['tʃ', 'uː', 'n'], accent: 'ssbe', note: 'yod-coalescence: /tj/ fuses to /tʃ/ — "choon"' },
+  { word: 'Tuesday', ipa: ['tʃ', 'uː', 'z', 'd', 'eɪ'], accent: 'ssbe', note: 'yod-coalescence: "choose-day"' },
+  { word: 'duty', ipa: ['dʒ', 'uː', 't', 'i'], accent: 'ssbe', note: 'yod-coalescence: /dj/ fuses to /dʒ/ — "joo-ty"' },
+  { word: 'due', ipa: ['dʒ', 'uː'], accent: 'ssbe', note: 'yod-coalescence: sounds like "Jew"' },
+  { word: 'student', ipa: ['s', 'tʃ', 'uː', 'd', 'ə', 'n', 't'], accent: 'ssbe', note: 'yod-coalescence inside the cluster: "s-choo-dent"' },
+  { word: 'goose', ipa: ['g', 'uː', 's'], accent: 'ssbe', note: 'GOOSE pushes far forward in the mouth — almost /ʉ/-like, lips barely rounded' },
+  { word: 'goat', ipa: ['g', 'əʊ', 't'], accent: 'ssbe', note: 'starts at schwa like RP, but the second element is fronter' },
+  { word: 'happy', ipa: ['h', 'æ', 'p', 'i'], accent: 'ssbe', note: 'happY tensing: the final vowel is tense /i/, not lax /ɪ/' },
+  { word: 'city', ipa: ['s', 'ɪ', 't', 'i'], accent: 'ssbe', note: 'happY tensing on the final vowel' },
+  { word: 'bath', ipa: ['b', 'ɑː', 'θ'], accent: 'ssbe', note: 'the BATH split survives intact — broad /ɑː/, same as RP' },
+  { word: 'car', ipa: ['k', 'ɑː'], accent: 'ssbe', note: 'still non-rhotic: no /r/, long /ɑː/' },
+  { word: 'trap', ipa: ['t', 'r', 'æ', 'p'], accent: 'ssbe', note: 'TRAP sits lower and more open than old RP — nearly /a/' },
+  { word: 'strut', ipa: ['s', 't', 'r', 'ʌ', 't'], accent: 'ssbe', note: 'STRUT as in RP; initial /t/ stays a true /t/' },
+  { word: 'thought', ipa: ['θ', 'ɔː', 'ʔ'], accent: 'ssbe', note: 'THOUGHT vowel as RP, final glottal /t/' },
+  { word: 'near', ipa: ['n', 'ɪə'], accent: 'ssbe', note: 'NEAR often smooths toward a long /ɪː/ — the glide is fading' },
+  { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'ssbe', note: 'FACE as in RP — the glide survives here' },
+  { word: 'lot', ipa: ['l', 'ɒ', 'ʔ'], accent: 'ssbe', note: 'LOT stays rounded /ɒ/; final glottal /t/' },
 ];
 
 // Minimal pairs for listening discrimination.

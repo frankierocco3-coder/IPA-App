@@ -17,9 +17,12 @@ const ipaString = entry => '/' + entry.ipa.join('') + '/';
 // Symbols a dialect never uses: a shared word carrying one of these has
 // no valid form in that dialect, so it's dropped rather than taught wrong.
 const ACCENT_FOREIGN = {
-  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː'],
-  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː'],
-  aus: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ʌ', 'ɑː', 'eɪ', 'aɪ', 'aʊ', 'əʊ', 'uː'],
+  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː', 'ɛː', 'ʔ'],
+  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː', 'ɛː', 'ʔ'],
+  aus: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ʌ', 'ɑː', 'eɪ', 'aɪ', 'aʊ', 'əʊ', 'uː', 'ɛː', 'ʔ'],
+  // Contemporary British (SSBE) shares RP's system but SQUARE is the
+  // monophthong /ɛː/, so the old /eə/ diphthong never appears.
+  ssbe: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː', 'eə'],
 };
 
 const poolFor = accent => {
@@ -43,7 +46,7 @@ export const phonemesForAccent = accent =>
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
-const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American', aus: 'Australian' };
+const ACCENT_NAMES = { rp: 'RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'Contemporary British' };
 
 // Word pairs that exist in both accents: the raw material for shift
 // drills. The RP form is the rp-tagged entry, or the untagged one
@@ -216,6 +219,14 @@ const ACCENT_ERRORS = {
     // over-shooting the vowel shift in the wrong direction
     ipa => ipa.map(p => ({ 'æɪ': 'ɑɪ', 'ɑɪ': 'æɪ', 'əʉ': 'æɔ', 'æɔ': 'əʉ', 'ɐː': 'ɐ' }[p] ?? p)),
   ],
+  ssbe: [
+    // one generation too formal: undoing the contemporary features (RP habits)
+    ipa => ipa.map(p => (p === 'ʔ' ? 't' : p === 'ɛː' ? 'eə' : p)),
+    // yod error: keeping /tj dj/ separate where the contemporary accent fuses them
+    ipa => ipa.flatMap(p => (p === 'tʃ' ? ['t', 'j'] : p === 'dʒ' ? ['d', 'j'] : [p])),
+    // American habits: rhotic r after long vowels, flat BATH
+    ipa => ipa.flatMap(p => (p === 'ɑː' ? ['æ'] : ['ɜː', 'ɔː'].includes(p) ? [p, 'r'] : [p])),
+  ],
 };
 
 function genAccentFact(accent) {
@@ -265,6 +276,7 @@ function genFillBlank(lessonPhonemes, accent) {
     display: `/${pattern}/`,
     audioText: entry.word,
     lang: accent ? ACCENT_TTS_LANG[accent] : undefined,
+    accent: accent ?? undefined,   // two accents can share a lang (rp/ssbe) — the clip folder needs this
     choices,
     explain: `“${entry.word}” = ${ipaString(entry)}${entry.note ? ` — ${entry.note}` : ''}`,
   };
@@ -399,7 +411,7 @@ function genEnglishToIpa() {
 
 // ── Shift drills: transform a word between accents ────────────
 
-const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };
+const ACCENT_TTS_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-GB' };
 
 // The dialect a shift drill starts from, when not stated: RP is the
 // reference baseline, so anything else shifts from RP.
@@ -429,6 +441,7 @@ function genShiftChoice(to, fromAccent) {
     display: pair.word,
     audioText: pair.word,
     lang: ACCENT_TTS_LANG[to],
+    accent: to,
     choices,
     explain: `${ACCENT_NAMES[to]}: /${target.join('')}/${pair[to].note ? ` — ${pair[to].note}` : ''}`,
   };
@@ -449,6 +462,7 @@ function genShiftBuild(to, fromAccent) {
     prompt: `“${pair.word}” is /${pair[from].ipa.join('')}/ in ${ACCENT_NAMES[from]}. Build it in ${ACCENT_NAMES[to]}.`,
     audioText: pair.word,
     lang: ACCENT_TTS_LANG[to],
+    accent: to,
     display: pair.word,
     target: [...target],
     tiles: shuffle([...target].concat(sourceOnly, filler)),
@@ -473,6 +487,7 @@ function genAccentEar(to, fromAccent) {
     prompt: `Listen to “${pair.word}”. Which accent did you hear?`,
     audioText: pair.word,
     lang: ACCENT_TTS_LANG[said],
+    accent: said,
     hideUntilPlayed: true,
     choices,
     explain: `That was ${ACCENT_NAMES[said]}: /${pair[said].ipa.join('')}/.`,

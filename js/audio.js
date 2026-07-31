@@ -41,10 +41,32 @@ function pickVoice(lang) {
 speechSynthesis.onvoiceschanged = () => { Object.keys(voiceCache).forEach(k => delete voiceCache[k]); };
 
 // Map an accent id to the TTS language that should voice it.
-export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU' };
+export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-GB' };
 
-// …and back again, so a spoken language picks the right clip folder.
+// …and back again, so a spoken language picks the right clip folder. Two
+// accents can share a TTS language (RP and Contemporary British are both
+// en-GB), so callers with a known accent pass it explicitly — the lang
+// mapping is only the fallback.
 const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
+
+// ── Per-course voice preference ───────────────────────────────
+// Courses with named speakers (Contemporary British: Alyx and Peach) pin
+// one voice instead of alternating randomly. Stored by voice KEY.
+const PREFS_KEY = 'speechcraft-voice-prefs';
+export function voicePref(dir) {
+  try { return (JSON.parse(localStorage.getItem(PREFS_KEY)) ?? {})[dir] ?? null; } catch { return null; }
+}
+export function setVoicePref(dir, key) {
+  try {
+    const p = JSON.parse(localStorage.getItem(PREFS_KEY)) ?? {};
+    p[dir] = key;
+    localStorage.setItem(PREFS_KEY, JSON.stringify(p));
+  } catch { /* preference is a nicety */ }
+}
+// Voice keys that have ANY clips for a dialect — drives selector states.
+export function voicesAvailable(dir) {
+  return Object.keys(clipIndex?.[dir] ?? {});
+}
 
 // Which words have a recorded clip: {accent: {voice key: [words]}}. Each
 // accent can have several voices (male/female); we pick between them at
@@ -52,10 +74,13 @@ const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
 // learn to recognise the accent itself rather than one person's voice.
 // Until the index loads (or if it never does) every word uses device TTS.
 let clipIndex = null;
+let indexResolve;
+export const indexReady = new Promise(r => { indexResolve = r; });
+export const clipIndexLoaded = () => clipIndex != null;
 fetch('audio/index.json')
   .then(r => (r.ok ? r.json() : null))
-  .then(idx => { if (idx) clipIndex = idx; })
-  .catch(() => {});
+  .then(idx => { if (idx) clipIndex = idx; indexResolve(); })
+  .catch(() => { indexResolve(); });
 
 const clipName = word => word.toLowerCase().replace(/[^a-z0-9]+/g, '_');
 
@@ -87,7 +112,14 @@ export const isWordText = text => {
 const approvedSet = new Set(APPROVED_PHONEMES);
 
 function phonemeVariants(slug, accent) {
-  return ['f', 'm'].filter(v => approvedSet.has(`${accent}/${v}/${slug}`));
+  // Voice keys come from the approved entries themselves — 'f'/'m' for the
+  // original dialects, named speakers (alyx/peach) for newer ones.
+  const out = [];
+  for (const id of approvedSet) {
+    const [a, v, s] = id.split('/');
+    if (a === accent && s === slug) out.push(v);
+  }
+  return out;
 }
 
 export const hasPhonemeClip = (slug, accent) => phonemeVariants(slug, accent).length > 0;
@@ -164,16 +196,22 @@ function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
 // `device: true` skips the pre-baked ElevenLabs clips and always uses the
 // browser voice — used for running text (sonnets, monologues), where only a
 // few words would have clips and the mix of clip/robot voices is jarring.
-export function speak(text, { rate = 0.85, lang = 'en-GB', device = false } = {}) {
+export function speak(text, { rate = 0.85, lang = 'en-GB', device = false, accent = null } = {}) {
   if (!isWordText(text)) return;   // bare IPA is playPhoneme's job, never TTS's
   if (current) { current.pause(); current = null; }
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 
   if (!device) {
-    const dir = LANG_DIR[lang] ?? 'rp';
+    const dir = accent ?? LANG_DIR[lang] ?? 'rp';
     const options = voicesWith(dir, text);
     if (options.length) {
-      const voice = options[Math.floor(Math.random() * options.length)];
+      // A pinned voice (named speakers) always wins; without one, pick at
+      // random so the accent is heard from more than one person.
+      const pref = voicePref(dir);
+      const voice = pref && options.includes(pref)
+        ? pref
+        : pref ? options[0]   // pinned voice lacks this clip: deterministic stand-in, never random
+        : options[Math.floor(Math.random() * options.length)];
       return playClip(dir, voice, text, { rate, lang });
     }
   }

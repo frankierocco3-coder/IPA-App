@@ -4,6 +4,8 @@ import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip } from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
+import { voicePref, setVoicePref, voicesAvailable, indexReady, clipIndexLoaded } from './audio.js';
+import { voicesForCourse } from './data/voices.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
@@ -11,7 +13,7 @@ import { ONEILL } from './data/oneill.js';
 import { WILDE } from './data/wilde.js';
 import { PIRANDELLO } from './data/pirandello.js';
 import { IBSEN } from './data/ibsen.js';
-import { IDIOM, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS } from './data/idiom.js';
+import { IDIOM, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS, MLE } from './data/idiom.js';
 import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 import { migrateLegacyCustomText, listProjects, getProject, saveProject, createProject,
@@ -175,7 +177,7 @@ function modeLesson(mode, accent = null) {
   };
 }
 
-const TRACK_ACCENT = { nam: 'nam', rp: 'rp', aus: 'aus' };
+const TRACK_ACCENT = { nam: 'nam', rp: 'rp', aus: 'aus', ssbe: 'ssbe' };
 
 // A synthetic lesson drawing on everything the track teaches.
 function practiceLesson(track) {
@@ -205,6 +207,7 @@ function practiceLesson(track) {
 const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
   { id: 'rp', icon: '🇬🇧', label: 'RP' },
+  { id: 'ssbe', icon: '🎧', label: 'Contemporary British', sub: 'Standard Southern British English' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
@@ -440,14 +443,64 @@ function continueCard(track, course) {
   };
 }
 
+// Named-speaker chooser for courses that pin a voice (Contemporary
+// British: Alyx / Peach). Samples appear only when real clips exist —
+// device TTS is never passed off as a named speaker.
+function voiceChooser(course) {
+  const voices = voicesForCourse(course.id);
+  if (!voices.length) return { html: '', wire: () => {} };
+  const cur = voicePref(course.id) ?? voices[0].id;
+  const avail = voicesAvailable(course.id);
+  const anyPending = voices.some(v => v.reviewStatus !== 'approved');
+  return {
+    html: `
+    <section class="continue-card voice-card" aria-label="Choose your voice">
+      <div class="cc-info">
+        <span class="cc-stage">🎙 Choose your voice</span>
+        <div class="chip-row">
+          ${voices.map(v => `
+            <button class="chip-pick ${v.id === cur ? 'on' : ''}" data-voice="${esc(v.id)}" type="button"
+                    aria-pressed="${v.id === cur}">${esc(v.displayName)} <small>${esc(v.presentation)}</small></button>`).join('')}
+          ${voices.map(v => avail.includes(v.id) ? `
+            <button class="word-chip" data-voice-sample="${esc(v.id)}" type="button"
+                    aria-label="Play a sample of ${esc(v.displayName)}">🔊 ${esc(v.displayName)} sample</button>` : '').join('')}
+        </div>
+        <p class="cc-meta">${!avail.length
+          ? 'Alyx and Peach are being recorded — their clips arrive once the review batch is approved. Until then this course uses the device’s British voice.'
+          : anyPending
+            ? 'Sample recordings are in — still under review, so most of the course uses the device’s British voice for now.'
+            : 'Everything in this course speaks in your chosen voice.'}</p>
+      </div>
+    </section>`,
+    wire: el => {
+      // The clip index loads async — if it wasn't ready when this drew,
+      // redraw once so the sample buttons appear.
+      if (!avail.length && !clipIndexLoaded()) {
+        indexReady.then(() => {
+          if (document.querySelector('.shell .voice-card')) renderShell(activeSection());
+        });
+      }
+      el.querySelectorAll('[data-voice]').forEach(b =>
+        b.addEventListener('click', () => { setVoicePref(course.id, b.dataset.voice); renderShell(activeSection()); }));
+      el.querySelectorAll('[data-voice-sample]').forEach(b =>
+        b.addEventListener('click', () => {
+          const a = new Audio(`audio/${course.id}/${b.dataset.voiceSample}/square.mp3`);
+          a.play().catch(() => {});
+        }));
+    },
+  };
+}
+
 function learnMain(el, course) {
   const track = trackFor(course.id);
   const { done, total } = trackProgress(track);
   const cc = continueCard(track, course);
   const path = buildTrackPath(track, { guidebook: true, labels: true });
+  const vc = voiceChooser(course);
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
     ${cc.html}
+    ${vc.html}
     ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
       <div class="track-progress">
@@ -457,6 +510,7 @@ function learnMain(el, course) {
     </div>
     <div class="track-scroll hub-scroll">${path.html}</div>`;
   cc.wire(el);
+  vc.wire(el);
   wireWhatIsIpaCard(el);
   path.wire(el);
 }
@@ -486,7 +540,7 @@ function renderGuidebook(unit, track) {
   // Speak in the course's own voices — a NAM guidebook must never sound RP.
   const lang = ACCENT_LANG[TRACK_ACCENT[track?.id]] ?? 'en-GB';
   app.querySelectorAll('.word-chip[data-sym]').forEach(b => {
-    b.addEventListener('click', () => speak(b.dataset.say, { lang }));
+    b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: TRACK_ACCENT[track?.id] ?? null }));
   });
 }
 
@@ -1086,6 +1140,7 @@ const GOALS = [
 const ONBOARD_ACCENTS = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American', blurb: 'The screen standard — every R spoken, flat BATH, open LOT.', sample: true },
   { id: 'rp', icon: '🇬🇧', label: 'Received Pronunciation', blurb: 'The British stage standard — non-rhotic, broad BATH.', sample: true },
+  { id: 'ssbe', icon: '🎧', label: 'Contemporary British', blurb: 'Standard Southern British English — Britain now: glottal stops, easy vowels, no stuffiness.', sample: false },
   { id: 'aus', icon: '🇦🇺', label: 'Australian', blurb: 'Forward vowels and a rising line — the hardest to fake.', sample: true },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations', blurb: 'Start with the alphabet of sounds, no accent attached.', sample: false },
 ];
@@ -1228,11 +1283,16 @@ function renderPreferences() {
         ${COURSES.map(c => `<button class="chip-pick ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" type="button"
           aria-pressed="${c.id === course.id}">${c.icon} ${esc(c.label)}</button>`).join('')}
       </div>
+      <h2 class="guide-heading">Contemporary British voice</h2>
+      <div id="pref-voice"></div>
       <h2 class="guide-heading">First-run setup</h2>
       <p class="pane-note">Runs the welcome flow again. Your progress is untouched.</p>
       <button class="btn" id="pref-rerun" type="button">Run setup again</button>
     </main>`;
   wireBrandHome();
+  const pv = voiceChooser(COURSES.find(c => c.id === 'ssbe'));
+  document.getElementById('pref-voice').innerHTML = pv.html;
+  pv.wire(document.getElementById('pref-voice'));
   app.querySelectorAll('[data-goal]').forEach(b =>
     b.addEventListener('click', () => { store.saveOnboarding({ goal: b.dataset.goal }); renderPreferences(); }));
   app.querySelectorAll('[data-course]').forEach(b =>
@@ -1269,10 +1329,11 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
       }
     }
   }
-  for (const d of ['nam', 'rp', 'aus']) {
+  for (const d of ['nam', 'rp', 'aus', 'ssbe']) {
+    const named = voicesForCourse(d).map(v => v.id);
     for (const sym of phonemesForAccent(d)) {
       const slug = phonemeSlug(sym);
-      for (const v of ['f', 'm']) {
+      for (const v of (named.length ? named : ['f', 'm'])) {
         rows.push({ id: `${d}/${v}/${slug}`, d, v, clip: `/${sym}/`, kind: 'phoneme',
           path: `audio/phonemes/${d}/${v}/${slug}.mp3`,
           missing: !hasPhonemeClip(slug, d) });
@@ -1306,8 +1367,8 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     <main class="guide audit-page">
       <p class="pane-note">Owner tool. Play each clip, mark it — <b>Good</b> means a learner may hear it, <b>Bad</b> quarantines it. Export writes a new <code>js/data/audio-flags.js</code> to commit.</p>
       <div class="audit-filters">
-        ${sel('af-d', ['all', 'nam', 'rp', 'aus'], f.d)}
-        ${sel('af-v', ['all', 'f', 'm'], f.v)}
+        ${sel('af-d', ['all', 'nam', 'rp', 'aus', 'ssbe'], f.d)}
+        ${sel('af-v', ['all', ...new Set(rows.map(r => r.v))], f.v)}
         ${sel('af-kind', ['all', 'word', 'phoneme'], f.kind)}
         ${sel('af-status', ['all', 'unreviewed', 'good', 'bad', 'missing'], f.status)}
         <button class="btn" id="audit-export" type="button">Export flags</button>
@@ -1355,7 +1416,16 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     });
     row.querySelector('.av-bad')?.addEventListener('click', () => {
       const cur = auditVerdicts()[id];
-      saveVerdict(id, cur === 'bad' ? null : 'bad');
+      const marking = cur !== 'bad';
+      saveVerdict(id, marking ? 'bad' : null);
+      if (marking) {
+        const note = window.prompt('Optional note — what is wrong with this clip?', '');
+        try {
+          const notes = JSON.parse(localStorage.getItem(AUDIT_KEY + '-notes')) ?? {};
+          if (note) notes[id] = note.slice(0, 140); else delete notes[id];
+          localStorage.setItem(AUDIT_KEY + '-notes', JSON.stringify(notes));
+        } catch { /* note is a nicety */ }
+      }
       renderAudioAudit(f);
     });
   });
@@ -1366,13 +1436,19 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     const bad = Object.keys(all).filter(k => all[k] === 'bad').sort();
     const phonemeIds = new Set(rows.filter(r => r.kind === 'phoneme').map(r => r.id));
     const approved = Object.keys(all).filter(k => all[k] === 'good' && phonemeIds.has(k)).sort();
+    let notes = {};
+    try { notes = JSON.parse(localStorage.getItem(AUDIT_KEY + '-notes')) ?? {}; } catch {}
+    const goodSsbe = Object.keys(all).filter(k => all[k] === 'good' && k.startsWith('ssbe/')).length;
     const out = document.getElementById('audit-out');
     out.hidden = false;
     out.value = [
       '// Generated by the #audit page on ' + new Date().toISOString().slice(0, 10) + ' — review, then replace js/data/audio-flags.js.',
-      'export const KNOWN_BAD = [', ...bad.map(x => `  '${x}',`), '];', '',
+      goodSsbe ? `// ssbe review: ${goodSsbe} clip(s) marked good this session.` : '',
+      'export const KNOWN_BAD = [',
+      ...bad.map(x => `  '${x}',${notes[x] ? `   // ${notes[x].replace(/\n/g, ' ')}` : ''}`),
+      '];', '',
       'export const APPROVED_PHONEMES = [', ...approved.map(x => `  '${x}',`), '];', '',
-    ].join('\n');
+    ].filter(l => l !== '').join('\n');
     out.focus();
     out.select();
   });
@@ -1495,6 +1571,11 @@ function hubIdiom(hub, d, track) {
       <details class="idiom-extra"><summary>The productive patterns — how Australian makes these words</summary>
         ${AUS_PATTERNS.map(p => `<div class="idiom-card"><div class="idiom-head"><span class="idiom-term">${esc(p.pattern)}</span></div><p class="idiom-meaning">${esc(p.rule)}</p><p class="idiom-example">${esc(p.examples)}</p></div>`).join('')}
       </details>` : ''}
+    ${d === 'ssbe' ? `
+      <details class="idiom-extra"><summary>London &amp; Multicultural London English — a separate register</summary>
+        <p class="pane-note">MLE is its own living variety, not generic British slang — these are labelled separately on purpose. Demonstrated in a Contemporary British accent here, but the words belong to London’s multicultural speech community. Reference only; never drilled.</p>
+        ${MLE.map(m => `<div class="idiom-card"><div class="idiom-head"><span class="idiom-term">${esc(m.term)}</span><span class="tag">MLE</span></div><p class="idiom-meaning">${esc(m.meaning)}</p></div>`).join('')}
+      </details>` : ''}
     ${d === 'rp' ? `
       <details class="idiom-extra"><summary>U and non-U — the sharpest class tell you have</summary>
         <p class="pane-note">Mitford’s 1954 upper vs aspirational-middle pairs. Getting one backwards reads instantly false, however good the vowels. A 1954 snapshot — some has softened.</p>
@@ -1516,7 +1597,7 @@ function hubIdiom(hub, d, track) {
   // dialect's own voices (device fallback until idiom clips are generated).
   hub.querySelector('#idiom-list').addEventListener('click', ev => {
     const b = ev.target.closest('button[data-say]');
-    if (b) speak(b.dataset.say, { lang: ACCENT_LANG[d] });
+    if (b) speak(b.dataset.say, { lang: ACCENT_LANG[d], accent: d });
   });
   hub.querySelector('#idiom-q').addEventListener('input', e => { idiomFilters.q = e.target.value; draw(); });
   hub.querySelector('#idiom-flagged').addEventListener('change', e => { idiomFilters.flagged = e.target.checked; draw(); });
@@ -1611,6 +1692,7 @@ function renderVowelMap() {
 const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
   { id: 'rp', label: 'RP', lang: 'en-GB', flag: '🇬🇧' },
+  { id: 'ssbe', label: 'Contemporary British', lang: 'en-GB', flag: '🎧' },
   { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;
@@ -3169,10 +3251,10 @@ function renderSoundDetail(sym, accent) {
   wireBrandHome();
   // Two distinct controls, never cross-substituted: a phoneme request plays
   // the phoneme or nothing; the word-mode control is explicitly a word.
-  const say = () => { if (hasIso) playPhoneme(slug, acc); else speak(p.examples[0], { lang }); };
+  const say = () => { if (hasIso) playPhoneme(slug, acc); else speak(p.examples[0], { lang, accent: acc }); };
   document.getElementById('say-sym').addEventListener('click', say);
   app.querySelectorAll('[data-say]').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.say, { lang })));
+    b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: acc })));
 }
 
 // ── Track page: that dialect's units & lessons ────────────────
@@ -3447,7 +3529,7 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
   document.getElementById('wii-link')?.addEventListener('click', openWhatIsIpa);
   wireWiiQuestions(app, st);
   app.querySelectorAll('[data-say]').forEach(btn =>
-    btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson) }))
+    btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson), accent: lesson.accent ?? lesson.shiftTo ?? null }))
   );
   app.querySelectorAll('.diagram-toggle').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -3518,12 +3600,18 @@ function exLang(s, ex) {
   return ex.lang ?? langFor(s.lesson);
 }
 
+// The accent whose clip folder should voice this exercise — the exercise's
+// own accent (shift/ear questions play specific accents) or the lesson's.
+function exAccent(s, ex) {
+  return ex.accent ?? s.lesson.accent ?? s.lesson.shiftTo ?? null;
+}
+
 function wireAudio(s, ex, onFirstPlay) {
   const btn = document.getElementById('speaker');
   if (!btn) return;
   let played = false;
   btn.addEventListener('click', () => {
-    speak(ex.audioText, { lang: exLang(s, ex) });
+    speak(ex.audioText, { lang: exLang(s, ex), accent: exAccent(s, ex) });
     if (!played) { played = true; onFirstPlay?.(); }
   });
 }
@@ -3584,7 +3672,7 @@ function renderChoice(s, ex) {
     document.querySelectorAll('.choice').forEach(b => (b.disabled = false));
     document.getElementById('choices')?.classList.remove('gated');
   });
-  if (ex.audioText && !gated) setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex) }), 300);
+  if (ex.audioText && !gated) setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex), accent: exAccent(s, ex) }), 300);
 
   document.querySelectorAll('.choice').forEach(btn =>
     btn.addEventListener('click', () => {
@@ -3655,7 +3743,7 @@ function renderBuild(s, ex) {
     <button class="btn btn-primary" id="check" disabled>Check</button>`);
 
   wireAudio(s, ex);
-  setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex) }), 300);
+  setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex), accent: exAccent(s, ex) }), 300);
 
   const chosen = [];
   const answerEl = document.getElementById('answer');
@@ -3731,7 +3819,7 @@ function renderGapBuild(s, ex) {
     <button class="btn btn-primary" id="check" disabled>Check</button>`);
 
   wireAudio(s, ex);
-  setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex) }), 300);
+  setTimeout(() => speak(ex.audioText, { lang: exLang(s, ex), accent: exAccent(s, ex) }), 300);
 
   const slots = [...document.querySelectorAll('.slot')];
   const checkBtn = document.getElementById('check');

@@ -42,7 +42,48 @@ KEY_FILE = TOOLS / ".elevenlabs_key"
 
 API = "https://api.elevenlabs.io/v1"
 MODEL = "eleven_multilingual_v2"
-ACCENTS = ["rp", "nam", "aus"]
+ACCENTS = ["rp", "nam", "aus", "ssbe"]
+
+# ── Contemporary British review batch ─────────────────────────
+# Per the SSBE spec: a small diagnostic set is generated and EAR-APPROVED
+# by the owner (#audit) before any full asset generation for this course.
+# The rp lines exist so RP-vs-Contemporary comparisons use a real RP voice
+# on the RP side — never Alyx-vs-Peach passed off as RP-vs-SSBE.
+REVIEW_BATCH = {
+    "ssbe": [
+        # course sample sentence (also the voice-selector sample line)
+        "Alright? Welcome to Contemporary British - let's get you sounding like Britain now.",
+        # diagnostic vowel words
+        "bath", "trap", "strut", "lot", "thought", "goose", "goat", "face",
+        "car", "near", "square",
+        # consonant behaviour: glottal t and yod-coalescence
+        "better", "water", "butter", "tune", "Tuesday",
+        # connected speech
+        "I got a bottle of water at the station.",
+        "It's quite a little theatre, isn't it?",
+        "See you on Tuesday - I'll sort the tickets.",
+        "My parents were there on the opening night.",
+        "That's better than I thought it would be.",
+        # contemporary idioms, bare
+        "sorted", "knackered", "gutted", "chuffed", "buzzing",
+        "skint", "dodgy", "cheeky", "sound", "mate",
+        # idioms in sentences
+        "Tickets? Sorted.",
+        "I'm absolutely knackered after that shift.",
+        "He was gutted when the show closed early.",
+        "Fancy a cheeky pint after work?",
+        "Don't worry about Tom, he's sound.",
+        # comparison lines (same text generated for rp below)
+        "Better get some water before the tour starts.",
+        "My daughter's at university in the north.",
+        "I'll see you by the square on Tuesday.",
+    ],
+    "rp": [
+        "Better get some water before the tour starts.",
+        "My daughter's at university in the north.",
+        "I'll see you by the square on Tuesday.",
+    ],
+}
 
 
 def api_key():
@@ -220,6 +261,8 @@ def main() -> None:
     ap.add_argument("--index-only", action="store_true", help="just rebuild index.json")
     ap.add_argument("--idioms", action="store_true",
                     help="generate idiom terms + examples (each in its own dialect only)")
+    ap.add_argument("--review-batch", action="store_true",
+                    help="generate the SSBE diagnostic review set (owner ear-check gate)")
     ap.add_argument("--dry-run", action="store_true",
                     help="report clip counts and character cost; spend nothing")
     args = ap.parse_args()
@@ -235,7 +278,14 @@ def main() -> None:
         sys.exit("No accents to generate — add voice ids to tools/voices.json.")
 
     all_words = words()
-    per_accent = idiom_texts() if args.idioms else None
+    per_accent = idiom_texts() if args.idioms else (REVIEW_BATCH if args.review_batch else None)
+    if args.review_batch:
+        targets = [a for a in targets if a in REVIEW_BATCH]
+    if (args.idioms or not per_accent) and "ssbe" in targets:
+        # Structural gate, not just policy: no full ssbe generation of any
+        # kind until the Alyx/Peach review batch has been ear-approved.
+        print("! ssbe held back from bulk generation until the review batch is approved")
+        targets = [a for a in targets if a != "ssbe"]
     made = skipped = 0
     dry_chars = 0
     for accent in targets:

@@ -23,7 +23,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 AUDIO = ROOT / "audio"
 FLAGS = ROOT / "js" / "data" / "audio-flags.js"
-WORD_DIALECTS = ["rp", "nam", "aus"]
+WORD_DIALECTS = ["rp", "nam", "aus", "ssbe"]
 
 failures = []
 
