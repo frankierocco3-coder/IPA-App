@@ -99,19 +99,29 @@ def api_key():
 
 
 def request(path, *, data=None, raw=False):
-    req = urllib.request.Request(f"{API}{path}", data=data)
-    req.add_header("xi-api-key", api_key())
-    if data:
-        req.add_header("Content-Type", "application/json")
-    try:
-        with urllib.request.urlopen(req) as resp:
-            body = resp.read()
-    except urllib.error.HTTPError as err:
-        detail = err.read().decode("utf-8", "replace")[:400]
-        sys.exit(f"ElevenLabs {err.code} on {path}: {detail}")
-    except urllib.error.URLError as err:
-        sys.exit(f"Could not reach ElevenLabs: {err.reason}")
-    return body if raw else json.loads(body)
+    # Transient network failures (connection resets, timeouts) get three
+    # retries with backoff — a 35-minute batch should not die at minute 20
+    # because one socket hiccuped. Real API errors still stop the run.
+    import time
+    last = None
+    for attempt in range(4):
+        req = urllib.request.Request(f"{API}{path}", data=data)
+        req.add_header("xi-api-key", api_key())
+        if data:
+            req.add_header("Content-Type", "application/json")
+        try:
+            with urllib.request.urlopen(req, timeout=120) as resp:
+                body = resp.read()
+            return body if raw else json.loads(body)
+        except urllib.error.HTTPError as err:
+            detail = err.read().decode("utf-8", "replace")[:400]
+            sys.exit(f"ElevenLabs {err.code} on {path}: {detail}")
+        except (urllib.error.URLError, OSError) as err:
+            last = err
+            wait = 2 ** attempt
+            print(f"  ! network hiccup ({err}); retrying in {wait}s")
+            time.sleep(wait)
+    sys.exit(f"Could not reach ElevenLabs after retries: {last}")
 
 
 def list_voices() -> None:
@@ -315,11 +325,9 @@ def main() -> None:
                 chosen.append(pairs[t])
         per_accent = {"ssbe": sorted(set(chosen))}
         targets = ["ssbe"]
-    if (args.idioms or not per_accent) and "ssbe" in targets:
-        # Structural gate, not just policy: no full ssbe generation of any
-        # kind until the Alyx/Peach review batch has been ear-approved.
-        print("! ssbe held back from bulk generation until the review batch is approved")
-        targets = [a for a in targets if a != "ssbe"]
+    # The Alyx/Peach review batch and idiom pilot were EAR-APPROVED by the
+    # owner on 2026-07-30 — the earlier structural hold on ssbe bulk
+    # generation is lifted.
     made = skipped = 0
     dry_chars = 0
     for accent in targets:

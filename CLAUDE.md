@@ -178,11 +178,13 @@ checkpoints, 'idiomDialogue'+'idiomLiteral' in the final — authored banks
 (30 dialogues, 14 situations, 10 literal pairs) live in js/data/idiom.js;
 register derives from flags (flagged terms appear ONLY there, recognition
 not celebration). ssbe idiom page defaults era=Contemporary. Audio state:
-86-clip review batch + 19-idiom pilot (both voices) generated in
-audio/ssbe/ awaiting Frankie's ear at #audit; bulk ssbe generation
-structurally blocked until approved; strict no-TTS for ssbe deliberately
-DEFERRED until clips exist (review-first sequencing, Frankie's call).
-tools/audit_audio.py enforces course-bound voice keys (ssbe=alyx/peach).
+Frankie EAR-APPROVED the review batch + pilot (2026-07-30); bulk ssbe
+words + all 181 idioms generated in both voices. ssbe is a STRICT course
+(STRICT_ACCENTS in audio.js): no device-TTS fallback ever — missing clip
+= silent + console.warn, and tools/audit_audio.py FAILS THE DEPLOY if any
+speakable ssbe text lacks clips in both Alyx and Peach. Explicit
+device:true readings (sonnets/custom text) stay allowed everywhere.
+tools/audit_audio.py also enforces course-bound voice keys.
 Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.

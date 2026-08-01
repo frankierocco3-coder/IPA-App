@@ -5,7 +5,7 @@
 // never selectable, phoneme requests never fall back to words or TTS, and
 // raw IPA never reaches speechSynthesis.
 
-import { isWordText, voicesWith, hasPhonemeClip, playPhoneme } from '../js/audio.js';
+import { isWordText, voicesWith, hasPhonemeClip, playPhoneme, speak } from '../js/audio.js';
 import { KNOWN_BAD, APPROVED_PHONEMES } from '../js/data/audio-flags.js';
 
 const results = [];
@@ -46,6 +46,11 @@ export async function run() {
   playPhoneme('strut_vowel', 'nam');
   check('playPhoneme: never triggers TTS',
     (speechSynthesis.speaking || speechSynthesis.pending) === wasSpeaking);
+
+  // Strict course contract: Standard British never falls back to TTS.
+  check('strict ssbe: unknown text stays silent', speak('xyzzyunknownword', { accent: 'ssbe' }) === 'silent');
+  check('non-strict rp: unknown text may use TTS', speak('xyzzyunknownword', { accent: 'rp' }) === 'tts');
+  try { speechSynthesis.cancel(); } catch {}
 
   const failed = results.filter(r => !r.ok);
   results.forEach(r => console.log((r.ok ? '✓' : '✗') + ' ' + r.name));

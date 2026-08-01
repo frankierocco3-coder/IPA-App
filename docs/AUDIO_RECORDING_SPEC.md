@@ -64,6 +64,22 @@ not a plain retry. Until then those two words fall back to the device's
 US voice — the explicit, documented word-level fallback ("care" and "was"
 still play the male clip; "law" the female).
 
+## Standard British (ssbe) status — approved 2026-07-30
+
+The owner ear-approved the full review batch and the 19-idiom pilot (Alyx
+and Peach). Consequences, all enforced in code:
+
+* Bulk generation is unblocked (`generate_voices.py`, gate lifted).
+* Standard British is a **strict course** (`STRICT_ACCENTS` in
+  `js/audio.js`): course audio never falls back to device TTS — a missing
+  clip stays silent and logs a warning instead of misrepresenting a voice.
+* `tools/audit_audio.py` fails the deploy if any speakable Standard
+  British text (word pool + idiom terms/examples) lacks a clip in BOTH
+  Alyx and Peach — the strict rule can never silently rot.
+* Explicit `device: true` readings (running text: sonnets, monologues,
+  custom text) are a labelled device-voice feature, not a fallback, and
+  remain available in every course.
+
 ## Approval workflow
 
 1. Produce candidates (generation script or human recording).

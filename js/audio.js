@@ -127,10 +127,15 @@ let current = null;
 function playClip(dir, voice, word, fallback) {
   const el = new Audio(`audio/${dir}/${voice}/${clipName(word)}.mp3`);
   current = el;
-  // A 404 fires both 'error' and a play() rejection — guard so TTS fallback
-  // runs only once.
+  // A 404 fires both 'error' and a play() rejection — guard so the fallback
+  // runs only once. Strict courses never fall to TTS, even on a 404.
   let handled = false;
-  const fall = () => { if (handled) return; handled = true; deviceSpeak(word, fallback); };
+  const fall = () => {
+    if (handled) return;
+    handled = true;
+    if (fallback?.strict) { console.warn(`[audio] ${dir} clip failed for “${word}” — staying silent`); return; }
+    deviceSpeak(word, fallback);
+  };
   el.addEventListener('error', fall, { once: true });
   el.play().catch(fall);
 }
@@ -181,22 +186,37 @@ function deviceSpeak(text, { rate = 0.85, lang = 'en-GB' }) {
 // `device: true` skips the pre-baked ElevenLabs clips and always uses the
 // browser voice — used for running text (sonnets, monologues), where only a
 // few words would have clips and the mix of clip/robot voices is jarring.
+// Courses whose audio is fully clip-backed: no silent device-TTS stand-in
+// for course content. (Explicit device:true readings — running text — are
+// a labelled feature, not a fallback, and stay allowed everywhere.)
+const STRICT_ACCENTS = new Set(['ssbe']);
+
+// Returns what actually happened: 'clip' | 'tts' | 'silent' — the tests
+// assert on this; app callers are free to ignore it.
 export function speak(text, { rate = 0.85, lang = 'en-GB', device = false, accent = null } = {}) {
-  if (!isWordText(text)) return;   // bare IPA is playPhoneme's job, never TTS's
+  if (!isWordText(text)) return 'silent';   // bare IPA is playPhoneme's job, never TTS's
   if (current) { current.pause(); current = null; }
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 
+  const dir = accent ?? LANG_DIR[lang] ?? 'rp';
   if (!device) {
-    const dir = accent ?? LANG_DIR[lang] ?? 'rp';
     const options = voicesWith(dir, text);
     if (options.length) {
       // Random per playback across the dialect's approved voices — Alyx or
       // Peach for Standard British, f/m elsewhere. Repeats are fine.
       const voice = options[Math.floor(Math.random() * options.length)];
-      return playClip(dir, voice, text, { rate, lang });
+      playClip(dir, voice, text, { rate, lang, strict: STRICT_ACCENTS.has(dir) });
+      return 'clip';
+    }
+    if (STRICT_ACCENTS.has(dir)) {
+      // A gap in a fully clip-backed course is a bug, not a TTS moment —
+      // the deploy-gated coverage check exists to keep this unreachable.
+      console.warn(`[audio] no ${dir} clip for “${text}” — strict course, staying silent`);
+      return 'silent';
     }
   }
   deviceSpeak(text, { rate, lang });
+  return 'tts';
 }
 
 // Speak a device utterance and call `done` when it finishes (or errors).

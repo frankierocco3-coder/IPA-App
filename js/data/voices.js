@@ -13,7 +13,7 @@ export const VOICES = [
     accentCode: 'ssbe',
     presentation: 'male',
     provider: 'elevenlabs',
-    reviewStatus: 'pending-human-review',
+    reviewStatus: 'approved',   // owner ear-check, 2026-07-30
   },
   {
     id: 'peach',
@@ -23,7 +23,7 @@ export const VOICES = [
     accentCode: 'ssbe',
     presentation: 'female',
     provider: 'elevenlabs',
-    reviewStatus: 'pending-human-review',
+    reviewStatus: 'approved',   // owner ear-check, 2026-07-30
   },
 ];
 
