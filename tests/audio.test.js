@@ -47,9 +47,11 @@ export async function run() {
   check('playPhoneme: never triggers TTS',
     (speechSynthesis.speaking || speechSynthesis.pending) === wasSpeaking);
 
-  // Strict course contract: Standard British never falls back to TTS.
-  check('strict ssbe: unknown text stays silent', speak('xyzzyunknownword', { accent: 'ssbe' }) === 'silent');
-  check('non-strict rp: unknown text may use TTS', speak('xyzzyunknownword', { accent: 'rp' }) === 'tts');
+  // Universal strict contract: NO course falls back to device TTS for
+  // promised course audio; device voice exists only behind device:true.
+  check('strict: ssbe unknown text stays silent', speak('xyzzyunknownword', { accent: 'ssbe' }) === 'silent');
+  check('strict: rp unknown text stays silent', speak('xyzzyunknownword', { accent: 'rp' }) === 'silent');
+  check('explicit device reading still allowed', speak('a short reading line', { device: true }) === 'tts');
   try { speechSynthesis.cancel(); } catch {}
 
   const failed = results.filter(r => !r.ok);

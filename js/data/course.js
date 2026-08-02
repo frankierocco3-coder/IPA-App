@@ -204,7 +204,7 @@ export const COURSE = [
     id: 'rp',
     title: 'Stage 2 · The Sounds',
     color: '#6b7fa3',
-    icon: '🇬🇧',
+    icon: '🎩',
     accent: true,
     blurb: 'The classic “BBC English” accent — non-rhoticity, the BATH split, and full transcriptions.',
     lessons: [
@@ -255,7 +255,7 @@ export const COURSE = [
     id: 'ssbe',
     title: 'Stage 2 · The Sounds',
     color: '#7d6b9e',
-    icon: '🎧',
+    icon: '🇬🇧',
     accent: true,
     blurb: 'The modern sound system — glottal stops, coalesced yods, fronted vowels — with variation labelled honestly.',
     lessons: [
@@ -313,7 +313,7 @@ export const TRACKS = [
   {
     id: 'rp',
     title: 'Traditional RP',
-    icon: '🇬🇧',
+    icon: '🎩',
     color: '#6b7fa3',
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
@@ -331,7 +331,7 @@ export const TRACKS = [
   {
     id: 'ssbe',
     title: 'Standard British',
-    icon: '🎧',
+    icon: '🇬🇧',
     color: '#7d6b9e',
     accent: true,
     blurb: 'A modern British target for contemporary characters, conversation, film and TV.',

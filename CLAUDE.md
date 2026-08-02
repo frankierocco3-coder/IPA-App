@@ -212,6 +212,28 @@ owner ear-checks clips at #audit (hash-gated grid, exports a fresh flags
 file); tools/audit_audio.py enforces index↔files↔flags integrity in the
 deploy gate; tests/audio.test.js (browser) covers the contract.
 
+LAUNCH PASS (2026-07-30): Words & Expressions is the only learner-facing
+name for the idiom section. Icons: Traditional RP 🎩, Standard British 🇬🇧.
+Audio is UNIVERSALLY STRICT now (all courses): speak() plays a real clip
+or stays silent (returns 'clip'|'tts'|'silent'); resolveAudio() is the
+central resolver; device TTS ONLY behind explicit device:true (labelled
+readings). Generators filter to playable words; unavailable words render
+.is-off chips (nam strut/car are the two gaps — quarantined both voices).
+Sound-detail hero: "Hear the sound" only with an approved phoneme clip,
+else a non-interactive "Isolated sound coming soon" (+optional syllable
+demo via slug_syllable approvals). Long-form audio claims come ONLY from
+generated js/data/audio-coverage.js (tools/longform_coverage.py — rerun
+after any narration batch): sonnets nam 151/154, rp 153/154, aus 59,
+ssbe 0; libraries 0. Reader shows recorded-audio badges + labelled device
+reading. Featured Texts = Recast pilot sonnets with verified nam+rp.
+Sonnets Recast (BETA, js/data/recasts.js): 18/29/73/116/130 × Original /
+Plain Meaning / nam+ssbe+aus creative adaptations (NEVER called
+translations or accent performances; review gate docs/RECAST_REVIEW.md).
+More: About / Feedback (GitHub Issues link — allow-listed navigation-only
+exception in security_audit) / Privacy / Sources & Credits.
+tools/launch_lint.py (in deploy gate): banned names, icons, W&E naming,
+checkpoint determinism, coverage-driven reader, no-TTS regression.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

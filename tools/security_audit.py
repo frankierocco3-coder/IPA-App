@@ -88,13 +88,18 @@ for path in all_text_files():
 # ── 2. external origins in shipped code ───────────────────────
 EXTERNAL = re.compile(r'''(?:src|href)\s*=\s*["'](https?://[^"']+)''', re.I)
 FETCH_EXT = re.compile(r'''(?:fetch|XMLHttpRequest|importScripts)\s*\(\s*["'](https?://[^"']+)''', re.I)
-ALLOWED_ORIGINS = set()          # this app is intentionally fully self-hosted
+# This app is intentionally fully self-hosted. The single exception is a
+# NAVIGATION link (never a fetch): the Feedback page's GitHub Issues anchor,
+# added for launch (rel="noopener noreferrer", opens in a new tab). Anything
+# else external still fails the audit.
+ALLOWED_ORIGINS = {'https://github.com/frankierocco3-coder/IPA-App/issues'}
 
 for path in shipped_files():
     body = read(path)
     for m in list(EXTERNAL.findall(body)) + list(FETCH_EXT.findall(body)):
         origin = re.match(r'https?://[^/]+', m).group(0)
-        if origin not in ALLOWED_ORIGINS:
+        # allow-list entries may be a full URL (tightest) or an origin
+        if origin not in ALLOWED_ORIGINS and m not in ALLOWED_ORIGINS:
             errors.append(f'external origin in {rel(path)} -> {m[:80]}')
 
 # ── 3. unsafe JS constructs ───────────────────────────────────

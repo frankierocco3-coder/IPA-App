@@ -2,9 +2,11 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
-import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded } from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
+import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
+import { RECASTS, RECAST_LABEL } from './data/recasts.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
@@ -38,6 +40,14 @@ const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 // same transform the word clips use ("STRUT vowel" → strut_vowel).
 const phonemeSlug = sym =>
   PHONEMES[sym] ? PHONEMES[sym].name.toLowerCase().replace(/[^a-z0-9]+/g, '_') : null;
+
+// A word control that is only playable when a real recording exists for
+// this course. Missing → visibly unavailable, never a dead button and
+// never device TTS. (Before the index loads, assume available.)
+const speakableWord = (w, acc) => !clipIndexLoaded() || hasWordClip(w, acc);
+const wordChip = (w, acc) => speakableWord(w, acc)
+  ? `<button class="word-chip" data-say="${esc(w)}" type="button" aria-label="Hear the word “${esc(w)}”">🔊 ${esc(w)}</button>`
+  : `<span class="word-chip is-off" role="note" aria-label="“${esc(w)}” — recording coming soon">${esc(w)} <small>· recording soon</small></span>`;
 
 const app = document.getElementById('app');
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -208,8 +218,8 @@ function practiceLesson(track) {
 
 const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
-  { id: 'rp', icon: '🇬🇧', label: 'Traditional RP' },
-  { id: 'ssbe', icon: '🎧', label: 'Standard British' },
+  { id: 'rp', icon: '🎩', label: 'Traditional RP' },
+  { id: 'ssbe', icon: '🇬🇧', label: 'Standard British' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
@@ -491,7 +501,7 @@ function showSsbeIntro(course) {
 function renderAboutSsbe() {
   record(renderAboutSsbe);
   app.innerHTML = `
-    ${pageTopbar('🎧 About Standard British', '#7d6b9e')}
+    ${pageTopbar('🇬🇧 About Standard British', '#7d6b9e')}
     <main class="guide">
       <h1>Standard British</h1>
       ${ssbeIntroBody()}
@@ -527,10 +537,16 @@ function learnMain(el, course) {
 function renderGuidebook(unit, track) {
   record(() => renderGuidebook(unit, track));
   const sections = unit.lessons.map(l => {
-    const chips = (l.phonemes ?? []).map(ph => PHONEMES[ph] ? `
-      <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(PHONEMES[ph].examples[0])}"
-              aria-label="Hear ${esc(ph)} in the word “${esc(PHONEMES[ph].examples[0])}”"
-              title="${esc(PHONEMES[ph].name)} — hear it in “${esc(PHONEMES[ph].examples[0])}”">/${esc(ph)}/</button>` : '').join('');
+    const gbAcc = TRACK_ACCENT[track?.id] ?? null;
+    const chips = (l.phonemes ?? []).map(ph => {
+      if (!PHONEMES[ph]) return '';
+      const w = PHONEMES[ph].examples.find(x => speakableWord(x, gbAcc));
+      return w ? `
+      <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(w)}"
+              aria-label="Hear ${esc(ph)} in the word “${esc(w)}”"
+              title="${esc(PHONEMES[ph].name)} — hear it in “${esc(w)}”">/${esc(ph)}/</button>` : `
+      <span class="word-chip is-off" aria-label="${esc(PHONEMES[ph].name)} — recordings coming soon">/${esc(ph)}/</span>`;
+    }).join('');
     return `
       <section class="gb-lesson">
         <h2>${esc(l.title)}</h2>
@@ -607,7 +623,7 @@ function practiceMain(el, course) {
         ${g.title === 'Accent & Vocabulary' && d ? `
           <button class="mode-card idiom-mode" id="hub-idiom-drill" type="button">
             <span class="mode-icon" aria-hidden="true">🗣</span>
-            <span class="mode-title">Native Idioms</span>
+            <span class="mode-title">Words &amp; Expressions</span>
             <span class="mode-blurb">The words, not just the sounds.</span>
             <span class="mode-meta">~4 min</span>
           </button>` : ''}
@@ -632,14 +648,14 @@ function libraryMain(el, course) {
   const d = course.id === 'core' ? null : course.id;
   const track = trackFor(course.id);
   const cards = [
-    d === 'ssbe' ? { icon: '🎧', title: 'About Standard British',
+    d === 'ssbe' ? { icon: '🇬🇧', title: 'About Standard British',
       blurb: 'Revisit the course introduction, its core sound patterns and how it differs from Traditional RP.',
       go: renderAboutSsbe } : null,
     { icon: '📖', title: 'IPA',
       blurb: d ? `${dialectName(d)}’s sounds and tongue placement.` : 'All 55 sounds and how they’re made.',
       go: () => (d ? renderInventory(d) : renderChart()) },
-    d ? { icon: course.icon, title: 'Native Idioms',
-      blurb: `The words that carry the ${dialectName(d)} voice.`,
+    d ? { icon: course.icon, title: 'Words & Expressions',
+      blurb: 'The words, slang and expressions that bring the dialect to life.',
       go: () => renderIdioms(d) } : null,
     { icon: '📜', title: 'Texts & Speeches',
       blurb: 'Sonnets, monologues, and your own pieces.',
@@ -696,7 +712,7 @@ function renderIdioms(d) {
   // material is reference, not the point.
   Object.assign(idiomFilters, { q: '', era: d === 'ssbe' ? 'contemporary' : 'all', type: 'all', flagged: false });
   app.innerHTML = `
-    ${pageTopbar('🗣 Native Idioms', trackFor(d).color)}
+    ${pageTopbar('🗣 Words & Expressions', trackFor(d).color)}
     <main class="track-list" id="idiom-page"></main>`;
   wireBrandHome();
   hubIdiom(document.getElementById('idiom-page'), d, trackFor(d));
@@ -912,7 +928,7 @@ function openWhatIsIpa() {
 // A word row with its transcription and a listen button.
 const wiiWordRow = (word, ipa, note = '') => `
   <div class="guide-word">
-    <button class="word-chip" data-say="${esc(word)}" type="button">🔊 ${esc(word)}</button>
+    ${wordChip(word, 'nam')}
     <span class="guide-ipa">${esc(ipa)}</span>
     ${note ? `<span class="guide-note">${esc(note)}</span>` : ''}
   </div>`;
@@ -1014,12 +1030,14 @@ function wiiStepHtml(step, st) {
       <div class="guide-word"><span class="wii-who">accents</span><span class="guide-note">the same word can transcribe differently</span></div>
       <p class="guide-text">The same word, two accents — listen to both:</p>
       <div class="guide-word">
-        <button class="word-chip" data-say="car" data-lang="en-US" type="button">🔊 car 🇺🇸</button>
+        ${speakableWord('car', 'nam')
+          ? `<button class="word-chip" data-say="car" data-lang="en-US" data-acc="nam" type="button">🔊 car 🇺🇸</button>`
+          : `<span class="word-chip is-off">car 🇺🇸 <small>· recording soon</small></span>`}
         <span class="guide-ipa">/kɑr/</span><span class="guide-note">Neutral American — the r is spoken</span>
       </div>
       <div class="guide-word">
-        <button class="word-chip" data-say="car" data-lang="en-GB" type="button">🔊 car 🇬🇧</button>
-        <span class="guide-ipa">/kɑː/</span><span class="guide-note">RP — the r becomes vowel length</span>
+        <button class="word-chip" data-say="car" data-lang="en-GB" data-acc="rp" type="button">🔊 car 🎩</button>
+        <span class="guide-ipa">/kɑː/</span><span class="guide-note">Traditional RP — the r becomes vowel length</span>
       </div>
       <details class="idiom-extra"><summary>Advanced detail — narrow transcription</summary>
         <p class="pane-note">Square brackets [ ] mark a <i>narrow</i> transcription: exactly what a speaker did, with diacritics for fine detail — [kʰɑːˑ] notes aspiration and length. Speechcraft teaches broad transcription; narrow can wait.</p>
@@ -1124,7 +1142,7 @@ function drawWhatIsIpa(step, st) {
     drawWhatIsIpa(to, st);
   });
   app.querySelectorAll('[data-say]').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.say, { lang: b.dataset.lang ?? 'en-US' })));
+    b.addEventListener('click', () => speak(b.dataset.say, { lang: b.dataset.lang ?? 'en-US', accent: b.dataset.acc ?? 'nam' })));
   app.querySelectorAll('[data-phoneme]').forEach(b =>
     b.addEventListener('click', () => playPhoneme(b.dataset.phoneme, 'nam')));
   app.querySelector('[data-sound-detail]')?.addEventListener('click', e =>
@@ -1152,8 +1170,8 @@ const GOALS = [
 
 const ONBOARD_ACCENTS = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American', blurb: 'The screen standard — every R spoken, flat BATH, open LOT.', sample: true },
-  { id: 'rp', icon: '🇬🇧', label: 'Traditional RP', blurb: 'The classic British stage standard — non-rhotic, broad BATH.', sample: true },
-  { id: 'ssbe', icon: '🎧', label: 'Standard British', blurb: 'A modern British target for present-day roles and conversation.', sample: false },
+  { id: 'rp', icon: '🎩', label: 'Traditional RP', blurb: 'The classic British stage standard — non-rhotic, broad BATH.', sample: true },
+  { id: 'ssbe', icon: '🇬🇧', label: 'Standard British', blurb: 'A modern British target for present-day roles and conversation.', sample: false },
   { id: 'aus', icon: '🇦🇺', label: 'Australian', blurb: 'Forward vowels and a rising line — the hardest to fake.', sample: true },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations', blurb: 'Start with the alphabet of sounds, no accent attached.', sample: false },
 ];
@@ -1464,12 +1482,61 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
 
 // ── More: the reference shelf ─────────────────────────────────
 
+// ── Launch safeguards: About / Feedback / Sources & Credits ──
+
+function renderAbout() {
+  record(renderAbout);
+  app.innerHTML = `
+    ${pageTopbar('ℹ️ About Speechcraft', '#6f8657')}
+    <main class="guide">
+      <h1>About Speechcraft</h1>
+      <p class="guide-text">Speechcraft teaches the sounds of English the way actors train: the International Phonetic Alphabet, four pronunciation targets (Neutral American, Traditional RP, Standard British, Australian), and a rehearsal workspace for real text with recording and comparison.</p>
+      <p class="guide-text"><b>Speechcraft is in beta.</b> Content and recordings are still being reviewed and expanded. It is a practice tool, not a substitute for a dialect coach — accents are learned by ears and feedback, and no app can promise fluency.</p>
+      <p class="pane-note">Pronunciation targets are exactly that: targets. Real speakers vary by region, generation and situation.</p>
+    </main>`;
+  wireBrandHome();
+}
+
+function renderFeedback() {
+  record(renderFeedback);
+  app.innerHTML = `
+    ${pageTopbar('✉️ Feedback', '#8a6d3b')}
+    <main class="guide">
+      <h1>Report a problem</h1>
+      <p class="guide-text">Heard a wrong pronunciation? Found a mistake? Reports go through the project’s GitHub Issues page — no account data leaves this app.</p>
+      <p class="guide-text">The most useful reports include: <b>the course</b>, <b>the word or screen</b>, <b>what you heard</b>, and <b>what you expected</b>.</p>
+      <p><a class="btn btn-primary" href="https://github.com/frankierocco3-coder/IPA-App/issues" target="_blank" rel="noopener noreferrer">Open GitHub Issues ↗</a></p>
+    </main>`;
+  wireBrandHome();
+}
+
+function renderCredits() {
+  record(renderCredits);
+  app.innerHTML = `
+    ${pageTopbar('📚 Sources & Credits', '#64748b')}
+    <main class="guide">
+      <h1>Sources &amp; Credits</h1>
+      <h2 class="guide-heading">Texts</h2>
+      <p class="guide-text">Shakespeare’s sonnets and the included plays by Chekhov, Ibsen, Wilde, O’Neill and Pirandello are public-domain works; some translations are public domain <b>in the United States</b> specifically (noted on each collection: Fell &amp; West, Storer &amp; Livingston, Archer, Gosse, Sharp &amp; Marx Aveling).</p>
+      <h2 class="guide-heading">Sonnets Recast</h2>
+      <p class="guide-text">Plain-meaning summaries and dialect recasts are <b>original Speechcraft educational adaptations</b>, written for this app. They are creative adaptations, not literal translations, and carry a beta review label.</p>
+      <h2 class="guide-heading">Audio</h2>
+      <p class="guide-text">Word, expression and narration recordings are synthesised with licensed ElevenLabs voices under their commercial licence, generated offline and bundled as static files. Where no recording exists, the app says so — the optional “device voice” readings use your own device’s built-in speech.</p>
+      <h2 class="guide-heading">Everything else</h2>
+      <p class="guide-text">Design, course content, exercises, transcriptions and code are original to Speechcraft. Pronunciation data derives from CMUdict (public domain) for General American, with rule-derived adaptations marked ≈ elsewhere.</p>
+    </main>`;
+  wireBrandHome();
+}
+
 function moreMain(el) {
   const cards = [
     { icon: '👤', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
     { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
     { icon: '⚙️', title: 'Preferences', blurb: 'Your goal, course, and first-run choices.', go: renderPreferences, color: '#64748b' },
+    { icon: 'ℹ️', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
+    { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
+    { icon: '📚', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
@@ -1624,13 +1691,13 @@ function hubIdiom(hub, d, track) {
 function idiomLesson(d, track) {
   return {
     id: 'idiom-' + d,
-    title: `${dialectName(d)} slang & idiom`,
+    title: `${dialectName(d)} words & expressions`,
     practice: true,
     accent: d,
     phonemes: [],
     types: ['idiom'],
     count: 10,
-    unit: { title: 'Slang & Idiom', color: track?.color ?? '#8a6d3b' },
+    unit: { title: 'Words & Expressions', color: track?.color ?? '#8a6d3b' },
     track: null,
   };
 }
@@ -1641,20 +1708,26 @@ function textSpeechPane(pane) {
     blurb: `${lib.data.length} speeches · ${esc(lib.note)}`,
     go: () => renderLibraryList(key),
   }));
+  const featured = Object.keys(RECASTS).map(Number).filter(n =>
+    LONGFORM_COVERAGE.sonnets.nam.includes(n) && LONGFORM_COVERAGE.sonnets.rp.includes(n));
   const cards = [
+    featured.length ? { icon: '⭐', title: 'Featured Texts',
+      blurb: `Sonnets with complete, verified Neutral American and Traditional RP recordings — plus the Sonnets Recast beta: ${featured.map(n => `№${n}`).join(', ')}.`,
+      go: () => renderSonnet(featured[0]) } : null,
     { icon: '🎬', title: 'My Texts', blurb: 'Your rehearsal projects — saved roles, notes, and recorded takes.', go: renderProjects },
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
     ...libs,
     { icon: '✍️', title: 'Train Any Text', blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.', go: renderCustomText },
   ];
-  pane.innerHTML = cards.map((c, i) => `
+  const shown = cards.filter(Boolean);
+  pane.innerHTML = shown.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
       <div class="track-glyph">${c.icon}</div>
       <div class="track-info"><h2>${c.title}</h2><p>${c.blurb}</p></div>
       <div class="track-arrow">›</div>
     </button>`).join('');
   pane.querySelectorAll('.track-card').forEach(b =>
-    b.addEventListener('click', () => cards[+b.dataset.i].go()));
+    b.addEventListener('click', () => shown[+b.dataset.i].go()));
 }
 
 
@@ -1701,8 +1774,8 @@ function renderVowelMap() {
 // Dialects you can read/scan/transcribe any text in.
 const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
-  { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🇬🇧' },
-  { id: 'ssbe', label: 'Standard British', lang: 'en-GB', flag: '🎧' },
+  { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🎩' },
+  { id: 'ssbe', label: 'Standard British', lang: 'en-GB', flag: '🇬🇧' },
   { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;
@@ -2383,8 +2456,10 @@ function renderPiece(key, id) {
     verse: false,                     // prose — no pentameter framing
     meta: s,
     // Same narrator voices as the sonnets; missing clips fall back to device TTS.
-    clip: (n, acc) => lib.narrated.includes(acc) ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
-    narrated: lib.narrated,
+    clip: (n, acc) => (LONGFORM_COVERAGE.libs[key]?.[acc] ?? []).includes(s.id)
+      ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
+    narrated: Object.keys(LONGFORM_COVERAGE.libs[key] ?? {})
+      .filter(d => (LONGFORM_COVERAGE.libs[key][d] ?? []).includes(s.id)),
     scopeId: `${key}:${s.id}`,
     prev: prev ? { label: '‹ Previous', go: () => renderPiece(key, prev.id) } : null,
     next: next ? { label: 'Next ›', go: () => renderPiece(key, next.id) } : null,
@@ -2430,25 +2505,25 @@ function renderSonnet(n) {
   if (!s) return renderSonnetList();
   const idx = SONNETS.findIndex(x => x.n === n);
   const prev = SONNETS[idx - 1], next = SONNETS[idx + 1];
+  // A dialect is offered as recorded ONLY when this sonnet's complete
+  // line set exists for it (generated manifest — never a hardcoded claim).
+  const narrated = Object.keys(LONGFORM_COVERAGE.sonnets)
+    .filter(d => LONGFORM_COVERAGE.sonnets[d].includes(n));
   renderReader({
-    label: `Sonnet ${n}`, lines: s.lines, accent: 'rp',
-    // Pre-generated ElevenLabs clip for a given 1-based line + dialect, if any.
-    clip: (i, acc) => SONNET_NARRATED.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
-    narrated: SONNET_NARRATED,
+    label: `Sonnet ${n}`, lines: s.lines, accent: narrated[0] ?? 'rp',
+    clip: (i, acc) => narrated.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
+    narrated,
+    recast: RECASTS[n] ?? null,
     scopeId: `sonnet:${n}`,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
   });
 }
 
-// Dialects that have any pre-generated sonnet audio (missing files fall back
-// to the device voice, so partial coverage is fine).
-// Sonnets were generated in all three; Australian is only partial, and any
-// ungenerated line falls back to the device voice per line.
-const SONNET_NARRATED = ['nam', 'rp', 'aus'];
+
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null, narrated = [], scopeId = null, projectId = null }) {
+function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null, narrated = [], recast = null, scopeId = null, projectId = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -2467,12 +2542,17 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
     ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
     <main class="guide sonnet-view">
       ${metaHtml}
+      <p class="audio-avail">${narrated.length
+        ? `🎙 Recorded audio: ${narrated.map(d => `<span class="tag tag-dialect">${esc((TEXT_DIALECTS.find(x => x.id === d) ?? {}).flag ?? '')} ${esc(dialectName(d))}</span>`).join(' ')}`
+        : '🎙 Studio recordings coming soon — the reading below uses your device voice, clearly labelled.'}
+        ${TEXT_DIALECTS.filter(d => !narrated.includes(d.id)).map(d => `<span class="tag tag-off">${esc(d.label)} — coming soon</span>`).join(' ')}</p>
       <div class="dialect-picker reader-dialects"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="rd-dialects"></div></div>
       <div class="sonnet-tabs">
         <button class="son-tab on" data-mode="speak">🔊 Listen</button>
         <button class="son-tab" data-mode="scan">📐 Scan</button>
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
         <button class="son-tab" data-mode="perform">🎙 Perform</button>
+        ${recast ? '<button class="son-tab" data-mode="recast">🔁 Recast <span class="tag tag-skill">beta</span></button>' : ''}
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
@@ -2494,6 +2574,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
     if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
+    else if (m === 'recast') { wireRecast._lines = lines.map(stripStage); pane.innerHTML = recastPane(recast, lines); wireRecast(pane, recast); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
   drawDialects();
@@ -2820,9 +2901,51 @@ function lineHtml(ln) {
   return esc(ln).replace(/\[[^\]]*\]/g, m => `<i class="stage-dir">${m}</i>`);
 }
 
+// ── Sonnets Recast (beta): Original / Plain Meaning / Dialect Recast ──
+// The original words performed in an accent are an "Original Performance"
+// (the Perform tab). Replacing the words is a "Dialect Recast" — never
+// labelled as an accent performance, never as a literal translation.
+const RECAST_DIALECTS = [
+  { id: 'nam', label: 'Neutral American' },
+  { id: 'ssbe', label: 'Standard British' },
+  { id: 'aus', label: 'Australian' },
+];
+
+function recastPane(recast, lines) {
+  return `
+    <p class="recast-beta">🔁 <b>Sonnets Recast</b> — ${esc(RECAST_LABEL)}. The original words spoken in an
+      accent are an <b>original performance</b> (see Perform); a recast rewrites the ideas in a
+      contemporary register. Traditional RP offers the original and Plain Meaning — its register IS the original's.</p>
+    <div class="recast-views" role="tablist" aria-label="Recast views">
+      <button class="son-tab on" data-view="original" role="tab">Original</button>
+      <button class="son-tab" data-view="plain" role="tab">Plain Meaning</button>
+      ${RECAST_DIALECTS.filter(d => recast.recasts[d.id]).map(d =>
+        `<button class="son-tab" data-view="${d.id}" role="tab">${esc(d.label)} recast</button>`).join('')}
+    </div>
+    <div class="recast-body" id="recast-body"></div>
+    <p class="pane-note">Recast recordings are not yet produced — these are text views. Audio will only ever appear here in each recast's own dialect voices.</p>`;
+}
+
+function wireRecast(pane, recast) {
+  const body = pane.querySelector('#recast-body');
+  wireRecast._orig = (wireRecast._lines ?? []).map(l => esc(l)).join('\n');
+  const show2 = view => {
+    pane.querySelectorAll('.recast-views .son-tab').forEach(t => t.classList.toggle('on', t.dataset.view === view));
+    if (view === 'original') body.innerHTML = `<div class="recast-text">${wireRecast._orig}</div>`;
+    else if (view === 'plain') body.innerHTML = `<p class="guide-text">${esc(recast.plain)}</p>`;
+    else body.innerHTML = `
+      <p class="pane-note">${esc(RECAST_LABEL)} — original Speechcraft adaptation; meaning preserved, meter not formally reviewed.</p>
+      <div class="recast-text">${esc(recast.recasts[view])}</div>`;
+  };
+  pane.querySelectorAll('.recast-views .son-tab').forEach(t =>
+    t.addEventListener('click', () => show2(t.dataset.view)));
+  show2('original');
+}
+
 function speakPane(lines, accent = null, narrated = []) {
   // Say plainly whose voice this is, so switching dialect is never a mystery.
-  const voiceNote = !narrated.length ? ''
+  const voiceNote = !narrated.length
+    ? `<p class="voice-note voice-note-fallback">🔈 Reading in your <b>device voice</b> — no studio recording exists for this piece yet.</p>`
     : narrated.includes(accent)
       ? `<p class="voice-note">🎙 Read by <b>${esc(NARRATOR_NAMES[accent] ?? 'the narrator')}</b>.</p>`
       : `<p class="voice-note voice-note-fallback">🔈 Reading in your device voice. This collection’s recorded narrator is <b>${esc(NARRATOR_NAMES[narrated[0]] ?? '—')}</b> — switch to <b>${esc(dialectName(narrated[0]))}</b> to hear it.</p>`;
@@ -3234,18 +3357,23 @@ function renderSoundDetail(sym, accent) {
   // never pretending a word is the phoneme.
   const slug = phonemeSlug(sym);
   const hasIso = hasPhonemeClip(slug, acc);
-  const chips = p.examples.map(w =>
-    `<button class="word-chip" data-say="${esc(w)}" aria-label="Hear the word “${esc(w)}”">🔊 ${esc(w)}</button>`).join('');
+  const hasSyl = hasPhonemeClip(slug + '_syllable', acc);
+  const chips = p.examples.map(w => wordChip(w, acc)).join('');
 
   app.innerHTML = `
     ${pageTopbar(`/${esc(sym)}/`, '#64748b')}
     <main class="guide sound-detail">
       <div class="sound-hero">
         <div class="sound-big-wrap">
+          ${hasIso ? `
           <button class="sound-big" id="say-sym"
-            aria-label="${hasIso ? `Hear the isolated sound ${esc(sym)}` : `Hear the word “${esc(p.examples[0])}” — an isolated recording of ${esc(sym)} is not available yet`}"
-            title="${hasIso ? 'Hear the sound' : `Hear it in “${esc(p.examples[0])}”`}">/${esc(sym)}/</button>
-          <span class="sound-big-cap">${hasIso ? '🔊 Hear the sound' : `🔊 in “${esc(p.examples[0])}”`}</span>
+            aria-label="Hear the isolated sound ${esc(sym)}" title="Hear the sound">/${esc(sym)}/</button>
+          <span class="sound-big-cap">🔊 Hear the sound</span>`
+          : `
+          <div class="sound-big is-off" aria-label="Isolated sound recording for ${esc(sym)} coming soon">/${esc(sym)}/</div>
+          <span class="sound-big-cap">Isolated sound coming soon</span>`}
+          ${hasSyl ? `<button class="word-chip" id="say-syl" type="button"
+            aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, not a fully isolated sound">🔊 Hear it in a syllable</button>` : ''}
         </div>
         <div>
           <h1>${esc(p.name)}</h1>
@@ -3259,10 +3387,9 @@ function renderSoundDetail(sym, accent) {
     </main>`;
 
   wireBrandHome();
-  // Two distinct controls, never cross-substituted: a phoneme request plays
-  // the phoneme or nothing; the word-mode control is explicitly a word.
-  const say = () => { if (hasIso) playPhoneme(slug, acc); else speak(p.examples[0], { lang, accent: acc }); };
-  document.getElementById('say-sym').addEventListener('click', say);
+  // A phoneme request plays the phoneme or nothing — no word stand-in.
+  document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, acc));
+  document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
   app.querySelectorAll('[data-say]').forEach(b =>
     b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: acc })));
 }
@@ -3442,8 +3569,8 @@ function guideStepHtml(lesson, s, st) {
   }
   if (s.kind === 'phoneme') {
     const p = PHONEMES[s.ph];
-    const chips = p.examples.map(w =>
-      `<button class="word-chip" data-say="${esc(w)}" type="button">🔊 ${esc(w)}</button>`).join('');
+    const acc = lesson.accent ?? lesson.shiftTo ?? null;
+    const chips = p.examples.map(w => wordChip(w, acc)).join('');
     const diagram = articulationSVG(s.ph);
     const isVowel = p.type !== 'consonant';
     // One-tap check so the step ends with doing, not just reading. Distractor
@@ -3458,8 +3585,12 @@ function guideStepHtml(lesson, s, st) {
     return `
       <h1 class="guide-step-sym">/${esc(s.ph)}/ · ${esc(p.name)}</h1>
       <div class="guide-card">
-        <button class="guide-symbol" data-say="${esc(p.examples[0])}" type="button"
-                aria-label="Hear ${esc(s.ph)} in the word “${esc(p.examples[0])}”">/${esc(s.ph)}/</button>
+        ${(() => {
+          const w = p.examples.find(x => speakableWord(x, acc));
+          return w ? `<button class="guide-symbol" data-say="${esc(w)}" type="button"
+                aria-label="Hear ${esc(s.ph)} in the word “${esc(w)}”">/${esc(s.ph)}/</button>`
+            : `<div class="guide-symbol is-off" aria-label="Recordings for ${esc(s.ph)} coming soon">/${esc(s.ph)}/</div>`;
+        })()}
         <div class="guide-info">
           <p>${esc(p.hint)}</p>
           <div class="chips">${chips}</div>
@@ -3472,9 +3603,10 @@ function guideStepHtml(lesson, s, st) {
       ${wiiQuestion(st, 'gq-' + s.ph, `Quick check — which symbol is the sound in “<b>${esc(p.examples[0])}</b>”?`, opts)}`;
   }
   if (s.kind === 'words') {
+    const acc = lesson.accent ?? lesson.shiftTo ?? null;
     const row = w => `
       <div class="guide-word">
-        <button class="word-chip" data-say="${esc(w.word)}" type="button">🔊 ${esc(w.word)}</button>
+        ${wordChip(w.word, acc)}
         <span class="guide-ipa">/${w.ipa.join('')}/</span>
         <span class="guide-note">${esc(w.note ?? '')}</span>
       </div>`;

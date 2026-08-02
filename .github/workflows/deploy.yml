@@ -37,6 +37,9 @@ jobs:
       - name: Audio integrity (index ↔ files ↔ quality flags)
         run: python3 tools/audit_audio.py
 
+      - name: Launch lint (language, icons, structural guarantees)
+        run: python3 tools/launch_lint.py
+
       - name: Credential scan (working tree + full git history)
         run: python3 tools/scan_secrets.py --worktree --history
 

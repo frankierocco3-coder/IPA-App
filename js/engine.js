@@ -4,6 +4,13 @@
 import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
 import { EXERCISES_PER_LESSON } from './data/course.js';
 import { IDIOM, IDIOM_DIALOGUES, IDIOM_SITUATIONS, IDIOM_LITERAL } from './data/idiom.js';
+import { voicesWith, clipIndexLoaded } from './audio.js';
+
+// Exercises that promise audio only use words with a real, playable
+// recording in the target accent (quarantined clips count as missing).
+// Before the index loads we don't filter — lessons start well after it.
+const playableWord = (word, accent) =>
+  !clipIndexLoaded() || voicesWith(accent ?? 'rp', word).length > 0;
 
 const shuffle = arr => arr.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -94,7 +101,7 @@ function genSymbolToWord(target, accent) {
 }
 
 function genSoundToSymbol(target, lessonPhonemes, accent) {
-  const wordPool = wordsWith(target, accent);
+  const wordPool = wordsWith(target, accent).filter(w => playableWord(w.word, accent));
   if (!wordPool.length) return null;
   const word = pick(wordPool);
   const wrong = shuffle(lessonPhonemes.filter(p => p !== target && !contains(word, p)));
@@ -155,7 +162,8 @@ function genMatch(lessonPhonemes, accent) {
 function genBuild(lessonPhonemes, { accent = null } = {}) {
   const pool = poolFor(accent).filter(w =>
     w.ipa.length >= 2 && w.ipa.length <= 5 &&
-    w.ipa.some(p => lessonPhonemes.includes(p))
+    w.ipa.some(p => lessonPhonemes.includes(p)) &&
+    playableWord(w.word, accent)
   );
   if (!pool.length) return null;
   const entry = pick(pool);
@@ -171,8 +179,11 @@ function genBuild(lessonPhonemes, { accent = null } = {}) {
   };
 }
 
-function genMinimalPair() {
-  const [a, b] = pick(MINIMAL_PAIRS);
+function genMinimalPair(accent = null) {
+  const usable = MINIMAL_PAIRS.filter(([a, b]) =>
+    playableWord(a, accent) && playableWord(b, accent));
+  if (!usable.length) return null;
+  const [a, b] = pick(usable);
   const ea = WORDS.find(w => w.word === a);
   const eb = WORDS.find(w => w.word === b);
   const said = pick([ea, eb]);
@@ -230,7 +241,9 @@ const ACCENT_ERRORS = {
 };
 
 function genAccentFact(accent) {
-  const entry = pick(WORDS.filter(w => w.accent === accent));
+  const pool = WORDS.filter(w => w.accent === accent && playableWord(w.word, accent));
+  if (!pool.length) return null;
+  const entry = pick(pool);
   const wrongs = ACCENT_ERRORS[accent].map(fn => fn(entry.ipa));
   const uniqueWrongs = [...new Map(wrongs.map(w => [w.join(''), w])).values()]
     .filter(w => w.join('') !== entry.ipa.join(''))
@@ -254,7 +267,7 @@ function genAccentFact(accent) {
 // Fill in the blank: one segment of a transcription is missing.
 function genFillBlank(lessonPhonemes, accent) {
   const pool = (accent ? WORDS.filter(w => w.accent === accent) : poolFor(null))
-    .filter(w => w.ipa.length >= 2);
+    .filter(w => w.ipa.length >= 2 && playableWord(w.word, accent));
   const preferred = pool.filter(w => w.ipa.some(p => lessonPhonemes.includes(p)));
   const entry = pick(preferred.length ? preferred : pool);
   const targetable = entry.ipa
@@ -331,8 +344,10 @@ function genSpellBlank() {
 }
 
 // A transcription with several gaps, filled from tiles.
-function genGapBuild(lessonPhonemes) {
-  const entry = pick(poolFor(null).filter(w => w.ipa.length >= 3));
+function genGapBuild(lessonPhonemes, accent = null) {
+  const pool = poolFor(accent).filter(w => w.ipa.length >= 3 && playableWord(w.word, accent));
+  if (!pool.length) return null;
+  const entry = pick(pool);
   const idxs = shuffle(entry.ipa.map((_, i) => i));
   const preferred = idxs.filter(i => lessonPhonemes.includes(entry.ipa[i]));
   const gapCount = Math.min(2, entry.ipa.length - 1);
@@ -419,7 +434,7 @@ const defaultSource = to => (to === 'rp' ? 'nam' : 'rp');
 
 function genShiftChoice(to, fromAccent) {
   const from = fromAccent ?? defaultSource(to);
-  const pairs = shiftPairs(from, to);
+  const pairs = shiftPairs(from, to).filter(p => playableWord(p.word, to));
   if (!pairs.length) return null;
   const pair = pick(pairs);
   const src = pair[from].ipa;
@@ -449,7 +464,8 @@ function genShiftChoice(to, fromAccent) {
 
 function genShiftBuild(to, fromAccent) {
   const from = fromAccent ?? defaultSource(to);
-  const candidates = shiftPairs(from, to).filter(p => p[to].ipa.length <= 5);
+  const candidates = shiftPairs(from, to).filter(p =>
+    p[to].ipa.length <= 5 && playableWord(p.word, to));
   if (!candidates.length) return null;
   const pair = pick(candidates);
   const target = pair[to].ipa;
@@ -473,7 +489,8 @@ function genShiftBuild(to, fromAccent) {
 function genAccentEar(to, fromAccent) {
   const a1 = fromAccent ?? defaultSource(to ?? 'nam');
   const a2 = to ?? 'nam';
-  const pairs = shiftPairs(a1, a2);
+  const pairs = shiftPairs(a1, a2).filter(p =>
+    playableWord(p.word, a1) && playableWord(p.word, a2));
   if (!pairs.length) return null;
   const pair = pick(pairs);
   const said = pick([a1, a2]);
@@ -617,7 +634,7 @@ const GENERATORS = {
   description: l => genDescription(pick(l.phonemes), l.phonemes),
   match: l => genMatch(l.phonemes, l.accent),
   build: l => genBuild(l.phonemes, { accent: l.accent }),
-  minimalPair: () => genMinimalPair(),
+  minimalPair: l => genMinimalPair(l.accent ?? l.shiftTo ?? null),
   accentFact: l => genAccentFact(l.accent),
   shiftChoice: l => genShiftChoice(l.shiftTo ?? pick(['rp', 'nam']), l.shiftFrom),
   shiftBuild: l => genShiftBuild(l.shiftTo ?? pick(['rp', 'nam']), l.shiftFrom),
@@ -625,7 +642,7 @@ const GENERATORS = {
   fillBlank: l => genFillBlank(l.phonemes, l.accent),
   typeWord: () => genTypeWord(),
   spellBlank: () => genSpellBlank(),
-  gapBuild: l => genGapBuild(l.phonemes),
+  gapBuild: l => genGapBuild(l.phonemes, l.accent ?? l.shiftTo ?? null),
   sentenceToEnglish: () => genSentenceToEnglish(),
   englishToIpa: () => genEnglishToIpa(),
 };
