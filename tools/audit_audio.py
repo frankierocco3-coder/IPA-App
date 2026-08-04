@@ -90,6 +90,20 @@ def main():
         if not word_path.is_file() and not phon_path.is_file():
             fail("KNOWN_BAD entry has no file (stale?): %s" % entry)
 
+    # 3b: the candidate phoneme index matches the files on disk
+    pidx_path = AUDIO / "phonemes-index.json"
+    if pidx_path.exists():
+        pidx = json.loads(pidx_path.read_text(encoding="utf-8"))
+        for d, voices in pidx.items():
+            for v, slugs in voices.items():
+                for slug in slugs:
+                    if not (AUDIO / "phonemes" / d / v / (slug + ".mp3")).is_file():
+                        fail("phonemes-index lists missing file: %s/%s/%s" % (d, v, slug))
+        for f in (AUDIO / "phonemes").rglob("*.mp3") if (AUDIO / "phonemes").is_dir() else []:
+            d, v = f.parts[-3], f.parts[-2]
+            if f.stem not in set(pidx.get(d, {}).get(v, [])):
+                fail("phoneme file on disk missing from phonemes-index: %s" % f.relative_to(ROOT))
+
     # 4 + 5: approved phonemes exist under audio/phonemes/ only
     for entry in approved:
         p = AUDIO / "phonemes" / (entry + ".mp3")

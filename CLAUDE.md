@@ -234,6 +234,17 @@ exception in security_audit) / Privacy / Sources & Credits.
 tools/launch_lint.py (in deploy gate): banned names, icons, W&E naming,
 checkpoint determinism, coverage-driven reader, no-TTS regression.
 
+SPRINT (2026-07-30 late): example words swapped by owner's ear — strut→
+but, car→bar, war→saw (cup stays; lexical-set NAMES unchanged); new words
+recorded everywhere. 350 isolated-phoneme CANDIDATES generated
+(tools/generate_phonemes.py; audio/phonemes-index.json; syllable demos
+for stops/affricates/ʔ) — ALL awaiting Frankie's ear at #audit; approvals
+flip sound-page heroes from "coming soon" to "Hear the sound". Try-it
+recorder (tryItHtml/wireTryIt, ephemeral) on sound pages + W&E cards.
+Save schema v2 stamp; steps label; scroll reset per section; safe-area
+bottom nav; Privacy wipe covers all speechcraft-* keys. Release report:
+docs/launch-readiness-report.md (conditionally ready for beta).
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

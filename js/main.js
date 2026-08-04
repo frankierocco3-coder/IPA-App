@@ -263,6 +263,7 @@ function renderShell(section) {
   navStack = [];
   navRestoring = false;
   setSection(section);
+  window.scrollTo(0, 0);          // each section starts at its own top
   const course = COURSES.find(c => c.id === activeCourse());
 
   app.innerHTML = `
@@ -343,7 +344,7 @@ function drawStatsbar(course, section) {
         const { done, total } = trackProgress(t);
         return `<button class="course-row ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
           <span class="course-icon">${c.icon}</span>
-          <span class="course-row-info"><b>${esc(c.label)}</b><small>${done}/${total} lessons</small></span>
+          <span class="course-row-info"><b>${esc(c.label)}</b><small>${done}/${total} steps</small></span>
           ${c.id === course.id ? '<span class="course-check">✓</span>' : ''}
         </button>`;
       }).join('')}
@@ -1030,14 +1031,14 @@ function wiiStepHtml(step, st) {
       <div class="guide-word"><span class="wii-who">accents</span><span class="guide-note">the same word can transcribe differently</span></div>
       <p class="guide-text">The same word, two accents — listen to both:</p>
       <div class="guide-word">
-        ${speakableWord('car', 'nam')
-          ? `<button class="word-chip" data-say="car" data-lang="en-US" data-acc="nam" type="button">🔊 car 🇺🇸</button>`
-          : `<span class="word-chip is-off">car 🇺🇸 <small>· recording soon</small></span>`}
-        <span class="guide-ipa">/kɑr/</span><span class="guide-note">Neutral American — the r is spoken</span>
+        ${speakableWord('bar', 'nam')
+          ? `<button class="word-chip" data-say="bar" data-lang="en-US" data-acc="nam" type="button">🔊 bar 🇺🇸</button>`
+          : `<span class="word-chip is-off">bar 🇺🇸 <small>· recording soon</small></span>`}
+        <span class="guide-ipa">/bɑr/</span><span class="guide-note">Neutral American — the r is spoken</span>
       </div>
       <div class="guide-word">
-        <button class="word-chip" data-say="car" data-lang="en-GB" data-acc="rp" type="button">🔊 car 🎩</button>
-        <span class="guide-ipa">/kɑː/</span><span class="guide-note">Traditional RP — the r becomes vowel length</span>
+        <button class="word-chip" data-say="bar" data-lang="en-GB" data-acc="rp" type="button">🔊 bar 🎩</button>
+        <span class="guide-ipa">/bɑː/</span><span class="guide-note">Traditional RP — the r becomes vowel length</span>
       </div>
       <details class="idiom-extra"><summary>Advanced detail — narrow transcription</summary>
         <p class="pane-note">Square brackets [ ] mark a <i>narrow</i> transcription: exactly what a speaker did, with diacritics for fine detail — [kʰɑːˑ] notes aspiration and length. Speechcraft teaches broad transcription; narrow can wait.</p>
@@ -1343,7 +1344,9 @@ const saveVerdict = (id, v) => {
 async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', status: 'all' }) {
   stopSpeech();
   let index = {};
+  let phonIndex = {};
   try { index = await (await fetch('audio/index.json')).json(); } catch { /* rows empty */ }
+  try { phonIndex = await (await fetch('audio/phonemes-index.json')).json(); } catch { /* none yet */ }
   const verdicts = auditVerdicts();
   KNOWN_BAD_LIST.forEach(id => { if (!verdicts[id]) verdicts[id] = 'bad'; });
 
@@ -1360,9 +1363,14 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     for (const sym of phonemesForAccent(d)) {
       const slug = phonemeSlug(sym);
       for (const v of (named.length ? named : ['f', 'm'])) {
-        rows.push({ id: `${d}/${v}/${slug}`, d, v, clip: `/${sym}/`, kind: 'phoneme',
-          path: `audio/phonemes/${d}/${v}/${slug}.mp3`,
-          missing: !hasPhonemeClip(slug, d) });
+        const candidates = phonIndex[d]?.[v] ?? [];
+        for (const s2 of [slug, slug + '_syllable']) {
+          if (s2.endsWith('_syllable') && !candidates.includes(s2)) continue;
+          rows.push({ id: `${d}/${v}/${s2}`, d, v,
+            clip: `/${sym}/${s2.endsWith('_syllable') ? ' (syllable)' : ''}`, kind: 'phoneme',
+            path: `audio/phonemes/${d}/${v}/${s2}.mp3`,
+            missing: !candidates.includes(s2) });
+        }
       }
     }
   }
@@ -1613,6 +1621,7 @@ function hubIdiom(hub, d, track) {
         <div class="idiom-listen">
           <button class="word-chip" data-say="${esc(e.term)}" type="button" aria-label="Hear “${esc(e.term)}”">🔊 Hear it</button>
           ${e.example ? `<button class="word-chip" data-say="${esc(e.example)}" type="button" aria-label="Hear the example sentence">🔊 In a sentence</button>` : ''}
+          <button class="word-chip" data-tryterm="${esc(e.term)}" type="button" aria-label="Record yourself saying “${esc(e.term)}”">🎙 Try it</button>
         </div>
       </div>`).join('')
       : '<p class="pane-note">Nothing matches that filter.</p>';
@@ -1622,6 +1631,7 @@ function hubIdiom(hub, d, track) {
     `<button class="dialect-chip ${on ? 'on' : ''}" data-g="${group}" data-v="${value}" type="button">${label}</button>`;
 
   hub.innerHTML = `
+    <div id="idiom-tryit"></div>
     <p class="pane-note">${d === 'ssbe'
       ? `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. Contemporary usage is the default view; use the Era filter for older material.`
       : `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.`}</p>
@@ -1673,6 +1683,14 @@ function hubIdiom(hub, d, track) {
   // One delegated listener survives every draw(); everything speaks in this
   // dialect's own voices (device fallback until idiom clips are generated).
   hub.querySelector('#idiom-list').addEventListener('click', ev => {
+    const t = ev.target.closest('button[data-tryterm]');
+    if (t) {
+      const slot = hub.querySelector('#idiom-tryit');
+      slot.innerHTML = tryItHtml(`Record yourself saying “${t.dataset.tryterm}”, then compare.`);
+      wireTryIt(slot, () => speak(t.dataset.tryterm, { lang: ACCENT_LANG[d], accent: d }));
+      slot.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      return;
+    }
     const b = ev.target.closest('button[data-say]');
     if (b) speak(b.dataset.say, { lang: ACCENT_LANG[d], accent: d });
   });
@@ -1833,8 +1851,18 @@ async function wipeLocalData({ includeProgress }) {
   }
   try { resetAnalytics(); report.push('analytics'); } catch { /* ignore */ }
   try { clearPersonal(); report.push('personal dictionary'); } catch { /* ignore */ }
+  // App-state keys that are settings/telemetry, not progress
+  for (const k of ['speechcraft-quests-v1', 'speechcraft-audio-audit-v1',
+                   'speechcraft-audio-audit-v1-notes', 'speechcraft-voice-prefs',
+                   'speechcraft-home-tab', 'speechcraft-hub-sub']) {
+    try { localStorage.removeItem(k); } catch { /* ignore */ }
+  }
+  report.push('quests & app settings');
   if (includeProgress) {
     try { localStorage.removeItem('ipa-trainer-v1'); report.push('course progress'); } catch { /* ignore */ }
+    for (const k of ['speechcraft-course', 'speechcraft-section']) {
+      try { localStorage.removeItem(k); } catch { /* ignore */ }
+    }
   }
   return report;
 }
@@ -3338,6 +3366,63 @@ function renderChart() {
   );
 }
 
+// ── Try it yourself: record, play back, compare with the model ─
+// Ephemeral by design — nothing is saved; My Texts remains the place for
+// keeping takes. One object URL lives at a time.
+let tryItUrl = null;
+
+function tryItHtml(label = 'Record yourself, then compare with the model.') {
+  if (!recordingSupported()) return '';
+  return `
+  <section class="tryit" aria-label="Try it yourself">
+    <span class="cc-stage">🎙 Try it yourself</span>
+    <div class="tryit-row">
+      <button class="btn btn-record" data-tryit="rec" type="button">⏺ Record</button>
+      <button class="btn btn-lite" data-tryit="model" type="button">🔊 Model</button>
+      <audio controls hidden data-tryit="play" aria-label="Your recording"></audio>
+    </div>
+    <p class="pane-note" data-tryit="status" role="status">${esc(label)}</p>
+  </section>`;
+}
+
+function wireTryIt(container, playModel) {
+  const box = container.querySelector('.tryit');
+  if (!box) return;
+  const rec = box.querySelector('[data-tryit="rec"]');
+  const player = box.querySelector('[data-tryit="play"]');
+  const status = box.querySelector('[data-tryit="status"]');
+  let recording = false;
+  box.querySelector('[data-tryit="model"]').addEventListener('click', () => playModel());
+  rec.addEventListener('click', async () => {
+    if (!recording) {
+      try {
+        stopSpeech();
+        await startRecording({ onAutoStop: () => rec.click() });
+        recording = true;
+        rec.textContent = '⏹ Stop';
+        rec.classList.add('is-recording');
+        status.textContent = 'Recording… speak, then press stop.';
+      } catch (err) {
+        status.textContent = err?.name === 'NotAllowedError'
+          ? 'Microphone permission was declined — allow it in the browser to record.'
+          : 'Recording isn’t available right now.';
+      }
+      return;
+    }
+    recording = false;
+    rec.textContent = '⏺ Record';
+    rec.classList.remove('is-recording');
+    const take = await stopRecording();
+    if (!take?.blob) { status.textContent = 'Nothing captured — try again.'; return; }
+    if (tryItUrl) URL.revokeObjectURL(tryItUrl);
+    tryItUrl = URL.createObjectURL(take.blob);
+    player.src = tryItUrl;
+    player.hidden = false;
+    player.play().catch(() => {});
+    status.textContent = 'That’s you. Play the model, then match it.';
+  });
+}
+
 // Detail for one sound: articulation diagram, description, example words.
 // `accent` is the dialect context the page was opened from — inside a course
 // everything speaks that course's voices. Without one (the full Foundations
@@ -3384,12 +3469,18 @@ function renderSoundDetail(sym, accent) {
         <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''}
       <h2 class="guide-heading">Hear it in words</h2>
       <div class="chips">${chips}</div>
+      ${tryItHtml(`Record yourself saying ${hasIso ? `the sound /${sym}/` : `“${p.examples.find(x => speakableWord(x, acc)) ?? p.examples[0]}”`}, then compare.`)}
     </main>`;
 
   wireBrandHome();
   // A phoneme request plays the phoneme or nothing — no word stand-in.
   document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, acc));
   document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
+  wireTryIt(app, () => {
+    if (hasIso) { playPhoneme(slug, acc); return; }
+    const w = p.examples.find(x => speakableWord(x, acc));
+    if (w) speak(w, { lang, accent: acc });
+  });
   app.querySelectorAll('[data-say]').forEach(b =>
     b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: acc })));
 }

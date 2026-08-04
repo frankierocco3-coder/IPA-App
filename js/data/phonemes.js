@@ -7,7 +7,7 @@ export const PHONEMES = {
   'ɪ': { type: 'vowel', name: 'KIT vowel', hint: 'near-close front lax vowel', examples: ['kit', 'bid', 'ship', 'gym'] },
   'e': { type: 'vowel', name: 'DRESS vowel', hint: 'mid front vowel', examples: ['dress', 'bed', 'head', 'said'] },
   'æ': { type: 'vowel', name: 'TRAP vowel', hint: 'near-open front vowel', examples: ['trap', 'cat', 'hand', 'bad'] },
-  'ʌ': { type: 'vowel', name: 'STRUT vowel', hint: 'open-mid back unrounded vowel', examples: ['strut', 'cup', 'love', 'blood'] },
+  'ʌ': { type: 'vowel', name: 'STRUT vowel', hint: 'open-mid back unrounded vowel', examples: ['but', 'cup', 'love', 'blood'] },
   'ʊ': { type: 'vowel', name: 'FOOT vowel', hint: 'near-close back lax rounded vowel', examples: ['foot', 'put', 'good', 'could'] },
   'ɒ': { type: 'vowel', name: 'LOT vowel', hint: 'open back rounded vowel', examples: ['lot', 'odd', 'wash', 'stop'] },
   'ə': { type: 'vowel', name: 'schwa', hint: 'mid central vowel — the unstressed “uh”', examples: ['about', 'sofa', 'banana', 'the'] },
@@ -15,7 +15,7 @@ export const PHONEMES = {
   // ── Long vowels ─────────────────────────────────────────────
   'iː': { type: 'vowel', name: 'FLEECE vowel', hint: 'close front long vowel', examples: ['fleece', 'sea', 'machine', 'key'] },
   'ɑː': { type: 'vowel', name: 'PALM/BATH vowel', hint: 'open back long unrounded vowel', examples: ['palm', 'father', 'start', 'bath'] },
-  'ɔː': { type: 'vowel', name: 'THOUGHT vowel', hint: 'open-mid back long rounded vowel', examples: ['thought', 'law', 'north', 'war'] },
+  'ɔː': { type: 'vowel', name: 'THOUGHT vowel', hint: 'open-mid back long rounded vowel', examples: ['thought', 'law', 'north', 'saw'] },
   'uː': { type: 'vowel', name: 'GOOSE vowel', hint: 'close back long rounded vowel', examples: ['goose', 'two', 'blue', 'group'] },
   'ɜː': { type: 'vowel', name: 'NURSE vowel', hint: 'open-mid central long vowel', examples: ['nurse', 'stir', 'learn', 'word'] },
 
@@ -39,7 +39,7 @@ export const PHONEMES = {
   'ɚ': { type: 'vowel', name: 'American lettER', hint: 'r-colored schwa (unstressed)', examples: ['teacher', 'father', 'doctor', 'never'] },
 
   // ── Australian vowels (accent-track symbols) ────────────────
-  'ɐ': { type: 'vowel', name: 'Australian STRUT', hint: 'open central vowel — the Australian “uh”', examples: ['cup', 'strut', 'love', 'blood'] },
+  'ɐ': { type: 'vowel', name: 'Australian STRUT', hint: 'open central vowel — the Australian “uh”', examples: ['cup', 'but', 'love', 'blood'] },
   'ɐː': { type: 'vowel', name: 'Australian PALM/BATH', hint: 'long open central vowel', examples: ['palm', 'father', 'start', 'bath'] },
   'æɔ': { type: 'diphthong', name: 'Australian MOUTH', hint: 'glides from near-open front toward rounded back', examples: ['mouth', 'now', 'out', 'crowd'] },
   'æɪ': { type: 'diphthong', name: 'Australian FACE', hint: 'glides from near-open front toward close front', examples: ['face', 'day', 'rain', 'break'] },
@@ -137,7 +137,7 @@ export const WORDS = [
   { word: 'was', ipa: ['w', 'ɒ', 'z'] },
   { word: 'big', ipa: ['b', 'ɪ', 'g'] },
   // RP-specific: non-rhotic + BATH/PALM words
-  { word: 'car', ipa: ['k', 'ɑː'], accent: 'rp', note: 'non-rhotic: no /r/ at the end' },
+  { word: 'bar', ipa: ['b', 'ɑː'], accent: 'rp', note: 'non-rhotic: no /r/ at the end' },
   { word: 'start', ipa: ['s', 't', 'ɑː', 't'], accent: 'rp', note: 'non-rhotic: /r/ before a consonant is dropped' },
   { word: 'north', ipa: ['n', 'ɔː', 'θ'], accent: 'rp', note: 'non-rhotic: vowel lengthens instead of /r/' },
   { word: 'word', ipa: ['w', 'ɜː', 'd'], accent: 'rp', note: 'non-rhotic: NURSE vowel, no /r/' },
@@ -149,7 +149,7 @@ export const WORDS = [
   { word: 'four', ipa: ['f', 'ɔː'], accent: 'rp', note: 'non-rhotic: THOUGHT vowel, no /r/' },
 
   // Neutral American: rhotic, flat BATH, unrounded LOT, /oʊ/ GOAT
-  { word: 'car', ipa: ['k', 'ɑ', 'r'], accent: 'nam', note: 'rhotic: the /r/ is always pronounced' },
+  { word: 'bar', ipa: ['b', 'ɑ', 'r'], accent: 'nam', note: 'rhotic: the /r/ is always pronounced' },
   { word: 'start', ipa: ['s', 't', 'ɑ', 'r', 't'], accent: 'nam', note: 'rhotic: /r/ survives before a consonant' },
   { word: 'north', ipa: ['n', 'ɔː', 'r', 'θ'], accent: 'nam', note: 'rhotic: THOUGHT vowel + /r/' },
   { word: 'word', ipa: ['w', 'ɝ', 'd'], accent: 'nam', note: 'r-colored NURSE vowel /ɝ/' },
@@ -169,7 +169,7 @@ export const WORDS = [
   { word: 'teacher', ipa: ['t', 'iː', 'tʃ', 'ɚ'], accent: 'nam', note: 'r-colored lettER schwa /ɚ/ in the last syllable' },
 
   // Australian: non-rhotic like RP, but with raised and fronted vowels
-  { word: 'car', ipa: ['k', 'ɐː'], accent: 'aus', note: 'non-rhotic: no /r/, and PALM is central /ɐː/' },
+  { word: 'bar', ipa: ['b', 'ɐː'], accent: 'aus', note: 'non-rhotic: no /r/, and PALM is central /ɐː/' },
   { word: 'start', ipa: ['s', 't', 'ɐː', 't'], accent: 'aus', note: 'non-rhotic: central /ɐː/, no /r/' },
   { word: 'father', ipa: ['f', 'ɐː', 'ð', 'ə'], accent: 'aus', note: 'central /ɐː/ plus final schwa' },
   { word: 'bath', ipa: ['b', 'ɐː', 'θ'], accent: 'aus', note: 'BATH word: broad central /ɐː/' },
@@ -260,9 +260,9 @@ export const WORDS = [
   { word: 'happy', ipa: ['h', 'æ', 'p', 'i'], accent: 'ssbe', note: 'happY tensing: the final vowel is tense /i/, not lax /ɪ/' },
   { word: 'city', ipa: ['s', 'ɪ', 't', 'i'], accent: 'ssbe', note: 'happY tensing on the final vowel' },
   { word: 'bath', ipa: ['b', 'ɑː', 'θ'], accent: 'ssbe', note: 'the BATH split survives intact — broad /ɑː/, same as RP' },
-  { word: 'car', ipa: ['k', 'ɑː'], accent: 'ssbe', note: 'still non-rhotic: no /r/, long /ɑː/' },
+  { word: 'bar', ipa: ['b', 'ɑː'], accent: 'ssbe', note: 'still non-rhotic: no /r/, long /ɑː/' },
   { word: 'trap', ipa: ['t', 'r', 'æ', 'p'], accent: 'ssbe', note: 'TRAP sits lower and more open than old RP — nearly /a/' },
-  { word: 'strut', ipa: ['s', 't', 'r', 'ʌ', 't'], accent: 'ssbe', note: 'STRUT as in RP; initial /t/ stays a true /t/' },
+  { word: 'but', ipa: ['b', 'ʌ', 'ʔ'], accent: 'ssbe', note: 'the STRUT vowel — and the final /t/ closes to a glottal stop' },
   { word: 'thought', ipa: ['θ', 'ɔː', 'ʔ'], accent: 'ssbe', note: 'THOUGHT vowel as RP, final glottal /t/' },
   { word: 'near', ipa: ['n', 'ɪə'], accent: 'ssbe', note: 'NEAR often smooths toward a long /ɪː/ — the glide is fading' },
   { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'ssbe', note: 'FACE as in RP — the glide survives here' },

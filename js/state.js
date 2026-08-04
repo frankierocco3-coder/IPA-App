@@ -4,13 +4,20 @@ const KEY = 'ipa-trainer-v1';
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(KEY)) ?? {};
+    const s = JSON.parse(localStorage.getItem(KEY)) ?? {};
+    // v1 (unversioned) data is fully forward-compatible — every reader
+    // defaults missing fields. Never wipe on unknown versions; newer data
+    // from a future build is read best-effort.
+    return s;
   } catch {
     return {};
   }
 }
 
+const SCHEMA_VERSION = 2;   // bump only with a matching migration in load()
+
 function save(state) {
+  state.v = SCHEMA_VERSION;
   localStorage.setItem(KEY, JSON.stringify(state));
 }
 
