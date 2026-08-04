@@ -1,4 +1,22 @@
-# Phoneme recording plan (generated)
+# Phoneme recording plan
+
+STATUS 2026-07-30: TTS-coaxed candidates were generated, batch-approved,
+then withdrawn after listening — synthetic isolated phonemes are not good
+enough. The plan is HUMAN recordings (Frankie or a hired voice per
+dialect).
+
+## Adding your own recordings
+1. Record per the guidance table below (quiet room, consistent level,
+   trim silence). One file per sound per dialect per voice.
+2. Name and place: audio/phonemes/<dialect>/<voice>/<slug>.mp3
+   (voices: f/m for nam·rp·aus, alyx/peach for ssbe — or replace with
+   your own single human voice key per dialect and approve those ids).
+3. Rebuild the candidate index: python3 tools/generate_phonemes.py
+   (skip generation; it re-indexes existing files) — or hand-write
+   audio/phonemes-index.json.
+4. Listen at #audit (kind=phoneme), mark Good, export, commit the flags.
+   Approved sounds flip the sound-page hero to "Hear the sound"
+   automatically.
 
 Every isolated-phoneme asset still missing (none exist yet). Slug =
 lowercased display name, underscores. Path:

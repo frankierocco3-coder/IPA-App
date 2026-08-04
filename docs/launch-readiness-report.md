@@ -35,9 +35,10 @@ security · console clean · desktop + 390px smoke.
 - Words & expressions: nam 344/346*, rp 335/335, aus 368/368,
   ssbe 565/565. (*nam strut/car respell candidates on disk, quarantined
   pending owner ear; the words no longer appear as teaching examples.)
-- Isolated phonemes: 350/350 approved (owner BATCH declaration,
-  2026-07-30 — not a per-clip ear-check; reactive quarantine via #audit
-  overrides any clip later found bad).
+- Isolated phonemes: 0 — the TTS candidates were withdrawn by the owner
+  after listening; human recordings planned (docs/PHONEME_RECORDING_PLAN
+  has the workflow). Sound pages show a decorative symbol; word audio
+  carries every page. No fake or dead controls.
 - Long-form: sonnets nam 154/154, rp 154/154, aus 59/154, ssbe 0/154;
   all five monologue libraries 0 (manifest:
   docs/LONGFORM_RECORDING_MANIFEST.md, 22 rows).
@@ -56,8 +57,9 @@ security · console clean · desktop + 390px smoke.
   first (repo ~560MB vs Pages ~1GB soft limit).
 
 ## Assessment
-**Ready for beta.** (The phoneme condition was resolved by the owner's
-batch approval; the reactive #audit quarantine path covers stragglers.) No dishonest control exists anywhere:
+**Ready for beta.** Isolated phonemes are deliberately absent (human
+recordings are post-launch content work, not a launch blocker) — every
+visible control still plays exactly what it claims. No dishonest control exists anywhere:
 everything playable plays exactly what it claims in the course it claims.
 Recommended manual smoke: one lesson per course, one W&E
 try-it, one sonnet (badges + Recast), Privacy wipe on a throwaway

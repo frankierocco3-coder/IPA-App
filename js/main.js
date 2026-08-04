@@ -3459,7 +3459,7 @@ function renderSoundDetail(sym, accent) {
             aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, since this sound cannot be spoken alone" title="Hear it in a syllable">/${esc(sym)}/</button>
           <span class="sound-big-cap">🔊 In a syllable</span>`
           : `
-          <div class="sound-big is-off" aria-hidden="true">/${esc(sym)}/</div>`}
+          <div class="sound-big is-plain" aria-hidden="true">/${esc(sym)}/</div>`}
           ${hasIso && hasSyl ? `<button class="word-chip" id="say-syl" type="button"
             aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, not a fully isolated sound">🔊 Hear it in a syllable</button>` : ''}
         </div>
