@@ -6,7 +6,25 @@ by this script — it is the batch plan for future generation.
 
 | Collection/dialect | Texts incomplete | Lines to record |
 | --- | --- | --- |
+| chekhov/aus | 35 | 208 |
+| chekhov/nam | 35 | 208 |
+| chekhov/rp | 35 | 208 |
+| chekhov/ssbe | 35 | 208 |
+| ibsen/aus | 36 | 240 |
+| ibsen/nam | 36 | 240 |
+| ibsen/rp | 36 | 240 |
+| ibsen/ssbe | 36 | 240 |
+| oneill/aus | 35 | 536 |
+| oneill/nam | 35 | 536 |
+| oneill/rp | 35 | 536 |
+| oneill/ssbe | 35 | 536 |
+| pirandello/aus | 36 | 524 |
+| pirandello/nam | 36 | 524 |
+| pirandello/rp | 36 | 524 |
+| pirandello/ssbe | 36 | 524 |
 | sonnets/aus | 95 | 1306 |
-| sonnets/nam | 3 | 3 |
-| sonnets/rp | 1 | 1 |
 | sonnets/ssbe | 154 | 2155 |
+| wilde/aus | 36 | 537 |
+| wilde/nam | 36 | 537 |
+| wilde/rp | 36 | 537 |
+| wilde/ssbe | 36 | 537 |

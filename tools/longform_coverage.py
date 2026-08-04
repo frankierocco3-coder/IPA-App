@@ -38,7 +38,7 @@ def lib_line_counts(lib):
         return {}
     src = p.read_text(encoding="utf-8")
     counts = {}
-    for m in re.finditer(r"id:\s*'([^']+)'(.*?)lines:\s*\[(.*?)\]", src, re.S):
+    for m in re.finditer(r'id:\s*["\']([^"\']+)["\'](.*?)lines:\s*\[(.*?)\]', src, re.S):
         counts[m.group(1)] = len(re.findall(r'"(?:[^"\\]|\\.)*"|(?<!\\)\'(?:[^\'\\]|\\.)*\'', m.group(3)))
     return counts
 
