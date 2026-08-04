@@ -57,6 +57,7 @@ export async function saveTake({ projectId = null, scopeId = null, target, blob,
     label: target?.label ?? '',
     mimeType,
     durationMs,
+    sizeBytes: blob?.size ?? null,
     rating,
     note,
     createdAt: Date.now(),
@@ -95,6 +96,19 @@ export async function listTakes({ projectId = null, scopeId = null } = {}) {
     all = all.filter(t => t.scopeId === scopeId);
   }
   return all.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** Every saved take, newest first — for the storage manager. */
+export async function listAllTakes() {
+  const all = await idbAll(STORES.recordings);
+  return all.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/** Delete EVERY saved take (blob + metadata), leaving projects intact. */
+export async function deleteAllTakes() {
+  const all = await idbAll(STORES.recordings);
+  for (const t of all) await deleteTake(t.id);
+  return all.length;
 }
 
 /** Delete every take belonging to a project (used when the project goes). */

@@ -1270,3 +1270,5 @@ body.modal-open { overflow: hidden; }
 
 /* Decorative sound symbol (no isolated recording exists — by design). */
 .sound-big.is-plain { cursor: default; display: grid; place-items: center; }
+
+.tryit-ephemeral { font-size: 11px; color: var(--muted); margin-top: 4px; }

@@ -40,7 +40,8 @@ def main():
     # 1 + 2: banned learner-facing strings (strip line comments first)
     no_comments = re.sub(r"^\s*//.*$", "", shipped, flags=re.M)
     for banned in ["Native Idioms", "Contemporary British", "Standard Southern",
-                   "Educated Southern", "educated southern", "No Fear Shakespeare"]:
+                   "Educated Southern", "educated southern", "No Fear Shakespeare",
+                   "Recast beta", "Sonnets Recast", "coming soon\u201d recast"]:
         if banned in no_comments:
             line = next(l for l in no_comments.splitlines() if banned in l)
             fail("banned learner-facing string %r — %s" % (banned, line.strip()[:90]))
@@ -57,6 +58,17 @@ def main():
         fail("Traditional RP track icon is not 🎩")
     if "title: 'Standard British',\n    icon: '🇬🇧'" not in course_js:
         fail("Standard British track icon is not 🇬🇧")
+
+    # 3c: lesson ids are unique across all courses (units/tracks may share
+    # names with each other; lessons may not collide with anything)
+    ids = []
+    for block in re.findall(r"lessons: \[(.*?)\n    \]", course_js, re.S):
+        ids += re.findall(r"\bid: '([^']+)'", block)
+    dupes = sorted({i for i in ids if ids.count(i) > 1})
+    for d_ in dupes:
+        fail("duplicate lesson id in course.js: %s" % d_)
+    if len(ids) < 40:
+        fail("lesson-id audit parsed suspiciously few lessons (%d)" % len(ids))
 
     # 4: deterministic Words & Expressions in ssbe checkpoints
     if "extras.push('idiom', 'idiomRegister')" not in main_js:

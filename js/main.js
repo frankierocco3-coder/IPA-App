@@ -6,7 +6,7 @@ import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech,
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
-import { RECASTS, RECAST_LABEL } from './data/recasts.js';
+import { RECASTS } from './data/recasts.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
@@ -23,7 +23,7 @@ import { migrateLegacyCustomText, listProjects, getProject, saveProject, createP
 import { recordingSupported, startRecording, stopRecording, cancelRecording,
          isRecording, micErrorMessage, formatMs, MAX_RECORDING_MS } from './perform.js';
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
-         releaseAllUrls, playUrl, RATINGS, deleteTakesFor } from './recordings.js';
+         releaseAllUrls, playUrl, RATINGS, deleteTakesFor, listAllTakes, deleteAllTakes } from './recordings.js';
 import { dbSupported, STORES, idbClear } from './db.js';
 import { questRows, claimQuest, onLessonFinished } from './quests.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
@@ -78,6 +78,7 @@ let navRestoring = false;
 
 function record(thunk) {
   stopSpeech();                                  // leaving/entering a page stops any reading
+  releaseTryIt();                                // practice recordings die with their page
   if (navRestoring) { navRestoring = false; return; }
   if (navStack[navStack.length - 1] === thunk) return; // ignore same-page re-render
   navStack.push(thunk);
@@ -152,6 +153,7 @@ const ALL_LESSONS = Object.values(TRACK_LESSONS).flat();
 
 function isUnlocked(lesson) {
   if (store.freePlay) return true;
+  if (store.isCompleted(lesson.id)) return true;   // completed is ALWAYS replayable
   const chain = TRACK_LESSONS[lesson.track.id];
   const i = chain.findIndex(l => l.id === lesson.id);
   return i === 0 || store.isCompleted(chain[i - 1].id);
@@ -264,6 +266,7 @@ function renderShell(section) {
   navRestoring = false;
   setSection(section);
   window.scrollTo(0, 0);          // each section starts at its own top
+  releaseTryIt();
   const course = COURSES.find(c => c.id === activeCourse());
 
   app.innerHTML = `
@@ -1526,8 +1529,8 @@ function renderCredits() {
       <h1>Sources &amp; Credits</h1>
       <h2 class="guide-heading">Texts</h2>
       <p class="guide-text">Shakespeare’s sonnets and the included plays by Chekhov, Ibsen, Wilde, O’Neill and Pirandello are public-domain works; some translations are public domain <b>in the United States</b> specifically (noted on each collection: Fell &amp; West, Storer &amp; Livingston, Archer, Gosse, Sharp &amp; Marx Aveling).</p>
-      <h2 class="guide-heading">Sonnets Recast</h2>
-      <p class="guide-text">Plain-meaning summaries and dialect recasts are <b>original Speechcraft educational adaptations</b>, written for this app. They are creative adaptations, not literal translations, and carry a beta review label.</p>
+      <h2 class="guide-heading">Plain Meaning guides</h2>
+      <p class="guide-text">The Plain Meaning summaries are <b>original Speechcraft educational content</b>, written for this app — faithful prose explanations, not translations or performances.</p>
       <h2 class="guide-heading">Audio</h2>
       <p class="guide-text">Word, expression and narration recordings are synthesised with licensed ElevenLabs voices under their commercial licence, generated offline and bundled as static files. Where no recording exists, the app says so — the optional “device voice” readings use your own device’s built-in speech.</p>
       <h2 class="guide-heading">Everything else</h2>
@@ -1730,7 +1733,7 @@ function textSpeechPane(pane) {
     LONGFORM_COVERAGE.sonnets.nam.includes(n) && LONGFORM_COVERAGE.sonnets.rp.includes(n));
   const cards = [
     featured.length ? { icon: '⭐', title: 'Featured Texts',
-      blurb: `Sonnets with complete, verified Neutral American and Traditional RP recordings — plus the Sonnets Recast beta: ${featured.map(n => `№${n}`).join(', ')}.`,
+      blurb: `Sonnets with complete, verified Neutral American and Traditional RP recordings and Plain Meaning guides: ${featured.map(n => `№${n}`).join(', ')}. (Some also have Australian audio — each page shows exactly what's recorded.)`,
       go: () => renderSonnet(featured[0]) } : null,
     { icon: '🎬', title: 'My Texts', blurb: 'Your rehearsal projects — saved roles, notes, and recorded takes.', go: renderProjects },
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
@@ -1867,12 +1870,55 @@ async function wipeLocalData({ includeProgress }) {
   return report;
 }
 
+async function fillRecordingManager() {
+  const box = document.getElementById('rec-manager');
+  if (!box) return;
+  if (!dbSupported()) {
+    box.innerHTML = '<h2 class="chart-h">Manage recordings</h2><p class="pane-note">Recording storage isn’t available in this browser.</p>';
+    return;
+  }
+  let takes = [];
+  try { takes = await listAllTakes(); }
+  catch { box.innerHTML = '<h2 class="chart-h">Manage recordings</h2><p class="pane-note pane-warn">Could not read saved recordings — the browser database may be blocked.</p>'; return; }
+  const known = takes.reduce((n, t) => n + (t.sizeBytes ?? 0), 0);
+  const unsized = takes.filter(t => !t.sizeBytes).length;
+  const byProject = new Map();
+  for (const t of takes) byProject.set(t.projectId ?? t.scopeId ?? 'unfiled', (byProject.get(t.projectId ?? t.scopeId ?? 'unfiled') ?? 0) + 1);
+  let estimate = '';
+  try {
+    if (navigator.storage?.estimate) {
+      const e = await navigator.storage.estimate();
+      if (e.quota) estimate = `This site is using ~${((e.usage ?? 0) / 1048576).toFixed(1)} MB of ~${(e.quota / 1048576).toFixed(0)} MB the browser allows.`;
+    }
+  } catch { /* estimate is a nicety */ }
+  box.innerHTML = `
+    <h2 class="chart-h">Manage recordings</h2>
+    <div class="stat-row"><span class="stat-name">Saved takes</span><span class="stat-val">${takes.length}</span></div>
+    <div class="stat-row"><span class="stat-name">Audio storage</span><span class="stat-val">${(known / 1048576).toFixed(1)} MB${unsized ? ` + ${unsized} older take(s) unsized` : ''}</span></div>
+    <div class="stat-row"><span class="stat-name">Projects / texts with takes</span><span class="stat-val">${byProject.size}</span></div>
+    ${estimate ? `<p class="pane-note">${esc(estimate)}</p>` : ''}
+    <p class="pane-note">Individual takes are managed where they live — each project's Perform tab has play, download and delete per take.</p>
+    ${takes.length ? '<button class="btn btn-danger" id="rec-delete-all" type="button">Delete ALL saved recordings</button>' : ''}
+    <p class="pane-note">Deleting recordings never touches course progress, XP, projects, notes or the personal dictionary — projects simply show no saved takes afterwards.</p>`;
+  document.getElementById('rec-delete-all')?.addEventListener('click', async () => {
+    if (!confirm(`Delete all ${takes.length} saved recordings?\n\nProjects, notes and progress are kept. This cannot be undone.`)) return;
+    if (!confirm('Last check — really delete every saved take?')) return;
+    try {
+      releaseAllUrls();
+      const n = await deleteAllTakes();
+      alert(`${n} recording(s) deleted. Projects and progress are untouched.`);
+    } catch (err) { alert('Some recordings could not be deleted — nothing else was touched.'); console.warn(err); }
+    fillRecordingManager();
+  });
+}
+
 function renderPrivacy() {
   record(renderPrivacy);
   app.innerHTML = `
     ${pageTopbar('🔒 Privacy & Data', '#8a6d3b')}
     <main class="track-list">
       <p class="track-blurb">Everything Speechcraft stores stays in this browser on this device. Nothing you record, write or practise is ever sent anywhere.</p>
+      <p class="pane-note">Two kinds of recordings: <b>practice takes</b> (“Try it yourself”) live only in memory and are discarded automatically when you leave the page; <b>saved takes</b> (Perform → Save take) are kept in this browser's database until you delete them. Clearing this site's browser data removes everything.</p>
 
       <section class="stat-block">
         <h2 class="chart-h">What is stored here</h2>
@@ -1882,6 +1928,11 @@ function renderPrivacy() {
         <div class="stat-row"><span class="stat-name">Personal dictionary</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
+      </section>
+
+      <section class="stat-block" id="rec-manager">
+        <h2 class="chart-h">Manage recordings</h2>
+        <p class="pane-note">Loading…</p>
       </section>
 
       <section class="stat-block">
@@ -1898,6 +1949,7 @@ function renderPrivacy() {
       </div>
     </main>`;
   wireBrandHome();
+  fillRecordingManager();
 
   const run = async (includeProgress, label) => {
     if (!confirm(`${label}\n\nThis permanently deletes that data from this device and cannot be undone.\n\nContinue?`)) return;
@@ -2580,7 +2632,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
         <button class="son-tab" data-mode="scan">📐 Scan</button>
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
         <button class="son-tab" data-mode="perform">🎙 Perform</button>
-        ${recast ? '<button class="son-tab" data-mode="recast">🔁 Recast <span class="tag tag-skill">beta</span></button>' : ''}
+        ${recast?.plain ? '<button class="son-tab" data-mode="plain">📖 Plain Meaning</button>' : ''}
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
@@ -2594,7 +2646,13 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
   let cur = accent, mode = 'speak';
   const pane = document.getElementById('sonnet-pane');
   const drawDialects = () => document.getElementById('rd-dialects').innerHTML =
-    TEXT_DIALECTS.map(d => `<button class="dialect-chip ${d.id === cur ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">${d.flag}</span>${d.label}</button>`).join('');
+    TEXT_DIALECTS.map(d => {
+      const hasAudio = narrated.includes(d.id);
+      return `<button class="dialect-chip ${d.id === cur ? 'on' : ''} ${hasAudio ? '' : 'no-audio'}" data-d="${d.id}"
+        title="${hasAudio ? `${esc(d.label)} — recorded audio` : `${esc(d.label)} — no recording for this text yet; transcription and Perform still work`}"
+        aria-label="${esc(d.label)}${hasAudio ? '' : ' — recording coming soon; transcription and rehearsal modes still work'}">
+        <span class="dialect-icon">${d.flag}</span>${d.label}${hasAudio ? '' : ' <small class="chip-soon">· audio soon</small>'}</button>`;
+    }).join('');
   const show = m => {
     stopSpeech();
     mode = m;
@@ -2602,7 +2660,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
     if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
-    else if (m === 'recast') { wireRecast._lines = lines.map(stripStage); pane.innerHTML = recastPane(recast, lines); wireRecast(pane, recast); }
+    else if (m === 'plain') { pane.innerHTML = plainPane(recast); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
   drawDialects();
@@ -2885,12 +2943,13 @@ function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }) {
             ${rate ? `<span class="tag take-rate rate-${t.rating}">${esc(rate.label)}</span>` : ''}
             ${isBest ? '<span class="tag tag-skill">★ Best Take</span>' : ''}
           </div>
-          <p class="take-meta">${esc(t.label || '')} · ${formatMs(t.durationMs || 0)} · ${new Date(t.createdAt).toLocaleDateString()}</p>
+          <p class="take-meta">${esc(t.label || '')} · ${formatMs(t.durationMs || 0)} · ${new Date(t.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}${t.sizeBytes ? ` · ${(t.sizeBytes / 1024).toFixed(0)} KB` : ''}</p>
           ${t.note ? `<p class="take-note">${esc(t.note)}</p>` : ''}
           <div class="take-actions">
             <button class="btn-lite" type="button" data-act="play">▶ Play</button>
             <button class="btn-lite" type="button" data-act="compare">⇄ Compare</button>
             ${projectId ? `<button class="btn-lite" type="button" data-act="best">${isBest ? 'Unset best' : '★ Best Take'}</button>` : ''}
+            <button class="btn-lite" type="button" data-act="dl">⬇ Download</button>
             <button class="btn-lite btn-danger" type="button" data-act="del">Delete</button>
           </div>
         </div>`;
@@ -2911,6 +2970,14 @@ function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }) {
           await new Promise(r => setTimeout(r, 250));
           playUrl(await takeUrl(id));
         }
+        else if (act === 'dl') {
+          const url = await takeUrl(id);
+          const meta = takes.find(t => t.id === id);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `speechcraft-take-${new Date(meta.createdAt).toISOString().slice(0, 10)}.${(meta.mimeType || '').includes('mp4') ? 'm4a' : 'webm'}`;
+          document.body.appendChild(a); a.click(); a.remove();
+        }
         else if (act === 'best') { await setBestTake(projectId, id); drawTakes(); }
         else if (act === 'del') {
           if (!confirm('Delete this take? This cannot be undone.')) return;
@@ -2929,45 +2996,16 @@ function lineHtml(ln) {
   return esc(ln).replace(/\[[^\]]*\]/g, m => `<i class="stage-dir">${m}</i>`);
 }
 
-// ── Sonnets Recast (beta): Original / Plain Meaning / Dialect Recast ──
-// The original words performed in an accent are an "Original Performance"
-// (the Perform tab). Replacing the words is a "Dialect Recast" — never
-// labelled as an accent performance, never as a literal translation.
-const RECAST_DIALECTS = [
-  { id: 'nam', label: 'Neutral American' },
-  { id: 'ssbe', label: 'Standard British' },
-  { id: 'aus', label: 'Australian' },
-];
-
-function recastPane(recast, lines) {
+// ── Plain Meaning: a faithful reading companion (no dialect tabs) ──
+// The original text lives in Listen; this mode explains its literal
+// meaning, imagery and emotional movement. It is an explanation, never a
+// performance translation. (The dialect-adaptation experiment was removed
+// from the interface 2026-07-31; its source data is retained off-UI for a
+// possible future "Transpositions" feature.)
+function plainPane(recast) {
   return `
-    <p class="recast-beta">🔁 <b>Sonnets Recast</b> — ${esc(RECAST_LABEL)}. The original words spoken in an
-      accent are an <b>original performance</b> (see Perform); a recast rewrites the ideas in a
-      contemporary register. Traditional RP offers the original and Plain Meaning — its register IS the original's.</p>
-    <div class="recast-views" role="tablist" aria-label="Recast views">
-      <button class="son-tab on" data-view="original" role="tab">Original</button>
-      <button class="son-tab" data-view="plain" role="tab">Plain Meaning</button>
-      ${RECAST_DIALECTS.filter(d => recast.recasts[d.id]).map(d =>
-        `<button class="son-tab" data-view="${d.id}" role="tab">${esc(d.label)} recast</button>`).join('')}
-    </div>
-    <div class="recast-body" id="recast-body"></div>
-    <p class="pane-note">Recast recordings are not yet produced — these are text views. Audio will only ever appear here in each recast's own dialect voices.</p>`;
-}
-
-function wireRecast(pane, recast) {
-  const body = pane.querySelector('#recast-body');
-  wireRecast._orig = (wireRecast._lines ?? []).map(l => esc(l)).join('\n');
-  const show2 = view => {
-    pane.querySelectorAll('.recast-views .son-tab').forEach(t => t.classList.toggle('on', t.dataset.view === view));
-    if (view === 'original') body.innerHTML = `<div class="recast-text">${wireRecast._orig}</div>`;
-    else if (view === 'plain') body.innerHTML = `<p class="guide-text">${esc(recast.plain)}</p>`;
-    else body.innerHTML = `
-      <p class="pane-note">${esc(RECAST_LABEL)} — original Speechcraft adaptation; meaning preserved, meter not formally reviewed.</p>
-      <div class="recast-text">${esc(recast.recasts[view])}</div>`;
-  };
-  pane.querySelectorAll('.recast-views .son-tab').forEach(t =>
-    t.addEventListener('click', () => show2(t.dataset.view)));
-  show2('original');
+    <p class="pane-note">📖 <b>Plain Meaning</b> — what the original says, in plain prose. The full text is in the Listen tab.</p>
+    <p class="guide-text">${esc(recast.plain)}</p>`;
 }
 
 function speakPane(lines, accent = null, narrated = []) {
@@ -3371,6 +3409,10 @@ function renderChart() {
 // keeping takes. One object URL lives at a time.
 let tryItUrl = null;
 
+function releaseTryIt() {
+  if (tryItUrl) { URL.revokeObjectURL(tryItUrl); tryItUrl = null; }
+}
+
 function tryItHtml(label = 'Record yourself, then compare with the model.') {
   if (!recordingSupported()) return '';
   return `
@@ -3382,6 +3424,7 @@ function tryItHtml(label = 'Record yourself, then compare with the model.') {
       <audio controls hidden data-tryit="play" aria-label="Your recording"></audio>
     </div>
     <p class="pane-note" data-tryit="status" role="status">${esc(label)}</p>
+    <p class="tryit-ephemeral">Practice only — not saved. Keep takes in 🎬 My Texts.</p>
   </section>`;
 }
 
