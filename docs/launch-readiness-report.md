@@ -35,8 +35,9 @@ security · console clean · desktop + 390px smoke.
 - Words & expressions: nam 344/346*, rp 335/335, aus 368/368,
   ssbe 565/565. (*nam strut/car respell candidates on disk, quarantined
   pending owner ear; the words no longer appear as teaching examples.)
-- Isolated phonemes: 0 approved / 350 candidates awaiting review
-  (~41 isolated + syllable slots per dialect-voice).
+- Isolated phonemes: 350/350 approved (owner BATCH declaration,
+  2026-07-30 — not a per-clip ear-check; reactive quarantine via #audit
+  overrides any clip later found bad).
 - Long-form: sonnets nam 154/154, rp 154/154, aus 59/154, ssbe 0/154;
   all five monologue libraries 0 (manifest:
   docs/LONGFORM_RECORDING_MANIFEST.md, 22 rows).
@@ -55,10 +56,9 @@ security · console clean · desktop + 390px smoke.
   first (repo ~560MB vs Pages ~1GB soft limit).
 
 ## Assessment
-**Conditionally ready for beta.** No dishonest control exists anywhere:
+**Ready for beta.** (The phoneme condition was resolved by the owner's
+batch approval; the reactive #audit quarantine path covers stragglers.) No dishonest control exists anywhere:
 everything playable plays exactly what it claims in the course it claims.
-The condition is the owner's phoneme-candidate review — without it, sound
-pages carry working word audio and the recorder, but no isolated-sound
-buttons. Recommended manual smoke: one lesson per course, one W&E
+Recommended manual smoke: one lesson per course, one W&E
 try-it, one sonnet (badges + Recast), Privacy wipe on a throwaway
 profile, Feedback link.

@@ -98,11 +98,12 @@ const approvedSet = new Set(APPROVED_PHONEMES);
 
 function phonemeVariants(slug, accent) {
   // Voice keys come from the approved entries themselves — 'f'/'m' for the
-  // original dialects, named speakers (alyx/peach) for newer ones.
+  // original dialects, named speakers (alyx/peach) for newer ones. A later
+  // Bad verdict at #audit (KNOWN_BAD) overrides the batch approval.
   const out = [];
   for (const id of approvedSet) {
     const [a, v, s] = id.split('/');
-    if (a === accent && s === slug) out.push(v);
+    if (a === accent && s === slug && !badSet.has(id)) out.push(v);
   }
   return out;
 }
