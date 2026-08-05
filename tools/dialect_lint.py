@@ -131,12 +131,20 @@ def main():
                 fail("%s: realization %r in a broad transcription — flag the "
                      "entry `narrow: true` or use the phoneme" % (scope, sym))
 
-    # 6: duplicate track / unit ids
-    unit_ids = re.findall(r"^  \{\n    id: '([^']+)'", course_src, re.M)
-    unit_ids += re.findall(r"^\s{4}id: '([^']+)',$", course_src, re.M)
-    dupes = sorted({u for u in unit_ids if unit_ids.count(u) > 1 and u})
+    # 6: duplicate unit ids (within COURSE) and track ids (within TRACKS).
+    # A unit and a track may legitimately share an id ('nam' is both);
+    # collisions are only illegal within each list.
+    course_block = re.search(r"export const COURSE = \[(.*?)\n\];", course_src, re.S)
+    unit_ids = re.findall(r"^    id: '([^']+)',$", course_block.group(1), re.M) \
+        if course_block else []
+    if len(unit_ids) < 10:
+        fail("course.js: parsed suspiciously few unit ids (%d)" % len(unit_ids))
+    for u in sorted({u for u in unit_ids if unit_ids.count(u) > 1}):
+        fail("course.js COURSE: duplicate unit id %r" % u)
     tracks = re.search(r"export const TRACKS = \[(.*?)\n\];", course_src, re.S)
     track_ids = re.findall(r"id: '([^']+)'", tracks.group(1)) if tracks else []
+    if len(track_ids) < 4:
+        fail("course.js: parsed suspiciously few track ids (%d)" % len(track_ids))
     for t in sorted({t for t in track_ids if track_ids.count(t) > 1}):
         fail("course.js TRACKS: duplicate track id %r" % t)
 
