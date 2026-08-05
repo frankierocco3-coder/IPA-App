@@ -20,7 +20,7 @@ import { scanLine } from './scan.js';
 import { loadPron, ipaFor } from './pron.js';
 import { migrateLegacyCustomText, listProjects, getProject, saveProject, createProject,
          duplicateProject, deleteProject, emptyProject, touchRehearsed, sortProjects,
-         searchProjects, STATUSES, splitLines } from './projects.js';
+         searchProjects, STATUSES, CONTENT_TYPES, contentTypeLabel, splitLines } from './projects.js';
 import { recordingSupported, startRecording, stopRecording, cancelRecording,
          isRecording, micErrorMessage, formatMs, MAX_RECORDING_MS } from './perform.js';
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
@@ -228,6 +228,7 @@ const COURSES = [
 ];
 const SECTIONS = [
   { id: 'learn', icon: '🏠', label: 'Learn' },
+  { id: 'studio', icon: '🎬', label: 'Studio' },
   { id: 'practice', icon: '🎯', label: 'Practice' },
   { id: 'library', icon: '📚', label: 'Library' },
   { id: 'progress', icon: '📈', label: 'Progress' },
@@ -295,7 +296,7 @@ function renderShell(section) {
       </aside>
     </div>
     <nav class="bottom-nav" aria-label="Sections">
-      ${['learn', 'practice', 'library', 'progress', 'more'].map(id => {
+      ${['learn', 'studio', 'practice', 'library', 'progress', 'more'].map(id => {
         const s = SECTIONS.find(x => x.id === id);
         return `<button class="bn-item ${id === section ? 'on' : ''}" data-sec="${id}" type="button">
           <span class="bn-icon">${s.icon}</span><span class="bn-label">${s.label}</span></button>`;
@@ -311,6 +312,7 @@ function renderShell(section) {
 
   const main = document.getElementById('shell-main');
   if (section === 'learn') learnMain(main, course);
+  else if (section === 'studio') studioMain(main);
   else if (section === 'practice') practiceMain(main, course);
   else if (section === 'library') libraryMain(main, course);
   else if (section === 'progress') progressMain(main);
@@ -686,8 +688,8 @@ function libraryMain(el, course) {
     d ? { icon: course.icon, title: 'Words & Expressions',
       blurb: 'The words, slang and expressions that bring the dialect to life.',
       go: () => renderIdioms(d) } : null,
-    { icon: '📜', title: 'Texts & Speeches',
-      blurb: 'Sonnets, monologues, and your own pieces.',
+    { icon: '📜', title: 'Scripts & Speeches',
+      blurb: 'Monologues, scenes, speeches and sonnets — curated public-domain material.',
       go: renderTextsPage },
     { icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract.',
@@ -709,11 +711,11 @@ function libraryMain(el, course) {
     b.addEventListener('click', () => cards[+b.dataset.i].go()));
 }
 
-// Texts & Speeches as a full page (it left the sidebar for the Library).
+// Scripts & Speeches as a full page (it left the sidebar for the Library).
 function renderTextsPage() {
   record(renderTextsPage);
   app.innerHTML = `
-    ${pageTopbar('📜 Texts & Speeches', '#8a6d3b')}
+    ${pageTopbar('📜 Scripts & Speeches', '#8a6d3b')}
     <main class="track-list" id="texts-page"></main>`;
   wireBrandHome();
   textSpeechPane(document.getElementById('texts-page'));
@@ -1097,7 +1099,7 @@ function wiiStepHtml(step, st) {
         <li>Examine tongue and lip placement.</li>
         <li>Say the sounds separately.</li>
         <li>Blend them into the word.</li>
-        <li>Record yourself (Library → Texts &amp; Speeches → My Texts has a real recorder).</li>
+        <li>Record yourself (the 🎬 Studio has a real recorder).</li>
         <li>Compare, adjust, repeat.</li>
       </ol>
       <p class="guide-text">Try it on one word:</p>
@@ -1526,9 +1528,12 @@ function renderAbout() {
     ${pageTopbar('ℹ️ About Speechcraft', '#6f8657')}
     <main class="guide">
       <h1>About Speechcraft</h1>
-      <p class="guide-text">Speechcraft teaches the sounds of English the way actors train: the International Phonetic Alphabet, four pronunciation targets (Neutral American, Traditional RP, Standard British, Australian), and a rehearsal workspace for real text with recording and comparison.</p>
+      <p class="guide-text"><b>Speechcraft helps actors understand speech, prepare their text and rehearse it in a chosen accent.</b> It exists because IPA is usually taught as an abstraction, disconnected from the work of performance — Speechcraft makes the sounds of speech easier to understand, then helps you apply them to monologues, speeches, scenes and lyrics. Learn the sound. Mark the text. Rehearse the role.</p>
+      <div class="guide-word"><span class="wii-who">Learn</span><span class="guide-note">the IPA, how speech is produced, and four accent targets — courses that teach the skills</span></div>
+      <div class="guide-word"><span class="wii-who">Prepare</span><span class="guide-note">your own text in the Studio: paste it, transcribe it to IPA in your dialect, mark it up with notes</span></div>
+      <div class="guide-word"><span class="wii-who">Rehearse</span><span class="guide-note">listen, repeat, record and compare takes until the accent lives in the text</span></div>
       <p class="guide-text"><b>Speechcraft is in beta.</b> Content and recordings are still being reviewed and expanded. It is a practice tool, not a substitute for a dialect coach — accents are learned by ears and feedback, and no app can promise fluency.</p>
-      <p class="pane-note">Pronunciation targets are exactly that: targets. Real speakers vary by region, generation and situation.</p>
+      <p class="pane-note">Pronunciation targets are exactly that: targets. Real speakers vary by region, generation and situation. Anything you paste into the Studio stays private on this device — nothing is uploaded or shared.</p>
     </main>`;
   wireBrandHome();
 }
@@ -1780,10 +1785,9 @@ function textSpeechPane(pane) {
     featured.length ? { icon: '⭐', title: 'Featured Texts',
       blurb: `Sonnets with complete, verified Neutral American and Traditional RP recordings and Plain Meaning guides: ${featured.map(n => `№${n}`).join(', ')}. (Some also have Australian audio — each page shows exactly what's recorded.)`,
       go: () => renderSonnet(featured[0]) } : null,
-    { icon: '🎬', title: 'My Texts', blurb: 'Your rehearsal projects — saved roles, notes, and recorded takes.', go: renderProjects },
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
     ...libs,
-    { icon: '✍️', title: 'Train Any Text', blurb: 'Paste a monologue, speech, or scene — practise it in any dialect.', go: renderCustomText },
+    { icon: '🎬', title: 'Your own text', blurb: 'Monologues, scenes, speeches and lyrics you paste live in the Studio — private to this device.', go: () => goSection('studio') },
   ];
   const shown = cards.filter(Boolean);
   pane.innerHTML = shown.map((c, i) => `
@@ -2112,7 +2116,7 @@ function startDailyRehearsal() {
   });
 }
 
-// ── My Texts: rehearsal projects ──────────────────────────────
+// ── Speechcraft Studio: private rehearsal projects ────────────
 // A project is a saved role: its text, dialect, notes, difficult words and
 // every take recorded against it.
 
@@ -2124,34 +2128,32 @@ const STATUS_CLASS = {
 let projectSort = 'rehearsed';
 let projectQuery = '';
 
-async function renderProjects() {
-  record(renderProjects);
-  app.innerHTML = `
-    ${pageTopbar('🎬 My Texts', '#8a6d3b')}
-    <main class="track-list">
-      <p class="track-blurb">Your rehearsal projects — a saved role with its text, dialect, notes and recordings, all kept on this device.</p>
-      <div class="proj-toolbar">
-        <input class="sonnet-search" id="proj-search" type="search" placeholder="Search title, character, source…" value="${esc(projectQuery)}" autocomplete="off">
-        <div class="proj-tools">
-          <label class="field-label" for="proj-sort">Sort</label>
-          <select class="input-sel" id="proj-sort" aria-label="Sort projects">
-            <option value="rehearsed">Recently rehearsed</option>
-            <option value="updated">Recently edited</option>
-            <option value="created">Date created</option>
-            <option value="title">Title</option>
-            <option value="character">Character</option>
-          </select>
-          <button class="btn btn-lite" id="proj-import" type="button">Import</button>
-          <button class="btn btn-primary" id="proj-new" type="button">+ New project</button>
-        </div>
+// The Studio landing: every private project, on the shell's own section.
+// Learn teaches the skills; the Studio is where they meet your text.
+async function studioMain(el) {
+  el.innerHTML = `
+    <h1 class="page-h">Speechcraft Studio</h1>
+    <p class="track-blurb">Prepare, transcribe and rehearse your own text. Everything you paste here stays private on this device — nothing is uploaded or shared.</p>
+    <div class="proj-toolbar">
+      <input class="sonnet-search" id="proj-search" type="search" placeholder="Search title, character, source…" value="${esc(projectQuery)}" autocomplete="off">
+      <div class="proj-tools">
+        <label class="field-label" for="proj-sort">Sort</label>
+        <select class="input-sel" id="proj-sort" aria-label="Sort projects">
+          <option value="rehearsed">Recently rehearsed</option>
+          <option value="updated">Recently edited</option>
+          <option value="created">Date created</option>
+          <option value="title">Title</option>
+          <option value="character">Character</option>
+        </select>
+        <button class="btn btn-lite" id="proj-import" type="button">Import</button>
+        <button class="btn btn-primary" id="proj-new" type="button">+ New Project</button>
       </div>
-      <div id="proj-list"><p class="pane-note">Loading…</p></div>
-    </main>
+    </div>
+    <div id="proj-list"><p class="pane-note">Loading…</p></div>
     <input type="file" id="proj-file" accept="application/json" hidden>`;
-  wireBrandHome();
 
-  const listEl = document.getElementById('proj-list');
-  const sortSel = document.getElementById('proj-sort');
+  const listEl = el.querySelector('#proj-list');
+  const sortSel = el.querySelector('#proj-sort');
   sortSel.value = projectSort;
 
   async function draw() {
@@ -2168,24 +2170,30 @@ async function renderProjects() {
       listEl.innerHTML = `
         <div class="empty-state">
           <p class="empty-emoji">🎬</p>
-          <h2>No projects yet</h2>
-          <p>Create one for a piece you're working on — an audition speech, a scene, a monologue. You'll get the text, its IPA, scansion, and a place to record and compare takes.</p>
-          <p class="pane-note">Example: <b>Stanley Audition</b> — A Streetcar Named Desire · Stanley Kowalski · Act II · General American</p>
+          <h2>Your first project starts here</h2>
+          <p>Paste a piece you're working on — an audition speech, a scene, a monologue, song lyrics. You'll get the text, its IPA in your chosen dialect, scansion, notes, and a place to record and compare takes.</p>
+          <p class="pane-note">Example: <b>Stanley Audition</b> — A Streetcar Named Desire · Monologue · Neutral American</p>
         </div>`;
       return;
     }
     if (!rows.length) { listEl.innerHTML = '<p class="pane-note">No projects match that search.</p>'; return; }
 
+    const preview = t => {
+      const s = String(t || '').replace(/\s+/g, ' ').trim();
+      return s ? esc(s.slice(0, 110)) + (s.length > 110 ? '…' : '') : '<i>No text yet</i>';
+    };
     listEl.innerHTML = rows.map(p => `
       <div class="proj-card" data-id="${p.id}">
         <button class="proj-open" type="button" data-act="open">
           <span class="proj-main">
             <span class="proj-title">${esc(p.title || 'Untitled project')}</span>
-            <span class="proj-sub">${esc([p.character, p.source].filter(Boolean).join(' · ') || 'No source yet')}</span>
+            <span class="proj-sub">${esc([p.character, p.source].filter(Boolean).join(' · ') || contentTypeLabel(p.contentType))}</span>
+            <span class="proj-preview">${preview(p.text)}</span>
             <span class="proj-meta">
+              <span class="tag">${esc(contentTypeLabel(p.contentType))}</span>
+              <span class="tag tag-dialect">${esc(dialectName(p.accent) || p.accent)}</span>
               <span class="tag ${STATUS_CLASS[p.status] || ''}">${esc(p.status)}</span>
-              <span class="tag">${esc(dialectName(p.accent) || p.accent)}</span>
-              <span class="proj-when">${p.rehearsedAt ? `Rehearsed ${relDate(p.rehearsedAt)}` : `Created ${relDate(p.createdAt)}`}</span>
+              <span class="proj-when">Edited ${relDate(p.updatedAt)}</span>
             </span>
           </span>
           <span class="track-arrow">›</span>
@@ -2216,14 +2224,11 @@ async function renderProjects() {
     });
   }
 
-  document.getElementById('proj-search').addEventListener('input', e => { projectQuery = e.target.value; draw(); });
+  el.querySelector('#proj-search').addEventListener('input', e => { projectQuery = e.target.value; draw(); });
   sortSel.addEventListener('change', e => { projectSort = e.target.value; draw(); });
-  document.getElementById('proj-new').addEventListener('click', async () => {
-    const p = await createProject({ title: 'Untitled project' });
-    renderProject(p.id);
-  });
-  const fileInput = document.getElementById('proj-file');
-  document.getElementById('proj-import').addEventListener('click', () => fileInput.click());
+  el.querySelector('#proj-new').addEventListener('click', renderNewProject);
+  const fileInput = el.querySelector('#proj-file');
+  el.querySelector('#proj-import').addEventListener('click', () => fileInput.click());
   fileInput.addEventListener('change', async () => {
     const f = fileInput.files?.[0]; if (!f) return;
     try {
@@ -2235,6 +2240,65 @@ async function renderProjects() {
   });
 
   draw();
+}
+
+// New Project: one guided form. Nothing is saved until Create — cancelling
+// leaves no empty project behind.
+function renderNewProject() {
+  record(renderNewProject);
+  let accent = 'nam';
+  app.innerHTML = `
+    ${pageTopbar('🎬 New Project', '#8a6d3b')}
+    <main class="guide">
+      <p class="track-blurb">Paste the text you're working on. You can change everything later — nothing is saved until you press Create.</p>
+      <div class="proj-form">
+        <div class="form-grid">
+          <label class="field"><span class="field-label">Project title</span>
+            <input class="input-text" id="np-title" placeholder="Stanley Audition" autocomplete="off"></label>
+          <label class="field"><span class="field-label">Content type</span>
+            <select class="input-sel" id="np-type">
+              ${CONTENT_TYPES.map(([v, l]) => `<option value="${v}">${esc(l)}</option>`).join('')}
+            </select></label>
+        </div>
+        <label class="field"><span class="field-label">Text</span>
+          <textarea class="ct-area" id="np-text" placeholder="Paste the monologue, scene, speech or lyrics here — one line per line."></textarea></label>
+        <div class="dialect-picker"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="np-dialects"></div></div>
+        <p class="pane-note">Your text stays private on this device. Song lyrics use the same tools — playback is a spoken diction reference, not singing.</p>
+        <p class="pane-note pane-warn" id="np-warn" hidden></p>
+        <div class="form-actions">
+          <button class="btn btn-primary" id="np-create" type="button">Create project</button>
+          <button class="btn btn-lite" id="np-cancel" type="button">Cancel</button>
+        </div>
+      </div>
+    </main>`;
+  wireBrandHome();
+
+  const chipsEl = document.getElementById('np-dialects');
+  const drawChips = () => chipsEl.innerHTML = TEXT_DIALECTS.map(d =>
+    `<button class="dialect-chip ${d.id === accent ? 'on' : ''}" data-d="${d.id}" type="button"><span class="dialect-icon">${d.flag}</span>${d.label}</button>`).join('');
+  drawChips();
+  chipsEl.addEventListener('click', e => {
+    const b = e.target.closest('.dialect-chip'); if (!b) return;
+    accent = b.dataset.d; drawChips();
+  });
+  document.getElementById('np-cancel').addEventListener('click', goBack);
+  document.getElementById('np-create').addEventListener('click', async () => {
+    const title = document.getElementById('np-title').value.trim();
+    const text = document.getElementById('np-text').value;
+    const warn = document.getElementById('np-warn');
+    if (!title && !text.trim()) {
+      warn.hidden = false;
+      warn.textContent = 'Give the project a title or some text to start from.';
+      return;
+    }
+    const p = await createProject({
+      title: title || 'Untitled project',
+      contentType: document.getElementById('np-type').value,
+      accent,
+      text,
+    });
+    renderProject(p.id);
+  });
 }
 
 function relDate(ts) {
@@ -2251,7 +2315,7 @@ function relDate(ts) {
 async function renderProject(id, tab = 'text') {
   record(() => renderProject(id, tab));
   const p = await getProject(id);
-  if (!p) return renderProjects();
+  if (!p) return goSection('studio');
 
   app.innerHTML = `
     ${pageTopbar('🎬 ' + esc(p.title || 'Untitled'), '#8a6d3b')}
@@ -2260,13 +2324,14 @@ async function renderProject(id, tab = 'text') {
         <h1 class="piece-title">${esc(p.title || 'Untitled project')}</h1>
         <p class="piece-source">${esc([p.character, p.source, p.scene].filter(Boolean).join(' · ') || 'Add a source below')}</p>
         <div class="piece-tags">
+          <span class="tag">${esc(contentTypeLabel(p.contentType))}</span>
           <span class="tag ${STATUS_CLASS[p.status] || ''}">${esc(p.status)}</span>
           <span class="tag tag-dialect">🗣 ${esc(dialectName(p.accent) || p.accent)}</span>
           ${p.lines.length ? `<span class="tag">${p.lines.length} lines</span>` : ''}
         </div>
       </div>
       <div class="sonnet-tabs proj-tabs">
-        ${[['text', '📄 Text'], ['ipa', '🔤 IPA'], ['scan', '📐 Scan'], ['perform', '🎙 Perform'], ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']]
+        ${[['text', '📄 Text'], ['ipa', '🔤 Transcribe to IPA'], ['scan', '📐 Scan'], ['perform', '🎙 Perform'], ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']]
           .map(([k, l]) => `<button class="son-tab ${k === tab ? 'on' : ''}" data-tab="${k}" type="button">${l}</button>`).join('')}
       </div>
       <div id="proj-pane" class="sonnet-pane"></div>
@@ -2298,12 +2363,45 @@ async function renderProject(id, tab = 'text') {
 
 const emptyText = () => '<p class="pane-note">Add the text on the <b>Text</b> tab first.</p>';
 
+// Debounced autosave shared by the editable panes: edits persist on their
+// own after a short pause, with a visible Saving…/Saved state, and never
+// re-render the pane (a re-render would steal the caret).
+function wireAutosave(stateEl, collect) {
+  let timer = null, saving = false, queued = false;
+  const run = async () => {
+    if (saving) { queued = true; return; }
+    saving = true;
+    stateEl.textContent = 'Saving…';
+    try {
+      const fresh = await collect();
+      await saveProject(fresh);
+      stateEl.textContent = 'Saved ✓';
+    } catch {
+      stateEl.textContent = 'Not saved — storage error. Copy your text to be safe.';
+    }
+    saving = false;
+    if (queued) { queued = false; run(); }
+  };
+  return {
+    touch() {
+      stateEl.textContent = 'Saving…';
+      clearTimeout(timer);
+      timer = setTimeout(run, 800);
+    },
+    async flush() { clearTimeout(timer); await run(); },
+  };
+}
+
 function paneText(pane, p, id) {
   pane.innerHTML = `
     <div class="proj-form">
       <div class="form-grid">
         <label class="field"><span class="field-label">Project title</span>
           <input class="input-text" id="f-title" value="${esc(p.title)}" placeholder="Stanley Audition"></label>
+        <label class="field"><span class="field-label">Content type</span>
+          <select class="input-sel" id="f-type">
+            ${CONTENT_TYPES.map(([v, l]) => `<option value="${v}" ${v === (p.contentType ?? 'other') ? 'selected' : ''}>${esc(l)}</option>`).join('')}
+          </select></label>
         <label class="field"><span class="field-label">Source</span>
           <input class="input-text" id="f-source" value="${esc(p.source)}" placeholder="A Streetcar Named Desire"></label>
         <label class="field"><span class="field-label">Author</span>
@@ -2325,8 +2423,8 @@ function paneText(pane, p, id) {
         <textarea class="ct-area" id="f-text" placeholder="Paste the speech here — one line per line.">${esc(p.text)}</textarea></label>
       <p class="pane-note" id="f-warn" hidden></p>
       <div class="form-actions">
-        <button class="btn btn-primary" id="f-save" type="button">Save</button>
-        <span class="save-state" id="f-state" role="status" aria-live="polite"></span>
+        <button class="btn btn-primary" id="f-save" type="button">Save now</button>
+        <span class="save-state" id="f-state" role="status" aria-live="polite">Autosaves as you type.</span>
       </div>
     </div>`;
 
@@ -2334,7 +2432,24 @@ function paneText(pane, p, id) {
   const warn = pane.querySelector('#f-warn');
   const originalLineCount = p.lines.length;
 
-  // Changing the text can orphan line-numbered takes — say so before saving.
+  const auto = wireAutosave(pane.querySelector('#f-state'), async () => ({
+    ...(await getProject(id)),
+    title: pane.querySelector('#f-title').value.trim(),
+    contentType: pane.querySelector('#f-type').value,
+    source: pane.querySelector('#f-source').value.trim(),
+    author: pane.querySelector('#f-author').value.trim(),
+    character: pane.querySelector('#f-character').value.trim(),
+    scene: pane.querySelector('#f-scene').value.trim(),
+    accent: pane.querySelector('#f-accent').value,
+    status: pane.querySelector('#f-status').value,
+    text: textEl.value,
+  }));
+  pane.querySelectorAll('#f-title, #f-source, #f-author, #f-character, #f-scene, #f-text')
+    .forEach(elm => elm.addEventListener('input', () => auto.touch()));
+  pane.querySelectorAll('#f-type, #f-accent, #f-status')
+    .forEach(elm => elm.addEventListener('change', () => auto.touch()));
+
+  // Changing the text can orphan line-numbered takes — say so as you type.
   textEl.addEventListener('input', () => {
     const next = splitLines(textEl.value).length;
     if (originalLineCount && next !== originalLineCount) {
@@ -2345,37 +2460,29 @@ function paneText(pane, p, id) {
   });
 
   pane.querySelector('#f-save').addEventListener('click', async () => {
-    const patch = {
-      ...p,
-      title: pane.querySelector('#f-title').value.trim(),
-      source: pane.querySelector('#f-source').value.trim(),
-      author: pane.querySelector('#f-author').value.trim(),
-      character: pane.querySelector('#f-character').value.trim(),
-      scene: pane.querySelector('#f-scene').value.trim(),
-      accent: pane.querySelector('#f-accent').value,
-      status: pane.querySelector('#f-status').value,
-      text: textEl.value,
-    };
-    await saveProject(patch);
-    pane.querySelector('#f-state').textContent = 'Saved.';
-    setTimeout(() => renderProject(id, 'text'), 350);
+    await auto.flush();
+    renderProject(id, 'text');
   });
 }
 
 function paneNotes(pane, p, id) {
   pane.innerHTML = `
-    <label class="field"><span class="field-label">Personal notes</span>
-      <textarea class="ct-area" id="n-notes" placeholder="Blocking, intention, breath, what the director said…">${esc(p.notes)}</textarea></label>
-    <label class="field"><span class="field-label">Pronunciation notes</span>
-      <textarea class="ct-area short" id="n-pron" placeholder="e.g. keep the r's; BATH stays flat…">${esc(p.pronunciationNotes)}</textarea></label>
+    <label class="field"><span class="field-label">Acting Notes</span>
+      <textarea class="ct-area" id="n-notes" placeholder="Beats, objectives, tactics, operative words, thought groups, what the director said…">${esc(p.notes)}</textarea></label>
+    <label class="field"><span class="field-label">Pronunciation Notes</span>
+      <textarea class="ct-area short" id="n-pron" placeholder="Stress, intonation, linking, breath points, tricky vowels, dialect reminders, names…">${esc(p.pronunciationNotes)}</textarea></label>
     <div class="form-actions">
-      <button class="btn btn-primary" id="n-save" type="button">Save notes</button>
-      <span class="save-state" id="n-state" role="status" aria-live="polite"></span>
+      <button class="btn btn-primary" id="n-save" type="button">Save now</button>
+      <span class="save-state" id="n-state" role="status" aria-live="polite">Autosaves as you type.</span>
     </div>`;
-  pane.querySelector('#n-save').addEventListener('click', async () => {
-    await saveProject({ ...p, notes: pane.querySelector('#n-notes').value, pronunciationNotes: pane.querySelector('#n-pron').value });
-    pane.querySelector('#n-state').textContent = 'Saved.';
-  });
+  const auto = wireAutosave(pane.querySelector('#n-state'), async () => ({
+    ...(await getProject(id)),
+    notes: pane.querySelector('#n-notes').value,
+    pronunciationNotes: pane.querySelector('#n-pron').value,
+  }));
+  pane.querySelectorAll('#n-notes, #n-pron').forEach(elm =>
+    elm.addEventListener('input', () => auto.touch()));
+  pane.querySelector('#n-save').addEventListener('click', () => auto.flush());
 }
 
 function paneWords(pane, p, id) {
@@ -2435,6 +2542,7 @@ async function exportProject(id) {
     projects: [{
       title: p.title, source: p.source, author: p.author,
       character: p.character, scene: p.scene, accent: p.accent,
+      contentType: p.contentType ?? 'other',
       text: p.text, notes: p.notes, pronunciationNotes: p.pronunciationNotes,
       difficultWords: (p.difficultWords ?? []).map(w => ({ word: w.word, note: w.note ?? '' })),
       overrides: {
@@ -2591,37 +2699,9 @@ function renderPiece(key, id) {
   });
 }
 // Paste any monologue / speech / scene and open it in the reader.
-function renderCustomText() {
-  record(renderCustomText);
-  const saved = store.customText || {};
-  let accent = saved.accent || 'nam';
-  app.innerHTML = `
-    ${pageTopbar('✍️ Train Any Text', '#8a6d3b')}
-    <main class="track-list custom-editor">
-      <p class="track-blurb">Paste any monologue, speech, or scene — one line per line. Then speak it aloud, scan its rhythm, and study every word’s pronunciation in the dialect you’re working in.</p>
-      <input class="sonnet-search" id="ct-title" placeholder="Title (optional) — e.g. “Hamlet 3.1”" value="${esc(saved.title || '')}">
-      <textarea class="ct-area" id="ct-body" placeholder="Paste your text here…">${esc(saved.body || '')}</textarea>
-      <div class="dialect-picker"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="ct-dialects"></div></div>
-      <button class="btn btn-practice" id="ct-go">Open in trainer →</button>
-    </main>`;
-  wireBrandHome();
-  const chipsEl = document.getElementById('ct-dialects');
-  const draw = () => chipsEl.innerHTML = TEXT_DIALECTS.map(d =>
-    `<button class="dialect-chip ${d.id === accent ? 'on' : ''}" data-d="${d.id}"><span class="dialect-icon">${d.flag}</span>${d.label}</button>`).join('');
-  draw();
-  chipsEl.addEventListener('click', e => {
-    const b = e.target.closest('.dialect-chip'); if (!b) return;
-    accent = b.dataset.d; draw();
-  });
-  document.getElementById('ct-go').addEventListener('click', () => {
-    const title = document.getElementById('ct-title').value.trim();
-    const body = document.getElementById('ct-body').value;
-    const lines = body.split(/\n/).map(l => l.replace(/\s+$/, '')).filter(l => l.trim() !== '');
-    if (!lines.length) { document.getElementById('ct-body').focus(); return; }
-    store.saveCustomText({ title, body, accent });
-    renderReader({ label: title || 'Your text', lines, accent, editor: true });
-  });
-}
+// (The old "Train Any Text" scratchpad is gone: pasted text lives in the
+// Studio as a real project now. Its one-time draft migration into a project
+// already ran at startup, and the legacy localStorage value stays untouched.)
 
 // One sonnet, opened in the reader (defaults to RP; dialect is switchable).
 function renderSonnet(n) {
@@ -2648,7 +2728,7 @@ function renderSonnet(n) {
 
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, editor, clip, verse = true, meta = null, narrated = [], recast = null, scopeId = null, projectId = null }) {
+function renderReader({ label, lines, accent, prev, next, clip, verse = true, meta = null, narrated = [], recast = null, scopeId = null, projectId = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -2681,8 +2761,7 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
-        ${editor ? '<button class="btn-lite" id="rd-edit">‹ Edit text</button>'
-          : (prev ? `<button class="btn-lite" id="rd-prev">${esc(prev.label)}</button>` : '<span></span>')}
+        ${prev ? `<button class="btn-lite" id="rd-prev">${esc(prev.label)}</button>` : '<span></span>'}
         ${next ? `<button class="btn-lite" id="rd-next">${esc(next.label)}</button>` : '<span></span>'}
       </div>
     </main>`;
@@ -2714,7 +2793,6 @@ function renderReader({ label, lines, accent, prev, next, editor, clip, verse = 
     cur = b.dataset.d; drawDialects(); show(mode);
   });
   app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
-  document.getElementById('rd-edit')?.addEventListener('click', () => { stopSpeech(); renderCustomText(); });
   document.getElementById('rd-prev')?.addEventListener('click', () => { stopSpeech(); prev.go(); });
   document.getElementById('rd-next')?.addEventListener('click', () => { stopSpeech(); next.go(); });
   show('speak');
@@ -3150,8 +3228,8 @@ async function fillSound(lines, accent, pane, opts = {}) {
     }).join('');
 
     pane.innerHTML = `
-      <p class="pane-note">Every word transcribed in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived</span>' : ''}.${miss ? ` <span class="approx">${miss} not in the dictionary (—).</span>` : ''}
-        Tap any word to correct its pronunciation.${edited ? ` <span class="approx">${edited} customised.</span>` : ''}</p>
+      <p class="pane-note">Transcribed to IPA in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived, not dictionary-exact</span>' : ''}.${miss ? ` <span class="approx">${miss} word${miss === 1 ? ' is' : 's are'} not in the dictionary (marked —) — names and invented words need your ear: tap one to supply its pronunciation.</span>` : ''}
+        Tap any word to correct it.${edited ? ` <span class="approx">${edited} customised.</span>` : ''}</p>
       <div class="son-transcribe">${linesHtml}</div>`;
 
     pane.querySelectorAll('.tw-word').forEach(b =>
@@ -3171,7 +3249,7 @@ function openWordEditor({ word, accent, project, projectId, lineIdx, wordIdx, on
   const current = resolvePronunciation({ word, accent, project, lineIdx, wordIdx, base });
   const generated = base?.ipa ?? '';
   // Alternates the built-in data can offer: the same word read in the other dialects.
-  const alts = ['nam', 'rp', 'aus']
+  const alts = TEXT_DIALECTS.map(d => d.id)
     .filter(a => a !== accent)
     .map(a => ({ accent: a, ipa: ipaFor(word, a)?.ipa }))
     .filter(a => a.ipa && a.ipa !== generated);
@@ -3454,7 +3532,7 @@ function renderChart() {
 }
 
 // ── Try it yourself: record, play back, compare with the model ─
-// Ephemeral by design — nothing is saved; My Texts remains the place for
+// Ephemeral by design — nothing is saved; the Studio remains the place for
 // keeping takes. One object URL lives at a time.
 let tryItUrl = null;
 
@@ -3473,7 +3551,7 @@ function tryItHtml(label = 'Record yourself, then compare with the model.') {
       <audio controls hidden data-tryit="play" aria-label="Your recording"></audio>
     </div>
     <p class="pane-note" data-tryit="status" role="status">${esc(label)}</p>
-    <p class="tryit-ephemeral">Practice only — not saved. Keep takes in 🎬 My Texts.</p>
+    <p class="tryit-ephemeral">Practice only — not saved. Keep takes in the 🎬 Studio.</p>
   </section>`;
 }
 

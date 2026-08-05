@@ -10,6 +10,19 @@ import { store } from './state.js';
 
 export const STATUSES = ['Not Started', 'In Rehearsal', 'Performance Ready', 'Archived'];
 
+// What kind of material a Studio project holds. 'lyrics' is first-class:
+// pasted song lyrics use the same text/IPA tools (spoken diction reference —
+// the app never pretends to sing).
+export const CONTENT_TYPES = [
+  ['monologue', 'Monologue'],
+  ['scene', 'Scene'],
+  ['speech', 'Speech'],
+  ['lyrics', 'Song Lyrics'],
+  ['other', 'Other'],
+];
+export const contentTypeLabel = t =>
+  (CONTENT_TYPES.find(([v]) => v === t) ?? [null, 'Text'])[1];
+
 export const DATA_VERSION = 1;
 
 /** A blank project. `lines` is derived from `text` on save. */
@@ -22,7 +35,8 @@ export function emptyProject(patch = {}) {
     author: '',
     character: '',
     scene: '',
-    accent: 'rp',        // dialect id: rp | nam | aus
+    contentType: 'other', // monologue | scene | speech | lyrics | other
+    accent: 'rp',        // dialect id: nam | rp | ssbe | aus
     text: '',
     lines: [],
     notes: '',
@@ -138,7 +152,7 @@ export async function migrateLegacyCustomText() {
       title: legacy.title?.trim() || 'My first text',
       accent: legacy.accent || 'rp',
       text: legacy.body,
-      notes: 'Imported from your earlier "Train Any Text" draft.',
+      notes: 'Imported from your earlier pasted-text draft.',
     });
     await metaSet('migrated.customText', { at: Date.now(), created: true, projectId: p.id });
     return p;

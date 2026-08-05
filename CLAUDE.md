@@ -119,9 +119,10 @@ tests/              security.test.js (browser-run)
 ## Current state
 
 **Working:** Duolingo-style shell (Speechcraft skin): left sidebar
-**Learn / Practice / Library / Progress / More** (same five on the mobile
-bottom nav; Shop and Profile live under More but are still shell sections;
-LEGACY_SECTIONS maps old saved 'textbook'/'quests' states). You are always
+**Learn / Studio / Practice / Library / Progress / More** (same six on
+the mobile bottom nav; Shop and Profile live under More but are still
+shell sections; LEGACY_SECTIONS maps old saved 'textbook'/'quests'
+states). You are always
 "in" one course — 🇺🇸/🇬🇧/🇦🇺/ʃə Foundations — switched via the course chip.
 First run: 4-step onboarding (welcome → goal → accent with 🔊 samples →
 begin-or-diagnostic); prefs in store.onboarding; users with prior progress
@@ -273,6 +274,35 @@ gate) fails on: unknown lesson symbols, wrong-system symbols in
 lessons/WORDS, allophones in broad entries, missing DIALECT_INFO,
 duplicate track ids. launch_lint bans the retired copy ("every butler",
 "Transcribe like the BBC", "hold their places", "gets measured against").
+
+SPEECHCRAFT STUDIO Phase 1 (2026-08-05): top-level Studio section =
+the PROMOTED rehearsal-projects system (js/projects.js — NOT a parallel
+store). studioMain landing (cards: contentType/dialect/status/preview/
+edited; search/sort/import/export/duplicate/confirmed-delete) +
+renderNewProject wizard (title/type/text/dialect; saves NOTHING on
+cancel; empty-create guarded). Model gained contentType
+(monologue/scene/speech/lyrics/other — CONTENT_TYPES in projects.js;
+additive, no migration needed; export/import whitelisted in validate.js,
+which also finally accepts accent 'ssbe'). paneText/paneNotes AUTOSAVE
+(wireAutosave: 800ms debounce, Saving…/Saved ✓ status, storage-error
+message, never re-renders mid-edit); notes labelled Acting Notes /
+Pronunciation Notes. Project IPA tab is "Transcribe to IPA" (never
+"Translate"); dictionary misses say names/invented words need your ear.
+pron.js gained toSsbe (toRP + eə→ɛː, approx ≈) so ssbe projects no
+longer show American IPA as exact; word-editor alternates now offer all
+4 dialects. LIBRARY: "Scripts & Speeches" (curated only — My Texts card
+GONE, Train Any Text feature DELETED incl. renderReader's editor param;
+legacy store.customText data untouched, its one-time migration already
+ran); a "Your own text" pointer card jumps to Studio. About Speechcraft
+carries the product statement ("helps actors understand speech, prepare
+their text and rehearse it in a chosen accent") + Learn/Prepare/Rehearse
+framing + Studio privacy line — IMPERSONAL by Frankie's choice (no
+founder story). launch_lint bans "My Texts"/"Train Any Text"/"Texts &
+Speeches"/"Translate to IPA". Roadmap (incl. the no-backend Phase 3
+honesty gate for ElevenLabs TTS — no stub interface ships):
+docs/SPEECHCRAFT_STUDIO_ROADMAP.md.
+
+**Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.
 * RP/Australian IPA is rule-derived from General American, marked "≈".

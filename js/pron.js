@@ -48,12 +48,20 @@ function toAus(s) {
     .replace(/ɑː/g, 'ɐː').replace(/ʌ/g, 'ɐ').replace(/uː?/g, 'ʉː');
 }
 
+// General American → Standard British: RP's skeleton with the steady
+// SQUARE /ɛː/. Fine-grained contemporary features (glottalling, yod
+// coalescence) are realizations, not respellings — the broad form is RP-like.
+function toSsbe(s) {
+  return toRP(s).replace(/eə/g, 'ɛː');
+}
+
 // Returns { ipa, approx } or null if the word isn't in the dictionary.
 export function ipaFor(word, accent) {
   if (!PRON) return null;
   const am = PRON[cleanKey(word)];
   if (!am) return null;
   if (accent === 'rp') return { ipa: toRP(am), approx: true };
+  if (accent === 'ssbe') return { ipa: toSsbe(am), approx: true };
   if (accent === 'aus') return { ipa: toAus(am), approx: true };
   return { ipa: am, approx: false };            // nam / General American (exact)
 }

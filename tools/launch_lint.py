@@ -44,7 +44,10 @@ def main():
                    "Recast beta", "Sonnets Recast", "coming soon\u201d recast",
                    # dialect-accuracy pass: retired inaccurate copy stays retired
                    "every butler", "Transcribe like the BBC", "hold their places",
-                   "gets measured against"]:
+                   "gets measured against",
+                   # Studio pass: retired names, and IPA is transcription not translation
+                   "My Texts", "Train Any Text", "Texts & Speeches",
+                   "Texts &amp; Speeches", "Translate to IPA"]:
         if banned in no_comments:
             line = next(l for l in no_comments.splitlines() if banned in l)
             fail("banned learner-facing string %r — %s" % (banned, line.strip()[:90]))
