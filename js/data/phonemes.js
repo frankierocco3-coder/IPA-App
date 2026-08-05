@@ -1,6 +1,15 @@
 // English-relevant IPA phoneme inventory (RP reference accent).
 // `examples`: words containing the sound, first one is the anchor/carrier word.
 // `hint`: articulatory description used in description-based exercises.
+//
+// Notation convention (the Dialect Accuracy Standard):
+//   /…/  broad phonemic transcription — what the courses teach and drill.
+//   […]  a spoken realization (allophone) — never counted as an extra phoneme.
+//   The English R is written /r/ in broad transcription, following dictionary
+//   practice; its precise phonetic symbol is [ɹ]. Entries flagged
+//   `allophone: true` are realizations (listed for teaching, excluded from
+//   inventory counts); entries flagged `weak: true` are weak/unstressed
+//   vowels, grouped separately in the IPA reference.
 
 export const PHONEMES = {
   // ── Short vowels ────────────────────────────────────────────
@@ -10,7 +19,7 @@ export const PHONEMES = {
   'ʌ': { type: 'vowel', name: 'STRUT vowel', hint: 'open-mid back unrounded vowel', examples: ['but', 'cup', 'love', 'blood'] },
   'ʊ': { type: 'vowel', name: 'FOOT vowel', hint: 'near-close back lax rounded vowel', examples: ['foot', 'put', 'good', 'could'] },
   'ɒ': { type: 'vowel', name: 'LOT vowel', hint: 'open back rounded vowel', examples: ['lot', 'odd', 'wash', 'stop'] },
-  'ə': { type: 'vowel', name: 'schwa', hint: 'mid central vowel — the unstressed “uh”', examples: ['about', 'sofa', 'banana', 'the'] },
+  'ə': { type: 'vowel', name: 'schwa', weak: true, hint: 'mid central vowel — the unstressed “uh”', examples: ['about', 'sofa', 'banana', 'the'] },
 
   // ── Long vowels ─────────────────────────────────────────────
   'iː': { type: 'vowel', name: 'FLEECE vowel', hint: 'close front long vowel', examples: ['fleece', 'sea', 'machine', 'key'] },
@@ -28,22 +37,26 @@ export const PHONEMES = {
   'ɪə': { type: 'diphthong', name: 'NEAR diphthong', hint: 'glides from close front toward schwa', examples: ['near', 'here', 'beer', 'idea'] },
   'eə': { type: 'diphthong', name: 'SQUARE diphthong', hint: 'glides from mid front toward schwa', examples: ['square', 'fair', 'there', 'care'] },
   'ɛː': { type: 'vowel', name: 'contemporary SQUARE', hint: 'a long steady open-mid front vowel — where older RP glided /eə/, modern British holds one position', examples: ['square', 'fair', 'there', 'care'] },
-  'i': { type: 'vowel', name: 'happY vowel', hint: 'the short-but-tense vowel ending happy, city, coffee — /iː/ quality without its length', examples: ['happy', 'city', 'duty'] },
-  'ʔ': { type: 'consonant', name: 'glottal stop', hint: 'the vocal folds close and release — contemporary British replaces /t/ with it between vowels and at word ends', examples: ['better', 'water', 'got', 'butter'] },
+  'i': { type: 'vowel', name: 'happY vowel', weak: true, hint: 'the weak-but-tense vowel ending happy, city, coffee — /iː/ quality without its length, only in unstressed positions', examples: ['happy', 'city', 'duty'] },
+  'ʔ': { type: 'consonant', name: 'glottal stop', allophone: 't', hint: 'a spoken realization [ʔ] of the phoneme /t/, not an extra consonant — the vocal folds close and release. Common before consonants, at word ends and before unstressed syllables: /ˈbetə/ → [ˈbeʔə]. Use varies by speaker, setting and environment; careful speech keeps [t]', examples: ['better', 'water', 'got', 'butter'] },
   'ʊə': { type: 'diphthong', name: 'CURE diphthong', hint: 'glides from close back toward schwa', examples: ['cure', 'tour', 'pure', 'jury'] },
 
   // ── Neutral American vowels (accent-track symbols) ─────────
   'ɑ': { type: 'vowel', name: 'American LOT/PALM', hint: 'open back unrounded vowel — the unrounded American “ah”', examples: ['lot', 'father', 'stop', 'hot'] },
   'oʊ': { type: 'diphthong', name: 'American GOAT', hint: 'glides from mid back rounded toward close back', examples: ['go', 'show', 'soap', 'home'] },
   'ɝ': { type: 'vowel', name: 'American NURSE', hint: 'r-colored mid central vowel (stressed)', examples: ['nurse', 'word', 'learn', 'stir'] },
-  'ɚ': { type: 'vowel', name: 'American lettER', hint: 'r-colored schwa (unstressed)', examples: ['teacher', 'father', 'doctor', 'never'] },
+  'ɚ': { type: 'vowel', name: 'American lettER', weak: true, hint: 'r-colored schwa (unstressed)', examples: ['teacher', 'father', 'doctor', 'never'] },
 
-  // ── Australian vowels (accent-track symbols) ────────────────
+  // ── Australian vowels (HCE / revised Australian transcription) ──
   'ɐ': { type: 'vowel', name: 'Australian STRUT', hint: 'open central vowel — the Australian “uh”', examples: ['cup', 'but', 'love', 'blood'] },
   'ɐː': { type: 'vowel', name: 'Australian PALM/BATH', hint: 'long open central vowel', examples: ['palm', 'father', 'start', 'bath'] },
+  'ɔ': { type: 'vowel', name: 'Australian LOT', hint: 'short open-mid back rounded vowel — sits higher than the RP /ɒ/', examples: ['lot', 'odd', 'wash', 'stop'] },
+  'oː': { type: 'vowel', name: 'Australian THOUGHT', hint: 'long close-mid back rounded vowel — noticeably higher than RP /ɔː/', examples: ['thought', 'law', 'north', 'four'] },
+  'eː': { type: 'vowel', name: 'Australian SQUARE', hint: 'long mid front vowel — a steady monophthong where RP glides /eə/', examples: ['square', 'fair', 'there', 'care'] },
   'æɔ': { type: 'diphthong', name: 'Australian MOUTH', hint: 'glides from near-open front toward rounded back', examples: ['mouth', 'now', 'out', 'crowd'] },
   'æɪ': { type: 'diphthong', name: 'Australian FACE', hint: 'glides from near-open front toward close front', examples: ['face', 'day', 'rain', 'break'] },
-  'ɑɪ': { type: 'diphthong', name: 'Australian PRICE', hint: 'glides from open back toward close front', examples: ['price', 'high', 'try', 'buy'] },
+  'ɑe': { type: 'diphthong', name: 'Australian PRICE', hint: 'glides from open back toward a mid front vowel — a wide, open journey', examples: ['price', 'high', 'try', 'buy'] },
+  'oɪ': { type: 'diphthong', name: 'Australian CHOICE', hint: 'glides from a close-mid back rounded start toward close front — starts higher than RP /ɔɪ/', examples: ['choice', 'boy', 'noise', 'join'] },
   'əʉ': { type: 'diphthong', name: 'Australian GOAT', hint: 'glides from schwa toward a fronted close rounded vowel', examples: ['goat', 'show', 'no', 'soap'] },
   'ʉː': { type: 'vowel', name: 'Australian GOOSE', hint: 'long close central rounded vowel — fronted “oo”', examples: ['goose', 'two', 'blue', 'who'] },
 
@@ -73,7 +86,7 @@ export const PHONEMES = {
   'tʃ': { type: 'consonant', name: 'ch', hint: 'voiceless postalveolar affricate — “ch”', examples: ['chin', 'teacher', 'match', 'nature'] },
   'dʒ': { type: 'consonant', name: 'j', hint: 'voiced postalveolar affricate — “j”', examples: ['jam', 'magic', 'bridge', 'age'] },
   'l': { type: 'consonant', name: 'l', hint: 'alveolar lateral approximant', examples: ['leg', 'yellow', 'feel', 'little'] },
-  'r': { type: 'consonant', name: 'r', hint: 'postalveolar approximant', examples: ['red', 'sorry', 'try', 'write'] },
+  'r': { type: 'consonant', name: 'r', hint: 'postalveolar approximant — written /r/ in broad transcription by dictionary convention; the precise phonetic symbol is [ɹ]', examples: ['red', 'sorry', 'try', 'write'] },
   'w': { type: 'consonant', name: 'w', hint: 'labial-velar approximant', examples: ['wet', 'away', 'one', 'quick'] },
   'j': { type: 'consonant', name: 'yod', hint: 'palatal approximant — “y” in yes', examples: ['yes', 'beyond', 'few', 'use'] },
 };
@@ -167,24 +180,48 @@ export const WORDS = [
   { word: 'soap', ipa: ['s', 'oʊ', 'p'], accent: 'nam', note: 'American GOAT: /oʊ/' },
   { word: 'home', ipa: ['h', 'oʊ', 'm'], accent: 'nam', note: 'American GOAT: /oʊ/' },
   { word: 'teacher', ipa: ['t', 'iː', 'tʃ', 'ɚ'], accent: 'nam', note: 'r-colored lettER schwa /ɚ/ in the last syllable' },
+  // Connected-speech words: tapping, yod-dropping, happY tensing, /æ/ raising
+  { word: 'better', ipa: ['b', 'e', 't', 'ɚ'], accent: 'nam', note: 'the /t/ between vowels is usually tapped: [ˈbeɾɚ] — a quick, d-like flap' },
+  { word: 'water', ipa: ['w', 'ɔː', 't', 'ɚ'], accent: 'nam', note: 'tapped /t/: [ˈwɔːɾɚ]. Speakers with the cot–caught merger say the vowel as /ɑ/' },
+  { word: 'city', ipa: ['s', 'ɪ', 't', 'i'], accent: 'nam', note: 'tapped /t/ and a tense happY /i/ ending: [ˈsɪɾi]' },
+  { word: 'ladder', ipa: ['l', 'æ', 'd', 'ɚ'], accent: 'nam', note: '/d/ taps between vowels too — “ladder” and “latter” can sound identical: [ˈlæɾɚ]' },
+  { word: 'tune', ipa: ['t', 'uː', 'n'], accent: 'nam', note: 'yod-dropping: no /j/ after /t d n/ — RP /tjuːn/, American /tuːn/' },
+  { word: 'duty', ipa: ['d', 'uː', 't', 'i'], accent: 'nam', note: 'yod-dropping plus a tapped /t/: [ˈduːɾi]' },
+  { word: 'man', ipa: ['m', 'æ', 'n'], accent: 'nam', note: '/æ/ commonly raises before nasals — closer to [ɛə] — but the broad symbol stays /æ/' },
 
   // Australian: non-rhotic like RP, but with raised and fronted vowels
+  // (HCE / revised Australian symbols: /ɔ oː eː ɑe oɪ/)
   { word: 'bar', ipa: ['b', 'ɐː'], accent: 'aus', note: 'non-rhotic: no /r/, and PALM is central /ɐː/' },
   { word: 'start', ipa: ['s', 't', 'ɐː', 't'], accent: 'aus', note: 'non-rhotic: central /ɐː/, no /r/' },
   { word: 'father', ipa: ['f', 'ɐː', 'ð', 'ə'], accent: 'aus', note: 'central /ɐː/ plus final schwa' },
   { word: 'bath', ipa: ['b', 'ɐː', 'θ'], accent: 'aus', note: 'BATH word: broad central /ɐː/' },
   { word: 'dance', ipa: ['d', 'ɐː', 'n', 's'], accent: 'aus', note: 'BATH word — though many Australians say /dæns/' },
-  { word: 'north', ipa: ['n', 'ɔː', 'θ'], accent: 'aus', note: 'non-rhotic: THOUGHT vowel, no /r/' },
+  { word: 'north', ipa: ['n', 'oː', 'θ'], accent: 'aus', note: 'non-rhotic: Australian THOUGHT /oː/, no /r/' },
   { word: 'word', ipa: ['w', 'ɜː', 'd'], accent: 'aus', note: 'non-rhotic: NURSE vowel, no /r/' },
   { word: 'nurse', ipa: ['n', 'ɜː', 's'], accent: 'aus', note: 'non-rhotic NURSE vowel' },
   { word: 'here', ipa: ['h', 'ɪə'], accent: 'aus', note: 'non-rhotic: NEAR diphthong, no /r/' },
-  { word: 'four', ipa: ['f', 'ɔː'], accent: 'aus', note: 'non-rhotic: THOUGHT vowel, no /r/' },
+  { word: 'four', ipa: ['f', 'oː'], accent: 'aus', note: 'non-rhotic: Australian THOUGHT /oː/, no /r/' },
+  { word: 'law', ipa: ['l', 'oː'], accent: 'aus', note: 'THOUGHT is /oː/ — higher and closer than RP /ɔː/' },
+  { word: 'thought', ipa: ['θ', 'oː', 't'], accent: 'aus', note: 'THOUGHT vowel /oː/' },
+  { word: 'lot', ipa: ['l', 'ɔ', 't'], accent: 'aus', note: 'LOT is short /ɔ/ — a touch higher than the RP /ɒ/' },
+  { word: 'stop', ipa: ['s', 't', 'ɔ', 'p'], accent: 'aus', note: 'LOT vowel /ɔ/' },
+  { word: 'wash', ipa: ['w', 'ɔ', 'ʃ'], accent: 'aus', note: 'LOT vowel /ɔ/' },
+  { word: 'was', ipa: ['w', 'ɔ', 'z'], accent: 'aus', note: 'LOT vowel /ɔ/ when stressed; weak form /wəz/' },
+  { word: 'on', ipa: ['ɔ', 'n'], accent: 'aus', note: 'LOT vowel /ɔ/' },
+  { word: 'square', ipa: ['s', 'k', 'w', 'eː'], accent: 'aus', note: 'SQUARE is a steady long /eː/ — no glide' },
+  { word: 'fair', ipa: ['f', 'eː'], accent: 'aus', note: 'steady SQUARE /eː/' },
+  { word: 'there', ipa: ['ð', 'eː'], accent: 'aus', note: 'steady SQUARE /eː/' },
+  { word: 'care', ipa: ['k', 'eː'], accent: 'aus', note: 'steady SQUARE /eː/' },
   { word: 'face', ipa: ['f', 'æɪ', 's'], accent: 'aus', note: 'FACE starts wide open: /æɪ/' },
   { word: 'day', ipa: ['d', 'æɪ'], accent: 'aus', note: 'FACE diphthong /æɪ/' },
   { word: 'rain', ipa: ['r', 'æɪ', 'n'], accent: 'aus', note: 'FACE diphthong /æɪ/' },
-  { word: 'price', ipa: ['p', 'r', 'ɑɪ', 's'], accent: 'aus', note: 'PRICE starts further back: /ɑɪ/' },
-  { word: 'high', ipa: ['h', 'ɑɪ'], accent: 'aus', note: 'PRICE diphthong /ɑɪ/' },
-  { word: 'my', ipa: ['m', 'ɑɪ'], accent: 'aus', note: 'PRICE diphthong /ɑɪ/' },
+  { word: 'price', ipa: ['p', 'r', 'ɑe', 's'], accent: 'aus', note: 'PRICE starts back and lands mid-front: /ɑe/' },
+  { word: 'high', ipa: ['h', 'ɑe'], accent: 'aus', note: 'PRICE diphthong /ɑe/' },
+  { word: 'my', ipa: ['m', 'ɑe'], accent: 'aus', note: 'PRICE diphthong /ɑe/' },
+  { word: 'choice', ipa: ['tʃ', 'oɪ', 's'], accent: 'aus', note: 'CHOICE starts higher than RP: /oɪ/' },
+  { word: 'boy', ipa: ['b', 'oɪ'], accent: 'aus', note: 'CHOICE diphthong /oɪ/' },
+  { word: 'join', ipa: ['dʒ', 'oɪ', 'n'], accent: 'aus', note: 'CHOICE diphthong /oɪ/' },
+  { word: 'tour', ipa: ['t', 'ʊə'], accent: 'aus', note: 'CURE /ʊə/ is rare and receding — many speakers merge these words toward /oː/' },
   { word: 'mouth', ipa: ['m', 'æɔ', 'θ'], accent: 'aus', note: 'MOUTH glides /æɔ/' },
   { word: 'now', ipa: ['n', 'æɔ'], accent: 'aus', note: 'MOUTH diphthong /æɔ/' },
   { word: 'goat', ipa: ['g', 'əʉ', 't'], accent: 'aus', note: 'GOAT glides toward a fronted /ʉ/: /əʉ/' },
@@ -244,12 +281,14 @@ export const WORDS = [
   { word: 'care', ipa: ['k', 'ɛː'], accent: 'ssbe', note: 'monophthong SQUARE' },
   { word: 'hair', ipa: ['h', 'ɛː'], accent: 'ssbe', note: 'monophthong SQUARE' },
   { word: 'parents', ipa: ['p', 'ɛː', 'r', 'ə', 'n', 't', 's'], accent: 'ssbe', note: 'SQUARE before r keeps the steady /ɛː/' },
-  { word: 'better', ipa: ['b', 'e', 'ʔ', 'ə'], accent: 'ssbe', note: 'the between-vowel /t/ becomes a glottal stop — casual and completely standard now' },
-  { word: 'water', ipa: ['w', 'ɔː', 'ʔ', 'ə'], accent: 'ssbe', note: 'glottal /t/, non-rhotic schwa ending' },
-  { word: 'butter', ipa: ['b', 'ʌ', 'ʔ', 'ə'], accent: 'ssbe', note: 'glottal /t/' },
-  { word: 'got', ipa: ['g', 'ɒ', 'ʔ'], accent: 'ssbe', note: 'word-final /t/ closes to a glottal stop' },
-  { word: 'quite', ipa: ['k', 'w', 'aɪ', 'ʔ'], accent: 'ssbe', note: 'final glottal /t/' },
-  { word: 'little', ipa: ['l', 'ɪ', 'ʔ', 'ə', 'l'], accent: 'ssbe', note: 'glottal /t/ before the final syllable' },
+  // narrow: true — these drill the SPOKEN realization [ʔ] of phonemic /t/,
+  // so they display in square brackets: /ˈbetə/ → [ˈbeʔə].
+  { word: 'better', ipa: ['b', 'e', 'ʔ', 'ə'], accent: 'ssbe', narrow: true, note: 'phonemically /betə/ — many speakers realize the between-vowel /t/ as a glottal stop [ʔ]' },
+  { word: 'water', ipa: ['w', 'ɔː', 'ʔ', 'ə'], accent: 'ssbe', narrow: true, note: 'phonemically /wɔːtə/ — glottal realization of /t/, non-rhotic schwa ending' },
+  { word: 'butter', ipa: ['b', 'ʌ', 'ʔ', 'ə'], accent: 'ssbe', narrow: true, note: 'phonemically /bʌtə/ — /t/ realized as [ʔ]' },
+  { word: 'got', ipa: ['g', 'ɒ', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /gɒt/ — word-final /t/ often closes to [ʔ]' },
+  { word: 'quite', ipa: ['k', 'w', 'aɪ', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /kwaɪt/ — final /t/ often realized as [ʔ]' },
+  { word: 'little', ipa: ['l', 'ɪ', 'ʔ', 'ə', 'l'], accent: 'ssbe', narrow: true, note: 'phonemically /lɪtəl/ — [ʔ] before the unstressed final syllable' },
   { word: 'tune', ipa: ['tʃ', 'uː', 'n'], accent: 'ssbe', note: 'yod-coalescence: /tj/ fuses to /tʃ/ — "choon"' },
   { word: 'Tuesday', ipa: ['tʃ', 'uː', 'z', 'd', 'eɪ'], accent: 'ssbe', note: 'yod-coalescence: "choose-day"' },
   { word: 'duty', ipa: ['dʒ', 'uː', 't', 'i'], accent: 'ssbe', note: 'yod-coalescence: /dj/ fuses to /dʒ/ — "joo-ty"' },
@@ -262,11 +301,11 @@ export const WORDS = [
   { word: 'bath', ipa: ['b', 'ɑː', 'θ'], accent: 'ssbe', note: 'the BATH split survives intact — broad /ɑː/, same as RP' },
   { word: 'bar', ipa: ['b', 'ɑː'], accent: 'ssbe', note: 'still non-rhotic: no /r/, long /ɑː/' },
   { word: 'trap', ipa: ['t', 'r', 'æ', 'p'], accent: 'ssbe', note: 'TRAP sits lower and more open than old RP — nearly /a/' },
-  { word: 'but', ipa: ['b', 'ʌ', 'ʔ'], accent: 'ssbe', note: 'the STRUT vowel — and the final /t/ closes to a glottal stop' },
-  { word: 'thought', ipa: ['θ', 'ɔː', 'ʔ'], accent: 'ssbe', note: 'THOUGHT vowel as RP, final glottal /t/' },
+  { word: 'but', ipa: ['b', 'ʌ', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /bʌt/ — the STRUT vowel, with final /t/ often realized as [ʔ]' },
+  { word: 'thought', ipa: ['θ', 'ɔː', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /θɔːt/ — THOUGHT vowel as RP, final /t/ as [ʔ]' },
   { word: 'near', ipa: ['n', 'ɪə'], accent: 'ssbe', note: 'NEAR often smooths toward a long /ɪː/ — the glide is fading' },
   { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'ssbe', note: 'FACE as in RP — the glide survives here' },
-  { word: 'lot', ipa: ['l', 'ɒ', 'ʔ'], accent: 'ssbe', note: 'LOT stays rounded /ɒ/; final glottal /t/' },
+  { word: 'lot', ipa: ['l', 'ɒ', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /lɒt/ — LOT stays rounded /ɒ/; final /t/ often as [ʔ]' },
 ];
 
 // Minimal pairs for listening discrimination.

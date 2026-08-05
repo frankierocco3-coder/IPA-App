@@ -15,7 +15,10 @@ const playableWord = (word, accent) =>
 const shuffle = arr => arr.map(x => [Math.random(), x]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const contains = (entry, ph) => entry.ipa.includes(ph);
-const ipaString = entry => '/' + entry.ipa.join('') + '/';
+// Notation rule: /…/ for broad phonemic forms, […] for entries flagged
+// `narrow` (they contain a spoken realization such as [ʔ] for /t/).
+const wrapIpa = (entry, syms) => (entry.narrow ? '[' : '/') + syms.join('') + (entry.narrow ? ']' : '/');
+const ipaString = entry => wrapIpa(entry, entry.ipa);
 
 // The word pool for a dialect: shared (untagged) words plus that
 // dialect's own forms. Where a word exists both ways (nurse is /nɜːs/
@@ -24,12 +27,14 @@ const ipaString = entry => '/' + entry.ipa.join('') + '/';
 // Symbols a dialect never uses: a shared word carrying one of these has
 // no valid form in that dialect, so it's dropped rather than taught wrong.
 const ACCENT_FOREIGN = {
-  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː', 'ɛː', 'ʔ'],
-  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː', 'ɛː', 'ʔ'],
-  aus: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ʌ', 'ɑː', 'eɪ', 'aɪ', 'aʊ', 'əʊ', 'uː', 'ɛː', 'ʔ'],
-  // Contemporary British (SSBE) shares RP's system but SQUARE is the
-  // monophthong /ɛː/, so the old /eə/ diphthong never appears.
-  ssbe: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ', 'ʉː', 'eə'],
+  nam: ['ɒ', 'ɜː', 'əʊ', 'ɑː', 'ɪə', 'eə', 'ʊə', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'ɛː', 'ʔ'],
+  rp: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'ɛː', 'ʔ'],
+  // Australian uses the HCE/revised symbols /ɔ oː eː ɑe oɪ/, so the RP
+  // LOT/THOUGHT/SQUARE/PRICE/CHOICE symbols are foreign to it.
+  aus: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ʌ', 'ɑː', 'eɪ', 'aɪ', 'aʊ', 'əʊ', 'uː', 'ɒ', 'ɔː', 'eə', 'ɔɪ', 'ɛː', 'ʔ'],
+  // Standard British shares RP's system but SQUARE is the monophthong
+  // /ɛː/, so the old /eə/ diphthong never appears.
+  ssbe: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'eə'],
 };
 
 const poolFor = accent => {
@@ -223,12 +228,12 @@ const ACCENT_ERRORS = {
     ipa => ipa.flatMap(p => (p === 'ɝ' ? ['ɜː', 'r'] : p === 'ɚ' ? ['ə', 'r'] : [p])),
   ],
   aus: [
-    // under-shifted: leaving the RP diphthongs and vowels in place
-    ipa => ipa.map(p => ({ 'æɪ': 'eɪ', 'ɑɪ': 'aɪ', 'æɔ': 'aʊ', 'əʉ': 'əʊ', 'ʉː': 'uː', 'ɐ': 'ʌ', 'ɐː': 'ɑː' }[p] ?? p)),
+    // under-shifted: leaving the RP vowels and diphthongs in place
+    ipa => ipa.map(p => ({ 'æɪ': 'eɪ', 'ɑe': 'aɪ', 'æɔ': 'aʊ', 'əʉ': 'əʊ', 'ʉː': 'uː', 'ɐ': 'ʌ', 'ɐː': 'ɑː', 'ɔ': 'ɒ', 'oː': 'ɔː', 'eː': 'eə', 'oɪ': 'ɔɪ' }[p] ?? p)),
     // rhotic error: sounding the /r/ Australian drops
-    ipa => ipa.flatMap(p => (['ɐː', 'ɔː', 'ɜː', 'ɪə'].includes(p) ? [p, 'r'] : [p])),
+    ipa => ipa.flatMap(p => (['ɐː', 'oː', 'ɜː', 'ɪə', 'eː'].includes(p) ? [p, 'r'] : [p])),
     // over-shooting the vowel shift in the wrong direction
-    ipa => ipa.map(p => ({ 'æɪ': 'ɑɪ', 'ɑɪ': 'æɪ', 'əʉ': 'æɔ', 'æɔ': 'əʉ', 'ɐː': 'ɐ' }[p] ?? p)),
+    ipa => ipa.map(p => ({ 'æɪ': 'ɑe', 'ɑe': 'æɪ', 'əʉ': 'æɔ', 'æɔ': 'əʉ', 'ɐː': 'ɐ', 'ɔ': 'oː', 'oː': 'ɔ' }[p] ?? p)),
   ],
   ssbe: [
     // one generation too formal: undoing the contemporary features (RP habits)
@@ -251,8 +256,8 @@ function genAccentFact(accent) {
   if (!uniqueWrongs.length) return null;
   const name = ACCENT_NAMES[accent];
   const choices = shuffle([
-    { label: '/' + entry.ipa.join('') + '/', ok: true },
-    ...uniqueWrongs.map(w => ({ label: '/' + w.join('') + '/' })),
+    { label: wrapIpa(entry, entry.ipa), ok: true },
+    ...uniqueWrongs.map(w => ({ label: wrapIpa(entry, w) })),
   ]);
   return {
     type: 'choice',
@@ -447,18 +452,18 @@ function genShiftChoice(to, fromAccent) {
     .slice(0, 3);
   if (uniqueWrongs.length < 2) return null;
   const choices = shuffle([
-    { label: '/' + target.join('') + '/', ok: true },
-    ...uniqueWrongs.map(w => ({ label: '/' + w.join('') + '/' })),
+    { label: wrapIpa(pair[to], target), ok: true },
+    ...uniqueWrongs.map(w => ({ label: wrapIpa(pair[to], w) })),
   ]);
   return {
     type: 'choice',
-    prompt: `In ${ACCENT_NAMES[from]}, “${pair.word}” is /${src.join('')}/. How does ${ACCENT_NAMES[to]} say it?`,
+    prompt: `In ${ACCENT_NAMES[from]}, “${pair.word}” is ${wrapIpa(pair[from], src)}. How does ${ACCENT_NAMES[to]} say it?`,
     display: pair.word,
     audioText: pair.word,
     lang: ACCENT_TTS_LANG[to],
     accent: to,
     choices,
-    explain: `${ACCENT_NAMES[to]}: /${target.join('')}/${pair[to].note ? ` — ${pair[to].note}` : ''}`,
+    explain: `${ACCENT_NAMES[to]}: ${wrapIpa(pair[to], target)}${pair[to].note ? ` — ${pair[to].note}` : ''}`,
   };
 }
 
@@ -475,14 +480,14 @@ function genShiftBuild(to, fromAccent) {
   const filler = shuffle(Object.keys(PHONEMES).filter(p => !target.includes(p) && !sourceOnly.includes(p))).slice(0, 2);
   return {
     type: 'build',
-    prompt: `“${pair.word}” is /${pair[from].ipa.join('')}/ in ${ACCENT_NAMES[from]}. Build it in ${ACCENT_NAMES[to]}.`,
+    prompt: `“${pair.word}” is ${wrapIpa(pair[from], pair[from].ipa)} in ${ACCENT_NAMES[from]}. Build it in ${ACCENT_NAMES[to]}.`,
     audioText: pair.word,
     lang: ACCENT_TTS_LANG[to],
     accent: to,
     display: pair.word,
     target: [...target],
     tiles: shuffle([...target].concat(sourceOnly, filler)),
-    explain: `${ACCENT_NAMES[to]}: /${target.join('')}/${pair[to].note ? ` — ${pair[to].note}` : ''}`,
+    explain: `${ACCENT_NAMES[to]}: ${wrapIpa(pair[to], target)}${pair[to].note ? ` — ${pair[to].note}` : ''}`,
   };
 }
 
@@ -496,7 +501,7 @@ function genAccentEar(to, fromAccent) {
   const said = pick([a1, a2]);
   const choices = shuffle([a1, a2].map(a => ({
     label: ACCENT_NAMES[a],
-    sub: '/' + pair[a].ipa.join('') + '/',
+    sub: wrapIpa(pair[a], pair[a].ipa),
     ok: a === said,
   })));
   return {
@@ -507,7 +512,7 @@ function genAccentEar(to, fromAccent) {
     accent: said,
     hideUntilPlayed: true,
     choices,
-    explain: `That was ${ACCENT_NAMES[said]}: /${pair[said].ipa.join('')}/.`,
+    explain: `That was ${ACCENT_NAMES[said]}: ${wrapIpa(pair[said], pair[said].ipa)}.`,
   };
 }
 

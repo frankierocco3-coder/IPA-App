@@ -41,7 +41,10 @@ def main():
     no_comments = re.sub(r"^\s*//.*$", "", shipped, flags=re.M)
     for banned in ["Native Idioms", "Contemporary British", "Standard Southern",
                    "Educated Southern", "educated southern", "No Fear Shakespeare",
-                   "Recast beta", "Sonnets Recast", "coming soon\u201d recast"]:
+                   "Recast beta", "Sonnets Recast", "coming soon\u201d recast",
+                   # dialect-accuracy pass: retired inaccurate copy stays retired
+                   "every butler", "Transcribe like the BBC", "hold their places",
+                   "gets measured against"]:
         if banned in no_comments:
             line = next(l for l in no_comments.splitlines() if banned in l)
             fail("banned learner-facing string %r — %s" % (banned, line.strip()[:90]))

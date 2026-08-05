@@ -40,6 +40,9 @@ jobs:
       - name: Launch lint (language, icons, structural guarantees)
         run: python3 tools/launch_lint.py
 
+      - name: Dialect lint (inventories, transcription systems, notation)
+        run: python3 tools/dialect_lint.py
+
       - name: Credential scan (working tree + full git history)
         run: python3 tools/scan_secrets.py --worktree --history
 

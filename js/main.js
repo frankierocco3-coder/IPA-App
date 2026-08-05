@@ -1,5 +1,6 @@
 import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
+import { DIALECT_INFO } from './data/dialects.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded } from './audio.js';
@@ -502,17 +503,39 @@ function showSsbeIntro(course) {
   ov.querySelector('.intro-card').focus();
 }
 
-function renderAboutSsbe() {
-  record(renderAboutSsbe);
+// One About page per course, rendered from the shared Dialect Accuracy
+// Standard data (js/data/dialects.js) — the same component and visual
+// treatment for all four accents.
+function renderAboutCourse(d) {
+  const info = DIALECT_INFO[d];
+  if (!info) return goSection('library');
+  record(() => renderAboutCourse(d));
+  const tierRows = (label, items) => items.map(x => `
+    <div class="guide-word"><span class="wii-who">${esc(label)}</span><span class="guide-note">${esc(x)}</span></div>`).join('');
   app.innerHTML = `
-    ${pageTopbar('🇬🇧 About Standard British', '#7d6b9e')}
+    ${pageTopbar(`${info.icon} ${esc(info.aboutTitle)}`, info.color)}
     <main class="guide">
-      <h1>Standard British</h1>
-      ${ssbeIntroBody()}
+      <h1>${esc(info.aboutTitle.replace(/^About /, ''))}</h1>
+      <p class="guide-text">${esc(info.target)}</p>
+      <p class="guide-text">${esc(info.period)} ${esc(info.context)}</p>
+      <h2 class="guide-heading">What this course does not claim</h2>
+      <p class="guide-text">${esc(info.notClaim)}</p>
+      <h2 class="guide-heading">The features, labelled honestly</h2>
+      ${tierRows('Core target', info.core)}
+      ${tierRows('Common', info.common)}
+      ${tierRows('Variable', info.variable)}
+      <h2 class="guide-heading">Connected speech &amp; rhythm</h2>
+      <p class="guide-text">${esc(info.rhythm)}</p>
+      <h2 class="guide-heading">Transcription convention</h2>
+      <p class="guide-text">${esc(info.convention)}</p>
+      <h2 class="guide-heading">How it differs from ${esc(info.differsFrom.label)}</h2>
+      <p class="guide-text">${esc(info.differsFrom.how)}</p>
+      <h2 class="guide-heading">Sources &amp; further reading</h2>
+      ${info.sources.map(s => `<p class="pane-note">${esc(s)}</p>`).join('')}
       <div class="guide-start"><button class="btn btn-primary" id="about-go" type="button">Go to the course</button></div>
     </main>`;
   wireBrandHome();
-  document.getElementById('about-go').addEventListener('click', () => { setCourse('ssbe'); goSection('learn'); });
+  document.getElementById('about-go').addEventListener('click', () => { setCourse(d); goSection('learn'); });
 }
 
 function learnMain(el, course) {
@@ -544,12 +567,14 @@ function renderGuidebook(unit, track) {
     const gbAcc = TRACK_ACCENT[track?.id] ?? null;
     const chips = (l.phonemes ?? []).map(ph => {
       if (!PHONEMES[ph]) return '';
+      // Realizations wear [brackets]; phonemes wear /slashes/.
+      const shown = PHONEMES[ph].allophone ? `[${esc(ph)}]` : `/${esc(ph)}/`;
       const w = PHONEMES[ph].examples.find(x => speakableWord(x, gbAcc));
       return w ? `
       <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(w)}"
               aria-label="Hear ${esc(ph)} in the word “${esc(w)}”"
-              title="${esc(PHONEMES[ph].name)} — hear it in “${esc(w)}”">/${esc(ph)}/</button>` : `
-      <span class="word-chip is-off" aria-label="${esc(PHONEMES[ph].name)} — recordings coming soon">/${esc(ph)}/</span>`;
+              title="${esc(PHONEMES[ph].name)} — hear it in “${esc(w)}”">${shown}</button>` : `
+      <span class="word-chip is-off" aria-label="${esc(PHONEMES[ph].name)} — recordings coming soon">${shown}</span>`;
     }).join('');
     return `
       <section class="gb-lesson">
@@ -652,11 +677,11 @@ function libraryMain(el, course) {
   const d = course.id === 'core' ? null : course.id;
   const track = trackFor(course.id);
   const cards = [
-    d === 'ssbe' ? { icon: '🇬🇧', title: 'About Standard British',
-      blurb: 'Revisit the course introduction, its core sound patterns and how it differs from Traditional RP.',
-      go: renderAboutSsbe } : null,
+    DIALECT_INFO[d] ? { icon: DIALECT_INFO[d].icon, title: DIALECT_INFO[d].aboutTitle,
+      blurb: `What this course teaches and doesn’t claim, its features tier by tier, and how it differs from ${DIALECT_INFO[d].differsFrom.label}.`,
+      go: () => renderAboutCourse(d) } : null,
     { icon: '📖', title: 'IPA',
-      blurb: d ? `${dialectName(d)}’s sounds and tongue placement.` : 'All 55 sounds and how they’re made.',
+      blurb: d ? `${dialectName(d)}’s sounds and tongue placement.` : 'Every sound across the courses, and how each is made.',
       go: () => (d ? renderInventory(d) : renderChart()) },
     d ? { icon: course.icon, title: 'Words & Expressions',
       blurb: 'The words, slang and expressions that bring the dialect to life.',
@@ -1533,6 +1558,9 @@ function renderCredits() {
       <p class="guide-text">The Plain Meaning summaries are <b>original Speechcraft educational content</b>, written for this app — faithful prose explanations, not translations or performances.</p>
       <h2 class="guide-heading">Audio</h2>
       <p class="guide-text">Word, expression and narration recordings are synthesised with licensed ElevenLabs voices under their commercial licence, generated offline and bundled as static files. Where no recording exists, the app says so — the optional “device voice” readings use your own device’s built-in speech.</p>
+      <h2 class="guide-heading">Dialect references</h2>
+      <p class="guide-text">Each course’s pronunciation target follows published descriptions — cited in full on that course’s About page in the Library:</p>
+      ${[...new Set(Object.values(DIALECT_INFO).flatMap(i => i.sources))].map(s => `<p class="pane-note">${esc(s)}</p>`).join('')}
       <h2 class="guide-heading">Everything else</h2>
       <p class="guide-text">Design, course content, exercises, transcriptions and code are original to Speechcraft. Pronunciation data derives from CMUdict (public domain) for General American, with rule-derived adaptations marked ≈ elsewhere.</p>
     </main>`;
@@ -1565,27 +1593,44 @@ const idiomFilters = { q: '', era: 'all', type: 'all', flagged: false };
 // the tongue-placement diagram page.
 function hubHandbook(hub, d, track) {
   const syms = phonemesForAccent(d);
+  const info = DIALECT_INFO[d];
+  // Standard organization: full vowel phonemes / diphthongs / consonants,
+  // then weak vowels, then realizations & connected speech. Allophones
+  // (like [ʔ] for /t/) are realizations — they are never counted in the
+  // phoneme sections.
+  const isWeak = s => PHONEMES[s]?.weak;
+  const isAllo = s => PHONEMES[s]?.allophone;
   const groups = [
-    { title: 'Vowels', items: syms.filter(s => PHONEMES[s]?.type === 'vowel') },
-    { title: 'Diphthongs', items: syms.filter(s => PHONEMES[s]?.type === 'diphthong') },
-    { title: 'Consonants', items: syms.filter(s => PHONEMES[s]?.type === 'consonant') },
-  ].filter(g => g.items.length);
-  hub.innerHTML = `
-    <p class="pane-note">The ${esc(dialectName(d))} sound inventory — tap any symbol for its tongue placement, how it’s made, and example words.</p>
-    ${groups.map(g => `
-      <section class="chart-section">
-        <h2 class="chart-h">${g.title} <span>${g.items.length}</span></h2>
-        <div class="chart-grid">
-          ${g.items.map(sym => `
+    { title: 'Vowel phonemes', items: syms.filter(s => PHONEMES[s]?.type === 'vowel' && !isWeak(s) && !isAllo(s)) },
+    { title: 'Diphthong phonemes', items: syms.filter(s => PHONEMES[s]?.type === 'diphthong' && !isWeak(s) && !isAllo(s)) },
+    { title: 'Consonant phonemes', items: syms.filter(s => PHONEMES[s]?.type === 'consonant' && !isAllo(s)) },
+    { title: 'Weak vowels', note: 'The vowels of unstressed syllables — counted apart from the full vowel system.', items: syms.filter(s => isWeak(s) && !isAllo(s)) },
+    { title: 'Common realizations & connected speech', realizations: true,
+      note: 'How the phonemes above are actually spoken — realizations in [brackets], never extra phonemes.',
+      items: syms.filter(isAllo) },
+  ].filter(g => g.items.length || (g.realizations && info));
+  const chip = (sym, allo) => `
             <button class="chart-chip" data-sym="${esc(sym)}" type="button" title="How “${esc(sym)}” is made">
-              <span class="chart-sym">${esc(sym)}</span>
+              <span class="chart-sym">${allo ? `[${esc(sym)}]` : esc(sym)}</span>
               <span class="chart-meta">
-                <span class="chart-name">${esc(PHONEMES[sym].name)}</span>
+                <span class="chart-name">${esc(PHONEMES[sym].name)}${allo ? ` — a realization of /${esc(PHONEMES[sym].allophone)}/` : ''}</span>
                 <span class="chart-eg">${PHONEMES[sym].examples.slice(0, 2).map(w => `<b>${esc(w)}</b>`).join(', ')}</span>
               </span>
               <span class="chart-play">›</span>
-            </button>`).join('')}
+            </button>`;
+  hub.innerHTML = `
+    <p class="pane-note">The ${esc(dialectName(d))} sound inventory — tap any symbol for its tongue placement, how it’s made, and example words. Notation: /…/ marks a phoneme, […] a spoken realization.</p>
+    ${groups.map(g => `
+      <section class="chart-section">
+        <h2 class="chart-h">${g.title} <span>${g.items.length || ''}</span></h2>
+        ${g.note ? `<p class="chart-note">${esc(g.note)}</p>` : ''}
+        <div class="chart-grid">
+          ${g.items.map(sym => chip(sym, g.realizations)).join('')}
         </div>
+        ${g.realizations && info ? `
+          ${info.common.map(x => `<div class="guide-word"><span class="wii-who">Common</span><span class="guide-note">${esc(x)}</span></div>`).join('')}
+          ${info.variable.map(x => `<div class="guide-word"><span class="wii-who">Variable</span><span class="guide-note">${esc(x)}</span></div>`).join('')}
+          <p class="pane-note">${esc(info.rhythm)}</p>` : ''}
       </section>`).join('')}`;
   hub.querySelectorAll('.chart-chip').forEach(b =>
     b.addEventListener('click', () => renderSoundDetail(b.dataset.sym, d)));
@@ -3364,12 +3409,16 @@ function renderChart() {
   record(renderChart);
   const syms = Object.entries(PHONEMES);
   const groups = [
-    { title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the schwa /ə/.',
-      items: syms.filter(([, p]) => p.type === 'vowel') },
+    { title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the accent-specific variants.',
+      items: syms.filter(([, p]) => p.type === 'vowel' && !p.weak && !p.allophone) },
     { title: 'Diphthongs', note: 'Vowels that glide from one position to another.',
-      items: syms.filter(([, p]) => p.type === 'diphthong') },
-    { title: 'Consonants', note: 'The consonant sounds of English.',
-      items: syms.filter(([, p]) => p.type === 'consonant') },
+      items: syms.filter(([, p]) => p.type === 'diphthong' && !p.weak && !p.allophone) },
+    { title: 'Consonants', note: 'The consonant phonemes of English.',
+      items: syms.filter(([, p]) => p.type === 'consonant' && !p.allophone) },
+    { title: 'Weak vowels', note: 'The vowels of unstressed syllables, counted apart from the full vowel system.',
+      items: syms.filter(([, p]) => p.weak && !p.allophone) },
+    { title: 'Realizations', note: 'Ways a phoneme is actually spoken, written in [brackets] — never extra phonemes.',
+      items: syms.filter(([, p]) => p.allophone) },
   ];
 
   const section = g => `
@@ -3379,7 +3428,7 @@ function renderChart() {
       <div class="chart-grid">
         ${g.items.map(([sym, p]) => `
           <button class="chart-chip" data-sym="${esc(sym)}" title="How “${esc(sym)}” is made">
-            <span class="chart-sym">${esc(sym)}</span>
+            <span class="chart-sym">${p.allophone ? `[${esc(sym)}]` : esc(sym)}</span>
             <span class="chart-meta">
               <span class="chart-name">${esc(p.name)}</span>
               <span class="chart-eg">${p.examples.slice(0, 2).map(w => `<b>${esc(w)}</b>`).join(', ')}</span>
@@ -3474,10 +3523,12 @@ function renderSoundDetail(sym, accent) {
   const p = PHONEMES[sym];
   if (!p) return renderChart();
   record(() => renderSoundDetail(sym, accent));
+  // Realizations (like [ʔ] for /t/) wear square brackets everywhere.
+  const wrapSym = s => (p.allophone ? `[${s}]` : `/${s}/`);
   const diagram = articulationSVG(sym);
   const lang = ACCENT_LANG[accent]
     ?? ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
-    ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑɪ', 'æɔ', 'əʉ'].includes(sym) ? 'en-AU' : 'en-GB');
+    ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ɔ', 'oː', 'eː', 'oɪ'].includes(sym) ? 'en-AU' : 'en-GB');
   const acc = accent ?? ({ 'en-US': 'nam', 'en-GB': 'rp', 'en-AU': 'aus' })[lang];
   const isVowel = p.type !== 'consonant';
   // The big symbol plays the ISOLATED sound only when an ear-approved clip
@@ -3489,20 +3540,20 @@ function renderSoundDetail(sym, accent) {
   const chips = p.examples.map(w => wordChip(w, acc)).join('');
 
   app.innerHTML = `
-    ${pageTopbar(`/${esc(sym)}/`, '#64748b')}
+    ${pageTopbar(wrapSym(esc(sym)), '#64748b')}
     <main class="guide sound-detail">
       <div class="sound-hero">
         <div class="sound-big-wrap">
           ${hasIso ? `
           <button class="sound-big" id="say-sym"
-            aria-label="Hear the isolated sound ${esc(sym)}" title="Hear the sound">/${esc(sym)}/</button>
+            aria-label="Hear the isolated sound ${esc(sym)}" title="Hear the sound">${wrapSym(esc(sym))}</button>
           <span class="sound-big-cap">🔊 Hear the sound</span>`
           : hasSyl ? `
           <button class="sound-big" id="say-syl-hero"
-            aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, since this sound cannot be spoken alone" title="Hear it in a syllable">/${esc(sym)}/</button>
+            aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, since this sound cannot be spoken alone" title="Hear it in a syllable">${wrapSym(esc(sym))}</button>
           <span class="sound-big-cap">🔊 In a syllable</span>`
           : `
-          <div class="sound-big is-plain" aria-hidden="true">/${esc(sym)}/</div>`}
+          <div class="sound-big is-plain" aria-hidden="true">${wrapSym(esc(sym))}</div>`}
           ${hasIso && hasSyl ? `<button class="word-chip" id="say-syl" type="button"
             aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, not a fully isolated sound">🔊 Hear it in a syllable</button>` : ''}
         </div>

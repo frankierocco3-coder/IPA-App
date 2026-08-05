@@ -35,11 +35,16 @@ function toRP(s) {
   return out.replace(/oʊ/g, 'əʊ').replace(/ɑ(?!ː)/g, 'ɑː');
 }
 
-// RP → Australian: centralised open vowels, fronted GOOSE, shifted diphthongs.
+// RP → Australian (HCE/revised symbols): centralised open vowels, fronted
+// GOOSE, shifted diphthongs, raised LOT/THOUGHT, steady SQUARE.
+// Order matters: CHOICE before THOUGHT (both start with ɔ), and LOT's
+// ɒ→ɔ only after every original ɔ has been consumed.
 function toAus(s) {
   s = toRP(s);
   return s
-    .replace(/eɪ/g, 'æɪ').replace(/aɪ/g, 'ɑɪ').replace(/aʊ/g, 'æɔ').replace(/əʊ/g, 'əʉ')
+    .replace(/ɔɪ/g, 'oɪ').replace(/ɔː?/g, 'oː').replace(/ɒ/g, 'ɔ')
+    .replace(/eə/g, 'eː')
+    .replace(/eɪ/g, 'æɪ').replace(/aɪ/g, 'ɑe').replace(/aʊ/g, 'æɔ').replace(/əʊ/g, 'əʉ')
     .replace(/ɑː/g, 'ɐː').replace(/ʌ/g, 'ɐ').replace(/uː?/g, 'ʉː');
 }
 

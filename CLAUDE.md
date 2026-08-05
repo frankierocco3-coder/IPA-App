@@ -39,6 +39,7 @@ bash tools/install-hooks.sh                        # pre-commit secret scan (onc
 
 python3 tools/security_audit.py                    # static checks
 python3 tools/audit_audio.py                       # audio index/files/flags integrity
+python3 tools/dialect_lint.py                      # inventories, transcription systems, notation
 python3 tools/scan_secrets.py --worktree --history # credential scan
 python3 tools/build_artifact.py _site              # exactly what Pages publishes
 
@@ -245,7 +246,33 @@ Save schema v2 stamp; steps label; scroll reset per section; safe-area
 bottom nav; Privacy wipe covers all speechcraft-* keys. Release report:
 docs/launch-readiness-report.md (conditionally ready for beta).
 
-**Incomplete — do not present as finished:**
+DIALECT ACCURACY PASS (2026-08-04): js/data/dialects.js is the shared
+Dialect Accuracy Standard — per-course target/period/context, feature
+tiers (core/common/variable), connected speech, convention, plain-text
+sources. It drives ALL FOUR About cards (renderAboutCourse; ssbe's
+bespoke card replaced) and the inventory pages' "Common realizations &
+connected speech" section. Notation contract: /…/ phonemic, […]
+realizations; /ʔ/ is NO LONGER counted as a phoneme — PHONEMES['ʔ'] has
+`allophone: 't'`, ssbe WORDS entries drilling it are `narrow: true` and
+display in [brackets] (engine wrapIpa keeps brackets consistent across a
+choice set so they never leak the answer). Weak vowels (ə, i, ɚ:
+`weak: true`) group separately; inventory counts exclude allophones.
+AUSTRALIAN uses HCE/revised symbols now: /ɔ oː eː ɑe oɪ/ replace
+ɒ/ɔː/eə/ɑɪ/ɔɪ course-wide (WORDS, course.js, ACCENT_FOREIGN/ERRORS,
+diagram.js, pron.js toAus, phonemeSlug-safe); old symbols remain for
+rp/core. CURE /ʊə/ kept in aus as rare/receding (Library + guidebook now
+agree). New nam words (better/water/city/ladder/tune/duty/man) teach
+tapping/yod-dropping/raising — clips already existed. RP: honest
+history (no butlers, no Shakespeare-spoke-RP), rp-3 is "Transcribe
+Traditional RP". NAM intro: regionally-unmarked target, cot–caught as
+labelled variation, /iː uː ɔː/ documented as broad convention. R stays
+/r/ in broad transcription with [ɹ] taught (Frankie's call, matches
+dictionaries); sources are plain-text citations, NO new external links
+(allow-list still just GitHub Issues). tools/dialect_lint.py (in deploy
+gate) fails on: unknown lesson symbols, wrong-system symbols in
+lessons/WORDS, allophones in broad entries, missing DIALECT_INFO,
+duplicate track ids. launch_lint bans the retired copy ("every butler",
+"Transcribe like the BBC", "hold their places", "gets measured against").
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.
 * RP/Australian IPA is rule-derived from General American, marked "≈".
