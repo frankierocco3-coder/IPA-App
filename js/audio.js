@@ -62,7 +62,9 @@ let clipIndex = null;
 let indexResolve;
 export const indexReady = new Promise(r => { indexResolve = r; });
 export const clipIndexLoaded = () => clipIndex != null;
-fetch('audio/index.json')
+// Module-relative URL so the index loads no matter which page imported us
+// (the app at /, or the local test runner under /tests/).
+fetch(new URL('../audio/index.json', import.meta.url))
   .then(r => (r.ok ? r.json() : null))
   .then(idx => { if (idx) clipIndex = idx; indexResolve(); })
   .catch(() => { indexResolve(); });

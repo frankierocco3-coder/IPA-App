@@ -1,0 +1,30 @@
+<!doctype html>
+<!-- Local test runner: opens the app in an iframe and runs every browser
+     suite against the real modules. Dev-only — tools/build_artifact.py
+     excludes tests/, so this page is never deployed. -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Speechcraft — all browser suites</title>
+  <link rel="icon" href="../favicon.svg">
+
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; margin: 24px; max-width: 760px; }
+    h1 { font-size: 20px; }
+    #verdict { font-size: 26px; font-weight: 800; padding: 12px 18px; border-radius: 10px; display: inline-block; }
+    .pass { background: #dcefdc; color: #23531f; }
+    .fail { background: #f6dcdc; color: #7a1f1f; }
+    table { border-collapse: collapse; margin-top: 16px; width: 100%; }
+    td, th { text-align: left; padding: 5px 10px; border-bottom: 1px solid #ddd; }
+    .detail { color: #7a1f1f; font-size: 13px; }
+    iframe { width: 1px; height: 1px; opacity: 0; position: absolute; }
+  </style>
+</head>
+<body>
+  <h1>Speechcraft — browser regression run</h1>
+  <p id="status">Loading the app and running every suite…</p>
+  <div id="verdict" hidden></div>
+  <div id="tables"></div>
+  <script type="module" src="./run-all.js"></script>
+</body>
+</html>

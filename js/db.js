@@ -116,6 +116,31 @@ export const idbPutMany = (store, values) =>
 export const idbDeleteMany = (store, keys) =>
   withStore(store, 'readwrite', s => { keys.forEach(k => s.delete(k)); });
 
+/**
+ * One readwrite transaction across SEVERAL stores — all-or-nothing.
+ * `fn` receives {storeName: objectStore}. Used so a recording's metadata
+ * and its audio blob commit or fail together: a half-write would leave an
+ * invisible orphan blob eating storage.
+ */
+export async function idbAcross(names, fn) {
+  const db = await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(names, 'readwrite');
+    const stores = {};
+    for (const n of names) stores[n] = tx.objectStore(n);
+    try {
+      fn(stores);
+    } catch (err) {
+      try { tx.abort(); } catch { /* already dead */ }
+      reject(err);
+      return;
+    }
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+    tx.onabort = () => reject(tx.error);
+  });
+}
+
 export const metaGet = async (key, fallback = null) =>
   (await idbGet(STORES.meta, key))?.value ?? fallback;
 

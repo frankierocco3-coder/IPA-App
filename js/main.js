@@ -77,9 +77,21 @@ const BRAND_BTN = `<button class="brand brand-btn" id="brand-home">${EMBLEM}<spa
 let navStack = [];
 let navRestoring = false;
 
+// Everything audio-shaped that must not survive a page change: a live
+// microphone capture, cached take object URLs, and the Perform pane's
+// unsaved pending take (registered via performCleanup).
+let performCleanup = null;
+function teardownAV() {
+  cancelRecording();                             // never leave the mic hot mid-navigation
+  releaseAllUrls();
+  try { performCleanup?.(); } catch { /* pane already gone */ }
+  performCleanup = null;
+}
+
 function record(thunk) {
   stopSpeech();                                  // leaving/entering a page stops any reading
   releaseTryIt();                                // practice recordings die with their page
+  teardownAV();                                  // live capture + unsaved takes die too
   if (navRestoring) { navRestoring = false; return; }
   if (navStack[navStack.length - 1] === thunk) return; // ignore same-page re-render
   navStack.push(thunk);
@@ -226,11 +238,13 @@ const COURSES = [
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
+// The ONE ordered nav config: the desktop sidebar and the mobile bottom
+// nav both render straight from this array, so the two can never drift.
 const SECTIONS = [
   { id: 'learn', icon: '🏠', label: 'Learn' },
-  { id: 'studio', icon: '🎬', label: 'Studio' },
   { id: 'practice', icon: '🎯', label: 'Practice' },
   { id: 'library', icon: '📚', label: 'Library' },
+  { id: 'studio', icon: '🎬', label: 'Studio' },
   { id: 'progress', icon: '📈', label: 'Progress' },
   { id: 'more', icon: '⋯', label: 'More' },
 ];
@@ -269,6 +283,7 @@ function renderShell(section) {
   setSection(section);
   window.scrollTo(0, 0);          // each section starts at its own top
   releaseTryIt();
+  teardownAV();
   const course = COURSES.find(c => c.id === activeCourse());
 
   app.innerHTML = `
@@ -296,11 +311,8 @@ function renderShell(section) {
       </aside>
     </div>
     <nav class="bottom-nav" aria-label="Sections">
-      ${['learn', 'studio', 'practice', 'library', 'progress', 'more'].map(id => {
-        const s = SECTIONS.find(x => x.id === id);
-        return `<button class="bn-item ${id === section ? 'on' : ''}" data-sec="${id}" type="button">
-          <span class="bn-icon">${s.icon}</span><span class="bn-label">${s.label}</span></button>`;
-      }).join('')}
+      ${SECTIONS.map(s => `<button class="bn-item ${s.id === section ? 'on' : ''}" data-sec="${s.id}" type="button">
+          <span class="bn-icon">${s.icon}</span><span class="bn-label">${s.label}</span></button>`).join('')}
     </nav>`;
 
   document.getElementById('brand-home').addEventListener('click', () => goSection('learn'));
@@ -2779,6 +2791,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     }).join('');
   const show = m => {
     stopSpeech();
+    teardownAV();      // reader mode switches don't re-run record(): stop any capture here
     mode = m;
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
     if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
@@ -2945,6 +2958,9 @@ function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }) {
     if (pending?.url) URL.revokeObjectURL(pending.url);
     pending = null;
   };
+  // An unsaved take must not survive leaving this pane — navigation calls
+  // this through teardownAV().
+  performCleanup = releasePending;
 
   const resetTakeBox = () => {
     releasePending();
@@ -4369,7 +4385,18 @@ function renderNoHearts(lesson, { failed = false } = {}) {
 // mitigation available on this host. It is a fallback, not a guarantee — a
 // sandboxed iframe can suppress navigation. The optional host configs in
 // deploy/ set the real header.
-if (window.top !== window.self) {
+//
+// A SAME-origin frame is not a clickjacking vector (an attacker cannot
+// serve from this origin), so it is allowed — that is how the local test
+// runner (tests/run-all.html) hosts the app. Cross-origin embedding gets
+// the bust-or-refuse treatment, and crucially the app no longer half-boots
+// into the gutted document afterwards.
+const framedHostile = (() => {
+  if (window.top === window.self) return false;
+  try { return window.top.location.origin !== window.location.origin; }
+  catch { return true; }          // cross-origin access throws → hostile
+})();
+if (framedHostile) {
   try { window.top.location = window.self.location; }
   catch { document.documentElement.textContent = 'Speechcraft cannot be embedded in another page.'; }
 }
@@ -4397,19 +4424,21 @@ if (['localhost', '127.0.0.1'].includes(location.hostname)) {
   };
 }
 
-// One-time: turn any old "Train Any Text" draft into a real project. The
-// original localStorage value is left untouched as a backup.
-migrateLegacyCustomText().catch(err => console.warn('migration skipped:', err));
+if (!framedHostile) {
+  // One-time: turn any old "Train Any Text" draft into a real project. The
+  // original localStorage value is left untouched as a backup.
+  migrateLegacyCustomText().catch(err => console.warn('migration skipped:', err));
 
-// Recorded-take object URLs are per-session; let them go on unload.
-window.addEventListener('pagehide', () => { try { releaseAllUrls(); cancelRecording(); } catch {} });
+  // Recorded-take object URLs are per-session; let them go on unload.
+  window.addEventListener('pagehide', () => { try { teardownAV(); releaseTryIt(); } catch {} });
 
-if (location.hash === '#audit') renderAudioAudit();   // owner ear-check tool
-else if (needsOnboarding()) renderOnboarding();
-else renderHome();
+  if (location.hash === '#audit') renderAudioAudit();   // owner ear-check tool
+  else if (needsOnboarding()) renderOnboarding();
+  else renderHome();
 
-// Typing #audit into the address bar mid-session works too — a bare hash
-// change doesn't reload the page, so the boot check alone would miss it.
-window.addEventListener('hashchange', () => {
-  if (location.hash === '#audit') renderAudioAudit();
-});
+  // Typing #audit into the address bar mid-session works too — a bare hash
+  // change doesn't reload the page, so the boot check alone would miss it.
+  window.addEventListener('hashchange', () => {
+    if (location.hash === '#audit') renderAudioAudit();
+  });
+}

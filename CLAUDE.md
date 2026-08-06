@@ -50,8 +50,14 @@ python3 tools/generate_voices.py --idioms --dry-run  # idiom clips, ~15k credits
 
 In the browser console, with the app running:
 ```js
-import('./tests/security.test.js').then(m => m.run());   // expect 20/20
+import('./tests/security.test.js').then(m => m.run());     // expect 20/20
+import('./tests/audio.test.js').then(m => m.run());        // expect 20/20
+import('./tests/regression.test.js').then(m => m.run());   // expect 33/33
 ```
+Or open `tests/run-all.html` on the dev server — it hosts the app in a
+same-origin iframe (allowed by the clickjacking guard) and prints one
+PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
+excludes it).
 
 ## Layout
 
@@ -301,6 +307,33 @@ founder story). launch_lint bans "My Texts"/"Train Any Text"/"Texts &
 Speeches"/"Translate to IPA". Roadmap (incl. the no-backend Phase 3
 honesty gate for ElevenLabs TTS — no stub interface ships):
 docs/SPEECHCRAFT_STUDIO_ROADMAP.md.
+
+LAUNCH-TIGHTENING BATCH (2026-08-05, committed locally — NOT pushed, per
+Frankie's instruction): nav order is Learn/Practice/Library/Studio/
+Progress/More, both surfaces rendered from the ONE `SECTIONS` array (the
+bottom nav's separate id list is gone — they cannot drift). Recording
+lifecycle hardened: `teardownAV()` (main.js) runs on every record()/
+renderShell()/reader-mode-switch/pagehide — cancels live capture, revokes
+take URLs, and drops the Perform pane's unsaved pending take via the
+`performCleanup` hook; saveTake/deleteTake now commit metadata+blob in ONE
+IndexedDB transaction (`idbAcross` in db.js — no orphan blobs), and
+deleteTake's best-take-pointer cleanup reads the meta BEFORE deleting
+(the old code only worked by accident of a backwards guard).
+pron.js is now WORD-AWARE: conservative LOT/THOUGHT/BATH word lists undo
+the American mergers (not→/nɒt/, dance→/dɑːns/, caught→/kɔːt/), centring-
+diphthong rules give NEAR/SQUARE/CURE their glides (near→/nɪə/,
+square→/skweə/ rp //skwɛː/ ssbe //skweː/ aus), lone /ɔ/→/ɔː/ (water→
+/wɔːtə/), all still marked ≈. audio.js clip-index fetch is module-relative
+(was document-relative — 404'd from any non-root page).
+tests/regression.test.js (33 checks: nav both surfaces + drift, 21 IPA
+cases, recording persistence/atomic delete/best-take cleanup/per-project
+isolation — only touches records IT creates, never user data;
+deleteAllTakes deliberately not exercised). tests/run-all.html+run-all.js
+= local runner, hosts the app in a same-origin iframe and prints one
+PASSED/FAILED verdict; the clickjacking guard now permits SAME-origin
+frames (cross-origin still busts/refuses, and the app no longer
+half-boots into a gutted document when refusing — that was a live crash).
+All gates + artifact build pass; runner verdict PASSED 73/73.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

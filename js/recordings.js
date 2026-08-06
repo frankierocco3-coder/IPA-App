@@ -5,7 +5,7 @@
 // and to a target — the phoneme, word or line that was being rehearsed —
 // so the same screen can hold takes at all three levels.
 
-import { STORES, idbGet, idbPut, idbDelete, idbAllBy, idbAll, uid } from './db.js';
+import { STORES, idbGet, idbPut, idbAllBy, idbAll, idbAcross, uid } from './db.js';
 import { getProject, saveProject } from './projects.js';
 
 export const RATINGS = [
@@ -62,8 +62,12 @@ export async function saveTake({ projectId = null, scopeId = null, target, blob,
     note,
     createdAt: Date.now(),
   };
-  await idbPut(STORES.blobs, { id, blob });
-  await idbPut(STORES.recordings, meta);
+  // One transaction across both stores: the blob and its metadata commit
+  // together or not at all — no invisible orphan audio on a half-failure.
+  await idbAcross([STORES.blobs, STORES.recordings], s => {
+    s[STORES.blobs].put({ id, blob });
+    s[STORES.recordings].put(meta);
+  });
   return meta;
 }
 
@@ -77,11 +81,18 @@ export async function updateTake(id, patch) {
 
 export async function deleteTake(id) {
   releaseUrl(id);
-  await idbDelete(STORES.recordings, id);
-  await idbDelete(STORES.blobs, id);
-  // If it was a project's best take, clear that pointer too.
+  // Read the metadata BEFORE deleting so the best-take pointer can be
+  // cleaned up directly, then remove blob + metadata in one transaction.
   const meta = await idbGet(STORES.recordings, id);
-  if (!meta) {
+  await idbAcross([STORES.blobs, STORES.recordings], s => {
+    s[STORES.recordings].delete(id);
+    s[STORES.blobs].delete(id);
+  });
+  // If it was a project's best take, clear that pointer too.
+  if (meta?.projectId) {
+    const owner = await getProject(meta.projectId);
+    if (owner?.bestTakeId === id) { owner.bestTakeId = null; await saveProject(owner); }
+  } else {
     const all = await idbAll(STORES.projects);
     const owner = all.find(p => p.bestTakeId === id);
     if (owner) { owner.bestTakeId = null; await saveProject(owner); }
