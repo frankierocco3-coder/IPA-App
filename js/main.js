@@ -7,7 +7,10 @@ import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech,
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
-import { RECASTS } from './data/recasts.js';
+import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from './data/recasts.js';
+import { actionFor, actionDrafts } from './data/action.js';
+import { videoFor } from './data/media-videos.js';
+import { BRIDGE_ROUTES, routeFor, loadBridgePrefs, saveBridgePrefs } from './data/bridge.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
@@ -700,6 +703,12 @@ function libraryMain(el, course) {
     d ? { icon: course.icon, title: 'Words & Expressions',
       blurb: 'The words, slang and expressions that bring the dialect to life.',
       go: () => renderIdioms(d) } : null,
+    d && actionFor(d).length ? { icon: '🎭', title: 'Dialect in Action',
+      blurb: 'The dialect’s words and rhythms inside believable speech — short scenes and monologues.',
+      go: () => renderDialectAction(d) } : null,
+    { icon: '🌉', title: 'Accent Bridge',
+      blurb: 'The accent you’re learning, explained through the accent you already speak.',
+      go: renderBridge },
     { icon: '📜', title: 'Scripts & Speeches',
       blurb: 'Monologues, scenes, speeches and sonnets — curated public-domain material.',
       go: renderTextsPage },
@@ -1534,6 +1543,55 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     out.focus();
     out.select();
   });
+}
+
+// ── Content review (#review) — owner gate for written drafts ──
+// The writing counterpart to #audit: every Dialect in Action piece and
+// sonnet transposition still awaiting review, rendered exactly as a
+// learner would see it. Approval is a deliberate file edit (reviewStatus
+// in js/data/action.js, TRANSPOSITION_REVIEW in js/data/recasts.js) —
+// nothing on this page can publish anything by accident.
+function renderContentReview() {
+  stopSpeech();
+  const drafts = actionDrafts();
+  const transDrafts = [];
+  for (const n of Object.keys(RECASTS)) {
+    for (const d of Object.keys(RECASTS[n].recasts ?? {})) {
+      if (!approvedTranspositions(+n).includes(d)) {
+        transDrafts.push({ n: +n, d, text: RECASTS[n].recasts[d] });
+      }
+    }
+  }
+  app.innerHTML = `
+    <header class="topbar">
+      <button class="backbtn" id="review-exit" aria-label="Back to the app" title="Back to the app">‹</button>
+      <div class="track-title" style="color:#64748b">📝 Content review</div>
+      <div class="stats"><span class="stat">${drafts.length + transDrafts.length} drafts</span></div>
+    </header>
+    <main class="guide audit-page">
+      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set <code>reviewStatus: 'approved'</code> in <code>js/data/action.js</code>, or flip the entry in <code>TRANSPOSITION_REVIEW</code> in <code>js/data/recasts.js</code>, and commit. Approved pieces appear in the Library/reader automatically.</p>
+
+      <h2 class="guide-heading">Dialect in Action — ${drafts.length} draft piece(s)</h2>
+      ${drafts.map(p => `
+        <section class="review-piece">
+          <p class="sonnet-hint">id <code>${esc(p.id)}</code> · ${esc(p.courseId)} · status <b>${esc(p.reviewStatus)}</b></p>
+          ${actionPieceHtml(p)}
+          <p class="pane-note">Reviewer notes: ${esc(p.reviewNotes)}</p>
+        </section>`).join('')}
+
+      <h2 class="guide-heading">Sonnet transpositions — ${transDrafts.length} draft version(s)</h2>
+      <p class="pane-note">Checklist: docs/RECAST_REVIEW.md — faithfulness to argument, imagery and emotional progression; dialect register; no parody.</p>
+      ${transDrafts.map(t => `
+        <section class="review-piece">
+          <p class="sonnet-hint">Sonnet ${t.n} · ${esc(TRANSPOSITION_LABELS[t.d] ?? t.d)} · status <b>draft</b></p>
+          <div class="sonnet-lines">${t.text.split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
+        </section>`).join('')}
+    </main>`;
+  document.getElementById('review-exit').addEventListener('click', () => {
+    history.replaceState(null, '', location.pathname);
+    renderHome();
+  });
+  wireActionPiece(app);
 }
 
 // ── More: the reference shelf ─────────────────────────────────
@@ -2732,11 +2790,17 @@ function renderSonnet(n) {
   // line set exists for it (generated manifest — never a hardcoded claim).
   const narrated = Object.keys(LONGFORM_COVERAGE.sonnets)
     .filter(d => LONGFORM_COVERAGE.sonnets[d].includes(n));
+  // In Today's Voice: only transpositions BOTH written and approved — the
+  // tab itself disappears when this list is empty. Never a dead tab.
+  const today = approvedTranspositions(n).map(d => ({
+    id: d, label: TRANSPOSITION_LABELS[d] ?? d, text: RECASTS[n].recasts[d],
+  }));
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: narrated[0] ?? 'rp',
     clip: (i, acc) => narrated.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
     narrated,
     recast: RECASTS[n] ?? null,
+    today,
     scopeId: `sonnet:${n}`,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
@@ -2746,7 +2810,7 @@ function renderSonnet(n) {
 
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, clip, verse = true, meta = null, narrated = [], recast = null, scopeId = null, projectId = null }) {
+function renderReader({ label, lines, accent, prev, next, clip, verse = true, meta = null, narrated = [], recast = null, today = [], scopeId = null, projectId = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -2776,6 +2840,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
         <button class="son-tab" data-mode="perform">🎙 Perform</button>
         ${recast?.plain ? '<button class="son-tab" data-mode="plain">📖 Plain Meaning</button>' : ''}
+        ${today.length ? '<button class="son-tab" data-mode="today">🗣 In Today’s Voice</button>' : ''}
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
       <div class="sonnet-nav">
@@ -2804,6 +2869,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
     else if (m === 'plain') { pane.innerHTML = plainPane(recast); }
+    else if (m === 'today') { todayPane(pane, today); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
   drawDialects();
@@ -3151,6 +3217,190 @@ function plainPane(recast) {
   return `
     <p class="pane-note">📖 <b>Plain Meaning</b> — what the original says, in plain prose. The full text is in the Listen tab.</p>
     <p class="guide-text">${esc(recast.plain)}</p>`;
+}
+
+// In Today's Voice: the sonnet's ideas re-voiced in a contemporary
+// register — a CREATIVE TRANSPOSITION, labelled as such, never presented
+// as a literal translation. Only approved dialect versions ever arrive
+// here (renderSonnet filters through the review gate).
+function todayPane(pane, today) {
+  let cur = today[0].id;
+  const draw = () => {
+    const t = today.find(x => x.id === cur);
+    pane.innerHTML = `
+      <p class="pane-note">🗣 <b>In Today’s Voice</b> — the same argument and imagery, re-voiced in a present-day register. A <b>creative transposition</b>, not a literal translation; the original is always one tab away.</p>
+      ${today.length > 1 ? `
+      <div class="dialect-picker"><span class="dialect-label">Version</span><div class="dialect-chips" id="today-chips">
+        ${today.map(x => `<button class="dialect-chip ${x.id === cur ? 'on' : ''}" data-t="${esc(x.id)}" type="button">${esc(x.label)}</button>`).join('')}
+      </div></div>` : `<p class="sonnet-hint">${esc(t.label)}</p>`}
+      <div class="sonnet-lines today-lines">${t.text.split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>`;
+    pane.querySelector('#today-chips')?.addEventListener('click', e => {
+      const b = e.target.closest('.dialect-chip'); if (!b) return;
+      cur = b.dataset.t; draw();
+    });
+  };
+  draw();
+}
+
+// ── Dialect in Action ─────────────────────────────────────────
+// Believable speech built from the course's Words & Expressions. Only
+// approved pieces reach the Library; drafts render solely on #review.
+
+// [[term|ID]] markers become highlighted, tappable expression chips that
+// open the matching Words & Expressions entry.
+function actionLineHtml(text) {
+  return esc(text).replace(/\[\[([^\]|]+)\|([A-Z]+-\d+)\]\]/g,
+    (_, term, id) => `<button class="xp-term" data-xp="${id}" type="button"
+      aria-label="Expression: ${esc(term)} — open its definition">${esc(term)}</button>`);
+}
+
+function actionPieceHtml(piece) {
+  return `
+    <div class="piece-meta">
+      <h1 class="piece-title">${esc(piece.title)}</h1>
+      <p class="piece-source">${esc(piece.setting)}</p>
+      <p class="piece-scene">${esc(piece.speakerDescription)}</p>
+      <div class="piece-tags">
+        <span class="tag">${piece.type === 'dialogue' ? 'Dialogue' : 'Monologue'}</span>
+        <span class="tag tag-dialect">🗣 ${esc(dialectName(piece.courseId))}</span>
+        <span class="tag">${esc(piece.register)}</span>
+      </div>
+      <p class="pane-note">${esc(piece.region)}. Highlighted words are this course’s Words &amp; Expressions — tap one for its meaning.</p>
+      ${piece.audio ? '' : '<p class="pane-note">🎙 No recording exists for this piece yet — audio arrives only when an approved recording in this exact dialect does.</p>'}
+    </div>
+    <div class="sonnet-lines action-lines">
+      ${piece.lines.map(l => `
+        <p class="guide-text action-line">${l.speaker ? `<b class="action-speaker">${esc(l.speaker)}:</b> ` : ''}${actionLineHtml(l.text)}</p>`).join('')}
+    </div>`;
+}
+
+function wireActionPiece(root) {
+  root.querySelectorAll('.xp-term').forEach(b =>
+    b.addEventListener('click', () => {
+      const entry = IDIOM.find(e => e.id === b.dataset.xp);
+      if (!entry) return;
+      openModal({
+        title: `“${entry.term}”`,
+        body: `
+          <p class="idiom-meaning">${esc(entry.meaning)}</p>
+          ${entry.example ? `<p class="idiom-example">“${esc(entry.example)}”</p>` : ''}
+          ${entry.note ? `<p class="idiom-note">${esc(entry.note)}</p>` : ''}
+          <p class="pane-note">From ${esc(dialectName(entry.dialect))} Words &amp; Expressions.</p>`,
+        actions: '<button class="btn btn-primary" id="xp-close" type="button">Done</button>',
+        onMount: (rootEl, close) => rootEl.querySelector('#xp-close').addEventListener('click', close),
+      });
+    }));
+}
+
+function renderDialectAction(d) {
+  record(() => renderDialectAction(d));
+  const pieces = actionFor(d);
+  app.innerHTML = `
+    ${pageTopbar('🎭 Dialect in Action', trackFor(d).color)}
+    <main class="track-list">
+      <p class="track-blurb">${esc(dialectName(d))}’s words, expressions and rhythm inside believable speech — a scene and a story, not a vocabulary list.</p>
+      ${pieces.map((p, i) => `
+        <button class="track-card" data-i="${i}" type="button" style="--track-color:${trackFor(d).color}">
+          <div class="track-glyph">${p.type === 'dialogue' ? '💬' : '🎤'}</div>
+          <div class="track-info"><h2>${esc(p.title)}</h2><p>${esc(p.setting)} · ${esc(p.register)}</p></div>
+          <div class="track-arrow">›</div>
+        </button>`).join('')}
+    </main>`;
+  wireBrandHome();
+  app.querySelectorAll('.track-card').forEach(b =>
+    b.addEventListener('click', () => renderActionPiece(d, pieces[+b.dataset.i].id)));
+}
+
+function renderActionPiece(d, id) {
+  record(() => renderActionPiece(d, id));
+  const piece = actionFor(d).find(p => p.id === id);
+  if (!piece) return renderDialectAction(d);
+  app.innerHTML = `
+    ${pageTopbar('🎭 ' + esc(piece.title), trackFor(d).color)}
+    <main class="guide sonnet-view">${actionPieceHtml(piece)}</main>`;
+  wireBrandHome();
+  wireActionPiece(app);
+}
+
+// ── Accent Bridge ─────────────────────────────────────────────
+// The learner SELF-SELECTS both accents — the app never diagnoses. Routes
+// and comparisons live in js/data/bridge.js; A/B audio appears only when
+// the exact word is recorded in BOTH accents.
+
+function renderBridge() {
+  record(renderBridge);
+  const prefs = loadBridgePrefs();
+  const accents = COURSES.filter(c => c.id !== 'core');
+  const route = routeFor(prefs.from, prefs.to);
+  const sel = (id, cur, label) => `
+    <label class="field"><span class="field-label">${label}</span>
+      <select class="input-sel" id="${id}">
+        ${accents.map(a => `<option value="${a.id}" ${a.id === cur ? 'selected' : ''}>${a.icon} ${esc(a.label)}</option>`).join('')}
+      </select></label>`;
+
+  const compCard = c => {
+    const canA = speakableWord(c.word, prefs.from);
+    const canB = speakableWord(c.word, prefs.to);
+    return `
+    <section class="bridge-card" aria-label="${esc(c.feature)}">
+      <div class="idiom-head"><span class="idiom-term">${esc(c.feature)}</span><span class="tag">${esc(c.lexicalSet)}</span></div>
+      <p class="bridge-pair"><span class="ipa-chip">/${esc(c.startIPA)}/</span> <span aria-hidden="true">→</span>
+        <span class="ipa-chip is-target">/${esc(c.targetIPA)}/</span> <span class="bridge-word">“${esc(c.word)}”</span></p>
+      <div class="idiom-listen">
+        ${canA ? `<button class="word-chip" data-say-acc="${prefs.from}" data-w="${esc(c.word)}" type="button" aria-label="Hear ${esc(c.word)} in your starting accent">🔊 ${esc(dialectName(prefs.from))}</button>` : `<span class="word-chip is-off">${esc(dialectName(prefs.from))} — no recording</span>`}
+        ${canB ? `<button class="word-chip" data-say-acc="${prefs.to}" data-w="${esc(c.word)}" type="button" aria-label="Hear ${esc(c.word)} in the accent you're learning">🔊 ${esc(dialectName(prefs.to))}</button>` : `<span class="word-chip is-off">${esc(dialectName(prefs.to))} — no recording</span>`}
+        ${canA && canB ? `<button class="word-chip" data-ab="${esc(c.word)}" type="button" aria-label="Play ${esc(c.word)} in both accents, one after the other">⇄ A/B</button>` : ''}
+      </div>
+      <p class="guide-note"><b>Stays the same:</b> ${esc(c.stays)}</p>
+      <p class="guide-note"><b>What changes:</b> ${esc(c.changes)}</p>
+      <details class="idiom-extra"><summary>Lips · Tongue · Jaw · Voice</summary>
+        <dl class="anat-list">
+          <div><dt>Lips</dt><dd>${esc(c.guidance.lips)}</dd></div>
+          <div><dt>Tongue</dt><dd>${esc(c.guidance.tongue)}</dd></div>
+          <div><dt>Jaw</dt><dd>${esc(c.guidance.jaw)}</dd></div>
+          <div><dt>Voice</dt><dd>${esc(c.guidance.voice)}</dd></div>
+        </dl>
+      </details>
+      <div class="idiom-listen">
+        ${c.symbols.map(s => PHONEMES[s] ? `<button class="word-chip" data-guide="${esc(s)}" type="button" aria-label="Open the guidebook page for ${esc(s)}">📖 /${esc(s)}/ ${esc(PHONEMES[s].name)}</button>` : '').join('')}
+        ${c.symbols.length && PHONEMES[c.symbols[0]] ? `<button class="word-chip" data-practice="${esc(c.symbols[0])}" type="button" aria-label="Practise this sound — record yourself on its guidebook page">🎙 Practise this sound</button>` : ''}
+      </div>
+    </section>`;
+  };
+
+  app.innerHTML = `
+    ${pageTopbar('🌉 Accent Bridge', '#64748b')}
+    <main class="guide">
+      <p class="track-blurb">The accent you’re learning, explained through the one you already speak. Pick both yourself — you know your own speech best; nothing here guesses or diagnoses.</p>
+      <div class="form-grid">
+        ${sel('br-from', prefs.from, 'My starting accent')}
+        ${sel('br-to', prefs.to, 'I’m learning')}
+      </div>
+      ${route ? `
+        <h1>${esc(route.title)}</h1>
+        <p class="guide-text">${esc(route.intro)}</p>
+        <p class="pane-note">“Typically” is doing honest work here: real speakers vary, and these comparisons describe the course targets, not every voice you’ll meet.</p>
+        ${route.comparisons.map(compCard).join('')}`
+      : `
+        <p class="pane-note">This route isn’t written yet. So far: ${BRIDGE_ROUTES.map(r => `<b>${esc(r.title)}</b>`).join(', ')}. More pairings arrive as they’re reviewed — nothing ships unchecked.</p>`}
+    </main>`;
+  wireBrandHome();
+
+  const re = () => renderBridge();
+  document.getElementById('br-from').addEventListener('change', e => { saveBridgePrefs(e.target.value, loadBridgePrefs().to); navStack.pop(); re(); });
+  document.getElementById('br-to').addEventListener('change', e => { saveBridgePrefs(loadBridgePrefs().from, e.target.value); navStack.pop(); re(); });
+  app.querySelectorAll('[data-say-acc]').forEach(b =>
+    b.addEventListener('click', () => speak(b.dataset.w, { accent: b.dataset.sayAcc, lang: dialectLang(b.dataset.sayAcc) })));
+  app.querySelectorAll('[data-ab]').forEach(b =>
+    b.addEventListener('click', () => {
+      const w = b.dataset.ab;
+      speak(w, { accent: loadBridgePrefs().from, lang: dialectLang(loadBridgePrefs().from) });
+      setTimeout(() => speak(w, { accent: loadBridgePrefs().to, lang: dialectLang(loadBridgePrefs().to) }), 1100);
+    }));
+  app.querySelectorAll('[data-guide]').forEach(b =>
+    b.addEventListener('click', () => renderSoundDetail(b.dataset.guide, loadBridgePrefs().to)));
+  app.querySelectorAll('[data-practice]').forEach(b =>
+    b.addEventListener('click', () => renderSoundDetail(b.dataset.practice, loadBridgePrefs().to)));
 }
 
 function speakPane(lines, accent = null, narrated = []) {
@@ -3631,6 +3881,48 @@ function inventoryOrder(accent) {
   ];
 }
 
+// Articulation video: renders ONLY for an approved manifest entry — with
+// none approved (the current state) the sound page shows nothing extra, an
+// honest absence rather than a "coming soon" tease. Native controls plus
+// loop and half-speed toggles; captions track required; inline playback.
+function articulationVideoHtml(v, kindLabel) {
+  if (!v) return '';
+  const g = v.articulation ?? {};
+  return `
+    <figure class="artic-video" data-video-id="${esc(v.id)}">
+      <figcaption class="field-label">${esc(kindLabel)}${v.word ? ` — “${esc(v.word)}”` : ''} · /${esc(v.symbol)}/</figcaption>
+      <video controls playsinline preload="metadata" poster="${esc(v.poster)}" aria-label="${esc(kindLabel)} articulation video for ${esc(v.symbol)}">
+        <source src="${esc(v.video)}">
+        ${v.captions ? `<track kind="captions" src="${esc(v.captions)}" srclang="en" label="Captions" default>` : ''}
+      </video>
+      <div class="artic-video-tools">
+        <button class="btn-lite" data-vid-loop type="button" aria-pressed="false">🔁 Loop</button>
+        <button class="btn-lite" data-vid-slow type="button" aria-pressed="false">🐢 Half speed</button>
+      </div>
+      ${(g.lips || g.tongue || g.jaw || g.voice) ? `
+      <dl class="anat-list artic-video-guide">
+        ${g.lips ? `<div><dt>Lips</dt><dd>${esc(g.lips)}</dd></div>` : ''}
+        ${g.tongue ? `<div><dt>Tongue</dt><dd>${esc(g.tongue)}</dd></div>` : ''}
+        ${g.jaw ? `<div><dt>Jaw</dt><dd>${esc(g.jaw)}</dd></div>` : ''}
+        ${g.voice ? `<div><dt>Voice</dt><dd>${esc(g.voice)}</dd></div>` : ''}
+      </dl>` : ''}
+    </figure>`;
+}
+
+function wireArticulationVideos(root) {
+  root.querySelectorAll('.artic-video').forEach(fig => {
+    const vid = fig.querySelector('video');
+    fig.querySelector('[data-vid-loop]')?.addEventListener('click', e => {
+      vid.loop = !vid.loop;
+      e.currentTarget.setAttribute('aria-pressed', String(vid.loop));
+    });
+    fig.querySelector('[data-vid-slow]')?.addEventListener('click', e => {
+      vid.playbackRate = vid.playbackRate === 0.5 ? 1 : 0.5;
+      e.currentTarget.setAttribute('aria-pressed', String(vid.playbackRate === 0.5));
+    });
+  });
+}
+
 // Detail for one sound: articulation diagram, description, example words.
 // `accent` is the dialect context the page was opened from — inside a course
 // everything speaks that course's voices. Without one (the full Foundations
@@ -3697,6 +3989,8 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
       </div>
       ${diagram ? `<div class="artic-wrap">${diagram}
         <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''}
+      ${articulationVideoHtml(videoFor(acc, sym, 'isolated'), 'Isolated Sound')}
+      ${articulationVideoHtml(videoFor(acc, sym, 'word'), 'Example Word')}
       <h2 class="guide-heading">Hear it in words</h2>
       <div class="chips">${chips}</div>
       ${tryItHtml(`Record yourself saying ${hasIso ? `the sound /${sym}/` : `“${p.examples.find(x => speakableWord(x, acc)) ?? p.examples[0]}”`}, then compare.`)}
@@ -3709,6 +4003,7 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
     </main>`;
 
   wireBrandHome();
+  wireArticulationVideos(app);
   // A phoneme request plays the phoneme or nothing — no word stand-in.
   document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, acc));
   document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
@@ -4490,13 +4785,16 @@ if (!framedHostile) {
   // Recorded-take object URLs are per-session; let them go on unload.
   window.addEventListener('pagehide', () => { try { teardownAV(); releaseTryIt(); } catch {} });
 
-  if (location.hash === '#audit') renderAudioAudit();   // owner ear-check tool
+  if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
+  else if (location.hash === '#review') renderContentReview(); // owner writing-review tool
   else if (needsOnboarding()) renderOnboarding();
   else renderHome();
 
-  // Typing #audit into the address bar mid-session works too — a bare hash
-  // change doesn't reload the page, so the boot check alone would miss it.
+  // Typing #audit/#review into the address bar mid-session works too — a
+  // bare hash change doesn't reload the page, so the boot check alone
+  // would miss it.
   window.addEventListener('hashchange', () => {
     if (location.hash === '#audit') renderAudioAudit();
+    else if (location.hash === '#review') renderContentReview();
   });
 }

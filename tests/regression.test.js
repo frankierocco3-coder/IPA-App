@@ -18,6 +18,11 @@ import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl }
 import { setPersonal, getPersonal, deletePersonal } from '../js/overrides.js';
 import { dbSupported } from '../js/db.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
+import { DIALECT_ACTION, actionFor } from '../js/data/action.js';
+import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
+import { videoLookup } from '../js/data/media-videos.js';
+import { BRIDGE_ROUTES, routeFor, loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
+import { IDIOM } from '../js/data/idiom.js';
 
 const results = [];
 const ok = (name) => results.push({ name, pass: true });
@@ -116,6 +121,54 @@ export async function run({ navDoc = document } = {}) {
   check('a word clip cannot satisfy a phoneme request',
     hasWordClip('kit', 'nam') === true && hasPhonemeClip('kit_vowel', 'nam') === false,
     `word=${hasWordClip('kit', 'nam')} phoneme=${hasPhonemeClip('kit_vowel', 'nam')}`);
+
+  // ── 4b. Review gates: drafts never reach learners ────────────
+  const draftCount = DIALECT_ACTION.filter(p => p.reviewStatus !== 'approved').length;
+  for (const course of ['nam', 'rp', 'ssbe', 'aus']) {
+    const visible = actionFor(course);
+    check(`Dialect in Action ${course}: only approved pieces visible`,
+      visible.every(p => p.reviewStatus === 'approved'));
+  }
+  check('Dialect in Action drafts exist and are gated',
+    draftCount > 0 || DIALECT_ACTION.every(p => p.reviewStatus === 'approved'));
+  const idiomIds = new Set(IDIOM.map(e => e.id));
+  const badRefs = DIALECT_ACTION.flatMap(p =>
+    p.expressionRefs.filter(r => !idiomIds.has(r)).map(r => `${p.id}:${r}`));
+  check('every action expression ref exists in Words & Expressions',
+    badRefs.length === 0, badRefs.join(', '));
+
+  // Sonnet views: In Today's Voice appears ONLY for approved transpositions
+  for (const n of Object.keys(RECASTS)) {
+    const approved = approvedTranspositions(+n);
+    const wrongly = approved.filter(d => TRANSPOSITION_REVIEW[+n]?.[d] !== 'approved');
+    check(`sonnet ${n}: approved transposition list honours the review map`, wrongly.length === 0);
+  }
+  check('sonnet 18 structural pilot: drafts exist, none learner-visible yet',
+    Object.keys(RECASTS[18].recasts).length >= 3 && approvedTranspositions(18).length === 0);
+
+  // Articulation-video manifest: approval + exact course/kind matching
+  const vids = [
+    { id: 'a', courseId: 'nam', symbol: 'ɪ', kind: 'isolated', reviewStatus: 'approved' },
+    { id: 'b', courseId: 'nam', symbol: 'ɪ', kind: 'word', reviewStatus: 'draft' },
+  ];
+  check('video lookup: approved entry returned', videoLookup(vids, 'nam', 'ɪ', 'isolated')?.id === 'a');
+  check('video lookup: draft entry never returned', videoLookup(vids, 'nam', 'ɪ', 'word') === null);
+  check('video lookup: wrong course never returned', videoLookup(vids, 'rp', 'ɪ', 'isolated') === null);
+
+  // ── 4c. Accent Bridge ────────────────────────────────────────
+  const route = routeFor('nam', 'rp');
+  check('bridge: nam→rp route has 6–10 approved comparisons',
+    route && route.comparisons.length >= 6 && route.comparisons.length <= 10,
+    `got ${route?.comparisons.length}`);
+  check('bridge: unwritten route is honestly null', routeFor('aus', 'ssbe') === null);
+  check('bridge: draft comparisons are filtered out',
+    BRIDGE_ROUTES.every(r => routeFor(r.from, r.to).comparisons.every(c => c.reviewStatus === 'approved')));
+  const prevPrefs = localStorage.getItem('speechcraft-bridge');
+  saveBridgePrefs('aus', 'nam');
+  const round = loadBridgePrefs();
+  check('bridge: preferences persist', round.from === 'aus' && round.to === 'nam');
+  if (prevPrefs === null) localStorage.removeItem('speechcraft-bridge');
+  else localStorage.setItem('speechcraft-bridge', prevPrefs);
 
   // ── 5. Sound-page Prev/Next (runner only: drives the app iframe) ─
   if (navDoc !== document && navDoc.defaultView) {

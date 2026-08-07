@@ -359,6 +359,34 @@ phoneme, and a runner-only driven nav flow: boundaries, order, replace-
 history Back, focus). Runner verdict PASSED 88/88. TTS candidates remain
 withdrawn and were NOT approved; no audio generated.
 
+VERTICAL SLICE (2026-08-05, committed locally — NOT pushed): four new
+review-gated systems, all data-driven, nothing fake. (1) DIALECT IN
+ACTION (js/data/action.js): 8 original draft pieces (dialogue+monologue
+× 4 courses) with [[term|ID]] expression markers that open the real W&E
+entry; actionFor() returns ONLY approved pieces — Library card absent
+until something is approved; dialect_lint validates every ref exists +
+matches the course. (2) SONNET LEARNING EDITIONS: recasts.js gained
+TRANSPOSITION_REVIEW + approvedTranspositions(); the reader's "In
+Today's Voice" tab (creative-transposition labelling, TRANSPOSITION_
+LABELS) appears ONLY for approved dialect versions — all 15 are draft,
+so no learner change yet; Plain Meaning untouched. (3) ARTICULATION
+VIDEO (js/data/media-videos.js): typed manifest (EMPTY — no fake
+videos) + approval-gated player component in main.js (poster, captions
+track, loop + half-speed, LTJV list); honest ABSENCE when unapproved
+(Frankie's no-coming-soon taste); storage plan + sibling-repo same-
+origin hosting recommendation in docs/MEDIA_HOSTING.md. (4) ACCENT
+BRIDGE (js/data/bridge.js): self-selected from/to (never diagnosed;
+prefs in speechcraft-bridge), pilot route nam→rp with 8 approved
+comparisons (they restate the shipped Dialect Accuracy Standard — new
+claims beyond curriculum must start draft); A/B word audio only when
+BOTH exact clips exist (the contract caught quarantined 'car' → example
+is 'bar'); Library card on every course. OWNER GATE #review (like
+#audit, boot+hashchange): renders all 23 written drafts exactly as
+learners would see them; approval = editing reviewStatus /
+TRANSPOSITION_REVIEW in the data files. dialect_lint checks 9-11
+(manifests, action refs, transposition statuses — all proven non-
+vacuous). Regression suite 67 checks; runner PASSED 107/107.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

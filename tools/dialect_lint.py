@@ -161,6 +161,73 @@ def main():
             if sw not in ref_words:
                 fail("SENTENCES: %r has no untagged reference transcription" % sw)
 
+    # 9: phoneme production manifests are internally consistent
+    import json as _json
+    valid_slugs = set()
+    name_rows = re.findall(r"^\s*'[^']+': \{ type: '\w+', name: '([^']+)'", phonemes_src, re.M)
+    for n in name_rows:
+        s = re.sub(r"[^a-z0-9]+", "_", n.lower()).strip("_")
+        valid_slugs.add(s)
+        valid_slugs.add(s + "_syllable")
+    for mp in sorted((ROOT / "tools").glob("phoneme_manifest_*.json")):
+        try:
+            man = _json.loads(mp.read_text(encoding="utf-8"))
+        except Exception as e:
+            fail("%s: invalid JSON (%s)" % (mp.name, e))
+            continue
+        d = man.get("dialect")
+        v = man.get("voice", "reference")
+        if d not in ("nam", "rp", "ssbe", "aus"):
+            fail("%s: unknown dialect %r" % (mp.name, d))
+            continue
+        seen = set()
+        for e in man.get("entries", []):
+            slug = e.get("slug", "")
+            scope = "%s entry %r" % (mp.name, slug)
+            if slug in seen:
+                fail("%s: duplicate slug" % scope)
+            seen.add(slug)
+            if slug not in valid_slugs:
+                fail("%s: slug not in the phoneme inventory" % scope)
+            if e.get("type") not in ("isolated", "syllable"):
+                fail("%s: type must be isolated|syllable" % scope)
+            want_path = "audio/phonemes/%s/%s/%s.mp3" % (d, v, slug)
+            if e.get("path") != want_path:
+                fail("%s: path %r ≠ expected %r" % (scope, e.get("path"), want_path))
+            if e.get("symbol") not in phonemes:
+                fail("%s: symbol %r not in PHONEMES" % (scope, e.get("symbol")))
+
+    # 10: Dialect in Action pieces reference real, same-course expressions
+    action_src = (DATA / "action.js").read_text(encoding="utf-8")
+    idiom_src = (DATA / "idiom.js").read_text(encoding="utf-8")
+    idiom_ids = set(re.findall(r"id: '([A-Z]+-\d+)'", idiom_src))
+    prefix = {"nam": "NAM", "rp": "RP", "ssbe": "SSBE", "aus": "AUS"}
+    for pm in re.finditer(r"\{\s*id: '([a-z-]+)',\s*courseId: '(\w+)',(.*?)reviewStatus: '(\w+)'",
+                          action_src, re.S):
+        pid, course, body, status = pm.groups()
+        scope = "action.js piece %r" % pid
+        if status not in ("draft", "approved"):
+            fail("%s: reviewStatus %r not draft|approved" % (scope, status))
+        markers = set(re.findall(r"\[\[[^\]|]+\|([A-Z]+-\d+)\]\]", body))
+        refs = set(re.findall(r"'([A-Z]+-\d+)'", body))
+        for rid in markers | refs:
+            if rid not in idiom_ids:
+                fail("%s: references unknown Words & Expressions id %s" % (scope, rid))
+            elif not rid.startswith(prefix.get(course, "?") + "-"):
+                fail("%s: id %s belongs to another course" % (scope, rid))
+        for rid in markers - refs:
+            fail("%s: marker %s missing from expressionRefs" % (scope, rid))
+
+    # 11: transposition review statuses are well-formed
+    recasts_src = (DATA / "recasts.js").read_text(encoding="utf-8")
+    tr = re.search(r"TRANSPOSITION_REVIEW = \{(.*?)\n\};", recasts_src, re.S)
+    if not tr:
+        fail("recasts.js: TRANSPOSITION_REVIEW missing")
+    else:
+        for st in re.findall(r": '(\w+)'", tr.group(1)):
+            if st not in ("draft", "approved"):
+                fail("recasts.js: transposition status %r not draft|approved" % st)
+
     if fails:
         print("DIALECT LINT FAILED — %d problem(s):" % len(fails))
         for f_ in fails:

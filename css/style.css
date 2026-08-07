@@ -1222,6 +1222,31 @@ body.modal-open { overflow: hidden; }
 .sound-step:disabled { opacity: 0.35; cursor: default; }
 .sound-footnav { display: flex; justify-content: space-between; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
 .sound-step-wide { min-height: 44px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+/* ── Dialect in Action ─────────────────────────────────────── */
+.xp-term {
+  font: inherit; color: var(--green-dark); background: var(--accent-tint);
+  border: none; border-bottom: 2px solid var(--green); border-radius: 4px 4px 0 0;
+  padding: 0 3px; cursor: pointer; min-height: 28px;
+}
+.xp-term:hover { background: var(--panel-2); }
+.action-line { margin-bottom: 10px; }
+.action-speaker { color: var(--muted); font-variant: small-caps; letter-spacing: 0.4px; }
+.review-piece { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; margin: 14px 0; background: var(--panel); }
+
+/* ── Accent Bridge ─────────────────────────────────────────── */
+.bridge-card { border: 2px solid var(--line); border-bottom-width: 3px; border-radius: 14px; padding: 14px 16px; margin: 14px 0; background: var(--panel); }
+.bridge-pair { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; font-size: 17px; }
+.ipa-chip { font-weight: 700; background: var(--panel-2); border-radius: 8px; padding: 3px 9px; }
+.ipa-chip.is-target { background: var(--accent-tint); color: var(--green-dark); }
+.bridge-word { color: var(--muted); font-style: italic; }
+
+/* ── Articulation video (renders only for approved manifest entries) ── */
+.artic-video { margin: 14px 0; border: 2px solid var(--line); border-radius: 14px; padding: 12px; background: var(--panel); }
+.artic-video video { width: 100%; max-height: 340px; border-radius: 10px; background: #000; }
+.artic-video-tools { display: flex; gap: 8px; margin-top: 8px; }
+.artic-video-tools .btn-lite { min-height: 44px; }
+.artic-video-guide { margin-top: 10px; }
 .wii-sound-pair { display: inline-flex; gap: 4px; align-items: center; }
 
 /* ── #audit: the owner's clip review grid ───────────────────── */

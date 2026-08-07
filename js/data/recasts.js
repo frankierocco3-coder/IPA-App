@@ -1,22 +1,51 @@
-// Sonnets Recast — original Speechcraft educational adaptations (BETA).
+// Sonnet learning editions — original Speechcraft content.
 //
 // Three views per supported sonnet:
-//   original  — Shakespeare's public-domain wording (lives in sonnets.js)
-//   plain     — an independently written explanation of the literal
-//               meaning, imagery and emotional movement
-//   recasts   — original CREATIVE DIALECT ADAPTATIONS: the ideas re-voiced
-//               in a contemporary register. NOT literal translations, NOT
-//               "accent performances" (performing the original words in an
-//               accent is the Perform tab's job), and no claim of strict
-//               iambic pentameter — the meter has not been formally
-//               reviewed.
+//   Original         — Shakespeare's public-domain wording (sonnets.js)
+//   Plain Meaning    — an independently written explanation of the literal
+//                      meaning, imagery and emotional movement
+//   In Today's Voice — original CREATIVE DIALECT TRANSPOSITIONS: the ideas
+//                      re-voiced in a contemporary register. NOT literal
+//                      translations, NOT "accent performances" (performing
+//                      the original words in an accent is the Perform
+//                      tab's job), and no claim of strict iambic
+//                      pentameter — the meter has not been formally
+//                      reviewed.
 //
-// All adaptations are original to Speechcraft. No third-party modern
-// translations were consulted or reproduced. Traditional RP deliberately
-// offers Original + Plain Meaning only — a slang RP "translation" would be
-// a costume, not a register. Review checklist: docs/RECAST_REVIEW.md.
+// All content is original to Speechcraft. No third-party modern study
+// guides or translations were consulted or reproduced. Traditional RP
+// deliberately offers Original + Plain Meaning only — a slang RP
+// "translation" would be a costume, not a register.
+//
+// REVIEW GATE: a transposition reaches learners only when its dialect
+// entry below is 'approved' in TRANSPOSITION_REVIEW. Everything starts
+// 'draft' and renders only on the owner #review page until Frankie has
+// checked it for literary faithfulness and dialect accuracy
+// (checklist: docs/RECAST_REVIEW.md). Plain Meaning is already live and
+// is NOT gated by this map.
 
-export const RECAST_LABEL = 'Creative dialect adaptation — beta, under content review';
+export const TRANSPOSITION_LABELS = {
+  nam: 'Neutral American Transposition',
+  ssbe: 'Standard British Transposition',
+  aus: 'Australian Transposition',
+  rp: 'Traditional RP Transposition',
+};
+
+// Sonnet 18 is the structural pilot: every view wired end to end, all
+// transpositions still awaiting review.
+export const TRANSPOSITION_REVIEW = {
+  18: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  29: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  73: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  116: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  130: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
+};
+
+// The dialects of sonnet `n` a learner may see under In Today's Voice:
+// approved AND actually written. No approval, no tab — never a dead tab.
+export const approvedTranspositions = n =>
+  Object.keys(RECASTS[n]?.recasts ?? {})
+    .filter(d => TRANSPOSITION_REVIEW[n]?.[d] === 'approved');
 
 export const RECASTS = {
   18: {
