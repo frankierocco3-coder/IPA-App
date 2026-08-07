@@ -98,17 +98,22 @@ export const isWordText = text => {
 // to never reach a learner. No word fallback, no TTS fallback, ever.
 const approvedSet = new Set(APPROVED_PHONEMES);
 
-function phonemeVariants(slug, accent) {
-  // Voice keys come from the approved entries themselves — 'f'/'m' for the
-  // original dialects, named speakers (alyx/peach) for newer ones. A later
-  // Bad verdict at #audit (KNOWN_BAD) overrides the batch approval.
+// Pure resolution: which approved voice keys can play this slug in this
+// accent, minus anything a later Bad verdict quarantined. Voice keys come
+// from the approved entries themselves — 'f'/'m' for the original word
+// voices, named speakers (alyx/peach), or a neutral human 'reference' key
+// for isolated phonemes; nothing here hardcodes the identifiers.
+// Exported for tests/regression.test.js — not part of the app-facing API.
+export function phonemeVariantsFrom(approved, bad, slug, accent) {
   const out = [];
-  for (const id of approvedSet) {
+  for (const id of approved) {
     const [a, v, s] = id.split('/');
-    if (a === accent && s === slug && !badSet.has(id)) out.push(v);
+    if (a === accent && s === slug && !bad.has(id)) out.push(v);
   }
   return out;
 }
+
+const phonemeVariants = (slug, accent) => phonemeVariantsFrom(approvedSet, badSet, slug, accent);
 
 export const hasPhonemeClip = (slug, accent) => phonemeVariants(slug, accent).length > 0;
 

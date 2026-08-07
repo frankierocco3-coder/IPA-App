@@ -86,6 +86,11 @@ def main():
     if re.search(r"SONNET_NARRATED\s*=", main_js):
         fail("hardcoded SONNET_NARRATED narration claim has returned")
 
+    # 6b: syllable demonstrations stay labelled as demonstrations, never
+    # passed off as pure isolated sounds
+    if "🔊 In a syllable" not in main_js or "syllable demonstration" not in main_js:
+        fail("syllable-demo labelling weakened on the sound pages")
+
     # 6: no silent device fallback in course audio
     audio_js = (ROOT / "js" / "audio.js").read_text(encoding="utf-8")
     if "deviceSpeak(text, { rate, lang });\n  return 'tts';" in audio_js \

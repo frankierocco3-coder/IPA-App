@@ -1,22 +1,26 @@
 # Phoneme recording plan
 
-STATUS 2026-07-30: TTS-coaxed candidates were generated, batch-approved,
-then withdrawn after listening — synthetic isolated phonemes are not good
-enough. The plan is HUMAN recordings (Frankie or a hired voice per
-dialect).
+STATUS 2026-08-05: production target is ONE consistent human reference
+voice per dialect, under the neutral voice key `reference` (isolated
+phonemes are NOT tied to the word-audio f/m/alyx/peach identifiers —
+the playback gate reads the voice key from the approved id itself).
+The withdrawn TTS candidates stay withdrawn.
+
+**Start here: the Neutral American pilot** — 16 recordings listed with
+per-sound guidance in `tools/phoneme_manifest_nam.json` (13 isolated +
+3 syllable demos).
 
 ## Adding your own recordings
-1. Record per the guidance table below (quiet room, consistent level,
-   trim silence). One file per sound per dialect per voice.
-2. Name and place: audio/phonemes/<dialect>/<voice>/<slug>.mp3
-   (voices: f/m for nam·rp·aus, alyx/peach for ssbe — or replace with
-   your own single human voice key per dialect and approve those ids).
-3. Rebuild the candidate index: python3 tools/generate_phonemes.py
-   (skip generation; it re-indexes existing files) — or hand-write
-   audio/phonemes-index.json.
-4. Listen at #audit (kind=phoneme), mark Good, export, commit the flags.
+1. Record per the manifest/table guidance (quiet room, consistent level,
+   trim silence). Name each file `<slug>.mp3` in one folder.
+2. Import safely — validates slugs, rejects junk, never overwrites,
+   rebuilds the candidate index:
+   `python3 tools/import_phonemes.py <folder> --dialect nam --voice reference --dry-run`
+   then again without `--dry-run`.
+3. Listen at #audit (kind=phoneme), mark Good, export, commit the flags.
    Approved sounds flip the sound-page hero to "Hear the sound"
-   automatically.
+   automatically. Approval is exact to dialect/voice/slug; importing
+   alone never makes anything learner-facing.
 
 Every isolated-phoneme asset still missing (none exist yet). Slug =
 lowercased display name, underscores. Path:

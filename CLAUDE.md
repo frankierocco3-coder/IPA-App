@@ -335,6 +335,30 @@ frames (cross-origin still busts/refuses, and the app no longer
 half-boots into a gutted document when refusing — that was a live crash).
 All gates + artifact build pass; runner verdict PASSED 73/73.
 
+GUIDEBOOK NAV + HUMAN PHONEME PREP (2026-08-05, committed locally — NOT
+pushed): sound pages have Prev/Next through `inventoryOrder(accent)` (the
+exact displayed inventory order; compact ‹ › by the heading + labelled
+bottom row; disabled at bounds, no looping; excluded symbols unreachable).
+Prev/Next REPLACES the page in navStack (pop before re-render) so ONE
+Back press returns to the inventory; record()'s teardownAV handles
+audio/mic/try-it cleanup on switch; scroll-to-top always, focus moves to
+#sound-title on step. Human isolated phonemes: neutral voice key
+`reference` confirmed working end-to-end (phonemeVariantsFrom in audio.js
+is voice-key-agnostic — exported pure for tests); NAM pilot manifest =
+tools/phoneme_manifest_nam.json (13 isolated + 3 syllable demos, per-
+sound guidance, never deployed); tools/import_phonemes.py = safe offline
+import (slug/dialect/voice validation, size+magic checks, dupe detection,
+no overwrite without --replace, --dry-run, rebuilds phonemes-index.json,
+NEVER touches APPROVED_PHONEMES; --self-test 11/11). #audit phoneme rows
+now derive voice keys from the candidate index (reference rows appear on
+import; fallback keys keep the to-record checklist) and show the internal
+slug + isolated-vs-syllable-demo label. launch_lint pins the syllable-
+demo labelling. tests/regression.test.js grew to 48 (reference-key
+resolution, quarantine, cross-dialect/slug exactness, word-can't-satisfy-
+phoneme, and a runner-only driven nav flow: boundaries, order, replace-
+history Back, focus). Runner verdict PASSED 88/88. TTS candidates remain
+withdrawn and were NOT approved; no audio generated.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

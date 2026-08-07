@@ -1401,15 +1401,21 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     }
   }
   for (const d of ['nam', 'rp', 'aus', 'ssbe']) {
+    // Voice keys come from the candidate index itself (so a human
+    // 'reference' voice shows up the moment its files are imported); with
+    // no candidates on disk yet, fall back to the expected keys so the
+    // grid still works as a to-record checklist.
     const named = voicesForCourse(d).map(v => v.id);
+    const onDisk = Object.keys(phonIndex[d] ?? {});
+    const voiceKeys = onDisk.length ? onDisk : (named.length ? named : ['f', 'm']);
     for (const sym of phonemesForAccent(d)) {
       const slug = phonemeSlug(sym);
-      for (const v of (named.length ? named : ['f', 'm'])) {
+      for (const v of voiceKeys) {
         const candidates = phonIndex[d]?.[v] ?? [];
         for (const s2 of [slug, slug + '_syllable']) {
           if (s2.endsWith('_syllable') && !candidates.includes(s2)) continue;
-          rows.push({ id: `${d}/${v}/${s2}`, d, v,
-            clip: `/${sym}/${s2.endsWith('_syllable') ? ' (syllable)' : ''}`, kind: 'phoneme',
+          rows.push({ id: `${d}/${v}/${s2}`, d, v, slug: s2,
+            clip: `/${sym}/${s2.endsWith('_syllable') ? ' — syllable demo' : ' — isolated'}`, kind: 'phoneme',
             path: `audio/phonemes/${d}/${v}/${s2}.mp3`,
             missing: !candidates.includes(s2) });
         }
@@ -1456,7 +1462,7 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
             ${r.missing ? '<span class="audit-play is-off" title="No clip yet">∅</span>'
               : `<button class="audit-play" data-path="${esc(r.path)}" type="button" aria-label="Play ${esc(r.id)}">▶</button>`}
             <span class="audit-name">${esc(r.clip)}</span>
-            <span class="audit-meta">${r.d}/${r.v} · ${r.kind}${r.missing ? ' · missing' : ''}</span>
+            <span class="audit-meta">${r.d}/${r.v} · ${r.kind}${r.slug ? ` · ${esc(r.slug)}` : ''}${r.missing ? ' · missing' : ''}</span>
             ${r.missing ? '' : `
               <span class="audit-verdict">
                 <button class="btn-lite av-good" type="button" aria-pressed="${verdicts[r.id] === 'good'}">Good</button>
@@ -3609,11 +3615,29 @@ function wireTryIt(container, playModel) {
   });
 }
 
+// The visible inventory order for a context: exactly the sequence the
+// course's IPA page (or the full Foundations chart) displays its chips in.
+// Prev/Next on the sound pages follows THIS order and nothing else, so a
+// symbol excluded from a course can never be reached from inside it.
+function inventoryOrder(accent) {
+  const syms = accent ? phonemesForAccent(accent) : Object.keys(PHONEMES);
+  const info = s => PHONEMES[s] ?? {};
+  return [
+    ...syms.filter(s => info(s).type === 'vowel' && !info(s).weak && !info(s).allophone),
+    ...syms.filter(s => info(s).type === 'diphthong' && !info(s).weak && !info(s).allophone),
+    ...syms.filter(s => info(s).type === 'consonant' && !info(s).allophone),
+    ...syms.filter(s => info(s).weak && !info(s).allophone),
+    ...syms.filter(s => info(s).allophone),
+  ];
+}
+
 // Detail for one sound: articulation diagram, description, example words.
 // `accent` is the dialect context the page was opened from — inside a course
 // everything speaks that course's voices. Without one (the full Foundations
 // chart) fall back to guessing from dialect-exclusive symbols.
-function renderSoundDetail(sym, accent) {
+// `focusHeading` is set by Prev/Next so keyboard and screen-reader users
+// land on the new sound's name.
+function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
   const p = PHONEMES[sym];
   if (!p) return renderChart();
   record(() => renderSoundDetail(sym, accent));
@@ -3633,6 +3657,18 @@ function renderSoundDetail(sym, accent) {
   const hasSyl = hasPhonemeClip(slug + '_syllable', acc);
   const chips = p.examples.map(w => wordChip(w, acc)).join('');
 
+  // Prev/Next through the visible inventory for this context. No looping:
+  // the controls simply disable at either end.
+  const order = inventoryOrder(accent);
+  const idx = order.indexOf(sym);
+  const prevSym = idx > 0 ? order[idx - 1] : null;
+  const nextSym = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
+  const navLabel = s => `${PHONEMES[s].allophone ? `[${s}]` : `/${s}/`} ${PHONEMES[s].name}`;
+  const arrow = (s, dir) => `
+    <button class="sound-step" data-step="${esc(s ?? '')}" type="button" ${s ? '' : 'disabled'}
+      aria-label="${s ? `${dir === 'prev' ? 'Previous' : 'Next'} sound: ${esc(navLabel(s))}` : `No ${dir === 'prev' ? 'previous' : 'next'} sound`}"
+      title="${s ? esc(navLabel(s)) : ''}">${dir === 'prev' ? '‹' : '›'}</button>`;
+
   app.innerHTML = `
     ${pageTopbar(wrapSym(esc(sym)), '#64748b')}
     <main class="guide sound-detail">
@@ -3651,9 +3687,12 @@ function renderSoundDetail(sym, accent) {
           ${hasIso && hasSyl ? `<button class="word-chip" id="say-syl" type="button"
             aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, not a fully isolated sound">🔊 Hear it in a syllable</button>` : ''}
         </div>
-        <div>
-          <h1>${esc(p.name)}</h1>
+        <div class="sound-head">
+          <h1 id="sound-title" tabindex="-1">${esc(p.name)}</h1>
           <p class="guide-text">${esc(p.hint)}.</p>
+          <div class="sound-steps" aria-label="Neighbouring sounds">
+            ${arrow(prevSym, 'prev')}${arrow(nextSym, 'next')}
+          </div>
         </div>
       </div>
       ${diagram ? `<div class="artic-wrap">${diagram}
@@ -3661,6 +3700,12 @@ function renderSoundDetail(sym, accent) {
       <h2 class="guide-heading">Hear it in words</h2>
       <div class="chips">${chips}</div>
       ${tryItHtml(`Record yourself saying ${hasIso ? `the sound /${sym}/` : `“${p.examples.find(x => speakableWord(x, acc)) ?? p.examples[0]}”`}, then compare.`)}
+      <nav class="sound-footnav" aria-label="Neighbouring sounds">
+        ${prevSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(prevSym)}" type="button"
+          aria-label="Previous sound: ${esc(navLabel(prevSym))}">‹ Previous: ${esc(navLabel(prevSym))}</button>` : '<span></span>'}
+        ${nextSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(nextSym)}" type="button"
+          aria-label="Next sound: ${esc(navLabel(nextSym))}">Next: ${esc(navLabel(nextSym))} ›</button>` : '<span></span>'}
+      </nav>
     </main>`;
 
   wireBrandHome();
@@ -3675,6 +3720,19 @@ function renderSoundDetail(sym, accent) {
   });
   app.querySelectorAll('[data-say]').forEach(b =>
     b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: acc })));
+
+  // Prev/Next REPLACE this page in the back history: after /ɪ/ → /e/ → /æ/
+  // the main Back button returns straight to the inventory. record() inside
+  // the next render handles the audio/mic/try-it cleanup.
+  app.querySelectorAll('[data-step]').forEach(b =>
+    b.addEventListener('click', () => {
+      if (!b.dataset.step) return;
+      navStack.pop();
+      renderSoundDetail(b.dataset.step, accent, { focusHeading: true });
+    }));
+
+  window.scrollTo(0, 0);
+  if (focusHeading) document.getElementById('sound-title')?.focus();
 }
 
 // ── Track page: that dialect's units & lessons ────────────────

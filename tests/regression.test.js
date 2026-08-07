@@ -17,6 +17,7 @@ import { createProject, getProject, deleteProject } from '../js/projects.js';
 import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl } from '../js/recordings.js';
 import { setPersonal, getPersonal, deletePersonal } from '../js/overrides.js';
 import { dbSupported } from '../js/db.js';
+import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
 
 const results = [];
 const ok = (name) => results.push({ name, pass: true });
@@ -99,6 +100,69 @@ export async function run({ navDoc = document } = {}) {
       try { await deleteProject(pA.id); await deleteProject(pB.id); } catch { /* best effort */ }
       try { deletePersonal('__regressionword', 'rp'); } catch { /* best effort */ }
     }
+  }
+
+  // ── 4. Isolated-phoneme contract (pure resolution checks) ───
+  const A = ids => new Set(ids);
+  check('reference voice key resolves when explicitly approved',
+    String(phonemeVariantsFrom(A(['nam/reference/kit_vowel']), A([]), 'kit_vowel', 'nam')) === 'reference');
+  check('a Bad verdict quarantines an approved reference clip',
+    phonemeVariantsFrom(A(['nam/reference/kit_vowel']), A(['nam/reference/kit_vowel']), 'kit_vowel', 'nam').length === 0);
+  check('approval never leaks across dialects',
+    phonemeVariantsFrom(A(['nam/reference/kit_vowel']), A([]), 'kit_vowel', 'rp').length === 0);
+  check('approval is slug-exact (syllable ≠ isolated)',
+    phonemeVariantsFrom(A(['nam/reference/p_syllable']), A([]), 'p', 'nam').length === 0);
+  await indexReady;
+  check('a word clip cannot satisfy a phoneme request',
+    hasWordClip('kit', 'nam') === true && hasPhonemeClip('kit_vowel', 'nam') === false,
+    `word=${hasWordClip('kit', 'nam')} phoneme=${hasPhonemeClip('kit_vowel', 'nam')}`);
+
+  // ── 5. Sound-page Prev/Next (runner only: drives the app iframe) ─
+  if (navDoc !== document && navDoc.defaultView) {
+    const w = navDoc.defaultView;
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const clickIn = el => el?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+    try {
+      clickIn([...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
+      await sleep(300);
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === 'IPA'));
+      await sleep(400);
+      const chips = [...navDoc.querySelectorAll('.chart-chip')].map(c => c.dataset.sym);
+      check('inventory page renders chips', chips.length > 20, `got ${chips.length}`);
+
+      clickIn(navDoc.querySelector('.chart-chip'));           // first symbol
+      await sleep(300);
+      const steps = () => [...navDoc.querySelectorAll('.sound-steps .sound-step')];
+      check('first symbol: Previous disabled', steps()[0]?.disabled === true);
+      check('first symbol: Next enabled', steps()[1]?.disabled === false);
+      check('Next targets the inventory’s second symbol', steps()[1]?.dataset.step === chips[1],
+        `next=${steps()[1]?.dataset.step} want=${chips[1]}`);
+
+      clickIn(steps()[1]);                                    // → second symbol
+      await sleep(300);
+      check('Next replaces the page (second symbol shown)',
+        steps()[0]?.dataset.step === chips[0] && steps()[1]?.dataset.step === chips[2],
+        `prev=${steps()[0]?.dataset.step} next=${steps()[1]?.dataset.step}`);
+      check('focus lands on the new sound heading',
+        navDoc.activeElement?.id === 'sound-title', `active=${navDoc.activeElement?.id}`);
+      check('audio is quiet after switching symbols',
+        !(w.speechSynthesis.speaking || w.speechSynthesis.pending));
+
+      clickIn(navDoc.getElementById('nav-back'));             // ONE back press
+      await sleep(300);
+      check('Back returns straight to the inventory (history was replaced)',
+        navDoc.querySelectorAll('.chart-chip').length > 20 && !navDoc.getElementById('sound-title'),
+        'still on a sound page');
+
+      clickIn([...navDoc.querySelectorAll('.chart-chip')].pop());   // final symbol
+      await sleep(300);
+      check('final symbol: Next disabled', steps()[1]?.disabled === true);
+      check('final symbol: Previous enabled', steps()[0]?.disabled === false);
+    } catch (err) {
+      bad('sound-page navigation drive', String(err));
+    }
+  } else {
+    ok('sound-page navigation drive (skipped in-app — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);
