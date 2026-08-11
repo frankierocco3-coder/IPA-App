@@ -537,6 +537,41 @@ Library deliberately absent (no controls for unbuilt modes). launch_lint
 total; five gates pass. Section-11 test drive creates and deletes its
 own project; leaves no trace.
 
+A/B GAP CLOSURE (2026-08-11, committed locally, NOT pushed; A-corrections
+and B provisionally accepted): (1) Dissection navigation restored to the
+approved spec — '🔍 Dissect This' is an ACTION on the project view (with
+a quiet coverage note when a record exists), opening renderDissect's
+focused screen; normal Back returns to the project; the Studio tab strip
+is back to five; launch_lint fails if a dissect tab reappears.
+(2) Export/import: exportProject carries the project's dissection
+(allow-listed fields, no ids/targetKeys); validate.js validateDissection
+returns clean {materialType, createdAt, answers} or NULL (invalid/
+oversized/unsupported → project imports without it; pre-dissection files
+unchanged — backward compatible); import rebinds via
+dissect.attachImportedDissection around the NEW project id; six-answer
+values/statuses preserved; nothing from the file becomes id/key/HTML.
+(3) Privacy: 'Text dissections' disclosure row; wipe now iterates
+db.CONTENT_STORES (blobs/recordings/DISSECTIONS/projects/meta — the old
+hardcoded list orphaned dissections on full wipe: real bug, fixed);
+wipe button + confirm name dissections; Manage Recordings notes say
+dissections survive recording deletion; stale 'Perform tab' → 'Takes
+tab'; stale Preferences 'Your goal' blurb fixed. (4) db.js: SCHEMA_STEPS
++ applySchema + openRaw(name, version, {onClosed}) exported for real
+scratch-DB upgrade tests; onblocked rejects with UpgradeBlockedError
+carrying the visible 'Close other Speechcraft tabs, then reload'
+instruction (never hangs — 4s-raced in tests); onversionchange closes
+so future builds are never blocked; older build vs newer data →
+VersionError, data untouched; dbErrorMessage(err) maps all three
+honestly and is rendered by studioMain/renderDissect/fillRecording-
+Manager catches. (5) Autosave: dissect.createSaver — debounced,
+strictly serialized, newest queued job supersedes, failed write NEVER
+announces 'Saved ✓'; MAX_ANSWER_LEN=20000 (matches LIMITS.notes)
+enforced by textarea maxlength (visible, never silent) + saveAnswer
+clamp + import clamp; malformed Unicode (lone surrogates) round-trips
+via structured clone; in-app navigation during a pending debounce still
+lands the write (timer + closure survive; tested). Suite → 222 checks
+(regression 182), five gates pass.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

@@ -1353,3 +1353,5 @@ body.modal-open { overflow: hidden; }
 .diss-marks .diss-mark { min-height: 44px; }
 .diss-mark[aria-pressed="true"] { outline: 2px solid var(--accent, #6f8657); outline-offset: -2px; font-weight: 700; }
 .diss-del { color: var(--red, #b3453a); }
+.piece-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.piece-actions .pane-note { margin: 0; }

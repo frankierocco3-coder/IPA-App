@@ -30,6 +30,14 @@ export const QUICK_QUESTIONS = [
 
 export const ANSWER_STATUS = { answered: 'answered', unknown: 'unknown', na: 'na' };
 
+// Per-answer ceiling. The spec calls analyses "large, unbounded" as the
+// reason they live in IndexedDB, not as a promise of infinite fields —
+// this matches LIMITS.notes (20k chars ≈ 3,500 words per answer, far past
+// any real analysis) and is enforced visibly via the textarea's maxlength,
+// so the clamp below can never silently truncate what the user sees.
+// Whole-record ceiling follows: 6 × 20k + fixed fields < 125k chars.
+export const MAX_ANSWER_LEN = 20000;
+
 // The spec's material types. Studio content types that match pass through;
 // 'lyrics' and 'other' fall back to 'monologue' (the closest single-voice
 // reading of a text — revisit if lyric-specific analysis ever ships).
@@ -84,7 +92,7 @@ export async function saveAnswer(id, questionId, { value, status } = {}) {
   const d = await getDissection(id);
   if (!d) throw new Error('no such dissection');
   if (!QUICK_QUESTIONS.some(q => q.id === questionId)) throw new Error('unknown question id');
-  const text = String(value ?? '');
+  const text = String(value ?? '').slice(0, MAX_ANSWER_LEN);
   const st = status ?? (text.trim() ? ANSWER_STATUS.answered : null);
   if (st === null) delete d.answers[questionId];
   else d.answers[questionId] = { value: text, status: st, updatedAt: Date.now() };
@@ -122,4 +130,67 @@ export function coverageLine(d) {
   if (c.unknown) bits.push(`${c.unknown} still open`);
   if (c.na) bits.push(`${c.na} not relevant`);
   return bits.join(' · ');
+}
+
+/**
+ * Debounced, strictly serialized autosave. One write runs at a time; a
+ * touch during a write queues (and replaces any previously queued) job,
+ * so saves can never overlap or land out of order — the newest job always
+ * runs last and its verdict is the one announced. `onState` receives
+ * 'saving' | 'saved' | 'error'; a failed write NEVER reports 'saved'.
+ */
+export function createSaver({ delay = 800, onState = () => {} } = {}) {
+  let timer = null, running = false, queued = null;
+  const pump = async (job) => {
+    running = true;
+    onState('saving');
+    let ok = true;
+    try { await job(); } catch { ok = false; }
+    if (queued) { const j = queued; queued = null; return pump(j); }
+    running = false;
+    onState(ok ? 'saved' : 'error');
+  };
+  return {
+    /** Schedule `job` after the debounce window. */
+    touch(job) {
+      onState('saving');
+      clearTimeout(timer);
+      timer = setTimeout(() => this.now(job), delay);
+    },
+    /** Run `job` immediately (or queue it behind the in-flight write). */
+    now(job) {
+      clearTimeout(timer);
+      if (running) queued = job;
+      else pump(job);
+    },
+  };
+}
+
+/**
+ * Attach a VALIDATED imported dissection (from validate.js) to a freshly
+ * imported project. The record is rebuilt from scratch around the NEW
+ * project id — nothing from the file becomes a key or id, and only the
+ * six known question ids can carry answers (validate.js already enforced
+ * both, but this constructor is the second wall).
+ */
+export async function attachImportedDissection(projectId, projectTitle, clean) {
+  if (!clean) return null;
+  const d = newDissection({
+    targetType: 'project',
+    targetId: projectId,
+    targetLabel: projectTitle,
+    materialType: clean.materialType,
+  });
+  if (clean.createdAt) d.createdAt = clean.createdAt;
+  for (const { id: qid } of QUICK_QUESTIONS) {
+    const a = clean.answers?.[qid];
+    if (!a) continue;
+    d.answers[qid] = {
+      value: String(a.value ?? '').slice(0, MAX_ANSWER_LEN),
+      status: Object.values(ANSWER_STATUS).includes(a.status) ? a.status : ANSWER_STATUS.answered,
+      updatedAt: a.updatedAt ?? Date.now(),
+    };
+  }
+  await putDissection(d);
+  return d;
 }

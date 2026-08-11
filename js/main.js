@@ -31,10 +31,10 @@ import { recordingSupported, startRecording, stopRecording, cancelRecording,
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor, listAllTakes, deleteAllTakes,
          takesPresence } from './recordings.js';
-import { dbSupported, STORES, idbClear } from './db.js';
+import { dbSupported, STORES, idbClear, CONTENT_STORES, dbErrorMessage } from './db.js';
 import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
          saveAnswer, deleteDissection, deleteDissectionsFor, materialTypeFrom,
-         coverageLine } from './dissect.js';
+         coverageLine, createSaver, MAX_ANSWER_LEN, attachImportedDissection } from './dissect.js';
 import { questRows, claimQuest, onLessonFinished } from './quests.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
          ValidationError, LIMITS } from './validate.js';
@@ -1872,7 +1872,7 @@ function moreMain(el) {
   const cards = [
     { icon: '👤', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
     { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
-    { icon: '⚙️', title: 'Preferences', blurb: 'Your goal, course, and first-run choices.', go: renderPreferences, color: '#64748b' },
+    { icon: '⚙️', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
     { icon: 'ℹ️', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
@@ -2191,7 +2191,10 @@ async function wipeLocalData({ includeProgress }) {
   if (dbSupported()) {
     try {
       releaseAllUrls();
-      for (const s of [STORES.blobs, STORES.recordings, STORES.projects, STORES.meta]) {
+      // CONTENT_STORES (db.js) is the authoritative wipe list — a store
+      // added there is wiped here automatically, so new content types can
+      // never silently survive a full delete. Includes dissections.
+      for (const s of CONTENT_STORES) {
         await idbClear(s);
         report.push(s);
       }
@@ -2224,7 +2227,7 @@ async function fillRecordingManager() {
   }
   let takes = [];
   try { takes = await listAllTakes(); }
-  catch { box.innerHTML = '<h2 class="chart-h">Manage recordings</h2><p class="pane-note pane-warn">Could not read saved recordings — the browser database may be blocked.</p>'; return; }
+  catch (err) { box.innerHTML = `<h2 class="chart-h">Manage recordings</h2><p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>`; return; }
   const known = takes.reduce((n, t) => n + (t.sizeBytes ?? 0), 0);
   const unsized = takes.filter(t => !t.sizeBytes).length;
   const byProject = new Map();
@@ -2242,9 +2245,9 @@ async function fillRecordingManager() {
     <div class="stat-row"><span class="stat-name">Audio storage</span><span class="stat-val">${(known / 1048576).toFixed(1)} MB${unsized ? ` + ${unsized} older take(s) unsized` : ''}</span></div>
     <div class="stat-row"><span class="stat-name">Projects / texts with takes</span><span class="stat-val">${byProject.size}</span></div>
     ${estimate ? `<p class="pane-note">${esc(estimate)}</p>` : ''}
-    <p class="pane-note">Individual takes are managed where they live — each project's Perform tab has play, download and delete per take.</p>
+    <p class="pane-note">Individual takes are managed where they live — each project's Takes tab has play, download and delete per take.</p>
     ${takes.length ? '<button class="btn btn-danger" id="rec-delete-all" type="button">Delete ALL saved recordings</button>' : ''}
-    <p class="pane-note">Deleting recordings never touches course progress, XP, projects, notes or the personal dictionary — projects simply show no saved takes afterwards.</p>`;
+    <p class="pane-note">Deleting recordings never touches course progress, XP, projects, dissections, notes or the personal dictionary — projects simply show no saved takes afterwards.</p>`;
   document.getElementById('rec-delete-all')?.addEventListener('click', async () => {
     if (!confirm(`Delete all ${takes.length} saved recordings?\n\nProjects, notes and progress are kept. This cannot be undone.`)) return;
     if (!confirm('Last check — really delete every saved take?')) return;
@@ -2268,6 +2271,7 @@ function renderPrivacy() {
       <section class="stat-block">
         <h2 class="chart-h">What is stored here</h2>
         <div class="stat-row"><span class="stat-name">Rehearsal projects &amp; notes</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Text dissections</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Audio recordings</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Practice analytics</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Personal dictionary</span><span class="stat-val">this device</span></div>
@@ -2288,7 +2292,7 @@ function renderPrivacy() {
       <div class="danger-zone">
         <h2 class="chart-h">Delete local data</h2>
         <p class="pane-note">This cannot be undone. Export anything you want to keep first.</p>
-        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, recordings, analytics &amp; dictionary</button>
+        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, dissections, recordings, analytics &amp; dictionary</button>
         <button class="btn btn-lite btn-danger" id="wipe-all" type="button">Delete everything, including course progress</button>
         <p class="save-state" id="wipe-state" role="status" aria-live="polite"></p>
       </div>
@@ -2303,7 +2307,7 @@ function renderPrivacy() {
     document.getElementById('wipe-state').textContent = `Deleted: ${done.join(', ')}.`;
   };
   document.getElementById('wipe-content').addEventListener('click', () =>
-    run(false, 'Delete all projects, recordings, analytics and personal dictionary entries?\n\nYour XP, streak and completed lessons are KEPT.'));
+    run(false, 'Delete all projects, dissections, recordings, analytics and personal dictionary entries?\n\nYour XP, streak and completed lessons are KEPT.'));
   document.getElementById('wipe-all').addEventListener('click', () =>
     run(true, 'Delete EVERYTHING, including your XP, streak and completed lessons?'));
 }
@@ -2466,7 +2470,7 @@ async function studioMain(el) {
     }
     let all = [];
     try { all = await listProjects(); }
-    catch { listEl.innerHTML = '<p class="pane-note pane-warn">Could not open local storage.</p>'; return; }
+    catch (err) { listEl.innerHTML = `<p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>`; return; }
 
     const rows = sortProjects(searchProjects(all, projectQuery), projectSort);
     if (!all.length) {
@@ -2629,7 +2633,6 @@ async function renderProject(id, tab = 'text') {
     ? ['perform', '🎙 Perform']
     : (await takesPresence({ projectId: id })) === 'empty' ? null : ['perform', '🎬 Takes'];
   const tabs = [['text', '📄 Text'], ['ipa', '🔤 Transcribe to IPA'], ['scan', '📐 Scan'],
-    ['dissect', '🔍 Dissect This'],
     takesTab, ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']].filter(Boolean);
 
   app.innerHTML = `
@@ -2644,6 +2647,10 @@ async function renderProject(id, tab = 'text') {
           <span class="tag tag-dialect">🗣 ${esc(dialectName(p.accent) || p.accent)}</span>
           ${p.lines.length ? `<span class="tag">${p.lines.length} lines</span>` : ''}
         </div>
+        <div class="piece-actions">
+          <button class="btn" id="proj-dissect" type="button">🔍 Dissect This</button>
+          <span class="pane-note" id="proj-diss-note"></span>
+        </div>
       </div>
       <div class="sonnet-tabs proj-tabs">
         ${tabs.map(([k, l]) => `<button class="son-tab ${k === tab ? 'on' : ''}" data-tab="${k}" type="button">${l}</button>`).join('')}
@@ -2656,10 +2663,18 @@ async function renderProject(id, tab = 'text') {
   app.querySelectorAll('.proj-tabs .son-tab').forEach(b =>
     b.addEventListener('click', () => { stopSpeech(); renderProject(id, b.dataset.tab); }));
 
+  // Dissection is a focused screen, not a tab (per the approved spec) —
+  // normal Back returns here. The note quietly shows coverage when a
+  // dissection already exists; a failed lookup just leaves it blank.
+  document.getElementById('proj-dissect').addEventListener('click', () => renderDissect(id));
+  const dissNote = document.getElementById('proj-diss-note');
+  dissectionFor('project', id)
+    .then(d => { if (d && dissNote.isConnected) dissNote.textContent = coverageLine(d); })
+    .catch(() => {});
+
   const fresh = async () => getProject(id);
 
   if (tab === 'text') paneText(pane, p, id);
-  else if (tab === 'dissect') paneDissect(pane, p, id);
   else if (tab === 'notes') paneNotes(pane, p, id);
   else if (tab === 'words') paneWords(pane, p, id);
   else if (tab === 'scan') pane.innerHTML = p.lines.length ? scanPane(p.lines, false) : emptyText();
@@ -2709,12 +2724,35 @@ function wireAutosave(stateEl, collect) {
 }
 
 // ── Speech Dissection, Quick mode (Build B) ──────────────────
-// Six questions on one Studio project. A thinking tool, not a worksheet:
+// Six questions on one Studio project, on its own FOCUSED SCREEN (per the
+// approved spec: not another Studio tab). Back uses the normal history
+// stack and returns to the project. A thinking tool, not a worksheet:
 // "I don't know yet" and "Not relevant" are one-tap first-class answers,
 // coverage is words not a score, and everything autosaves. The record is
-// created lazily on the first real interaction, so browsing the tab never
-// writes to the database. EVERY stored string is untrusted on read —
+// created lazily on the first real interaction, so opening the screen
+// never writes to the database. EVERY stored string is untrusted on read —
 // esc() on render, values assigned via .value where possible.
+async function renderDissect(id) {
+  record(() => renderDissect(id));
+  let p;
+  try { p = await getProject(id); }
+  catch (err) {
+    app.innerHTML = `${pageTopbar('🔍 Dissect', '#8a6d3b')}
+      <main class="guide"><p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p></main>`;
+    wireBrandHome();
+    return;
+  }
+  if (!p) return goSection('studio');
+  app.innerHTML = `
+    ${pageTopbar('🔍 Dissect: ' + esc(p.title || 'Untitled'), '#8a6d3b')}
+    <main class="guide">
+      <h1 class="piece-title">${esc(p.title || 'Untitled project')}</h1>
+      <div id="diss-screen"></div>
+    </main>`;
+  wireBrandHome();
+  paneDissect(document.getElementById('diss-screen'), p, id);
+}
+
 async function paneDissect(pane, p, id) {
   let d = await dissectionFor('project', id);
 
@@ -2744,7 +2782,7 @@ async function paneDissect(pane, p, id) {
           <div class="diss-body" id="db-${i}" hidden>
             <label class="field">
               <span class="field-label">${esc(q)}</span>
-              <textarea class="diss-text" rows="4" spellcheck="true"></textarea>
+              <textarea class="diss-text" rows="4" spellcheck="true" maxlength="${MAX_ANSWER_LEN}"></textarea>
             </label>
             <div class="diss-marks">
               <button class="btn-lite diss-mark" data-mark="unknown" type="button" aria-pressed="false">🤔 I don’t know yet</button>
@@ -2789,24 +2827,18 @@ async function paneDissect(pane, p, id) {
     return d;
   };
 
-  // Debounced write with the Studio panes' visible save state. Serialized
-  // so a slow write never interleaves with the next.
-  let timer = null, saving = false, queued = null;
-  const write = async (job) => {
-    if (saving) { queued = job; return; }
-    saving = true;
-    stateEl.textContent = 'Saving…';
-    try {
-      await ensure();
-      d = await job();
-      stateEl.textContent = 'Saved ✓';
-    } catch {
-      stateEl.textContent = 'Not saved — storage error. Copy your text to be safe.';
-    }
-    saving = false;
-    refresh();
-    if (queued) { const j = queued; queued = null; write(j); }
-  };
+  // Debounced, strictly serialized writes (dissect.js createSaver): rapid
+  // typing collapses, nothing overlaps or lands out of order, and a failed
+  // write shows the honest storage message — never "Saved ✓".
+  const saver = createSaver({
+    onState: (s) => {
+      stateEl.textContent = s === 'saving' ? 'Saving…'
+        : s === 'saved' ? 'Saved ✓'
+        : 'Not saved — storage error. Copy your text to be safe.';
+      if (s !== 'saving') refresh();
+    },
+  });
+  const job = (fn) => async () => { await ensure(); d = await fn(); };
 
   for (const sec of sections) {
     const qid = sec.dataset.q;
@@ -2830,20 +2862,16 @@ async function paneDissect(pane, p, id) {
 
     // Typing answers the question: status derives from the text and any
     // explicit mark is released (the derivation in saveAnswer handles it).
-    text.addEventListener('input', () => {
-      stateEl.textContent = 'Saving…';
-      clearTimeout(timer);
-      timer = setTimeout(() => write(() => saveAnswer(d.id, qid, { value: text.value })), 800);
-    });
+    text.addEventListener('input', () =>
+      saver.touch(job(() => saveAnswer(d.id, qid, { value: text.value }))));
 
     // One-tap marks. Tapping the active mark releases it (back to whatever
     // the text implies); marking never erases typed text.
     for (const btn of sec.querySelectorAll('.diss-mark'))
       btn.addEventListener('click', () => {
-        clearTimeout(timer);
         const active = btn.getAttribute('aria-pressed') === 'true';
-        write(() => saveAnswer(d.id, qid,
-          active ? { value: text.value } : { value: text.value, status: btn.dataset.mark }));
+        saver.now(job(() => saveAnswer(d.id, qid,
+          active ? { value: text.value } : { value: text.value, status: btn.dataset.mark })));
       });
   }
 
@@ -2997,6 +3025,7 @@ async function exportProject(id) {
   const p = await getProject(id);
   if (!p) return;
   const takes = await listTakes({ projectId: id });
+  const diss = await dissectionFor('project', id).catch(() => null);
   // Explicit allow-list: only these fields are ever written to a shared file.
   // No internal database ids, no object URLs, no device information.
   const payload = {
@@ -3023,6 +3052,18 @@ async function exportProject(id) {
         level: t.level, label: t.label, rating: t.rating,
         note: t.note, durationMs: t.durationMs, createdAt: t.createdAt,
       })),
+      // The project's dissection travels with it — allow-listed fields
+      // only, no internal ids or target keys (import rebuilds those
+      // around the NEW project id).
+      ...(diss ? { dissection: {
+        schemaVersion: 1,
+        materialType: diss.materialType,
+        createdAt: diss.createdAt,
+        answers: Object.fromEntries(QUICK_QUESTIONS.flatMap(({ id: qid }) => {
+          const a = diss.answers?.[qid];
+          return a ? [[qid, { value: a.value, status: a.status, updatedAt: a.updatedAt }]] : [];
+        })),
+      } } : {}),
     }],
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
@@ -3045,6 +3086,7 @@ async function importProjectFile(file) {
   const projects = validateProjectBundle(raw, { newId: () => emptyProject().id });
 
   const dropped = projects.reduce((n, p) => n + (p.droppedRecordings || 0), 0);
+  const withDiss = projects.filter(p => p.dissection).length;
   const summary = [
     `Import ${projects.length} project${projects.length === 1 ? '' : 's'}?`,
     '',
@@ -3052,14 +3094,17 @@ async function importProjectFile(file) {
     projects.length > 8 ? `  \u2026and ${projects.length - 8} more` : '',
     '',
     'These are added alongside your existing projects \u2014 nothing is replaced.',
+    withDiss ? `${withDiss} project${withDiss === 1 ? ' carries its' : 's carry their'} dissection.` : '',
     dropped ? `Audio is never included in project files, so ${dropped} recording reference${dropped === 1 ? '' : 's'} will be skipped.` : '',
   ].filter(Boolean).join('\n');
   if (!confirm(summary)) return 0;
 
   let n = 0;
   for (const p of projects) {
-    const { droppedRecordings, ...clean } = p;
+    const { droppedRecordings, dissection, ...clean } = p;
     await saveProject(clean);
+    // Rebuilt around the NEW project id (never the file's) \u2014 see dissect.js.
+    if (dissection) await attachImportedDissection(clean.id, clean.title, dissection);
     n++;
   }
   return n;

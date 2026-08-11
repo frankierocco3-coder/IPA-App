@@ -19,10 +19,13 @@ import { createProject, getProject, deleteProject } from '../js/projects.js';
 import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl,
          takesPresence, listAllTakes } from '../js/recordings.js';
 import { setPersonal, getPersonal, deletePersonal } from '../js/overrides.js';
-import { dbSupported } from '../js/db.js';
+import { dbSupported, CONTENT_STORES, openRaw, dbErrorMessage } from '../js/db.js';
 import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
          getDissection, saveAnswer, deleteDissection, deleteDissectionsFor,
-         materialTypeFrom, coverageOf, coverageLine } from '../js/dissect.js';
+         materialTypeFrom, coverageOf, coverageLine, createSaver, MAX_ANSWER_LEN,
+         attachImportedDissection } from '../js/dissect.js';
+import { validateDissection, validateProjectBundle } from '../js/validate.js';
+import { emptyProject, saveProject } from '../js/projects.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
 import { store } from '../js/state.js';
 import { CAPABILITIES } from '../js/capabilities.js';
@@ -812,15 +815,133 @@ export async function run({ navDoc = document } = {}) {
         (await getProject(pD.id))?.id === pD.id);
       const d5 = newDissection({ targetType: 'project', targetId: pD.id, targetLabel: pD.title });
       await putDissection(d5);
+      // Deleting recordings alone must never touch dissections.
+      await deleteTakesFor(pD.id);
+      check('dissect: deleting a project\'s recordings leaves its dissection',
+        (await dissectionFor('project', pD.id))?.id === d5.id);
       const removed = await deleteDissectionsFor(pD.id);
       check('dissect: project-deletion cascade removes only that project\'s dissections',
         removed === 1 && (await dissectionFor('project', pD.id)) == null);
       await deleteProject(pD.id);
+
+      // Answer-length ceiling and malformed Unicode.
+      const d6 = newDissection({ targetType: 'project', targetId: '__diss-limits', targetLabel: 'L' });
+      await putDissection(d6);
+      await saveAnswer(d6.id, 'quick.happening', { value: 'x'.repeat(MAX_ANSWER_LEN + 5000) });
+      check('dissect: answers clamp at the visible ceiling',
+        (await getDissection(d6.id)).answers['quick.happening'].value.length === MAX_ANSWER_LEN);
+      const weird = 'lone \uD800 surrogate, emoji 🎭, combining é́';
+      await saveAnswer(d6.id, 'quick.wants', { value: weird });
+      check('dissect: malformed Unicode round-trips unchanged and harmless',
+        (await getDissection(d6.id)).answers['quick.wants'].value === weird);
+      await deleteDissection(d6.id);
+
+      // Privacy's wipe list is centralized and includes dissections.
+      check('dissect: CONTENT_STORES wipe list covers dissections (and everything else)',
+        [STORES.blobs, STORES.recordings, STORES.dissections, STORES.projects, STORES.meta]
+          .every(s => CONTENT_STORES.includes(s)));
     } catch (err) {
       bad('dissect storage round-trips', String(err));
     }
   } else {
     ok('dissect storage round-trips (needs IndexedDB)');
+  }
+
+  // Export/import: how a dissection travels with its project.
+  {
+    const rawBundle = {
+      format: 'speechcraft-project', formatVersion: 1,
+      projects: [{
+        title: 'Imported with dissection', text: 'One line.',
+        dissection: {
+          schemaVersion: 1, materialType: 'scene', createdAt: Date.now(),
+          answers: {
+            'quick.happening': { value: 'X <img src=x onerror=alert(1)>', status: 'answered', updatedAt: Date.now() },
+            'quick.wants': { value: 'kept while unknown', status: 'unknown', updatedAt: Date.now() },
+            'quick.nope': { value: 'unknown id — dropped', status: 'answered' },
+            'quick.doing': { value: 'y'.repeat(MAX_ANSWER_LEN + 9000), status: 'answered' },
+            'quick.change': { value: 'no status — dropped' },
+          },
+        },
+      }],
+    };
+    const bundle = validateProjectBundle(rawBundle, { newId: () => emptyProject().id });
+    const bd = bundle[0].dissection;
+    check('import: a valid dissection rides its project through validation',
+      !!bd && bd.materialType === 'scene'
+      && bd.answers['quick.happening'].status === 'answered'
+      && bd.answers['quick.wants'].status === 'unknown');
+    check('import: unknown question ids and status-less answers are dropped',
+      !('quick.nope' in bd.answers) && !('quick.change' in bd.answers)
+      && Object.keys(bd.answers).every(k => QUICK_QUESTIONS.some(q => q.id === k)));
+    check('import: oversized answers clamp to the ceiling',
+      bd.answers['quick.doing'].value.length === MAX_ANSWER_LEN);
+    check('import: malformed / unsupported dissections are skipped, project still imports',
+      validateDissection('a string') === null
+      && validateDissection({ schemaVersion: 2, answers: { 'quick.wants': { value: 'x', status: 'answered' } } }) === null
+      && validateDissection({ schemaVersion: 1, answers: [] }) === null
+      && validateProjectBundle({ format: 'speechcraft-project', formatVersion: 1,
+          projects: [{ title: 'No dissection', text: 'ok' }] },
+          { newId: () => emptyProject().id })[0].dissection === null);
+
+    if (dbSupported()) {
+      try {
+        const { droppedRecordings, dissection, ...clean } = bundle[0];
+        await saveProject(clean);
+        await attachImportedDissection(clean.id, clean.title, dissection);
+        const attached = await dissectionFor('project', clean.id);
+        check('import: dissection rebinds to the NEW project id, answers intact',
+          attached?.targetKey === `project:${clean.id}` && attached?.targetId === clean.id
+          && attached.answers['quick.happening'].value.includes('<img src=x')   // stored as text, never markup
+          && attached.answers['quick.wants'].status === 'unknown');
+        await deleteDissectionsFor(clean.id);
+        await deleteProject(clean.id);
+      } catch (err) {
+        bad('import: dissection rebinding round-trip', String(err));
+      }
+    } else {
+      ok('import rebinding round-trip (needs IndexedDB)');
+    }
+  }
+
+  // The autosave saver: serialized, honest, never a false "Saved ✓".
+  {
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const st1 = [];
+    createSaver({ delay: 1, onState: s => st1.push(s) }).now(async () => {});
+    await wait(30);
+    check('saver: a successful write announces saved', st1.join(',') === 'saving,saved');
+    const st2 = [];
+    createSaver({ delay: 1, onState: s => st2.push(s) }).now(async () => { throw new Error('quota'); });
+    await wait(30);
+    check('saver: a failed write reports the error and NEVER "saved"',
+      st2.includes('error') && !st2.includes('saved'));
+    const order = [];
+    let releaseA;
+    const s3 = createSaver({ delay: 1 });
+    s3.now(async () => { order.push('A-start'); await new Promise(r => { releaseA = r; }); order.push('A-end'); });
+    s3.now(async () => { order.push('B'); });
+    releaseA();
+    await wait(30);
+    check('saver: writes are strictly serialized, never overlapping or reordered',
+      order.join(',') === 'A-start,A-end,B');
+    const ran = [];
+    let releaseA2;
+    const s4 = createSaver({ delay: 1 });
+    s4.now(async () => { await new Promise(r => { releaseA2 = r; }); ran.push('A'); });
+    s4.now(async () => { ran.push('stale'); });
+    s4.now(async () => { ran.push('C'); });
+    releaseA2();
+    await wait(30);
+    check('saver: a newer pending write supersedes the stale one', ran.join(',') === 'A,C');
+    const st5 = [];
+    const s5 = createSaver({ delay: 1, onState: s => st5.push(s) });
+    s5.now(async () => { throw new Error('x'); });
+    await wait(15);
+    s5.now(async () => {});
+    await wait(15);
+    check('saver: recovers to saved after a failed write',
+      st5.includes('error') && st5[st5.length - 1] === 'saved');
   }
 
   // The journey, through the real UI (runner only).
@@ -839,19 +960,27 @@ export async function run({ navDoc = document } = {}) {
         text: 'I am not asking you. I am telling you.',
       });
       projId = proj.id;
-      const openDissect = async () => {
+      const openProject = async () => {
         clickIn(doc.getElementById('brand-home')); await sleep(300);
         clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Studio')));
         await sleep(400);
         const card = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === projId);
         clickIn(card?.querySelector('button[data-act="open"]') ?? card); await sleep(450);
-        clickIn([...doc.querySelectorAll('.proj-tabs .son-tab')].find(b => b.dataset.tab === 'dissect'));
-        await sleep(450);
       };
-      await openDissect();
+      const openDissect = async () => {
+        await openProject();
+        clickIn(doc.getElementById('proj-dissect')); await sleep(450);
+      };
+      await openProject();
+      check('dissect UI: an action in the project view, NOT a Studio tab',
+        !!doc.getElementById('proj-dissect')
+        && ![...doc.querySelectorAll('.proj-tabs .son-tab')].some(b => b.dataset.tab === 'dissect'));
+      clickIn(doc.getElementById('proj-dissect')); await sleep(450);
       const qSec = qid => doc.querySelector(`.diss-q[data-q="${qid}"]`);
-      check('dissect UI: six questions render behind real labels',
-        doc.querySelectorAll('.diss-q').length === 6
+      check('dissect UI: a dedicated focused screen with six questions behind real labels',
+        !doc.querySelector('.proj-tabs')                       // not inside the project view
+        && !!doc.getElementById('nav-back')                    // normal Back affordance
+        && doc.querySelectorAll('.diss-q').length === 6
         && doc.querySelectorAll('#diss-list label.field .field-label').length === 6);
       const answer = async (qid, textVal) => {
         clickIn(qSec(qid).querySelector('.diss-head')); await sleep(150);
@@ -901,13 +1030,38 @@ export async function run({ navDoc = document } = {}) {
       check('dissect UI: a revision survives reload',
         qSec('quick.happening').querySelector('.diss-text').value.startsWith('Revised'));
 
+      // Navigating away during a pending (debounced) save loses nothing —
+      // the write still lands — and Back returns to the same project.
+      clickIn(qSec('quick.change').querySelector('.diss-head')); await sleep(150);
+      const taP = qSec('quick.change').querySelector('.diss-text');
+      taP.value = 'typed, then navigated before the debounce fired';
+      taP.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
+      clickIn(doc.getElementById('nav-back'));               // leave immediately
+      await sleep(1400);
+      const afterNav = await dissectionFor('project', projId);
+      check('dissect UI: navigating during a pending save loses nothing',
+        afterNav?.answers?.['quick.change']?.value?.startsWith('typed, then navigated'),
+        JSON.stringify(afterNav?.answers?.['quick.change'] ?? null));
+      check('dissect UI: Back returns to the same Studio project',
+        !!doc.getElementById('proj-dissect') && !!doc.querySelector('.proj-tabs'));
+
       // Delete the dissection alone; the project must survive.
+      await openDissect();
       frame.contentWindow.confirm = () => true;
       clickIn(doc.getElementById('diss-del')); await sleep(400);
       check('dissect UI: delete resets the pane and spares the project',
         (await dissectionFor('project', projId)) == null
         && (await getProject(projId))?.id === projId
         && doc.getElementById('diss-cov').textContent.includes('Nothing explored yet'));
+
+      // Privacy discloses dissection storage. Read-only checks: the wipe
+      // buttons are NEVER clicked here — they would destroy real data.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('More'))); await sleep(350);
+      clickIn([...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent.includes('Privacy'))); await sleep(400);
+      check('dissect UI: Privacy discloses dissections and includes them in the wipe',
+        doc.body.textContent.includes('Text dissections')
+        && doc.body.textContent.includes('Delete projects, dissections, recordings'));
     } catch (err) {
       bad('dissect UI journey', String(err));
     } finally {
@@ -918,6 +1072,93 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('dissect UI journey (runner only — run tests/run-all.html)');
+  }
+
+  // ── 12. The IndexedDB upgrade experience ────────────────────
+  // Real upgrades of the real schema code, on a SCRATCH database — the
+  // app's own database is never opened at a different version here.
+  if (dbSupported()) {
+    const NAME = '__sc-upgrade-test';
+    const nuke = () => new Promise(res => {
+      const r = indexedDB.deleteDatabase(NAME);
+      r.onsuccess = r.onerror = r.onblocked = () => res();
+    });
+    const put = (db, store, val) => new Promise((res, rej) => {
+      const tx = db.transaction(store, 'readwrite');
+      tx.objectStore(store).put(val);
+      tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+    });
+    const getAll = (db, store) => new Promise((res, rej) => {
+      const r = db.transaction(store).objectStore(store).getAll();
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+    try {
+      await nuke();
+
+      // A populated version-1 database upgrades to version 2 intact.
+      const v1 = await openRaw(NAME, 1);
+      await put(v1, STORES.projects, { id: 'p1', title: 'kept project' });
+      await put(v1, STORES.recordings, { id: 'r1', projectId: 'p1', label: 'kept take' });
+      await put(v1, STORES.blobs, { id: 'r1', blob: new Blob(['audio-bytes']) });
+      await put(v1, STORES.meta, { key: 'k', value: 'kept meta' });
+      v1.close();
+      const v2 = await openRaw(NAME, 2);
+      check('upgrade: populated v1 reaches v2 with projects, recordings, blobs and meta intact',
+        v2.version === 2
+        && (await getAll(v2, STORES.projects))[0]?.title === 'kept project'
+        && (await getAll(v2, STORES.recordings))[0]?.label === 'kept take'
+        && (await getAll(v2, STORES.blobs)).length === 1
+        && (await getAll(v2, STORES.meta))[0]?.value === 'kept meta'
+        && v2.objectStoreNames.contains(STORES.dissections));
+
+      // An older tab that never steps aside: the upgrade must reject fast
+      // with the visible close-other-tabs instruction — never hang.
+      const holder = await new Promise((res, rej) => {
+        const r = indexedDB.open(NAME, 2);
+        r.onsuccess = () => res(r.result);       // deliberately NO versionchange handler
+        r.onerror = () => rej(r.error);
+      });
+      v2.close();
+      const blocked = await Promise.race([
+        openRaw(NAME, 3).then(db => { db.close(); return 'opened'; }, err => err),
+        new Promise(res => setTimeout(() => res('hung'), 4000)),
+      ]);
+      check('upgrade: a blocking older tab rejects fast with the instruction — no silent hang',
+        blocked?.name === 'UpgradeBlockedError'
+        && String(blocked?.message).includes('Close other Speechcraft tabs'),
+        String(blocked?.message ?? blocked));
+      holder.close();
+      await new Promise(r => setTimeout(r, 150));   // let the freed upgrade settle
+
+      // versionchange: the current connection steps aside so a future
+      // build's upgrade is never blocked by this tab.
+      let steppedAside = false;
+      await openRaw(NAME, 3, { onClosed: () => { steppedAside = true; } });
+      const v4 = await openRaw(NAME, 4);
+      check('upgrade: versionchange closes the old connection for a future build',
+        steppedAside && v4.version === 4);
+
+      // An older cached build against newer data: fails safely with
+      // VersionError; nothing is deleted or reset.
+      const older = await openRaw(NAME, 3).then(() => 'opened', err => err);
+      check('upgrade: an older build fails safely with VersionError, data untouched',
+        older?.name === 'VersionError'
+        && (await getAll(v4, STORES.projects))[0]?.title === 'kept project',
+        String(older?.name ?? older));
+      v4.close();
+
+      // The user-facing lines stay honest about the data.
+      check('upgrade: every dbErrorMessage stays honest about the data',
+        dbErrorMessage(Object.assign(new Error('close-tabs instruction'), { name: 'UpgradeBlockedError' })) === 'close-tabs instruction'
+        && dbErrorMessage(Object.assign(new Error('m'), { name: 'VersionError' })).includes('untouched')
+        && dbErrorMessage(new Error('anything')).includes('untouched'));
+    } catch (err) {
+      bad('IndexedDB upgrade experience', String(err));
+    } finally {
+      await nuke();
+    }
+  } else {
+    ok('IndexedDB upgrade experience (needs IndexedDB)');
   }
 
   const failed = results.filter(r => !r.pass);

@@ -142,6 +142,26 @@ def main():
                 "The project and its text are untouched."]:
         if pin not in main_js:
             fail("Speech Dissection lost a first-class control: %r" % pin)
+    # …and stays OFF the Studio tab strip (approved spec: an action and a
+    # focused screen, never another tab)
+    if "'dissect', '🔍 Dissect This'" in main_js or '"dissect", "🔍' in main_js:
+        fail("Dissect This crept back into the Studio tab strip")
+    # Privacy must disclose dissection storage and include it in the wipe
+    for pin in ["Text dissections",
+                "Delete projects, dissections, recordings"]:
+        if pin not in main_js:
+            fail("Privacy lost its dissection disclosure: %r" % pin)
+
+    # 6f: a blocked storage upgrade must carry the visible instruction,
+    # and the wipe list must stay centralized with dissections in it
+    db_js = (ROOT / "js" / "db.js").read_text(encoding="utf-8")
+    for pin in ["Close other Speechcraft tabs, then reload this page.",
+                "UpgradeBlockedError"]:
+        if pin not in db_js:
+            fail("db.js lost the honest upgrade-blocked instruction: %r" % pin)
+    if "STORES.dissections,\n  STORES.projects" not in db_js.replace("  ", " ") \
+       and "STORES.dissections" not in db_js.split("CONTENT_STORES")[-1][:200]:
+        fail("CONTENT_STORES no longer includes dissections — a full wipe would orphan them")
 
     # 6b: syllable demonstrations stay labelled as demonstrations, never
     # passed off as pure isolated sounds
