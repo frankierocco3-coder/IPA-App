@@ -32,6 +32,9 @@ import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor, listAllTakes, deleteAllTakes,
          takesPresence } from './recordings.js';
 import { dbSupported, STORES, idbClear } from './db.js';
+import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
+         saveAnswer, deleteDissection, deleteDissectionsFor, materialTypeFrom,
+         coverageLine } from './dissect.js';
 import { questRows, claimQuest, onLessonFinished } from './quests.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
          ValidationError, LIMITS } from './validate.js';
@@ -2515,8 +2518,9 @@ async function studioMain(el) {
         else if (act === 'export') exportProject(id);
         else if (act === 'del') {
           const p = await getProject(id);
-          if (!confirm(`Delete “${p?.title || 'Untitled'}”?\n\nThis also deletes its saved recordings. This cannot be undone.`)) return;
+          if (!confirm(`Delete “${p?.title || 'Untitled'}”?\n\nThis also deletes its saved recordings and its dissection. This cannot be undone.`)) return;
           await deleteTakesFor(id);
+          await deleteDissectionsFor(id);   // cascade matches recordings
           await deleteProject(id);
           draw();
         }
@@ -2625,6 +2629,7 @@ async function renderProject(id, tab = 'text') {
     ? ['perform', '🎙 Perform']
     : (await takesPresence({ projectId: id })) === 'empty' ? null : ['perform', '🎬 Takes'];
   const tabs = [['text', '📄 Text'], ['ipa', '🔤 Transcribe to IPA'], ['scan', '📐 Scan'],
+    ['dissect', '🔍 Dissect This'],
     takesTab, ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']].filter(Boolean);
 
   app.innerHTML = `
@@ -2654,6 +2659,7 @@ async function renderProject(id, tab = 'text') {
   const fresh = async () => getProject(id);
 
   if (tab === 'text') paneText(pane, p, id);
+  else if (tab === 'dissect') paneDissect(pane, p, id);
   else if (tab === 'notes') paneNotes(pane, p, id);
   else if (tab === 'words') paneWords(pane, p, id);
   else if (tab === 'scan') pane.innerHTML = p.lines.length ? scanPane(p.lines, false) : emptyText();
@@ -2700,6 +2706,156 @@ function wireAutosave(stateEl, collect) {
     },
     async flush() { clearTimeout(timer); await run(); },
   };
+}
+
+// ── Speech Dissection, Quick mode (Build B) ──────────────────
+// Six questions on one Studio project. A thinking tool, not a worksheet:
+// "I don't know yet" and "Not relevant" are one-tap first-class answers,
+// coverage is words not a score, and everything autosaves. The record is
+// created lazily on the first real interaction, so browsing the tab never
+// writes to the database. EVERY stored string is untrusted on read —
+// esc() on render, values assigned via .value where possible.
+async function paneDissect(pane, p, id) {
+  let d = await dissectionFor('project', id);
+
+  const STATUS_GLYPH = { answered: '✓', unknown: '?', na: '—', blank: '○' };
+  const STATUS_WORD = { answered: 'answered', unknown: 'marked "I don\'t know yet"',
+                        na: 'marked not relevant', blank: 'not explored yet' };
+  const stOf = qid => {
+    const a = d?.answers?.[qid];
+    return !a ? 'blank' : a.status === ANSWER_STATUS.unknown ? 'unknown'
+      : a.status === ANSWER_STATUS.na ? 'na' : 'answered';
+  };
+
+  pane.innerHTML = `
+    <div class="proj-form">
+      <p class="pane-note">Six questions to run on this text. <b>“I don’t know yet” is a real answer</b> — an honest open question is worth more than a guess. Nothing here is scored.</p>
+      <p class="diss-coverage" id="diss-cov" aria-live="polite"></p>
+      <div id="diss-list">
+        ${QUICK_QUESTIONS.map(({ id: qid, q }, i) => `
+        <section class="diss-q" data-q="${qid}">
+          <h3 class="diss-h">
+            <button class="diss-head" type="button" aria-expanded="false" aria-controls="db-${i}">
+              <span class="diss-status" data-st="" aria-hidden="true"></span>
+              <span class="diss-question">${esc(q)}</span>
+              <span class="diss-status-word sr-only"></span>
+            </button>
+          </h3>
+          <div class="diss-body" id="db-${i}" hidden>
+            <label class="field">
+              <span class="field-label">${esc(q)}</span>
+              <textarea class="diss-text" rows="4" spellcheck="true"></textarea>
+            </label>
+            <div class="diss-marks">
+              <button class="btn-lite diss-mark" data-mark="unknown" type="button" aria-pressed="false">🤔 I don’t know yet</button>
+              <button class="btn-lite diss-mark" data-mark="na" type="button" aria-pressed="false">Not relevant</button>
+            </div>
+          </div>
+        </section>`).join('')}
+      </div>
+      <p class="pane-note" id="diss-state" role="status" aria-live="polite"></p>
+      <p><button class="btn-lite diss-del" id="diss-del" type="button" hidden>Delete this dissection</button></p>
+    </div>`;
+
+  const stateEl = pane.querySelector('#diss-state');
+  const covEl = pane.querySelector('#diss-cov');
+  const sections = [...pane.querySelectorAll('.diss-q')];
+
+  const refresh = () => {
+    covEl.textContent = d ? coverageLine(d)
+      : 'Nothing explored yet — open a question to start.';
+    pane.querySelector('#diss-del').hidden = !d;
+    for (const sec of sections) {
+      const st = stOf(sec.dataset.q);
+      sec.querySelector('.diss-status').dataset.st = st;
+      sec.querySelector('.diss-status').textContent = STATUS_GLYPH[st];
+      sec.querySelector('.diss-status-word').textContent = STATUS_WORD[st];
+      for (const b of sec.querySelectorAll('.diss-mark'))
+        b.setAttribute('aria-pressed', String(st === b.dataset.mark));
+    }
+  };
+
+  // Values go in through .value, never innerHTML — inert by construction.
+  for (const sec of sections)
+    sec.querySelector('.diss-text').value = d?.answers?.[sec.dataset.q]?.value ?? '';
+
+  const ensure = async () => {
+    if (!d) {
+      d = newDissection({ targetType: 'project', targetId: id,
+        targetLabel: p.title || 'Untitled project',
+        materialType: materialTypeFrom(p.contentType) });
+      await putDissection(d);
+    }
+    return d;
+  };
+
+  // Debounced write with the Studio panes' visible save state. Serialized
+  // so a slow write never interleaves with the next.
+  let timer = null, saving = false, queued = null;
+  const write = async (job) => {
+    if (saving) { queued = job; return; }
+    saving = true;
+    stateEl.textContent = 'Saving…';
+    try {
+      await ensure();
+      d = await job();
+      stateEl.textContent = 'Saved ✓';
+    } catch {
+      stateEl.textContent = 'Not saved — storage error. Copy your text to be safe.';
+    }
+    saving = false;
+    refresh();
+    if (queued) { const j = queued; queued = null; write(j); }
+  };
+
+  for (const sec of sections) {
+    const qid = sec.dataset.q;
+    const head = sec.querySelector('.diss-head');
+    const body = sec.querySelector('.diss-body');
+    const text = sec.querySelector('.diss-text');
+
+    // Progressive disclosure: one question open at a time.
+    head.addEventListener('click', () => {
+      const open = head.getAttribute('aria-expanded') === 'true';
+      for (const s2 of sections) {
+        s2.querySelector('.diss-head').setAttribute('aria-expanded', 'false');
+        s2.querySelector('.diss-body').hidden = true;
+      }
+      if (!open) {
+        head.setAttribute('aria-expanded', 'true');
+        body.hidden = false;
+        text.focus();
+      }
+    });
+
+    // Typing answers the question: status derives from the text and any
+    // explicit mark is released (the derivation in saveAnswer handles it).
+    text.addEventListener('input', () => {
+      stateEl.textContent = 'Saving…';
+      clearTimeout(timer);
+      timer = setTimeout(() => write(() => saveAnswer(d.id, qid, { value: text.value })), 800);
+    });
+
+    // One-tap marks. Tapping the active mark releases it (back to whatever
+    // the text implies); marking never erases typed text.
+    for (const btn of sec.querySelectorAll('.diss-mark'))
+      btn.addEventListener('click', () => {
+        clearTimeout(timer);
+        const active = btn.getAttribute('aria-pressed') === 'true';
+        write(() => saveAnswer(d.id, qid,
+          active ? { value: text.value } : { value: text.value, status: btn.dataset.mark }));
+      });
+  }
+
+  pane.querySelector('#diss-del').addEventListener('click', async () => {
+    if (!d) return;
+    if (!confirm('Delete this dissection?\n\nThe project and its text are untouched. This cannot be undone.')) return;
+    await deleteDissection(d.id);
+    d = null;
+    paneDissect(pane, p, id);   // fresh blank pane
+  });
+
+  refresh();
 }
 
 function paneText(pane, p, id) {

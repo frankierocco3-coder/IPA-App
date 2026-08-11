@@ -134,6 +134,15 @@ def main():
         if pin not in main_js:
             fail("reading-pathway credit/PD/excerpt missing: %r" % pin)
 
+    # 6e: Speech Dissection stays a thinking tool — the one-tap honest
+    # answers and the separate-from-project delete are pinned
+    for pin in ["I don’t know yet",
+                "Not relevant",
+                "Delete this dissection",
+                "The project and its text are untouched."]:
+        if pin not in main_js:
+            fail("Speech Dissection lost a first-class control: %r" % pin)
+
     # 6b: syllable demonstrations stay labelled as demonstrations, never
     # passed off as pure isolated sounds
     if "🔊 In a syllable" not in main_js or "syllable demonstration" not in main_js:

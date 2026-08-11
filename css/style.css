@@ -1329,3 +1329,27 @@ body.modal-open { overflow: hidden; }
 .sound-big.is-plain { cursor: default; display: grid; place-items: center; }
 
 .tryit-ephemeral { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+/* ── Speech Dissection, Quick mode (Build B) ─────────────────
+   Accordion of six questions: 44px+ touch targets, one open at a time,
+   status glyphs colored by state. */
+.diss-coverage { font-size: 14px; color: var(--muted); margin: 2px 0 10px; }
+.diss-q { border: 2px solid var(--line); border-radius: 12px; margin-bottom: 8px; background: var(--panel); overflow: hidden; }
+.diss-h { margin: 0; }
+.diss-head { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 48px;
+  padding: 10px 14px; background: none; border: 0; cursor: pointer; text-align: left;
+  font: inherit; color: inherit; }
+.diss-head[aria-expanded="true"] { border-bottom: 2px solid var(--line); }
+.diss-status { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; display: grid;
+  place-items: center; font-size: 14px; font-weight: 700; border: 2px solid var(--line);
+  color: var(--muted); }
+.diss-status[data-st="answered"] { background: var(--green, #6f8657); border-color: var(--green, #6f8657); color: #fff; }
+.diss-status[data-st="unknown"] { border-color: #b98c2e; color: #b98c2e; }
+.diss-status[data-st="na"] { background: var(--line); }
+.diss-question { font-weight: 600; }
+.diss-body { padding: 12px 14px; }
+.diss-body textarea { width: 100%; resize: vertical; }
+.diss-marks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+.diss-marks .diss-mark { min-height: 44px; }
+.diss-mark[aria-pressed="true"] { outline: 2px solid var(--accent, #6f8657); outline-offset: -2px; font-weight: 700; }
+.diss-del { color: var(--red, #b3453a); }

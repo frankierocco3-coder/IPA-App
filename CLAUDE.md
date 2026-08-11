@@ -510,6 +510,33 @@ page now carries VERBATIM Jowett excerpts (verified 2026-08-11 against
 Project Gutenberg #1672/#1636/#1497), pinned in launch_lint 6d and
 regression section 10.
 
+BUILD B (2026-08-11, committed locally, NOT pushed): Speech Dissection
+Quick mode, per docs/BUILD_02_DISSECT_QUICK.md + SPEECH_DISSECTION_SPEC
+§1/§3/§8/§11. New js/dissect.js (six QUICK_QUESTIONS with stable ids
+quick.happening/wants/resisting/doing/change/after — NEVER rename;
+newDissection in the exact §8 shape with reserved
+annotations/speakers/interpretations/userQuestions/history arrays;
+saveAnswer derives answered/blank from text unless an explicit
+'unknown'/'na' status is passed — marks always KEEP typed text;
+coverageOf/coverageLine words-not-scores). Storage: DB_VERSION 1→2,
+additive-only migration creating store 'dissections' (keyPath id,
+index targetKey) — nothing existing touched; regression pins v2 and
+proves takes survive the live upgrade. UI: '🔍 Dissect This' tab on
+the Studio project view → paneDissect accordion (one question open at
+a time, real <label>s, 800ms debounced autosave with visible
+Saving…/Saved ✓, one-tap "I don't know yet"/"Not relevant" as
+first-class answers, lazy record creation so browsing writes nothing,
+delete-dissection separate from delete-project with its own confirm).
+Project deletion now cascades deleteDissectionsFor beside
+deleteTakesFor and SAYS so in the confirm. XSS: stored answers are the
+app's highest user-authored-text surface — values enter the DOM only
+via textarea .value, esc() everywhere else; regression stores a live
+payload and asserts inertness. Guided/Full modes and the Action
+Library deliberately absent (no controls for unbuilt modes). launch_lint
+6e pins the one-tap controls. Regression suite → 159 checks / 199
+total; five gates pass. Section-11 test drive creates and deletes its
+own project; leaves no trace.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

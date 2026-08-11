@@ -6,22 +6,32 @@
 // settings) so existing progress is never touched by anything in here.
 //
 // Stores
-//   projects   — keyPath 'id'; index 'updatedAt', 'title'
-//   recordings — keyPath 'id'; index 'projectId', 'createdAt'
-//   blobs      — keyPath 'id' (same id as the recording); { id, blob }
-//   meta       — keyPath 'key'; small internal bookkeeping (migrations etc.)
+//   projects    — keyPath 'id'; index 'updatedAt', 'title'
+//   recordings  — keyPath 'id'; index 'projectId', 'createdAt'
+//   blobs       — keyPath 'id' (same id as the recording); { id, blob }
+//   meta        — keyPath 'key'; small internal bookkeeping (migrations etc.)
+//   dissections — keyPath 'id'; index 'targetKey' (v2, Build B — Speech
+//                 Dissection Quick; unbounded user-authored analysis text,
+//                 which is why it lives here and never in localStorage)
 //
 // Audio blobs live in their own store so listing takes never has to pull
 // megabytes of audio into memory.
+//
+// VERSION HISTORY — every step is purely additive; no migration has ever
+// read, rewritten or deleted existing records, so downgrade-readers stay
+// safe and recordings/projects are untouched by upgrades.
+//   1  projects / recordings / blobs / meta
+//   2  + dissections (new store only — nothing else touched)
 
 const DB_NAME = 'speechcraft';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 export const STORES = {
   projects: 'projects',
   recordings: 'recordings',
   blobs: 'blobs',
   meta: 'meta',
+  dissections: 'dissections',
 };
 
 let dbPromise = null;
@@ -62,7 +72,13 @@ export function openDB() {
         db.createObjectStore(STORES.blobs, { keyPath: 'id' });
         db.createObjectStore(STORES.meta, { keyPath: 'key' });
       }
-      // Future: if (from < 2) { ... }
+      if (from < 2) {
+        // Build B: Speech Dissection records. Additive only — creates one
+        // new store and touches nothing that exists.
+        const dissections = db.createObjectStore(STORES.dissections, { keyPath: 'id' });
+        dissections.createIndex('targetKey', 'targetKey');
+      }
+      // Future: if (from < 3) { ... }
     };
 
     req.onsuccess = () => {

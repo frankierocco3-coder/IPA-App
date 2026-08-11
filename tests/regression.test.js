@@ -20,6 +20,9 @@ import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl,
          takesPresence, listAllTakes } from '../js/recordings.js';
 import { setPersonal, getPersonal, deletePersonal } from '../js/overrides.js';
 import { dbSupported } from '../js/db.js';
+import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
+         getDissection, saveAnswer, deleteDissection, deleteDissectionsFor,
+         materialTypeFrom, coverageOf, coverageLine } from '../js/dissect.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
 import { store } from '../js/state.js';
 import { CAPABILITIES } from '../js/capabilities.js';
@@ -299,7 +302,11 @@ export async function run({ navDoc = document } = {}) {
       const relisted = (await listTakes({ projectId: pP.id }))[0];
       check('seeded take metadata unchanged after re-read', JSON.stringify(relisted) === snapshot);
       check('seeded take blob remains readable', !!(await takeUrl(saved.id)));
-      check('IndexedDB version unchanged (no migration)', (await openDB()).version === 1);
+      // v1 → v2 was Build B's dissections store — additive only, ordered
+      // separately from the pause (which still migrates nothing). The take
+      // checks around this line run against the migrated database, so they
+      // are the live proof that recordings survive the upgrade untouched.
+      check('IndexedDB at v2 (Build B), takes intact across the migration', (await openDB()).version === 2);
       await deleteTake(saved.id);
       check('seeded take deletable', (await listTakes({ projectId: pP.id })).length === 0);
     } finally {
@@ -741,6 +748,176 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('Build A preface + pathway drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 11. Build B: Speech Dissection, Quick mode ──────────────
+  // Shape and storage first (records this section creates and deletes
+  // itself — a user's own dissections are never touched), then, runner
+  // only, the whole journey: answer, mark, reload, revise, delete.
+  check('dissect: six questions with the ordered stable ids',
+    String(QUICK_QUESTIONS.map(q => q.id)) ===
+    'quick.happening,quick.wants,quick.resisting,quick.doing,quick.change,quick.after');
+  {
+    const shape = newDissection({ targetType: 'project', targetId: 'x1', targetLabel: 'T', materialType: 'scene' });
+    check('dissect: new record matches the spec §8 shape', shape.schemaVersion === 1
+      && shape.mode === 'quick' && shape.targetKey === 'project:x1' && shape.materialType === 'scene'
+      && ['annotations', 'speakers', 'interpretations', 'userQuestions', 'history']
+        .every(k => Array.isArray(shape[k]) && shape[k].length === 0));
+    check('dissect: material types map into the spec set',
+      materialTypeFrom('speech') === 'speech' && materialTypeFrom('lyrics') === 'monologue'
+      && materialTypeFrom(undefined) === 'monologue');
+    const d2 = newDissection({ targetType: 'project', targetId: 'x2', targetLabel: 'T' });
+    d2.answers['quick.happening'] = { value: 'a', status: ANSWER_STATUS.answered, updatedAt: 1 };
+    d2.answers['quick.wants'] = { value: '', status: ANSWER_STATUS.unknown, updatedAt: 1 };
+    d2.answers['quick.resisting'] = { value: '', status: ANSWER_STATUS.na, updatedAt: 1 };
+    const c = coverageOf(d2);
+    check('dissect: coverage counts all four states, never a score',
+      c.answered === 1 && c.unknown === 1 && c.na === 1 && c.blank === 3
+      && coverageLine(d2).includes('3 of 6 explored') && !coverageLine(d2).includes('%'));
+  }
+
+  if (dbSupported()) {
+    try {
+      const d3 = newDissection({ targetType: 'project', targetId: '__diss-test', targetLabel: 'Diss test' });
+      await putDissection(d3);
+      check('dissect: record persists and is found by target key',
+        (await dissectionFor('project', '__diss-test'))?.id === d3.id);
+      await saveAnswer(d3.id, 'quick.happening', { value: 'A confession under pressure.' });
+      await saveAnswer(d3.id, 'quick.wants', { value: 'half a thought', status: 'unknown' });
+      await saveAnswer(d3.id, 'quick.resisting', { value: '', status: 'na' });
+      const back = await getDissection(d3.id);
+      check('dissect: the three answer states round-trip, marks keep text',
+        back.answers['quick.happening'].status === 'answered'
+        && back.answers['quick.wants'].status === 'unknown'
+        && back.answers['quick.wants'].value === 'half a thought'
+        && back.answers['quick.resisting'].status === 'na');
+      await saveAnswer(d3.id, 'quick.happening', { value: 'Revised: a bargain, not a confession.' });
+      check('dissect: revision overwrites in place',
+        (await getDissection(d3.id)).answers['quick.happening'].value.startsWith('Revised'));
+      await saveAnswer(d3.id, 'quick.wants', { value: '' });
+      check('dissect: clearing an unmarked answer returns it to unexplored',
+        !(await getDissection(d3.id)).answers['quick.wants']);
+      let rejectedQ = false;
+      try { await saveAnswer(d3.id, 'quick.nope', { value: 'x' }); } catch { rejectedQ = true; }
+      check('dissect: unknown question ids are rejected, never stored', rejectedQ);
+      await deleteDissection(d3.id);
+      check('dissect: deletion removes the record', (await getDissection(d3.id)) == null);
+
+      // Deletion isolation, both directions, on disposable records.
+      const pD = await createProject({ title: '__regression dissect (safe to delete)' });
+      const d4 = newDissection({ targetType: 'project', targetId: pD.id, targetLabel: pD.title });
+      await putDissection(d4);
+      await deleteDissection(d4.id);
+      check('dissect: deleting a dissection leaves the project intact',
+        (await getProject(pD.id))?.id === pD.id);
+      const d5 = newDissection({ targetType: 'project', targetId: pD.id, targetLabel: pD.title });
+      await putDissection(d5);
+      const removed = await deleteDissectionsFor(pD.id);
+      check('dissect: project-deletion cascade removes only that project\'s dissections',
+        removed === 1 && (await dissectionFor('project', pD.id)) == null);
+      await deleteProject(pD.id);
+    } catch (err) {
+      bad('dissect storage round-trips', String(err));
+    }
+  } else {
+    ok('dissect storage round-trips (needs IndexedDB)');
+  }
+
+  // The journey, through the real UI (runner only).
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let projId = null;
+    try {
+      let doc = frame.contentDocument;
+      // Re-read contentWindow every dispatch — reloads swap the realm.
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const proj = await createProject({
+        title: '__regression dissect drive (safe to delete)',
+        contentType: 'monologue',
+        text: 'I am not asking you. I am telling you.',
+      });
+      projId = proj.id;
+      const openDissect = async () => {
+        clickIn(doc.getElementById('brand-home')); await sleep(300);
+        clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Studio')));
+        await sleep(400);
+        const card = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === projId);
+        clickIn(card?.querySelector('button[data-act="open"]') ?? card); await sleep(450);
+        clickIn([...doc.querySelectorAll('.proj-tabs .son-tab')].find(b => b.dataset.tab === 'dissect'));
+        await sleep(450);
+      };
+      await openDissect();
+      const qSec = qid => doc.querySelector(`.diss-q[data-q="${qid}"]`);
+      check('dissect UI: six questions render behind real labels',
+        doc.querySelectorAll('.diss-q').length === 6
+        && doc.querySelectorAll('#diss-list label.field .field-label').length === 6);
+      const answer = async (qid, textVal) => {
+        clickIn(qSec(qid).querySelector('.diss-head')); await sleep(150);
+        const ta = qSec(qid).querySelector('.diss-text');
+        ta.value = textVal;
+        ta.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
+        await sleep(1100);   // ride out the 800ms debounce
+      };
+      // The XSS probe is stored as an ANSWER — it must come back as text.
+      await answer('quick.happening', 'She has already decided to leave.');
+      await answer('quick.wants', '<img src=x onerror="window.__dissXss=1"><b>bold?</b>');
+      clickIn(qSec('quick.resisting').querySelector('.diss-head')); await sleep(150);
+      clickIn(qSec('quick.resisting').querySelector('[data-mark="unknown"]')); await sleep(400);
+      clickIn(qSec('quick.doing').querySelector('.diss-head')); await sleep(150);
+      clickIn(qSec('quick.doing').querySelector('[data-mark="na"]')); await sleep(400);
+      check('dissect UI: autosave reports a visible save state',
+        doc.getElementById('diss-state').textContent.includes('Saved'));
+
+      // Survive a real reload with all five states (2 answered, unknown,
+      // na, blank) exactly as left.
+      frame.contentWindow.location.reload();
+      doc = null;
+      for (let i = 0; i < 40; i++) { await sleep(150); doc = frame.contentDocument; if (doc?.querySelector('.side-nav .side-item')) break; }
+      await openDissect();
+      const st = qid => qSec(qid).querySelector('.diss-status').dataset.st;
+      check('dissect UI: all five states survive a reload',
+        st('quick.happening') === 'answered' && st('quick.wants') === 'answered'
+        && st('quick.resisting') === 'unknown' && st('quick.doing') === 'na'
+        && st('quick.change') === 'blank' && st('quick.after') === 'blank',
+        [st('quick.happening'), st('quick.wants'), st('quick.resisting'), st('quick.doing'), st('quick.change')].join(','));
+      check('dissect UI: coverage reads as words, not a score',
+        doc.getElementById('diss-cov').textContent.includes('4 of 6 explored')
+        && doc.getElementById('diss-cov').textContent.includes('1 still open'));
+      clickIn(qSec('quick.wants').querySelector('.diss-head')); await sleep(150);
+      check('dissect UI: stored XSS payload renders inert',
+        qSec('quick.wants').querySelector('.diss-text').value.includes('<img src=x')
+        && !qSec('quick.wants').querySelector('img, b')
+        && frame.contentWindow.__dissXss === undefined);
+
+      // Revise, reload, confirm the revision stuck.
+      await answer('quick.happening', 'Revised: she decided years ago.');
+      frame.contentWindow.location.reload();
+      doc = null;
+      for (let i = 0; i < 40; i++) { await sleep(150); doc = frame.contentDocument; if (doc?.querySelector('.side-nav .side-item')) break; }
+      await openDissect();
+      clickIn(qSec('quick.happening').querySelector('.diss-head')); await sleep(150);
+      check('dissect UI: a revision survives reload',
+        qSec('quick.happening').querySelector('.diss-text').value.startsWith('Revised'));
+
+      // Delete the dissection alone; the project must survive.
+      frame.contentWindow.confirm = () => true;
+      clickIn(doc.getElementById('diss-del')); await sleep(400);
+      check('dissect UI: delete resets the pane and spares the project',
+        (await dissectionFor('project', projId)) == null
+        && (await getProject(projId))?.id === projId
+        && doc.getElementById('diss-cov').textContent.includes('Nothing explored yet'));
+    } catch (err) {
+      bad('dissect UI journey', String(err));
+    } finally {
+      if (projId) {
+        await deleteDissectionsFor(projId).catch(() => {});
+        await deleteProject(projId).catch(() => {});
+      }
+    }
+  } else {
+    ok('dissect UI journey (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);
