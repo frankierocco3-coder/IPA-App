@@ -1067,6 +1067,22 @@ body.modal-open { overflow: hidden; }
 
 /* ── Onboarding: the first-session walk-in ─────────────────── */
 .onboard { max-width: 560px; margin: 0 auto; padding: 44px 20px 56px; display: flex; flex-direction: column; gap: 18px; min-height: 88vh; }
+
+/* ── "Before You Speak" threshold ──────────────────────────── */
+/* Reuses the onboarding shell. New pieces: the Plato blockquote, the
+   equal-weight choice, and a visible ring on the focused heading. */
+.threshold { position: relative; }
+.threshold h1:focus { outline: 3px solid var(--green); outline-offset: 4px; border-radius: 6px; }
+.th-close { position: absolute; top: 10px; right: 10px; }
+.th-quote { border-left: 3px solid var(--line); margin: 4px 0 10px; padding: 4px 0 4px 16px; }
+.th-quote p { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; margin: 0 0 6px; }
+.th-attrib { font-size: 13px; color: var(--muted); }
+.th-note { text-align: center; color: var(--muted); margin-top: 6px; }
+.th-way { width: 100%; }                 /* equal weight — deliberately no primary */
+.th-invite-actions { display: flex; flex-direction: column; gap: 8px; }
+@media (prefers-reduced-motion: reduce) {
+  .threshold, .threshold * { transition: none !important; animation: none !important; }
+}
 .ob-dots { display: flex; gap: 8px; justify-content: center; }
 .ob-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); }
 .ob-dot.on { background: var(--green); border-color: var(--green-dark); }

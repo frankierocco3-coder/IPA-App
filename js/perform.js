@@ -4,6 +4,16 @@
 // hold exactly one recording at a time, always release the microphone when
 // we stop, and hand back a Blob the caller can store or play.
 //
+// CAPABILITY BOUNDARY: while CAPABILITIES.learnerSpeaking is false,
+// startRecording() throws FeatureDisabledError BEFORE touching
+// getUserMedia — the second enforcement level under the hidden UI, so
+// even a forgotten legacy path can never start the microphone. Throwing
+// (not returning) is deliberate: resolving normally would falsely tell
+// callers capture had started. stopRecording/cancelRecording stay
+// unguarded — releasing a microphone must always be possible.
+
+import { CAPABILITIES } from './capabilities.js';
+//
 // Format differs by browser — Chrome/Firefox give webm/opus, Safari and iOS
 // give mp4/aac — so we ask MediaRecorder what it supports rather than
 // hardcoding, and store the mime type alongside the blob.
@@ -36,6 +46,8 @@ function pickMimeType() {
 /** Human-readable reason a recording could not start. */
 export function micErrorMessage(err) {
   const name = err?.name || '';
+  if (name === 'FeatureDisabledError')
+    return 'Recording is paused in this version of Speechcraft. Your saved takes are unaffected.';
   if (name === 'NotAllowedError' || name === 'SecurityError')
     return 'Microphone access was blocked. Allow it in your browser’s site settings, then try again.';
   if (name === 'NotFoundError' || name === 'DevicesNotFoundError')
@@ -53,10 +65,16 @@ export const isRecording = () => !!active;
 
 /**
  * Begin recording. Resolves once capture has actually started.
- * `onTick(ms)` fires about every 200ms with elapsed time.
- * `onAutoStop()` fires if the duration cap is reached.
+ * `options.onTick(ms)` fires about every 200ms with elapsed time.
+ * `options.onAutoStop()` fires if the duration cap is reached.
+ * `caps` is the explicit capability dependency: production callers use
+ * the frozen default; tests may inject either state.
  */
-export async function startRecording({ onTick, onAutoStop } = {}) {
+export async function startRecording(options = {}, caps = CAPABILITIES) {
+  const { onTick, onAutoStop } = options;
+  if (!caps.learnerSpeaking)
+    throw Object.assign(new Error('learner speaking is disabled in this build'),
+      { name: 'FeatureDisabledError' });
   if (active) throw new Error('Already recording');
   if (!recordingSupported()) throw Object.assign(new Error('unsupported'), { name: 'NotSupportedError' });
 

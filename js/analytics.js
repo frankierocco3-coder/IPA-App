@@ -195,6 +195,19 @@ export function totals() {
  *            + confusion-pair frequency
  *            − a bonus for things already improving (so they don't dominate)
  */
+/**
+ * The drill targets a set of rehearsal picks implies: a confusion pair
+ * contributes both of its symbols, a single recommendation its own `sym`.
+ * Never assumes a `phonemes` field (the old consumer read one that was
+ * never returned — every targeted practice CTA was silently dead; B04
+ * bug #1). `isValid` lets the caller filter to real inventory symbols.
+ */
+export function rehearsalTargets(picks, isValid = () => true) {
+  return [...new Set((picks ?? []).flatMap(p =>
+    p?.pair ? [p.pair.right, p.pair.wrong] : (p?.sym ? [p.sym] : [])
+  ))].filter(isValid);
+}
+
 export function dailyRehearsal(max = 4) {
   const a = load();
   const rows = Object.entries(a.symbols).map(([sym, s]) => {

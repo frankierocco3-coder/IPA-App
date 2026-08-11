@@ -1,6 +1,8 @@
 import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { DIALECT_INFO } from './data/dialects.js';
+import { CAPABILITIES } from './capabilities.js';
+import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded } from './audio.js';
@@ -27,7 +29,8 @@ import { migrateLegacyCustomText, listProjects, getProject, saveProject, createP
 import { recordingSupported, startRecording, stopRecording, cancelRecording,
          isRecording, micErrorMessage, formatMs, MAX_RECORDING_MS } from './perform.js';
 import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
-         releaseAllUrls, playUrl, RATINGS, deleteTakesFor, listAllTakes, deleteAllTakes } from './recordings.js';
+         releaseAllUrls, playUrl, RATINGS, deleteTakesFor, listAllTakes, deleteAllTakes,
+         takesPresence } from './recordings.js';
 import { dbSupported, STORES, idbClear } from './db.js';
 import { questRows, claimQuest, onLessonFinished } from './quests.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
@@ -36,7 +39,8 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
          listPersonal, exportPersonal, importPersonal, setProjectWordOverride,
          setOccurrenceOverride, clearOverridesFor, normWord } from './overrides.js';
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
-         resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE, confidenceOf } from './analytics.js';
+         rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
+         confidenceOf } from './analytics.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -334,6 +338,9 @@ function renderShell(section) {
   else if (section === 'shop') shopMain(main);
   else if (section === 'profile') profileMain(main);
   else moreMain(main);
+  // The intro suppression is one landing render wide, whatever the section
+  // — a tools-choice user's later Learn visit gets the intro as normal.
+  skipCourseIntroOnce = false;
 }
 
 // ── Stats bar: course chip + streak / gems / hearts ───────────
@@ -560,9 +567,40 @@ function learnMain(el, course) {
   const { done, total } = trackProgress(track);
   const cc = continueCard(track, course);
   const path = buildTrackPath(track, { guidebook: true, labels: true });
+  // One-time invitation for grandfathered users (verbatim copy — it must
+  // not block), and the diagnostic offer, which retires only when the
+  // diagnostic has been taken or declined (never on mere XP: the offer is
+  // how the diagnostic stays reachable; Practice holds the permanent entry).
+  const invite = store.threshold?.source === 'grandfathered' && !store.thresholdInviteSeen ? `
+    <section class="continue-card th-invite" aria-label="New: Before You Speak">
+      <div class="cc-info">
+        <span class="cc-stage">✨ New</span>
+        <h2>New: Before You Speak</h2>
+        <p class="cc-meta">A short opening on the power and responsibility of speech. It takes about three minutes, and your progress is untouched either way.</p>
+      </div>
+      <div class="th-invite-actions">
+        <button class="btn btn-primary" id="th-invite-read" type="button">Read it</button>
+        <button class="btn-lite" id="th-invite-later" type="button">Not now</button>
+      </div>
+    </section>` : '';
+  const diag = store.onboarding.diagnostic == null ? `
+    <section class="continue-card th-diag" aria-label="Quick diagnostic">
+      <div class="cc-info">
+        <span class="cc-stage">🎯 Optional</span>
+        <h2>Take a quick diagnostic</h2>
+        <p class="cc-meta">≈8 quick questions — it can’t cost hearts, and it seeds your weak-sound tracking.</p>
+      </div>
+      <div class="th-invite-actions">
+        <button class="btn btn-primary" id="th-diag-take" type="button">Take it</button>
+        <button class="btn-lite" id="th-diag-later" type="button">Not now</button>
+      </div>
+    </section>` : '';
+
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
+    ${invite}
     ${cc.html}
+    ${diag}
     ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
       <div class="track-progress">
@@ -574,7 +612,23 @@ function learnMain(el, course) {
   cc.wire(el);
   wireWhatIsIpaCard(el);
   path.wire(el);
-  if (course.id === 'ssbe' && !store.introsSeen.ssbe) showSsbeIntro(course);
+  el.querySelector('#th-invite-read')?.addEventListener('click', () => {
+    store.dismissThresholdInvite();
+    renderThreshold(0, { replay: true });
+  });
+  el.querySelector('#th-invite-later')?.addEventListener('click', () => {
+    store.dismissThresholdInvite();
+    goSection('learn');
+  });
+  el.querySelector('#th-diag-take')?.addEventListener('click', () => {
+    store.saveOnboarding({ diagnostic: 'taken' });
+    startLesson(practiceLesson(track));
+  });
+  el.querySelector('#th-diag-later')?.addEventListener('click', () => {
+    store.saveOnboarding({ diagnostic: 'declined' });
+    goSection('learn');
+  });
+  if (course.id === 'ssbe' && !store.introsSeen.ssbe && !skipCourseIntroOnce) showSsbeIntro(course);
 }
 
 // Per-unit guidebook: what the unit teaches, in one readable page.
@@ -661,6 +715,9 @@ function practiceMain(el, course) {
     <div class="practice-row">
       <button class="btn-lite" id="hub-mixed" type="button">Prefer the full spread? Full-course mixed review — everything ${esc(name)} has taught, not just weak sounds ›</button>
     </div>` : ''}
+    <div class="practice-row">
+      <button class="btn-lite" id="hub-diagnostic" type="button">🎯 Take the diagnostic — ≈8 quick questions that seed your weak-sound tracking. Never costs hearts ›</button>
+    </div>
     ${dailyRehearsalCard()}
     <p class="pane-note">Practice never costs hearts — mixed review and rehearsal even earn one back. Real lessons on the Learn path are where hearts are at stake.</p>
     ${PRACTICE_GROUPS.map(g => `
@@ -679,6 +736,10 @@ function practiceMain(el, course) {
   el.querySelector('#quick-practice').addEventListener('click', () =>
     targeted ? startDailyRehearsal() : startLesson(practiceLesson(track)));
   el.querySelector('#hub-mixed')?.addEventListener('click', () => startLesson(practiceLesson(track)));
+  el.querySelector('#hub-diagnostic')?.addEventListener('click', () => {
+    store.saveOnboarding({ diagnostic: 'taken' });   // retires the Learn offer card
+    startLesson(practiceLesson(track));
+  });
   el.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
   el.querySelector('#hub-idiom-drill')?.addEventListener('click', () => startLesson(idiomLesson(d, track)));
   el.querySelectorAll('.mode-card[data-mode]').forEach(b =>
@@ -1120,7 +1181,7 @@ function wiiStepHtml(step, st) {
         <li>Examine tongue and lip placement.</li>
         <li>Say the sounds separately.</li>
         <li>Blend them into the word.</li>
-        <li>Record yourself (the 🎬 Studio has a real recorder).</li>
+        <li>Listen closely to the model recordings and shadow them in your head as you read.</li>
         <li>Compare, adjust, repeat.</li>
       </ol>
       <p class="guide-text">Try it on one word:</p>
@@ -1208,17 +1269,75 @@ function drawWhatIsIpa(step, st) {
   if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
 }
 
-// ── Onboarding: the first-session walk-in ─────────────────────
-// Four short steps: what this is → why you're here → which voice → how to
-// start. Preferences persist in the main store; users with pre-onboarding
-// progress are marked done at boot and never see it.
+// ── "Before You Speak" — the first-launch threshold ───────────
+// Eight screens: panels 1–6 (the substance), the kept course picker, then
+// the choice, which lands the user exactly where it says. Replaces the old
+// welcome/goal onboarding outright. No XP, no track — this is an opening,
+// not a lesson.
+//
+// COPY IS VERBATIM from docs/THRESHOLD_COPY.md. Do not paraphrase,
+// shorten, or "improve" a single line here without changing it there
+// first. Static trusted strings authored in-repo — no user data.
 
-const GOALS = [
-  { id: 'acting', icon: '🎭', label: 'Acting & performance', blurb: 'Dialects for roles — texts, rehearsal, recorded takes.' },
-  { id: 'accent', icon: '🗣', label: 'Accent training', blurb: 'Sound at home in a new accent, sound by sound.' },
-  { id: 'ipa', icon: '📖', label: 'IPA & linguistics', blurb: 'Read and write the alphabet of sounds itself.' },
-  { id: 'general', icon: '💬', label: 'General pronunciation', blurb: 'Clearer, more deliberate everyday speech.' },
+const THRESHOLD_PANELS = [
+  { title: 'Before You Speak',
+    quote: 'The beginning is the most important part of the work, especially in the case of a young and tender thing.',
+    attribution: '— Plato, <i>Republic</i> 377a–b',
+    body: ['Before you use Speechcraft, you need to understand the power of speech.'] },
+  { title: 'Speech Reveals Thought',
+    body: [
+      'Speech reveals thought. It reveals what we understand, what we assume, what we value, what we fear, and how carefully we have examined our own ideas.',
+      'For an actor, speech turns thought and intention into action upon another character.',
+      'For a teacher, it turns information into understanding.',
+      'For a leader, it gives people direction and gathers them around a purpose.',
+      'For all of us, it is how we ask, refuse, explain, comfort, confront, confess, defend, persuade, and connect.',
+      'The better we become at understanding an idea and communicating it, the better we understand other people — and ourselves.',
+    ] },
+  { title: 'Developing a Voice',
+    body: [
+      'Developing your voice is not learning to sound confident, intelligent, or expressive.',
+      'It is the practice of deepening your understanding of yourself, other people, and the world.',
+      'When you try to put an idea into words, you find out where your understanding is clear and where it stops. You find what you know, what you assumed, what you cannot yet explain, and what you still need to ask.',
+      'Speech does not only display understanding. The effort to speak clearly helps create it.',
+      'If you cannot yet articulate something, do not conclude that you know nothing. Treat the difficulty as an invitation to examine what you know more deeply.',
+      'Speechcraft exists in part to close the distance between having an understanding and being able to give it to someone else.',
+    ] },
+  { title: 'Knowledge and Its Appearance',
+    body: [
+      'Speaking confidently is not the same as knowing what you are talking about.',
+      'One person may understand a subject deeply and struggle to express it. Another may understand very little and speak with confidence, intensity, and force.',
+      'Speechcraft will make either of them more powerful.',
+      'That is why learning to speak has to include learning to question, to investigate, to listen, and to recognize where your knowledge ends.',
+    ] },
+  { title: 'Emotion and Knowledge',
+    body: [
+      'Emotion without examined understanding can become a distraction — a veil over what the speaker does not know.',
+      'Emotion grounded in knowledge does the opposite. It deepens the listener\'s understanding and shows them why the subject matters.',
+      'A responsible speaker uses emotion to illuminate the subject. A manipulative speaker uses emotion to draw attention away from what is missing.',
+      'Speechcraft will teach you to tell the difference — in other speakers, and in yourself.',
+      'When the subject is the speaker\'s own grief, love, fear, or experience, the emotion may itself be part of the truth. But feeling something strongly does not prove every conclusion drawn from the feeling.',
+      '<b>The strength of a feeling does not determine the truth of a claim.</b>',
+    ] },
+  { title: 'Learn to See Speech',
+    body: [
+      'You will not only practice speaking. You will learn to examine speech.',
+      'You will read words, listen to voices, and watch speakers at work.',
+      'You will take apart conversations, scenes, monologues, speeches, interviews, and debates — to find what each person wants, what they know, what they assume, what they conceal, and how they use language and emotion to work on another person.',
+      'Then you will make those choices yourself, on purpose.',
+    ] },
 ];
+
+// Verbatim panel-7 copy (the choice) — rendered by the final screen.
+const THRESHOLD_CHOICE = {
+  title: 'Choose your way in',
+  options: [
+    { id: 'craft', label: 'Learn the Craft',
+      blurb: 'Follow the guided path from sound and knowledge to intention, speech, and performance.' },
+    { id: 'tools', label: 'Use the Tools',
+      blurb: 'Go straight to Speechcraft\'s practical tools. The guided path stays available whenever you want it.' },
+  ],
+  note: 'Both take you into the same app. You can change your mind at any time.',
+};
 
 const ONBOARD_ACCENTS = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American', blurb: 'The screen standard — every R spoken, flat BATH, open LOT.', sample: true },
@@ -1231,45 +1350,90 @@ const ONBOARD_ACCENTS = [
 // Words whose clips make the accents' differences audible side by side.
 const SAMPLE_WORDS = ['dance', 'water', 'nurse'];
 
-function needsOnboarding() {
-  if (store.onboarding.done) return false;
-  if (store.hasEarnedAnything) {                 // predates onboarding
-    store.saveOnboarding({ done: true });
-    return false;
-  }
-  return true;
+// Suppress a course's one-time intro overlay for exactly one Learn render —
+// a new user finishing the eight-screen threshold must not land in a modal.
+let skipCourseIntroOnce = false;
+
+// Evidence of prior use, all readable synchronously. `onboarding.done` is
+// the primary signal (every user who ever reached the shell has it) and
+// must keep that name; the rest are belt and braces.
+function priorUseSignals() {
+  const sig = [];
+  try {
+    if (store.onboarding.done) sig.push('onboarding');
+    if (store.hasEarnedAnything) sig.push('progress');
+    if (store.streak > 0) sig.push('streak');
+    if (store.whatIsIpa.done) sig.push('what-is-ipa');
+    if (Object.keys(store.introsSeen ?? {}).length) sig.push('course-intro');
+    if (store.customText?.body) sig.push('custom-text');
+    if (listPersonal().length) sig.push('dictionary');
+    if (localStorage.getItem('speechcraft-course')
+      || localStorage.getItem('speechcraft-home-tab')) sig.push('nav-state');
+  } catch { /* storage unavailable — treat as fresh */ }
+  return sig;
 }
 
-function renderOnboarding(step = 0, sel = {}) {
+// The localStorage-scrubbed edge case: projects or takes in IndexedDB are
+// prior use too. Bounded so a hung database can never block boot.
+async function hasIdbTraces() {
+  if (!dbSupported()) return false;
+  try {
+    const probe = (async () =>
+      (await listProjects()).length > 0 || (await listAllTakes()).length > 0)();
+    const timeout = new Promise(r => setTimeout(() => r(false), 150));
+    return (await Promise.race([probe, timeout])) === true;
+  } catch { return false; }
+}
+
+// Boot gate. Existing users are grandfathered — recorded, never walled —
+// and get the one-time invitation card in Learn instead.
+async function gateThreshold() {
+  if (store.threshold) { renderHome(); return; }
+  if (priorUseSignals().length || await hasIdbTraces()) {
+    store.completeThreshold({ choice: null, source: 'grandfathered' });
+    renderHome();
+    return;
+  }
+  renderThreshold();
+}
+
+// The threshold itself. Screens 0–5 are the verbatim panels, screen 6 is
+// the course picker (kept from the old onboarding, samples and all — it is
+// the only place a new user hears the dialects compared, and it is what
+// calls setCourse), screen 7 is the choice, which lands where it says.
+// `replay` mode (About Speechcraft, Preferences, the invitation card)
+// never resets progress, never rewrites the original choice, never
+// re-blocks: Esc or ✕ leaves at any time.
+function renderThreshold(step = 0, opts = {}) {
   stopSpeech();
-  const total = 4;
-  const dots = `<div class="ob-dots" aria-label="Step ${step + 1} of ${total}">${
-    Array.from({ length: total }, (_, i) => `<span class="ob-dot ${i <= step ? 'on' : ''}"></span>`).join('')}</div>`;
+  const { replay = false, sel = {} } = opts;
+  // A replaying user already chose a course once — preselect it so the
+  // picker never blocks them; changing it stays optional.
+  if (replay && !sel.accent) sel.accent = activeCourse();
+  if (replay && step === 0) record(() => renderThreshold(0, { replay: true }));
+  const TOTAL = THRESHOLD_PANELS.length + 2;      // 6 panels + picker + choice
+  const dots = `<div class="ob-dots" aria-label="Progress">${
+    Array.from({ length: TOTAL }, (_, i) => `<span class="ob-dot ${i <= step ? 'on' : ''}"></span>`).join('')}</div>`;
   const back = step > 0
     ? `<button class="btn ob-back" id="ob-back" type="button">‹ Back</button>` : '<span></span>';
+  const close = replay
+    ? `<button class="quit th-close" id="th-close" aria-label="Close and return" type="button">✕</button>` : '';
 
-  const bodies = [
-    // 1 — welcome
-    () => `
-      <div class="ob-emblem">${EMBLEM}</div>
-      <h1>Welcome to Speechcraft</h1>
-      <p class="ob-lede">Speechcraft teaches you to hear, read, and speak the sounds of English — the way actors train.</p>
-      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button">Get started</button></div>`,
-    // 2 — goal
-    () => `
-      <h1>What brings you here?</h1>
-      <p class="ob-lede">This just sets the tone — everything stays open to you.</p>
-      <div class="ob-options" role="radiogroup" aria-label="Your goal">
-        ${GOALS.map(g => `
-          <button class="ob-option ${sel.goal === g.id ? 'on' : ''}" data-goal="${g.id}" type="button"
-                  role="radio" aria-checked="${sel.goal === g.id}">
-            <span class="ob-opt-icon">${g.icon}</span>
-            <span class="ob-opt-text"><b>${esc(g.label)}</b><small>${esc(g.blurb)}</small></span>
-          </button>`).join('')}
-      </div>
-      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button" ${sel.goal ? '' : 'disabled'}>Continue</button></div>`,
-    // 3 — accent
-    () => `
+  let body;
+  if (step < THRESHOLD_PANELS.length) {
+    const p = THRESHOLD_PANELS[step];
+    body = `
+      <h1>${p.title}</h1>
+      ${p.quote ? `
+      <blockquote class="th-quote">
+        <p>${p.quote}</p>
+        <footer class="th-attrib">${p.attribution}</footer>
+      </blockquote>` : ''}
+      ${p.body.map(t => `<p class="guide-text th-text">${t}</p>`).join('')}
+      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button">Continue</button></div>`;
+  } else if (step === THRESHOLD_PANELS.length) {
+    // Course picker — kept as it was, samples included.
+    body = `
       <h1>Pick your first course</h1>
       <p class="ob-lede">You can switch or add the others any time from the flag at the top.</p>
       <div class="ob-options" role="radiogroup" aria-label="First course">
@@ -1284,98 +1448,98 @@ function renderOnboarding(step = 0, sel = {}) {
               aria-label="Hear a ${esc(a.label)} sample">🔊 Sample</button>` : ''}
           </div>`).join('')}
       </div>
-      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button" ${sel.accent ? '' : 'disabled'}>Continue</button></div>`,
-    // 4 — how to start
-    () => `
-      <h1>How do you want to start?</h1>
-      <p class="ob-lede">The diagnostic is ≈8 quick questions — it can’t cost hearts, and it seeds your weak-sound tracking.</p>
-      <div class="ob-actions ob-actions-col">
-        <button class="btn btn-primary" id="ob-begin" type="button">▶ Begin your first lesson</button>
-        <button class="btn" id="ob-diagnostic" type="button">🎯 Take a quick diagnostic</button>
-      </div>`,
-  ];
+      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button" ${sel.accent ? '' : 'disabled'}>Continue</button></div>`;
+  } else {
+    // The choice. Equal visual weight — deliberately no primary styling.
+    body = `
+      <h1>${THRESHOLD_CHOICE.title}</h1>
+      <div class="ob-options" aria-label="Choose your way in">
+        ${THRESHOLD_CHOICE.options.map(o => `
+          <button class="ob-option th-way" data-choice="${o.id}" type="button">
+            <span class="ob-opt-text"><b>${esc(o.label)}</b><small>${esc(o.blurb)}</small></span>
+          </button>`).join('')}
+      </div>
+      <p class="th-note"><i>${THRESHOLD_CHOICE.note}</i></p>`;
+  }
 
   app.innerHTML = `
-    <main class="onboard" aria-labelledby="ob-h">
+    <main class="onboard threshold" aria-labelledby="ob-h">
+      ${close}
       ${dots}
-      <div class="ob-body" id="ob-h">${bodies[step]()}</div>
+      <div class="ob-body" id="ob-h">${body}</div>
       <div class="ob-footer">${back}</div>
     </main>`;
 
-  const go = (s2, sel2) => renderOnboarding(s2, { ...sel, ...sel2 });
-  document.getElementById('ob-back')?.addEventListener('click', () => go(step - 1, {}));
+  const go = (s2, sel2 = {}) => renderThreshold(s2, { replay, sel: { ...sel, ...sel2 } });
+  document.getElementById('ob-back')?.addEventListener('click', () => go(step - 1));
+  document.getElementById('th-close')?.addEventListener('click', () => goBack());
+  // Esc: on a replay it exits; on the first-run wall it steps back a panel.
+  app.querySelector('.threshold').addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    if (replay) goBack();
+    else if (step > 0) go(step - 1);
+  });
 
-  if (step === 0) document.getElementById('ob-next').addEventListener('click', () => go(1, {}));
-
-  if (step === 1) {
-    app.querySelectorAll('[data-goal]').forEach(b =>
-      b.addEventListener('click', () => go(1, { goal: b.dataset.goal })));
-    document.getElementById('ob-next').addEventListener('click', () => go(2, {}));
-  }
-
-  if (step === 2) {
+  if (step < THRESHOLD_PANELS.length) {
+    document.getElementById('ob-next').addEventListener('click', () => go(step + 1));
+  } else if (step === THRESHOLD_PANELS.length) {
     app.querySelectorAll('[data-accent]').forEach(b =>
-      b.addEventListener('click', () => go(2, { accent: b.dataset.accent })));
+      b.addEventListener('click', () => go(step, { accent: b.dataset.accent })));
     app.querySelectorAll('.ob-sample').forEach(b =>
       b.addEventListener('click', () => {
         const d = b.dataset.sample;
         speakSequence(SAMPLE_WORDS.map(w => ({ text: w, clipUrl: `audio/${d}/f/${w}.mp3` })),
           { lang: ACCENT_LANG[d] });
       }));
-    document.getElementById('ob-next').addEventListener('click', () => go(3, {}));
+    document.getElementById('ob-next').addEventListener('click', () => {
+      if (replay && sel.accent) setCourse(sel.accent);   // "Run setup again" honors the pick
+      go(step + 1);
+    });
+  } else {
+    app.querySelectorAll('[data-choice]').forEach(b =>
+      b.addEventListener('click', () => {
+        const choice = b.dataset.choice;
+        if (replay) {
+          store.markThresholdReplay(choice);             // navigate — never rewrite `choice`
+        } else {
+          store.completeThreshold({ choice, source: 'first-run' });
+          store.saveOnboarding({ done: true, accent: sel.accent ?? null });
+          setCourse(sel.accent ?? 'nam');
+          skipCourseIntroOnce = true;                    // no modal on the landing render
+        }
+        goSection(choice === 'craft' ? 'learn' : 'studio');
+      }));
   }
 
-  if (step === 3) {
-    const finish = () => {
-      store.saveOnboarding({ done: true, goal: sel.goal ?? null, accent: sel.accent ?? null });
-      setCourse(sel.accent ?? 'nam');
-      setSection('learn');
-    };
-    const track = () => trackFor(sel.accent ?? 'nam');
-    document.getElementById('ob-begin').addEventListener('click', () => {
-      finish();
-      const first = TRACK_LESSONS[track().id][0];
-      renderGuide(first);
-    });
-    document.getElementById('ob-diagnostic').addEventListener('click', () => {
-      finish();
-      startLesson(practiceLesson(track()));
-    });
-  }
-
-  // Focus the step heading so keyboard and screen-reader users land somewhere sensible.
+  // Focus the heading (visible ring via .threshold h1:focus) and start
+  // each screen at the top.
+  window.scrollTo(0, 0);
   const h = app.querySelector('h1');
   if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
 }
 
-// Preferences: revisit what onboarding asked, any time. More → Preferences.
+// Preferences. The old "Your goal" picker is gone: the stored goal value
+// was write-only (read nowhere behavioral), so no control may edit it.
+// Existing records keep their goal field untouched; nothing reads it.
 function renderPreferences() {
   record(renderPreferences);
-  const ob = store.onboarding;
   const course = COURSES.find(c => c.id === activeCourse());
   app.innerHTML = `
     ${pageTopbar('⚙️ Preferences', '#64748b')}
     <main class="guide">
-      <h2 class="guide-heading">Your goal</h2>
-      <div class="chip-row" id="pref-goals">
-        ${GOALS.map(g => `<button class="chip-pick ${ob.goal === g.id ? 'on' : ''}" data-goal="${g.id}" type="button"
-          aria-pressed="${ob.goal === g.id}">${g.icon} ${esc(g.label)}</button>`).join('')}
-      </div>
       <h2 class="guide-heading">Active course</h2>
       <div class="chip-row" id="pref-courses">
         ${COURSES.map(c => `<button class="chip-pick ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" type="button"
           aria-pressed="${c.id === course.id}">${c.icon} ${esc(c.label)}</button>`).join('')}
       </div>
       <h2 class="guide-heading">First-run setup</h2>
-      <p class="pane-note">Runs the welcome flow again. Your progress is untouched.</p>
+      <p class="pane-note">Runs the opening and course picker again. Your progress is untouched.</p>
       <button class="btn" id="pref-rerun" type="button">Run setup again</button>
     </main>`;
   wireBrandHome();
-  app.querySelectorAll('[data-goal]').forEach(b =>
-    b.addEventListener('click', () => { store.saveOnboarding({ goal: b.dataset.goal }); renderPreferences(); }));
   app.querySelectorAll('[data-course]').forEach(b =>
     b.addEventListener('click', () => { setCourse(b.dataset.course); renderPreferences(); }));
-  document.getElementById('pref-rerun').addEventListener('click', () => renderOnboarding());
+  document.getElementById('pref-rerun').addEventListener('click', () => renderThreshold(0, { replay: true }));
 }
 
 // ── Audio audit: the owner's ear-check grid (#audit) ──────────
@@ -1607,11 +1771,15 @@ function renderAbout() {
       <p class="guide-text"><b>Speechcraft helps actors understand speech, prepare their text and rehearse it in a chosen accent.</b> It exists because IPA is usually taught as an abstraction, disconnected from the work of performance — Speechcraft makes the sounds of speech easier to understand, then helps you apply them to monologues, speeches, scenes and lyrics. Learn the sound. Mark the text. Rehearse the role.</p>
       <div class="guide-word"><span class="wii-who">Learn</span><span class="guide-note">the IPA, how speech is produced, and four accent targets — courses that teach the skills</span></div>
       <div class="guide-word"><span class="wii-who">Prepare</span><span class="guide-note">your own text in the Studio: paste it, transcribe it to IPA in your dialect, mark it up with notes</span></div>
-      <div class="guide-word"><span class="wii-who">Rehearse</span><span class="guide-note">listen, repeat, record and compare takes until the accent lives in the text</span></div>
+      <div class="guide-word"><span class="wii-who">Rehearse</span><span class="guide-note">listen, repeat, and work the text against the model recordings until the accent lives in it</span></div>
       <p class="guide-text"><b>Speechcraft is in beta.</b> Content and recordings are still being reviewed and expanded. It is a practice tool, not a substitute for a dialect coach — accents are learned by ears and feedback, and no app can promise fluency.</p>
+      <h2 class="guide-heading">Before You Speak</h2>
+      <p class="guide-text">The opening — on what speech reveals, and what it can conceal. Read it again any time.</p>
+      <p><button class="btn" id="about-threshold" type="button">Read it again</button></p>
       <p class="pane-note">Pronunciation targets are exactly that: targets. Real speakers vary by region, generation and situation. Anything you paste into the Studio stays private on this device — nothing is uploaded or shared.</p>
     </main>`;
   wireBrandHome();
+  document.getElementById('about-threshold').addEventListener('click', () => renderThreshold(0, { replay: true }));
 }
 
 function renderFeedback() {
@@ -1750,7 +1918,7 @@ function hubIdiom(hub, d, track) {
         <div class="idiom-listen">
           <button class="word-chip" data-say="${esc(e.term)}" type="button" aria-label="Hear “${esc(e.term)}”">🔊 Hear it</button>
           ${e.example ? `<button class="word-chip" data-say="${esc(e.example)}" type="button" aria-label="Hear the example sentence">🔊 In a sentence</button>` : ''}
-          <button class="word-chip" data-tryterm="${esc(e.term)}" type="button" aria-label="Record yourself saying “${esc(e.term)}”">🎙 Try it</button>
+          ${CAPABILITIES.learnerSpeaking ? `<button class="word-chip" data-tryterm="${esc(e.term)}" type="button" aria-label="Record yourself saying “${esc(e.term)}”">🎙 Try it</button>` : ''}
         </div>
       </div>`).join('')
       : '<p class="pane-note">Nothing matches that filter.</p>';
@@ -2043,7 +2211,7 @@ function renderPrivacy() {
     ${pageTopbar('🔒 Privacy & Data', '#8a6d3b')}
     <main class="track-list">
       <p class="track-blurb">Everything Speechcraft stores stays in this browser on this device. Nothing you record, write or practise is ever sent anywhere.</p>
-      <p class="pane-note">Two kinds of recordings: <b>practice takes</b> (“Try it yourself”) live only in memory and are discarded automatically when you leave the page; <b>saved takes</b> (Perform → Save take) are kept in this browser's database until you delete them. Clearing this site's browser data removes everything.</p>
+      <p class="pane-note"><b>New recording is temporarily unavailable</b> in this version of Speechcraft. Your existing saved recordings remain on this device, and you can still play, download and delete them — here, or from a project's Takes tab. Clearing this site's browser data removes everything.</p>
 
       <section class="stat-block">
         <h2 class="chart-h">What is stored here</h2>
@@ -2177,9 +2345,16 @@ function dailyRehearsalCard() {
 
 /** Build a lesson out of today's picks using the existing exercise formats. */
 function startDailyRehearsal() {
-  const picks = dailyRehearsal(4);
-  const phonemes = [...new Set(picks.flatMap(p => p.phonemes))].filter(p => PHONEMES[p]);
-  if (!phonemes.length) return;
+  // Pair picks contribute both symbols, single picks their own — derived
+  // by rehearsalTargets (B04 bug #1: the old field read here never
+  // existed, so this button did nothing, silently).
+  const phonemes = rehearsalTargets(dailyRehearsal(4), s => !!PHONEMES[s]);
+  if (!phonemes.length) {
+    // Honest and accessible — never a silent dead button. The user stays
+    // exactly where they are.
+    alert('Nothing to rehearse yet — answer a few more exercises first, and your weak sounds will appear here.');
+    return;
+  }
   startLesson({
     id: 'daily-rehearsal',
     title: 'Today’s Rehearsal',
@@ -2247,7 +2422,7 @@ async function studioMain(el) {
         <div class="empty-state">
           <p class="empty-emoji">🎬</p>
           <h2>Your first project starts here</h2>
-          <p>Paste a piece you're working on — an audition speech, a scene, a monologue, song lyrics. You'll get the text, its IPA in your chosen dialect, scansion, notes, and a place to record and compare takes.</p>
+          <p>Paste a piece you're working on — an audition speech, a scene, a monologue, song lyrics. You'll get the text, its IPA in your chosen dialect, scansion, and a place for your acting and pronunciation notes.</p>
           <p class="pane-note">Example: <b>Stanley Audition</b> — A Streetcar Named Desire · Monologue · Neutral American</p>
         </div>`;
       return;
@@ -2393,6 +2568,16 @@ async function renderProject(id, tab = 'text') {
   const p = await getProject(id);
   if (!p) return goSection('studio');
 
+  // While recording is paused, the Perform tab becomes a Takes view and
+  // appears only when this project HAS saved takes — or when the lookup
+  // failed, which must reveal the tab with its recovery message, never
+  // hide it. A confirmed-empty lookup is the only thing that hides it.
+  const takesTab = CAPABILITIES.learnerSpeaking
+    ? ['perform', '🎙 Perform']
+    : (await takesPresence({ projectId: id })) === 'empty' ? null : ['perform', '🎬 Takes'];
+  const tabs = [['text', '📄 Text'], ['ipa', '🔤 Transcribe to IPA'], ['scan', '📐 Scan'],
+    takesTab, ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']].filter(Boolean);
+
   app.innerHTML = `
     ${pageTopbar('🎬 ' + esc(p.title || 'Untitled'), '#8a6d3b')}
     <main class="guide sonnet-view">
@@ -2407,8 +2592,7 @@ async function renderProject(id, tab = 'text') {
         </div>
       </div>
       <div class="sonnet-tabs proj-tabs">
-        ${[['text', '📄 Text'], ['ipa', '🔤 Transcribe to IPA'], ['scan', '📐 Scan'], ['perform', '🎙 Perform'], ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']]
-          .map(([k, l]) => `<button class="son-tab ${k === tab ? 'on' : ''}" data-tab="${k}" type="button">${l}</button>`).join('')}
+        ${tabs.map(([k, l]) => `<button class="son-tab ${k === tab ? 'on' : ''}" data-tab="${k}" type="button">${l}</button>`).join('')}
       </div>
       <div id="proj-pane" class="sonnet-pane"></div>
     </main>`;
@@ -2429,9 +2613,10 @@ async function renderProject(id, tab = 'text') {
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(p.lines, p.accent, pane, { projectId: id }); }
   }
   else if (tab === 'perform') {
-    if (!p.lines.length) pane.innerHTML = emptyText();
+    if (CAPABILITIES.learnerSpeaking && !p.lines.length) pane.innerHTML = emptyText();
     else {
-      await touchRehearsed(id);
+      // Viewing saved takes is not rehearsing — only stamp when recording.
+      if (CAPABILITIES.learnerSpeaking) await touchRehearsed(id);
       renderPerformPane(pane, { lines: p.lines, accent: p.accent, clip: null, scopeId: null, projectId: id });
     }
   }
@@ -2838,7 +3023,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
         <button class="son-tab on" data-mode="speak">🔊 Listen</button>
         <button class="son-tab" data-mode="scan">📐 Scan</button>
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
-        <button class="son-tab" data-mode="perform">🎙 Perform</button>
+        ${CAPABILITIES.learnerSpeaking ? '<button class="son-tab" data-mode="perform">🎙 Perform</button>' : ''}
         ${recast?.plain ? '<button class="son-tab" data-mode="plain">📖 Plain Meaning</button>' : ''}
         ${today.length ? '<button class="son-tab" data-mode="today">🗣 In Today’s Voice</button>' : ''}
       </div>
@@ -2856,8 +3041,8 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     TEXT_DIALECTS.map(d => {
       const hasAudio = narrated.includes(d.id);
       return `<button class="dialect-chip ${d.id === cur ? 'on' : ''} ${hasAudio ? '' : 'no-audio'}" data-d="${d.id}"
-        title="${hasAudio ? `${esc(d.label)} — recorded audio` : `${esc(d.label)} — no recording for this text yet; transcription and Perform still work`}"
-        aria-label="${esc(d.label)}${hasAudio ? '' : ' — recording coming soon; transcription and rehearsal modes still work'}">
+        title="${hasAudio ? `${esc(d.label)} — recorded audio` : `${esc(d.label)} — no model recording for this text yet; the transcription and scansion views still work`}"
+        aria-label="${esc(d.label)}${hasAudio ? '' : ' — model recording coming soon; the transcription and scansion views still work'}">
         <span class="dialect-icon">${d.flag}</span>${d.label}${hasAudio ? '' : ' <small class="chip-soon">· audio soon</small>'}</button>`;
     }).join('');
   const show = m => {
@@ -2881,6 +3066,19 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
   document.getElementById('rd-prev')?.addEventListener('click', () => { stopSpeech(); prev.go(); });
   document.getElementById('rd-next')?.addEventListener('click', () => { stopSpeech(); next.go(); });
   show('speak');
+
+  // Recording paused: reveal a Takes tab when this text HAS saved takes —
+  // or when the lookup failed, which must reveal it with the recovery
+  // message. Only a confirmed-empty lookup leaves the tab hidden.
+  if (!CAPABILITIES.learnerSpeaking && (scopeId || projectId)) {
+    const tabsEl = app.querySelector('.sonnet-tabs');
+    takesPresence({ projectId, scopeId }).then(presence => {
+      if (presence === 'empty') return;
+      if (!tabsEl?.isConnected || tabsEl.querySelector('[data-mode="perform"]')) return;
+      tabsEl.insertAdjacentHTML('beforeend', '<button class="son-tab" data-mode="perform">🎬 Takes</button>');
+      tabsEl.querySelector('[data-mode="perform"]').addEventListener('click', () => show('perform'));
+    });
+  }
 }
 
 
@@ -2896,7 +3094,87 @@ function announce(msg) {
   if (el) el.textContent = msg;
 }
 
-function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }) {
+// takesPresence lives in js/recordings.js (injectable lister → the
+// timeout and error semantics are unit-tested). Uncertainty is never
+// read as absence: only a confirmed-empty lookup hides the Takes tab.
+
+// The disabled-build Takes view: existing recordings stay fully accessible
+// (play, download, confirmed delete; rating/note/Best Take shown read-only)
+// with no capture controls of any kind. Privacy → Manage Recordings is the
+// permanent backstop and the recovery path on lookup failure.
+async function renderTakesView(pane, { accent, clip, scopeId, projectId }) {
+  const lang = dialectLang(accent);
+  pane.innerHTML = `
+    <div id="perform-live" class="sr-only" role="status" aria-live="polite"></div>
+    <p class="pane-note">Recording new takes is paused in this version of Speechcraft. Your saved takes stay on this device — play, download or delete them here, or under Privacy &amp; Data → Manage Recordings.</p>
+    <h3 class="guide-heading">Saved takes</h3>
+    <div id="perf-takes" class="takes-list"><p class="pane-note">Loading…</p></div>`;
+
+  const takesEl = pane.querySelector('#perf-takes');
+  const draw = async () => {
+    let takes = [];
+    try { takes = await listTakes({ projectId, scopeId }); }
+    catch {
+      takesEl.innerHTML = '<p class="pane-note pane-warn">Couldn’t open local storage to check for saved takes. Nothing has been deleted — try again, or manage recordings under Privacy &amp; Data.</p>';
+      return;
+    }
+    if (!takes.length) {
+      takesEl.innerHTML = '<p class="pane-note">No saved takes for this piece.</p>';
+      return;
+    }
+    takesEl.innerHTML = takes.map((t, i) => {
+      const rate = RATINGS.find(r => r.id === t.rating);
+      return `
+        <div class="take-card" data-take="${t.id}">
+          <div class="take-head">
+            <span class="take-name">Take ${takes.length - i}</span>
+            ${rate ? `<span class="tag take-rate rate-${t.rating}">${esc(rate.label)}</span>` : ''}
+          </div>
+          <p class="take-meta">${esc(t.label || '')} · ${formatMs(t.durationMs || 0)} · ${new Date(t.createdAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}${t.sizeBytes ? ` · ${(t.sizeBytes / 1024).toFixed(0)} KB` : ''}</p>
+          ${t.note ? `<p class="take-note">${esc(t.note)}</p>` : ''}
+          <div class="take-actions">
+            <button class="btn-lite" type="button" data-act="play">▶ Play</button>
+            <button class="btn-lite" type="button" data-act="dl">⬇ Download</button>
+            <button class="btn-lite btn-danger" type="button" data-act="del">Delete</button>
+          </div>
+        </div>`;
+    }).join('');
+    // Read-only ★ Best Take badge (no toggle while recording is paused).
+    if (projectId) {
+      const project = await getProject(projectId);
+      const best = project?.bestTakeId && takesEl.querySelector(`[data-take="${project.bestTakeId}"] .take-head`);
+      if (best) best.insertAdjacentHTML('beforeend', '<span class="tag tag-skill">★ Best Take</span>');
+    }
+    takesEl.querySelectorAll('.take-card').forEach(card => {
+      const id = card.dataset.take;
+      card.addEventListener('click', async e => {
+        const btn = e.target.closest('button[data-act]'); if (!btn) return;
+        const act = btn.dataset.act;
+        if (act === 'play') { playUrl(await takeUrl(id)); }
+        else if (act === 'dl') {
+          const url = await takeUrl(id);
+          const meta = takes.find(t => t.id === id);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `speechcraft-take-${new Date(meta.createdAt).toISOString().slice(0, 10)}.${(meta.mimeType || '').includes('mp4') ? 'm4a' : 'webm'}`;
+          document.body.appendChild(a); a.click(); a.remove();
+        } else if (act === 'del') {
+          if (!confirm('Delete this take? This cannot be undone.')) return;
+          await deleteTake(id);
+          announce('Take deleted.');
+          draw();
+        }
+      });
+    });
+  };
+  draw();
+}
+
+function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }, caps = CAPABILITIES) {
+  if (!caps.learnerSpeaking) {
+    renderTakesView(pane, { accent, clip, scopeId, projectId });
+    return;
+  }
   const lang = dialectLang(accent);
   const canRecord = recordingSupported();
   const canStore = dbSupported();
@@ -2931,27 +3209,8 @@ function renderPerformPane(pane, { lines, accent, clip, scopeId, projectId }) {
 
     <div class="perform-controls">
       <button class="btn btn-lite" id="perf-model" type="button">🔊 Listen to model</button>
-      <button class="btn btn-record" id="perf-rec" type="button" ${canRecord ? '' : 'disabled'}>⏺ Record</button>
-      <span class="perform-timer" id="perf-timer" hidden aria-hidden="true">00:00</span>
     </div>
-    <p class="pane-note perform-limit">Recordings stop automatically at ${Math.round(MAX_RECORDING_MS / 60000)} minutes.</p>
-    <p class="perform-error" id="perf-error" role="alert" hidden></p>
-
-    <div class="perform-take" id="perf-take" hidden>
-      <h3 class="guide-heading">Your take</h3>
-      <div class="perform-controls">
-        <button class="btn btn-lite" id="perf-play" type="button">▶ Play mine</button>
-        <button class="btn btn-lite" id="perf-compare" type="button">⇄ Compare</button>
-        <button class="btn btn-lite btn-danger" id="perf-discard" type="button">Delete</button>
-      </div>
-      <fieldset class="rating-set">
-        <legend class="field-label">Self-rating</legend>
-        ${RATINGS.map(r => `<button class="btn btn-lite rating" type="button" data-rating="${r.id}" aria-pressed="false">${r.label}</button>`).join('')}
-      </fieldset>
-      <label class="field-label" for="perf-note">Notes</label>
-      <input class="input-text" id="perf-note" type="text" maxlength="140" placeholder="e.g. dropped the final consonant">
-      <button class="btn btn-primary" id="perf-save" type="button">Save take</button>
-    </div>
+    ${performCaptureHtml(caps, { canRecord })}
 
     <h3 class="guide-heading">Saved takes</h3>
     <div id="perf-takes" class="takes-list"><p class="pane-note">Loading…</p></div>`;
@@ -3363,7 +3622,7 @@ function renderBridge() {
       </details>
       <div class="idiom-listen">
         ${c.symbols.map(s => PHONEMES[s] ? `<button class="word-chip" data-guide="${esc(s)}" type="button" aria-label="Open the guidebook page for ${esc(s)}">📖 /${esc(s)}/ ${esc(PHONEMES[s].name)}</button>` : '').join('')}
-        ${c.symbols.length && PHONEMES[c.symbols[0]] ? `<button class="word-chip" data-practice="${esc(c.symbols[0])}" type="button" aria-label="Practise this sound — record yourself on its guidebook page">🎙 Practise this sound</button>` : ''}
+        ${c.symbols.length && PHONEMES[c.symbols[0]] ? `<button class="word-chip" data-practice="${esc(c.symbols[0])}" type="button" aria-label="Study this sound on its guidebook page">📖 Study this sound</button>` : ''}
       </div>
     </section>`;
   };
@@ -3812,20 +4071,9 @@ function releaseTryIt() {
   if (tryItUrl) { URL.revokeObjectURL(tryItUrl); tryItUrl = null; }
 }
 
-function tryItHtml(label = 'Record yourself, then compare with the model.') {
-  if (!recordingSupported()) return '';
-  return `
-  <section class="tryit" aria-label="Try it yourself">
-    <span class="cc-stage">🎙 Try it yourself</span>
-    <div class="tryit-row">
-      <button class="btn btn-record" data-tryit="rec" type="button">⏺ Record</button>
-      <button class="btn btn-lite" data-tryit="model" type="button">🔊 Model</button>
-      <audio controls hidden data-tryit="play" aria-label="Your recording"></audio>
-    </div>
-    <p class="pane-note" data-tryit="status" role="status">${esc(label)}</p>
-    <p class="tryit-ephemeral">Practice only — not saved. Keep takes in the 🎬 Studio.</p>
-  </section>`;
-}
+// tryItHtml now lives in js/record-ui.js behind the capability boundary —
+// it renders nothing while learner speaking is disabled. wireTryIt below
+// is a no-op when no widget rendered.
 
 function wireTryIt(container, playModel) {
   const box = container.querySelector('.tryit');
@@ -4787,8 +5035,7 @@ if (!framedHostile) {
 
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool
-  else if (needsOnboarding()) renderOnboarding();
-  else renderHome();
+  else gateThreshold();   // threshold for fresh users; grandfathers everyone else
 
   // Typing #audit/#review into the address bar mid-session works too — a
   // bare hash change doesn't reload the page, so the boot check alone

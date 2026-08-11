@@ -125,14 +125,34 @@ tests/              security.test.js (browser-run)
 ## Current state
 
 **Working:** Duolingo-style shell (Speechcraft skin): left sidebar
-**Learn / Studio / Practice / Library / Progress / More** (same six on
-the mobile bottom nav; Shop and Profile live under More but are still
-shell sections; LEGACY_SECTIONS maps old saved 'textbook'/'quests'
-states). You are always
+**Learn / Practice / Library / Studio / Progress / More** (same six on
+the mobile bottom nav, both rendered from the ONE `SECTIONS` array; Shop
+and Profile live under More but are still shell sections;
+LEGACY_SECTIONS maps old saved 'textbook'/'quests' states). You are always
 "in" one course — 🇺🇸/🇬🇧/🇦🇺/ʃə Foundations — switched via the course chip.
-First run: 4-step onboarding (welcome → goal → accent with 🔊 samples →
-begin-or-diagnostic); prefs in store.onboarding; users with prior progress
-are auto-marked done; revisit via More → Preferences. Until the first
+First run: the "BEFORE YOU SPEAK" THRESHOLD (Build 01, branch
+threshold-before-you-speak) — 8 screens: verbatim panels 1–6 from
+docs/THRESHOLD_COPY.md (launch_lint pins spot lines; NEVER paraphrase) →
+the kept course picker with 🔊 samples → the choice (Learn the Craft →
+Learn, Use the Tools → Studio; equal weight; lands where it says). NO
+XP, no LEARN track (Frankie's locked decisions). Replaces the old
+4-step onboarding: welcome+goal steps DELETED (GOALS gone; Preferences
+lost its goal picker — stored goal values remain, read nowhere), course
+picker kept verbatim, diagnostic moved to a Learn offer card that
+retires on onboarding.diagnostic ('taken'/'declined') + a PERMANENT
+Practice row (hub-diagnostic). store.threshold = {version, completedAt,
+choice, source: first-run|grandfathered, lastReplayedAt, lastChoice};
+completeThreshold NEVER overwrites; replay (About Speechcraft,
+Preferences rerun, invite card) navigates without rewriting choice.
+Grandfathering: priorUseSignals() (onboarding.done primary — do not
+rename — plus xp/streak/intros/dictionary/customText/nav keys) + a
+150ms-bounded IndexedDB probe; grandfathered users get the one-time
+dismissible invite card in Learn (store.thresholdInviteSeen), NEVER the
+wall. skipCourseIntroOnce suppresses the ssbe intro modal for exactly
+the landing render (cleared in renderShell). Esc: back-a-panel on the
+wall, exit on replay. Dots only, no counter. Users with prior progress
+are auto-grandfathered; revisit via More → Preferences ("Run setup
+again", course preselected on replay). Until the first
 lesson pays out (store.hasEarnedAnything) the stats bar shows only the
 course chip and the rail hides quests.
 Learn = "Continue learning" card (next lesson, type, ~min, primary action)
@@ -386,6 +406,54 @@ learners would see them; approval = editing reviewStatus /
 TRANSPOSITION_REVIEW in the data files. dialect_lint checks 9-11
 (manifests, action refs, transposition statuses — all proven non-
 vacuous). Regression suite 67 checks; runner PASSED 107/107.
+
+B03 — LEARNER SPEAKING IS PAUSED (binding product decision, 2026-08-12;
+uncommitted on branch threshold-before-you-speak alongside B01):
+js/capabilities.js exports frozen CAPABILITIES.learnerSpeaking=false —
+build-controlled ONLY, nothing derives it from storage/URL/settings, no
+toggle; tests INJECT a caps param, never mutate. TWO enforcement levels:
+(1) js/record-ui.js is the sole source of capture UI (tryItHtml,
+performCaptureHtml — both return '' when disabled, both DI-testable and
+proven to still render when caps injected true); (2)
+startRecording(options, caps=CAPABILITIES) throws FeatureDisabledError
+BEFORE getUserMedia (throwing is deliberate — resolving would fake
+capture-started; micErrorMessage maps it to honest copy).
+stopRecording/cancelRecording unguarded (mic release must always work);
+teardownAV unchanged. Perform tab → '🎬 Takes' view: play/download/
+confirmed-delete only, rating/note/★Best shown READ-ONLY; tab appears
+when takesPresence() says 'has' OR 'error' (2s timeout; uncertainty
+REVEALS with a recovery message pointing at Privacy → Manage
+Recordings, the permanent backstop) — only confirmed-empty hides it.
+Take identity: projectId (indexed) XOR scopeId ('sonnet:N' /
+'<libKey>:<pieceId>', scan+filter). W&E Try-it gated. touchRehearsed
+only stamps when actually recording. DB_VERSION stays 1 (test-pinned).
+Copy audit done (About Rehearse line, Studio empty state, What-Is-IPA
+recorder line, reader chip labels, bridge 'Study this sound', Privacy
+3-sentence disclosure — launch_lint pins the disclosures + frozen flag,
+NO global word bans). Speaking game removed from the active sequence;
+reintroduction requires the future speaking audit (docs/ROADMAP).
+Regression suite: 92 checks incl. getUserMedia spy at ZERO across all
+driven journeys, dual-state renders, guard behavior, seeded-take
+preservation. Firefox/Safari/mobile passes of non-speaking journeys are
+Frankie's to run; MediaRecorder certification moved to the speaking
+audit.
+
+B04 FIXES (2026-08-12, approved, uncommitted with B01/B03): bug #1 —
+analytics.rehearsalTargets(picks, isValid) derives drill targets (pair →
+both symbols, single → sym; never assumes a `phonemes` field, which
+dailyRehearsal never returned — the targeted Quick Practice and Today's
+Rehearsal CTAs had been silently dead); startDailyRehearsal validates
+and, with no drillable phoneme target (picks can be whole-word
+transcription pairs from accent exercises — by analytics design), shows
+an honest alert instead of returning silently. Bug #2 — state.js
+freePlay getter/setter RESTORED ("Remove Quest Mode", July 22, deleted
+persistence while the UI kept the toggle); boolean-strict both ways, so
+missing/legacy/malformed values read false. Regression suite → 123
+checks (pair/single/mixed/empty targets; free-play default, malformed
+values, enable/disable persistence at storage level AND through the real
+UI across iframe reloads + a course switch; CTA never-silent contract
+with a deterministic seeded launch + driven completion; analytics key
+snapshot-restored so tests leave no trace; mic spy still zero).
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

@@ -146,9 +146,12 @@ export const store = {
   startBoost(minutes = 15) { const s = load(); s.boostUntil = Date.now() + minutes * 60000; save(s); },
 
   // ── Onboarding / preferences ────────────────────────────────
-  // { done, goal, accent, diagnostic } — goal is one of GOALS' ids. Users
-  // whose progress predates onboarding are marked done on first load so
-  // they are never funnelled through it.
+  // { done, goal, accent, diagnostic } — `goal` is legacy (its picker is
+  // gone; the stored value stays untouched and is read nowhere).
+  // `diagnostic` is 'taken' | 'declined' | undefined — it retires the
+  // Learn offer card. `done` doubles as the threshold's grandfathering
+  // signal; do not rename it. Users whose progress predates onboarding
+  // are marked done so they are never funnelled through first-run flows.
   get onboarding() { return load().onboarding ?? { done: false, goal: null, accent: null }; },
   saveOnboarding(patch) {
     const s = load();
@@ -157,6 +160,50 @@ export const store = {
   },
   // Hearts, gems, streaks and quests stay quiet until something is earned.
   get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
+
+  // ── Free play ───────────────────────────────────────────────
+  // Unlocks every lesson for browsing. Persistence restored (B04 bug #2:
+  // "Remove Quest Mode" deleted this accessor in July while the UI kept
+  // the toggle, silently demoting the flag to per-session memory).
+  // Strictly boolean both ways: any missing, legacy or malformed stored
+  // value reads as false, and only `true` is ever written as true.
+  get freePlay() { return load().freePlay === true; },
+  set freePlay(on) { const s = load(); s.freePlay = on === true; save(s); },
+
+  // ── "Before You Speak" threshold ────────────────────────────
+  // { version, completedAt, choice, source, lastReplayedAt, lastChoice }
+  //   choice  'craft' | 'tools' | null (grandfathered users never chose)
+  //   source  'first-run' | 'grandfathered'
+  // The record is written once and never overwritten: replays only touch
+  // lastReplayedAt/lastChoice. Versioned so a materially revised threshold
+  // can be handled deliberately later.
+  get threshold() { return load().threshold ?? null; },
+  completeThreshold({ choice = null, source }) {
+    const s = load();
+    if (s.threshold) return s.threshold;          // never overwrite
+    s.threshold = {
+      version: 1,
+      completedAt: new Date().toISOString(),
+      choice,
+      source,
+      lastReplayedAt: null,
+      lastChoice: null,
+    };
+    save(s);
+    return s.threshold;
+  },
+  markThresholdReplay(lastChoice = null) {
+    const s = load();
+    if (!s.threshold) return null;                // replay implies a record
+    s.threshold = { ...s.threshold, lastReplayedAt: new Date().toISOString(),
+                    lastChoice: lastChoice ?? s.threshold.lastChoice ?? null };
+    save(s);
+    return s.threshold;
+  },
+  // One-time invitation card for grandfathered users (adjacent flag, not
+  // part of the spec'd threshold record).
+  get thresholdInviteSeen() { return load().thresholdInviteSeen === true; },
+  dismissThresholdInvite() { const s = load(); s.thresholdInviteSeen = true; save(s); },
 
   // ── "What Is IPA?" intro module ─────────────────────────────
   // Completion badge only — deliberately no XP or gems, so "Progress

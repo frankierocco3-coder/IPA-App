@@ -86,6 +86,37 @@ def main():
     if re.search(r"SONNET_NARRATED\s*=", main_js):
         fail("hardcoded SONNET_NARRATED narration claim has returned")
 
+    # 6d: the speaking pause — targeted surface pins, NOT global word bans
+    # ("Perform"/"Record" stay legal in history, function names and saved-
+    # take management). The capability flag must default to disabled, the
+    # Privacy copy must carry the three required disclosures, and the
+    # capture UI must come only from the gated builders.
+    caps_js = (ROOT / "js" / "capabilities.js").read_text(encoding="utf-8")
+    if "learnerSpeaking: false" not in caps_js:
+        fail("CAPABILITIES.learnerSpeaking no longer defaults to disabled")
+    if "Object.freeze" not in caps_js:
+        fail("CAPABILITIES is no longer frozen")
+    for pin in ["New recording is temporarily unavailable",
+                "saved recordings remain on this device",
+                "play, download and delete"]:
+        if pin not in main_js:
+            fail("Privacy recording-pause disclosure missing: %r" % pin)
+    record_ui = (ROOT / "js" / "record-ui.js").read_text(encoding="utf-8")
+    for guard in ["if (!caps.learnerSpeaking) return ''"]:
+        if record_ui.count(guard) < 2:
+            fail("a capture-UI builder in record-ui.js lost its capability gate")
+
+    # 6c: the threshold copy stays VERBATIM (spot pins from
+    # docs/THRESHOLD_COPY.md — if one of these drifts, someone paraphrased)
+    for pin in ["— Plato, <i>Republic</i> 377a–b",
+                "especially in the case of a young and tender thing",
+                "Speech reveals thought. It reveals what we understand",
+                "The strength of a feeling does not determine the truth of a claim.",
+                "Both take you into the same app. You can change your mind at any time.",
+                "The guided path stays available whenever you want it."]:
+        if pin not in main_js:
+            fail("threshold copy drifted from docs/THRESHOLD_COPY.md: missing %r" % pin[:60])
+
     # 6b: syllable demonstrations stay labelled as demonstrations, never
     # passed off as pure isolated sounds
     if "🔊 In a syllable" not in main_js or "syllable demonstration" not in main_js:

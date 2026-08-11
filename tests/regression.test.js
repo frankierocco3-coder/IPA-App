@@ -13,11 +13,19 @@
 // is covered by the per-project delete test, which asserts the same thing.
 
 import { loadPron, ipaFor } from '../js/pron.js';
+import { rehearsalTargets } from '../js/analytics.js';
+import { PHONEMES, WORDS } from '../js/data/phonemes.js';
 import { createProject, getProject, deleteProject } from '../js/projects.js';
-import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl } from '../js/recordings.js';
+import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl,
+         takesPresence, listAllTakes } from '../js/recordings.js';
 import { setPersonal, getPersonal, deletePersonal } from '../js/overrides.js';
 import { dbSupported } from '../js/db.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
+import { store } from '../js/state.js';
+import { CAPABILITIES } from '../js/capabilities.js';
+import { tryItHtml, performCaptureHtml } from '../js/record-ui.js';
+import { startRecording, isRecording, micErrorMessage, recordingSupported } from '../js/perform.js';
+import { openDB, idbGet, STORES } from '../js/db.js';
 import { DIALECT_ACTION, actionFor } from '../js/data/action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
 import { videoLookup } from '../js/data/media-videos.js';
@@ -36,6 +44,15 @@ export const EXPECTED_NAV = ['Learn', 'Practice', 'Library', 'Studio', 'Progress
 // from the app's own console the live document is the default.
 export async function run({ navDoc = document } = {}) {
   results.length = 0;
+
+  // Spy on the APP's getUserMedia for the whole run (runner only): every
+  // journey driven below must finish with this still at zero.
+  let gumCalls = 0;
+  const appWin = navDoc !== document ? navDoc.defaultView : null;
+  if (appWin?.navigator?.mediaDevices?.getUserMedia) {
+    const orig = appWin.navigator.mediaDevices.getUserMedia.bind(appWin.navigator.mediaDevices);
+    appWin.navigator.mediaDevices.getUserMedia = (...a) => { gumCalls++; return orig(...a); };
+  }
 
   // ── 1. Navigation: same order on both surfaces ──────────────
   const side = [...navDoc.querySelectorAll('.side-nav .side-item .side-label')].map(e => e.textContent.trim());
@@ -170,7 +187,30 @@ export async function run({ navDoc = document } = {}) {
   if (prevPrefs === null) localStorage.removeItem('speechcraft-bridge');
   else localStorage.setItem('speechcraft-bridge', prevPrefs);
 
-  // ── 5. Sound-page Prev/Next (runner only: drives the app iframe) ─
+  // ── 5. "Before You Speak" threshold ─────────────────────────
+  // Runs BEFORE the nav drive below, which deliberately leaves the iframe
+  // on a deep page (deep pages have no side-nav — that's their design).
+  // This profile has prior use or a completed first run, so a record
+  // exists and the immutability rules hold. markThresholdReplay writes
+  // only replay fields; running this suite never changes anyone's choice.
+  const th0 = store.threshold;
+  check('threshold record written at boot', !!th0 && th0.version === 1
+    && ['grandfathered', 'first-run'].includes(th0.source), JSON.stringify(th0));
+  store.completeThreshold({ choice: 'craft', source: 'first-run' });
+  const th1 = store.threshold;
+  check('completeThreshold never overwrites an existing record',
+    th1.source === th0.source && th1.choice === th0.choice && th1.completedAt === th0.completedAt);
+  const rep = store.markThresholdReplay('tools');
+  check('replay preserves the original choice', rep.choice === th0.choice
+    && rep.lastChoice === 'tools' && typeof rep.lastReplayedAt === 'string');
+  if (navDoc !== document) {
+    check('user with prior use boots to the shell, never the wall',
+      !!navDoc.querySelector('.side-nav .side-item') && !navDoc.querySelector('.threshold'));
+  } else {
+    ok('wall check (runner only — run tests/run-all.html)');
+  }
+
+  // ── 6. Sound-page Prev/Next (runner only: drives the app iframe) ─
   if (navDoc !== document && navDoc.defaultView) {
     const w = navDoc.defaultView;
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -216,6 +256,398 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('sound-page navigation drive (skipped in-app — run tests/run-all.html)');
+  }
+
+  // ── 7. The speaking pause (capability boundary, both states) ─
+  check('CAPABILITIES.learnerSpeaking defaults to disabled', CAPABILITIES.learnerSpeaking === false);
+  check('CAPABILITIES is frozen', Object.isFrozen(CAPABILITIES));
+  try { CAPABILITIES.learnerSpeaking = true; } catch { /* frozen throws in strict mode */ }
+  check('CAPABILITIES cannot be mutated', CAPABILITIES.learnerSpeaking === false);
+
+  check('disabled: try-it renders nothing', tryItHtml('x') === '');
+  check('disabled: capture controls render nothing', performCaptureHtml() === '');
+  if (recordingSupported()) {
+    const en1 = tryItHtml('x', { learnerSpeaking: true });
+    const en2 = performCaptureHtml({ learnerSpeaking: true });
+    check('enabled (injected): try-it still renders its recorder',
+      en1.includes('data-tryit="rec"') && en1.includes('⏺ Record'));
+    check('enabled (injected): Perform capture controls still render',
+      en2.includes('id="perf-rec"') && en2.includes('id="perf-save"') && en2.includes('data-rating'));
+  } else {
+    ok('enabled-state render checks (needs MediaRecorder support)');
+  }
+
+  let guardErr = null;
+  try { await startRecording({}, { learnerSpeaking: false }); }
+  catch (e) { guardErr = e; }
+  check('startRecording guard throws FeatureDisabledError', guardErr?.name === 'FeatureDisabledError');
+  check('guard leaves no active capture', isRecording() === false);
+  let defErr = null;
+  try { await startRecording(); } catch (e) { defErr = e; }
+  check('production default is the disabled guard', defErr?.name === 'FeatureDisabledError');
+  check('guard maps to honest copy', micErrorMessage(guardErr).includes('paused'));
+
+  // Preservation: a seeded take survives with metadata intact, blob
+  // readable, and the database version untouched.
+  if (dbSupported()) {
+    const pP = await createProject({ title: '__pause-preservation (safe to delete)' });
+    try {
+      const blob = new Blob(['pause-preservation-audio'], { type: 'audio/webm' });
+      const saved = await saveTake({ projectId: pP.id, target: { level: 'line', ref: 0, label: 'kept' },
+        blob, mimeType: 'audio/webm', durationMs: 700, rating: 'close', note: 'preserve me' });
+      const snapshot = JSON.stringify(saved);
+      const relisted = (await listTakes({ projectId: pP.id }))[0];
+      check('seeded take metadata unchanged after re-read', JSON.stringify(relisted) === snapshot);
+      check('seeded take blob remains readable', !!(await takeUrl(saved.id)));
+      check('IndexedDB version unchanged (no migration)', (await openDB()).version === 1);
+      await deleteTake(saved.id);
+      check('seeded take deletable', (await listTakes({ projectId: pP.id })).length === 0);
+    } finally {
+      try { await deleteTakesFor(pP.id); await deleteProject(pP.id); } catch { /* best effort */ }
+    }
+  } else {
+    bad('preservation checks', 'IndexedDB unavailable');
+  }
+
+  // Journey sweep (runner only): drive the remaining core surfaces and
+  // prove no capture control exists and getUserMedia was never called.
+  if (appWin) {
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const clickIn = el => el?.dispatchEvent(new appWin.MouseEvent('click', { bubbles: true }));
+    const side = name => [...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+    const noCapture = where => check(`no capture controls: ${where}`,
+      !navDoc.querySelector('[data-tryit], #perf-rec, #perf-save, .rating, [data-tryterm], .tryit'),
+      'found a capture control');
+    try {
+      clickIn(side('Learn')); await sleep(250);
+      for (const s of ['Practice', 'Library', 'Studio', 'Progress', 'More']) { clickIn(side(s)); await sleep(220); }
+      noCapture('sections walk');
+      // Words & Expressions
+      clickIn(side('Library')); await sleep(250);
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Words & Expressions')));
+      await sleep(350);
+      noCapture('Words & Expressions');
+      // Sound page (guidebook)
+      clickIn(navDoc.getElementById('brand-home')); await sleep(250);
+      clickIn(side('Library')); await sleep(250);
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === 'IPA'));
+      await sleep(350);
+      clickIn(navDoc.querySelector('.chart-chip')); await sleep(300);
+      noCapture('sound page');
+      // Privacy
+      clickIn(navDoc.getElementById('brand-home')); await sleep(250);
+      clickIn(side('More')); await sleep(250);
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Privacy')));
+      await sleep(400);
+      check('Privacy carries the pause disclosure',
+        navDoc.body.textContent.includes('New recording is temporarily unavailable'));
+      noCapture('Privacy & Data');
+      clickIn(navDoc.getElementById('brand-home')); await sleep(250);
+    } catch (err) {
+      bad('journey sweep', String(err));
+    }
+    check('getUserMedia was never called across all driven journeys', gumCalls === 0, `calls=${gumCalls}`);
+  } else {
+    ok('journey sweep (runner only — run tests/run-all.html)');
+  }
+
+  // ── 8. Pre-existing READER recordings under the pause ───────
+  // takesPresence semantics first (pure, injectable lister): the timeout
+  // and error paths must return 'error' — which callers REVEAL, never
+  // hide — and only a confirmed-successful empty lookup returns 'empty'.
+  if (dbSupported()) {
+    check('presence: resolves has', await takesPresence({ scopeId: '__none' }, async () => [{ id: 'x' }]) === 'has');
+    check('presence: confirmed empty', await takesPresence({ scopeId: '__none' }, async () => []) === 'empty');
+    check('presence: lister failure → error (revealed)',
+      await takesPresence({ scopeId: '__none' }, async () => { throw new Error('db'); }) === 'error');
+    const hang = () => new Promise(() => {});
+    check('presence: timeout → error (revealed)', await takesPresence({ scopeId: '__none' }, hang) === 'error');
+  }
+
+  if (appWin && dbSupported()) {
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const clickIn = el => el?.dispatchEvent(new appWin.MouseEvent('click', { bubbles: true }));
+    const side = name => [...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+    const goHome = async () => { clickIn(navDoc.getElementById('brand-home')); await sleep(250); };
+    const openScripts = async () => {
+      await goHome();
+      clickIn(side('Library')); await sleep(280);
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Scripts')));
+      await sleep(320);
+    };
+    const waitTakesTab = async () => {
+      for (let i = 0; i < 30; i++) {
+        const t = navDoc.querySelector('.sonnet-tabs [data-mode="perform"]');
+        if (t) return t;
+        await sleep(120);
+      }
+      return null;
+    };
+    const blob = new Blob(['reader-take-audio-' + 'x'.repeat(4000)], { type: 'audio/webm' });
+    let sonnetTake = null, ibsenTake = null;
+    try {
+      sonnetTake = await saveTake({ scopeId: 'sonnet:18', target: { level: 'line', ref: 0, label: 'Shall I compare thee' },
+        blob, mimeType: 'audio/webm', durationMs: 900, rating: 'close', note: 'reader keeper' });
+      ibsenTake = await saveTake({ scopeId: 'ibsen:IBSEN-001', target: { level: 'line', ref: 0, label: 'The Secret Loan' },
+        blob, mimeType: 'audio/webm', durationMs: 800 });
+
+      // Sonnet 18: tab appears, takes accessible, no capture, no mic call.
+      const gumBefore = gumCalls;
+      await openScripts();
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Sonnets')));
+      await sleep(350);
+      clickIn(navDoc.querySelector('.sonnet-row[data-n="18"]'));
+      await sleep(500);
+      const tab18 = await waitTakesTab();
+      check('sonnet 18 with a saved take reveals the Takes tab', !!tab18 && tab18.textContent.includes('Takes'));
+      clickIn(tab18); await sleep(500);
+      const pane18 = navDoc.getElementById('sonnet-pane');
+      const acts = [...(pane18?.querySelectorAll('.take-actions button') ?? [])].map(b => b.textContent.trim());
+      check('reader take offers Play / Download / Delete',
+        acts.includes('▶ Play') && acts.includes('⬇ Download') && acts.includes('Delete'), acts.join(','));
+      check('reader take blob is playable (readable URL)', !!(await takeUrl(sonnetTake.id)));
+      check('reader Takes view has no capture or editable-rating controls',
+        !pane18?.querySelector('#perf-rec, #perf-save, #perf-compare, .rating, [data-tryit]'));
+      check('reader rating shows read-only', !!pane18?.querySelector('.take-rate'));
+      clickIn([...pane18.querySelectorAll('.take-actions button')].find(b => b.textContent.includes('Play')));
+      await sleep(200);
+      check('opening the reader Takes view makes zero getUserMedia calls', gumCalls === gumBefore,
+        `calls went ${gumBefore}→${gumCalls}`);
+
+      // Monologue-library scope: same association and visibility.
+      await openScripts();
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Ibsen')));
+      await sleep(350);
+      clickIn([...navDoc.querySelectorAll('button, .track-card, .sonnet-row')].find(c => c.textContent.includes('The Secret Loan')));
+      await sleep(500);
+      const tabIb = await waitTakesTab();
+      check('ibsen:IBSEN-001 take reveals the Takes tab on its piece', !!tabIb && tabIb.textContent.includes('Takes'));
+
+      // Privacy → Manage Recordings still lists both reader takes.
+      await goHome();
+      clickIn(side('More')); await sleep(250);
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Privacy')));
+      await sleep(600);
+      const privText = navDoc.body.textContent;
+      const all = await listAllTakes();
+      check('Privacy backstop still reaches both reader takes',
+        all.some(t => t.id === sonnetTake.id) && all.some(t => t.id === ibsenTake.id)
+        && /Manage recordings/i.test(privText));
+
+      // Deletion through the reader UI removes take + blob.
+      await openScripts();
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Sonnets')));
+      await sleep(350);
+      clickIn(navDoc.querySelector('.sonnet-row[data-n="18"]'));
+      await sleep(500);
+      const tab18b = await waitTakesTab();
+      clickIn(tab18b); await sleep(500);
+      appWin.confirm = () => true;
+      clickIn([...navDoc.querySelectorAll('#sonnet-pane .take-actions button')].find(b => b.textContent.trim() === 'Delete'));
+      await sleep(500);
+      check('reader take deletable through the Takes view',
+        (await listTakes({ scopeId: 'sonnet:18' })).length === 0);
+      // Assert against the blob STORE directly — takeUrl caches object
+      // URLs per-realm, and the UI delete ran in the app iframe's realm.
+      check('deleted reader take blob removed from the store',
+        (await idbGet(STORES.blobs, sonnetTake.id)) === undefined);
+      sonnetTake = null;
+
+      // A confirmed-empty reader never shows the tab: sonnet 29 has none.
+      await openScripts();
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Sonnets')));
+      await sleep(350);
+      clickIn(navDoc.querySelector('.sonnet-row[data-n="29"]'));
+      await sleep(2600);   // longer than the presence timeout
+      check('reader with confirmed-empty lookup shows no Takes tab',
+        !navDoc.querySelector('.sonnet-tabs [data-mode="perform"]'));
+      await goHome();
+    } catch (err) {
+      bad('reader-take drive', String(err));
+    } finally {
+      try { if (sonnetTake) await deleteTake(sonnetTake.id); } catch { /* best effort */ }
+      try { if (ibsenTake) await deleteTake(ibsenTake.id); } catch { /* best effort */ }
+    }
+  } else {
+    ok('reader-take drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 9. B04 bug fixes ────────────────────────────────────────
+  // Bug #1: rehearsal targets derive from the pick shapes that actually
+  // exist — pairs give both symbols, singles give sym, nothing assumes a
+  // `phonemes` field, and an empty result is detectable (the UI shows an
+  // honest message instead of a silent dead button).
+  const valid = s => !!PHONEMES[s];
+  check('rehearsal: pair pick yields both symbols',
+    String(rehearsalTargets([{ pair: { right: 'ɪ', wrong: 'iː' } }], valid).sort()) === String(['iː', 'ɪ'].sort()));
+  check('rehearsal: single pick yields its symbol',
+    String(rehearsalTargets([{ sym: 'æ' }], valid)) === 'æ');
+  check('rehearsal: mixed picks dedupe and combine',
+    rehearsalTargets([{ pair: { right: 'ɪ', wrong: 'iː' } }, { sym: 'ɪ' }, { sym: 'θ' }], valid).length === 3);
+  check('rehearsal: invalid and empty picks give an empty list',
+    rehearsalTargets([], valid).length === 0
+    && rehearsalTargets([{}, { sym: 'notasymbol' }, { phonemes: ['ɪ'] }], valid).length === 0);
+
+  // Bug #2: free-play persistence — storage-level, with the raw key
+  // snapshotted and restored so the profile is left exactly as found.
+  {
+    const KEY = 'ipa-trainer-v1';
+    const rawBefore = localStorage.getItem(KEY);
+    try {
+      const write = v => {
+        const s = JSON.parse(localStorage.getItem(KEY) ?? '{}');
+        if (v === undefined) delete s.freePlay; else s.freePlay = v;
+        localStorage.setItem(KEY, JSON.stringify(s));
+      };
+      write(undefined);
+      check('free play: defaults to false when absent', store.freePlay === false);
+      let malformedOk = true;
+      for (const badVal of ['yes', 1, {}, null]) {
+        write(badVal);
+        if (store.freePlay !== false) malformedOk = false;
+      }
+      check('free play: malformed stored values read as false', malformedOk);
+      store.freePlay = true;
+      check('free play: enabling writes true to storage',
+        JSON.parse(localStorage.getItem(KEY)).freePlay === true && store.freePlay === true);
+      store.freePlay = false;
+      check('free play: disabling persists false',
+        JSON.parse(localStorage.getItem(KEY)).freePlay === false && store.freePlay === false);
+      store.freePlay = 'truthy-but-not-true';
+      check('free play: setter is boolean-strict', store.freePlay === false);
+    } finally {
+      if (rawBefore === null) localStorage.removeItem(KEY);
+      else localStorage.setItem(KEY, rawBefore);
+    }
+  }
+
+  // Real-UI journeys (runner only): the targeted CTAs launch, the session
+  // completes, and free play survives an actual reload and course switch.
+  if (appWin) {
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const clickIn = el => el?.dispatchEvent(new appWin.MouseEvent('click', { bubbles: true }));
+    const side = name => [...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+    // compact session driver for choice-based practice types
+    const ipaOf = {};
+    for (const w of WORDS) (ipaOf[w.word.toLowerCase()] ??= []).push(w.ipa);
+    const hasSym = (w, s) => (ipaOf[w.toLowerCase()] ?? []).some(a => a.includes(s));
+    const bareL = l => l.replace(/^[/\[]|[/\]]$/g, '');
+    const driveSession = async (maxSteps = 130) => {
+      let good = 0, bad = 0, lastShow = false;
+      for (let i = 0; i < maxSteps; i++) {
+        const body = navDoc.body.textContent;
+        if (/Practice complete|Perfect lesson/.test(body) && !navDoc.getElementById('choices')) return { end: 'results', good, bad };
+        const fb = navDoc.getElementById('feedback');
+        const show = !!fb?.classList.contains('show');
+        if (show && !lastShow) (fb.classList.contains('good') ? good++ : bad++);
+        lastShow = show;
+        const cont = navDoc.getElementById('continue');
+        if (cont) { clickIn(cont); await sleep(140); continue; }
+        const btns = [...navDoc.querySelectorAll('#choices .choice')].filter(b => !b.disabled);
+        if (btns.length) {
+          const prompt = navDoc.querySelector('.prompt')?.textContent ?? '';
+          const disp = navDoc.querySelector('.display-card span:last-child')?.textContent ?? '';
+          const labels = btns.map(b => b.querySelector('.choice-label')?.textContent ?? '');
+          let idx = -1, mm;
+          if ((mm = prompt.match(/contains the sound \/(.+)\//))) idx = labels.findIndex(l => hasSym(l, mm[1]));
+          else if ((mm = prompt.match(/sounds is in “([^”]+)”/))) idx = labels.findIndex(l => hasSym(mm[1], bareL(l)));
+          else if (prompt.includes('matches this description')) idx = labels.findIndex(l => PHONEMES[bareL(l)] && disp.includes(PHONEMES[bareL(l)].hint.slice(0, 16)));
+          else if ((mm = prompt.match(/transcription of “([^”]+)”/)) && disp.includes('_')) {
+            const shown = disp.replace(/[/\s]/g, '');
+            outer: for (const arr of (ipaOf[mm[1].toLowerCase()] ?? []))
+              for (let k = 0; k < arr.length; k++)
+                if (arr.slice(0, k).join('') + '_' + arr.slice(k + 1).join('') === shown) { idx = labels.indexOf(arr[k]); break outer; }
+          }
+          clickIn(btns[idx >= 0 ? idx : Math.floor(Math.random() * btns.length)]);
+          await sleep(150); continue;
+        }
+        const all = [...navDoc.querySelectorAll('#choices .choice')];
+        if (all.length && all.every(b => b.disabled)) { clickIn(navDoc.querySelector('#speaker, .speaker')); await sleep(900); continue; }
+        await sleep(150);
+      }
+      return { end: 'timeout', good, bad };
+    };
+    const ANALYTICS_KEY = 'speechcraft-analytics-v1';
+    const analyticsBefore = localStorage.getItem(ANALYTICS_KEY);
+    try {
+      // The contract for both targeted CTAs: with valid phoneme targets
+      // they launch; with none they show the honest message. What they
+      // may NEVER do again is nothing at all. Seed two genuinely weak
+      // PHONEME symbols so the launch branch is deterministic (the raw
+      // analytics key is snapshotted and restored below).
+      const seeded = JSON.parse(analyticsBefore ?? '{"symbols":{},"pairs":{},"days":{}}');
+      const weak = { attempts: 6, correct: 1, recent: [0, 0, 1, 0, 0], lastAt: Date.now(), totalMs: 0 };
+      // Replace, don't merge: only real phoneme weaknesses in view, so the
+      // picks (and therefore the launch branch) are deterministic.
+      seeded.symbols = { 'θ': { ...weak }, 'ð': { ...weak } };
+      seeded.pairs = {};
+      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(seeded));
+      const alerts = [];
+      appWin.alert = msg => alerts.push(String(msg));
+      clickIn(navDoc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Practice')); await sleep(400);
+      const targeted = !!navDoc.getElementById('hub-mixed');   // targeted mode shows the mixed alternative link
+      clickIn(navDoc.getElementById('quick-practice')); await sleep(700);
+      const launched = !!navDoc.querySelector('.prompt, #choices, #bank');
+      check('bug #1: targeted Quick Practice launches or honestly declines — never silent',
+        targeted ? (launched || alerts.length > 0) : launched,
+        `targeted=${targeted} launched=${launched} alerts=${alerts.length}`);
+      const session = launched ? await driveSession() : { end: 'declined-honestly' };
+      check('bug #1: a launched practice session completes',
+        session.end === 'results' || session.end === 'declined-honestly', JSON.stringify(session));
+      [...navDoc.querySelectorAll('button')].forEach(b => { if (/Continue|Done|Next/.test(b.textContent)) clickIn(b); });
+      await sleep(400);
+      appWin.confirm = () => true;
+      clickIn(navDoc.getElementById('quit')); await sleep(300);
+      clickIn(navDoc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Practice')); await sleep(400);
+      const alertsBefore = alerts.length;
+      const todayBtn = navDoc.getElementById('today-start');
+      clickIn(todayBtn); await sleep(700);
+      const todayLaunched = !!navDoc.querySelector('.prompt, #choices, #bank');
+      check('bug #1: Today’s Rehearsal launches or honestly declines — never silent',
+        !todayBtn || todayLaunched || alerts.length > alertsBefore,
+        `btn=${!!todayBtn} launched=${todayLaunched} alerted=${alerts.length > alertsBefore}${alerts.length ? ' · “' + alerts[alerts.length - 1].slice(0, 50) + '”' : ''}`);
+      clickIn(navDoc.getElementById('quit')); await sleep(300);
+      [...navDoc.querySelectorAll('button')].forEach(b => { if (/Quit|Leave|Yes|End/.test(b.textContent)) clickIn(b); });
+      await sleep(350);
+      check('bug-fix sessions introduced no microphone path', gumCalls === 0, `calls=${gumCalls}`);
+
+      // Free play through the real UI, across a real reload + course switch
+      clickIn(navDoc.getElementById('brand-home')); await sleep(350);
+      clickIn(navDoc.getElementById('freeplay')); await sleep(250);
+      const onNow = store.freePlay === true;
+      const frame = navDoc.defaultView.frameElement;
+      frame.contentWindow.location.reload();
+      let doc2 = null;
+      for (let i = 0; i < 40; i++) { await sleep(150); doc2 = frame.contentDocument; if (doc2?.querySelector('.side-nav .side-item')) break; }
+      const onAfterReload = store.freePlay === true && doc2?.getElementById('freeplay')?.classList.contains('on');
+      // course switch while enabled
+      doc2.querySelector('[aria-label^="Change course"]')?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
+      await sleep(250);
+      [...doc2.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American'))
+        ?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
+      await sleep(450);
+      const onAfterSwitch = store.freePlay === true && doc2.getElementById('freeplay')?.classList.contains('on');
+      // disable and reload
+      doc2.getElementById('freeplay')?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
+      await sleep(250);
+      frame.contentWindow.location.reload();
+      let doc3 = null;
+      for (let i = 0; i < 40; i++) { await sleep(150); doc3 = frame.contentDocument; if (doc3?.querySelector('.side-nav .side-item')) break; }
+      const offAfterReload = store.freePlay === false && !doc3?.getElementById('freeplay')?.classList.contains('on');
+      check('bug #2: enable survives a real reload', onNow && onAfterReload);
+      check('bug #2: stays enabled across a course switch', onAfterSwitch);
+      check('bug #2: disable also survives reload', offAfterReload);
+    } catch (err) {
+      bad('B04 bug-fix journeys', String(err));
+    } finally {
+      // Leave analytics exactly as found (also discards this drive's noise).
+      if (analyticsBefore === null) localStorage.removeItem(ANALYTICS_KEY);
+      else localStorage.setItem(ANALYTICS_KEY, analyticsBefore);
+    }
+  } else {
+    ok('B04 bug-fix journeys (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

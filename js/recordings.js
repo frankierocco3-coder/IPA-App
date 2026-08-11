@@ -5,7 +5,7 @@
 // and to a target — the phoneme, word or line that was being rehearsed —
 // so the same screen can hold takes at all three levels.
 
-import { STORES, idbGet, idbPut, idbAllBy, idbAll, idbAcross, uid } from './db.js';
+import { STORES, idbGet, idbPut, idbAllBy, idbAll, idbAcross, uid, dbSupported } from './db.js';
 import { getProject, saveProject } from './projects.js';
 
 export const RATINGS = [
@@ -97,6 +97,24 @@ export async function deleteTake(id) {
     const owner = all.find(p => p.bestTakeId === id);
     if (owner) { owner.bestTakeId = null; await saveProject(owner); }
   }
+}
+
+/**
+ * How this project's / text's saved takes were found:
+ * 'has' | 'empty' | 'error'. Uncertainty must never be read as absence —
+ * a timeout or database failure returns 'error', and callers reveal the
+ * Takes surface with a recovery message rather than hiding it. Only a
+ * confirmed-successful empty lookup returns 'empty'.
+ * `lister` is injectable so tests can prove the timeout and error paths.
+ */
+export async function takesPresence({ projectId = null, scopeId = null } = {}, lister = listTakes) {
+  // No IndexedDB in this browser = certainly no takes stored here.
+  if (!dbSupported()) return 'empty';
+  try {
+    const probe = lister({ projectId, scopeId }).then(t => (t.length ? 'has' : 'empty'));
+    const timeout = new Promise(r => setTimeout(() => r('error'), 2000));
+    return await Promise.race([probe, timeout]);
+  } catch { return 'error'; }
 }
 
 export async function listTakes({ projectId = null, scopeId = null } = {}) {
