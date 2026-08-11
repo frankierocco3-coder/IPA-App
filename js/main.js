@@ -811,16 +811,26 @@ function renderTextsPage() {
 // library"). Three public-domain dialogues in Benjamin Jowett's
 // translations (Jowett d. 1893 — PD worldwide), credited in plain text.
 // House sources policy: no external links anywhere learner-facing.
+//
+// EXCERPTS ARE VERBATIM Jowett, verified 2026-08-11 against the Project
+// Gutenberg plain texts (Gorgias #1672, Phaedrus #1636, Republic #1497,
+// each "Translator: Benjamin Jowett"). Do not retouch the wording.
 const READING_PATHWAY = [
   { title: 'Plato — Gorgias',
     what: 'Socrates against the professional persuaders: what rhetoric is, what it can do, and what it costs a speaker who wields it without knowledge.',
+    excerpt: 'What is there greater than the word which persuades the judges in the courts, or the senators in the council, or the citizens in the assembly, or at any other political meeting?—if you have the power of uttering this word, you will have the physician your slave, and the trainer your slave, and the money-maker of whom you talk will be found to gather treasures, not for himself, but for you who are able to speak and to persuade the multitude.',
+    attrib: '— Gorgias the orator, making his sales pitch. Socrates spends the rest of the dialogue taking it apart.',
     why: 'The clearest ancient statement of the difference between communication and manipulation — the exact line this app asks you to hold.' },
   { title: 'Plato — Phaedrus',
     what: 'A walk outside the city walls that becomes the classical world’s deepest look at speech, writing, and the soul of the listener.',
+    excerpt: 'For this discovery of yours will create forgetfulness in the learners’ souls, because they will not use their memories; they will trust to the external written characters and not remember of themselves. The specific which you have discovered is an aid not to memory, but to reminiscence, and you give your disciples not truth, but only the semblance of truth; they will be hearers of many things and will have learned nothing; they will appear to be omniscient and will generally know nothing; they will be tiresome company, having the show of wisdom without the reality.',
+    attrib: '— King Thamus, refusing the invention of writing. Every argument about speech versus the page starts here.',
     why: 'On knowing your audience: why a true speech must be shaped to the soul that hears it — an actor’s job description, twenty-three centuries early.' },
   { title: 'Plato — Republic (Books II–III & X)',
     what: 'The education of the guardians — including the passage this app opens with — and Plato’s famous quarrel with performance itself.',
-    why: 'Read the source of “the beginning is the most important part of the work” — then argue with Plato about whether actors should exist. Every actor eventually does.' },
+    excerpt: 'You know also that the beginning is the most important part of any work, especially in the case of a young and tender thing; for that is the time at which the character is being formed and the desired impression is more readily taken.',
+    attrib: '— Socrates, Book II (377a–b) — the full sentence behind the preface’s epigraph.',
+    why: 'Read the source — then argue with Plato about whether actors should exist. Every actor eventually does.' },
 ];
 
 function renderReadingPathway() {
@@ -833,9 +843,13 @@ function renderReadingPathway() {
       ${READING_PATHWAY.map((r, i) => `
         <h2 class="guide-heading">${i + 1}. ${esc(r.title)}</h2>
         <p class="guide-text">${esc(r.what)}</p>
+        <blockquote class="th-quote">
+          <p>${esc(r.excerpt)}</p>
+          <footer class="th-attrib">${esc(r.attrib)}</footer>
+        </blockquote>
         <div class="guide-word"><span class="wii-who">For actors</span><span class="guide-note">${esc(r.why)}</span></div>`).join('')}
       <h2 class="guide-heading">Editions &amp; credit</h2>
-      <p class="guide-text">Translation: Benjamin Jowett, <i>The Dialogues of Plato</i>, third edition, 1892. Jowett died in 1893, and his translations are in the public domain worldwide. Free plain-text editions are available from Project Gutenberg — search the dialogue’s title together with “Jowett”.</p>
+      <p class="guide-text">Excerpts and translation: Benjamin Jowett, <i>The Dialogues of Plato</i>, third edition, 1892. Jowett died in 1893, and his translations are in the public domain worldwide. Free plain-text editions are available from Project Gutenberg — search the dialogue’s title together with “Jowett”.</p>
       <p class="pane-note">Speechcraft doesn’t bundle the books — this is a pathway, not an ebook shelf.</p>
     </main>`;
   wireBrandHome();

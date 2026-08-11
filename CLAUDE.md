@@ -489,6 +489,27 @@ Esc exit, record immutability, no XP; section re-acquires the live
 iframe document because section 9 reloads the frame). Suite total
 179/179; all five gates pass.
 
+TEXT-FIRST RULE (2026-08-11, binding, supersedes conflicting audio
+requirements in the build order): Speechcraft completes the full
+WRITTEN product first. All written content, interfaces, explanations
+and text tools are active (preface, rhetoric excerpts, Speech
+Dissection, Playable Actions, written Dialect in Action, written
+Accent Bridge, Shakespeare editions, W&E connections, document
+import/OCR, Studio tools, the 23-draft review workflow). ALL new audio
+and media are deferred — isolated-phoneme recordings, A/B recordings,
+narration of any kind, articulation/mouth videos, learner recording,
+speaking exercises, audio scoring. Isolated-phoneme recordings are NOT
+blockers anywhere (PHONEME_RECORDING_PLAN.md now says so). Existing
+approved audio: keep, don't regenerate or restructure; playback stays
+where it already works; never create new audio for current builds,
+never make a written feature depend on audio, never show a playback
+button without an approved file, no "audio coming soon" clutter, no
+speech synthesis substitution, preserve audio-contract regression
+coverage. Build A corrections under this rule: the Rhetoric & Oratory
+page now carries VERBATIM Jowett excerpts (verified 2026-08-11 against
+Project Gutenberg #1672/#1636/#1497), pinned in launch_lint 6d and
+regression section 10.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

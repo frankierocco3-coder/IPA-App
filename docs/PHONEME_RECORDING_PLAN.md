@@ -1,5 +1,11 @@
 # Phoneme recording plan
 
+**STATUS 2026-08-11 — DEFERRED, NOT A BLOCKER.** The text-first scope
+decision defers all new audio work, isolated-phoneme recordings
+included. Nothing in the active builds waits on these recordings, and
+they must not appear on any active-blocker list. The pipeline below
+stays ready for whenever audio work resumes.
+
 STATUS 2026-08-05: production target is ONE consistent human reference
 voice per dialect, under the neutral voice key `reference` (isolated
 phonemes are NOT tied to the word-audio f/m/alyx/peach identifiers —

@@ -683,6 +683,10 @@ export async function run({ navDoc = document } = {}) {
       check('pathway: translator credited with PD statement',
         pageText.includes('Benjamin Jowett') && pageText.includes('public domain worldwide')
         && pageText.includes('Project Gutenberg'));
+      check('pathway: each dialogue carries its verbatim Jowett excerpt',
+        pageText.includes('persuades the judges in the courts')
+        && pageText.includes('create forgetfulness in the learners')
+        && pageText.includes('the beginning is the most important part of any work'));
       check('pathway: no external links (house sources policy)',
         doc.querySelectorAll('main a[href]').length === 0);
       check('pathway: a pathway, not an ebook shelf',

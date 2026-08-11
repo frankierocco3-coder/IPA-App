@@ -123,12 +123,16 @@ def main():
             fail("preface copy drifted from docs/WHY_SPEECH_MATTERS_COPY.md: missing %r" % pin[:60])
 
     # 6d: the reading pathway stays a credited public-domain pathway, not
-    # an ebook shelf — translator credit and PD statement are pinned
+    # an ebook shelf — translator credit, PD statement and the verbatim
+    # Jowett excerpts (verified against Project Gutenberg) are pinned
     for pin in ["Benjamin Jowett",
                 "public domain worldwide",
-                "Rhetoric &amp; Oratory"]:
+                "Rhetoric &amp; Oratory",
+                "persuades the judges in the courts",
+                "create forgetfulness in the learners",
+                "the beginning is the most important part of any work"]:
         if pin not in main_js:
-            fail("reading-pathway credit/PD statement missing: %r" % pin)
+            fail("reading-pathway credit/PD/excerpt missing: %r" % pin)
 
     # 6b: syllable demonstrations stay labelled as demonstrations, never
     # passed off as pure isolated sounds
