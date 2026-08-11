@@ -170,7 +170,9 @@ export const store = {
   get freePlay() { return load().freePlay === true; },
   set freePlay(on) { const s = load(); s.freePlay = on === true; save(s); },
 
-  // ── "Before You Speak" threshold ────────────────────────────
+  // ── First-launch preface (né "Before You Speak", now "Why
+  // Speech Matters" — Build A retitled the copy; the record shape,
+  // key and semantics are unchanged) ──────────────────────────
   // { version, completedAt, choice, source, lastReplayedAt, lastChoice }
   //   choice  'craft' | 'tools' | null (grandfathered users never chose)
   //   source  'first-run' | 'grandfathered'

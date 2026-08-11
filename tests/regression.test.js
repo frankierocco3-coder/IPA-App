@@ -187,7 +187,7 @@ export async function run({ navDoc = document } = {}) {
   if (prevPrefs === null) localStorage.removeItem('speechcraft-bridge');
   else localStorage.setItem('speechcraft-bridge', prevPrefs);
 
-  // ── 5. "Before You Speak" threshold ─────────────────────────
+  // ── 5. First-launch preface (né "Before You Speak") ─────────
   // Runs BEFORE the nav drive below, which deliberately leaves the iframe
   // on a deep page (deep pages have no side-nav — that's their design).
   // This profile has prior use or a completed first run, so a record
@@ -648,6 +648,95 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('B04 bug-fix journeys (runner only — run tests/run-all.html)');
+  }
+
+  // ── 10. Build A: the preface and the reading pathway ────────
+  // Runner-only. Runs AFTER section 9, whose journeys reloaded the app
+  // iframe — navDoc/appWin are stale here, so the live document is
+  // re-acquired from the frame element (which lives in the runner page
+  // and survives reloads).
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    try {
+      let doc = null;
+      for (let i = 0; i < 40; i++) {
+        doc = frame.contentDocument;
+        if (doc?.querySelector('.side-nav .side-item')) break;
+        await sleep(150);
+      }
+      const w = frame.contentWindow;
+      const clickIn = el => el?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+
+      // Reading pathway: Library card → credited PD pathway → back.
+      clickIn(side('Library')); await sleep(350);
+      const rhet = card('Rhetoric & Oratory');
+      check('pathway: Library shows the Rhetoric & Oratory card', !!rhet);
+      clickIn(rhet); await sleep(350);
+      const pageText = doc.body.textContent;
+      check('pathway: all three dialogues present, in reading order',
+        ['Gorgias', 'Phaedrus', 'Republic'].every(t => pageText.includes(t))
+        && pageText.indexOf('Gorgias') < pageText.indexOf('Phaedrus')
+        && pageText.indexOf('Phaedrus') < pageText.indexOf('Republic (Books'));
+      check('pathway: translator credited with PD statement',
+        pageText.includes('Benjamin Jowett') && pageText.includes('public domain worldwide')
+        && pageText.includes('Project Gutenberg'));
+      check('pathway: no external links (house sources policy)',
+        doc.querySelectorAll('main a[href]').length === 0);
+      check('pathway: a pathway, not an ebook shelf',
+        pageText.includes('not an ebook shelf'));
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      check('pathway: Back returns to the Library shelf',
+        !!card('Rhetoric & Oratory') && !!card('Scripts & Speeches'));
+
+      // Preface replay: About → Why Speech Matters → full walk → Esc out.
+      const thBefore = store.threshold;
+      const xpBefore = store.xp;
+      clickIn(side('More')); await sleep(350);
+      clickIn(card('About Speechcraft')); await sleep(350);
+      check('preface: About carries the new heading and replay button',
+        doc.body.textContent.includes('Why Speech Matters') && !!doc.getElementById('about-threshold'));
+      clickIn(doc.getElementById('about-threshold')); await sleep(350);
+      const wall = () => doc.querySelector('.threshold');
+      const h1 = () => wall()?.querySelector('h1')?.textContent ?? '';
+      check('preface: replay opens on "Why Speech Matters"',
+        !!wall() && h1() === 'Why Speech Matters', `h1=${h1()}`);
+      check('preface: nine progress dots',
+        wall()?.querySelector('.ob-dots')?.children.length === 9,
+        `dots=${wall()?.querySelector('.ob-dots')?.children.length}`);
+      const seen = [h1()];
+      for (let i = 0; i < 6; i++) {
+        clickIn(doc.getElementById('ob-next')); await sleep(200);
+        seen.push(h1());
+      }
+      check('preface: panels walk sound-to-performance and end in reflection',
+        String(seen) === String(['Why Speech Matters', 'Speech Is Action', 'Speech Reveals Thought',
+          'Why Actors Train This Way', 'Communication and Manipulation', 'The Journey', 'Before You Choose']),
+        seen.join(' | '));
+      check('preface: reflection ending has no quiz apparatus',
+        !wall().querySelector('#choices, #feedback, .choice'));
+      clickIn(doc.getElementById('ob-next')); await sleep(250);
+      check('preface: course picker kept, preselected on replay',
+        !!wall()?.querySelector('[data-accent]') && doc.getElementById('ob-next')?.disabled === false);
+      clickIn(doc.getElementById('ob-next')); await sleep(250);
+      check('preface: choice screen kept with both ways in',
+        wall()?.querySelectorAll('[data-choice]').length === 2);
+      wall()?.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      await sleep(300);
+      check('preface: Esc exits the replay back to About',
+        !doc.querySelector('.threshold') && !!doc.getElementById('about-threshold'));
+      const thAfter = store.threshold;
+      check('preface: replay walk never rewrote the original record',
+        thAfter.choice === thBefore.choice && thAfter.completedAt === thBefore.completedAt
+        && thAfter.source === thBefore.source);
+      check('preface: awards no XP', store.xp === xpBefore);
+    } catch (err) {
+      bad('Build A drive', String(err));
+    }
+  } else {
+    ok('Build A preface + pathway drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

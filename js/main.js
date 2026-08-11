@@ -572,11 +572,11 @@ function learnMain(el, course) {
   // diagnostic has been taken or declined (never on mere XP: the offer is
   // how the diagnostic stays reachable; Practice holds the permanent entry).
   const invite = store.threshold?.source === 'grandfathered' && !store.thresholdInviteSeen ? `
-    <section class="continue-card th-invite" aria-label="New: Before You Speak">
+    <section class="continue-card th-invite" aria-label="New: Why Speech Matters">
       <div class="cc-info">
         <span class="cc-stage">✨ New</span>
-        <h2>New: Before You Speak</h2>
-        <p class="cc-meta">A short opening on the power and responsibility of speech. It takes about three minutes, and your progress is untouched either way.</p>
+        <h2>New: Why Speech Matters</h2>
+        <p class="cc-meta">A short preface on the power and responsibility of speech. It takes about three minutes, and your progress is untouched either way.</p>
       </div>
       <div class="th-invite-actions">
         <button class="btn btn-primary" id="th-invite-read" type="button">Read it</button>
@@ -773,6 +773,9 @@ function libraryMain(el, course) {
     { icon: '📜', title: 'Scripts & Speeches',
       blurb: 'Monologues, scenes, speeches and sonnets — curated public-domain material.',
       go: renderTextsPage },
+    { icon: '🏛', title: 'Rhetoric & Oratory',
+      blurb: 'A focused reading pathway — the classical roots of everything this app trains.',
+      go: renderReadingPathway },
     { icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract.',
       go: renderInstrument },
@@ -801,6 +804,41 @@ function renderTextsPage() {
     <main class="track-list" id="texts-page"></main>`;
   wireBrandHome();
   textSpeechPane(document.getElementById('texts-page'));
+}
+
+// ── Rhetoric & Oratory: the reading pathway (Build A) ────────
+// A focused pathway, not an ebook library (locked scope: "no large ebook
+// library"). Three public-domain dialogues in Benjamin Jowett's
+// translations (Jowett d. 1893 — PD worldwide), credited in plain text.
+// House sources policy: no external links anywhere learner-facing.
+const READING_PATHWAY = [
+  { title: 'Plato — Gorgias',
+    what: 'Socrates against the professional persuaders: what rhetoric is, what it can do, and what it costs a speaker who wields it without knowledge.',
+    why: 'The clearest ancient statement of the difference between communication and manipulation — the exact line this app asks you to hold.' },
+  { title: 'Plato — Phaedrus',
+    what: 'A walk outside the city walls that becomes the classical world’s deepest look at speech, writing, and the soul of the listener.',
+    why: 'On knowing your audience: why a true speech must be shaped to the soul that hears it — an actor’s job description, twenty-three centuries early.' },
+  { title: 'Plato — Republic (Books II–III & X)',
+    what: 'The education of the guardians — including the passage this app opens with — and Plato’s famous quarrel with performance itself.',
+    why: 'Read the source of “the beginning is the most important part of the work” — then argue with Plato about whether actors should exist. Every actor eventually does.' },
+];
+
+function renderReadingPathway() {
+  record(renderReadingPathway);
+  app.innerHTML = `
+    ${pageTopbar('🏛 Rhetoric & Oratory', '#8a6d3b')}
+    <main class="guide">
+      <h1>Rhetoric &amp; Oratory</h1>
+      <p class="guide-text">The preface’s ideas are old — these are the works they come from. A focused pathway, not a library: three dialogues, each earning its place, in the order worth reading them.</p>
+      ${READING_PATHWAY.map((r, i) => `
+        <h2 class="guide-heading">${i + 1}. ${esc(r.title)}</h2>
+        <p class="guide-text">${esc(r.what)}</p>
+        <div class="guide-word"><span class="wii-who">For actors</span><span class="guide-note">${esc(r.why)}</span></div>`).join('')}
+      <h2 class="guide-heading">Editions &amp; credit</h2>
+      <p class="guide-text">Translation: Benjamin Jowett, <i>The Dialogues of Plato</i>, third edition, 1892. Jowett died in 1893, and his translations are in the public domain worldwide. Free plain-text editions are available from Project Gutenberg — search the dialogue’s title together with “Jowett”.</p>
+      <p class="pane-note">Speechcraft doesn’t bundle the books — this is a pathway, not an ebook shelf.</p>
+    </main>`;
+  wireBrandHome();
 }
 
 // Full-page wrappers for the dialect panes, so collections open like any
@@ -1269,61 +1307,58 @@ function drawWhatIsIpa(step, st) {
   if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
 }
 
-// ── "Before You Speak" — the first-launch threshold ───────────
-// Eight screens: panels 1–6 (the substance), the kept course picker, then
-// the choice, which lands the user exactly where it says. Replaces the old
-// welcome/goal onboarding outright. No XP, no track — this is an opening,
-// not a lesson.
+// ── "Why Speech Matters" — the first-launch preface ──────────
+// Nine screens: seven panels (the substance, ending in reflection — no
+// quiz, no XP), the kept course picker, then the choice, which lands the
+// user exactly where it says. No XP, no track — this is a preface, not a
+// lesson (both locked product decisions).
 //
-// COPY IS VERBATIM from docs/THRESHOLD_COPY.md. Do not paraphrase,
-// shorten, or "improve" a single line here without changing it there
-// first. Static trusted strings authored in-repo — no user data.
+// COPY IS VERBATIM from docs/WHY_SPEECH_MATTERS_COPY.md (which supersedes
+// the earlier THRESHOLD_COPY.md per the Build A scope change). Do not
+// paraphrase or "improve" a line here without changing it there first.
+// Static trusted strings authored in-repo — no user data.
 
 const THRESHOLD_PANELS = [
-  { title: 'Before You Speak',
+  { title: 'Why Speech Matters',
     quote: 'The beginning is the most important part of the work, especially in the case of a young and tender thing.',
     attribution: '— Plato, <i>Republic</i> 377a–b',
-    body: ['Before you use Speechcraft, you need to understand the power of speech.'] },
+    body: ['Before you use Speechcraft, take three minutes with the instrument you are training. Speech is not decoration. It is action.'] },
+  { title: 'Speech Is Action',
+    body: [
+      'Every line you speak does something to someone. Speech carries clarity or confusion. It declares intention. It persuades, refuses, comforts, confronts. It signals identity and status before a listener can name either — and it is how one human being reaches another.',
+      'An actor who knows what a line is doing can play it. An actor who does not can only recite it.',
+    ] },
   { title: 'Speech Reveals Thought',
     body: [
       'Speech reveals thought. It reveals what we understand, what we assume, what we value, what we fear, and how carefully we have examined our own ideas.',
-      'For an actor, speech turns thought and intention into action upon another character.',
-      'For a teacher, it turns information into understanding.',
-      'For a leader, it gives people direction and gathers them around a purpose.',
-      'For all of us, it is how we ask, refuse, explain, comfort, confront, confess, defend, persuade, and connect.',
-      'The better we become at understanding an idea and communicating it, the better we understand other people — and ourselves.',
+      'The effort to speak clearly does not only display understanding — it helps create it. If you cannot yet articulate something, do not conclude that you know nothing. Treat the difficulty as an invitation to examine what you know more deeply.',
     ] },
-  { title: 'Developing a Voice',
+  { title: 'Why Actors Train This Way',
     body: [
-      'Developing your voice is not learning to sound confident, intelligent, or expressive.',
-      'It is the practice of deepening your understanding of yourself, other people, and the world.',
-      'When you try to put an idea into words, you find out where your understanding is clear and where it stops. You find what you know, what you assumed, what you cannot yet explain, and what you still need to ask.',
-      'Speech does not only display understanding. The effort to speak clearly helps create it.',
-      'If you cannot yet articulate something, do not conclude that you know nothing. Treat the difficulty as an invitation to examine what you know more deeply.',
-      'Speechcraft exists in part to close the distance between having an understanding and being able to give it to someone else.',
+      'The IPA gives you the sounds themselves, not spelling\'s rumors about them. Hear a sound precisely and you can make it precisely.',
+      'Dialect study turns an accent from an imitation into a system — something you can learn, keep, and switch on demand.',
+      'Text investigation shows you what a speaker wants, what they know, what they assume, and what they conceal — so the choices you make on a line are choices, not habits.',
+      'This is the training tradition of the stage: ear first, then text, then performance.',
     ] },
-  { title: 'Knowledge and Its Appearance',
+  { title: 'Communication and Manipulation',
     body: [
-      'Speaking confidently is not the same as knowing what you are talking about.',
-      'One person may understand a subject deeply and struggle to express it. Another may understand very little and speak with confidence, intensity, and force.',
-      'Speechcraft will make either of them more powerful.',
-      'That is why learning to speak has to include learning to question, to investigate, to listen, and to recognize where your knowledge ends.',
-    ] },
-  { title: 'Emotion and Knowledge',
-    body: [
-      'Emotion without examined understanding can become a distraction — a veil over what the speaker does not know.',
-      'Emotion grounded in knowledge does the opposite. It deepens the listener\'s understanding and shows them why the subject matters.',
-      'A responsible speaker uses emotion to illuminate the subject. A manipulative speaker uses emotion to draw attention away from what is missing.',
-      'Speechcraft will teach you to tell the difference — in other speakers, and in yourself.',
-      'When the subject is the speaker\'s own grief, love, fear, or experience, the emotion may itself be part of the truth. But feeling something strongly does not prove every conclusion drawn from the feeling.',
+      'Speaking confidently is not the same as knowing what you are talking about. Speechcraft will make you more powerful either way — which is exactly why this training includes learning to question, to listen, and to recognize where your knowledge ends.',
+      'A responsible speaker uses emotion to illuminate the subject. A manipulative speaker uses emotion to draw attention away from what is missing. You will learn to tell the difference — in other speakers, and in yourself.',
       '<b>The strength of a feeling does not determine the truth of a claim.</b>',
     ] },
-  { title: 'Learn to See Speech',
+  { title: 'The Journey',
     body: [
-      'You will not only practice speaking. You will learn to examine speech.',
-      'You will read words, listen to voices, and watch speakers at work.',
-      'You will take apart conversations, scenes, monologues, speeches, interviews, and debates — to find what each person wants, what they know, what they assume, what they conceal, and how they use language and emotion to work on another person.',
-      'Then you will make those choices yourself, on purpose.',
+      'Speechcraft moves the way rehearsal moves:',
+      '<b>Understand the sound.</b> The IPA, your instrument, the dialect\'s system.',
+      '<b>Mark the text.</b> Transcription, stress, scansion — the score beneath the words.',
+      '<b>Investigate the thought.</b> What the speaker wants, assumes, and conceals.',
+      '<b>Prepare the performance.</b> Choices made on purpose, ready to deliver.',
+    ] },
+  { title: 'Before You Choose',
+    body: [
+      'One question, before you pick your way in — no score, no points.',
+      'Think of a moment when someone\'s words genuinely changed you: what you believed, or what you did next. What did that speaker understand — about the subject, and about you?',
+      'Hold on to that moment. It is the thing you are here to learn to do on purpose.',
     ] },
 ];
 
@@ -1411,7 +1446,7 @@ function renderThreshold(step = 0, opts = {}) {
   // picker never blocks them; changing it stays optional.
   if (replay && !sel.accent) sel.accent = activeCourse();
   if (replay && step === 0) record(() => renderThreshold(0, { replay: true }));
-  const TOTAL = THRESHOLD_PANELS.length + 2;      // 6 panels + picker + choice
+  const TOTAL = THRESHOLD_PANELS.length + 2;      // 7 panels + picker + choice
   const dots = `<div class="ob-dots" aria-label="Progress">${
     Array.from({ length: TOTAL }, (_, i) => `<span class="ob-dot ${i <= step ? 'on' : ''}"></span>`).join('')}</div>`;
   const back = step > 0
@@ -1533,7 +1568,7 @@ function renderPreferences() {
           aria-pressed="${c.id === course.id}">${c.icon} ${esc(c.label)}</button>`).join('')}
       </div>
       <h2 class="guide-heading">First-run setup</h2>
-      <p class="pane-note">Runs the opening and course picker again. Your progress is untouched.</p>
+      <p class="pane-note">Runs the preface and course picker again. Your progress is untouched.</p>
       <button class="btn" id="pref-rerun" type="button">Run setup again</button>
     </main>`;
   wireBrandHome();
@@ -1773,8 +1808,8 @@ function renderAbout() {
       <div class="guide-word"><span class="wii-who">Prepare</span><span class="guide-note">your own text in the Studio: paste it, transcribe it to IPA in your dialect, mark it up with notes</span></div>
       <div class="guide-word"><span class="wii-who">Rehearse</span><span class="guide-note">listen, repeat, and work the text against the model recordings until the accent lives in it</span></div>
       <p class="guide-text"><b>Speechcraft is in beta.</b> Content and recordings are still being reviewed and expanded. It is a practice tool, not a substitute for a dialect coach — accents are learned by ears and feedback, and no app can promise fluency.</p>
-      <h2 class="guide-heading">Before You Speak</h2>
-      <p class="guide-text">The opening — on what speech reveals, and what it can conceal. Read it again any time.</p>
+      <h2 class="guide-heading">Why Speech Matters</h2>
+      <p class="guide-text">The preface — on what speech does, what it reveals, and what it can conceal. Read it again any time.</p>
       <p><button class="btn" id="about-threshold" type="button">Read it again</button></p>
       <p class="pane-note">Pronunciation targets are exactly that: targets. Real speakers vary by region, generation and situation. Anything you paste into the Studio stays private on this device — nothing is uploaded or shared.</p>
     </main>`;

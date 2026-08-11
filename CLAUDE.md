@@ -455,6 +455,40 @@ UI across iframe reloads + a course switch; CTA never-silent contract
 with a deterministic seeded launch + driven completion; analytics key
 snapshot-restored so tests leave no trace; mic spy still zero).
 
+BUILD A (2026-08-11, committed locally, NOT pushed): scope change made
+the roadmap active — twelve features now in build order A–G, six things
+stay deferred (isolated phoneme recordings, mouth/tongue videos,
+lyrics/sheet-music, interface languages, additional accents, learner
+speaking — never reintroduce indirectly). Local checkpoint commits are
+now permitted as tested restore points; push/merge/deploy still
+forbidden. Checkpoint 428f570 preserved accepted B01–B04, then Build A:
+the threshold became the "Why Speech Matters" preface — seven panels +
+kept course picker + kept choice (nine dots, computed from
+THRESHOLD_PANELS.length + 2). Copy source is now
+docs/WHY_SPEECH_MATTERS_COPY.md (supersedes THRESHOLD_COPY.md for
+panels 1–7; that file stays untouched as B01 history). Kept verbatim:
+Plato quote + attribution, "Speech reveals thought…", the
+feeling/truth line, both choice-screen lines. New pins in launch_lint
+6c/6d: "Why Speech Matters", "Speech is not decoration. It is
+action.", "ear first, then text, then performance", "no score, no
+points", Jowett credit + "public domain worldwide" + "Rhetoric &amp;
+Oratory". Preface ends in reflection ("Before You Choose") — no quiz,
+no XP (locked). About/invite/Preferences copy renamed to match; the
+threshold storage record, key names and grandfathering signal are
+UNCHANGED (state.js comment says so). New Library card "Rhetoric &
+Oratory" → renderReadingPathway: three Plato dialogues
+(Gorgias/Phaedrus/Republic II–III & X) with for-actors notes, Benjamin
+Jowett 1892 credit, PD statement, plain-text Project Gutenberg pointer,
+NO external links (house sources policy), explicitly not an ebook
+shelf. IPA sound-page Prev/Next already satisfied Build A's nav spec
+(shipped earlier; section-6 tests cover it). Regression suite → 139
+checks (section 10: six pathway checks incl. link-free page and
+reading order; ten preface checks — full replay walk through all nine
+screens, panel-title sequence, no quiz apparatus, picker preselected,
+Esc exit, record immutability, no XP; section re-acquires the live
+iframe document because section 9 reloads the frame). Suite total
+179/179; all five gates pass.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

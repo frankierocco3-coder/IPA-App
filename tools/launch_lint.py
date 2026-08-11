@@ -106,16 +106,29 @@ def main():
         if record_ui.count(guard) < 2:
             fail("a capture-UI builder in record-ui.js lost its capability gate")
 
-    # 6c: the threshold copy stays VERBATIM (spot pins from
-    # docs/THRESHOLD_COPY.md — if one of these drifts, someone paraphrased)
-    for pin in ["— Plato, <i>Republic</i> 377a–b",
+    # 6c: the preface copy stays VERBATIM (spot pins from
+    # docs/WHY_SPEECH_MATTERS_COPY.md, which supersedes THRESHOLD_COPY.md
+    # for panels 1-7 — if one of these drifts, someone paraphrased)
+    for pin in ["Why Speech Matters",
+                "— Plato, <i>Republic</i> 377a–b",
                 "especially in the case of a young and tender thing",
+                "Speech is not decoration. It is action.",
                 "Speech reveals thought. It reveals what we understand",
                 "The strength of a feeling does not determine the truth of a claim.",
+                "ear first, then text, then performance",
+                "no score, no points",
                 "Both take you into the same app. You can change your mind at any time.",
                 "The guided path stays available whenever you want it."]:
         if pin not in main_js:
-            fail("threshold copy drifted from docs/THRESHOLD_COPY.md: missing %r" % pin[:60])
+            fail("preface copy drifted from docs/WHY_SPEECH_MATTERS_COPY.md: missing %r" % pin[:60])
+
+    # 6d: the reading pathway stays a credited public-domain pathway, not
+    # an ebook shelf — translator credit and PD statement are pinned
+    for pin in ["Benjamin Jowett",
+                "public domain worldwide",
+                "Rhetoric &amp; Oratory"]:
+        if pin not in main_js:
+            fail("reading-pathway credit/PD statement missing: %r" % pin)
 
     # 6b: syllable demonstrations stay labelled as demonstrations, never
     # passed off as pure isolated sounds
