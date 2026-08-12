@@ -36,6 +36,9 @@ import { startRecording, isRecording, micErrorMessage, recordingSupported } from
 import { openDB, idbGet, STORES } from '../js/db.js';
 import { DIALECT_ACTION, actionFor } from '../js/data/action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
+import { SONNETS } from '../js/data/sonnets.js';
+import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
+         EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
@@ -548,7 +551,10 @@ export async function run({ navDoc = document } = {}) {
     for (const w of WORDS) (ipaOf[w.word.toLowerCase()] ??= []).push(w.ipa);
     const hasSym = (w, s) => (ipaOf[w.toLowerCase()] ?? []).some(a => a.includes(s));
     const bareL = l => l.replace(/^[/\[]|[/\]]$/g, '');
-    const driveSession = async (maxSteps = 130) => {
+    // Step cap sized for throttled background tabs: most steps are no-op
+    // waits when the browser clamps timers to 1s, so the budget must be
+    // generous — the loop exits the moment the results screen appears.
+    const driveSession = async (maxSteps = 400) => {
       let good = 0, bad = 0, lastShow = false;
       for (let i = 0; i < maxSteps; i++) {
         const body = navDoc.body.textContent;
@@ -1483,6 +1489,102 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('Build D drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 15. Build F: the sonnet-edition catalog ─────────────────
+  try {
+    check('editions: exactly 154 Original sonnets, numbered 1..154',
+      SONNETS.length === 154 && SONNETS.every((s, i) => s.n === i + 1)
+      && SONNETS.every(s => s.lines.length >= 12 && s.lines.length <= 15));
+    const newEds = await allEditions();
+    const expectNew = EDITION_CHUNKS.reduce((s, c) => s + c.expect, 0);
+    const edKeys = Object.keys(newEds).map(Number);
+    check('editions: chunk contents match the manifest exactly',
+      edKeys.length === expectNew
+      && EDITION_CHUNKS.every(c =>
+        edKeys.filter(n => n >= c.from && n <= c.to).length === c.expect)
+      && edKeys.every(n => !LEGACY_SONNETS.includes(n)),
+      `keys=${edKeys.length} expect=${expectNew}`);
+    check('editions: every written sonnet has all four texts and no RP adaptation',
+      Object.values(newEds).every(e =>
+        e.plain?.length > 200 && e.nam?.length > 100 && e.ssbe?.length > 100
+        && e.aus?.length > 100 && !('rp' in e)));
+    check('editions: the four texts are mutually distinct per sonnet',
+      Object.values(newEds).every(e => new Set([e.plain, e.nam, e.ssbe, e.aus]).size === 4));
+    check('editions: every new text is a DRAFT — nothing learner-visible',
+      edKeys.every(n => editionStatus(n, 'plain') === 'draft'
+        && ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft')));
+    check('editions: the five pilots stay in the original queue, unduplicated',
+      (await editionFor(18))?.legacy === true
+      && (await editionFor(18)).voices.nam === RECASTS[18].recasts.nam
+      && (await editionFor(18)).plainStatus === 'approved'
+      && LEGACY_SONNETS.every(n => !(n in newEds)));
+    check('editions: no third-party guide label anywhere in the catalog',
+      !JSON.stringify(newEds).includes('No Fear'));
+    if (EDITION_CATALOG_COMPLETE) {
+      let full = { plain: 0, nam: 0, ssbe: 0, aus: 0 };
+      for (let n = 1; n <= 154; n++) {
+        const e = await editionFor(n);
+        if (e?.plain) full.plain++;
+        for (const d of ['nam', 'ssbe', 'aus']) if (e?.voices[d]) full[d]++;
+      }
+      check('editions: CATALOG COMPLETE — 154 of every kind',
+        full.plain === 154 && full.nam === 154 && full.ssbe === 154 && full.aus === 154,
+        JSON.stringify(full));
+    } else {
+      ok(`editions: catalog in progress — ${expectNew + LEGACY_SONNETS.length}/154 sonnets written`);
+    }
+  } catch (err) {
+    bad('edition catalog integrity', String(err));
+  }
+
+  // Reader behavior under the draft gate (runner only).
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    try {
+      let doc = frame.contentDocument;
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+      const tabs = () => [...doc.querySelectorAll('.sonnet-tabs .son-tab')].map(b => b.textContent);
+      // renderSonnet awaits a lazy chunk import — poll for the finished
+      // render rather than trusting a fixed sleep under timer throttling.
+      const until = async (fn, ms = 12000) => {
+        const t0 = Date.now();
+        while (Date.now() - t0 < ms) { if (fn()) return true; await sleep(200); }
+        return fn();
+      };
+
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(350);
+      clickIn(card('Scripts & Speeches')); await sleep(400);
+      // Exact title — 'Featured Texts' also mentions sonnets and must not match.
+      clickIn(card('Shakespeare’s Sonnets')); await sleep(500);
+      clickIn(doc.querySelector('.sonnet-row[data-n="2"]'));
+      await until(() => doc.body.textContent.includes('Sonnet 2') && !!doc.querySelector('.sonnet-tabs'));
+      check('editions UI: a draft edition shows NO Plain/Today tabs to learners',
+        doc.body.textContent.includes('Sonnet 2')
+        && !tabs().some(t => t.includes('Plain')) && !tabs().some(t => t.includes('Voice')),
+        tabs().join(','));
+      clickIn(doc.getElementById('nav-back'));
+      await until(() => !!doc.getElementById('sonnet-search'));
+      clickIn(doc.querySelector('.sonnet-row[data-n="18"]'));
+      await until(() => doc.body.textContent.includes('Sonnet 18') && !!doc.querySelector('.sonnet-tabs'));
+      check('editions UI: pilot 18 keeps its live Plain Meaning, drafts stay hidden',
+        tabs().some(t => t.includes('Plain'))
+        && !tabs().some(t => t.includes('Voice')),
+        tabs().join(','));
+      clickIn(doc.getElementById('nav-back'));
+      await until(() => !!doc.getElementById('sonnet-search'));
+      check('editions UI: Back returns to the sonnet list',
+        !!doc.getElementById('sonnet-search'));
+    } catch (err) {
+      bad('edition reader drive', String(err));
+    }
+  } else {
+    ok('edition reader drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

@@ -10,6 +10,8 @@ import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
 import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from './data/recasts.js';
+import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
+         EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from './data/editions/index.js';
 import { actionFor, actionDrafts } from './data/action.js';
 import { videoFor } from './data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -1911,7 +1913,7 @@ function renderContentReview() {
       <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
-      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code> or <code>js/data/bridge.js</code>, record the reviewer, and commit. Approved pieces appear in the Library automatically. Nothing here may be batch-approved, and Claude may never approve its own writing.</p>
+      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear in the Library automatically. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
 
       <h1>The original 23-item queue</h1>
       <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>
@@ -1951,12 +1953,60 @@ function renderContentReview() {
             </div>`).join('')}
           ${r.sourceNote ? `<p class="pane-note">${esc(r.sourceNote)}</p>` : ''}
         </section>`).join('')}
+
+      <h1 id="edition-drafts">Sonnet editions — the Build F written catalog</h1>
+      <p class="pane-note">New drafts, tracked in <code>js/data/edition-reviews.js</code> —
+        listed separately from the original 23. Coverage so far:
+        ${EDITION_CHUNKS.length ? EDITION_CHUNKS.map(c => `${c.from}–${c.to}`).join(', ') : 'none yet'}
+        (${EDITION_CHUNKS.reduce((s, c) => s + c.expect, 0)} new sonnets ×
+        Plain Meaning + 3 voices)${EDITION_CATALOG_COMPLETE ? ' — CATALOG COMPLETE (149 new + 5 pilots = 154)' : ' — catalog in progress'}.
+        The five pilots (${LEGACY_SONNETS.join(', ')}) stay in the original queue above.
+        Plain Meaning needs a literary review; each voice needs literary AND
+        dialect/register review. Enter a sonnet number to inspect its drafts.</p>
+      <div class="proj-toolbar">
+        <label class="field-label" for="ed-n">Sonnet</label>
+        <input class="input-sel" id="ed-n" type="number" min="1" max="154" value="1" style="width:6em">
+        <button class="btn-lite" id="ed-show" type="button">Show drafts</button>
+      </div>
+      <div id="ed-view"></div>
     </main>`;
   document.getElementById('review-exit').addEventListener('click', () => {
     history.replaceState(null, '', location.pathname);
     renderHome();
   });
   wireActionPiece(app);
+
+  // Edition-draft inspector: loads ONE sonnet's chunk on demand — the
+  // review page never parses the whole catalog either.
+  const edView = document.getElementById('ed-view');
+  document.getElementById('ed-show').addEventListener('click', async () => {
+    const n = +document.getElementById('ed-n').value;
+    edView.innerHTML = '<p class="pane-note">Loading…</p>';
+    const orig = SONNETS.find(x => x.n === n);
+    const ed = await editionFor(n).catch(() => null);
+    if (!orig) { edView.innerHTML = '<p class="pane-note">No such sonnet.</p>'; return; }
+    if (!ed) { edView.innerHTML = `<p class="pane-note">Sonnet ${n}: edition batch not written yet.</p>`; return; }
+    if (ed.legacy) {
+      edView.innerHTML = `<p class="pane-note">Sonnet ${n} is one of the five pilots — its transpositions live in the original 23-item queue above (js/data/recasts.js).</p>`;
+      return;
+    }
+    const block = (label, kind, text) => `
+      <section class="review-piece">
+        <p class="sonnet-hint">Sonnet ${n} · ${esc(label)} · status <b>${esc(editionStatus(n, kind))}</b>
+          ${kind === 'plain' ? '· requires literary review' : '· requires literary + dialect/register review'}</p>
+        <div class="sonnet-lines">${String(text).split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
+      </section>`;
+    edView.innerHTML = `
+      <section class="review-piece">
+        <p class="sonnet-hint">Sonnet ${n} · Original (byte-locked, not under review)</p>
+        <div class="sonnet-lines">${orig.lines.map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
+      </section>
+      ${block('Plain Meaning', 'plain', ed.plain)}
+      ${block('In Today’s Voice — Neutral American', 'nam', ed.voices.nam)}
+      ${block('In Today’s Voice — Standard British', 'ssbe', ed.voices.ssbe)}
+      ${block('In Today’s Voice — Australian', 'aus', ed.voices.aus)}
+      <p class="pane-note">Traditional RP deliberately has no vocabulary adaptation — RP is a pronunciation target, not a modern slang register. Its course shows Original + Plain Meaning (once approved).</p>`;
+  });
 }
 
 // ── More: the reference shelf ─────────────────────────────────
@@ -3377,7 +3427,7 @@ function renderPiece(key, id) {
 // already ran at startup, and the legacy localStorage value stays untouched.)
 
 // One sonnet, opened in the reader (defaults to RP; dialect is switchable).
-function renderSonnet(n) {
+async function renderSonnet(n) {
   record(() => renderSonnet(n));
   const s = SONNETS.find(x => x.n === n);
   if (!s) return renderSonnetList();
@@ -3387,16 +3437,23 @@ function renderSonnet(n) {
   // line set exists for it (generated manifest — never a hardcoded claim).
   const narrated = Object.keys(LONGFORM_COVERAGE.sonnets)
     .filter(d => LONGFORM_COVERAGE.sonnets[d].includes(n));
-  // In Today's Voice: only transpositions BOTH written and approved — the
-  // tab itself disappears when this list is empty. Never a dead tab.
-  const today = approvedTranspositions(n).map(d => ({
-    id: d, label: TRANSPOSITION_LABELS[d] ?? d, text: RECASTS[n].recasts[d],
-  }));
+  // The learning edition, loaded lazily from its chunk (Build F). A load
+  // failure means the sonnet simply renders without edition tabs — the
+  // Original never depends on the catalog.
+  const ed = await editionFor(n).catch(() => null);
+  // Plain Meaning and In Today's Voice: only texts BOTH written and
+  // APPROVED — drafts render solely on #review, and an empty list means
+  // no tab at all. Never a dead tab, never a draft on a learner surface.
+  const today = ed
+    ? ['nam', 'ssbe', 'aus']
+        .filter(d => ed.voices[d] && ed.voiceStatus(d) === 'approved')
+        .map(d => ({ id: d, label: TRANSPOSITION_LABELS[d] ?? d, text: ed.voices[d] }))
+    : [];
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: narrated[0] ?? 'rp',
     clip: (i, acc) => narrated.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
     narrated,
-    recast: RECASTS[n] ?? null,
+    recast: ed && ed.plain && ed.plainStatus === 'approved' ? { plain: ed.plain } : null,
     today,
     scopeId: `sonnet:${n}`,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,

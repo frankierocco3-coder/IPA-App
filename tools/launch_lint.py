@@ -233,6 +233,41 @@ def main():
             if _re.search(r"\b" + _re.escape(term) + r"\b", src, _re.I):
                 fail("removed NAM expression resurfaced in %s: %r" % (name, term))
 
+    # 6i: the Build F sonnet-edition catalog
+    import hashlib as _hl
+    sonnets_sha = _hl.sha256((ROOT / "js" / "data" / "sonnets.js").read_bytes()).hexdigest()
+    if sonnets_sha != "c0daa0262d2dda6eb74697dbd83abe1abf9a55c8e553f2e73a3a218d82e4e844":
+        fail("js/data/sonnets.js changed — the original Shakespeare text is "
+             "byte-locked; if an edit was DELIBERATE, update this pin in the "
+             "same commit and say why (got sha256 %s)" % sonnets_sha[:16])
+    ed_dir = ROOT / "js" / "data" / "editions"
+    ed_index = (ed_dir / "index.js").read_text(encoding="utf-8")
+    ed_chunks = _re.findall(
+        r"\{ file: '(sonnets-\d+-\d+)', from: (\d+), to: (\d+), expect: (\d+) \}", ed_index)
+    declared_new = 0
+    for fname, _frm, _to, expect in ed_chunks:
+        src = (ed_dir / (fname + ".js")).read_text(encoding="utf-8")
+        for key in ("plain: `", "nam: `", "ssbe: `", "aus: `"):
+            cnt = src.count(key)
+            if cnt != int(expect):
+                fail("editions/%s.js has %d %r entries, manifest expects %s"
+                     % (fname, cnt, key.split(':')[0], expect))
+        if "rp: `" in src:
+            fail("a Traditional RP vocabulary adaptation appeared in editions/%s.js — "
+                 "RP is a pronunciation target; its course shows Original + Plain "
+                 "Meaning only (documented decision)" % fname)
+        if "No Fear" in src:
+            fail("third-party guide label in editions/%s.js" % fname)
+        declared_new += int(expect)
+    if "EDITION_CATALOG_COMPLETE = true" in ed_index and declared_new != 149:
+        fail("catalog marked complete but chunks hold %d of the 149 new sonnets"
+             % declared_new)
+    if declared_new > 149:
+        fail("edition chunks declare %d new sonnets — more than the 149 that exist "
+             "outside the five pilots" % declared_new)
+    if "No Fear" in main_js:
+        fail("'No Fear' label must never appear on a learner surface")
+
     # 6f: a blocked storage upgrade must carry the visible instruction,
     # and the wipe list must stay centralized with dissections in it
     db_js = (ROOT / "js" / "db.js").read_text(encoding="utf-8")
