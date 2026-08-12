@@ -45,6 +45,7 @@ export const LEGACY_SONNETS = [18, 29, 73, 116, 130];
 export const EDITION_CHUNKS = [
   { file: 'sonnets-001-014', from: 1, to: 14, expect: 14 },
   { file: 'sonnets-015-028', from: 15, to: 28, expect: 13 },
+  { file: 'sonnets-029-042', from: 29, to: 42, expect: 13 },
 ];
 
 // Flipped to true by the FINAL batch; integrity checks then demand the
