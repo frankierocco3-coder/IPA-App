@@ -8,7 +8,7 @@ never duplicated; 149 new sonnets ship in 11 chunks.
 | Batch | Chunk file | Sonnets | New entries | Status |
 |---|---|---|---|---|
 | 1 | sonnets-001-014 | 1–14 | 14 | DONE — suite 283/283, gates pass |
-| 2 | sonnets-015-028 | 15–28 (skip 18) | 13 | pending |
+| 2 | sonnets-015-028 | 15–28 (skip 18) | 13 | DONE — suite 283/283, gates pass |
 | 3 | sonnets-029-042 | 29–42 (skip 29) | 13 | pending |
 | 4 | sonnets-043-056 | 43–56 | 14 | pending |
 | 5 | sonnets-057-070 | 57–70 | 14 | pending |

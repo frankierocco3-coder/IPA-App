@@ -44,6 +44,7 @@ export const LEGACY_SONNETS = [18, 29, 73, 116, 130];
 // against this manifest.
 export const EDITION_CHUNKS = [
   { file: 'sonnets-001-014', from: 1, to: 14, expect: 14 },
+  { file: 'sonnets-015-028', from: 15, to: 28, expect: 13 },
 ];
 
 // Flipped to true by the FINAL batch; integrity checks then demand the
