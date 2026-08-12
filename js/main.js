@@ -788,6 +788,9 @@ function libraryMain(el, course) {
     { icon: '🎯', title: 'Playable Actions',
       blurb: 'What you’re doing to the other person.',
       go: renderPlayableActions },
+    { icon: '🔍', title: 'Speech Dissection',
+      blurb: 'The six-question pass actors run on any text — what it is, and how to use it.',
+      go: renderDissectHub },
     { icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract.',
       go: renderInstrument },
@@ -2072,6 +2075,9 @@ function moreMain(el) {
     { icon: '👤', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
     { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
     { icon: '⚙️', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
+    // Permanent doorway to the preface — never retired by onboarding state.
+    // Replaying only touches the replay timestamps (state.js guarantees it).
+    { icon: '✨', title: 'Why Speech Matters', blurb: 'The preface — speech as action, and why actors train it. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
@@ -2936,6 +2942,87 @@ function wireAutosave(stateEl, collect) {
 // created lazily on the first real interaction, so opening the screen
 // never writes to the database. EVERY stored string is untrusted on read —
 // esc() on render, values assigned via .value where possible.
+// ── Speech Dissection hub: the permanent explainer (Library) ──
+// Anyone can read the whole method without owning a project, and opening
+// this page NEVER writes to IndexedDB — records are only created when a
+// user starts answering inside a project's dissection screen. The worked
+// example below is original Speechcraft text written for this page; it
+// quotes nothing from the review queue.
+async function renderDissectHub() {
+  record(renderDissectHub);
+  stopSpeech();
+  // Each question with what it helps the actor discover — teaching copy,
+  // paired with the stable ids so the six here can never drift from the
+  // six the tool actually asks.
+  const DISCOVERS = {
+    'quick.happening': 'The ground under the scene: the event the words are riding on, before any interpretation.',
+    'quick.wants': 'The engine. A speaker who wants nothing has nothing to play.',
+    'quick.resisting': 'The obstacle — because if the listener already agrees, the speech has no work to do.',
+    'quick.doing': 'The playable action: not the feeling, but what these words are doing to the other person.',
+    'quick.change': 'The turn — the line where it becomes a different conversation.',
+    'quick.after': 'The result: what these words actually changed, which tells you what they were for.',
+  };
+  const EXAMPLE = [
+    ['What is happening?', 'answered', 'A landlord has come to the door at night to tell a tenant the building is being sold.'],
+    ['What does the speaker want?', 'answered', 'To leave without a scene — to have said it and be gone.'],
+    ['What is the listener resisting?', 'answered', 'The idea that this is final. She keeps answering as if it were still negotiable.'],
+    ['What is the speaker doing to change them?', 'answered', 'Hiding behind paperwork — using “the buyers” and “the process” so the decision never sounds like his.'],
+    ['Where does the exchange change?', 'unknown', 'Not sure yet — maybe when she stops arguing and just asks “when?”. Marked “I don’t know yet” until the next read.'],
+    ['What is different at the end?', 'na', 'The scene cuts off before the end — marked “Not relevant” for this excerpt.'],
+  ];
+  app.innerHTML = `
+    ${pageTopbar('🔍 Speech Dissection', '#8a6d3b')}
+    <main class="guide">
+      <h1 id="hub-title">Speech Dissection</h1>
+      <p class="guide-text"><b>A reusable way of taking a text apart</b> — a scene, a monologue, a speech, an interview, your own sides. The governing question behind all of it: <i>what is this person doing to that person with these words — and do they know what they’re talking about?</i></p>
+      <h2 class="guide-heading">Why actors dissect a text</h2>
+      <p class="guide-text">An actor who knows what a line is doing can play it; an actor who doesn’t can only recite it. Dissection separates what the speaker <b>knows</b> from what they <b>claim</b>, what they <b>want</b> from what they <b>show</b> — so the choices you make on a line are choices, not habits. It’s a thinking tool, not a worksheet: nothing here is scored.</p>
+      <h2 class="guide-heading">The six questions (Quick mode)</h2>
+      ${QUICK_QUESTIONS.map(({ id, q }) => `
+        <div class="guide-word"><span class="wii-who">${esc(q)}</span><span class="guide-note">${esc(DISCOVERS[id])}</span></div>`).join('')}
+      <h2 class="guide-heading">Three honest answer states</h2>
+      <p class="guide-text">Every question takes one of three first-class answers: <b>answered</b> in your own words; <b>“I don’t know yet”</b> — one tap, and worth more than a guess; or <b>“Not relevant”</b> — one tap, for questions this text genuinely doesn’t raise. Completion is never “all six answered”: the tool shows coverage, not a score, and every answer stays revisable.</p>
+      <h2 class="guide-heading">A worked example</h2>
+      <p class="pane-note">An original two-line scene, dissected. <i>“I’ll leave the papers here. The buyers want the keys by the first.” — “You said we’d talk about this. You’re still saying it now, aren’t you?”</i></p>
+      ${EXAMPLE.map(([q, st, a]) => `
+        <div class="guide-word"><span class="wii-who">${esc(q)}</span><span class="guide-note"><b>${st === 'answered' ? '✓' : st === 'unknown' ? '?' : '—'}</b> ${esc(a)}</span></div>`).join('')}
+      <h2 class="guide-heading">Private, editable, yours</h2>
+      <p class="guide-text">Answers save automatically to this device and never leave it — nothing is uploaded or shared. You can revise any answer at any time, and deleting a dissection never touches the project or its text. Reading this page stores nothing at all.</p>
+      <h2 class="guide-heading">Use it on your own text</h2>
+      <p class="guide-text">Dissection lives inside Studio projects: open a project and press <b>🔍 Dissect This</b>, or start straight from here.</p>
+      <div id="hub-projects"><p class="pane-note">Checking your Studio projects…</p></div>
+      <p><button class="btn" id="hub-new-project" type="button">＋ New Studio project</button></p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('hub-new-project').addEventListener('click', renderNewProject);
+
+  // Project selector — read-only listing; choosing one opens its EXISTING
+  // dissection screen (saved answers untouched, creation still lazy).
+  const slot = document.getElementById('hub-projects');
+  if (!dbSupported()) {
+    slot.innerHTML = '<p class="pane-note">Projects need local storage, which this browser has disabled (private mode often does). The method above still works with pen and paper.</p>';
+    return;
+  }
+  let projects = [];
+  try { projects = sortProjects(await listProjects(), 'updated'); }
+  catch (err) { slot.innerHTML = `<p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>`; return; }
+  if (!projects.length) {
+    slot.innerHTML = '<p class="pane-note">No Studio projects yet — create one below and its Dissect screen is one tap away. (You’re welcome to just read this page; nothing gets created until you answer a question.)</p>';
+    return;
+  }
+  slot.innerHTML = `
+    <p class="pane-note" id="hub-pick-label">Dissect one of your projects:</p>
+    ${projects.slice(0, 12).map(p => `
+      <button class="track-card hub-proj" data-id="${esc(p.id)}" type="button" style="--track-color:#8a6d3b">
+        <div class="track-glyph">🎬</div>
+        <div class="track-info"><h2>${esc(p.title || 'Untitled project')}</h2><p>${esc(contentTypeLabel(p.contentType))}</p></div>
+        <div class="track-arrow">›</div>
+      </button>`).join('')}
+    ${projects.length > 12 ? `<p class="pane-note">…and ${projects.length - 12} more in Studio.</p>` : ''}`;
+  slot.querySelectorAll('.hub-proj').forEach(b =>
+    b.addEventListener('click', () => renderDissect(b.dataset.id)));
+}
+
 async function renderDissect(id) {
   record(() => renderDissect(id));
   let p;

@@ -670,6 +670,28 @@ consistency. Regression section 15 incl. strict 154-of-every-kind
 check. 11 batch commits ccb74ba→…; suite 283/283 at completion; all
 five gates pass every batch. 616 draft texts await human review.
 
+PERMANENT ENTRIES (2026-08-12, committed locally, NOT pushed;
+written-content-only): (1) More shelf gained a permanent '✨ Why
+Speech Matters' card (moreMain, between Preferences and About) opening
+renderThreshold(0,{replay:true}) — the About "Read it again" button
+and Preferences rerun both remain; replay writes only
+lastReplayedAt/lastChoice, Back/Esc returns to the invoking page via
+navStack. (2) Library shelf gained a permanent '🔍 Speech Dissection'
+card → renderDissectHub: full method explainer (what/why, the six
+QUICK_QUESTIONS each with a what-it-discovers line, three answer
+states, an original worked example incl. one 'unknown' and one 'na',
+privacy note, how-to), project selector (up to 12, most-recent first,
+opens renderDissect with saved answers untouched) or empty-state
+create path, plus an always-present '＋ New Studio project' button →
+renderNewProject. Opening the hub NEVER writes to IndexedDB (record
+creation stays lazy in paneDissect). Per-project 🔍 Dissect This
+button unchanged. Regression: section 10 reworked to enter via the
+More card (permanence, Esc-returns-to-origin, replay-resets-nothing
+incl. onboarding+lessons); new section 16 (14 checks: hub
+readability, no-record-on-read, both profile states, saved-dissection
+round trip, wizard journey, Back chain, mobile width, no audio, zero
+mic). Suite → 297 checks; five gates pass.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

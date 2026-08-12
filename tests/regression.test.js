@@ -15,7 +15,7 @@
 import { loadPron, ipaFor } from '../js/pron.js';
 import { rehearsalTargets } from '../js/analytics.js';
 import { PHONEMES, WORDS } from '../js/data/phonemes.js';
-import { createProject, getProject, deleteProject } from '../js/projects.js';
+import { createProject, getProject, deleteProject, listProjects } from '../js/projects.js';
 import { saveTake, listTakes, deleteTake, deleteTakesFor, setBestTake, takeUrl,
          takesPresence, listAllTakes } from '../js/recordings.js';
 import { setPersonal, getPersonal, deletePersonal } from '../js/overrides.js';
@@ -33,7 +33,7 @@ import { store } from '../js/state.js';
 import { CAPABILITIES } from '../js/capabilities.js';
 import { tryItHtml, performCaptureHtml } from '../js/record-ui.js';
 import { startRecording, isRecording, micErrorMessage, recordingSupported } from '../js/perform.js';
-import { openDB, idbGet, STORES } from '../js/db.js';
+import { openDB, idbGet, idbAll, STORES } from '../js/db.js';
 import { DIALECT_ACTION, actionFor } from '../js/data/action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
 import { SONNETS } from '../js/data/sonnets.js';
@@ -719,14 +719,16 @@ export async function run({ navDoc = document } = {}) {
       check('pathway: Back returns to the Library shelf',
         !!card('Rhetoric & Oratory') && !!card('Scripts & Speeches'));
 
-      // Preface replay: About → Why Speech Matters → full walk → Esc out.
+      // Preface replay through the PERMANENT More card — full walk, Esc out,
+      // and proof that nothing about the profile changed.
       const thBefore = store.threshold;
       const xpBefore = store.xp;
+      const obBefore = JSON.stringify(store.onboarding);
+      const doneBefore = store.completed.size;
       clickIn(side('More')); await sleep(350);
-      clickIn(card('About Speechcraft')); await sleep(350);
-      check('preface: About carries the new heading and replay button',
-        doc.body.textContent.includes('Why Speech Matters') && !!doc.getElementById('about-threshold'));
-      clickIn(doc.getElementById('about-threshold')); await sleep(350);
+      check('preface: a permanent Why Speech Matters card sits on the More shelf',
+        !!card('Why Speech Matters') && !!card('About Speechcraft'));
+      clickIn(card('Why Speech Matters')); await sleep(350);
       const wall = () => doc.querySelector('.threshold');
       const h1 = () => wall()?.querySelector('h1')?.textContent ?? '';
       check('preface: replay opens on "Why Speech Matters"',
@@ -753,13 +755,15 @@ export async function run({ navDoc = document } = {}) {
         wall()?.querySelectorAll('[data-choice]').length === 2);
       wall()?.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await sleep(300);
-      check('preface: Esc exits the replay back to About',
-        !doc.querySelector('.threshold') && !!doc.getElementById('about-threshold'));
+      check('preface: Esc returns to the page it was opened from, card intact',
+        !doc.querySelector('.threshold') && !!card('Why Speech Matters'));
       const thAfter = store.threshold;
       check('preface: replay walk never rewrote the original record',
         thAfter.choice === thBefore.choice && thAfter.completedAt === thBefore.completedAt
         && thAfter.source === thBefore.source);
-      check('preface: awards no XP', store.xp === xpBefore);
+      check('preface: replay resets nothing — XP, onboarding, lessons all unchanged',
+        store.xp === xpBefore && JSON.stringify(store.onboarding) === obBefore
+        && store.completed.size === doneBefore);
     } catch (err) {
       bad('Build A drive', String(err));
     }
@@ -1585,6 +1589,115 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('edition reader drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 16. Permanent entries: the Dissection hub (runner only) ─
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let hubProj = null;
+    try {
+      let doc = frame.contentDocument;
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+      const until = async (fn, ms = 10000) => {
+        const t0 = Date.now();
+        while (Date.now() - t0 < ms) { if (fn()) return true; await sleep(200); }
+        return fn();
+      };
+      let mic16 = 0;
+      const win0 = frame.contentWindow;
+      if (win0.navigator.mediaDevices?.getUserMedia) {
+        const orig16 = win0.navigator.mediaDevices.getUserMedia.bind(win0.navigator.mediaDevices);
+        win0.navigator.mediaDevices.getUserMedia = (...a) => { mic16++; return orig16(...a); };
+      }
+
+      // The About doorway to the preface stays alongside the More card.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('More')); await sleep(350);
+      clickIn(card('About Speechcraft')); await sleep(350);
+      check('hub: the About replay button survives beside the More card',
+        !!doc.getElementById('about-threshold'));
+
+      // The hub itself: readable end to end without owning anything.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(350);
+      check('hub: a permanent Speech Dissection card sits on the Library shelf',
+        !!card('Speech Dissection'));
+      const dissBefore = (await idbAll(STORES.dissections)).length;
+      const emptyProfile = (await listProjects()).length === 0;
+      clickIn(card('Speech Dissection'));
+      await until(() => doc.getElementById('hub-title') && !doc.getElementById('hub-projects')?.textContent.includes('Checking'));
+      const hubText = () => doc.body.textContent;
+      check('hub: all six questions are readable with what each discovers',
+        QUICK_QUESTIONS.every(({ q }) => hubText().includes(q))
+        && hubText().includes('The playable action'));
+      check('hub: the three answer states and the worked example are on the page',
+        hubText().includes('I don’t know yet') && hubText().includes('Not relevant')
+        && hubText().includes('A worked example')
+        && hubText().includes('I’ll leave the papers here'));
+      check('hub: reading the page creates no dissection record',
+        (await idbAll(STORES.dissections)).length === dissBefore);
+      check('hub: written-only — no audio or playback control anywhere',
+        !doc.querySelector('main audio')
+        && !doc.querySelector('main').textContent.includes('🔊')
+        && !/coming soon/i.test(doc.querySelector('main').textContent));
+      if (emptyProfile) {
+        check('hub: empty profile gets the clear create-a-project path',
+          hubText().includes('No Studio projects yet') && !!doc.getElementById('hub-new-project'));
+      } else {
+        ok('hub: empty-profile state (profile has projects — selector path tested below)');
+      }
+
+      // With a project that has SAVED answers: the selector opens the right
+      // dissection, untouched.
+      hubProj = await createProject({ title: '__regression hub (safe to delete)', text: 'Sit.' });
+      const hd = newDissection({ targetType: 'project', targetId: hubProj.id, targetLabel: hubProj.title });
+      await putDissection(hd);
+      await saveAnswer(hd.id, 'quick.wants', { value: 'To be let back in.' });
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(card('Speech Dissection'));
+      await until(() => !!doc.querySelector('.hub-proj'));
+      const row = [...doc.querySelectorAll('.hub-proj')].find(b => b.textContent.includes('__regression hub'));
+      check('hub: existing projects are offered in a selector', !!row);
+      clickIn(row);
+      await until(() => doc.body.textContent.includes('Dissect: __regression hub'));
+      clickIn(doc.querySelector('.diss-q[data-q="quick.wants"] .diss-head')); await sleep(200);
+      check('hub: selecting a project opens its saved dissection unchanged',
+        doc.querySelector('.diss-q[data-q="quick.wants"] .diss-text')?.value === 'To be let back in.');
+      clickIn(doc.getElementById('nav-back'));
+      await until(() => !!doc.getElementById('hub-title'));
+      check('hub: Back from a dissection returns to the hub', !!doc.getElementById('hub-title'));
+
+      // The create-a-project journey stays usable from the hub.
+      clickIn(doc.getElementById('hub-new-project')); await sleep(400);
+      check('hub: New Studio project opens the real creation wizard',
+        doc.body.textContent.includes('nothing is saved until you press Create'));
+      clickIn(doc.getElementById('nav-back'));
+      await until(() => !!doc.getElementById('hub-title'));
+
+      // Phone width: the hub must not scroll sideways.
+      const oldW = frame.style.width;
+      frame.style.width = '375px'; await sleep(250);
+      check('hub: fits a phone without horizontal scroll',
+        doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
+        `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
+      frame.style.width = oldW; await sleep(200);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      check('hub: Back returns to the Library shelf', !!card('Speech Dissection'));
+      check('hub: zero microphone calls across the drive', mic16 === 0);
+    } catch (err) {
+      bad('Dissection hub drive', String(err));
+    } finally {
+      if (hubProj) {
+        await deleteDissectionsFor(hubProj.id).catch(() => {});
+        await deleteProject(hubProj.id).catch(() => {});
+      }
+    }
+  } else {
+    ok('Dissection hub drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);
