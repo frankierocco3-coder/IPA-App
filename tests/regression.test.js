@@ -37,7 +37,8 @@ import { openDB, idbGet, STORES } from '../js/db.js';
 import { DIALECT_ACTION, actionFor } from '../js/data/action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
 import { videoLookup } from '../js/data/media-videos.js';
-import { BRIDGE_ROUTES, routeFor, loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
+import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
+         loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
 import { IDIOM } from '../js/data/idiom.js';
 
 const results = [];
@@ -185,9 +186,12 @@ export async function run({ navDoc = document } = {}) {
   check('bridge: nam→rp route has 6–10 approved comparisons',
     route && route.comparisons.length >= 6 && route.comparisons.length <= 10,
     `got ${route?.comparisons.length}`);
-  check('bridge: unwritten route is honestly null', routeFor('aus', 'ssbe') === null);
+  check('bridge: an unapproved route is honestly null to learners', routeFor('aus', 'ssbe') === null);
   check('bridge: draft comparisons are filtered out',
-    BRIDGE_ROUTES.every(r => routeFor(r.from, r.to).comparisons.every(c => c.reviewStatus === 'approved')));
+    BRIDGE_ROUTES.every(r => {
+      const served = routeFor(r.from, r.to);
+      return served === null || served.comparisons.every(c => c.reviewStatus === 'approved');
+    }));
   const prevPrefs = localStorage.getItem('speechcraft-bridge');
   saveBridgePrefs('aus', 'nam');
   const round = loadBridgePrefs();
@@ -1310,6 +1314,175 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('Playable Actions drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 14. Build D: written Accent Bridge + Dialect in Action ──
+  const ACCS = ['nam', 'rp', 'ssbe', 'aus'];
+  {
+    const pairs = ACCS.flatMap(a => ACCS.filter(b => b !== a).map(b => [a, b]));
+    check('bridge: every ordered pairing has exactly one route (N×(N−1) = 12)',
+      pairs.every(([a, b]) => BRIDGE_ROUTES.filter(r => r.from === a && r.to === b).length === 1)
+      && BRIDGE_ROUTES.length === 12);
+    check('bridge: no same-accent route exists',
+      BRIDGE_ROUTES.every(r => r.from !== r.to));
+    check('bridge: every comparison carries the full written contract',
+      BRIDGE_ROUTES.every(r => r.comparisons.length >= 5 && r.comparisons.every(c =>
+        c.id && c.feature && c.lexicalSet && c.word && c.startIPA && c.targetIPA
+        && c.stays && c.changes
+        && ['lips', 'tongue', 'jaw', 'voice'].every(k => (c.guidance?.[k] ?? '').length > 0)
+        && Array.isArray(c.symbols)
+        && ['approved', 'draft'].includes(c.reviewStatus))));
+    check('bridge: claims stay typical, never absolute',
+      BRIDGE_ROUTES.every(r =>
+        r.comparisons.some(c => /typicall|commonly|varies|often|genuinely/.test(c.changes))));
+    check('bridge: the reviewed nam→rp route is intact and approved, all else draft',
+      BRIDGE_ROUTES.find(r => r.id === 'nam-rp').comparisons.every(c => c.reviewStatus === 'approved')
+      && BRIDGE_ROUTES.find(r => r.id === 'nam-rp').comparisons.length === 8
+      && BRIDGE_ROUTES.filter(r => r.id !== 'nam-rp')
+        .every(r => r.comparisons.every(c => c.reviewStatus === 'draft')));
+    check('bridge: drafts never reach learners; statuses are honest',
+      routeFor('nam', 'rp')?.comparisons.length === 8
+      && routeFor('aus', 'rp') === null
+      && routeStatus('nam', 'rp') === 'approved'
+      && routeStatus('aus', 'rp') === 'draft'
+      && routeStatus('nam', 'nam') === 'same'
+      && bridgeDrafts().length === 11
+      && bridgeDrafts().every(r => r.id !== 'nam-rp'));
+    check('bridge: RP and Standard British stay distinct, correctly labelled',
+      BRIDGE_ROUTES.filter(r => r.from === 'ssbe' || r.to === 'ssbe')
+        .every(r => r.title.includes('Standard British'))
+      && BRIDGE_ROUTES.filter(r => r.from === 'rp' || r.to === 'rp')
+        .every(r => r.title.includes('Traditional RP'))
+      && BRIDGE_ROUTES.every(r => !/SSBE|Educated Southern|Contemporary British/.test(r.title))
+      && routeStatus('rp', 'ssbe') === 'draft' && routeStatus('ssbe', 'rp') === 'draft');
+
+    const removed = ['jake', 'copacetic', 'the berries', 'horsefeathers', 'hooey', 'bunk',
+      'palooka', 'take a powder', 'sawbuck', 'simoleons', 'kale', 'hooch', 'giggle water',
+      'flapper', 'dead soldiers', 'on the level', 'the brush off', 'shoot the breeze'];
+    const idiomText = IDIOM.map(e => [e.term, e.meaning, e.example, e.note].join(' ')).join(' ');
+    const actionText = DIALECT_ACTION.map(p => p.lines.map(l => l.text).join(' ')).join(' ');
+    check('no removed NAM expression resurfaces in idioms or pieces',
+      removed.every(t => !new RegExp(`\\b${t.replace(/ /g, '\\s+')}\\b`, 'i').test(idiomText)
+        && !new RegExp(`\\b${t.replace(/ /g, '\\s+')}\\b`, 'i').test(actionText)));
+
+    check('action: eight pieces — one scene and one monologue per course',
+      DIALECT_ACTION.length === 8
+      && ACCS.every(a =>
+        DIALECT_ACTION.filter(p => p.courseId === a && p.type === 'dialogue').length === 1
+        && DIALECT_ACTION.filter(p => p.courseId === a && p.type === 'monologue').length === 1));
+    check('action: every piece carries the complete written record',
+      DIALECT_ACTION.every(p => p.title && p.setting && p.speakerDescription && p.register
+        && p.situation && p.region && p.lines.length && p.reviewNotes
+        && p.review?.literary?.status === 'pending' && p.review?.dialect?.status === 'pending'
+        && p.review.literary.reviewer === null && p.review.dialect.reviewer === null
+        && p.reviewStatus === 'draft'));
+    check('action: monologues sit in the 45–90 second range',
+      DIALECT_ACTION.filter(p => p.type === 'monologue').every(p => {
+        const words = p.lines.map(l => l.text).join(' ').split(/\s+/).length;
+        return words >= 100 && words <= 230;
+      }));
+    check('action: every expression link resolves and every link is declared',
+      DIALECT_ACTION.every(p => {
+        const inline = [...p.lines.map(l => l.text).join(' ')
+          .matchAll(/\[\[[^\]|]+\|([A-Z]+-\d+)\]\]/g)].map(m => m[1]);
+        return inline.length
+          && new Set(inline).size === new Set(p.expressionRefs).size
+          && inline.every(id => p.expressionRefs.includes(id))
+          && p.expressionRefs.every(id => IDIOM.some(e => e.id === id));
+      }));
+    check('action: drafts stay invisible on every learner surface',
+      ACCS.every(a => actionFor(a).length === 0));
+    check('action: no piece smuggles audio in',
+      DIALECT_ACTION.every(p => p.audio === null));
+  }
+
+  // The drive: honest bridge states, the review area, mobile width.
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const prevPrefs2 = localStorage.getItem('speechcraft-bridge');
+    try {
+      let doc = frame.contentDocument;
+      const w = () => frame.contentWindow;
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+      const setSel = (id, v) => { const s = doc.getElementById(id); s.value = v;
+        s.dispatchEvent(new frame.contentWindow.Event('change', { bubbles: true })); };
+
+      // Fresh mic spy on the CURRENT realm (reloads earlier discarded the old one).
+      let mic14 = 0;
+      if (w().navigator.mediaDevices?.getUserMedia) {
+        const orig14 = w().navigator.mediaDevices.getUserMedia.bind(w().navigator.mediaDevices);
+        w().navigator.mediaDevices.getUserMedia = (...a) => { mic14++; return orig14(...a); };
+      }
+
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(350);
+      check('build D UI: draft Dialect in Action stays off the Library shelf',
+        !card('Dialect in Action'));
+
+      clickIn(card('Accent Bridge')); await sleep(400);
+      setSel('br-from', 'nam'); await sleep(300);
+      setSel('br-to', 'rp'); await sleep(300);
+      check('build D UI: the approved route renders with its source notes',
+        doc.querySelectorAll('.bridge-card').length === 8
+        && doc.body.textContent.includes('“Typically” is doing honest work')
+        && doc.body.textContent.includes('Dialect Accuracy Standard')
+        && doc.body.textContent.includes('About Neutral American')
+        && doc.body.textContent.includes('About Traditional RP'));
+      setSel('br-to', 'ssbe'); await sleep(300);
+      check('build D UI: a draft route shows the awaiting-review message, nothing else',
+        !!doc.getElementById('bridge-pending')
+        && doc.querySelectorAll('.bridge-card').length === 0
+        && !doc.querySelector('main audio'));
+      setSel('br-from', 'ssbe'); await sleep(300);
+      check('build D UI: a same-accent selection gets a clear message, never a broken route',
+        !!doc.getElementById('bridge-same')
+        && doc.querySelectorAll('.bridge-card').length === 0);
+      // Mobile width: the bridge page must not scroll sideways.
+      const oldW = frame.style.width;
+      frame.style.width = '375px'; await sleep(250);
+      setSel('br-from', 'nam'); setSel('br-to', 'rp'); await sleep(350);
+      check('build D UI: the route fits a phone without horizontal scroll',
+        doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
+        `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
+      frame.style.width = oldW; await sleep(200);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      check('build D UI: one Back returns from the bridge to the Library shelf',
+        !!card('Accent Bridge'));
+
+      // The review area: original 23 intact and identifiable, new bridge
+      // drafts listed separately with their reviewer requirements.
+      w().location.hash = '#review'; await sleep(500);
+      const rt = doc.body.textContent;
+      check('build D UI: the original 23-item queue stays identifiable',
+        rt.includes('The original 23-item queue')
+        && rt.includes('8 Dialect in Action piece(s) + 15 sonnet transposition(s)'));
+      check('build D UI: bridge drafts are listed separately, never among the 23',
+        rt.includes('Accent Bridge routes — 11 new draft route(s)')
+        && rt.includes('not') && rt.includes('part of the original 23'));
+      check('build D UI: every piece shows its two reviewer requirements',
+        [...doc.querySelectorAll('.review-piece .sonnet-hint')]
+          .filter(h => h.textContent.includes('literary:')).length === 8
+        && rt.includes('dialect/accent') );
+      check('build D UI: the review area shows no playback or capture controls',
+        !doc.querySelector('main audio, main [data-say-acc], main [data-ab]')
+        && !rt.includes('audio coming soon'));
+      clickIn(doc.getElementById('review-exit')); await sleep(400);
+      check('build D UI: leaving review restores the app',
+        !!doc.querySelector('.side-nav .side-item'));
+
+      check('build D UI: zero microphone calls across the Build D drive', mic14 === 0);
+    } catch (err) {
+      bad('Build D drive', String(err));
+    } finally {
+      if (prevPrefs2 === null) localStorage.removeItem('speechcraft-bridge');
+      else localStorage.setItem('speechcraft-bridge', prevPrefs2);
+    }
+  } else {
+    ok('Build D drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

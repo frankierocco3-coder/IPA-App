@@ -608,6 +608,40 @@ pins, search safety; drive covers open/search/clear/detail/both-
 direction pair nav/prev-next/edge/Back-state/Library-return/doorway
 round-trip/no-audio sweep). Suite → 246 checks total.
 
+BUILD D (2026-08-11, committed locally, NOT pushed): written Accent
+Bridge + Dialect in Action completion, text-first. BRIDGE: 4 accent
+courses (core excluded) → 12 ordered routes; nam→rp stays the only
+APPROVED route (its 8 comparisons byte-unchanged); 11 NEW routes ×
+5–7 comparisons each, EVERY comparison reviewStatus 'draft' —
+routeFor() returns null until a route has an approved comparison, so
+drafts never reach learners; routeStatus() distinguishes
+approved/draft/same/missing for honest empty states (same-accent →
+#bridge-same message; draft → #bridge-pending 'awaiting review by a
+qualified dialect reviewer'). Renderer adds a source-notes line built
+from DIALECT_INFO About titles (the existing dialect-reference
+system). All claims restate the Accuracy Standard, phrased
+'typically'; BATH incidence (dance/castle regional in aus),
+CURE variability, glottal/tap as REALIZATIONS of /t/ all carried
+honestly. bridgeDrafts() feeds #review. ACTION: the 8 pieces gained
+`situation` (situation+objective) and `review: {literary, dialect}`
+per-piece reviewer fields (status/reviewer/date — Claude never a
+reviewer); renderActionPiece gained an on-demand '≈ Show approximate
+IPA' toggle that pipes markup-stripped lines through the EXISTING
+fillSound derivation (dormant until a piece is approved — all 8 stay
+draft). #review restructured: 'The original 23-item queue' (8 pieces
++ 15 transpositions, identifiable) + separately 'Accent Bridge routes
+— 11 new draft route(s)' with reviewer-type requirements; no
+batch-approve. launch_lint 6h pins the 12-route coverage,
+approved-count==8 (an approval sweep in code fails the gate), route
+labels ('Standard British' everywhere, banned labels blocked), the
+honesty copy, and 6h2 re-bans the 17 removed period-NAM expressions
+in idiom/action DATA (comments exempt). Regression section 14: 26
+checks (coverage/shape/typicality/draft-visibility/label separation/
+removed-expression scan/piece completeness/expression-link
+resolution/45–90s monologues/UI drive incl. same-accent, pending,
+source notes, mobile-width no-h-scroll, one-Back, review separation,
+zero mic). Suite → 272 checks; five gates pass.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

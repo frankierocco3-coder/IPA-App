@@ -10,6 +10,8 @@
 //   setting            where/when this is spoken
 //   speakerDescription who is speaking (believable age range, background)
 //   register           formality label shown to the learner
+//   situation          what is happening and what the speaker(s) want —
+//                      the piece's situation and objective in one line
 //   region             where this speech would be at home
 //   lines              [{ speaker, text }] — speaker null for monologues.
 //                      [[term|ID]] marks a Words & Expressions occurrence;
@@ -21,6 +23,12 @@
 //                      file for this course = no play control at all.
 //   reviewStatus       'draft' | 'approved' — drafts render ONLY in the
 //                      owner review gate (#review), never in the Library.
+//                      'approved' requires BOTH reviews below approved.
+//   review             { literary: { status, reviewer, date },
+//                        dialect:  { status, reviewer, date } } — each
+//                      status 'pending' | 'approved'; reviewer is a
+//                      human's name, never Claude (Claude cannot approve
+//                      its own dialect or literary writing).
 //   reviewNotes        provenance + what review still has to check
 //
 // All pieces are ORIGINAL Speechcraft writing. Every draft below awaits a
@@ -38,6 +46,7 @@ export const DIALECT_ACTION = [
     setting: 'A phone call on a Friday afternoon',
     speakerDescription: 'Two friends in their late twenties, city apartment dwellers',
     register: 'Casual — friends who talk every week',
+    situation: 'Dana has to cancel tonight’s plans at the last minute and wants to keep the friendship easy; Marcus wants her to feel the cost before letting her off the hook.',
     region: 'Broadly urban U.S., deliberately unmarked',
     lines: [
       { speaker: 'Dana', text: 'Hey — so, don’t hate me, but I have to [[bail on|NAM-038]] tonight.' },
@@ -53,6 +62,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft. Review for natural rhythm and register; confirm no expression feels forced.',
   },
   {
@@ -63,6 +76,7 @@ export const DIALECT_ACTION = [
     setting: 'Telling a story to coworkers in a break room',
     speakerDescription: 'A speaker in their early thirties, any background — an ordinary storyteller',
     register: 'Casual narrative — animated but not performing',
+    situation: 'The speaker wants the room to relive the disaster as fondly as they do — turning a failed trip into a badge of honor.',
     region: 'Broadly urban U.S., deliberately unmarked',
     lines: [
       { speaker: null, text: 'So we had this whole camping trip planned, right? Months of planning. And the morning we leave, Jesse texts me that his car won’t start. No warning. So now I’m everyone’s [[ride|NAM-044]], which — fine, whatever.' },
@@ -74,6 +88,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft, ~140 words (~60s spoken). Check pacing and that the expressions read as natural speech.',
   },
 
@@ -86,6 +104,7 @@ export const DIALECT_ACTION = [
     setting: 'A sitting room, mid-twentieth century, before a family occasion',
     speakerDescription: 'An aunt in her sixties and her adult nephew — comfortable upper-middle household',
     register: 'Polished conversational — warm but correct',
+    situation: 'Aunt Margaret wants Edward committed to the family occasion on her terms; Edward wants to yield gracefully without appearing managed.',
     region: 'Southern England, period prestige register',
     lines: [
       { speaker: 'Aunt Margaret', text: 'Edward, you will be joining us on Saturday? Your uncle has been [[frightfully|RP-038]] keen to see you.' },
@@ -100,6 +119,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft. Review for period accuracy and warmth — must not tip into butler parody.',
   },
   {
@@ -110,6 +133,7 @@ export const DIALECT_ACTION = [
     setting: 'An after-dinner reminiscence among old friends',
     speakerDescription: 'A retired schoolmaster, seventies, fond rather than pompous',
     register: 'Measured, anecdotal, gently self-mocking',
+    situation: 'The speaker wants his listeners to feel the seriousness a child attaches to small institutions — and to laugh at him only as much as he laughs at himself.',
     region: 'Southern England, period prestige register',
     lines: [
       { speaker: null, text: 'When I was a boy at school, the great institution — the true centre of civic life — was not the chapel, nor the cricket pitch. It was the [[tuck shop|RP-036]].' },
@@ -121,6 +145,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft, ~150 words. Review period vocabulary and cadence; "knackered" register check for this speaker.',
   },
 
@@ -133,6 +161,7 @@ export const DIALECT_ACTION = [
     setting: 'A pub near the office, Thursday evening',
     speakerDescription: 'Two colleagues in their late twenties, present-day Britain',
     register: 'Relaxed workplace-friends register',
+    situation: 'Priya wants to put a stressful week down for good; Tom wants to mark her win and steer the evening toward celebration.',
     region: 'Contemporary southern Britain',
     lines: [
       { speaker: 'Priya', text: 'Right, that’s me done. I am absolutely [[knackered|SSBE-006]].' },
@@ -147,6 +176,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft. Review that the register sits naturally between colleagues, not forced matey-ness.',
   },
   {
@@ -157,6 +190,7 @@ export const DIALECT_ACTION = [
     setting: 'Recounting the week to a friend over coffee',
     speakerDescription: 'A renter in their mid-twenties, first flat without housemates',
     register: 'Conversational, wry, present-day',
+    situation: 'The speaker wants their friend to understand the move was worth every disaster — and is quietly talking themselves into believing it too.',
     region: 'Contemporary southern Britain',
     lines: [
       { speaker: null, text: 'So I finally moved out on Saturday. Own flat. Tiny — genuinely, the oven door touches the opposite wall when it’s open — but mine.' },
@@ -168,6 +202,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft, ~150 words. Review for contemporary register; expressions should feel incidental.',
   },
 
@@ -180,6 +218,7 @@ export const DIALECT_ACTION = [
     setting: 'Adjacent front yards, Saturday late morning',
     speakerDescription: 'Two neighbours, forties and sixties, friendly but not close',
     register: 'Easy suburban neighbourliness',
+    situation: 'Ray wants to turn a nodding acquaintance into a proper invitation; Col wants to accept without making it a bigger deal than it is.',
     region: 'General Australian, suburban',
     lines: [
       { speaker: 'Col', text: 'Morning! Big plans for the [[arvo|AUS-001]]?' },
@@ -195,6 +234,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft. Review that it reads as ordinary neighbourly Australian, not tourist-brochure Strine.',
   },
   {
@@ -205,6 +248,7 @@ export const DIALECT_ACTION = [
     setting: 'A story told at a family gathering',
     speakerDescription: 'A speaker in their fifties retelling a long-running family legend',
     register: 'Relaxed storytelling, self-deprecating',
+    situation: 'The speaker wants the family legend told properly — owning the failure so completely that the story becomes theirs.',
     region: 'General Australian',
     lines: [
       { speaker: null, text: 'Every family’s got one story that gets dragged out at Christmas, and ours is the tent. Nineteen ninety-eight. We drive six hours to the coast, get there late in the [[arvo|AUS-001]], and I announce — very confidently — that I don’t need the instructions.' },
@@ -216,6 +260,10 @@ export const DIALECT_ACTION = [
     ipa: null,
     audio: null,
     reviewStatus: 'draft',
+    review: {
+      literary: { status: 'pending', reviewer: null, date: null },
+      dialect: { status: 'pending', reviewer: null, date: null },
+    },
     reviewNotes: 'Original Speechcraft draft, ~160 words. Review Australian idiom placement and that "drongo" lands as affectionate.',
   },
 ];

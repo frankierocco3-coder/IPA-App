@@ -190,6 +190,49 @@ def main():
     if playable_js.count("pairId:") != 12:
         fail("Playable Actions must have exactly twelve pair-carrying entries")
 
+    # 6h: Accent Bridge (Build D) — twelve ordered routes, review-gated
+    bridge_js = (ROOT / "js" / "data" / "bridge.js").read_text(encoding="utf-8")
+    accents = ["nam", "rp", "ssbe", "aus"]
+    for a in accents:
+        for b in accents:
+            if a == b:
+                if "id: '%s-%s'" % (a, b) in bridge_js:
+                    fail("a same-accent bridge route exists: %s-%s" % (a, b))
+            elif "id: '%s-%s'" % (a, b) not in bridge_js:
+                fail("missing bridge route %s→%s (all N×(N−1) pairings required)" % (a, b))
+    approved = bridge_js.count("reviewStatus: 'approved'")
+    if approved != 8:
+        fail("bridge approved-comparison count changed (%d ≠ the 8 reviewed nam→rp entries) — "
+             "approval happens one review at a time, never in code sweeps" % approved)
+    for banned in ["Educated Southern British", "SSBE", "Contemporary British"]:
+        if banned in bridge_js.replace("'ssbe'", "").replace("ssbe-", "").replace("-ssbe", ""):
+            fail("bridge data shows a banned course label: %r" % banned)
+    if bridge_js.count("Standard British") < 6:
+        fail("bridge routes must label ssbe as 'Standard British' in every title")
+    for pin in ["there’s no distance to bridge",
+                "awaiting review by a qualified dialect reviewer",
+                "part of the original 23"]:
+        if pin not in main_js:
+            fail("bridge/review honesty copy missing: %r" % pin)
+
+    # 6h2: the removed period-American expressions stay removed from the
+    # learner-facing data (comments documenting the removal are fine)
+    import re as _re
+    def _strip_comments(src):
+        src = _re.sub(r"/\*.*?\*/", "", src, flags=_re.S)
+        return _re.sub(r"^\s*//.*$", "", src, flags=_re.M)
+    idiom_code = _strip_comments((ROOT / "js" / "data" / "idiom.js").read_text(encoding="utf-8"))
+    action_code = _strip_comments((ROOT / "js" / "data" / "action.js").read_text(encoding="utf-8"))
+    removed = ["jake", "copacetic", "the berries", "horsefeathers", "hooey",
+               "bunk", "palooka", "take a powder", "sawbuck", "simoleons",
+               "kale", "hooch", "giggle water", "flapper", "dead soldiers",
+               "on the level", "the brush off", "the brush-off",
+               "shoot the breeze"]
+    for term in removed:
+        for src, name in ((idiom_code, "idiom.js"), (action_code, "action.js")):
+            if _re.search(r"\b" + _re.escape(term) + r"\b", src, _re.I):
+                fail("removed NAM expression resurfaced in %s: %r" % (name, term))
+
     # 6f: a blocked storage upgrade must carry the visible instruction,
     # and the wipe list must stay centralized with dissections in it
     db_js = (ROOT / "js" / "db.js").read_text(encoding="utf-8")

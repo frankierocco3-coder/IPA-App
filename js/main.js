@@ -12,7 +12,8 @@ import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
 import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from './data/recasts.js';
 import { actionFor, actionDrafts } from './data/action.js';
 import { videoFor } from './data/media-videos.js';
-import { BRIDGE_ROUTES, routeFor, loadBridgePrefs, saveBridgePrefs } from './data/bridge.js';
+import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
+         loadBridgePrefs, saveBridgePrefs } from './data/bridge.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
@@ -1900,19 +1901,27 @@ function renderContentReview() {
       }
     }
   }
+  const brDrafts = bridgeDrafts();
+  const brComps = brDrafts.reduce((n, r) => n + r.comparisons.length, 0);
+  const revLine = (label, r) => `${label}: <b>${esc(r?.status ?? 'pending')}</b>${r?.reviewer ? ` — ${esc(r.reviewer)}${r.date ? `, ${esc(r.date)}` : ''}` : ''}`;
   app.innerHTML = `
     <header class="topbar">
       <button class="backbtn" id="review-exit" aria-label="Back to the app" title="Back to the app">‹</button>
       <div class="track-title" style="color:#64748b">📝 Content review</div>
-      <div class="stats"><span class="stat">${drafts.length + transDrafts.length} drafts</span></div>
+      <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
-      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set <code>reviewStatus: 'approved'</code> in <code>js/data/action.js</code>, or flip the entry in <code>TRANSPOSITION_REVIEW</code> in <code>js/data/recasts.js</code>, and commit. Approved pieces appear in the Library/reader automatically.</p>
+      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code> or <code>js/data/bridge.js</code>, record the reviewer, and commit. Approved pieces appear in the Library automatically. Nothing here may be batch-approved, and Claude may never approve its own writing.</p>
+
+      <h1>The original 23-item queue</h1>
+      <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>
 
       <h2 class="guide-heading">Dialect in Action — ${drafts.length} draft piece(s)</h2>
+      <p class="pane-note">Required reviewers, per piece: a <b>literary</b> read (rhythm, register, no parody) and a <b>dialect</b> read by a native or expert speaker of the course accent.</p>
       ${drafts.map(p => `
         <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(p.id)}</code> · ${esc(p.courseId)} · status <b>${esc(p.reviewStatus)}</b></p>
+          <p class="sonnet-hint">id <code>${esc(p.id)}</code> · ${esc(p.courseId)} · status <b>${esc(p.reviewStatus)}</b> ·
+            ${revLine('literary', p.review?.literary)} · ${revLine('dialect', p.review?.dialect)}</p>
           ${actionPieceHtml(p)}
           <p class="pane-note">Reviewer notes: ${esc(p.reviewNotes)}</p>
         </section>`).join('')}
@@ -1923,6 +1932,24 @@ function renderContentReview() {
         <section class="review-piece">
           <p class="sonnet-hint">Sonnet ${t.n} · ${esc(TRANSPOSITION_LABELS[t.d] ?? t.d)} · status <b>draft</b></p>
           <div class="sonnet-lines">${t.text.split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
+        </section>`).join('')}
+
+      <h1 id="bridge-drafts">Accent Bridge routes — ${brDrafts.length} new draft route(s)</h1>
+      <p class="pane-note">Build D drafts, listed separately — <b>not</b> part of the original 23. ${brComps} comparison(s) across ${brDrafts.length} route(s). Required reviewer: a <b>dialect/accent</b> reviewer qualified in both ends of each route. Every phonetic claim restates the Dialect Accuracy Standard; the reviewer confirms the restatement, the example words and the articulation guidance.</p>
+      ${brDrafts.map(r => `
+        <section class="review-piece">
+          <p class="sonnet-hint">route <code>${esc(r.id)}</code> · ${esc(r.title)} · ${r.comparisons.length} draft comparison(s)</p>
+          <p class="guide-text">${esc(r.intro)}</p>
+          ${r.comparisons.map(c => `
+            <div class="bridge-card">
+              <div class="idiom-head"><span class="idiom-term">${esc(c.feature)}</span><span class="tag">${esc(c.lexicalSet)}</span></div>
+              <p class="bridge-pair"><span class="ipa-chip">/${esc(c.startIPA)}/</span> <span aria-hidden="true">→</span>
+                <span class="ipa-chip is-target">/${esc(c.targetIPA)}/</span> <span class="bridge-word">“${esc(c.word)}”</span></p>
+              <p class="guide-note"><b>Stays:</b> ${esc(c.stays)}</p>
+              <p class="guide-note"><b>Changes:</b> ${esc(c.changes)}</p>
+              <p class="guide-note"><b>Lips:</b> ${esc(c.guidance.lips)} <b>Tongue:</b> ${esc(c.guidance.tongue)} <b>Jaw:</b> ${esc(c.guidance.jaw)} <b>Voice:</b> ${esc(c.guidance.voice)}</p>
+            </div>`).join('')}
+          ${r.sourceNote ? `<p class="pane-note">${esc(r.sourceNote)}</p>` : ''}
         </section>`).join('')}
     </main>`;
   document.getElementById('review-exit').addEventListener('click', () => {
@@ -3909,6 +3936,7 @@ function actionPieceHtml(piece) {
         <span class="tag tag-dialect">🗣 ${esc(dialectName(piece.courseId))}</span>
         <span class="tag">${esc(piece.register)}</span>
       </div>
+      ${piece.situation ? `<p class="guide-text piece-situation"><b>The situation:</b> ${esc(piece.situation)}</p>` : ''}
       <p class="pane-note">${esc(piece.region)}. Highlighted words are this course’s Words &amp; Expressions — tap one for its meaning.</p>
       ${piece.audio ? '' : '<p class="pane-note">🎙 No recording exists for this piece yet — audio arrives only when an approved recording in this exact dialect does.</p>'}
     </div>
@@ -3961,9 +3989,30 @@ function renderActionPiece(d, id) {
   if (!piece) return renderDialectAction(d);
   app.innerHTML = `
     ${pageTopbar('🎭 ' + esc(piece.title), trackFor(d).color)}
-    <main class="guide sonnet-view">${actionPieceHtml(piece)}</main>`;
+    <main class="guide sonnet-view">
+      ${actionPieceHtml(piece)}
+      <p><button class="btn-lite" id="action-ipa" type="button" aria-expanded="false">≈ Show approximate IPA</button></p>
+      <div id="action-ipa-pane" hidden></div>
+    </main>`;
   wireBrandHome();
   wireActionPiece(app);
+  // Line-by-line IPA through the EXISTING derivation system (the same one
+  // the Studio uses) — dictionary-backed for Neutral American, rule-derived
+  // and marked ≈ elsewhere. Honest or absent; never hand-invented here.
+  const ipaBtn = document.getElementById('action-ipa');
+  const ipaPane = document.getElementById('action-ipa-pane');
+  ipaBtn.addEventListener('click', () => {
+    const open = !ipaPane.hidden;
+    ipaPane.hidden = open;
+    ipaBtn.setAttribute('aria-expanded', String(!open));
+    ipaBtn.textContent = open ? '≈ Show approximate IPA' : 'Hide IPA';
+    if (!open && !ipaPane.dataset.filled) {
+      ipaPane.dataset.filled = '1';
+      const plain = piece.lines.map(l =>
+        (l.speaker ? l.speaker + ': ' : '') + l.text.replace(/\[\[([^\]|]+)\|[A-Z]+-\d+\]\]/g, '$1'));
+      fillSound(plain, d, ipaPane);
+    }
+  });
 }
 
 // ── Accent Bridge ─────────────────────────────────────────────
@@ -4024,9 +4073,14 @@ function renderBridge() {
         <h1>${esc(route.title)}</h1>
         <p class="guide-text">${esc(route.intro)}</p>
         <p class="pane-note">“Typically” is doing honest work here: real speakers vary, and these comparisons describe the course targets, not every voice you’ll meet.</p>
-        ${route.comparisons.map(compCard).join('')}`
+        ${route.comparisons.map(compCard).join('')}
+        <p class="pane-note bridge-sources">Source notes: these comparisons restate the two course targets in the Dialect Accuracy Standard — see <b>${esc(DIALECT_INFO[prefs.from]?.aboutTitle ?? dialectName(prefs.from))}</b> and <b>${esc(DIALECT_INFO[prefs.to]?.aboutTitle ?? dialectName(prefs.to))}</b> in the Library for the published descriptions and full citations.${route.sourceNote ? ' ' + esc(route.sourceNote) : ''}</p>`
+      : routeStatus(prefs.from, prefs.to) === 'same' ? `
+        <p class="pane-note" id="bridge-same">That’s the same accent on both ends — there’s no distance to bridge. Pick a different accent under “I’m learning” to see a route.</p>`
+      : routeStatus(prefs.from, prefs.to) === 'draft' ? `
+        <p class="pane-note" id="bridge-pending">This route is written and awaiting review by a qualified dialect reviewer. It will appear here the moment it’s approved — nothing ships unchecked.</p>`
       : `
-        <p class="pane-note">This route isn’t written yet. So far: ${BRIDGE_ROUTES.map(r => `<b>${esc(r.title)}</b>`).join(', ')}. More pairings arrive as they’re reviewed — nothing ships unchecked.</p>`}
+        <p class="pane-note">This route isn’t written yet. Reviewed so far: ${BRIDGE_ROUTES.filter(r => r.comparisons.some(c => c.reviewStatus === 'approved')).map(r => `<b>${esc(r.title)}</b>`).join(', ') || 'none'}. More pairings arrive as they’re reviewed — nothing ships unchecked.</p>`}
     </main>`;
   wireBrandHome();
 
