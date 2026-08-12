@@ -11,7 +11,7 @@ never duplicated; 149 new sonnets ship in 11 chunks.
 | 2 | sonnets-015-028 | 15–28 (skip 18) | 13 | DONE — suite 283/283, gates pass |
 | 3 | sonnets-029-042 | 29–42 (skip 29) | 13 | DONE — suite 283/283, gates pass |
 | 4 | sonnets-043-056 | 43–56 | 14 | DONE — suite 283/283, gates pass |
-| 5 | sonnets-057-070 | 57–70 | 14 | pending |
+| 5 | sonnets-057-070 | 57–70 | 14 | DONE — suite 283/283, gates pass |
 | 6 | sonnets-071-084 | 71–84 (skip 73) | 13 | pending |
 | 7 | sonnets-085-098 | 85–98 | 14 | pending |
 | 8 | sonnets-099-112 | 99–112 | 14 | pending |
