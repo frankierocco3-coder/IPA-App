@@ -1355,3 +1355,7 @@ body.modal-open { overflow: hidden; }
 .diss-del { color: var(--red, #b3453a); }
 .piece-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
 .piece-actions .pane-note { margin: 0; }
+
+/* Speech Dissection textbook (Library) — read-only reference lists */
+.sd-asks { margin: 4px 0 14px 0; padding-left: 26px; }
+.sd-asks li { margin: 3px 0; }

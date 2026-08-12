@@ -692,6 +692,28 @@ readability, no-record-on-read, both profile states, saved-dissection
 round trip, wizard journey, Back chain, mobile width, no audio, zero
 mic). Suite → 297 checks; five gates pass.
 
+TEXTBOOK/WORKSHEET SPLIT (2026-08-12, committed locally, NOT pushed):
+strict separation of the two Dissection surfaces. Library → 'Speech
+Dissection' card = renderDissectTextbook, a READ-ONLY textbook
+carrying the owner-supplied copy VERBATIM (intro + six numbered
+sections each with lead line, Ask-list and close, + 'Keep Returning
+to the Text' — 106 bullets total, count test-pinned). The textbook
+imports NOTHING from dissect.js, contains no
+textarea/marks/autosave/coverage/example/selector/create-button, and
+never touches IndexedDB; its only actions are the written 'Explore
+Playable Actions' link (section 4) and Back → Library. ALL
+interactivity remains exclusively in Studio → project → 'Dissect
+This' (paneDissect unchanged; Back → same project). The former hub's
+worked example, project selector and create-from-page button are
+GONE by order — do not reintroduce them on the textbook. Section 16
+rewritten (16 checks: card, six headings, full 106-bullet inventory,
+verbatim frame copy, zero controls, no example/selector, no IDB
+record on read, Playable link round-trip, mobile width, Studio
+worksheet retention + Back-to-project, zero mic). driveSession in
+section 9 now uses a 180s wall-clock budget instead of a step count
+(step budgets starve under background-tab timer throttling). Suite →
+299 checks; five gates pass.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

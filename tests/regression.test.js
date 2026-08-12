@@ -551,12 +551,13 @@ export async function run({ navDoc = document } = {}) {
     for (const w of WORDS) (ipaOf[w.word.toLowerCase()] ??= []).push(w.ipa);
     const hasSym = (w, s) => (ipaOf[w.toLowerCase()] ?? []).some(a => a.includes(s));
     const bareL = l => l.replace(/^[/\[]|[/\]]$/g, '');
-    // Step cap sized for throttled background tabs: most steps are no-op
-    // waits when the browser clamps timers to 1s, so the budget must be
-    // generous — the loop exits the moment the results screen appears.
-    const driveSession = async (maxSteps = 400) => {
+    // Wall-clock budget, not a step count: under background-tab timer
+    // throttling every sleep clamps to ~1s, so any fixed step budget can
+    // starve mid-session. The loop exits the moment results appear.
+    const driveSession = async (budgetMs = 180000) => {
       let good = 0, bad = 0, lastShow = false;
-      for (let i = 0; i < maxSteps; i++) {
+      const t0 = Date.now();
+      while (Date.now() - t0 < budgetMs) {
         const body = navDoc.body.textContent;
         if (/Practice complete|Perfect lesson/.test(body) && !navDoc.getElementById('choices')) return { end: 'results', good, bad };
         const fb = navDoc.getElementById('feedback');
@@ -1621,75 +1622,92 @@ export async function run({ navDoc = document } = {}) {
       check('hub: the About replay button survives beside the More card',
         !!doc.getElementById('about-threshold'));
 
-      // The hub itself: readable end to end without owning anything.
+      // The TEXTBOOK: readable end to end, no project, no interactivity.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Library')); await sleep(350);
-      check('hub: a permanent Speech Dissection card sits on the Library shelf',
+      check('textbook: a permanent Speech Dissection card sits on the Library shelf',
         !!card('Speech Dissection'));
       const dissBefore = (await idbAll(STORES.dissections)).length;
-      const emptyProfile = (await listProjects()).length === 0;
       clickIn(card('Speech Dissection'));
-      await until(() => doc.getElementById('hub-title') && !doc.getElementById('hub-projects')?.textContent.includes('Checking'));
-      const hubText = () => doc.body.textContent;
-      check('hub: all six questions are readable with what each discovers',
-        QUICK_QUESTIONS.every(({ q }) => hubText().includes(q))
-        && hubText().includes('The playable action'));
-      check('hub: the three answer states and the worked example are on the page',
-        hubText().includes('I don’t know yet') && hubText().includes('Not relevant')
-        && hubText().includes('A worked example')
-        && hubText().includes('I’ll leave the papers here'));
-      check('hub: reading the page creates no dissection record',
+      await until(() => !!doc.getElementById('sd-title'));
+      const tb = () => doc.getElementById('sd-textbook');
+      const tbText = () => tb().textContent;
+      check('textbook: all six sections render with their headings',
+        ['1. What is happening?', '2. What does the speaker want?',
+         '3. What is resisting the speaker?', '4. What is the speaker doing to change them?',
+         '5. What changes?', '6. What happens after?',
+         'Keep Returning to the Text'].every(h => tbText().includes(h)));
+      check('textbook: the full bullet inventory renders (all Ask lists complete)',
+        tb().querySelectorAll('.sd-asks li').length === 16 + 12 + 15 + 23 + 16 + 15 + 9
+        && tbText().includes('What circumstances must I reasonably imagine?')
+        && tbText().includes('Can I describe my objective as an active attempt to affect another person?')
+        && tbText().includes('Why has the problem not already been solved?')
+        && tbText().includes('When one action fails, what new action do I try?')
+        && tbText().includes('Which words signal a turn?')
+        && tbText().includes('What might actually happen instead?')
+        && tbText().includes('What new question should I take back to the text?'),
+        `lis=${tb().querySelectorAll('.sd-asks li').length}`);
+      check('textbook: verbatim frame copy present',
+        tbText().includes('A script gives you the words.')
+        && tbText().includes('“I am angry” describes a feeling.')
+        && tbText().includes('A beat is not merely a pause')
+        && tbText().includes('not about locking the performance into one answer'));
+      check('textbook: NO interactive answer controls of any kind',
+        !tb().querySelector('textarea, input, select, .diss-mark, .diss-q, [data-mark]')
+        && !tbText().includes('Saved ✓')
+        && !tbText().includes('explored')
+        && ![...tb().querySelectorAll('button')].some(b => /don’t know yet|Not relevant/i.test(b.textContent)));
+      check('textbook: no completed example and no project selector',
+        !tbText().includes('worked example') && !tbText().includes('I’ll leave the papers here')
+        && !doc.querySelector('.hub-proj') && !doc.getElementById('hub-new-project'));
+      check('textbook: reading it creates no dissection record',
         (await idbAll(STORES.dissections)).length === dissBefore);
-      check('hub: written-only — no audio or playback control anywhere',
-        !doc.querySelector('main audio')
-        && !doc.querySelector('main').textContent.includes('🔊')
-        && !/coming soon/i.test(doc.querySelector('main').textContent));
-      if (emptyProfile) {
-        check('hub: empty profile gets the clear create-a-project path',
-          hubText().includes('No Studio projects yet') && !!doc.getElementById('hub-new-project'));
-      } else {
-        ok('hub: empty-profile state (profile has projects — selector path tested below)');
-      }
-
-      // With a project that has SAVED answers: the selector opens the right
-      // dissection, untouched.
-      hubProj = await createProject({ title: '__regression hub (safe to delete)', text: 'Sit.' });
-      const hd = newDissection({ targetType: 'project', targetId: hubProj.id, targetLabel: hubProj.title });
-      await putDissection(hd);
-      await saveAnswer(hd.id, 'quick.wants', { value: 'To be let back in.' });
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-      clickIn(card('Speech Dissection'));
-      await until(() => !!doc.querySelector('.hub-proj'));
-      const row = [...doc.querySelectorAll('.hub-proj')].find(b => b.textContent.includes('__regression hub'));
-      check('hub: existing projects are offered in a selector', !!row);
-      clickIn(row);
-      await until(() => doc.body.textContent.includes('Dissect: __regression hub'));
-      clickIn(doc.querySelector('.diss-q[data-q="quick.wants"] .diss-head')); await sleep(200);
-      check('hub: selecting a project opens its saved dissection unchanged',
-        doc.querySelector('.diss-q[data-q="quick.wants"] .diss-text')?.value === 'To be let back in.');
+      check('textbook: written-only — no audio or playback control anywhere',
+        !tb().querySelector('audio')
+        && !tbText().includes('🔊')
+        && !/coming soon/i.test(tbText()));
+      clickIn(doc.getElementById('sd-playable')); await sleep(400);
+      check('textbook: the written Playable Actions link opens the section',
+        doc.body.textContent.includes('What are you doing to the other person through these words?'));
       clickIn(doc.getElementById('nav-back'));
-      await until(() => !!doc.getElementById('hub-title'));
-      check('hub: Back from a dissection returns to the hub', !!doc.getElementById('hub-title'));
+      await until(() => !!doc.getElementById('sd-title'));
+      check('textbook: Back from Playable Actions returns to the textbook',
+        !!doc.getElementById('sd-title'));
 
-      // The create-a-project journey stays usable from the hub.
-      clickIn(doc.getElementById('hub-new-project')); await sleep(400);
-      check('hub: New Studio project opens the real creation wizard',
-        doc.body.textContent.includes('nothing is saved until you press Create'));
-      clickIn(doc.getElementById('nav-back'));
-      await until(() => !!doc.getElementById('hub-title'));
-
-      // Phone width: the hub must not scroll sideways.
+      // Phone width: the textbook must not scroll sideways.
       const oldW = frame.style.width;
       frame.style.width = '375px'; await sleep(250);
-      check('hub: fits a phone without horizontal scroll',
+      check('textbook: fits a phone without horizontal scroll',
         doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
         `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
       frame.style.width = oldW; await sleep(200);
       clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('hub: Back returns to the Library shelf', !!card('Speech Dissection'));
-      check('hub: zero microphone calls across the drive', mic16 === 0);
+      check('textbook: Back returns to the Library shelf', !!card('Speech Dissection'));
+
+      // The Studio worksheet keeps ALL the interactivity — and its saved
+      // answers — with Back returning to the same project.
+      hubProj = await createProject({ title: '__regression hub (safe to delete)', text: 'Sit.' });
+      const hd = newDissection({ targetType: 'project', targetId: hubProj.id, targetLabel: hubProj.title });
+      await putDissection(hd);
+      await saveAnswer(hd.id, 'quick.wants', { value: 'To be let back in.' });
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Studio')); await sleep(400);
+      const pc = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === hubProj.id);
+      clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(450);
+      clickIn(doc.getElementById('proj-dissect'));
+      await until(() => doc.body.textContent.includes('Dissect: __regression hub'));
+      clickIn(doc.querySelector('.diss-q[data-q="quick.wants"] .diss-head')); await sleep(200);
+      check('worksheet: Studio keeps the interactive controls and saved answers',
+        doc.querySelector('.diss-q[data-q="quick.wants"] .diss-text')?.value === 'To be let back in.'
+        && doc.querySelectorAll('.diss-mark').length >= 2
+        && doc.body.textContent.includes('I don’t know yet'));
+      clickIn(doc.getElementById('nav-back')); await sleep(400);
+      check('worksheet: Back returns to the same Studio project',
+        doc.body.textContent.includes('__regression hub')
+        && !!doc.getElementById('proj-dissect'));
+      check('separation: zero microphone calls across the drive', mic16 === 0);
     } catch (err) {
-      bad('Dissection hub drive', String(err));
+      bad('Dissection textbook/worksheet drive', String(err));
     } finally {
       if (hubProj) {
         await deleteDissectionsFor(hubProj.id).catch(() => {});
@@ -1697,7 +1715,7 @@ export async function run({ navDoc = document } = {}) {
       }
     }
   } else {
-    ok('Dissection hub drive (runner only — run tests/run-all.html)');
+    ok('Dissection textbook/worksheet drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

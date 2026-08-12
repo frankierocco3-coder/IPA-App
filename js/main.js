@@ -789,8 +789,8 @@ function libraryMain(el, course) {
       blurb: 'What you’re doing to the other person.',
       go: renderPlayableActions },
     { icon: '🔍', title: 'Speech Dissection',
-      blurb: 'The six-question pass actors run on any text — what it is, and how to use it.',
-      go: renderDissectHub },
+      blurb: 'What is happening underneath the words — the actor’s working process, as a textbook.',
+      go: renderDissectTextbook },
     { icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract.',
       go: renderInstrument },
@@ -2942,85 +2942,117 @@ function wireAutosave(stateEl, collect) {
 // created lazily on the first real interaction, so opening the screen
 // never writes to the database. EVERY stored string is untrusted on read —
 // esc() on render, values assigned via .value where possible.
-// ── Speech Dissection hub: the permanent explainer (Library) ──
-// Anyone can read the whole method without owning a project, and opening
-// this page NEVER writes to IndexedDB — records are only created when a
-// user starts answering inside a project's dissection screen. The worked
-// example below is original Speechcraft text written for this page; it
-// quotes nothing from the review queue.
-async function renderDissectHub() {
-  record(renderDissectHub);
+// ── Speech Dissection: the read-only TEXTBOOK (Library) ──────
+// Strict separation: this page is educational reference only. Every
+// interactive response feature — textareas, answer states, autosave,
+// coverage, saved dissections — lives EXCLUSIVELY in the Studio
+// worksheet (project → Dissect This). This page imports nothing from
+// dissect.js and never creates, reads or updates a dissection record.
+// The copy below is the owner-supplied textbook text, verbatim.
+function renderDissectTextbook() {
+  record(renderDissectTextbook);
   stopSpeech();
-  // Each question with what it helps the actor discover — teaching copy,
-  // paired with the stable ids so the six here can never drift from the
-  // six the tool actually asks.
-  const DISCOVERS = {
-    'quick.happening': 'The ground under the scene: the event the words are riding on, before any interpretation.',
-    'quick.wants': 'The engine. A speaker who wants nothing has nothing to play.',
-    'quick.resisting': 'The obstacle — because if the listener already agrees, the speech has no work to do.',
-    'quick.doing': 'The playable action: not the feeling, but what these words are doing to the other person.',
-    'quick.change': 'The turn — the line where it becomes a different conversation.',
-    'quick.after': 'The result: what these words actually changed, which tells you what they were for.',
-  };
-  const EXAMPLE = [
-    ['What is happening?', 'answered', 'A landlord has come to the door at night to tell a tenant the building is being sold.'],
-    ['What does the speaker want?', 'answered', 'To leave without a scene — to have said it and be gone.'],
-    ['What is the listener resisting?', 'answered', 'The idea that this is final. She keeps answering as if it were still negotiable.'],
-    ['What is the speaker doing to change them?', 'answered', 'Hiding behind paperwork — using “the buyers” and “the process” so the decision never sounds like his.'],
-    ['Where does the exchange change?', 'unknown', 'Not sure yet — maybe when she stops arguing and just asks “when?”. Marked “I don’t know yet” until the next read.'],
-    ['What is different at the end?', 'na', 'The scene cuts off before the end — marked “Not relevant” for this excerpt.'],
+  const SECTIONS = [
+    { h: '1. What is happening?',
+      lead: 'Begin with facts before interpretation.',
+      asks: ['Where am I?', 'When is this happening?', 'Who am I speaking to?',
+        'What is our relationship?', 'What has just happened?', 'Why am I speaking now?',
+        'What does each person know?', 'What does each person not know?',
+        'What has already been said or done?', 'What are the immediate circumstances?',
+        'What is at stake?', 'What might happen if nothing changes?', 'Is anyone else present?',
+        'Are there social, physical or practical limitations affecting the conversation?',
+        'What facts come directly from the text?', 'What circumstances must I reasonably imagine?'],
+      close: ['Keep facts, reasonable assumptions and personal interpretation clearly distinguished.'] },
+    { h: '2. What does the speaker want?',
+      lead: 'Identify the change the speaker wants to create.',
+      asks: ['What do I want from the other person?', 'What do I want them to understand?',
+        'What do I want them to feel?', 'What do I want them to admit?',
+        'What do I want them to decide?', 'What do I want them to do next?',
+        'Why do I need this from them now?', 'What happens if I succeed?',
+        'What happens if I fail?', 'Is my stated goal different from what I truly want?',
+        'Does my objective change during the text?',
+        'Can I describe my objective as an active attempt to affect another person?'],
+      close: ['An emotion is not necessarily an objective. “I am angry” describes a feeling. “I want them to admit what they did” gives the actor something playable.'] },
+    { h: '3. What is resisting the speaker?',
+      lead: 'Find what prevents the speaker from getting what they want.',
+      asks: ['What does the other person want?', 'Why might they refuse me?', 'What do they fear?',
+        'What do I fear?', 'What truth is being avoided?', 'Is someone protecting a secret?',
+        'Is pride preventing honesty?', 'Are status or social rules limiting what can be said?',
+        'Is time running out?', 'Is there a practical or physical obstacle?',
+        'Am I working against my own behavior?', 'Do I want two conflicting things?',
+        'What would make giving in dangerous for the other person?',
+        'What makes this conversation difficult?', 'Why has the problem not already been solved?'],
+      close: ['Resistance creates dramatic pressure. The stronger the resistance, the more urgently and inventively the speaker must act.'] },
+    { h: '4. What is the speaker doing to change them?',
+      lead: 'Examine what the speaker is doing with the words.',
+      asks: ['Am I reassuring?', 'Am I confronting?', 'Am I confessing?', 'Am I justifying?',
+        'Am I forgiving?', 'Am I punishing?', 'Am I drawing the other person out?',
+        'Am I dismissing them?', 'Am I persuading?', 'Am I warning?', 'Am I challenging?',
+        'Am I comforting?', 'Am I seducing?', 'Am I provoking?', 'Am I bargaining?',
+        'Am I testing them?', 'Am I distracting them?', 'Am I concealing something?',
+        'Am I demanding an answer?', 'Am I trying to restore control?',
+        'Which action best describes what I am trying to accomplish?',
+        'Does the action affect the other person, or does it merely describe my emotion?',
+        'When one action fails, what new action do I try?'],
+      close: ['The same words can produce completely different scenes when the speaker’s action changes.'],
+      playable: true },
+    { h: '5. What changes?',
+      lead: 'Find the turns, discoveries and shifts inside the text.',
+      asks: ['Where does a new thought begin?', 'Where does the subject change?',
+        'Where does the speaker receive new information?', 'Where does a tactic fail?',
+        'Where does the speaker try a different action?',
+        'Where does the emotional temperature change?',
+        'Where does the speaker become more direct?', 'Where do they retreat or protect themselves?',
+        'Where is something finally admitted?', 'Where does a memory alter the present moment?',
+        'Where do the stakes increase?', 'Where does the balance of power change?',
+        'Where does the speaker contradict themselves?',
+        'Where does the rhythm or sentence structure suggest a shift?',
+        'Which words signal a turn?', 'What is different after the change?'],
+      close: ['These shifts create the beats of the scene. A beat is not merely a pause; it marks a change in thought, action, information or relationship.'] },
+    { h: '6. What happens after?',
+      lead: 'Imagine the immediate consequence of the final line.',
+      asks: ['What do I expect the other person to do?', 'What response am I waiting for?',
+        'What decision have I forced?', 'What remains unresolved?', 'What would silence mean?',
+        'What would agreement mean?', 'What would rejection mean?', 'Has the relationship changed?',
+        'Has power shifted?', 'What action might I take next?',
+        'Am I preparing to stay, leave, fight, confess, forgive or withdraw?',
+        'What new problem has been created?',
+        'Does the final line complete an action or begin one?',
+        'What does the speaker believe will happen?', 'What might actually happen instead?'],
+      close: ['The final line is rarely the end of the dramatic event. It is usually the speaker’s last attempt to make something happen next.'] },
   ];
+  const RETURNING = ['What evidence supports my choice?',
+    'Am I playing the words or imposing an unrelated idea?',
+    'Am I making a specific choice or relying on a general emotion?',
+    'Does this interpretation make the relationship clearer?',
+    'Does it increase the urgency of speaking?', 'Can the other person affect me?',
+    'Am I allowing my actions to change?', 'What remains uncertain?',
+    'What new question should I take back to the text?'];
+  const asksHtml = list => `
+      <p class="pane-note">Ask:</p>
+      <ul class="sd-asks">${list.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>`;
   app.innerHTML = `
     ${pageTopbar('🔍 Speech Dissection', '#8a6d3b')}
-    <main class="guide">
-      <h1 id="hub-title">Speech Dissection</h1>
-      <p class="guide-text"><b>A reusable way of taking a text apart</b> — a scene, a monologue, a speech, an interview, your own sides. The governing question behind all of it: <i>what is this person doing to that person with these words — and do they know what they’re talking about?</i></p>
-      <h2 class="guide-heading">Why actors dissect a text</h2>
-      <p class="guide-text">An actor who knows what a line is doing can play it; an actor who doesn’t can only recite it. Dissection separates what the speaker <b>knows</b> from what they <b>claim</b>, what they <b>want</b> from what they <b>show</b> — so the choices you make on a line are choices, not habits. It’s a thinking tool, not a worksheet: nothing here is scored.</p>
-      <h2 class="guide-heading">The six questions (Quick mode)</h2>
-      ${QUICK_QUESTIONS.map(({ id, q }) => `
-        <div class="guide-word"><span class="wii-who">${esc(q)}</span><span class="guide-note">${esc(DISCOVERS[id])}</span></div>`).join('')}
-      <h2 class="guide-heading">Three honest answer states</h2>
-      <p class="guide-text">Every question takes one of three first-class answers: <b>answered</b> in your own words; <b>“I don’t know yet”</b> — one tap, and worth more than a guess; or <b>“Not relevant”</b> — one tap, for questions this text genuinely doesn’t raise. Completion is never “all six answered”: the tool shows coverage, not a score, and every answer stays revisable.</p>
-      <h2 class="guide-heading">A worked example</h2>
-      <p class="pane-note">An original two-line scene, dissected. <i>“I’ll leave the papers here. The buyers want the keys by the first.” — “You said we’d talk about this. You’re still saying it now, aren’t you?”</i></p>
-      ${EXAMPLE.map(([q, st, a]) => `
-        <div class="guide-word"><span class="wii-who">${esc(q)}</span><span class="guide-note"><b>${st === 'answered' ? '✓' : st === 'unknown' ? '?' : '—'}</b> ${esc(a)}</span></div>`).join('')}
-      <h2 class="guide-heading">Private, editable, yours</h2>
-      <p class="guide-text">Answers save automatically to this device and never leave it — nothing is uploaded or shared. You can revise any answer at any time, and deleting a dissection never touches the project or its text. Reading this page stores nothing at all.</p>
-      <h2 class="guide-heading">Use it on your own text</h2>
-      <p class="guide-text">Dissection lives inside Studio projects: open a project and press <b>🔍 Dissect This</b>, or start straight from here.</p>
-      <div id="hub-projects"><p class="pane-note">Checking your Studio projects…</p></div>
-      <p><button class="btn" id="hub-new-project" type="button">＋ New Studio project</button></p>
+    <main class="guide" id="sd-textbook">
+      <h1 id="sd-title">Speech Dissection</h1>
+      <p class="guide-text">A script gives you the words. Speech Dissection helps you discover what is happening underneath them.</p>
+      <p class="guide-text">This is not about finding one perfect interpretation. It is an actor’s working process: examining the circumstances, objective, resistance, tactics and changes inside a piece of text.</p>
+      <p class="guide-text">Use these questions while reading a monologue, speech, scene or audition side. Return to them whenever the text feels unclear, general or emotionally disconnected.</p>
+      ${SECTIONS.map(s => `
+      <h2 class="guide-heading">${esc(s.h)}</h2>
+      <p class="guide-text">${esc(s.lead)}</p>
+      ${asksHtml(s.asks)}
+      ${s.close.map(c => `<p class="guide-text">${esc(c)}</p>`).join('')}
+      ${s.playable ? '<p><button class="btn-lite" id="sd-playable" type="button">🎯 Explore Playable Actions</button></p>' : ''}`).join('')}
+      <h2 class="guide-heading">Keep Returning to the Text</h2>
+      <p class="guide-text">As you work, continue asking:</p>
+      <ul class="sd-asks">${RETURNING.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>
+      <p class="guide-text">Speech Dissection is not about locking the performance into one answer. It gives the actor a specific, playable understanding from which discovery can continue.</p>
+      <p class="pane-note">To work these questions on your own text, open a Studio project and press <b>🔍 Dissect This</b>.</p>
     </main>`;
   wireBrandHome();
-  document.getElementById('hub-new-project').addEventListener('click', renderNewProject);
-
-  // Project selector — read-only listing; choosing one opens its EXISTING
-  // dissection screen (saved answers untouched, creation still lazy).
-  const slot = document.getElementById('hub-projects');
-  if (!dbSupported()) {
-    slot.innerHTML = '<p class="pane-note">Projects need local storage, which this browser has disabled (private mode often does). The method above still works with pen and paper.</p>';
-    return;
-  }
-  let projects = [];
-  try { projects = sortProjects(await listProjects(), 'updated'); }
-  catch (err) { slot.innerHTML = `<p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>`; return; }
-  if (!projects.length) {
-    slot.innerHTML = '<p class="pane-note">No Studio projects yet — create one below and its Dissect screen is one tap away. (You’re welcome to just read this page; nothing gets created until you answer a question.)</p>';
-    return;
-  }
-  slot.innerHTML = `
-    <p class="pane-note" id="hub-pick-label">Dissect one of your projects:</p>
-    ${projects.slice(0, 12).map(p => `
-      <button class="track-card hub-proj" data-id="${esc(p.id)}" type="button" style="--track-color:#8a6d3b">
-        <div class="track-glyph">🎬</div>
-        <div class="track-info"><h2>${esc(p.title || 'Untitled project')}</h2><p>${esc(contentTypeLabel(p.contentType))}</p></div>
-        <div class="track-arrow">›</div>
-      </button>`).join('')}
-    ${projects.length > 12 ? `<p class="pane-note">…and ${projects.length - 12} more in Studio.</p>` : ''}`;
-  slot.querySelectorAll('.hub-proj').forEach(b =>
-    b.addEventListener('click', () => renderDissect(b.dataset.id)));
+  // Written link only — never recommends an action or analyzes any text.
+  document.getElementById('sd-playable').addEventListener('click', renderPlayableActions);
 }
 
 async function renderDissect(id) {
