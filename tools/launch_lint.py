@@ -126,7 +126,8 @@ def main():
     # an ebook shelf — translator credit, PD statement and the verbatim
     # Jowett excerpts (verified against Project Gutenberg) are pinned
     for pin in ["Benjamin Jowett",
-                "public domain worldwide",
+                "public domain in the United States",
+                "check the copyright law where they live",
                 "Rhetoric &amp; Oratory",
                 "persuades the judges in the courts",
                 "create forgetfulness in the learners",
@@ -151,6 +152,43 @@ def main():
                 "Delete projects, dissections, recordings"]:
         if pin not in main_js:
             fail("Privacy lost its dissection disclosure: %r" % pin)
+
+    # 6e2: a present-but-unusable dissection in an import is REPORTED,
+    # never silently dropped
+    validate_js = (ROOT / "js" / "validate.js").read_text(encoding="utf-8")
+    for pin in ["could not be imported because that section was invalid or from an unsupported version",
+                "dissectionDropped"]:
+        if pin not in validate_js:
+            fail("import lost its dropped-dissection warning: %r" % pin[:60])
+
+    # 6g: Playable Actions stays exactly the approved twelve — verbs, pair
+    # relationships and shared practice lines pinned to ACTION_LIBRARY_v1
+    playable_js = (ROOT / "js" / "data" / "playable.js").read_text(encoding="utf-8")
+    for verb in ["To Reassure", "To Dismiss", "To Confess", "To Justify",
+                 "To Confront", "To Draw Out", "To Command", "To Appeal To",
+                 "To Warn", "To Intimidate", "To Forgive", "To Punish"]:
+        if "verb: '%s'" % verb not in playable_js:
+            fail("Playable Actions lost or renamed an entry: %r" % verb)
+    for pair in ["actions: ['reassure', 'dismiss']",
+                 "actions: ['confess', 'justify']",
+                 "actions: ['confront', 'draw-out']",
+                 "actions: ['command', 'appeal-to']",
+                 "actions: ['warn', 'intimidate']",
+                 "actions: ['forgive', 'punish']"]:
+        if pair not in playable_js:
+            fail("Playable Actions pair relationship drifted: %r" % pair)
+    for line in ["Nothing is going to happen to you tonight.",
+                 "I did it.",
+                 "Tell me what happened.",
+                 "Sit down.",
+                 "You don’t want to do that.",
+                 "It’s all right. I understand."]:
+        if playable_js.count(line) < 3:      # pair table + both entries
+            fail("a shared practice line drifted or lost a pair member: %r" % line)
+    if "What are you doing to the other person through these words?" not in playable_js:
+        fail("Playable Actions lost its governing question")
+    if playable_js.count("pairId:") != 12:
+        fail("Playable Actions must have exactly twelve pair-carrying entries")
 
     # 6f: a blocked storage upgrade must carry the visible instruction,
     # and the wipe list must stay centralized with dissections in it

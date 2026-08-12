@@ -471,7 +471,9 @@ Plato quote + attribution, "Speech reveals thought…", the
 feeling/truth line, both choice-screen lines. New pins in launch_lint
 6c/6d: "Why Speech Matters", "Speech is not decoration. It is
 action.", "ear first, then text, then performance", "no score, no
-points", Jowett credit + "public domain worldwide" + "Rhetoric &amp;
+points", Jowett credit + the US-scoped PD statement ("public domain in
+the United States" / "check the copyright law where they live" —
+NEVER claim worldwide PD; corrected 2026-08-11) + "Rhetoric &amp;
 Oratory". Preface ends in reflection ("Before You Choose") — no quiz,
 no XP (locked). About/invite/Preferences copy renamed to match; the
 threshold storage record, key names and grandfathering signal are
@@ -571,6 +573,40 @@ clamp + import clamp; malformed Unicode (lone surrogates) round-trips
 via structured clone; in-app navigation during a pending debounce still
 lands the write (timer + closure survive; tested). Suite → 222 checks
 (regression 182), five gates pass.
+
+HONESTY CORRECTIONS + BUILD C (2026-08-11, committed locally, NOT
+pushed; A/B accepted): (1) PD wording — "public domain worldwide" is
+GONE everywhere; the pathway credit now reads verbatim "Project
+Gutenberg identifies this Benjamin Jowett edition as public domain in
+the United States. Readers elsewhere should check the copyright law
+where they live." (pinned in 6d + WHY_SPEECH_MATTERS_COPY.md; never
+reintroduce a worldwide claim). (2) Import warning — validate.js
+validateProjectBundle now sets `dissectionDropped` when a dissection
+was PRESENT but unusable (absent files stay quiet — backward
+compatible); importProjectFile returns {count, droppedDissections};
+the studio import alert uses validate.importResultMessage(), whose
+warning line is lint-pinned; regression covers absent/valid/invalid ×
+message shapes. (3) BUILD C — Playable Actions: js/data/playable.js
+holds the twelve entries + six pairs VERBATIM from
+docs/ACTION_LIBRARY_v1.md (house typographic quotes are the only
+normalization; wording/punctuation otherwise untouched — do not
+rewrite or extend; lint 6g pins all 12 verbs, 6 pair relationships,
+6 practice lines ×3 occurrences, governing question, pairId count).
+Library card '🎯 Playable Actions' ("What you're doing to the other
+person.") → renderPlayableActions (governing question + distinction +
+pair lesson, search via module-level playableQuery so Back restores
+the exact list state, category headings only where entries exist,
+honest no-match state with Clear) → renderPlayableAction (Objective/
+Likely resistance/Coaching/Contrast, shared practice line as TEXT,
+↔-opposite and prev/next-pair navigation both using the sound-page
+replace-history pattern so one Back always returns to the list).
+Dissection quick.doing carries an 'Explore Playable Actions' doorway —
+navigation only: no answer analysis, no recommendation, nothing
+stored, no migration. Regression section 13 (17 checks: data
+integrity incl. contrast symmetry both directions, verbatim spot
+pins, search safety; drive covers open/search/clear/detail/both-
+direction pair nav/prev-next/edge/Back-state/Library-return/doorway
+round-trip/no-audio sweep). Suite → 246 checks total.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

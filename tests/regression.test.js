@@ -24,7 +24,9 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
          getDissection, saveAnswer, deleteDissection, deleteDissectionsFor,
          materialTypeFrom, coverageOf, coverageLine, createSaver, MAX_ANSWER_LEN,
          attachImportedDissection } from '../js/dissect.js';
-import { validateDissection, validateProjectBundle } from '../js/validate.js';
+import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
+import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
+         searchActions } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
 import { store } from '../js/state.js';
@@ -691,7 +693,9 @@ export async function run({ navDoc = document } = {}) {
         && pageText.indexOf('Gorgias') < pageText.indexOf('Phaedrus')
         && pageText.indexOf('Phaedrus') < pageText.indexOf('Republic (Books'));
       check('pathway: translator credited with PD statement',
-        pageText.includes('Benjamin Jowett') && pageText.includes('public domain worldwide')
+        pageText.includes('Benjamin Jowett')
+        && pageText.includes('public domain in the United States')
+        && pageText.includes('check the copyright law where they live')
         && pageText.includes('Project Gutenberg'));
       check('pathway: each dialogue carries its verbatim Jowett excerpt',
         pageText.includes('persuades the judges in the courts')
@@ -883,6 +887,25 @@ export async function run({ navDoc = document } = {}) {
       && validateProjectBundle({ format: 'speechcraft-project', formatVersion: 1,
           projects: [{ title: 'No dissection', text: 'ok' }] },
           { newId: () => emptyProject().id })[0].dissection === null);
+
+    // The omission is never silent — but only when something was dropped.
+    const mkBundle = proj => validateProjectBundle(
+      { format: 'speechcraft-project', formatVersion: 1, projects: [proj] },
+      { newId: () => emptyProject().id })[0];
+    check('import: a present-but-invalid dissection is flagged for the warning',
+      mkBundle({ title: 'Bad diss', text: 'x', dissection: 'garbage' }).dissectionDropped === true
+      && mkBundle({ title: 'Bad diss 2', text: 'x',
+           dissection: { schemaVersion: 99, answers: { 'quick.wants': { value: 'v', status: 'answered' } } } })
+         .dissectionDropped === true);
+    check('import: absent and valid dissections raise no flag',
+      mkBundle({ title: 'Old export', text: 'x' }).dissectionDropped === false
+      && bundle[0].dissectionDropped === false);
+    check('import: the visible result reports drops and only drops',
+      importResultMessage(1, 0) === 'Imported 1 project.'
+      && importResultMessage(2, 0) === 'Imported 2 projects.'
+      && importResultMessage(1, 1).startsWith('Imported 1 project.')
+      && importResultMessage(1, 1).includes('could not be imported because that section was invalid or from an unsupported version')
+      && importResultMessage(3, 2).includes('2 Speech Dissections could not be imported'));
 
     if (dbSupported()) {
       try {
@@ -1159,6 +1182,134 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('IndexedDB upgrade experience (needs IndexedDB)');
+  }
+
+  // ── 13. Build C: Playable Actions ───────────────────────────
+  // The approved twelve, exactly — data integrity first, then the UI.
+  check('playable: exactly twelve entries with unique ids',
+    PLAYABLE_ACTIONS.length === 12 && new Set(PLAYABLE_ACTIONS.map(a => a.id)).size === 12);
+  check('playable: six pairs, each with two members sharing one practice line',
+    ACTION_PAIRS.length === 6 && ACTION_PAIRS.every(p => {
+      const [x, y] = p.actions.map(actionById);
+      return p.actions.length === 2 && x && y
+        && x.practiceLine === p.line && y.practiceLine === p.line
+        && x.pairId === p.id && y.pairId === p.id;
+    }));
+  check('playable: every contrast is symmetric — both directions resolve',
+    PLAYABLE_ACTIONS.every(a => actionById(a.contrast.id)?.contrast.id === a.id));
+  check('playable: all seven categories represented, none empty or unknown',
+    new Set(PLAYABLE_ACTIONS.map(a => a.category)).size === 7
+    && PLAYABLE_ACTIONS.every(a => ACTION_CATEGORIES[a.category]));
+  check('playable: verbatim spot pins from ACTION_LIBRARY_v1',
+    actionById('reassure').objective === 'Make the listener believe they are safe, or that this can be managed.'
+    && actionById('punish').coaching.includes('The cruelest version is gentle.')
+    && actionById('warn').contrast.note === 'To intimidate makes you the consequence.'
+    && actionById('draw-out').coaching.includes('Your main tool is silence.'));
+  check('playable: search matches verb, category and content; never a broken state',
+    searchActions('').length === 12
+    && searchActions('reassure').some(a => a.id === 'reassure')
+    && searchActions('To Control').length === 2
+    && searchActions(' weird￿').length === 0);
+
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    let paProj = null;
+    try {
+      let doc = frame.contentDocument;
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+      const setSearch = v => {
+        const inp = doc.getElementById('pa-search');
+        inp.value = v;
+        inp.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
+      };
+      const rows = () => [...doc.querySelectorAll('.pa-row')];
+      const h1 = () => doc.querySelector('main h1')?.textContent ?? '';
+
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(350);
+      clickIn(card('Playable Actions')); await sleep(350);
+      check('playable UI: the section opens with the governing question and all twelve',
+        doc.body.textContent.includes('What are you doing to the other person through these words?')
+        && rows().length === 12
+        && doc.querySelectorAll('#pa-list .guide-heading').length === 7);
+      check('playable UI: entirely written — no audio affordances anywhere',
+        !doc.querySelector('main audio')
+        && !doc.querySelector('main').textContent.includes('🔊')
+        && !/coming soon/i.test(doc.querySelector('main').textContent));
+
+      setSearch('zzz-nothing'); await sleep(150);
+      check('playable UI: an empty search result is a message with a way back, never a bare page',
+        rows().length === 0
+        && doc.body.textContent.includes('No actions match')
+        && !!doc.getElementById('pa-clear')
+        && doc.querySelectorAll('#pa-list .guide-heading').length === 0);
+      clickIn(doc.getElementById('pa-clear')); await sleep(150);
+      check('playable UI: clearing the search restores all twelve', rows().length === 12);
+
+      setSearch('forgive'); await sleep(150);
+      check('playable UI: search narrows without empty category headings',
+        rows().some(r => r.textContent.includes('To Forgive'))
+        && [...doc.querySelectorAll('#pa-list .guide-heading')].length >= 1
+        && [...doc.querySelectorAll('#pa-list .guide-heading')].every(h2 => h2.nextElementSibling?.classList.contains('pa-row')));
+      clickIn(rows().find(r => r.textContent.includes('To Forgive'))); await sleep(350);
+      check('playable UI: the entry shows its shared line, definition and coaching',
+        h1() === 'To Forgive'
+        && doc.body.textContent.includes('It’s all right. I understand.')
+        && doc.body.textContent.includes('Release them from the debt')
+        && doc.body.textContent.includes('two completely different scenes'));
+
+      clickIn(doc.getElementById('pa-opposite')); await sleep(300);
+      const towardOpposite = h1();
+      clickIn(doc.getElementById('pa-opposite')); await sleep(300);
+      check('playable UI: the pair navigates in both directions',
+        towardOpposite === 'To Punish' && h1() === 'To Forgive');
+
+      clickIn(doc.getElementById('pa-prev')); await sleep(300);
+      const prevWorked = h1() === 'To Warn';                 // pair-5, first member
+      clickIn(doc.getElementById('pa-next')); await sleep(300);
+      check('playable UI: previous/next move between pairs and return',
+        prevWorked && h1() === 'To Forgive');
+      check('playable UI: the last pair has no next', !doc.getElementById('pa-next'));
+
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      check('playable UI: Back returns to the list with the search intact',
+        doc.getElementById('pa-search')?.value === 'forgive'
+        && rows().some(r => r.textContent.includes('To Forgive')));
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      check('playable UI: Back again lands on the Library shelf', !!card('Playable Actions'));
+
+      // The dissection doorway: navigation only, and Back comes home.
+      paProj = await createProject({ title: '__regression playable link (safe to delete)', text: 'Sit down.' });
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Studio')); await sleep(400);
+      const pc = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === paProj.id);
+      clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(450);
+      clickIn(doc.getElementById('proj-dissect')); await sleep(450);
+      clickIn(doc.querySelector('.diss-q[data-q="quick.doing"] .diss-head')); await sleep(150);
+      const link = doc.querySelector('[data-pa-link]');
+      check('playable UI: the Dissection doing-question offers the doorway', !!link);
+      clickIn(link); await sleep(350);
+      check('playable UI: the doorway opens Playable Actions',
+        doc.body.textContent.includes('What are you doing to the other person through these words?'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      check('playable UI: Back from the doorway returns to the dissection screen',
+        doc.querySelectorAll('.diss-q').length === 6);
+      check('playable UI: visiting the doorway stored nothing',
+        (await dissectionFor('project', paProj.id)) == null);
+    } catch (err) {
+      bad('Playable Actions drive', String(err));
+    } finally {
+      if (paProj) {
+        await deleteDissectionsFor(paProj.id).catch(() => {});
+        await deleteProject(paProj.id).catch(() => {});
+      }
+    }
+  } else {
+    ok('Playable Actions drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

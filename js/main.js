@@ -36,8 +36,11 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
          saveAnswer, deleteDissection, deleteDissectionsFor, materialTypeFrom,
          coverageLine, createSaver, MAX_ANSWER_LEN, attachImportedDissection } from './dissect.js';
 import { questRows, claimQuest, onLessonFinished } from './quests.js';
+import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, GOVERNING_QUESTION,
+         ACTION_DISTINCTION, PAIR_LESSON, actionById, pairById, pairIndexOf,
+         searchActions } from './data/playable.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
-         ValidationError, LIMITS } from './validate.js';
+         ValidationError, LIMITS, importResultMessage } from './validate.js';
 import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePersonal,
          listPersonal, exportPersonal, importPersonal, setProjectWordOverride,
          setOccurrenceOverride, clearOverridesFor, normWord } from './overrides.js';
@@ -779,6 +782,9 @@ function libraryMain(el, course) {
     { icon: '🏛', title: 'Rhetoric & Oratory',
       blurb: 'A focused reading pathway — the classical roots of everything this app trains.',
       go: renderReadingPathway },
+    { icon: '🎯', title: 'Playable Actions',
+      blurb: 'What you’re doing to the other person.',
+      go: renderPlayableActions },
     { icon: '🎭', title: 'Your Instrument',
       blurb: 'A tour of the vocal tract.',
       go: renderInstrument },
@@ -812,7 +818,7 @@ function renderTextsPage() {
 // ── Rhetoric & Oratory: the reading pathway (Build A) ────────
 // A focused pathway, not an ebook library (locked scope: "no large ebook
 // library"). Three public-domain dialogues in Benjamin Jowett's
-// translations (Jowett d. 1893 — PD worldwide), credited in plain text.
+// translations, credited in plain text with an honest US-scoped PD note.
 // House sources policy: no external links anywhere learner-facing.
 //
 // EXCERPTS ARE VERBATIM Jowett, verified 2026-08-11 against the Project
@@ -852,10 +858,126 @@ function renderReadingPathway() {
         </blockquote>
         <div class="guide-word"><span class="wii-who">For actors</span><span class="guide-note">${esc(r.why)}</span></div>`).join('')}
       <h2 class="guide-heading">Editions &amp; credit</h2>
-      <p class="guide-text">Excerpts and translation: Benjamin Jowett, <i>The Dialogues of Plato</i>, third edition, 1892. Jowett died in 1893, and his translations are in the public domain worldwide. Free plain-text editions are available from Project Gutenberg — search the dialogue’s title together with “Jowett”.</p>
+      <p class="guide-text">Excerpts and translation: Benjamin Jowett, <i>The Dialogues of Plato</i>, third edition, 1892. Project Gutenberg identifies this Benjamin Jowett edition as public domain in the United States. Readers elsewhere should check the copyright law where they live. Free plain-text editions are available from Project Gutenberg — search the dialogue’s title together with “Jowett”.</p>
       <p class="pane-note">Speechcraft doesn’t bundle the books — this is a pathway, not an ebook shelf.</p>
     </main>`;
   wireBrandHome();
+}
+
+// ── Playable Actions (Build C) ───────────────────────────────
+// Twelve verbatim entries and six contrast pairs from
+// docs/ACTION_LIBRARY_v1.md, rendered from js/data/playable.js.
+// Entirely written: the shared practice line is text for private
+// exploration — no audio, no recording, no scoring, no empty controls.
+// The search query survives in module state so Back from a detail page
+// returns to the exact list the actor left.
+let playableQuery = '';
+
+function renderPlayableActions() {
+  record(renderPlayableActions);          // replays with current playableQuery
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🎯 Playable Actions', '#8a6d3b')}
+    <main class="guide">
+      <h1>Playable Actions</h1>
+      <blockquote class="th-quote"><p><b>${GOVERNING_QUESTION}</b></p></blockquote>
+      <p class="guide-text">${ACTION_DISTINCTION}</p>
+      <p class="pane-note">Six pairs, each sharing one practice line. ${PAIR_LESSON}</p>
+      <input class="sonnet-search" id="pa-search" type="search"
+        placeholder="Search actions…" aria-label="Search playable actions"
+        value="${esc(playableQuery)}" autocomplete="off">
+      <div id="pa-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('pa-list');
+  const draw = () => {
+    const hits = searchActions(playableQuery);
+    if (!hits.length) {
+      // Honest empty state — a message and a way back, never a bare page.
+      listEl.innerHTML = `
+        <p class="pane-note">No actions match “${esc(playableQuery)}”.</p>
+        <p><button class="btn-lite" id="pa-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#pa-clear').addEventListener('click', () => {
+        playableQuery = '';
+        document.getElementById('pa-search').value = '';
+        draw();
+      });
+      return;
+    }
+    // Category headings only where an entry exists — never an empty one.
+    const cats = Object.entries(ACTION_CATEGORIES)
+      .map(([cid, label]) => [label, hits.filter(a => a.category === cid)])
+      .filter(([, list]) => list.length);
+    listEl.innerHTML = cats.map(([label, list]) => `
+      <h2 class="guide-heading">${esc(label)}</h2>
+      ${list.map(a => `
+        <button class="track-card pa-row" data-id="${a.id}" type="button" style="--track-color:#8a6d3b">
+          <div class="track-info"><h2>${esc(a.verb)}</h2><p>${esc(a.objective)}</p></div>
+          <div class="track-arrow">›</div>
+        </button>`).join('')}`).join('');
+    listEl.querySelectorAll('.pa-row').forEach(b =>
+      b.addEventListener('click', () => renderPlayableAction(b.dataset.id)));
+  };
+  document.getElementById('pa-search').addEventListener('input', e => {
+    playableQuery = e.target.value;
+    draw();
+  });
+  draw();
+}
+
+function renderPlayableAction(id) {
+  const a = actionById(id);
+  if (!a) return renderPlayableActions();
+  record(() => renderPlayableAction(id));
+  stopSpeech();
+  const pair = pairById(a.pairId);
+  const other = actionById(pair.actions.find(x => x !== a.id));
+  const idx = pairIndexOf(a.pairId);
+  const prevPair = ACTION_PAIRS[idx - 1] ?? null;
+  const nextPair = ACTION_PAIRS[idx + 1] ?? null;
+
+  app.innerHTML = `
+    ${pageTopbar('🎯 ' + esc(a.verb), '#8a6d3b')}
+    <main class="guide">
+      <h1 id="pa-title">${esc(a.verb)}</h1>
+      <p class="pane-note">${esc(ACTION_CATEGORIES[a.category])}</p>
+      <blockquote class="th-quote pa-line">
+        <p>“${esc(a.practiceLine)}”</p>
+        <footer class="th-attrib">The pair’s shared practice line — try it as ${esc(a.verb.toLowerCase())}, then as ${esc(other.verb.toLowerCase())}. ${PAIR_LESSON}</footer>
+      </blockquote>
+      <h2 class="guide-heading">Objective</h2>
+      <p class="guide-text">${esc(a.objective)}</p>
+      <h2 class="guide-heading">Likely resistance</h2>
+      <p class="guide-text">${esc(a.resistance)}</p>
+      <h2 class="guide-heading">Coaching</h2>
+      <p class="guide-text">${esc(a.coaching)}</p>
+      <h2 class="guide-heading">Contrast</h2>
+      <p class="guide-text">${esc(a.contrast.note)}</p>
+      <p><button class="btn pa-contrast" id="pa-opposite" type="button">↔ ${esc(other.verb)} — the opposite action</button></p>
+      <nav class="sound-footnav" aria-label="Neighbouring pairs">
+        ${prevPair ? `<button class="btn-lite sound-step-wide" id="pa-prev" type="button"
+          aria-label="Previous pair: ${esc(actionById(prevPair.actions[0]).verb)}">‹ Previous pair</button>` : '<span></span>'}
+        ${nextPair ? `<button class="btn-lite sound-step-wide" id="pa-next" type="button"
+          aria-label="Next pair: ${esc(actionById(nextPair.actions[0]).verb)}">Next pair ›</button>` : '<span></span>'}
+      </nav>
+    </main>`;
+  wireBrandHome();
+
+  // Direct navigation to the paired opposite: replace this page in history
+  // so Back from EITHER half of a pair returns straight to the list.
+  document.getElementById('pa-opposite').addEventListener('click', () => {
+    navStack.pop();
+    renderPlayableAction(other.id);
+  });
+  // Previous/next pair: same replace-history pattern as the sound pages.
+  const goPair = pr => { navStack.pop(); renderPlayableAction(pr.actions[0]); };
+  if (prevPair) document.getElementById('pa-prev').addEventListener('click', () => goPair(prevPair));
+  if (nextPair) document.getElementById('pa-next').addEventListener('click', () => goPair(nextPair));
+
+  window.scrollTo(0, 0);
+  const h = document.getElementById('pa-title');
+  h.setAttribute('tabindex', '-1');
+  h.focus();
 }
 
 // Full-page wrappers for the dialect panes, so collections open like any
@@ -2540,8 +2662,13 @@ async function studioMain(el) {
   fileInput.addEventListener('change', async () => {
     const f = fileInput.files?.[0]; if (!f) return;
     try {
-      const created = await importProjectFile(f);
-      if (created) { alert(`Imported ${created} project${created === 1 ? '' : 's'}.`); draw(); }
+      const { count, droppedDissections } = await importProjectFile(f);
+      if (count) {
+        // alert is modal: the result (including any dropped-dissection
+        // warning) stays on screen until the user dismisses it.
+        alert(importResultMessage(count, droppedDissections));
+        draw();
+      }
     } catch (err) {
       alert(`That file could not be imported.\n\n${err instanceof ValidationError ? err.message : 'The file could not be read.'}`);
     } finally { fileInput.value = ''; }
@@ -2788,6 +2915,9 @@ async function paneDissect(pane, p, id) {
               <button class="btn-lite diss-mark" data-mark="unknown" type="button" aria-pressed="false">🤔 I don’t know yet</button>
               <button class="btn-lite diss-mark" data-mark="na" type="button" aria-pressed="false">Not relevant</button>
             </div>
+            ${qid === 'quick.doing' ? `
+            <p class="pane-note diss-pa">Looking for the verb underneath the line?
+              <button class="btn-lite" data-pa-link type="button">Explore Playable Actions</button></p>` : ''}
           </div>
         </section>`).join('')}
       </div>
@@ -2874,6 +3004,10 @@ async function paneDissect(pane, p, id) {
           active ? { value: text.value } : { value: text.value, status: btn.dataset.mark })));
       });
   }
+
+  // Contextual doorway only: navigation, no analysis of the answer, no
+  // recommendation, nothing stored. Back returns to this screen.
+  pane.querySelector('[data-pa-link]')?.addEventListener('click', () => renderPlayableActions());
 
   pane.querySelector('#diss-del').addEventListener('click', async () => {
     if (!d) return;
@@ -3097,17 +3231,18 @@ async function importProjectFile(file) {
     withDiss ? `${withDiss} project${withDiss === 1 ? ' carries its' : 's carry their'} dissection.` : '',
     dropped ? `Audio is never included in project files, so ${dropped} recording reference${dropped === 1 ? '' : 's'} will be skipped.` : '',
   ].filter(Boolean).join('\n');
-  if (!confirm(summary)) return 0;
+  if (!confirm(summary)) return { count: 0, droppedDissections: 0 };
 
-  let n = 0;
+  let n = 0, droppedDiss = 0;
   for (const p of projects) {
-    const { droppedRecordings, dissection, ...clean } = p;
+    const { droppedRecordings, dissection, dissectionDropped, ...clean } = p;
     await saveProject(clean);
     // Rebuilt around the NEW project id (never the file's) \u2014 see dissect.js.
     if (dissection) await attachImportedDissection(clean.id, clean.title, dissection);
+    if (dissectionDropped) droppedDiss++;
     n++;
   }
-  return n;
+  return { count: n, droppedDissections: droppedDiss };
 }
 
 // ── Curated speech libraries (Chekhov, O'Neill, Wilde) ────────

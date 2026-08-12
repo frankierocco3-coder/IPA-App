@@ -122,3 +122,8 @@ again any time." Button: "Read it again".
 
 **Preferences:** "Runs the preface and course picker again. Your
 progress is untouched."
+
+**Reading-pathway credit (verbatim, US-scoped by decision 2026-08-11 —
+never claim worldwide PD):** "Project Gutenberg identifies this
+Benjamin Jowett edition as public domain in the United States. Readers
+elsewhere should check the copyright law where they live."
