@@ -52,6 +52,7 @@ export const EDITION_CHUNKS = [
   { file: 'sonnets-085-098', from: 85, to: 98, expect: 14 },
   { file: 'sonnets-099-112', from: 99, to: 112, expect: 14 },
   { file: 'sonnets-113-126', from: 113, to: 126, expect: 13 },
+  { file: 'sonnets-127-140', from: 127, to: 140, expect: 13 },
 ];
 
 // Flipped to true by the FINAL batch; integrity checks then demand the
