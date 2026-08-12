@@ -642,6 +642,34 @@ resolution/45–90s monologues/UI drive incl. same-accent, pending,
 source notes, mobile-width no-h-scroll, one-Back, review separation,
 zero mic). Suite → 272 checks; five gates pass.
 
+BUILDS E+F (2026-08-11/12, committed locally, NOT pushed): E =
+docs/REVIEW_PACKET_v1.md — 34 items (8 pieces + 15 transpositions +
+11 bridge routes) each with ID/complete text/benefit/dialects/
+reviewer types/source support/concerns/stereotype flags/register
+assumptions/checklists/blank verdict fields; bridge claims cited
+CLAIM-BY-CLAIM (Wells, Cruttenden/Gimson, Roach, Lindsey,
+Hillenbrand, Cox & Fletcher, Macquarie); no statuses changed. F =
+THE COMPLETE WRITTEN SONNET CATALOG: all 154 sonnets have Plain
+Meaning + In Today's Voice for nam/ssbe/aus. NO Traditional RP
+vocabulary adaptation exists BY DOCUMENTED DECISION (RP is a
+pronunciation target; its course shows Original + Plain Meaning) —
+lint fails if an rp: adaptation ever appears. Architecture:
+js/data/editions/ = 11 lazy chunk modules (dynamic import per opened
+sonnet; shell never parses the catalog) + index.js manifest/loader
+(EDITION_CATALOG_COMPLETE=true; pilots 18/29/73/116/130 served from
+recasts.js — never duplicated; the 15 pilot transpositions remain
+the original 23 queue) + js/data/edition-reviews.js approval ledger
+(absence = draft; plain needs literary review, voices need literary
+AND dialect; Claude never a reviewer; no batch approval).
+renderSonnet shows Plain/Today tabs ONLY for approved texts — today
+that means the reader looks unchanged except pilot Plain Meanings;
+#review has a lazy per-sonnet edition inspector. launch_lint 6i:
+sonnets.js byte-locked (sha256 pin c0daa026…), chunk/manifest
+cross-check per kind, rp:/No-Fear bans, 149-new cap + complete-flag
+consistency. Regression section 15 incl. strict 154-of-every-kind
+check. 11 batch commits ccb74ba→…; suite 283/283 at completion; all
+five gates pass every batch. 616 draft texts await human review.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

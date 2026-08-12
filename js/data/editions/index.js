@@ -53,11 +53,13 @@ export const EDITION_CHUNKS = [
   { file: 'sonnets-099-112', from: 99, to: 112, expect: 14 },
   { file: 'sonnets-113-126', from: 113, to: 126, expect: 13 },
   { file: 'sonnets-127-140', from: 127, to: 140, expect: 13 },
+  { file: 'sonnets-141-154', from: 141, to: 154, expect: 14 },
 ];
 
 // Flipped to true by the FINAL batch; integrity checks then demand the
-// full 154 of every kind.
-export const EDITION_CATALOG_COMPLETE = false;
+// full 154 of every kind. FLIPPED 2026-08-12 — the catalog is complete:
+// 149 new sonnets in 11 chunks + the 5 pilots in recasts.js = 154.
+export const EDITION_CATALOG_COMPLETE = true;
 
 const chunkCache = new Map();
 
