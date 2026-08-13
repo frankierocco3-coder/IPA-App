@@ -1,111 +1,154 @@
 # Why Speech Matters — verbatim copy source
 
-This document is the authoritative copy for the first-launch preface
-(Build A). It **supersedes `THRESHOLD_COPY.md`** for panels 1–7; that
-file remains in the repo untouched as the historical B01 source. The
-course-picker screen and the choice screen are unchanged from B01 and
-their copy still lives where THRESHOLD_COPY.md put it.
+This document is the authoritative copy for the permanent preface,
+REWRITTEN 2026-08-12 by owner order (three panels, inclusive audience).
+It supersedes the earlier seven-panel version below this repo's history
+and `THRESHOLD_COPY.md` before that. The former panels "Why Actors
+Train This Way" and "The Journey" are REMOVED by that order — do not
+reintroduce them under any name.
 
 Rules, same as before:
 
 - The app renders these lines **verbatim**. Change them here first, then
   in `js/main.js` (`THRESHOLD_PANELS`), then update the pins in
   `tools/launch_lint.py`.
-- `<b>…</b>` marks intentional bold. `<i>…</i>` marks intentional italics.
-- No XP, no quiz, no track. The preface ends in reflection, not scoring
-  (locked product decisions from B01, reaffirmed in the Build A scope).
+- `<b>…</b>` / `<i>…</i>` mark intentional emphasis.
+- No XP, no quiz, no track (locked product decisions from B01).
 - American spelling.
+- The preface is for ANYONE who speaks. Actors stay one named audience
+  (accents, scenes, monologues, Question Everything) — never the frame
+  for every user.
+- **Panel 3 is ORIGINAL Speechcraft writing.** "Speech Reveals Thought"
+  is not a quotation: no quotation marks, no attribution to Plato. The
+  panel-1 epigraph IS a verified Jowett quotation (Republic 377a–b,
+  checked against Project Gutenberg) and keeps its attribution.
+- Never promise erased identity, guaranteed confidence, or one
+  universally "correct" accent. Accent modification adds choice and
+  flexibility — it never "corrects" an inferior way of speaking.
 
-Flow: panels 1–7 below → course picker (kept, with 🔊 samples) → choice
-screen (kept: "Both take you into the same app. You can change your mind
-at any time." / "The guided path stays available whenever you want it.").
+Flow: panels 1–3 below → course picker (kept, with 🔊 samples — a
+functional onboarding screen, NOT a preface panel) → choice screen
+(kept: "Both take you into the same app. You can change your mind at
+any time." / "The guided path stays available whenever you want it.").
+The progress dots count ONLY the three content panels; the picker and
+choice screens show no preface dots.
+
+**TWO VARIANTS (owner order 2026-08-12, second revision):** the
+FIRST-TIME preface uses the CONCISE panels below ("First-time opening");
+the permanent More/About replay uses the EXPANDED panels ("Permanent
+section"). Same three titles, same order, same panel-1 epigraph with
+its complete attribution ("— Plato, *Republic* 377a–b, translated by
+Benjamin Jowett"). The goals list and the long accent disclaimer live
+ONLY in the permanent section — never in the first-time opening.
 
 ---
+
+# First-time opening (INTRO — concise, verbatim)
 
 ## Panel 1 — Why Speech Matters
 
 > The beginning is the most important part of the work, especially in
 > the case of a young and tender thing.
 >
-> — Plato, *Republic* 377a–b
+> — Plato, *Republic* 377a–b, translated by Benjamin Jowett
 
-Before you use Speechcraft, take three minutes with the instrument you
-are training. Speech is not decoration. It is action.
+How you speak shapes how people understand you, trust you and respond
+to you.
+
+Speechcraft helps you develop clearer, more confident and more
+intentional speech—whether you are preparing a presentation, studying
+rhetoric, exploring an accent, working on a role or strengthening your
+everyday voice.
+
+Training does not erase who you are. It gives you more choices.
 
 ## Panel 2 — Speech Is Action
 
-Every line you speak does something to someone. Speech carries clarity
-or confusion. It declares intention. It persuades, refuses, comforts,
-confronts. It signals identity and status before a listener can name
-either — and it is how one human being reaches another.
+Speaking is something you do to affect another person.
 
-An actor who knows what a line is doing can play it. An actor who does
-not can only recite it.
+You may be trying to inform, persuade, reassure, challenge, inspire or
+connect. The same words can land differently depending on your
+intention, timing, rhythm, emphasis and relationship to the listener.
+
+Strong speech begins with knowing what you want your words to do.
 
 ## Panel 3 — Speech Reveals Thought
 
-Speech reveals thought. It reveals what we understand, what we assume,
-what we value, what we fear, and how carefully we have examined our own
-ideas.
+Speech often reveals how clearly we have examined an idea. It shows
+what we understand, value, question or avoid.
 
-The effort to speak clearly does not only display understanding — it
-helps create it. If you cannot yet articulate something, do not conclude
-that you know nothing. Treat the difficulty as an invitation to examine
-what you know more deeply.
+Strengthening speech is more than changing pronunciation. It develops
+attention, listening, reasoning, structure and the connection between
+thought and expression.
 
-## Panel 4 — Why Actors Train This Way
+---
 
-The IPA gives you the sounds themselves, not spelling's rumors about
-them. Hear a sound precisely and you can make it precisely.
+# Permanent section (FULL — expanded, verbatim; More/About replay)
 
-Dialect study turns an accent from an imitation into a system —
-something you can learn, keep, and switch on demand.
+## Panel 1 — Why Speech Matters
 
-Text investigation shows you what a speaker wants, what they know, what
-they assume, and what they conceal — so the choices you make on a line
-are choices, not habits.
+> The beginning is the most important part of the work, especially in
+> the case of a young and tender thing.
+>
+> — Plato, *Republic* 377a–b, translated by Benjamin Jowett
 
-This is the training tradition of the stage: ear first, then text, then
-performance.
+How you speak shapes how people understand you, how far they trust you,
+what they remember of you, and how they respond to you. Speech is not
+decoration. It is action.
 
-## Panel 5 — Communication and Manipulation
+Speechcraft is for anyone who wants to understand, strengthen or expand
+the way they speak — including anyone who wants to:
 
-Speaking confidently is not the same as knowing what you are talking
-about. Speechcraft will make you more powerful either way — which is
-exactly why this training includes learning to question, to listen, and
-to recognize where your knowledge ends.
+- speak with greater clarity
+- speak more confidently
+- command attention without merely becoming louder
+- organize and express thoughts effectively
+- understand rhetoric and persuasion
+- explore different kinds of speakers and speaking situations
+- develop a more intentional personal voice
+- modify or neutralize aspects of an accent — adding choice and
+  flexibility, never "correcting" an inferior way of speaking
+- learn another English accent
+- prepare a speech, scene, monologue or presentation
+- investigate how language creates action
 
-A responsible speaker uses emotion to illuminate the subject. A
-manipulative speaker uses emotion to draw attention away from what is
-missing. You will learn to tell the difference — in other speakers, and
-in yourself.
+No app can erase who you are, guarantee confidence, or hand you the one
+"correct" accent — no such accent exists. What deliberate training can
+do is give you more choices, and more command of the choices you
+already make.
 
-**The strength of a feeling does not determine the truth of a claim.**
+## Panel 2 — Speech Is Action
 
-## Panel 6 — The Journey
+Speaking is something we do to another person. A speaker may set out to
+persuade, reassure, challenge, inspire, inform, confront, entertain,
+comfort, negotiate, command, question, reveal, conceal — or simply
+connect.
 
-Speechcraft moves the way rehearsal moves:
+The same words can land completely differently depending on intention,
+relationship, timing, rhythm, emphasis and delivery. That is as true in
+everyday conversation, teaching, leadership and interviews as it is in
+public speaking, presentations, advocacy, rhetoric, performance — and
+the difficult personal conversations that matter most.
 
-**Understand the sound.** The IPA, your instrument, the dialect's system.
+Powerful speech can clarify and connect. It can also pressure, mislead
+or manipulate. Developing your speech includes taking responsibility
+for its effect.
 
-**Mark the text.** Transcription, stress, scansion — the score beneath
-the words.
+## Panel 3 — Speech Reveals Thought (original Speechcraft writing)
 
-**Investigate the thought.** What the speaker wants, assumes, and
-conceals.
+Speech reveals thought. It reveals what we understand and what remains
+uncertain, how our ideas are organized, what we value, what we avoid,
+how we see the person in front of us — and how clearly we have examined
+our own position.
 
-**Prepare the performance.** Choices made on purpose, ready to deliver.
+Strengthening speech is therefore never just polishing pronunciation.
+It can mean strengthening attention, listening, intention, vocabulary,
+structure, reasoning — the whole relationship between thought and
+expression.
 
-## Panel 7 — Before You Choose (reflection ending)
-
-One question, before you pick your way in — no score, no points.
-
-Think of a moment when someone's words genuinely changed you: what you
-believed, or what you did next. What did that speaker understand — about
-the subject, and about you?
-
-Hold on to that moment. It is the thing you are here to learn to do on
-purpose.
+The IPA, rhetoric, accent study, text analysis and deliberate practice
+are different tools within that one larger craft. Speechcraft teaches
+them together.
 
 ---
 
@@ -120,8 +163,15 @@ Buttons: "Read it" / "Not now".
 what speech does, what it reveals, and what it can conceal. Read it
 again any time." Button: "Read it again".
 
+**More card:** blurb "The preface — what speech does, what it reveals,
+and who it's for. Read it again any time."
+
 **Preferences:** "Runs the preface and course picker again. Your
 progress is untouched."
+
+**About lead (inclusive framing, owner-ordered):** "Speechcraft is for
+anyone who wants to understand, strengthen or expand the way they
+speak."
 
 **Reading-pathway credit (verbatim, US-scoped by decision 2026-08-11 —
 never claim worldwide PD):** "Project Gutenberg identifies this

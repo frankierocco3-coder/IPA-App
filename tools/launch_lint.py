@@ -107,20 +107,31 @@ def main():
             fail("a capture-UI builder in record-ui.js lost its capability gate")
 
     # 6c: the preface copy stays VERBATIM (spot pins from
-    # docs/WHY_SPEECH_MATTERS_COPY.md, which supersedes THRESHOLD_COPY.md
-    # for panels 1-7 — if one of these drifts, someone paraphrased)
+    # docs/WHY_SPEECH_MATTERS_COPY.md — the 2026-08-12 three-panel
+    # rewrite: Why Speech Matters / Speech Is Action / Speech Reveals
+    # Thought; if one of these drifts, someone paraphrased)
     for pin in ["Why Speech Matters",
-                "— Plato, <i>Republic</i> 377a–b",
+                "— Plato, <i>Republic</i> 377a–b, translated by Benjamin Jowett",
                 "especially in the case of a young and tender thing",
+                # concise first-time opening (INTRO variant)
+                "Training does not erase who you are. It gives you more choices.",
+                "Strong speech begins with knowing what you want your words to do.",
+                "It shows what we understand, value, question or avoid.",
+                # expanded permanent section (FULL variant, More/About)
                 "Speech is not decoration. It is action.",
+                "understand, strengthen or expand the way they speak",
+                "adding choice and flexibility",
+                "taking responsibility for its effect",
                 "Speech reveals thought. It reveals what we understand",
-                "The strength of a feeling does not determine the truth of a claim.",
-                "ear first, then text, then performance",
-                "no score, no points",
+                "relationship between thought and expression",
                 "Both take you into the same app. You can change your mind at any time.",
                 "The guided path stays available whenever you want it."]:
         if pin not in main_js:
             fail("preface copy drifted from docs/WHY_SPEECH_MATTERS_COPY.md: missing %r" % pin[:60])
+    # The removed panels stay removed — under any name.
+    for gone in ["Why Actors Train This Way", "The Journey"]:
+        if gone in main_js:
+            fail("a removed preface panel resurfaced: %r" % gone)
 
     # 6d: the reading pathway stays a credited public-domain pathway, not
     # an ebook shelf — translator credit, PD statement and the verbatim
@@ -209,8 +220,10 @@ def main():
             fail("bridge data shows a banned course label: %r" % banned)
     if bridge_js.count("Standard British") < 6:
         fail("bridge routes must label ssbe as 'Standard British' in every title")
-    for pin in ["there’s no distance to bridge",
-                "awaiting review by a qualified dialect reviewer",
+    # (2026-08-12: the bridge became a Practice listening exercise. Same-
+    # accent selection is now structurally impossible — the start selector
+    # never offers the target — so the old same-accent message is gone.)
+    for pin in ["review by a qualified dialect reviewer",
                 "part of the original 23"]:
         if pin not in main_js:
             fail("bridge/review honesty copy missing: %r" % pin)
@@ -232,6 +245,31 @@ def main():
         for src, name in ((idiom_code, "idiom.js"), (action_code, "action.js")):
             if _re.search(r"\b" + _re.escape(term) + r"\b", src, _re.I):
                 fail("removed NAM expression resurfaced in %s: %r" % (name, term))
+
+    # 6j: information architecture (2026-08 revision) — the learner-facing
+    # textbook is titled "Question Everything"; the old "Speech Dissection"
+    # label is retired from every learner surface (internal store, field
+    # and question-ID names keep their historical "dissect…" spelling and
+    # are NEVER renamed). Featured Texts stays removed as a shelf.
+    if "Question Everything" not in main_js:
+        fail("the Question Everything textbook title is missing from main.js")
+    if "Speech Dissection" in _strip_comments(main_js):
+        fail("a learner surface still says 'Speech Dissection' — the learner-facing "
+             "title was renamed Question Everything (comments are fine)")
+    if "Featured Texts" in _strip_comments(main_js):
+        fail("the Featured Texts shelf returned — every text lives unpromoted "
+             "in its collection")
+
+    # 6k: the Practice revision (2026-08-12) — the section heading is
+    # "Quick Practice"; the "Recommended for you" framing is retired from
+    # every learner surface, and the bridge exercise never synthesizes:
+    # its rounds come only from playableComparisons (both-clips rule).
+    if "Quick Practice" not in main_js:
+        fail("the Quick Practice heading is missing from Practice")
+    if "Recommended for you" in _strip_comments(main_js):
+        fail("'Recommended for you' returned to a learner surface")
+    if "playableComparisons" not in main_js:
+        fail("the bridge exercise no longer routes through the both-clips gate")
 
     # 6i: the Build F sonnet-edition catalog
     import hashlib as _hl

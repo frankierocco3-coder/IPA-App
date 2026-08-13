@@ -1661,6 +1661,30 @@ export const bridgeDrafts = () =>
 // Self-selected preference persistence (its own key; the privacy wipe
 // already covers every speechcraft-* key).
 const PREF_KEY = 'speechcraft-bridge';
+// ── Practice gating for the LISTENING exercise ────────────────
+// A comparison may become an audio question ONLY when it is approved
+// AND both exact clips already exist. `hasClip(word, accent)` is
+// injected so tests can prove the exclusion rule without touching the
+// real audio index; the app passes audio.js's hasWordClip (which also
+// honors the quarantine flags). No fallback, no substitution — a
+// missing clip silently excludes the comparison from play while its
+// written route data stays intact.
+export function playableComparisons(route, hasClip) {
+  if (!route) return [];
+  return route.comparisons.filter(c =>
+    c.reviewStatus === 'approved' && hasClip(c.word, route.from) && hasClip(c.word, route.to));
+}
+
+// Approved routes INTO a target accent that hold at least one playable
+// comparison — the honest existence test for the Practice card. Draft
+// routes can never appear here: routeFor() already drops them.
+export function playableRoutesInto(target, hasClip) {
+  return BRIDGE_ROUTES
+    .filter(r => r.to === target && routeStatus(r.from, r.to) === 'approved')
+    .map(r => routeFor(r.from, r.to))
+    .filter(r => r && playableComparisons(r, hasClip).length > 0);
+}
+
 export function loadBridgePrefs() {
   try {
     const p = JSON.parse(localStorage.getItem(PREF_KEY)) ?? {};

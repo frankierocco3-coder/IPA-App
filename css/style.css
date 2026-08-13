@@ -1078,8 +1078,17 @@ body.modal-open { overflow: hidden; }
 .th-quote p { font-family: var(--serif); font-style: italic; font-size: 17px; line-height: 1.5; margin: 0 0 6px; }
 .th-attrib { font-size: 13px; color: var(--muted); }
 .th-note { text-align: center; color: var(--muted); margin-top: 6px; }
+.th-list { margin: 4px 0 12px; padding-left: 22px; display: grid; gap: 5px; }
+.th-list li { font-size: 15px; line-height: 1.45; }
 .th-way { width: 100%; }                 /* equal weight — deliberately no primary */
 .th-invite-actions { display: flex; flex-direction: column; gap: 8px; }
+.bridge-plays { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin: 10px 0; }
+.br-reveal { margin: 14px auto 0; max-width: 560px; text-align: left; border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px 16px; display: grid; gap: 8px; background: var(--panel-2); }
+.br-reveal.good { border-color: var(--green); }
+.br-reveal.bad { border-color: #c0564f; }
+.br-verdict { margin: 0; }
+.br-reveal .continue { justify-self: end; }
 @media (prefers-reduced-motion: reduce) {
   .threshold, .threshold * { transition: none !important; animation: none !important; }
 }

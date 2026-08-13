@@ -41,6 +41,7 @@ import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
+         playableComparisons, playableRoutesInto,
          loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
 import { IDIOM } from '../js/data/idiom.js';
 
@@ -50,7 +51,8 @@ const bad = (name, detail) => results.push({ name, pass: false, detail });
 const check = (name, cond, detail) => (cond ? ok(name) : bad(name, detail));
 
 // The one ordered nav config, as both surfaces must render it.
-export const EXPECTED_NAV = ['Learn', 'Practice', 'Library', 'Studio', 'Progress', 'More'];
+// IA revision 2026-08: Studio sits before Library.
+export const EXPECTED_NAV = ['Learn', 'Practice', 'Studio', 'Library', 'Progress', 'More'];
 
 // `navDoc` lets the standalone runner point at the app iframe's document;
 // from the app's own console the live document is the default.
@@ -390,7 +392,8 @@ export async function run({ navDoc = document } = {}) {
     const goHome = async () => { clickIn(navDoc.getElementById('brand-home')); await sleep(250); };
     const openScripts = async () => {
       await goHome();
-      clickIn(side('Library')); await sleep(280);
+      // IA revision: Scripts & Speeches lives on the Studio hub now.
+      clickIn(side('Studio')); await sleep(280);
       clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.textContent.includes('Scripts')));
       await sleep(320);
     };
@@ -718,7 +721,7 @@ export async function run({ navDoc = document } = {}) {
         pageText.includes('not an ebook shelf'));
       clickIn(doc.getElementById('nav-back')); await sleep(300);
       check('pathway: Back returns to the Library shelf',
-        !!card('Rhetoric & Oratory') && !!card('Scripts & Speeches'));
+        !!card('Rhetoric & Oratory') && !!card('Vowel Map'));
 
       // Preface replay through the PERMANENT More card — full walk, Esc out,
       // and proof that nothing about the profile changed.
@@ -734,23 +737,44 @@ export async function run({ navDoc = document } = {}) {
       const h1 = () => wall()?.querySelector('h1')?.textContent ?? '';
       check('preface: replay opens on "Why Speech Matters"',
         !!wall() && h1() === 'Why Speech Matters', `h1=${h1()}`);
-      check('preface: nine progress dots',
-        wall()?.querySelector('.ob-dots')?.children.length === 9,
+      check('preface: exactly three content-panel dots — setup screens are never counted',
+        wall()?.querySelector('.ob-dots')?.children.length === 3,
         `dots=${wall()?.querySelector('.ob-dots')?.children.length}`);
+      check('preface: the Jowett quotation keeps its complete attribution',
+        wall().textContent.includes('especially in the case of a young and tender thing')
+        && wall().textContent.includes('translated by Benjamin Jowett'));
+      check('preface (permanent): panel 1 speaks to everyone, honestly',
+        wall().textContent.includes('understand, strengthen or expand the way they speak')
+        && wall().textContent.includes('adding choice and flexibility')
+        && wall().textContent.includes('never “correcting” an inferior way of speaking')
+        && wall().textContent.includes('no such accent exists'));
       const seen = [h1()];
-      for (let i = 0; i < 6; i++) {
+      const removedSeen = [];
+      let ethicsSeen = false;
+      for (let i = 0; i < 2; i++) {
         clickIn(doc.getElementById('ob-next')); await sleep(200);
         seen.push(h1());
+        if (/Why Actors Train This Way|The Journey|Communication and Manipulation|Before You Choose/
+          .test(wall().textContent)) removedSeen.push(h1());
+        if (h1() === 'Speech Is Action'
+          && wall().textContent.includes('taking responsibility for its effect')) ethicsSeen = true;
       }
-      check('preface: panels walk sound-to-performance and end in reflection',
-        String(seen) === String(['Why Speech Matters', 'Speech Is Action', 'Speech Reveals Thought',
-          'Why Actors Train This Way', 'Communication and Manipulation', 'The Journey', 'Before You Choose']),
+      check('preface: exactly the three ordered panels',
+        String(seen) === String(['Why Speech Matters', 'Speech Is Action', 'Speech Reveals Thought']),
         seen.join(' | '));
-      check('preface: reflection ending has no quiz apparatus',
+      check('preface: the removed panels are gone under any name',
+        removedSeen.length === 0, removedSeen.join(' | '));
+      check('preface: Speech Is Action carries the ethics of powerful speech', ethicsSeen);
+      check('preface: Speech Reveals Thought is original copy — no quote marks, no Plato credit',
+        h1() === 'Speech Reveals Thought'
+        && !wall().querySelector('.th-quote')
+        && !wall().textContent.includes('Plato'));
+      check('preface: no quiz apparatus on any panel',
         !wall().querySelector('#choices, #feedback, .choice'));
       clickIn(doc.getElementById('ob-next')); await sleep(250);
-      check('preface: course picker kept, preselected on replay',
-        !!wall()?.querySelector('[data-accent]') && doc.getElementById('ob-next')?.disabled === false);
+      check('preface: course picker kept (functional screen, not a preface panel), preselected on replay',
+        !!wall()?.querySelector('[data-accent]') && doc.getElementById('ob-next')?.disabled === false
+        && !wall().querySelector('.ob-dots') && !wall().querySelector('.th-quote'));
       clickIn(doc.getElementById('ob-next')); await sleep(250);
       check('preface: choice screen kept with both ways in',
         wall()?.querySelectorAll('[data-choice]').length === 2);
@@ -920,7 +944,7 @@ export async function run({ navDoc = document } = {}) {
       && importResultMessage(2, 0) === 'Imported 2 projects.'
       && importResultMessage(1, 1).startsWith('Imported 1 project.')
       && importResultMessage(1, 1).includes('could not be imported because that section was invalid or from an unsupported version')
-      && importResultMessage(3, 2).includes('2 Speech Dissections could not be imported'));
+      && importResultMessage(3, 2).includes('2 dissections could not be imported'));
 
     if (dbSupported()) {
       try {
@@ -1001,6 +1025,9 @@ export async function run({ navDoc = document } = {}) {
       const openProject = async () => {
         clickIn(doc.getElementById('brand-home')); await sleep(300);
         clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Studio')));
+        await sleep(400);
+        // IA revision: the project list sits behind the Custom Work hub card.
+        clickIn([...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === 'Custom Work'));
         await sleep(400);
         const card = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === projId);
         clickIn(card?.querySelector('button[data-act="open"]') ?? card); await sleep(450);
@@ -1245,7 +1272,8 @@ export async function run({ navDoc = document } = {}) {
       const h1 = () => doc.querySelector('main h1')?.textContent ?? '';
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
-      clickIn(side('Library')); await sleep(350);
+      // IA revision: Playable Actions is a Studio hub card now.
+      clickIn(side('Studio')); await sleep(350);
       clickIn(card('Playable Actions')); await sleep(350);
       check('playable UI: the section opens with the governing question and all twelve',
         doc.body.textContent.includes('What are you doing to the other person through these words?')
@@ -1295,12 +1323,13 @@ export async function run({ navDoc = document } = {}) {
         doc.getElementById('pa-search')?.value === 'forgive'
         && rows().some(r => r.textContent.includes('To Forgive')));
       clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('playable UI: Back again lands on the Library shelf', !!card('Playable Actions'));
+      check('playable UI: Back again lands on the Studio hub', !!card('Playable Actions') && !!card('Custom Work'));
 
       // The dissection doorway: navigation only, and Back comes home.
       paProj = await createProject({ title: '__regression playable link (safe to delete)', text: 'Sit down.' });
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Studio')); await sleep(400);
+      clickIn(card('Custom Work')); await sleep(400);
       const pc = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === paProj.id);
       clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(450);
       clickIn(doc.getElementById('proj-dissect')); await sleep(450);
@@ -1407,7 +1436,27 @@ export async function run({ navDoc = document } = {}) {
       DIALECT_ACTION.every(p => p.audio === null));
   }
 
-  // The drive: honest bridge states, the review area, mobile width.
+  // The bridge as a LISTENING exercise: gating rules first (pure, with an
+  // injected clip check so the both-clips rule is provable), then the
+  // full Practice drive.
+  {
+    const rt = routeFor('nam', 'rp');
+    check('bridge practice: a comparison plays only when BOTH exact clips exist',
+      playableComparisons(rt, (word, acc) => !(word === 'bar' && acc === 'rp'))
+        .every(c => c.word !== 'bar')
+      && playableComparisons(rt, () => false).length === 0
+      && playableComparisons(null, () => true).length === 0);
+    check('bridge practice: no playable comparisons ⇒ no playable route ⇒ no card',
+      playableRoutesInto('rp', () => false).length === 0);
+    check('bridge practice: draft routes can never reach the playable set, even with full audio',
+      ['nam', 'rp', 'ssbe', 'aus'].every(t =>
+        playableRoutesInto(t, () => true).every(r => routeStatus(r.from, r.to) === 'approved')));
+    check('bridge practice: with the real clip index, nam→rp is playable and is the ONLY playable route',
+      playableRoutesInto('rp', hasWordClip).some(r => r.from === 'nam')
+      && playableComparisons(routeFor('nam', 'rp'), hasWordClip).length === 8
+      && ['nam', 'ssbe', 'aus'].every(t => playableRoutesInto(t, hasWordClip).length === 0));
+  }
+
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
     const sleep = ms => new Promise(r => setTimeout(r, ms));
@@ -1419,8 +1468,11 @@ export async function run({ navDoc = document } = {}) {
         el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
       const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
       const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
-      const setSel = (id, v) => { const s = doc.getElementById(id); s.value = v;
-        s.dispatchEvent(new frame.contentWindow.Event('change', { bubbles: true })); };
+      const switchCourse = async label => {
+        clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
+        clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes(label)));
+        await sleep(500);
+      };
 
       // Fresh mic spy on the CURRENT realm (reloads earlier discarded the old one).
       let mic14 = 0;
@@ -1434,35 +1486,112 @@ export async function run({ navDoc = document } = {}) {
       check('build D UI: draft Dialect in Action stays off the Library shelf',
         !card('Dialect in Action'));
 
-      clickIn(card('Accent Bridge')); await sleep(400);
-      setSel('br-from', 'nam'); await sleep(300);
-      setSel('br-to', 'rp'); await sleep(300);
-      check('build D UI: the approved route renders with its source notes',
-        doc.querySelectorAll('.bridge-card').length === 8
-        && doc.body.textContent.includes('“Typically” is doing honest work')
-        && doc.body.textContent.includes('Dialect Accuracy Standard')
-        && doc.body.textContent.includes('About Neutral American')
-        && doc.body.textContent.includes('About Traditional RP'));
-      setSel('br-to', 'ssbe'); await sleep(300);
-      check('build D UI: a draft route shows the awaiting-review message, nothing else',
-        !!doc.getElementById('bridge-pending')
-        && doc.querySelectorAll('.bridge-card').length === 0
-        && !doc.querySelector('main audio'));
-      setSel('br-from', 'ssbe'); await sleep(300);
-      check('build D UI: a same-accent selection gets a clear message, never a broken route',
-        !!doc.getElementById('bridge-same')
-        && doc.querySelectorAll('.bridge-card').length === 0);
-      // Mobile width: the bridge page must not scroll sideways.
-      const oldW = frame.style.width;
-      frame.style.width = '375px'; await sleep(250);
-      setSel('br-from', 'nam'); setSel('br-to', 'rp'); await sleep(350);
-      check('build D UI: the route fits a phone without horizontal scroll',
-        doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
-        `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
-      frame.style.width = oldW; await sleep(200);
+      // Practice page structure on Neutral American (no playable route in).
+      clickIn(side('Practice')); await sleep(400);
+      const practiceText = () => doc.body.textContent;
+      check('practice: the section heading is Quick Practice, Mixed Review right under it',
+        practiceText().includes('Quick Practice')
+        && !!doc.getElementById('quick-practice'));
+      check('practice: "Recommended for you" is gone from copy AND accessibility labels',
+        !practiceText().includes('Recommended for you')
+        && ![...doc.querySelectorAll('[aria-label]')]
+          .some(el => /recommended for you/i.test(el.getAttribute('aria-label'))));
+      check('practice: the diagnostic and old bridge shortcuts are gone, no husks left',
+        !doc.getElementById('hub-diagnostic') && !doc.getElementById('hub-bridge')
+        && ![...doc.querySelectorAll('.practice-row')].some(r => !r.textContent.trim()));
+      const h2s = () => [...doc.querySelectorAll('main h2.chart-h')].map(h => h.textContent.trim());
+      check('practice: Quick Practice, then Listening, then Reading IPA',
+        h2s()[0] === 'Quick Practice'
+        && h2s().findIndex(t => t.startsWith('Listening')) <
+           h2s().findIndex(t => t.startsWith('Reading IPA')));
+      const listeningTitles = () => {
+        const grid = [...doc.querySelectorAll('main h2.chart-h')]
+          .find(h => h.textContent.startsWith('Listening'))?.nextElementSibling;
+        return [...(grid?.querySelectorAll('.mode-card .mode-title') ?? [])].map(t => t.textContent);
+      };
+      check('practice: no Accent Bridge card on a course with no playable route in',
+        !doc.getElementById('mode-bridge')
+        && String(listeningTitles()) === 'Listen & Choose,Minimal Pairs');
+
+      // Traditional RP: nam→rp is approved with full audio — the card appears.
+      await switchCourse('Traditional RP');
+      clickIn(side('Practice')); await sleep(400);
+      check('bridge UI: Accent Bridge is a full Listening card, third after the two games',
+        String(listeningTitles()) === 'Listen & Choose,Minimal Pairs,Accent Bridge'
+        && !!doc.getElementById('mode-bridge'));
+      clickIn(doc.getElementById('mode-bridge')); await sleep(400);
+      const fromSel = () => doc.getElementById('bridge-from');
+      check('bridge UI: the setup offers only approved playable starts — never the target itself',
+        !!fromSel()
+        && [...fromSel().options].map(o => o.value).join() === 'nam'
+        && ![...fromSel().options].some(o => o.value === 'rp')
+        && doc.body.textContent.includes('8 comparisons ready to play')
+        && doc.body.textContent.includes('review by a qualified dialect reviewer'));
+      fromSel().value = 'rp';
+      fromSel().dispatchEvent(new (frame.contentWindow.Event)('change', { bubbles: true }));
+      await sleep(150);
+      check('bridge UI: an injected same-accent value snaps straight back',
+        fromSel().value === 'nam');
       clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('build D UI: one Back returns from the bridge to the Library shelf',
-        !!card('Accent Bridge'));
+      check('bridge UI: Back from setup returns to Practice',
+        !!doc.getElementById('quick-practice'));
+
+      // The full session: all eight rounds, answered from the route data.
+      clickIn(doc.getElementById('mode-bridge')); await sleep(400);
+      const heartsBefore = store.hearts;
+      const xpBefore14 = store.xp;
+      clickIn(doc.getElementById('bridge-start')); await sleep(400);
+      const namRp = BRIDGE_ROUTES.find(r => r.id === 'nam-rp');
+      let labelledOk = true, revealOk = true, focusOk = true, cleanOk = true;
+      const oldW = frame.style.width;
+      for (let round = 0; round < 8; round++) {
+        const word = doc.querySelector('.display-card span')?.textContent;
+        const comp = namRp.comparisons.find(c => c.word === word);
+        if (!comp) { revealOk = false; break; }
+        if (round === 0) {           // mobile width, checked inside a live round
+          frame.style.width = '375px'; await sleep(250);
+          check('bridge UI: a round fits a phone without horizontal scroll',
+            doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
+            `scroll=${doc.documentElement.scrollWidth}`);
+          frame.style.width = oldW; await sleep(200);
+        }
+        labelledOk = labelledOk
+          && /Starting Accent/.test(doc.getElementById('br-play-start')?.getAttribute('aria-label') ?? '')
+          && /Target Accent/.test(doc.getElementById('br-play-target')?.getAttribute('aria-label') ?? '')
+          && doc.getElementById('br-play-start').textContent.includes('Neutral American')
+          && doc.getElementById('br-play-target').textContent.includes('Traditional RP');
+        cleanOk = cleanOk
+          && !doc.querySelector('.exercise audio, .exercise .speaker, .voice-note-fallback')
+          && !doc.querySelector('[data-tryit], #perf-rec, .rating');
+        clickIn([...doc.querySelectorAll('.choice')]
+          .find(b => b.textContent.includes(`/${comp.targetIPA}/`)));
+        await sleep(200);
+        const reveal = doc.querySelector('.br-reveal');
+        revealOk = revealOk && !!reveal
+          && reveal.textContent.includes('What changes:')
+          && reveal.textContent.includes('What stays:')
+          && reveal.textContent.includes(`/${comp.targetIPA}/`)
+          && reveal.textContent.includes(`/${comp.startIPA}/`);
+        focusOk = focusOk && doc.activeElement?.id === 'continue';
+        clickIn(doc.getElementById('continue'));
+        await sleep(200);
+      }
+      check('bridge UI: labelled Starting/Target playback on every round', labelledOk);
+      check('bridge UI: every reveal carries both IPAs, what changes and what stays', revealOk);
+      check('bridge UI: Continue takes keyboard focus after each answer', focusOk);
+      check('bridge UI: no speaker fallback, no audio element, no capture controls in-session', cleanOk);
+      check('bridge UI: a complete session reaches the practice result',
+        doc.body.textContent.includes('Flawless round!')
+        && doc.body.textContent.includes('+7 XP'), doc.body.textContent.slice(0, 120));
+      check('bridge UI: completion recorded by Practice conventions — XP up, hearts untouched',
+        store.xp === xpBefore14 + 7 && store.hearts === heartsBefore,
+        `xp ${xpBefore14}→${store.xp} hearts ${heartsBefore}→${store.hearts}`);
+      check('bridge UI: Replay and Return to Practice are offered',
+        doc.getElementById('again')?.textContent === 'Replay'
+        && doc.getElementById('home')?.textContent === 'Return to Practice');
+      clickIn(doc.getElementById('home')); await sleep(400);
+      check('bridge UI: Return lands on Practice', !!doc.getElementById('quick-practice'));
+      await switchCourse('Neutral American');
 
       // The review area: original 23 intact and identifiable, new bridge
       // drafts listed separately with their reviewer requirements.
@@ -1563,9 +1692,11 @@ export async function run({ navDoc = document } = {}) {
       };
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
-      clickIn(side('Library')); await sleep(350);
+      // IA revision: Scripts & Speeches is a Studio hub card now.
+      clickIn(side('Studio')); await sleep(350);
       clickIn(card('Scripts & Speeches')); await sleep(400);
-      // Exact title — 'Featured Texts' also mentions sonnets and must not match.
+      check('editions UI: no Featured Texts shelf — collections only',
+        !card('Featured Texts'));
       clickIn(card('Shakespeare’s Sonnets')); await sleep(500);
       clickIn(doc.querySelector('.sonnet-row[data-n="2"]'));
       await until(() => doc.body.textContent.includes('Sonnet 2') && !!doc.querySelector('.sonnet-tabs'));
@@ -1621,15 +1752,23 @@ export async function run({ navDoc = document } = {}) {
       clickIn(card('About Speechcraft')); await sleep(350);
       check('hub: the About replay button survives beside the More card',
         !!doc.getElementById('about-threshold'));
+      check('about: leads with the inclusive framing, actors named as one audience',
+        doc.body.textContent.includes('anyone who wants to understand, strengthen or expand the way they speak')
+        && !doc.body.textContent.includes('Speechcraft helps actors understand speech')
+        && doc.body.textContent.includes('Actors get dedicated tools'));
 
       // The TEXTBOOK: readable end to end, no project, no interactivity.
+      // IA revision: it lives on the Studio hub, titled Question Everything.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
-      clickIn(side('Library')); await sleep(350);
-      check('textbook: a permanent Speech Dissection card sits on the Library shelf',
-        !!card('Speech Dissection'));
+      clickIn(side('Studio')); await sleep(350);
+      check('textbook: a permanent Question Everything card sits on the Studio hub',
+        !!card('Question Everything'));
       const dissBefore = (await idbAll(STORES.dissections)).length;
-      clickIn(card('Speech Dissection'));
+      clickIn(card('Question Everything'));
       await until(() => !!doc.getElementById('sd-title'));
+      check('textbook: the page is titled Question Everything, never Speech Dissection',
+        doc.getElementById('sd-title')?.textContent === 'Question Everything'
+        && !doc.getElementById('sd-textbook').textContent.includes('Speech Dissection'));
       const tb = () => doc.getElementById('sd-textbook');
       const tbText = () => tb().textContent;
       check('textbook: all six sections render with their headings',
@@ -1682,16 +1821,17 @@ export async function run({ navDoc = document } = {}) {
         `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
       frame.style.width = oldW; await sleep(200);
       clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('textbook: Back returns to the Library shelf', !!card('Speech Dissection'));
+      check('textbook: Back returns to the Studio hub', !!card('Question Everything'));
 
-      // The Studio worksheet keeps ALL the interactivity — and its saved
-      // answers — with Back returning to the same project.
+      // The Custom Work worksheet keeps ALL the interactivity — and its
+      // saved answers — with Back returning to the same project.
       hubProj = await createProject({ title: '__regression hub (safe to delete)', text: 'Sit.' });
       const hd = newDissection({ targetType: 'project', targetId: hubProj.id, targetLabel: hubProj.title });
       await putDissection(hd);
       await saveAnswer(hd.id, 'quick.wants', { value: 'To be let back in.' });
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Studio')); await sleep(400);
+      clickIn(card('Custom Work')); await sleep(400);
       const pc = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === hubProj.id);
       clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(450);
       clickIn(doc.getElementById('proj-dissect'));
@@ -1716,6 +1856,212 @@ export async function run({ navDoc = document } = {}) {
     }
   } else {
     ok('Dissection textbook/worksheet drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 17. IA revision: hubs, exact orders, honest availability ─
+  // Data level first: Dialect in Action is filtered by stable course ID
+  // alone — no leakage is even representable.
+  check('IA: Dialect in Action filters purely by stable course ID',
+    ['nam', 'rp', 'ssbe', 'aus'].every(a => actionFor(a).every(p => p.courseId === a)));
+  check('IA: every Dialect in Action piece carries exactly one known course ID',
+    DIALECT_ACTION.every(p => ['nam', 'rp', 'ssbe', 'aus'].includes(p.courseId)));
+  // Featured Texts left as a shelf, not as content: the pilot editions
+  // it pointed at are still served in full.
+  check('IA: removing Featured Texts deleted no content (pilot 18 intact)',
+    !!(await editionFor(18))?.plain && !!RECASTS[18]);
+
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    try {
+      let doc = frame.contentDocument;
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+      const hubTitles = () => [...doc.querySelectorAll('.track-card .track-info h2')].map(h => h.textContent);
+      let mic17 = 0;
+      const w17 = frame.contentWindow;
+      if (w17.navigator.mediaDevices?.getUserMedia) {
+        const orig17 = w17.navigator.mediaDevices.getUserMedia.bind(w17.navigator.mediaDevices);
+        w17.navigator.mediaDevices.getUserMedia = (...a) => { mic17++; return orig17(...a); };
+      }
+
+      // Library: the approved cards in the approved order, title-only.
+      // (Drive runs on Neutral American; Dialect in Action only appears
+      // once that course has approved pieces — honest absence otherwise.)
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(350);
+      const wantLib = ['About the Accent', 'Words & Expressions',
+        ...(actionFor('nam').length ? ['Dialect in Action'] : []),
+        'IPA', 'Rhetoric & Oratory', 'Your Instrument', 'Vowel Map'];
+      check('IA: Library shows exactly the approved cards in the approved order',
+        JSON.stringify(hubTitles()) === JSON.stringify(wantLib), hubTitles().join(' | '));
+      check('IA: Library hub cards are title-only — no blurbs, subtitles or status copy',
+        [...doc.querySelectorAll('.track-card .track-info')]
+          .every(i => !i.querySelector('p') && i.children.length === 1));
+      check('IA: no retired Library cards remain',
+        !card('Accent Bridge') && !card('Scripts & Speeches') && !card('Playable Actions')
+        && !card('Speech Dissection') && !card('Question Everything')
+        && !card('Personal Dictionary') && !card('Why Speech Matters'));
+
+      // Studio: the five approved cards, exact order, title-only.
+      clickIn(side('Studio')); await sleep(350);
+      check('IA: Studio hub shows exactly the five cards in the approved order',
+        JSON.stringify(hubTitles()) === JSON.stringify(['Scripts & Speeches',
+          'Question Everything', 'Playable Actions', 'Custom Work', 'Personal Dictionary']),
+        hubTitles().join(' | '));
+      check('IA: Studio hub cards are title-only',
+        [...doc.querySelectorAll('.track-card .track-info')]
+          .every(i => !i.querySelector('p') && i.children.length === 1));
+
+      // Scripts & Speeches keeps every collection; no Featured shelf.
+      clickIn(card('Scripts & Speeches')); await sleep(400);
+      const shelves = hubTitles();
+      check('IA: Scripts & Speeches preserves every text collection',
+        ['Shakespeare’s Sonnets', 'Chekhov · Monologues', 'O’Neill · Monologues',
+         'Wilde · Monologues', 'Pirandello · Monologues', 'Ibsen · Monologues',
+         'Custom Work'].every(t => shelves.includes(t))
+        && !shelves.includes('Featured Texts'), shelves.join(' | '));
+
+      // Custom Work: the project area, honestly described — no OCR claim.
+      clickIn(card('Custom Work')); await sleep(400);
+      check('IA: Custom Work is the project area and promises no OCR/scanning',
+        doc.body.textContent.includes('Custom Work')
+        && !!doc.getElementById('proj-new')
+        && !/OCR|document scan/i.test(doc.body.textContent));
+
+      // Why Speech Matters stays reachable under More, not the Library.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('More')); await sleep(350);
+      check('IA: Why Speech Matters lives under More', !!card('Why Speech Matters'));
+
+      // Learn on an UNSTARTED course: no standalone continue card above
+      // Unit 1 — Stage 1 · Orientation with its START node is the entry.
+      const completedBefore = store.completed.size;
+      clickIn(side('Learn')); await sleep(350);
+      clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
+      clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Australian')));
+      await sleep(500);
+      const doneNow = parseInt(doc.querySelector('.hub-progress .track-progress span')?.textContent ?? '', 10);
+      const ccNow = !!doc.querySelector('.continue-card[aria-label="Continue learning"], .continue-card[aria-label="Course complete"]');
+      check('IA: the continue card appears exactly when the course has progress',
+        (doneNow === 0) === !ccNow, `done=${doneNow} continueCard=${ccNow}`);
+      check('IA: Stage 1 · Orientation and Meet the accent stay the clear start',
+        doc.body.textContent.includes('Stage 1 · Orientation')
+        && doc.body.textContent.includes('Meet the accent')
+        && !!doc.querySelector('.start-flag'));
+      clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
+      clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American')));
+      await sleep(500);
+      check('IA: browsing courses changed no lesson progress',
+        store.completed.size === completedBefore,
+        `before=${completedBefore} after=${store.completed.size}`);
+      check('IA: zero microphone calls across the IA drive', mic17 === 0);
+
+      // A stale saved section falls back to Learn on a real reload.
+      localStorage.setItem('speechcraft-section', 'totally-bogus');
+      frame.contentWindow.location.reload();
+      let doc2 = null;
+      for (let i = 0; i < 60; i++) { await sleep(200); doc2 = frame.contentDocument;
+        if (doc2?.querySelector('.side-nav .side-item')) break; }
+      check('IA: a stale saved section falls back to Learn, never a blank page',
+        !!doc2?.querySelector('.side-item.on')?.textContent.includes('Learn')
+        && localStorage.getItem('speechcraft-section') === 'learn',
+        `on=${doc2?.querySelector('.side-item.on')?.textContent.trim()} stored=${localStorage.getItem('speechcraft-section')}`);
+    } catch (err) {
+      bad('IA revision drive', String(err));
+    }
+  } else {
+    ok('IA revision drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 18. The FIRST-TIME preface: concise three-panel opening ─
+  // Runner only, and deliberately LAST: it snapshots the profile,
+  // presents a genuinely fresh first run, walks the concise panels,
+  // then restores everything exactly as it was.
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const snapshot = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      snapshot[k] = localStorage.getItem(k);
+    }
+    try {
+      // Leftover projects or takes would grandfather a fresh profile past
+      // the wall. The drives clean up after themselves — prove it.
+      check('first-run preface: clean slate (no leftover projects or takes)',
+        (await listProjects()).length === 0 && (await listAllTakes()).length === 0);
+      localStorage.clear();
+      frame.contentWindow.location.reload();
+      let doc = null;
+      for (let i = 0; i < 60; i++) {
+        await sleep(200); doc = frame.contentDocument;
+        if (doc?.querySelector('.threshold') || doc?.querySelector('.side-nav .side-item')) break;
+      }
+      const w = frame.contentWindow;
+      const clickIn = el => el?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
+      let mic18 = 0;
+      if (w.navigator.mediaDevices?.getUserMedia) {
+        const orig18 = w.navigator.mediaDevices.getUserMedia.bind(w.navigator.mediaDevices);
+        w.navigator.mediaDevices.getUserMedia = (...a) => { mic18++; return orig18(...a); };
+      }
+      const wall = () => doc.querySelector('.threshold');
+      const h1 = () => wall()?.querySelector('h1')?.textContent ?? '';
+      const wallText = () => wall()?.textContent ?? '';
+      check('first-run preface: a fresh profile lands on the wall', !!wall(), h1());
+      check('first-run preface: exactly three content-panel dots',
+        wall()?.querySelector('.ob-dots')?.children.length === 3,
+        `dots=${wall()?.querySelector('.ob-dots')?.children.length}`);
+      check('first-run preface: opens on Why Speech Matters with the full Jowett attribution',
+        h1() === 'Why Speech Matters'
+        && wallText().includes('especially in the case of a young and tender thing')
+        && wallText().includes('— Plato,')
+        && wallText().includes('translated by Benjamin Jowett'));
+      check('first-run preface: concise panel 1 — no goals list, no long disclaimer',
+        wallText().includes('Training does not erase who you are. It gives you more choices.')
+        && !wall().querySelector('.th-list')
+        && !wallText().includes('never “correcting” an inferior way of speaking')
+        && !wallText().includes('no such accent exists'));
+      if (frame.clientHeight >= 500) {
+        check('first-run preface: Continue sits above the fold',
+          doc.getElementById('ob-next').getBoundingClientRect().top < frame.clientHeight,
+          `top=${Math.round(doc.getElementById('ob-next').getBoundingClientRect().top)} viewport=${frame.clientHeight}`);
+      }
+      const titles = [h1()];
+      let removedHit = false;
+      for (let i = 0; i < 2; i++) {
+        const next = doc.getElementById('ob-next');
+        check(`first-run preface: Continue usable on panel ${i + 1}`, !!next && !next.disabled);
+        clickIn(next); await sleep(200);
+        titles.push(h1());
+        if (/Why Actors Train This Way|The Journey|Communication and Manipulation|Before You Choose/
+          .test(wallText())) removedHit = true;
+      }
+      check('first-run preface: exactly the three ordered titles',
+        String(titles) === String(['Why Speech Matters', 'Speech Is Action', 'Speech Reveals Thought']),
+        titles.join(' | '));
+      check('first-run preface: the removed panels never appear', !removedHit);
+      check('first-run preface: concise panels 2 and 3 carry the ordered copy',
+        wallText().includes('It shows what we understand, value, question or avoid.'));
+      clickIn(doc.getElementById('ob-next')); await sleep(250);
+      check('first-run preface: the picker follows as a functional screen — no dots, no essay',
+        h1() === 'Pick your first course'
+        && !!wall()?.querySelector('[data-accent]')
+        && !wall().querySelector('.ob-dots')
+        && !wall().querySelector('.th-quote'));
+      check('first-run preface: zero microphone calls', mic18 === 0);
+    } catch (err) {
+      bad('first-run preface drive', String(err));
+    } finally {
+      localStorage.clear();
+      for (const [k, v] of Object.entries(snapshot)) localStorage.setItem(k, v);
+      frame.contentWindow.location.reload();
+      await new Promise(r => setTimeout(r, 1500));
+    }
+  } else {
+    ok('first-run preface drive (runner only — run tests/run-all.html)');
   }
 
   const failed = results.filter(r => !r.pass);

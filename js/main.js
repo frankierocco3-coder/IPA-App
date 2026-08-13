@@ -15,6 +15,7 @@ import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
 import { actionFor, actionDrafts } from './data/action.js';
 import { videoFor } from './data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
+         playableComparisons, playableRoutesInto,
          loadBridgePrefs, saveBridgePrefs } from './data/bridge.js';
 import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
 import { SONNETS } from './data/sonnets.js';
@@ -259,8 +260,8 @@ const COURSES = [
 const SECTIONS = [
   { id: 'learn', icon: '🏠', label: 'Learn' },
   { id: 'practice', icon: '🎯', label: 'Practice' },
-  { id: 'library', icon: '📚', label: 'Library' },
   { id: 'studio', icon: '🎬', label: 'Studio' },
+  { id: 'library', icon: '📚', label: 'Library' },
   { id: 'progress', icon: '📈', label: 'Progress' },
   { id: 'more', icon: '⋯', label: 'More' },
 ];
@@ -495,8 +496,8 @@ function continueCard(track, course) {
 
 // ── Standard British: one-time introduction ───────────────────
 // Shown automatically on the FIRST visit to the course's Learn view, then
-// never again; permanently revisitable from Library → About Standard
-// British (which never touches first-run state or progress).
+// never again; permanently revisitable from Library → About the Accent
+// (which never touches first-run state or progress).
 
 function ssbeIntroBody() {
   return `
@@ -521,7 +522,7 @@ function showSsbeIntro(course) {
         <button class="btn btn-primary" id="intro-begin" type="button">Begin Standard British</button>
         <button class="btn-lite" id="intro-skip" type="button">Not now — just look around</button>
       </div>
-      <p class="pane-note">You can reread this any time: Library → About Standard British.</p>
+      <p class="pane-note">You can reread this any time: Library → About the Accent.</p>
     </div>`;
   document.body.appendChild(ov);
   const done = () => { store.markIntroSeen(course.id); ov.remove(); };
@@ -574,12 +575,16 @@ function renderAboutCourse(d) {
 function learnMain(el, course) {
   const track = trackFor(course.id);
   const { done, total } = trackProgress(track);
-  const cc = continueCard(track, course);
+  // On an UNSTARTED course the path's own Stage 1 · Orientation start node
+  // is the single clear entry — a continue card here would duplicate
+  // "Meet the accent" above Unit 1. It appears once real progress exists.
+  const cc = done > 0 ? continueCard(track, course) : null;
   const path = buildTrackPath(track, { guidebook: true, labels: true });
   // One-time invitation for grandfathered users (verbatim copy — it must
   // not block), and the diagnostic offer, which retires only when the
-  // diagnostic has been taken or declined (never on mere XP: the offer is
-  // how the diagnostic stays reachable; Practice holds the permanent entry).
+  // diagnostic has been taken or declined (never on mere XP). This offer
+  // card is the diagnostic's ONLY doorway — the Practice-page shortcut
+  // was removed by owner order 2026-08-12.
   const invite = store.threshold?.source === 'grandfathered' && !store.thresholdInviteSeen ? `
     <section class="continue-card th-invite" aria-label="New: Why Speech Matters">
       <div class="cc-info">
@@ -608,7 +613,7 @@ function learnMain(el, course) {
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
     ${invite}
-    ${cc.html}
+    ${cc ? cc.html : ''}
     ${diag}
     ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
@@ -618,7 +623,7 @@ function learnMain(el, course) {
       </div>
     </div>
     <div class="track-scroll hub-scroll">${path.html}</div>`;
-  cc.wire(el);
+  cc?.wire(el);
   wireWhatIsIpaCard(el);
   path.wire(el);
   el.querySelector('#th-invite-read')?.addEventListener('click', () => {
@@ -692,6 +697,9 @@ function practiceMain(el, course) {
   const d = course.id === 'core' ? null : course.id;
   const track = trackFor(course.id);
   const name = d ? dialectName(d) : 'Core IPA';
+  // Accent Bridge earns its Listening card only when an approved route
+  // INTO this course exists with at least one both-clips comparison.
+  const bridgeRoutes = d ? playableRoutesInto(d, hasWordClip) : [];
 
   // Quick Practice: weak-sound rehearsal when the data exists, honest mixed
   // review when it doesn't.
@@ -711,7 +719,7 @@ function practiceMain(el, course) {
 
   el.innerHTML = `
     <h1 class="page-h">Practice</h1>
-    <h2 class="chart-h">Recommended for you</h2>
+    <h2 class="chart-h">Quick Practice</h2>
     <section class="continue-card quick-card" aria-label="Quick practice">
       <div class="cc-info">
         <span class="cc-stage">🎯 ${targeted ? 'Quick Practice' : 'Quick Practice · Mixed review'} · never costs hearts · earns ❤️ back</span>
@@ -724,9 +732,6 @@ function practiceMain(el, course) {
     <div class="practice-row">
       <button class="btn-lite" id="hub-mixed" type="button">Prefer the full spread? Full-course mixed review — everything ${esc(name)} has taught, not just weak sounds ›</button>
     </div>` : ''}
-    <div class="practice-row">
-      <button class="btn-lite" id="hub-diagnostic" type="button">🎯 Take the diagnostic — ≈8 quick questions that seed your weak-sound tracking. Never costs hearts ›</button>
-    </div>
     ${dailyRehearsalCard()}
     <p class="pane-note">Practice never costs hearts — mixed review and rehearsal even earn one back. Real lessons on the Learn path are where hearts are at stake.</p>
     ${PRACTICE_GROUPS.map(g => `
@@ -740,15 +745,19 @@ function practiceMain(el, course) {
             <span class="mode-meta">~4 min</span>
           </button>` : ''}
         ${g.ids.map(id => modeCard(MODES.find(m => m.id === id))).join('')}
+        ${g.title === 'Listening' && bridgeRoutes.length ? `
+          <button class="mode-card" id="mode-bridge" type="button">
+            <span class="mode-icon" aria-hidden="true">🌉</span>
+            <span class="mode-title">Accent Bridge</span>
+            <span class="mode-blurb">Start accent and target, ear to ear.</span>
+            <span class="mode-meta">~4 min · 🎧 audio</span>
+          </button>` : ''}
       </div>`).join('')}`;
 
   el.querySelector('#quick-practice').addEventListener('click', () =>
     targeted ? startDailyRehearsal() : startLesson(practiceLesson(track)));
   el.querySelector('#hub-mixed')?.addEventListener('click', () => startLesson(practiceLesson(track)));
-  el.querySelector('#hub-diagnostic')?.addEventListener('click', () => {
-    store.saveOnboarding({ diagnostic: 'taken' });   // retires the Learn offer card
-    startLesson(practiceLesson(track));
-  });
+  el.querySelector('#mode-bridge')?.addEventListener('click', () => renderBridgeSetup(d));
   el.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
   el.querySelector('#hub-idiom-drill')?.addEventListener('click', () => startLesson(idiomLesson(d, track)));
   el.querySelectorAll('.mode-card[data-mode]').forEach(b =>
@@ -760,58 +769,36 @@ function practiceMain(el, course) {
 // the dialect's flag), Texts & Speeches, anatomy, then the personal
 // dictionary — every reference in one place.
 
+// The Library hub: the approved seven primary cards, in this exact order,
+// TITLE-ONLY (no blurbs, subtitles or status copy — that material lives on
+// the destination pages). Dialect-only cards vanish on the core course,
+// and Dialect in Action appears only when THIS course has approved pieces
+// — never borrowed from another dialect, never a misleading empty shelf.
 function libraryMain(el, course) {
   const d = course.id === 'core' ? null : course.id;
   const track = trackFor(course.id);
   const cards = [
-    DIALECT_INFO[d] ? { icon: DIALECT_INFO[d].icon, title: DIALECT_INFO[d].aboutTitle,
-      blurb: `What this course teaches and doesn’t claim, its features tier by tier, and how it differs from ${DIALECT_INFO[d].differsFrom.label}.`,
+    d && DIALECT_INFO[d] ? { icon: DIALECT_INFO[d].icon, title: 'About the Accent',
       go: () => renderAboutCourse(d) } : null,
-    { icon: '📖', title: 'IPA',
-      blurb: d ? `${dialectName(d)}’s sounds and tongue placement.` : 'Every sound across the courses, and how each is made.',
-      go: () => (d ? renderInventory(d) : renderChart()) },
-    d ? { icon: course.icon, title: 'Words & Expressions',
-      blurb: 'The words, slang and expressions that bring the dialect to life.',
-      go: () => renderIdioms(d) } : null,
+    d ? { icon: '🗣', title: 'Words & Expressions', go: () => renderIdioms(d) } : null,
     d && actionFor(d).length ? { icon: '🎭', title: 'Dialect in Action',
-      blurb: 'The dialect’s words and rhythms inside believable speech — short scenes and monologues.',
       go: () => renderDialectAction(d) } : null,
-    { icon: '🌉', title: 'Accent Bridge',
-      blurb: 'The accent you’re learning, explained through the accent you already speak.',
-      go: renderBridge },
-    { icon: '📜', title: 'Scripts & Speeches',
-      blurb: 'Monologues, scenes, speeches and sonnets — curated public-domain material.',
-      go: renderTextsPage },
-    { icon: '🏛', title: 'Rhetoric & Oratory',
-      blurb: 'A focused reading pathway — the classical roots of everything this app trains.',
-      go: renderReadingPathway },
-    { icon: '🎯', title: 'Playable Actions',
-      blurb: 'What you’re doing to the other person.',
-      go: renderPlayableActions },
-    { icon: '🔍', title: 'Speech Dissection',
-      blurb: 'What is happening underneath the words — the actor’s working process, as a textbook.',
-      go: renderDissectTextbook },
-    { icon: '🎭', title: 'Your Instrument',
-      blurb: 'A tour of the vocal tract.',
-      go: renderInstrument },
-    { icon: '📐', title: 'The Vowel Map',
-      blurb: 'Where every vowel sits in the mouth.',
-      go: renderVowelMap },
-    { icon: '📕', title: 'Personal Dictionary',
-      blurb: 'Pronunciations you’ve corrected.',
-      go: renderDictionary },
+    { icon: '📖', title: 'IPA', go: () => (d ? renderInventory(d) : renderChart()) },
+    { icon: '🏛', title: 'Rhetoric & Oratory', go: renderReadingPathway },
+    { icon: '🎭', title: 'Your Instrument', go: renderInstrument },
+    { icon: '📐', title: 'Vowel Map', go: renderVowelMap },
   ].filter(Boolean);
   el.innerHTML = `<h1 class="page-h">Library</h1>` + cards.map((c, i) => `
-    <button class="track-card" data-i="${i}" type="button" style="--track-color:${track.color}">
+    <button class="track-card hub-card" data-i="${i}" type="button" style="--track-color:${track.color}">
       <div class="track-glyph">${c.icon}</div>
-      <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
+      <div class="track-info"><h2>${esc(c.title)}</h2></div>
       <div class="track-arrow">›</div>
     </button>`).join('');
   el.querySelectorAll('.track-card').forEach(b =>
     b.addEventListener('click', () => cards[+b.dataset.i].go()));
 }
 
-// Scripts & Speeches as a full page (it left the sidebar for the Library).
+// Scripts & Speeches as a full page (now entered from the Studio hub).
 function renderTextsPage() {
   record(renderTextsPage);
   app.innerHTML = `
@@ -862,7 +849,7 @@ function renderReadingPathway() {
           <p>${esc(r.excerpt)}</p>
           <footer class="th-attrib">${esc(r.attrib)}</footer>
         </blockquote>
-        <div class="guide-word"><span class="wii-who">For actors</span><span class="guide-note">${esc(r.why)}</span></div>`).join('')}
+        <div class="guide-word"><span class="wii-who">Why read it</span><span class="guide-note">${esc(r.why)}</span></div>`).join('')}
       <h2 class="guide-heading">Editions &amp; credit</h2>
       <p class="guide-text">Excerpts and translation: Benjamin Jowett, <i>The Dialogues of Plato</i>, third edition, 1892. Project Gutenberg identifies this Benjamin Jowett edition as public domain in the United States. Readers elsewhere should check the copyright law where they live. Free plain-text editions are available from Project Gutenberg — search the dialogue’s title together with “Jowett”.</p>
       <p class="pane-note">Speechcraft doesn’t bundle the books — this is a pathway, not an ebook shelf.</p>
@@ -1452,58 +1439,85 @@ function drawWhatIsIpa(step, st) {
   if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
 }
 
-// ── "Why Speech Matters" — the first-launch preface ──────────
-// Nine screens: seven panels (the substance, ending in reflection — no
-// quiz, no XP), the kept course picker, then the choice, which lands the
-// user exactly where it says. No XP, no track — this is a preface, not a
-// lesson (both locked product decisions).
+// ── "Why Speech Matters" — the preface ───────────────────────
+// THREE content panels (Why Speech Matters, Speech Is Action, Speech
+// Reveals Thought), then the kept course picker and the choice — both
+// FUNCTIONAL screens, never essay panels, never counted by the panel
+// progress indicator. No XP, no track (locked product decisions). The
+// preface is for ANYONE who speaks — actors remain one named audience,
+// never the only one.
 //
-// COPY IS VERBATIM from docs/WHY_SPEECH_MATTERS_COPY.md (which supersedes
-// the earlier THRESHOLD_COPY.md per the Build A scope change). Do not
-// paraphrase or "improve" a line here without changing it there first.
-// Static trusted strings authored in-repo — no user data.
+// TWO VERBATIM VARIANTS by owner order 2026-08-12:
+//   INTRO — the concise first-time opening (short paragraphs, no goals
+//           list, no long disclaimer; readable without scrolling).
+//   FULL  — the expanded permanent section, reached any time through
+//           More/About ("Why Speech Matters" card / "Read it again").
+// Same three titles, same order, same panel-1 Jowett epigraph with its
+// complete attribution. COPY IS VERBATIM from
+// docs/WHY_SPEECH_MATTERS_COPY.md — change it there first. "Speech
+// Reveals Thought" is ORIGINAL Speechcraft writing — never quote-marked,
+// never attributed to Plato. Static trusted strings — no user data.
 
-const THRESHOLD_PANELS = [
+const THRESHOLD_QUOTE = {
+  quote: 'The beginning is the most important part of the work, especially in the case of a young and tender thing.',
+  attribution: '— Plato, <i>Republic</i> 377a–b, translated by Benjamin Jowett',
+};
+
+const THRESHOLD_PANELS_INTRO = [
   { title: 'Why Speech Matters',
-    quote: 'The beginning is the most important part of the work, especially in the case of a young and tender thing.',
-    attribution: '— Plato, <i>Republic</i> 377a–b',
-    body: ['Before you use Speechcraft, take three minutes with the instrument you are training. Speech is not decoration. It is action.'] },
+    ...THRESHOLD_QUOTE,
+    body: [
+      'How you speak shapes how people understand you, trust you and respond to you.',
+      'Speechcraft helps you develop clearer, more confident and more intentional speech—whether you are preparing a presentation, studying rhetoric, exploring an accent, working on a role or strengthening your everyday voice.',
+      'Training does not erase who you are. It gives you more choices.',
+    ] },
   { title: 'Speech Is Action',
     body: [
-      'Every line you speak does something to someone. Speech carries clarity or confusion. It declares intention. It persuades, refuses, comforts, confronts. It signals identity and status before a listener can name either — and it is how one human being reaches another.',
-      'An actor who knows what a line is doing can play it. An actor who does not can only recite it.',
+      'Speaking is something you do to affect another person.',
+      'You may be trying to inform, persuade, reassure, challenge, inspire or connect. The same words can land differently depending on your intention, timing, rhythm, emphasis and relationship to the listener.',
+      'Strong speech begins with knowing what you want your words to do.',
     ] },
   { title: 'Speech Reveals Thought',
     body: [
-      'Speech reveals thought. It reveals what we understand, what we assume, what we value, what we fear, and how carefully we have examined our own ideas.',
-      'The effort to speak clearly does not only display understanding — it helps create it. If you cannot yet articulate something, do not conclude that you know nothing. Treat the difficulty as an invitation to examine what you know more deeply.',
+      'Speech often reveals how clearly we have examined an idea. It shows what we understand, value, question or avoid.',
+      'Strengthening speech is more than changing pronunciation. It develops attention, listening, reasoning, structure and the connection between thought and expression.',
     ] },
-  { title: 'Why Actors Train This Way',
+];
+
+const THRESHOLD_PANELS_FULL = [
+  { title: 'Why Speech Matters',
+    ...THRESHOLD_QUOTE,
     body: [
-      'The IPA gives you the sounds themselves, not spelling\'s rumors about them. Hear a sound precisely and you can make it precisely.',
-      'Dialect study turns an accent from an imitation into a system — something you can learn, keep, and switch on demand.',
-      'Text investigation shows you what a speaker wants, what they know, what they assume, and what they conceal — so the choices you make on a line are choices, not habits.',
-      'This is the training tradition of the stage: ear first, then text, then performance.',
+      'How you speak shapes how people understand you, how far they trust you, what they remember of you, and how they respond to you. Speech is not decoration. It is action.',
+      'Speechcraft is for anyone who wants to understand, strengthen or expand the way they speak — including anyone who wants to:',
+    ],
+    list: [
+      'speak with greater clarity',
+      'speak more confidently',
+      'command attention without merely becoming louder',
+      'organize and express thoughts effectively',
+      'understand rhetoric and persuasion',
+      'explore different kinds of speakers and speaking situations',
+      'develop a more intentional personal voice',
+      'modify or neutralize aspects of an accent — adding choice and flexibility, never “correcting” an inferior way of speaking',
+      'learn another English accent',
+      'prepare a speech, scene, monologue or presentation',
+      'investigate how language creates action',
+    ],
+    after: [
+      'No app can erase who you are, guarantee confidence, or hand you the one “correct” accent — no such accent exists. What deliberate training can do is give you more choices, and more command of the choices you already make.',
     ] },
-  { title: 'Communication and Manipulation',
+  { title: 'Speech Is Action',
     body: [
-      'Speaking confidently is not the same as knowing what you are talking about. Speechcraft will make you more powerful either way — which is exactly why this training includes learning to question, to listen, and to recognize where your knowledge ends.',
-      'A responsible speaker uses emotion to illuminate the subject. A manipulative speaker uses emotion to draw attention away from what is missing. You will learn to tell the difference — in other speakers, and in yourself.',
-      '<b>The strength of a feeling does not determine the truth of a claim.</b>',
+      'Speaking is something we do to another person. A speaker may set out to persuade, reassure, challenge, inspire, inform, confront, entertain, comfort, negotiate, command, question, reveal, conceal — or simply connect.',
+      'The same words can land completely differently depending on intention, relationship, timing, rhythm, emphasis and delivery. That is as true in everyday conversation, teaching, leadership and interviews as it is in public speaking, presentations, advocacy, rhetoric, performance — and the difficult personal conversations that matter most.',
+      'Powerful speech can clarify and connect. It can also pressure, mislead or manipulate. Developing your speech includes taking responsibility for its effect.',
     ] },
-  { title: 'The Journey',
+  { title: 'Speech Reveals Thought',
     body: [
-      'Speechcraft moves the way rehearsal moves:',
-      '<b>Understand the sound.</b> The IPA, your instrument, the dialect\'s system.',
-      '<b>Mark the text.</b> Transcription, stress, scansion — the score beneath the words.',
-      '<b>Investigate the thought.</b> What the speaker wants, assumes, and conceals.',
-      '<b>Prepare the performance.</b> Choices made on purpose, ready to deliver.',
-    ] },
-  { title: 'Before You Choose',
-    body: [
-      'One question, before you pick your way in — no score, no points.',
-      'Think of a moment when someone\'s words genuinely changed you: what you believed, or what you did next. What did that speaker understand — about the subject, and about you?',
-      'Hold on to that moment. It is the thing you are here to learn to do on purpose.',
+      'Speech reveals thought. It reveals what we understand and what remains uncertain, how our ideas are organized, what we value, what we avoid, how we see the person in front of us — and how clearly we have examined our own position.',
+      'Strengthening speech is therefore never just polishing pronunciation. It can mean strengthening attention, listening, intention, vocabulary, structure, reasoning — the whole relationship between thought and expression.',
+      'The IPA, rhetoric, accent study, text analysis and deliberate practice are different tools within that one larger craft. Speechcraft teaches them together.',
     ] },
 ];
 
@@ -1577,10 +1591,11 @@ async function gateThreshold() {
   renderThreshold();
 }
 
-// The threshold itself. Screens 0–5 are the verbatim panels, screen 6 is
-// the course picker (kept from the old onboarding, samples and all — it is
-// the only place a new user hears the dialects compared, and it is what
-// calls setCourse), screen 7 is the choice, which lands where it says.
+// The threshold itself. Screens 0–2 are the three verbatim preface
+// panels, screen 3 is the course picker (kept from the old onboarding,
+// samples and all — it is the only place a new user hears the dialects
+// compared, and it is what calls setCourse), screen 4 is the choice,
+// which lands where it says.
 // `replay` mode (About Speechcraft, Preferences, the invitation card)
 // never resets progress, never rewrites the original choice, never
 // re-blocks: Esc or ✕ leaves at any time.
@@ -1591,17 +1606,24 @@ function renderThreshold(step = 0, opts = {}) {
   // picker never blocks them; changing it stays optional.
   if (replay && !sel.accent) sel.accent = activeCourse();
   if (replay && step === 0) record(() => renderThreshold(0, { replay: true }));
-  const TOTAL = THRESHOLD_PANELS.length + 2;      // 7 panels + picker + choice
-  const dots = `<div class="ob-dots" aria-label="Progress">${
-    Array.from({ length: TOTAL }, (_, i) => `<span class="ob-dot ${i <= step ? 'on' : ''}"></span>`).join('')}</div>`;
+  // First run gets the concise opening; the permanent More/About replay
+  // keeps the expanded writing. Same three titles, same order.
+  const PANELS = replay ? THRESHOLD_PANELS_FULL : THRESHOLD_PANELS_INTRO;
+  // The progress indicator counts ONLY the three content panels — the
+  // course picker and the choice are functional screens, shown without
+  // preface dots.
+  const dots = step < PANELS.length
+    ? `<div class="ob-dots" aria-label="Preface progress">${
+        Array.from({ length: PANELS.length }, (_, i) => `<span class="ob-dot ${i <= step ? 'on' : ''}"></span>`).join('')}</div>`
+    : '';
   const back = step > 0
     ? `<button class="btn ob-back" id="ob-back" type="button">‹ Back</button>` : '<span></span>';
   const close = replay
     ? `<button class="quit th-close" id="th-close" aria-label="Close and return" type="button">✕</button>` : '';
 
   let body;
-  if (step < THRESHOLD_PANELS.length) {
-    const p = THRESHOLD_PANELS[step];
+  if (step < PANELS.length) {
+    const p = PANELS[step];
     body = `
       <h1>${p.title}</h1>
       ${p.quote ? `
@@ -1610,8 +1632,10 @@ function renderThreshold(step = 0, opts = {}) {
         <footer class="th-attrib">${p.attribution}</footer>
       </blockquote>` : ''}
       ${p.body.map(t => `<p class="guide-text th-text">${t}</p>`).join('')}
+      ${p.list ? `<ul class="th-list">${p.list.map(li => `<li>${li}</li>`).join('')}</ul>` : ''}
+      ${(p.after ?? []).map(t => `<p class="guide-text th-text">${t}</p>`).join('')}
       <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button">Continue</button></div>`;
-  } else if (step === THRESHOLD_PANELS.length) {
+  } else if (step === PANELS.length) {
     // Course picker — kept as it was, samples included.
     body = `
       <h1>Pick your first course</h1>
@@ -1660,9 +1684,9 @@ function renderThreshold(step = 0, opts = {}) {
     else if (step > 0) go(step - 1);
   });
 
-  if (step < THRESHOLD_PANELS.length) {
+  if (step < PANELS.length) {
     document.getElementById('ob-next').addEventListener('click', () => go(step + 1));
-  } else if (step === THRESHOLD_PANELS.length) {
+  } else if (step === PANELS.length) {
     app.querySelectorAll('[data-accent]').forEach(b =>
       b.addEventListener('click', () => go(step, { accent: b.dataset.accent })));
     app.querySelectorAll('.ob-sample').forEach(b =>
@@ -1916,7 +1940,7 @@ function renderContentReview() {
       <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
-      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear in the Library automatically. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
+      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
 
       <h1>The original 23-item queue</h1>
       <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>
@@ -2022,9 +2046,9 @@ function renderAbout() {
     ${pageTopbar('ℹ️ About Speechcraft', '#6f8657')}
     <main class="guide">
       <h1>About Speechcraft</h1>
-      <p class="guide-text"><b>Speechcraft helps actors understand speech, prepare their text and rehearse it in a chosen accent.</b> It exists because IPA is usually taught as an abstraction, disconnected from the work of performance — Speechcraft makes the sounds of speech easier to understand, then helps you apply them to monologues, speeches, scenes and lyrics. Learn the sound. Mark the text. Rehearse the role.</p>
+      <p class="guide-text"><b>Speechcraft is for anyone who wants to understand, strengthen or expand the way they speak.</b> It makes the sounds of speech easier to understand — the IPA, taught as a working tool instead of an abstraction — then helps you apply them to whatever you’re preparing: a speech, a presentation, a scene, a monologue, a difficult conversation. Actors get dedicated tools for accents, scenes and text work; the craft underneath is the same for everyone. Learn the sound. Mark the text. Speak it on purpose.</p>
       <div class="guide-word"><span class="wii-who">Learn</span><span class="guide-note">the IPA, how speech is produced, and four accent targets — courses that teach the skills</span></div>
-      <div class="guide-word"><span class="wii-who">Prepare</span><span class="guide-note">your own text in the Studio: paste it, transcribe it to IPA in your dialect, mark it up with notes</span></div>
+      <div class="guide-word"><span class="wii-who">Prepare</span><span class="guide-note">your own text in Studio → Custom Work: paste it, transcribe it to IPA in your dialect, mark it up with notes</span></div>
       <div class="guide-word"><span class="wii-who">Rehearse</span><span class="guide-note">listen, repeat, and work the text against the model recordings until the accent lives in it</span></div>
       <p class="guide-text"><b>Speechcraft is in beta.</b> Content and recordings are still being reviewed and expanded. It is a practice tool, not a substitute for a dialect coach — accents are learned by ears and feedback, and no app can promise fluency.</p>
       <h2 class="guide-heading">Why Speech Matters</h2>
@@ -2077,7 +2101,7 @@ function moreMain(el) {
     { icon: '⚙️', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
     // Permanent doorway to the preface — never retired by onboarding state.
     // Replaying only touches the replay timestamps (state.js guarantees it).
-    { icon: '✨', title: 'Why Speech Matters', blurb: 'The preface — speech as action, and why actors train it. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
+    { icon: '✨', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
@@ -2280,15 +2304,12 @@ function textSpeechPane(pane) {
     blurb: `${lib.data.length} speeches · ${esc(lib.note)}`,
     go: () => renderLibraryList(key),
   }));
-  const featured = Object.keys(RECASTS).map(Number).filter(n =>
-    LONGFORM_COVERAGE.sonnets.nam.includes(n) && LONGFORM_COVERAGE.sonnets.rp.includes(n));
+  // No Featured Texts shelf: every text is reachable through the
+  // collections below, with nothing promoted or duplicated.
   const cards = [
-    featured.length ? { icon: '⭐', title: 'Featured Texts',
-      blurb: `Sonnets with complete, verified Neutral American and Traditional RP recordings and Plain Meaning guides: ${featured.map(n => `№${n}`).join(', ')}. (Some also have Australian audio — each page shows exactly what's recorded.)`,
-      go: () => renderSonnet(featured[0]) } : null,
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
     ...libs,
-    { icon: '🎬', title: 'Your own text', blurb: 'Monologues, scenes, speeches and lyrics you paste live in the Studio — private to this device.', go: () => goSection('studio') },
+    { icon: '🎬', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
   ];
   const shown = cards.filter(Boolean);
   pane.innerHTML = shown.map((c, i) => `
@@ -2642,9 +2663,44 @@ let projectQuery = '';
 
 // The Studio landing: every private project, on the shell's own section.
 // Learn teaches the skills; the Studio is where they meet your text.
-async function studioMain(el) {
+// The Studio hub: the approved five primary cards, in this exact order,
+// TITLE-ONLY — descriptions live on the destination pages.
+function studioMain(el) {
+  const cards = [
+    { icon: '📜', title: 'Scripts & Speeches', go: renderTextsPage },
+    { icon: '🔍', title: 'Question Everything', go: renderDissectTextbook },
+    { icon: '🎯', title: 'Playable Actions', go: renderPlayableActions },
+    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
+    { icon: '📕', title: 'Personal Dictionary', go: renderDictionary },
+  ];
+  el.innerHTML = `<h1 class="page-h">Studio</h1>` + cards.map((c, i) => `
+    <button class="track-card hub-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
+      <div class="track-glyph">${c.icon}</div>
+      <div class="track-info"><h2>${esc(c.title)}</h2></div>
+      <div class="track-arrow">›</div>
+    </button>`).join('');
+  el.querySelectorAll('.track-card').forEach(b =>
+    b.addEventListener('click', () => cards[+b.dataset.i].go()));
+}
+
+// Custom Work: the project creation/upload area — the former Studio
+// landing, now one card deep. Everything about it is unchanged: create,
+// paste, edit, choose a dialect, IPA and notes, import project files.
+// (Document scanning/OCR is NOT available — it stays unmentioned here
+// until that separate build is approved.)
+function renderCustomWork() {
+  record(renderCustomWork);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🎬 Custom Work', '#8a6d3b')}
+    <main class="track-list" id="cw-main"></main>`;
+  wireBrandHome();
+  customWorkPane(document.getElementById('cw-main'));
+}
+
+async function customWorkPane(el) {
   el.innerHTML = `
-    <h1 class="page-h">Speechcraft Studio</h1>
+    <h1 class="page-h">Custom Work</h1>
     <p class="track-blurb">Prepare, transcribe and rehearse your own text. Everything you paste here stays private on this device — nothing is uploaded or shared.</p>
     <div class="proj-toolbar">
       <input class="sonnet-search" id="proj-search" type="search" placeholder="Search title, character, source…" value="${esc(projectQuery)}" autocomplete="off">
@@ -2683,7 +2739,7 @@ async function studioMain(el) {
         <div class="empty-state">
           <p class="empty-emoji">🎬</p>
           <h2>Your first project starts here</h2>
-          <p>Paste a piece you're working on — an audition speech, a scene, a monologue, song lyrics. You'll get the text, its IPA in your chosen dialect, scansion, and a place for your acting and pronunciation notes.</p>
+          <p>Paste a piece you're working on — an audition speech, a presentation, a scene, a monologue, song lyrics. You'll get the text, its IPA in your chosen dialect, scansion, and a place for your working and pronunciation notes.</p>
           <p class="pane-note">Example: <b>Stanley Audition</b> — A Streetcar Named Desire · Monologue · Neutral American</p>
         </div>`;
       return;
@@ -2833,7 +2889,7 @@ function relDate(ts) {
 async function renderProject(id, tab = 'text') {
   record(() => renderProject(id, tab));
   const p = await getProject(id);
-  if (!p) return goSection('studio');
+  if (!p) return renderCustomWork();   // project gone — back to the list
 
   // While recording is paused, the Perform tab becomes a Takes view and
   // appears only when this project HAS saved takes — or when the lookup
@@ -2942,7 +2998,9 @@ function wireAutosave(stateEl, collect) {
 // created lazily on the first real interaction, so opening the screen
 // never writes to the database. EVERY stored string is untrusted on read —
 // esc() on render, values assigned via .value where possible.
-// ── Speech Dissection: the read-only TEXTBOOK (Library) ──────
+// ── Question Everything: the read-only TEXTBOOK (Studio hub) ─
+// (Internal names keep the historical "dissect"/"dissection" spelling —
+// stores, fields and question IDs are never renamed.)
 // Strict separation: this page is educational reference only. Every
 // interactive response feature — textareas, answer states, autosave,
 // coverage, saved dissections — lives EXCLUSIVELY in the Studio
@@ -3032,10 +3090,10 @@ function renderDissectTextbook() {
       <p class="pane-note">Ask:</p>
       <ul class="sd-asks">${list.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>`;
   app.innerHTML = `
-    ${pageTopbar('🔍 Speech Dissection', '#8a6d3b')}
+    ${pageTopbar('🔍 Question Everything', '#8a6d3b')}
     <main class="guide" id="sd-textbook">
-      <h1 id="sd-title">Speech Dissection</h1>
-      <p class="guide-text">A script gives you the words. Speech Dissection helps you discover what is happening underneath them.</p>
+      <h1 id="sd-title">Question Everything</h1>
+      <p class="guide-text">A script gives you the words. Question Everything helps you discover what is happening underneath them.</p>
       <p class="guide-text">This is not about finding one perfect interpretation. It is an actor’s working process: examining the circumstances, objective, resistance, tactics and changes inside a piece of text.</p>
       <p class="guide-text">Use these questions while reading a monologue, speech, scene or audition side. Return to them whenever the text feels unclear, general or emotionally disconnected.</p>
       ${SECTIONS.map(s => `
@@ -3047,7 +3105,7 @@ function renderDissectTextbook() {
       <h2 class="guide-heading">Keep Returning to the Text</h2>
       <p class="guide-text">As you work, continue asking:</p>
       <ul class="sd-asks">${RETURNING.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>
-      <p class="guide-text">Speech Dissection is not about locking the performance into one answer. It gives the actor a specific, playable understanding from which discovery can continue.</p>
+      <p class="guide-text">Question Everything is not about locking the performance into one answer. It gives the actor a specific, playable understanding from which discovery can continue.</p>
       <p class="pane-note">To work these questions on your own text, open a Studio project and press <b>🔍 Dissect This</b>.</p>
     </main>`;
   wireBrandHome();
@@ -3065,7 +3123,7 @@ async function renderDissect(id) {
     wireBrandHome();
     return;
   }
-  if (!p) return goSection('studio');
+  if (!p) return renderCustomWork();   // project gone — back to the list
   app.innerHTML = `
     ${pageTopbar('🔍 Dissect: ' + esc(p.title || 'Untitled'), '#8a6d3b')}
     <main class="guide">
@@ -4191,90 +4249,143 @@ function renderActionPiece(d, id) {
   });
 }
 
-// ── Accent Bridge ─────────────────────────────────────────────
-// The learner SELF-SELECTS both accents — the app never diagnoses. Routes
-// and comparisons live in js/data/bridge.js; A/B audio appears only when
-// the exact word is recorded in BOTH accents.
+// ── Accent Bridge: the Listening practice exercise ────────────
+// Rebuilt 2026-08-12 by owner order: a structured listening session,
+// not an informational page. The learner picks the STARTING accent;
+// the TARGET is the course they're on (the two can never be equal —
+// the selector simply never offers it). Only human-reviewed routes are
+// selectable, and a comparison becomes an audio question only when
+// both exact approved clips exist — no synthesis, no substitution, no
+// fallback. Draft routes stay inside #review. The app never diagnoses
+// the learner's natural accent — the start is self-selected.
 
-function renderBridge() {
-  record(renderBridge);
+function renderBridgeSetup(target) {
+  record(() => renderBridgeSetup(target));
+  stopSpeech();
+  const routes = playableRoutesInto(target, hasWordClip);
+  if (!routes.length) return goSection('practice');   // no playable route — the card shouldn't exist
   const prefs = loadBridgePrefs();
-  const accents = COURSES.filter(c => c.id !== 'core');
-  const route = routeFor(prefs.from, prefs.to);
-  const sel = (id, cur, label) => `
-    <label class="field"><span class="field-label">${label}</span>
-      <select class="input-sel" id="${id}">
-        ${accents.map(a => `<option value="${a.id}" ${a.id === cur ? 'selected' : ''}>${a.icon} ${esc(a.label)}</option>`).join('')}
-      </select></label>`;
-
-  const compCard = c => {
-    const canA = speakableWord(c.word, prefs.from);
-    const canB = speakableWord(c.word, prefs.to);
-    return `
-    <section class="bridge-card" aria-label="${esc(c.feature)}">
-      <div class="idiom-head"><span class="idiom-term">${esc(c.feature)}</span><span class="tag">${esc(c.lexicalSet)}</span></div>
-      <p class="bridge-pair"><span class="ipa-chip">/${esc(c.startIPA)}/</span> <span aria-hidden="true">→</span>
-        <span class="ipa-chip is-target">/${esc(c.targetIPA)}/</span> <span class="bridge-word">“${esc(c.word)}”</span></p>
-      <div class="idiom-listen">
-        ${canA ? `<button class="word-chip" data-say-acc="${prefs.from}" data-w="${esc(c.word)}" type="button" aria-label="Hear ${esc(c.word)} in your starting accent">🔊 ${esc(dialectName(prefs.from))}</button>` : `<span class="word-chip is-off">${esc(dialectName(prefs.from))} — no recording</span>`}
-        ${canB ? `<button class="word-chip" data-say-acc="${prefs.to}" data-w="${esc(c.word)}" type="button" aria-label="Hear ${esc(c.word)} in the accent you're learning">🔊 ${esc(dialectName(prefs.to))}</button>` : `<span class="word-chip is-off">${esc(dialectName(prefs.to))} — no recording</span>`}
-        ${canA && canB ? `<button class="word-chip" data-ab="${esc(c.word)}" type="button" aria-label="Play ${esc(c.word)} in both accents, one after the other">⇄ A/B</button>` : ''}
-      </div>
-      <p class="guide-note"><b>Stays the same:</b> ${esc(c.stays)}</p>
-      <p class="guide-note"><b>What changes:</b> ${esc(c.changes)}</p>
-      <details class="idiom-extra"><summary>Lips · Tongue · Jaw · Voice</summary>
-        <dl class="anat-list">
-          <div><dt>Lips</dt><dd>${esc(c.guidance.lips)}</dd></div>
-          <div><dt>Tongue</dt><dd>${esc(c.guidance.tongue)}</dd></div>
-          <div><dt>Jaw</dt><dd>${esc(c.guidance.jaw)}</dd></div>
-          <div><dt>Voice</dt><dd>${esc(c.guidance.voice)}</dd></div>
-        </dl>
-      </details>
-      <div class="idiom-listen">
-        ${c.symbols.map(s => PHONEMES[s] ? `<button class="word-chip" data-guide="${esc(s)}" type="button" aria-label="Open the guidebook page for ${esc(s)}">📖 /${esc(s)}/ ${esc(PHONEMES[s].name)}</button>` : '').join('')}
-        ${c.symbols.length && PHONEMES[c.symbols[0]] ? `<button class="word-chip" data-practice="${esc(c.symbols[0])}" type="button" aria-label="Study this sound on its guidebook page">📖 Study this sound</button>` : ''}
-      </div>
-    </section>`;
-  };
+  let from = routes.some(r => r.from === prefs.from) ? prefs.from : routes[0].from;
 
   app.innerHTML = `
     ${pageTopbar('🌉 Accent Bridge', '#64748b')}
     <main class="guide">
-      <p class="track-blurb">The accent you’re learning, explained through the one you already speak. Pick both yourself — you know your own speech best; nothing here guesses or diagnoses.</p>
+      <h1>Accent Bridge</h1>
+      <p class="track-blurb">Hear the same words in your starting accent and in ${esc(dialectName(target))}, and learn to tell exactly what changes on the way. Routes appear here only after review by a qualified dialect reviewer, and every clip is an existing approved recording. You pick your own starting accent — nothing here guesses or diagnoses.</p>
       <div class="form-grid">
-        ${sel('br-from', prefs.from, 'My starting accent')}
-        ${sel('br-to', prefs.to, 'I’m learning')}
+        <label class="field"><span class="field-label">My starting accent</span>
+          <select class="input-sel" id="bridge-from">
+            ${routes.map(r => `<option value="${esc(r.from)}" ${r.from === from ? 'selected' : ''}>${esc(dialectName(r.from))}</option>`).join('')}
+          </select></label>
+        <label class="field"><span class="field-label">Target accent</span>
+          <span class="pane-note" id="bridge-target"><b>${esc(dialectName(target))}</b> — the course you’re learning. The two ends are always different accents.</span></label>
       </div>
-      ${route ? `
-        <h1>${esc(route.title)}</h1>
-        <p class="guide-text">${esc(route.intro)}</p>
-        <p class="pane-note">“Typically” is doing honest work here: real speakers vary, and these comparisons describe the course targets, not every voice you’ll meet.</p>
-        ${route.comparisons.map(compCard).join('')}
-        <p class="pane-note bridge-sources">Source notes: these comparisons restate the two course targets in the Dialect Accuracy Standard — see <b>${esc(DIALECT_INFO[prefs.from]?.aboutTitle ?? dialectName(prefs.from))}</b> and <b>${esc(DIALECT_INFO[prefs.to]?.aboutTitle ?? dialectName(prefs.to))}</b> in the Library for the published descriptions and full citations.${route.sourceNote ? ' ' + esc(route.sourceNote) : ''}</p>`
-      : routeStatus(prefs.from, prefs.to) === 'same' ? `
-        <p class="pane-note" id="bridge-same">That’s the same accent on both ends — there’s no distance to bridge. Pick a different accent under “I’m learning” to see a route.</p>`
-      : routeStatus(prefs.from, prefs.to) === 'draft' ? `
-        <p class="pane-note" id="bridge-pending">This route is written and awaiting review by a qualified dialect reviewer. It will appear here the moment it’s approved — nothing ships unchecked.</p>`
-      : `
-        <p class="pane-note">This route isn’t written yet. Reviewed so far: ${BRIDGE_ROUTES.filter(r => r.comparisons.some(c => c.reviewStatus === 'approved')).map(r => `<b>${esc(r.title)}</b>`).join(', ') || 'none'}. More pairings arrive as they’re reviewed — nothing ships unchecked.</p>`}
+      <p class="pane-note" id="bridge-note"></p>
+      <p class="pane-note bridge-sources" id="bridge-src"></p>
+      <div class="practice-row"><button class="btn btn-primary" id="bridge-start" type="button">Start listening</button></div>
     </main>`;
   wireBrandHome();
 
-  const re = () => renderBridge();
-  document.getElementById('br-from').addEventListener('change', e => { saveBridgePrefs(e.target.value, loadBridgePrefs().to); navStack.pop(); re(); });
-  document.getElementById('br-to').addEventListener('change', e => { saveBridgePrefs(loadBridgePrefs().from, e.target.value); navStack.pop(); re(); });
-  app.querySelectorAll('[data-say-acc]').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.w, { accent: b.dataset.sayAcc, lang: dialectLang(b.dataset.sayAcc) })));
-  app.querySelectorAll('[data-ab]').forEach(b =>
-    b.addEventListener('click', () => {
-      const w = b.dataset.ab;
-      speak(w, { accent: loadBridgePrefs().from, lang: dialectLang(loadBridgePrefs().from) });
-      setTimeout(() => speak(w, { accent: loadBridgePrefs().to, lang: dialectLang(loadBridgePrefs().to) }), 1100);
+  const currentRoute = () => routes.find(r => r.from === from);
+  const refresh = () => {
+    const route = currentRoute();
+    const n = playableComparisons(route, hasWordClip).length;
+    document.getElementById('bridge-note').textContent =
+      `${route.title} — ${n} comparison${n === 1 ? '' : 's'} ready to play. “Typically” is doing honest work here: these comparisons describe the course targets, not every voice you’ll meet.`;
+    document.getElementById('bridge-src').textContent = route.sourceNote ?? '';
+  };
+  refresh();
+  document.getElementById('bridge-from').addEventListener('change', e => {
+    // Only offered routes can stick — an injected same-accent or draft
+    // value snaps straight back.
+    from = routes.some(r => r.from === e.target.value) ? e.target.value : from;
+    e.target.value = from;
+    refresh();
+  });
+  document.getElementById('bridge-start').addEventListener('click', () => {
+    const route = currentRoute();
+    if (!route || route.from === target) return;      // same-accent can never start
+    saveBridgePrefs(route.from, target);
+    startLesson(bridgeLesson(route));
+  });
+}
+
+// A bridge session is a practice-arcade lesson with a FIXED queue: each
+// playable comparison exactly once (5–8 when available), never padded
+// or duplicated to reach a length.
+function bridgeLesson(route) {
+  const comps = playableComparisons(route, hasWordClip)
+    .map(c => [Math.random(), c]).sort((a, b) => a[0] - b[0]).map(x => x[1])
+    .slice(0, 8);
+  return {
+    practice: true,
+    arcade: true,
+    bridgeRoute: route,
+    mode: { id: 'bridge', icon: '🌉', title: 'Accent Bridge' },
+    accent: route.to,
+    title: route.title,
+    fixedQueue: comps.map(c => ({ type: 'bridge', comp: c, route })),
+    remake: () => bridgeLesson(route),
+  };
+}
+
+// One round: the word, two LABELLED clips (Starting / Target — both
+// existing approved recordings), and the question "which is the target
+// pronunciation?". After the answer, the approved written explanation:
+// both IPAs, what changes, what stays, and the reviewed articulation
+// guidance. Continue advances; nothing is ever requeued or duplicated.
+function renderBridgeRound(s, ex) {
+  const { comp, route } = ex;
+  const choices = Math.random() < 0.5
+    ? [{ ipa: comp.targetIPA, ok: true }, { ipa: comp.startIPA, ok: false }]
+    : [{ ipa: comp.startIPA, ok: false }, { ipa: comp.targetIPA, ok: true }];
+  lessonChrome(s, `
+    <h1 class="prompt">Which is the ${esc(dialectName(route.to))} pronunciation of “${esc(comp.word)}”?</h1>
+    <div class="display-card small"><span>${esc(comp.word)}</span></div>
+    <p class="hint">${esc(comp.feature)} · ${esc(comp.lexicalSet)} set — listen to both, then choose.</p>
+    <div class="bridge-plays">
+      <button class="btn btn-lite" id="br-play-start" type="button"
+        aria-label="Play the Starting Accent clip — ${esc(dialectName(route.from))}">▶ Starting Accent · ${esc(dialectName(route.from))}</button>
+      <button class="btn btn-lite" id="br-play-target" type="button"
+        aria-label="Play the Target Accent clip — ${esc(dialectName(route.to))}">▶ Target Accent · ${esc(dialectName(route.to))}</button>
+    </div>
+    <div class="choices" id="choices">
+      ${choices.map((c, i) => `
+        <button class="btn choice" data-i="${i}" type="button">
+          <span class="choice-label">/${esc(c.ipa)}/</span>
+        </button>`).join('')}
+    </div>
+    <div id="br-reveal"></div>`);
+  const play = acc => speak(comp.word, { lang: ACCENT_LANG[acc] ?? 'en-GB', accent: acc });
+  document.getElementById('br-play-start').addEventListener('click', () => play(route.from));
+  document.getElementById('br-play-target').addEventListener('click', () => play(route.to));
+  document.querySelectorAll('.choice').forEach(btn =>
+    btn.addEventListener('click', () => {
+      if (document.getElementById('br-reveal').childElementCount) return;
+      const ok = !!choices[+btn.dataset.i].ok;
+      document.querySelectorAll('.choice').forEach(b => (b.disabled = true));
+      btn.classList.add(ok ? 'good' : 'bad');
+      try {
+        recordAttempt({ ex, ok, chose: choices[+btn.dataset.i].ipa,
+          ms: s.shownAt ? Date.now() - s.shownAt : null, accent: route.to });
+      } catch (err) { console.warn('analytics skipped', err); }
+      if (!ok) s.mistakes++;
+      const g = comp.guidance ?? {};
+      document.getElementById('br-reveal').innerHTML = `
+        <section class="br-reveal ${ok ? 'good' : 'bad'}" role="status" aria-label="Answer and explanation">
+          <p class="br-verdict"><strong>${ok ? 'Correct!' : 'Not quite.'}</strong>
+            Target (${esc(dialectName(route.to))}): <span class="ipa-chip is-target">/${esc(comp.targetIPA)}/</span> ·
+            Starting (${esc(dialectName(route.from))}): <span class="ipa-chip">/${esc(comp.startIPA)}/</span></p>
+          <p class="guide-note"><b>What changes:</b> ${esc(comp.changes)}</p>
+          <p class="guide-note"><b>What stays:</b> ${esc(comp.stays)}</p>
+          ${['lips', 'tongue', 'jaw', 'voice'].filter(k => g[k]).map(k =>
+            `<p class="guide-note"><b>${k[0].toUpperCase() + k.slice(1)}:</b> ${esc(g[k])}</p>`).join('')}
+          <button class="btn continue ${ok ? '' : 'btn-red'}" id="continue" type="button">Continue</button>
+        </section>`;
+      const cont = document.getElementById('continue');
+      cont.addEventListener('click', () => { s.index++; renderExercise(s); });
+      cont.focus();
     }));
-  app.querySelectorAll('[data-guide]').forEach(b =>
-    b.addEventListener('click', () => renderSoundDetail(b.dataset.guide, loadBridgePrefs().to)));
-  app.querySelectorAll('[data-practice]').forEach(b =>
-    b.addEventListener('click', () => renderSoundDetail(b.dataset.practice, loadBridgePrefs().to)));
 }
 
 function speakPane(lines, accent = null, narrated = []) {
@@ -5193,7 +5304,9 @@ function startLesson(lesson) {
   if (!free && store.hearts <= 0) return renderNoHearts(lesson);
   const session = {
     lesson,
-    queue: generateLesson(lesson),
+    // A fixed queue (Accent Bridge) plays each entry exactly once —
+    // never generated, padded or duplicated.
+    queue: lesson.fixedQueue ? [...lesson.fixedQueue] : generateLesson(lesson),
     index: 0,
     hearts: free ? Infinity : store.hearts,
     mistakes: 0,
@@ -5228,6 +5341,7 @@ function renderExercise(s) {
   else if (ex.type === 'build') renderBuild(s, ex);
   else if (ex.type === 'gapbuild') renderGapBuild(s, ex);
   else if (ex.type === 'typein') renderTypein(s, ex);
+  else if (ex.type === 'bridge') renderBridgeRound(s, ex);
   else renderChoice(s, ex);
 }
 
@@ -5517,12 +5631,13 @@ function renderResults(s) {
         <h1>${perfect ? (arcade ? 'Flawless round!' : 'Flawless practice!') : (arcade ? 'Round complete!' : 'Practice complete!')}</h1>
         <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''}${typeof earnedHeart !== 'undefined' && earnedHeart ? ' · +1 ❤️' : ''}</p>
         <div class="end-actions">
-          <button class="btn btn-primary" id="again">${arcade ? 'Play again' : 'Practice again'}</button>
-          <button class="btn" id="home">Done</button>
+          <button class="btn btn-primary" id="again">${s.lesson.bridgeRoute ? 'Replay' : arcade ? 'Play again' : 'Practice again'}</button>
+          <button class="btn" id="home">${s.lesson.bridgeRoute ? 'Return to Practice' : 'Done'}</button>
         </div>
       </main>`;
     document.getElementById('again').addEventListener('click', () =>
-      startLesson(arcade ? modeLesson(s.lesson.mode, s.lesson.accent) : practiceLesson(s.lesson.track)));
+      startLesson(s.lesson.remake ? s.lesson.remake()
+        : arcade ? modeLesson(s.lesson.mode, s.lesson.accent) : practiceLesson(s.lesson.track)));
     document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
     return;
   }

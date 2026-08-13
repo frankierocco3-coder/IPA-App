@@ -714,6 +714,86 @@ section 9 now uses a 180s wall-clock budget instead of a step count
 (step budgets starve under background-tab timer throttling). Suite →
 299 checks; five gates pass.
 
+IA REVISION (2026-08-12, committed locally, NOT pushed): the
+information architecture is now hub-based and title-only. Sidebar +
+bottom nav (one SECTIONS array): Learn, Practice, Studio, Library,
+Progress, More; a stale saved section falls back to Learn (test-
+pinned via reload). Library = EXACTLY 7 title-only primary cards in
+order: About the Accent, Words & Expressions, Dialect in Action
+(hidden unless actionFor(course) has approved pieces — stable
+courseId filtering, zero cross-dialect leakage), IPA, Rhetoric &
+Oratory, Your Instrument, Vowel Map. Studio = hub of EXACTLY 5
+title-only cards: Scripts & Speeches (all text collections,
+renderTextsPage), Question Everything (the textbook), Playable
+Actions, Custom Work, Personal Dictionary. The old Studio landing is
+now renderCustomWork()/customWorkPane() — same project area, NO OCR
+claims. Featured Texts shelf REMOVED without deleting content.
+Accent Bridge moved to Practice (#hub-bridge row). Learn suppresses
+the continue card when done === 0 (Stage 1 · Orientation + START
+node is the sole entry on an unstarted course); it returns with
+progress. Why Speech Matters stays under More. LEARNER-FACING RENAME
+'Speech Dissection' → 'Question Everything' (textbook page + Studio
+card + validate.js import warnings, which now say plain
+'dissection(s)'); the project ACTION stays 'Dissect This'; internal
+IndexedDB stores/fields/question IDs/migration names are NEVER
+renamed (lint 6j pins the new title, bans the old on learner
+surfaces and bans Featured Texts). Tests: sections 1/8/10/11/13/14/
+15/16 rerouted (Studio hop through Custom Work card; bridge via
+Practice), new section 17 (exact hub orders, title-only proof,
+retired-card absence, collections preserved, no-OCR, course-switch
+continue-card rule with progress preservation, stale-section
+fallback, zero mic). Verified as part of the consolidated 2026-08-12
+build below.
+
+CONSOLIDATED REVISION (2026-08-12, committed locally, NOT pushed) —
+one owner order consolidating and superseding the IA, preface and
+Practice prompts. THREE parts. (1) PREFACE: THREE content panels — Why
+Speech Matters / Speech Is Action / Speech Reveals Thought — in TWO
+verbatim variants (docs/WHY_SPEECH_MATTERS_COPY.md): INTRO = concise
+first-time opening (short paragraphs, no goals list, no long accent
+disclaimer, Continue above the fold); FULL = expanded permanent
+section via More/About replay (keeps the 11-item "for anyone" list +
+honesty constraints). Both keep the verified Jowett epigraph with
+complete attribution "— Plato, Republic 377a–b, translated by Benjamin
+Jowett" (lint-pinned). "Speech Reveals Thought" is ORIGINAL Speechcraft
+copy — never quoted, never attributed. "Why Actors Train This Way" and
+"The Journey" are REMOVED and lint-BANNED. Progress dots count ONLY
+the 3 panels; picker + choice are functional screens, dotless.
+Audience language audited inclusive (About lead, More blurb, pathway
+row label, Custom Work empty state) — actors stay one named audience.
+(2) PRACTICE: heading "Quick Practice" (lint-pinned; "Recommended for
+you" lint-banned), Mixed Review beneath, diagnostic + old bridge
+pill shortcuts REMOVED (Learn's offer card is now the diagnostic's
+only doorway). Order: Quick Practice / Listening (Listen & Choose,
+Minimal Pairs, Accent Bridge) / Reading IPA (Matching, Decode first) /
+existing categories. (3) ACCENT BRIDGE = a real Listening exercise:
+renderBridgeSetup (start-accent select offering ONLY approved playable
+routes into the CURRENT course; same-accent structurally impossible;
+snaps back invalid values) → bridgeLesson (practice+arcade, fixedQueue,
+never duplicated) → renderBridgeRound (labelled Starting/Target clip
+buttons playing existing approved recordings ONLY — no synthesis, no
+fallback, no substitution; two-IPA choice; reveal = both IPAs + what
+changes + what stays + reviewed guidance; Continue focused) →
+practice-convention results (+5/+7 XP, no hearts, Replay / Return to
+Practice). Gating: bridge.js playableComparisons/playableRoutesInto
+(injectable hasClip; app passes hasWordClip incl. quarantine).
+Currently playable: nam→rp ONLY (all 8 comparisons, f+m clips both
+accents); the card is HIDDEN on nam/ssbe/aus/core — drafts stay in
+#review. The old renderBridge written browser is replaced by the setup
+screen + per-round written reveals (route data intact). Old #hub-bridge
+/ #hub-diagnostic / #bridge-same / #bridge-pending ids are GONE — lint
+6h re-pinned ("review by a qualified dialect reviewer", "part of the
+original 23"). Tests: section 10 rewritten (replay = FULL variant, 3
+dots, attribution, no-Plato-on-panel-3), section 14 rewritten (playable
+gating data checks + full 8-round session drive w/ course switch,
+same-accent snap-back, XP/hearts proof, Replay/Return labels), new
+section 18 LAST (snapshots + clears the profile, drives the REAL
+first-run concise wall, restores). NOTE: tests/run-all.html does NOT
+seed a profile — the suite needs onboarding completed once in that
+browser profile (section 18 leaves it restored). Suite: 3 suites ·
+352 checks · 0 failures (Security 20, Audio contract 20, Launch
+regression 312); five gates pass.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.
