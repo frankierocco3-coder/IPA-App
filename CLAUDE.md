@@ -5,8 +5,9 @@ for this repository. Deeper detail lives in `docs/`.
 
 ## What this is
 
-A **speech and dialect trainer for actors** — IPA teaching, three stage
-dialects, and a rehearsal workspace for real text with record-and-compare.
+A **speech, acting and dialect trainer** — four workspaces (Speech, Acting,
+IPA, Accents & Dialects), four accent courses, and a rehearsal workspace for
+real text.
 
 Live: <https://frankierocco3-coder.github.io/IPA-App/>
 Repo: `frankierocco3-coder/IPA-App` (public). Owner: Frankie.
@@ -52,7 +53,7 @@ In the browser console, with the app running:
 ```js
 import('./tests/security.test.js').then(m => m.run());     // expect 20/20
 import('./tests/audio.test.js').then(m => m.run());        // expect 20/20
-import('./tests/regression.test.js').then(m => m.run());   // expect 33/33
+import('./tests/regression.test.js').then(m => m.run());   // ~490 checks
 ```
 Or open `tests/run-all.html` on the dev server — it hosts the app in a
 same-origin iframe (allowed by the clickjacking guard) and prints one
@@ -63,7 +64,9 @@ excludes it).
 
 ```
 index.html          CSP lives here (meta tag, must stay first in <head>)
-js/main.js          ALL views + routing (~2.5k lines). Views are render*() fns
+js/main.js          ALL views + routing (~8.9k lines, 71% of app JS —
+                    a split is planned; see docs/PRE_RELEASE_PUNCH_LIST.md B-R1).
+                    Views are render*() fns
 js/engine.js        16 exercise generators
 js/state.js         localStorage progress (XP, streak, lessons)
 js/db.js            IndexedDB wrapper + schema/migrations
@@ -78,7 +81,7 @@ js/scan.js          syllabification / scansion
 js/diagram.js       articulation diagrams (inline SVG)
 js/pron.js          lazy-loads the 2.8MB pronunciation dictionary
 js/data/            course, phonemes, 6 text libraries, pron.json
-audio/              12,638 pre-generated MP3s (~480MB)
+audio/              8,419 pre-generated MP3s (~288MB)
 tools/              offline scripts — NEVER deployed
 docs/               product, architecture, security, deployment, threat model
 tests/              security.test.js (browser-run)
@@ -125,7 +128,7 @@ tests/              security.test.js (browser-run)
 ## Current state
 
 **Working:** Duolingo-style shell (Speechcraft skin): left sidebar
-**Learn / Practice / Library / Studio / Progress / More** (same six on
+**Learn / Practice / Studio / Library / Progress / More** (same six on
 the mobile bottom nav, both rendered from the ONE `SECTIONS` array; Shop
 and Profile live under More but are still shell sections;
 LEGACY_SECTIONS maps old saved 'textbook'/'quests' states). You are always
@@ -718,11 +721,15 @@ IA REVISION (2026-08-12, committed locally, NOT pushed): the
 information architecture is now hub-based and title-only. Sidebar +
 bottom nav (one SECTIONS array): Learn, Practice, Studio, Library,
 Progress, More; a stale saved section falls back to Learn (test-
-pinned via reload). Library = EXACTLY 7 title-only primary cards in
-order: About the Accent, Words & Expressions, Dialect in Action
-(hidden unless actionFor(course) has approved pieces — stable
-courseId filtering, zero cross-dialect leakage), IPA, Rhetoric &
-Oratory, Your Instrument, Vowel Map. Studio = hub of EXACTLY 5
+pinned via reload). Accent Library = EXACTLY 6 primary cards in
+order: IPA, Words & Expressions, Dialect in Action (always listed;
+unapproved pieces count the drafts and carry an "In review" badge
+that opens renderDialectActionPending — stable courseId filtering,
+zero cross-dialect leakage), Rhetoric & Oratory, Your Instrument,
+Vowel Map. There is NO About-the-Accent card or page (removed
+2026-08-17): DIALECT_INFO survives as the Dialect Accuracy Standard
+behind the IPA inventory, dialect_lint and Sources & Credits, but
+has no learner-facing page and no aboutTitle field. Studio = hub of EXACTLY 5
 title-only cards: Scripts & Speeches (all text collections,
 renderTextsPage), Question Everything (the textbook), Playable
 Actions, Custom Work, Personal Dictionary. The old Studio landing is
@@ -793,6 +800,139 @@ seed a profile — the suite needs onboarding completed once in that
 browser profile (section 18 leaves it restored). Suite: 3 suites ·
 352 checks · 0 failures (Security 20, Audio contract 20, Launch
 regression 312); five gates pass.
+
+SPEECH SYSTEM (2026-08-13, UNCOMMITTED BY OWNER ORDER — do not commit,
+push, merge or deploy this work without explicit instruction): the
+written Speech learning + practice system. Data layer:
+js/data/speech/{course,glossary,approaches,routines,arcade,texts,
+reviews,store,dialects}.js + docs/SPEECH_REVIEW.md. Learn and Practice
+each fork via a remembered segmented control (default IPA; keys
+speechcraft-learn-mode / speechcraft-practice-mode) — IPA experiences
+untouched underneath. Learn → Speech: optional goal (4 options,
+localStorage only, never hides/locks/ranks — it only picks which
+application tab opens first), 21-lesson course (Start Here 5 / Stage 1
+Foundation 7 / Stage 2 Shaping Meaning 5 / Stage 3 Whole Speaker 4),
+15-term glossary as in-place dialogs (no history writes), Explore →
+Approaches to Acting (4 drafts) + Dialects in Speech (two entrances
+over EXISTING dialect records — zero duplication). REVIEW MODEL
+(docs/SPEECH_REVIEW.md): professional-tier bodies (Stage-1
+anatomy/health → voice professional/SLP; Approaches → acting teacher)
+are NEVER learner-facing while draft (honest awaiting pages; full
+drafts in #review); editorial-tier content may show while pending
+(Playable Actions precedent). Speech Practice: Guided Practice (8
+subjects × Prepare·Train·Apply = 24 records; ONLY the 8 batch-1 Train
+routines run; 16 drafts #review-only), Speechcraft Arcade (4 groups —
+Build Fluency 3 / Shape the Thought 4 / Change the Circumstances 3 /
+Change the Action 1; Context Shift built but hidden until Speaking in
+Context exists), Practice My Text. 22 original practice texts
+(provenance recorded). Studio: Practice This Text on every project
+(passage picker → routine/game → returns to the SAME project); scenes
+parsed only via strict NAME: lines (never guessed), character chosen
+manually. Reflection: 7 fixed private choices + optional note —
+self-observation, never evaluation. Scoring: objective recall games
+may tally; interpretive work is completion-only (+5 XP, no hearts
+ever, no percentages). Persistence: localStorage ONLY
+(speechcraft-speech-goal/-done/-history, capped 200; wipeSpeechData in
+the Privacy wipe + disclosure row) — NO IndexedDB change, so no
+storage gate was tripped. History references text by TITLE SNAPSHOT —
+project deletion dangles nothing. Lint 6l pins: the two central
+practice statements, 'autonomic' ban, alphabet-experiment steps +
+no-attribution, 8 subjects / 24 routines / 8-batch, 3 practice
+choices, 4 arcade groups, Context Shift hidden, deferred-feature and
+media-API bans, verbatim safety line. Tests: section 19a data
+invariants + 19b full drive (fork integrity, goal non-locking, tab
+separation, glossary/Back, draft gates, routine run + reflection +
+history, arcade grouping + Unicode first-letter + pause invariance,
+Studio XSS-inert flow + cue association + return + deletion, zero
+mic). Deferred (roadmap ONLY, no placeholders): Body Language, 5-step
+formula, Build a Character, Speaking in Context, Context Shift,
+Delivery in Action, case studies, video essays, YouTube, Build Fluency
+pathway, method Studio courses, Vocal Performance, Musical Theatre,
+Improv.
+
+THREE-WORKSPACE IA (2026-08-13, UNCOMMITTED with the Speech system —
+same owner hold): the page-level Learn/Practice tabs are replaced by a
+PERSISTENT WORKSPACE SELECTOR in the stats bar (#ws-chip → #ws-menu),
+available on every section. Workspaces: **Speech** (no accent context
+at all — no flag, no course chip), **IPA** (static "IPA Foundations"
+chip, accent-neutral, no selector), **Accents & Dialects** (the
+existing accent selector, four accent courses only; IPA Foundations
+moved to its own workspace). Stored at speechcraft-workspace with
+migration: retired learn/practice-mode keys → speech, else inferred
+from the stored course (core → ipa, otherwise accents). Switching
+never touches speechcraft-course, progress or projects. Sections keep
+their names; learnMain/practiceMain/libraryMain dispatch on the
+workspace. SPEECH LIBRARY = four collections — Speechcraft Principles,
+Your Speaking Instrument, Meaning Intention & Urgency, Presence &
+Integration — plus Further Study (Approaches to Acting, Dialects in
+Speech). "Stage 1/2/3" labels are RETIRED and lint-banned (internal
+stage ids remain; SPEECH_COLLECTIONS maps them). SPEECH LEARN is the
+ordered pathway over the SAME records: per-lesson objective, the
+reading, a link to its Library collection, an understanding check ONLY
+where an answer is objectively correct (interpretive work is never
+scored), and "Practice this skill" → the mapped routine/game.
+MY WORKING TEXT (speechcraft-working-text): requested only when an
+exercise needs text, four sources (provided Speechcraft texts /
+Scripts & Speeches / a Studio project / Custom Work), stored as a
+REFERENCE and re-resolved live — Studio records are never duplicated;
+an unavailable reference falls back to the honest prompt. REVIEW
+TRANSPARENCY: speechCensus() computes every displayed count from the
+records ("14 available · 7 prepared and awaiting professional review"
+today); the count is a button opening a read-only page showing each
+prepared item's title, collection, complete copy, status, required
+reviewer, why review is required, concerns, source file + id and
+learner visibility, badged "Prepared draft — awaiting professional
+review" — never "missing" or "coming soon". "What are you working
+toward?" moved out of the curriculum into Preferences (answer
+preserved, still gates nothing). Deferred "Put It Together /
+Performance Lab" is documented in docs/SPEECH_REVIEW.md and lint-
+banned from the UI. Lint 6m pins all of it. Tests: suite pins the
+accents workspace for sections 1–18 and restores; section 19 drives
+workspace switching, persistence-across-reload, per-workspace headers,
+the four collections, no-Stage-labels, the review page, the
+working-text reference rule and the Preferences move.
+
+SPEECH REFINEMENT (2026-08-13, UNCOMMITTED with the rest of the Speech
+work): Learn and Library now answer different questions from ONE set of
+records. LEARN = guided course, heading "Speech Course": Continue-
+learning card → next available lesson, "N of M lessons completed", a
+compact status card, and four COLLAPSIBLE numbered MODULES (1
+Foundations, 2 The Speaking Instrument, 3 Shaping Meaning, 4
+Integrating the Skills — never "stages"); only the active module is
+expanded. Numbering is derived (lessonNumber → 1.1–1.5, 2.1–2.7,
+3.1–3.5, 4.1–4.4) so gaps are impossible. A module with nothing
+available yet (Module 2 today) renders as ONE summary — "7 chapters
+prepared · awaiting professional review" + badged titles + View
+prepared drafts — instead of scattering draft cards through the
+sequence. Further Study is GONE from Learn (one "Continue exploring in
+the Speech Library" link remains). A Learn lesson = Objective → Read
+(card opening the Library chapter) → Try → Apply → Check → Complete
+and continue; Try/Apply appear only where a real exercise is mapped,
+and the full chapter text is never duplicated into Learn. LIBRARY =
+textbook: "Browse the complete Speechcraft reference by topic", a
+labelled search over titles/collections/headings/glossary terms
+(lessonKeywords), the four collections + Further Study, and a chapter
+route with full copy, semantic lists, dl term lists, source notes,
+in-collection Previous/Next and "Study this in Learn" — and NO check,
+mark-as-read, XP, completion control, lock or game. REVIEW AREA
+redesigned: filterable inventory table (title/collection/status/
+visibility/Open draft) grouped by category, then one draft at a time
+with clean reading copy and identifiers inside a collapsed "Review
+details". Counts come from speechReviewCategories(): today 7 course
+chapters (voice/SLP) + 4 acting approaches (acting teacher) = 11 —
+no discrepancy found. Learner-facing governance language is neutral
+("AI-assisted educational drafts require approval from a named,
+qualified human reviewer"); visibility reads "Draft copy is review-
+only. Learners can see its title and review status." STUDIO gains a
+compact My Working Text card (title/source/Open project/Change text/
+Practice this text, or Choose a text when empty) over the unchanged
+five cards. SPEECH PROGRESS is its own pane — lessons completed,
+practice sessions, skills practised, working texts explored, topics
+revisited, per-module progress, recent practice — with NO weak sounds,
+IPA symbols or percentage scores; IPA/accent progress is untouched in
+their workspaces. Free Play is hidden in Speech (it gates lessons the
+Speech course does not use). The Speech rail is a contextual "Next
+step" panel that never points at review work.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

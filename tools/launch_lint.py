@@ -271,6 +271,117 @@ def main():
     if "playableComparisons" not in main_js:
         fail("the bridge exercise no longer routes through the both-clips gate")
 
+    # 6l: the Speech system (2026-08-13) — binding invariants
+    speech_dir = ROOT / "js" / "data" / "speech"
+    sp_course = (speech_dir / "course.js").read_text(encoding="utf-8")
+    sp_routines = (speech_dir / "routines.js").read_text(encoding="utf-8")
+    sp_arcade = (speech_dir / "arcade.js").read_text(encoding="utf-8")
+    acting_dir = ROOT / "js" / "data" / "acting"
+    sp_all = "".join((speech_dir / f).read_text(encoding="utf-8")
+                     for f in ["course.js", "glossary.js",
+                               "routines.js", "arcade.js", "texts.js",
+                               "reviews.js", "store.js", "dialects.js"]) \
+        + "".join((acting_dir / f).read_text(encoding="utf-8")
+                  for f in ["course.js", "approaches.js", "practice.js", "store.js"])
+    # The two central practice statements, verbatim.
+    for pin in ["Practice one element at a time so you can recognize and control it. "
+                "Then carry that skill into thought, listening, movement and response.",
+                "Practice the parts. Communicate as a whole."]:
+        if pin not in sp_course:
+            fail("a central Speech practice statement drifted: %r" % pin[:50])
+    # Memory is automatic/second nature — NEVER "autonomic" (comments
+    # documenting this rule are fine).
+    if _re.search(r"\bautonomic\b", _strip_comments(sp_all), _re.I) \
+       or _re.search(r"\bautonomic\b", _strip_comments(main_js), _re.I):
+        fail("'autonomic' used for memory — the binding term is automatic/automaticity")
+    # The alphabet experiment: present, and carrying NO personal attribution.
+    for pin in ["name the 3rd letter", "13th", "14th", "16th", "23rd"]:
+        if pin not in sp_course:
+            fail("the alphabet experiment lost a step: %r" % pin)
+    if _re.search(r"Frankie|Rocco|my acting teacher|I invented|I created", sp_course, _re.I):
+        fail("the alphabet experiment (or course copy) carries a personal attribution")
+    # Eight subjects, 24 routine records, exactly 8 in the reviewed batch.
+    for subj in ["Body & Breath", "Voice & Resonance", "Articulation & Clarity",
+                 "Pace & Pause", "Emphasis & Phrasing", "Thought & Intention",
+                 "Movement & Speech", "Presence & Persuasion"]:
+        if "title: '%s'" % subj not in sp_routines:
+            fail("Guided Practice lost a subject: %r" % subj)
+    sp_routines_code = _strip_comments(sp_routines)
+    if sp_routines_code.count("id: 'rt-") != 24:
+        fail("Guided Practice must hold exactly 24 routine records (found %d)"
+             % sp_routines_code.count("id: 'rt-"))
+    if sp_routines_code.count("reviewBatch: 1") != 8:
+        fail("the reviewed routine batch must be exactly 8 (found %d)"
+             % sp_routines_code.count("reviewBatch: 1"))
+    # The three Speech Practice navigation choices.
+    for pin in ["Guided Practice", "Speechcraft Arcade", "Practice My Text"]:
+        if pin not in main_js:
+            fail("Speech Practice lost a primary choice: %r" % pin)
+    # Arcade grouping, and Context Shift hidden (no learner-facing trace).
+    for grp in ["Build Fluency", "Shape the Thought", "Change the Circumstances",
+                "Change the Action"]:
+        if "title: '%s'" % grp not in sp_arcade:
+            fail("Arcade lost a group: %r" % grp)
+    if "id: 'context-shift'" not in sp_arcade or "hidden: true" not in sp_arcade:
+        fail("Context Shift must exist in data as hidden (roadmap-approved, not shipped)")
+    if "Context Shift" in _strip_comments(main_js):
+        fail("Context Shift leaked onto a learner surface")
+    # No deferred-feature placeholders. Feature names are banned from all
+    # learner surfaces; 'coming soon' is banned inside the Speech system
+    # (the one pre-existing '— recordings coming soon' chip in the IPA
+    # guidebook predates this build and is governed by the audio contract).
+    for banned in ["Body Language pathway", "Build a Character",
+                   "Musical Theatre", "Vocal Performance"]:
+        if banned.lower() in _strip_comments(main_js).lower():
+            fail("a deferred feature grew a placeholder: %r" % banned)
+    if "coming soon" in _strip_comments(sp_all).lower():
+        fail("a 'coming soon' placeholder appeared inside the Speech system")
+    # The Speech system is written-only: no capture/synthesis API anywhere in it.
+    for api in ["getUserMedia", "MediaRecorder", "speechSynthesis", "new Audio(",
+                "<audio", "<video", "youtube"]:
+        if api.lower() in sp_all.lower():
+            fail("speech data references a forbidden media API: %r" % api)
+    # The safety line, verbatim, in the course data.
+    if ("Stop if you experience pain, burning, dizziness or increasing strain. "
+        "Persistent hoarseness or vocal difficulty should be evaluated by a "
+        "qualified professional.") not in sp_course:
+        fail("the Speech safety line drifted")
+
+    # 6m: the three-workspace IA (2026-08-13)
+    for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:
+        if pin not in main_js:
+            fail("a workspace is missing from the selector: %r" % pin)
+    if "IPA Foundations" not in main_js:
+        fail("the IPA workspace lost its accent-neutral context label")
+    # The Speech Library presents COLLECTIONS, never stage labels.
+    for banned in ["Stage 1 · Foundation", "Stage 2 · Shaping Meaning",
+                   "Stage 3 · The Whole Speaker"]:
+        if banned in _strip_comments(sp_course) or banned in _strip_comments(main_js):
+            fail("a retired Stage label survives in the Speech material: %r" % banned)
+    for pin in ["Speechcraft Principles", "Your Speaking Instrument",
+                "Meaning, Intention & Urgency", "Presence & Integration"]:
+        if "title: '%s'" % pin not in sp_course:
+            fail("the Speech Library lost a collection: %r" % pin)
+    # Review transparency: computed counts, never a hardcoded claim.
+    if "function speechCensus" not in main_js:
+        fail("the review census helper is gone — counts must derive from records")
+    if _re.search(r"7 prepared and awaiting", main_js):
+        fail("a review count is hardcoded in the UI — it must come from speechCensus()")
+    for pin in ["Prepared draft — awaiting professional review",
+                "awaiting professional review"]:
+        if pin not in main_js:
+            fail("review-status wording missing: %r" % pin)
+    # My Working Text: requested only when needed, never invented.
+    if "My Working Text" not in main_js:
+        fail("the working-text system lost its name")
+    for pin in ["function needWorkingText", "function resolveWorkingText"]:
+        if pin not in main_js:
+            fail("the working-text system lost a required part: %r" % pin)
+    # Deferred combined experience stays documented-only.
+    for banned in ["Performance Lab", "Put It Together"]:
+        if banned in _strip_comments(main_js):
+            fail("the deferred combined experience grew a UI surface: %r" % banned)
+
     # 6i: the Build F sonnet-edition catalog
     import hashlib as _hl
     sonnets_sha = _hl.sha256((ROOT / "js" / "data" / "sonnets.js").read_bytes()).hexdigest()

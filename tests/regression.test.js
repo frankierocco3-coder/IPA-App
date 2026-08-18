@@ -44,6 +44,39 @@ import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
          loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
 import { IDIOM } from '../js/data/idiom.js';
+import { SPEECH_LESSONS, SPEECH_COLLECTIONS, SPEECH_MODULES, speechModuleGroups, speechReading,
+         TEXTBOOK_PARTS, TEXTBOOK_END_MATTER, textbookOrder, textbookPartChapters, chapterTitle,
+         speechLessonsFor, speechLessonById,
+         collectionForLesson, moduleForLesson, lessonNumber, lessonKeywords,
+         SPEECH_REVIEW_WHY, SPEECH_LESSON_EXTRAS } from '../js/data/speech/course.js';
+import { glossaryTerm } from '../js/data/speech/glossary.js';
+import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from '../js/data/acting/approaches.js';
+import { SPEECH_ROUTINES, PRACTICE_SUBJECTS, routinesFor,
+         learnerRoutines, draftRoutines } from '../js/data/speech/routines.js';
+import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById } from '../js/data/speech/arcade.js';
+import { SPEECH_TEXTS } from '../js/data/speech/texts.js';
+import { speechApproved, speechBodyVisible, speechReviewFor } from '../js/data/speech/reviews.js';
+import { speechGoal, setSpeechGoal, speechHistory, speechLessonDone } from '../js/data/speech/store.js';
+import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
+         actingLessonById, actingLessonNumber } from '../js/data/acting/course.js';
+import { ACTING_GAMES, SCENE_STUDY_AREAS } from '../js/data/acting/practice.js';
+
+// Background tabs clamp setTimeout to as little as one callback per
+// minute, which stalls a drive built from many short waits. MessageChannel
+// tasks are not clamped, so the suite spins the event loop instead — the
+// waits stay honest, and a hidden tab finishes in the same wall time as a
+// visible one.
+function scSleep(ms) {
+  return new Promise(resolve => {
+    const end = performance.now() + ms;
+    const ch = new MessageChannel();
+    ch.port1.onmessage = () => {
+      if (performance.now() >= end) { ch.port1.close(); ch.port2.close(); resolve(); }
+      else ch.port2.postMessage(0);
+    };
+    ch.port2.postMessage(0);
+  });
+}
 
 const results = [];
 const ok = (name) => results.push({ name, pass: true });
@@ -59,6 +92,13 @@ export const EXPECTED_NAV = ['Learn', 'Practice', 'Studio', 'Library', 'Progress
 export async function run({ navDoc = document } = {}) {
   results.length = 0;
 
+  // Workspaces (2026-08-13 IA): sections 1–18 exercise the IPA/accent
+  // surfaces, so the suite pins the Accents & Dialects workspace for
+  // them. Section 19 drives the switching itself; the finally-block
+  // there restores whatever the user had.
+  const workspaceBefore = localStorage.getItem('speechcraft-workspace');
+  try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+
   // Spy on the APP's getUserMedia for the whole run (runner only): every
   // journey driven below must finish with this still at zero.
   let gumCalls = 0;
@@ -69,6 +109,9 @@ export async function run({ navDoc = document } = {}) {
   }
 
   // ── 1. Navigation: same order on both surfaces ──────────────
+  // Sections 1–18 run in the Accents & Dialects workspace, which keeps
+  // the full six-item sidebar. Speech and Acting have their own,
+  // Learn-free order — checked in section 21.
   const side = [...navDoc.querySelectorAll('.side-nav .side-item .side-label')].map(e => e.textContent.trim());
   const bottom = [...navDoc.querySelectorAll('.bottom-nav .bn-item .bn-label')].map(e => e.textContent.trim());
   check('desktop nav order', JSON.stringify(side) === JSON.stringify(EXPECTED_NAV),
@@ -230,12 +273,12 @@ export async function run({ navDoc = document } = {}) {
   // ── 6. Sound-page Prev/Next (runner only: drives the app iframe) ─
   if (navDoc !== document && navDoc.defaultView) {
     const w = navDoc.defaultView;
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     const clickIn = el => el?.dispatchEvent(new w.MouseEvent('click', { bubbles: true }));
     try {
       clickIn([...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
       await sleep(300);
-      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === 'IPA'));
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => ['IPA', 'IPA for This Accent'].includes(c.querySelector('h2')?.textContent)));
       await sleep(400);
       const chips = [...navDoc.querySelectorAll('.chart-chip')].map(c => c.dataset.sym);
       check('inventory page renders chips', chips.length > 20, `got ${chips.length}`);
@@ -269,7 +312,7 @@ export async function run({ navDoc = document } = {}) {
       check('final symbol: Next disabled', steps()[1]?.disabled === true);
       check('final symbol: Previous enabled', steps()[0]?.disabled === false);
     } catch (err) {
-      bad('sound-page navigation drive', String(err));
+      bad('sound-page navigation drive', String(err?.stack ?? err).slice(0, 220));
     }
   } else {
     ok('sound-page navigation drive (skipped in-app — run tests/run-all.html)');
@@ -333,7 +376,7 @@ export async function run({ navDoc = document } = {}) {
   // Journey sweep (runner only): drive the remaining core surfaces and
   // prove no capture control exists and getUserMedia was never called.
   if (appWin) {
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     const clickIn = el => el?.dispatchEvent(new appWin.MouseEvent('click', { bubbles: true }));
     const side = name => [...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
     const noCapture = where => check(`no capture controls: ${where}`,
@@ -351,7 +394,7 @@ export async function run({ navDoc = document } = {}) {
       // Sound page (guidebook)
       clickIn(navDoc.getElementById('brand-home')); await sleep(250);
       clickIn(side('Library')); await sleep(250);
-      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === 'IPA'));
+      clickIn([...navDoc.querySelectorAll('.track-card')].find(c => ['IPA', 'IPA for This Accent'].includes(c.querySelector('h2')?.textContent)));
       await sleep(350);
       clickIn(navDoc.querySelector('.chart-chip')); await sleep(300);
       noCapture('sound page');
@@ -386,7 +429,7 @@ export async function run({ navDoc = document } = {}) {
   }
 
   if (appWin && dbSupported()) {
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     const clickIn = el => el?.dispatchEvent(new appWin.MouseEvent('click', { bubbles: true }));
     const side = name => [...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
     const goHome = async () => { clickIn(navDoc.getElementById('brand-home')); await sleep(250); };
@@ -485,7 +528,7 @@ export async function run({ navDoc = document } = {}) {
         !navDoc.querySelector('.sonnet-tabs [data-mode="perform"]'));
       await goHome();
     } catch (err) {
-      bad('reader-take drive', String(err));
+      bad('reader-take drive', String(err?.stack ?? err).slice(0, 220));
     } finally {
       try { if (sonnetTake) await deleteTake(sonnetTake.id); } catch { /* best effort */ }
       try { if (ibsenTake) await deleteTake(ibsenTake.id); } catch { /* best effort */ }
@@ -546,7 +589,7 @@ export async function run({ navDoc = document } = {}) {
   // Real-UI journeys (runner only): the targeted CTAs launch, the session
   // completes, and free play survives an actual reload and course switch.
   if (appWin) {
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     const clickIn = el => el?.dispatchEvent(new appWin.MouseEvent('click', { bubbles: true }));
     const side = name => [...navDoc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
     // compact session driver for choice-based practice types
@@ -683,7 +726,7 @@ export async function run({ navDoc = document } = {}) {
   // and survives reloads).
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     try {
       let doc = null;
       for (let i = 0; i < 40; i++) {
@@ -697,10 +740,13 @@ export async function run({ navDoc = document } = {}) {
       const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
 
       // Reading pathway: Library card → credited PD pathway → back.
-      clickIn(side('Library')); await sleep(350);
-      const rhet = card('Rhetoric & Oratory');
-      check('pathway: Library shows the Rhetoric & Oratory card', !!rhet);
-      clickIn(rhet); await sleep(350);
+      // Rhetoric & Oratory is authoritative in the SPEECH Library.
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="speech"]')); await sleep(420);
+      clickIn(side('Library')); await sleep(400);
+      const rhet = doc.querySelector('[data-tile="col:rhetoric"]');
+      check('pathway: the Speech Library shelves Rhetoric & Oratory', !!rhet);
+      clickIn(rhet); await sleep(400);
       const pageText = doc.body.textContent;
       check('pathway: all three dialogues present, in reading order',
         ['Gorgias', 'Phaedrus', 'Republic'].every(t => pageText.includes(t))
@@ -719,9 +765,11 @@ export async function run({ navDoc = document } = {}) {
         doc.querySelectorAll('main a[href]').length === 0);
       check('pathway: a pathway, not an ebook shelf',
         pageText.includes('not an ebook shelf'));
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('pathway: Back returns to the Library shelf',
-        !!card('Rhetoric & Oratory') && !!card('Vowel Map'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      check('pathway: Back returns to the Speech Library shelf',
+        !!doc.querySelector('[data-tile="col:rhetoric"]'));
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(420);
 
       // Preface replay through the PERMANENT More card — full walk, Esc out,
       // and proof that nothing about the profile changed.
@@ -790,7 +838,7 @@ export async function run({ navDoc = document } = {}) {
         store.xp === xpBefore && JSON.stringify(store.onboarding) === obBefore
         && store.completed.size === doneBefore);
     } catch (err) {
-      bad('Build A drive', String(err));
+      bad('Build A drive', String(err?.stack ?? err).slice(0, 220));
     }
   } else {
     ok('Build A preface + pathway drive (runner only — run tests/run-all.html)');
@@ -968,7 +1016,7 @@ export async function run({ navDoc = document } = {}) {
 
   // The autosave saver: serialized, honest, never a false "Saved ✓".
   {
-    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const wait = scSleep;
     const st1 = [];
     createSaver({ delay: 1, onState: s => st1.push(s) }).now(async () => {});
     await wait(30);
@@ -1009,7 +1057,7 @@ export async function run({ navDoc = document } = {}) {
   // The journey, through the real UI (runner only).
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     let projId = null;
     try {
       let doc = frame.contentDocument;
@@ -1255,7 +1303,7 @@ export async function run({ navDoc = document } = {}) {
 
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     let paProj = null;
     try {
       let doc = frame.contentDocument;
@@ -1345,7 +1393,7 @@ export async function run({ navDoc = document } = {}) {
       check('playable UI: visiting the doorway stored nothing',
         (await dissectionFor('project', paProj.id)) == null);
     } catch (err) {
-      bad('Playable Actions drive', String(err));
+      bad('Playable Actions drive', String(err?.stack ?? err).slice(0, 220));
     } finally {
       if (paProj) {
         await deleteDissectionsFor(paProj.id).catch(() => {});
@@ -1459,7 +1507,7 @@ export async function run({ navDoc = document } = {}) {
 
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     const prevPrefs2 = localStorage.getItem('speechcraft-bridge');
     try {
       let doc = frame.contentDocument;
@@ -1483,8 +1531,8 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Library')); await sleep(350);
-      check('build D UI: draft Dialect in Action stays off the Library shelf',
-        !card('Dialect in Action'));
+      check('build D UI: Dialect in Action is listed, and says honestly that its pieces await review',
+        !!card('Dialect in Action'));
 
       // Practice page structure on Neutral American (no playable route in).
       clickIn(side('Practice')); await sleep(400);
@@ -1616,7 +1664,7 @@ export async function run({ navDoc = document } = {}) {
 
       check('build D UI: zero microphone calls across the Build D drive', mic14 === 0);
     } catch (err) {
-      bad('Build D drive', String(err));
+      bad('Build D drive', String(err?.stack ?? err).slice(0, 220));
     } finally {
       if (prevPrefs2 === null) localStorage.removeItem('speechcraft-bridge');
       else localStorage.setItem('speechcraft-bridge', prevPrefs2);
@@ -1675,7 +1723,7 @@ export async function run({ navDoc = document } = {}) {
   // Reader behavior under the draft gate (runner only).
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     try {
       let doc = frame.contentDocument;
       const clickIn = el => { const win = frame.contentWindow;
@@ -1717,7 +1765,7 @@ export async function run({ navDoc = document } = {}) {
       check('editions UI: Back returns to the sonnet list',
         !!doc.getElementById('sonnet-search'));
     } catch (err) {
-      bad('edition reader drive', String(err));
+      bad('edition reader drive', String(err?.stack ?? err).slice(0, 220));
     }
   } else {
     ok('edition reader drive (runner only — run tests/run-all.html)');
@@ -1726,7 +1774,7 @@ export async function run({ navDoc = document } = {}) {
   // ── 16. Permanent entries: the Dissection hub (runner only) ─
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     let hubProj = null;
     try {
       let doc = frame.contentDocument;
@@ -1847,7 +1895,7 @@ export async function run({ navDoc = document } = {}) {
         && !!doc.getElementById('proj-dissect'));
       check('separation: zero microphone calls across the drive', mic16 === 0);
     } catch (err) {
-      bad('Dissection textbook/worksheet drive', String(err));
+      bad('Dissection textbook/worksheet drive', String(err?.stack ?? err).slice(0, 220));
     } finally {
       if (hubProj) {
         await deleteDissectionsFor(hubProj.id).catch(() => {});
@@ -1872,7 +1920,7 @@ export async function run({ navDoc = document } = {}) {
 
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     try {
       let doc = frame.contentDocument;
       const clickIn = el => { const win = frame.contentWindow;
@@ -1892,9 +1940,12 @@ export async function run({ navDoc = document } = {}) {
       // once that course has approved pieces — honest absence otherwise.)
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Library')); await sleep(350);
-      const wantLib = ['About the Accent', 'Words & Expressions',
-        ...(actionFor('nam').length ? ['Dialect in Action'] : []),
-        'IPA', 'Rhetoric & Oratory', 'Your Instrument', 'Vowel Map'];
+      // Dialect in Action is always listed now (an honest pending page
+      // when nothing has passed dialect review), and shared resources
+      // say so in their titles.
+      // No About-the-Accent entry: the accent Library opens on IPA.
+      const wantLib = ['IPA for This Accent', 'Words & Expressions', 'Dialect in Action',
+        'Rhetoric & Oratory', 'Your Instrument', 'Vowel Map'];
       check('IA: Library shows exactly the approved cards in the approved order',
         JSON.stringify(hubTitles()) === JSON.stringify(wantLib), hubTitles().join(' | '));
       check('IA: Library hub cards are title-only — no blurbs, subtitles or status copy',
@@ -1903,7 +1954,7 @@ export async function run({ navDoc = document } = {}) {
       check('IA: no retired Library cards remain',
         !card('Accent Bridge') && !card('Scripts & Speeches') && !card('Playable Actions')
         && !card('Speech Dissection') && !card('Question Everything')
-        && !card('Personal Dictionary') && !card('Why Speech Matters'));
+        && !card('Personal Dictionary'));
 
       // Studio: the five approved cards, exact order, title-only.
       clickIn(side('Studio')); await sleep(350);
@@ -1970,10 +2021,741 @@ export async function run({ navDoc = document } = {}) {
         && localStorage.getItem('speechcraft-section') === 'learn',
         `on=${doc2?.querySelector('.side-item.on')?.textContent.trim()} stored=${localStorage.getItem('speechcraft-section')}`);
     } catch (err) {
-      bad('IA revision drive', String(err));
+      bad('IA revision drive', String(err?.stack ?? err).slice(0, 220));
     }
   } else {
     ok('IA revision drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 19a. The Speech system: data-level invariants ────────────
+  {
+    const stageCounts = ['start', 'foundation', 'meaning', 'whole'].map(s => speechLessonsFor(s).length);
+    check('speech: 20 chapters — 4 Principles, 7 Instrument, 5 Meaning, 4 Presence',
+      String(stageCounts) === '4,7,5,4' && SPEECH_LESSONS.length === 20, stageCounts.join(','));
+    const courseText = JSON.stringify(SPEECH_LESSONS);
+    check('speech: both central practice statements preserved exactly',
+      courseText.includes('Practice one element at a time so you can recognize and control it. Then carry that skill into thought, listening, movement and response.')
+      && courseText.includes('Practice the parts. Communicate as a whole.'));
+    check('speech: memory is automatic/second nature — never autonomic',
+      !/\bautonomic\b/i.test(courseText));
+    const alpha = speechLessonById('sp-start-alphabet');
+    const alphaText = JSON.stringify(alpha);
+    check('speech: alphabet experiment — the five letters, no recitation first, no attribution',
+      alpha.body.some(b => b.experiment?.steps.length === 5)
+      && alphaText.includes('Without reciting the alphabet first')
+      && !/Frankie|Rocco|invented|my teacher/i.test(alphaText)
+      && alphaText.includes('no sensation you are supposed to have'));
+    check('speech: stage-1 anatomy bodies are NEVER learner-visible while draft',
+      speechLessonsFor('foundation').every(l =>
+        l.requiredReviewer === 'voice-professional' && !speechBodyVisible(l)));
+    check('speech: editorial lessons render while pending, per accepted precedent',
+      speechLessonsFor('start').every(l => speechBodyVisible(l)));
+    check('speech: glossary holds the 15 required terms',
+      ['automaticity', 'given-circumstances', 'objective', 'overall-objective', 'scene-objective',
+       'obstacle', 'action', 'tactic', 'beat', 'operative-word', 'urgency', 'resonance',
+       'articulation', 'rhetoric', 'presence'].every(t => !!glossaryTerm(t)));
+    check('speech: four acting approaches, complete sections, all gated behind acting review',
+      ACTING_APPROACHES.length === 4
+      && ACTING_APPROACHES.every(a =>
+        ['background', 'principles', 'terminology', 'considers', 'misunderstandings', 'sources']
+          .every(k => (a.sections[k] ?? '').length > 100)
+        && a.sections.questions.length >= 3
+        && !speechApproved(a.id))
+      && APPROACH_DISCLAIMER.includes('not official training'));
+    check('speech: 24 routine records — 8 reviewed-batch Train, 16 drafts',
+      SPEECH_ROUTINES.length === 24
+      && learnerRoutines().length === 8
+      && learnerRoutines().every(r => r.mode === 'train' && r.reviewBatch === 1)
+      && draftRoutines().length === 16
+      && PRACTICE_SUBJECTS.length === 8
+      && PRACTICE_SUBJECTS.every(s => routinesFor(s.id).length === 3));
+    check('speech: arcade groups hold 3/4/3/1 visible games; Context Shift unreachable',
+      String(ARCADE_GROUPS.map(g => arcadeGamesFor(g.id).length)) === '3,4,3,1'
+      && arcadeGameById('context-shift') === null
+      && ARCADE_GROUPS.length === 4);
+    check('speech: every practice-text kind exists, all original with provenance',
+      ['line', 'scene', 'request', 'apology', 'boundary', 'announcement', 'toast',
+       'persuasion', 'monologue', 'presentation']
+        .every(k => SPEECH_TEXTS.some(t => t.kind === k))
+      && SPEECH_TEXTS.every(t => t.provenance.includes('Original Speechcraft writing')
+        && t.requiredReviewer === 'editorial'));
+    const goalBefore = speechGoal();
+    setSpeechGoal('totally-bogus');
+    check('speech: a malformed stored goal falls back safely to none', speechGoal() === null);
+    setSpeechGoal('acting');
+    check('speech: goal set/read roundtrip', speechGoal() === 'acting');
+    setSpeechGoal(goalBefore);
+    check('speech: goal never gates content — visibility is review-status only, goal-independent',
+      SPEECH_LESSONS.every(l => typeof speechBodyVisible(l) === 'boolean'));
+    // Library collections cover every lesson exactly once, in order.
+    check('speech: four Library collections map the four stages, no lesson orphaned or doubled',
+      SPEECH_COLLECTIONS.length === 4
+      && String(SPEECH_COLLECTIONS.map(c => c.title))
+        === 'Speechcraft Principles,Your Speaking Instrument,Meaning, Intention & Urgency,Presence & Integration'
+      && SPEECH_COLLECTIONS.reduce((n, c) => n + speechLessonsFor(c.stage).length, 0) === SPEECH_LESSONS.length
+      && SPEECH_LESSONS.every(l => !!collectionForLesson(l)));
+    check('speech: every prepared draft carries a stated reason for review',
+      SPEECH_LESSONS.filter(l => !speechBodyVisible(l))
+        .every(l => (SPEECH_REVIEW_WHY[l.id] ?? '').length > 40));
+    check('speech: understanding checks exist only where an answer is objectively correct',
+      Object.entries(SPEECH_LESSON_EXTRAS).every(([id, x]) =>
+        !x.check || (Array.isArray(x.check.choices)
+          && Number.isInteger(x.check.answer)
+          && x.check.answer >= 0 && x.check.answer < x.check.choices.length))
+      // the interpretive lessons must never carry a scored check
+      && !SPEECH_LESSON_EXTRAS['sp-m-want']?.check
+      && !SPEECH_LESSON_EXTRAS['sp-m-urgency']?.check
+      && !SPEECH_LESSON_EXTRAS['sp-m-emphasis']?.check
+      && !SPEECH_LESSON_EXTRAS['sp-w-presence']?.check);
+    check('speech: Learn and Library read the SAME records — one authoritative source',
+      SPEECH_MODULES.every(m => {
+        const byModule = speechLessonsFor(m.stage);
+        const col = SPEECH_COLLECTIONS.find(c => c.stage === m.stage);
+        return String(byModule.map(l => l.id)) === String(speechLessonsFor(col.stage).map(l => l.id));
+      })
+      && SPEECH_LESSONS.every(l => !!moduleForLesson(l) && !!collectionForLesson(l)));
+    check('speech: search keywords derive from the records (title, collection, headings, terms)',
+      lessonKeywords(speechLessonById('sp-m-urgency')).includes('urgency')
+      && lessonKeywords(speechLessonById('sp-m-urgency')).includes('meaning, intention & urgency')
+      && lessonKeywords(speechLessonById('sp-f-jaw')).includes('jaw'));
+    check('speech: every lesson states an objective for the Learn pathway',
+      SPEECH_LESSONS.every(l => (SPEECH_LESSON_EXTRAS[l.id]?.objective ?? '').length > 20));
+    check('speech: practice links point at real routines and visible games',
+      Object.values(SPEECH_LESSON_EXTRAS).filter(x => x.practice).every(x =>
+        x.practice.kind === 'routine'
+          ? !!SPEECH_ROUTINES.find(r => r.id === x.practice.ref && r.reviewBatch === 1)
+          : !!arcadeGameById(x.practice.ref)));
+  }
+
+
+  // Mirrors the app's available-lesson sequence so progress assertions
+  // are computed from the same records the UI uses.
+  const speechCourseSequenceMirror = () => {
+    const seq = SPEECH_MODULES.flatMap(m => speechLessonsFor(m.stage))
+      .filter(l => speechBodyVisible(l));
+    return { total: seq.length, done: seq.filter(l => speechLessonDone(l.id)).length };
+  };
+  // ── 19b. The Speech system: the driven journeys ──────────────
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = scSleep;
+    let spProj = null;
+    const modesBefore = [localStorage.getItem('speechcraft-working-text')];
+    try {
+      let doc = frame.contentDocument;
+      const w = () => frame.contentWindow;
+      const clickIn = el => el?.dispatchEvent(new (frame.contentWindow.MouseEvent)('click', { bubbles: true }));
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
+      const until = async (fn, ms = 10000) => { const t0 = Date.now();
+        while (Date.now() - t0 < ms) { if (fn()) return true; await sleep(200); } return fn(); };
+      // The persistent workspace selector, driven the way a user does.
+      const pickWorkspace = async id => {
+        clickIn(doc.getElementById('ws-chip')); await sleep(150);
+        clickIn(doc.querySelector(`[data-ws="${id}"]`)); await sleep(400);
+      };
+      const statsbarText = () => doc.getElementById('statsbar')?.textContent ?? '';
+      let mic19 = 0;
+      if (w().navigator.mediaDevices?.getUserMedia) {
+        const orig19 = w().navigator.mediaDevices.getUserMedia.bind(w().navigator.mediaDevices);
+        w().navigator.mediaDevices.getUserMedia = (...a) => { mic19++; return orig19(...a); };
+      }
+      const noMedia = where => check(`speech: no audio/video element or capture control — ${where}`,
+        !doc.querySelector('main audio, main video, [data-tryit], #perf-rec, .rating')
+        && !doc.querySelector('main')?.textContent.includes('🔊'));
+
+      // ── The three workspaces ──────────────────────────────────
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Learn')); await sleep(350);
+      check('workspaces: all three are selectable from the persistent selector',
+        !!doc.getElementById('ws-chip')
+        && ['speech', 'ipa', 'accents'].every(id => {
+          doc.getElementById('ws-chip').click();
+          return !!doc.querySelector(`[data-ws="${id}"]`);
+        }));
+      await pickWorkspace('accents');
+      check('workspaces: Accents & Dialects keeps its accent selector and course',
+        !!doc.getElementById('course-chip')
+        && statsbarText().includes('Neutral American')
+        && doc.body.textContent.includes('Stage 1 · Orientation'));
+      clickIn(doc.getElementById('course-chip')); await sleep(200);
+      check('workspaces: the accent menu offers the four accent courses, not IPA Foundations',
+        ['Neutral American', 'Traditional RP', 'Standard British', 'Australian']
+          .every(n => [...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes(n)))
+        && ![...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes('IPA Foundations')));
+      clickIn(doc.body); await sleep(150);
+      await pickWorkspace('ipa');
+      check('workspaces: IPA is accent-neutral — fixed IPA Foundations context, no accent selector',
+        !!doc.getElementById('ipa-context')
+        && statsbarText().includes('IPA Foundations')
+        && !doc.getElementById('course-chip')
+        && !statsbarText().includes('Neutral American'));
+      check('workspaces: the sidebar works unchanged inside a workspace',
+        [...doc.querySelectorAll('.side-nav .side-item .side-label')].map(e => e.textContent.trim())
+          .join() === EXPECTED_NAV.join());
+      await pickWorkspace('speech');
+      check('workspaces: Speech never shows an accent as its context',
+        !doc.getElementById('course-chip')
+        && !statsbarText().includes('Neutral American')
+        && !statsbarText().includes('🇺🇸')
+        && statsbarText().includes('Speech'));
+      check('workspaces: Speech carries the same six-section sidebar',
+        [...doc.querySelectorAll('.side-nav .side-item .side-label')].map(e => e.textContent.trim())
+          .join() === EXPECTED_NAV.join());
+      // Persistence across a real reload.
+      frame.contentWindow.location.reload();
+      let rdoc = null;
+      for (let i = 0; i < 60; i++) { await sleep(200); rdoc = frame.contentDocument;
+        if (rdoc?.getElementById('ws-chip')) break; }
+      check('workspaces: the choice survives a reload',
+        localStorage.getItem('speechcraft-workspace') === 'speech'
+        && (rdoc?.getElementById('statsbar')?.textContent ?? '').includes('Speech')
+        && !rdoc?.getElementById('course-chip'));
+      doc = frame.contentDocument;
+      check('workspaces: switching never disturbed the stored accent course',
+        localStorage.getItem('speechcraft-course') === 'nam');
+      const awaitingReal = SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).length;
+      const availableReal = SPEECH_LESSONS.length - awaitingReal;
+      const approachesReal = ACTING_APPROACHES.filter(a => !speechApproved(a.id)).length;
+      // Speech has no Learn section: the workspace opens on its Library.
+      clickIn(side('Library')); await sleep(400);
+      check('speech: the Library shelves five principal resources',
+        doc.querySelector('.page-h')?.textContent === 'Speech Library'
+        && doc.querySelectorAll('.tile-grid .tile').length === 5);
+      check('speech: Free Play, hearts, gems and streak are hidden here',
+        !doc.getElementById('freeplay')
+        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('❤️')
+        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('💎')
+        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('🔥'));
+      check('speech: the rail offers a next step and the real review count',
+        (doc.getElementById('rail-quests')?.textContent ?? '').includes('Next step')
+        && (doc.getElementById('rail-quests')?.textContent ?? '').includes('Professional review'));
+      check('speech: the research question left the curriculum for Preferences',
+        !doc.querySelector('[data-goal]')
+        && !doc.body.textContent.includes('What are you working toward?'));
+      // A chapter opens straight from a collection, with no lesson chrome.
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ch="sp-start-parts"]')); await sleep(400);
+      check('library: a chapter has no check, no mark-as-read, no XP, no completion control',
+        !doc.querySelector('.sp-check') && !doc.getElementById('sp-done')
+        && !doc.querySelector('[data-check]')
+        && !/\bXP\b/.test(doc.querySelector('main')?.textContent ?? '')
+        && doc.activeElement?.id === 'sp-h');
+      check('library: a chapter keeps textbook prev/next and a contents link',
+        !!doc.querySelector('.sp-chapter-nav') && !!doc.getElementById('sp-to-contents'));
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+
+      // The review area: inventory first, then one draft at a time.
+      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
+      await sleep(380);
+      clickIn(doc.querySelector('.review-strip')); await sleep(420);
+      check('review: the inventory lists every prepared draft with filters by category',
+        doc.querySelectorAll('[data-open-draft]').length === awaitingReal
+        && doc.querySelectorAll('.sp-inventory').length === 1
+        && [...doc.querySelectorAll('[data-filter]')].length === 2);
+      check('review: learner-facing copy uses neutral governance language',
+        !doc.body.textContent.includes('Claude')
+        && doc.body.textContent.includes('named, qualified human reviewer'));
+      clickIn(doc.querySelector('[data-filter="all"]')); await sleep(300);
+      const probeDraft = SPEECH_LESSONS.find(l => !speechBodyVisible(l));
+      clickIn(doc.querySelector(`[data-open-draft="${probeDraft.id}"]`)); await sleep(400);
+      check('review: a draft opens with its complete copy and clean reading presentation',
+        (doc.querySelector('.sp-review-copy')?.textContent ?? '').length > 500
+        && !!doc.querySelector('.sp-badge')
+        && doc.activeElement?.id === 'sp-h');
+      check('review: identifiers live inside a collapsed Review details section',
+        !!doc.querySelector('.sp-review-details')
+        && doc.querySelector('.sp-review-details').open === false
+        && doc.querySelector('.sp-review-details').textContent.includes(probeDraft.id)
+        && doc.querySelector('.sp-review-details').textContent.includes('js/data/speech/course.js'));
+      check('review: visibility wording is consistent, never self-contradictory',
+        doc.body.textContent.includes('Draft copy is review-only')
+        && !doc.body.textContent.includes('Hidden from learners. The title appears'));
+      check('review: no reviewer or date is invented, and nothing is approved',
+        doc.body.textContent.includes('None recorded')
+        && SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).every(l => !speechApproved(l.id))
+        && ACTING_APPROACHES.every(a => !speechApproved(a.id)));
+      check('review: prepared work is never called missing or coming soon',
+        !/coming soon|not yet written|is missing/i.test(doc.querySelector('main')?.textContent ?? ''));
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+
+      // The two-application lesson: distinct tabs, acting default under
+      // the acting goal, glossary dialog that never touches history.
+      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
+      await sleep(350);
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ch="sp-m-want"]'));
+      await until(() => doc.querySelector('.sp-tabs'));
+      const tabs = [...doc.querySelectorAll('.sp-tabs .son-tab')].map(b => b.textContent);
+      check('speech: What Do You Want? keeps Everyday and Acting & Text distinct',
+        String(tabs) === 'Everyday Speaking,Acting & Text'
+        && doc.querySelector('.sp-tabs .son-tab.on')?.textContent === 'Acting & Text'
+        && doc.body.textContent.includes('Given circumstances')
+        && !doc.querySelector('.sp-tabpane[data-pane="everyday"]:not([hidden])'));
+      clickIn([...doc.querySelectorAll('.sp-tabs .son-tab')].find(b => b.textContent === 'Everyday Speaking'));
+      await sleep(200);
+      check('speech: the Everyday tab carries its own teaching, not a copy of the acting tab',
+        !!doc.querySelector('.sp-tabpane[data-pane="everyday"]:not([hidden])')
+        && !doc.querySelector('.sp-tabpane[data-pane="acting"]:not([hidden])')
+        && doc.querySelector('.sp-tabpane[data-pane="everyday"]').textContent.includes('Desired result'));
+      const histLen = w().history.length;
+      const hashBefore = w().location.hash;
+      clickIn(doc.querySelector('[data-gloss]')); await sleep(250);
+      check('speech: a glossary term opens in place as an accessible dialog',
+        !!doc.querySelector('.gloss-overlay [role="dialog"]')
+        && doc.activeElement === doc.querySelector('.gloss-card .btn'));
+      doc.querySelector('.gloss-card')?.dispatchEvent(
+        new (frame.contentWindow.KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
+      await sleep(200);
+      check('speech: Esc dismisses the glossary; browser history untouched',
+        !doc.querySelector('.gloss-overlay')
+        && w().history.length === histLen && w().location.hash === hashBefore);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+
+      // Completion: +5 XP once, never twice; then a gated Stage-1 page.
+      const xpA = store.xp;
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      check('speech: reading a chapter never awards XP — the Library is not a course',
+        store.xp === xpA);
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ch="sp-f-jaw"]')); await sleep(380);
+      check('speech: a draft anatomy lesson shows the honest gate, no body content',
+        doc.body.textContent.includes('awaiting review by a qualified voice professional')
+        && !doc.body.textContent.includes('bruxism'));
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+
+      // Approaches now live in the Acting Library.
+      await pickWorkspace('acting'); await sleep(350);
+      clickIn(doc.querySelector('[data-tile="col:approaches"]')); await sleep(350);
+      check('speech: all four approaches held behind acting review',
+        doc.querySelectorAll('[data-approach]').length === 4
+        && [...doc.querySelectorAll('[data-approach]')].every(b => b.textContent.includes('awaiting review')));
+      clickIn(doc.querySelector('[data-approach="adler"]')); await sleep(300);
+      check('speech: a draft approach page carries no method content',
+        doc.body.textContent.includes('awaiting review by a qualified acting teacher')
+        && !doc.body.textContent.includes('justification'));
+      clickIn(doc.getElementById('nav-back')); await sleep(250);
+      await pickWorkspace('speech'); await sleep(350);
+      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
+      await sleep(350);
+      clickIn(doc.querySelector('[data-tile="col:dialects"]')); await sleep(420);
+      // Four facets since the About-page removal (2026-08-17) took the four
+      // about-* facets with it. data-facet carries `renders`, not `id`.
+      check('speech: Dialects in Speech shows both entrances over shared records',
+        doc.querySelectorAll('[data-facet]').length === 4
+        && doc.body.textContent.includes('never means sharing one personality'));
+      check('speech: every facet button routes to a real surface — none are dead',
+        [...doc.querySelectorAll('[data-facet]')]
+          .every(b => ['inventory', 'idioms', 'action', 'bridge-practice'].includes(b.dataset.facet)));
+      clickIn([...doc.querySelectorAll('[data-facet]')].find(b => b.dataset.facet === 'idioms'));
+      await sleep(400);
+      check('speech: a facet routes to the EXISTING surface — no duplicate content',
+        doc.body.textContent.includes('Words & Expressions'));
+
+      // The Speech Library: four named collections, no Stage labels.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(400);
+      check('library: the landing page is a bookshelf of principal resources',
+        doc.querySelector('.page-h')?.textContent === 'Speech Library'
+        && doc.querySelectorAll('.tile-grid .tile').length === 5
+        && doc.querySelectorAll('[data-item]').length === 0
+        && !doc.body.textContent.includes('The Alphabet Experiment'));
+      check('library: the retired instructional collections are no longer top-level cards',
+        ['Speechcraft Principles', 'Your Speaking Instrument',
+         'Meaning, Intention & Urgency', 'Presence & Integration']
+          .every(t => !doc.body.textContent.includes(t)));
+      check('library: the textbook heads the shelf, with its computed chapter count',
+        [...doc.querySelectorAll('.tile-title')].map(t => t.textContent.replace(/\s+/g, ''))
+          .join('|').includes('SpeechcraftPrinciples')
+        && [...doc.querySelectorAll('.tile-title')].map(t => t.textContent.replace(/\s+/g, ''))
+          .join('|').includes('SpeechcraftTextbook'),
+        [...doc.querySelectorAll('.tile-title')].map(t => t.textContent).join(' | '));
+      check('library: the review strip carries the real count and opens the inventory',
+        (doc.querySelector('.review-strip')?.textContent ?? '')
+          .includes(String(SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).length)));
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(400);
+      check('library: the textbook opens on its four-part contents, without emoji rows',
+        doc.querySelectorAll('.tb-part').length === 4
+        && doc.querySelectorAll('.chapter-row').length === textbookOrder().length
+        && ![...doc.querySelectorAll('.chapter-row')].some(t => /\p{Extended_Pictographic}/u.test(t.textContent)));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
+      await sleep(380);
+      (() => {
+        const sf = doc.getElementById('sp-lib-search');
+        if (!sf) return;
+        sf.value = 'alphabet';
+        sf.dispatchEvent(new (frame.contentWindow.Event)('input', { bubbles: true }));
+      })();
+      await sleep(300);
+      check('library: search groups its results and opens a chapter directly',
+        doc.querySelectorAll('[data-item]').length === 1
+        && doc.querySelector('.item-title')?.textContent === 'The Alphabet Experiment');
+      clickIn(doc.querySelector('[data-item]')); await sleep(400);
+      check('library: a searched chapter opens without passing through its collection',
+        doc.querySelector('main h1')?.textContent === 'The Alphabet Experiment'
+        && !doc.querySelector('.sp-check') && !doc.getElementById('sp-done'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      (() => {
+        const sf = doc.getElementById('sp-lib-search');
+        if (!sf) return;
+        sf.value = '';
+        sf.dispatchEvent(new (frame.contentWindow.Event)('input', { bubbles: true }));
+      })();
+      await sleep(250);
+      noMedia('Speech Library');
+
+      // Practice: the three primary choices (titles only), games only here.
+      clickIn(side('Practice')); await sleep(400);
+      check('speech: exactly three title-only primary choices',
+        String([...doc.querySelectorAll('.track-card h2')].map(h => h.textContent))
+          === 'Guided Practice,Speechcraft Arcade,Practice My Text'
+        && [...doc.querySelectorAll('.track-card .track-info')].every(i => !i.querySelector('p')));
+      noMedia('Speech Practice hub');
+
+      // Guided Practice: 8 subjects; segmented Prepare · Train · Apply;
+      // drafts stay drafts; a full Train run with reflection.
+      clickIn(card('Guided Practice')); await sleep(350);
+      check('speech: eight Guided Practice subjects', doc.querySelectorAll('[data-subject]').length === 8);
+      clickIn(doc.querySelector('[data-subject="emphasis"]')); await sleep(350);
+      check('speech: compact Prepare · Train · Apply selector, Train ready, Prepare honestly draft',
+        String([...doc.querySelectorAll('[data-mode-seg]')].map(b => b.textContent)) === 'Prepare,Train,Apply'
+        && !!doc.getElementById('sp-run'));
+      clickIn([...doc.querySelectorAll('[data-mode-seg]')].find(b => b.dataset.modeSeg === 'apply'));
+      await sleep(300);
+      check('speech: an unreviewed routine never runs',
+        !!doc.getElementById('sp-draft-note') && !doc.getElementById('sp-run'));
+      clickIn([...doc.querySelectorAll('[data-mode-seg]')].find(b => b.dataset.modeSeg === 'train'));
+      await sleep(300);
+      const xpB = store.xp; const heartsB = store.hearts;
+      // No working text yet: the exercise must ASK, never invent one.
+      localStorage.removeItem('speechcraft-working-text');
+      clickIn(doc.getElementById('sp-run')); await sleep(400);
+      check('speech: an exercise needing text asks honestly, offering all four sources',
+        doc.querySelector('main h1')?.textContent === 'My Working Text'
+        && !!doc.querySelector('[data-builtin]')
+        && !!doc.getElementById('wt-scripts')
+        && !!doc.getElementById('wt-projects')
+        && !!doc.getElementById('wt-custom'));
+      clickIn(doc.querySelector('[data-builtin="st-line-3"]')); await sleep(350);
+      check('speech: the runner opens with comfort and safety language and the inert passage',
+        doc.body.textContent.includes('adapt or skip anything')
+        && doc.body.textContent.includes('Stop if you experience pain')
+        && doc.getElementById('sp-passage')?.textContent === 'I never said she took it.');
+      for (let i = 0; i < 10; i++) {
+        const b = doc.getElementById('sp-next');
+        if (!b) break;
+        clickIn(b); await sleep(120);
+      }
+      await until(() => doc.querySelector('.sp-reflect'));
+      check('speech: completion is completion — XP without any quality score',
+        doc.querySelector('.sp-reflect h1')?.textContent === 'Practice complete · +5 XP'
+        && !doc.body.textContent.includes('%')
+        && doc.querySelectorAll('[data-refl]').length === 7);
+      clickIn(doc.querySelector('[data-refl="noticed-effort"]'));
+      const noteEl = doc.getElementById('sp-refl-note');
+      if (noteEl) { noteEl.value = 'private note'; }
+      clickIn(doc.getElementById('sp-refl-done')); await sleep(400);
+      const hist = speechHistory();
+      check('speech: history records the practice, reflection and note — hearts untouched',
+        store.xp === xpB + 5 && store.hearts === heartsB
+        && hist[hist.length - 1]?.ref === 'rt-emph-train'
+        && String(hist[hist.length - 1]?.reflections) === 'noticed-effort'
+        && hist[hist.length - 1]?.note === 'private note');
+      check('speech: reflection returns to Speech Practice',
+        !!card('Guided Practice') && !!card('Speechcraft Arcade'));
+
+      // Arcade: grouping, hidden Context Shift, a fluency game with
+      // Unicode-safe first letters, and an interpretive game without scores.
+      clickIn(card('Speechcraft Arcade')); await sleep(350);
+      const groups = [...doc.querySelectorAll('main h2.chart-h')].map(h => h.textContent);
+      check('speech: arcade groups render in the approved order',
+        String(groups) === 'Build Fluency,Shape the Thought,Change the Circumstances,Change the Action'
+        && doc.querySelectorAll('.mode-card').length === 11
+        && !doc.body.textContent.includes('Context Shift'));
+      localStorage.removeItem('speechcraft-working-text');
+      clickIn(doc.querySelector('[data-game="first-letter"]')); await sleep(300);
+      clickIn(doc.querySelector('[data-builtin="st-apology-2"]')); await sleep(350);
+      const flText = doc.getElementById('sp-fl')?.textContent ?? '';
+      check('speech: first-letter recall preserves punctuation and Unicode text',
+        flText.startsWith('Y n m t s s t n, a I s n.'), flText.slice(0, 60));
+      // A phone must hold a game without sideways scroll.
+      const oldW19 = frame.style.width;
+      frame.style.width = '375px'; await sleep(250);
+      check('speech: a game fits a phone without horizontal scroll',
+        doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
+        `scroll=${doc.documentElement.scrollWidth}`);
+      frame.style.width = oldW19; await sleep(200);
+      clickIn(doc.getElementById('sp-done')); await sleep(300);
+      clickIn(doc.getElementById('sp-refl-done')); await sleep(350);
+      clickIn(card('Speechcraft Arcade')); await sleep(350);
+      clickIn(doc.querySelector('[data-game="move-pause"]')); await sleep(300);
+      clickIn(doc.querySelector('[data-builtin="st-line-1"]')); await sleep(350);
+      const mpWords = () => [...doc.querySelectorAll('#sp-mp span')].map(s => s.textContent).join('');
+      const wordsBefore19 = mpWords();
+      clickIn(doc.querySelectorAll('.sp-gap')[2]); await sleep(150);
+      check('speech: Move the Pause never alters the words',
+        mpWords() === wordsBefore19 && !!doc.querySelector('.sp-gap.on'));
+      clickIn(doc.getElementById('sp-done')); await sleep(300);
+      check('speech: an interpretive game ends in completion, never a tally',
+        !/\d+\/\d+/.test(doc.querySelector('.sp-reflect h1')?.textContent ?? 'x/x'));
+      clickIn(doc.getElementById('sp-refl-done')); await sleep(350);
+
+      // Studio integration: XSS-inert passage selection, manual character
+      // choice, correct cue association, and return to the same project.
+      spProj = await createProject({
+        title: '__speech drive (safe to delete)',
+        contentType: 'scene',
+        text: 'A: <img src=x onerror="window.__spXss=1"> did you wait?\nB: I said I would — didn’t I?\nA: People say things.\nB: Not me.',
+      });
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Studio')); await sleep(350);
+      clickIn(card('Custom Work')); await sleep(400);
+      const pc19 = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === spProj.id);
+      clickIn(pc19?.querySelector('button[data-act="open"]') ?? pc19); await sleep(450);
+      check('speech: the project view offers Practice This Text', !!doc.getElementById('proj-practice'));
+      // Choosing a Studio project as the working text must REFERENCE it,
+      // never copy it into a second record.
+      const projCountBefore = (await listProjects()).length;
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Practice')); await sleep(350);
+      clickIn(doc.getElementById('sp-wt-change') ?? doc.getElementById('sp-wt-pick')); await sleep(400);
+      await until(() => [...doc.querySelectorAll('#wt-projects .track-card')].length > 0);
+      clickIn([...doc.querySelectorAll('#wt-projects .track-card')]
+        .find(b => b.textContent.includes('__speech drive')));
+      await sleep(400);
+      const wtRef = JSON.parse(localStorage.getItem('speechcraft-working-text') ?? 'null');
+      check('speech: a Studio working text is stored as a reference, creating no duplicate record',
+        wtRef?.source === 'studio' && wtRef?.id === spProj.id
+        && !('body' in (wtRef ?? {}))
+        && (await listProjects()).length === projCountBefore);
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Studio')); await sleep(350);
+      clickIn(card('Custom Work')); await sleep(400);
+      const pc19b = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === spProj.id);
+      clickIn(pc19b?.querySelector('button[data-act="open"]') ?? pc19b); await sleep(450);
+      clickIn(doc.getElementById('proj-practice')); await sleep(400);
+      check('speech: passage selection renders untrusted text inertly',
+        doc.querySelectorAll('.sp-unit').length === 4
+        && doc.querySelector('.sp-unit')?.textContent.includes('<img src=x')
+        && !doc.querySelector('.sp-unit img')
+        && frame.contentWindow.__spXss === undefined);
+      clickIn(doc.getElementById('sp-use-all')); await sleep(350);
+      clickIn(doc.querySelector('[data-game="cue-pickup"]')); await sleep(350);
+      clickIn([...doc.querySelectorAll('[data-char]')].find(b => b.textContent === 'B')); await sleep(250);
+      check('speech: the cue is the OTHER character’s line, still inert',
+        doc.querySelector('.sp-cue-line')?.textContent.includes('A: <img src=x')
+        && !doc.querySelector('#sp-cue img'));
+      clickIn([...doc.querySelectorAll('#sp-cue button')].find(b => b.textContent.includes('Reveal')));
+      await sleep(200);
+      check('speech: reveal shows MY line with Unicode intact',
+        doc.querySelector('.sp-cue-mine')?.textContent === 'B: I said I would — didn’t I?');
+      clickIn([...doc.querySelectorAll('#sp-cue button')].find(b => b.textContent.includes('Had it')));
+      await sleep(200);
+      clickIn([...doc.querySelectorAll('#sp-cue button')].find(b => b.textContent.includes('Missed')));
+      await sleep(300);
+      check('speech: an objective recall game may tally correctness',
+        /1\/2 recalled/.test(doc.querySelector('.sp-reflect h1')?.textContent ?? ''));
+      clickIn(doc.getElementById('sp-refl-done')); await sleep(450);
+      check('speech: Practice This Text returns to the same Studio project',
+        doc.body.textContent.includes('__speech drive')
+        && !!doc.getElementById('proj-practice'));
+      check('speech: the XSS payload never executed anywhere along the flow',
+        frame.contentWindow.__spXss === undefined);
+      const histSnapshot = speechHistory().length;
+      await deleteProject(spProj.id); spProj = null;
+      check('speech: deleting the project leaves practice history intact (title snapshots, no live pointers)',
+        speechHistory().length === histSnapshot);
+
+      // Speech Progress is Speech-specific: no IPA weak-sound analytics.
+      await pickWorkspace('speech');
+      clickIn(side('Progress')); await sleep(400);
+      check('progress: Speech Progress speaks about exploration, never weak sounds',
+        doc.querySelector('.page-h')?.textContent === 'Speech Progress'
+        && !doc.querySelector('main')?.textContent.includes('Weak sounds')
+        && ['chapters explored', 'Guided Practice sessions', 'working texts explored',
+            'topics revisited', 'skills practised']
+          .every(t => doc.querySelector('main')?.textContent.includes(t)));
+      check('progress: no accuracy score is applied to interpretive Speech work',
+        !/\b\d+%/.test(doc.querySelector('main')?.textContent ?? ''));
+      // IPA progress is untouched in its own workspace.
+      await pickWorkspace('ipa');
+      clickIn(side('Progress')); await sleep(450);
+      check('progress: the IPA workspace keeps its own weak-sound analytics',
+        (doc.querySelector('main')?.textContent ?? '').includes('Weak sounds'),
+        (doc.querySelector('.page-h')?.textContent ?? ''));
+      await pickWorkspace('speech');
+
+      // The Studio working-text card uses the same state, no duplication.
+      clickIn(side('Studio')); await sleep(400);
+      check('studio: a compact My Working Text card sits above the preserved five cards',
+        !!doc.querySelector('.sp-wt-card')
+        && String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
+          === 'Scripts & Speeches,Question Everything,Playable Actions,Custom Work,Personal Dictionary');
+
+      check('speech: zero microphone calls across the entire Speech drive', mic19 === 0);
+    } catch (err) {
+      bad('Speech system drive', String(err?.stack ?? err).slice(0, 220));
+    } finally {
+      if (spProj) await deleteProject(spProj.id).catch(() => {});
+      if (modesBefore[0] === null) localStorage.removeItem('speechcraft-working-text');
+      else localStorage.setItem('speechcraft-working-text', modesBefore[0]);
+      try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+    }
+  } else {
+    ok('Speech system drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 20. The Acting workspace ─────────────────────────────────
+  {
+    check('acting: four modules holding all 28 lessons, numbered without gaps',
+      ACTING_MODULES.length === 4
+      && String(ACTING_MODULES.map(m => m.title))
+        === 'The Actor’s Work,Investigating the Text,Listening and Responding,Preparing the Performance'
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === ACTING_LESSONS.length
+      && ACTING_MODULES.every(m => actingLessonsFor(m.id)
+        .every((l, i) => actingLessonNumber(l) === `${m.n}.${i + 1}`)));
+    check('acting: every acting lesson is a prepared draft awaiting acting review',
+      ACTING_LESSONS.every(l => l.requiredReviewer === 'acting-professional' && !speechApproved(l.id)));
+    check('acting: shared concepts LINK to one authoritative record, never a copy',
+      ACTING_LESSONS.filter(l => l.sharedFrom).every(l =>
+        l.sharedFrom.workspace !== 'speech' || !!speechLessonById(l.sharedFrom.id))
+      && ACTING_LESSONS.some(l => l.sharedFrom?.id === 'sp-m-want'));
+    check('acting: the ten approved arcade games exist and none is scored',
+      ACTING_GAMES.length === 10
+      && ['Same Line, Different Circumstances', 'Objective Switch', 'Action Swap',
+          'Relationship Shift', 'Stakes Ladder', 'Change the Urgency', 'Find the Beat',
+          'Same Words, Different Subtext', 'What Changed?', 'Same Line Three Ways']
+        .every(t => ACTING_GAMES.some(g => g.title === t)));
+    check('acting: the scene-study workflow holds the ten areas',
+      SCENE_STUDY_AREAS.length === 10
+      && SCENE_STUDY_AREAS.every(a => a.id && a.title && a.prompt));
+    check('acting: the Library collections cover the lessons without duplication',
+      ACTING_COLLECTIONS.length === 3
+      && (() => {
+        const listed = ACTING_COLLECTIONS.flatMap(c => c.lessons);
+        return new Set(listed).size === listed.length
+          && listed.every(id => !!actingLessonById(id));
+      })());
+    check('acting: Playable Actions data is untouched — twelve entries, six pairs',
+      PLAYABLE_ACTIONS.length === 12 && ACTION_PAIRS.length === 6);
+    check('acting: the actor-only Speech lesson moved out of the Speech course',
+      !speechLessonById('sp-start-responsibility')
+      && !!actingLessonById('ac-offbook'));
+    check('acting: Speech keeps a general fluency chapter, not an actor one',
+      speechLessonById('sp-start-offbook')?.title === 'General Fluency and Prepared Speaking');
+  }
+
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = scSleep;
+    try {
+      let doc = frame.contentDocument;
+      const clickIn = el => el?.dispatchEvent(new (frame.contentWindow.MouseEvent)('click', { bubbles: true }));
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const pickWs = async id => {
+        clickIn(doc.getElementById('ws-chip')); await sleep(150);
+        clickIn(doc.querySelector(`[data-ws="${id}"]`)); await sleep(400);
+      };
+      let mic20 = 0;
+      const w20 = frame.contentWindow;
+      if (w20.navigator.mediaDevices?.getUserMedia) {
+        const o20 = w20.navigator.mediaDevices.getUserMedia.bind(w20.navigator.mediaDevices);
+        w20.navigator.mediaDevices.getUserMedia = (...a) => { mic20++; return o20(...a); };
+      }
+      const projectsBefore = (await listProjects()).length;
+
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(doc.getElementById('ws-chip')); await sleep(200);
+      check('acting: the selector offers four workspaces in the approved order',
+        [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join()
+          === 'Speech,Acting,IPA,Accents & Dialects');
+      clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
+      clickIn(side('Learn')); await sleep(400);
+      check('acting: the workspace keeps its guided course and its Library',
+        !!doc.querySelector('.page-h')
+        && [...doc.querySelectorAll('.side-nav .side-label')].some(e => e.textContent.trim() === 'Learn'));
+      check('acting: no accent context and no Free Play in the Acting workspace',
+        !doc.getElementById('course-chip')
+        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
+        && !doc.getElementById('freeplay'));
+      check('acting: the review strip counts acting drafts only, computed from records',
+        (() => {
+          const want = ACTING_LESSONS.filter(l => !speechApproved(l.id)).length
+            + ACTING_APPROACHES.filter(a => !speechApproved(a.id)).length;
+          return (doc.querySelector('.review-strip')?.textContent ?? '').includes(String(want));
+        })(), doc.querySelector('.review-strip')?.textContent?.replace(/\s+/g, ' ').trim());
+
+      clickIn(side('Library')); await sleep(400);
+      check('acting: the Library landing shows collections only, never 32 drafts at once',
+        doc.querySelectorAll('.tile-grid .tile').length === 8
+        && !doc.body.textContent.includes('Behavior Comes From the Situation')
+        && (doc.querySelector('.review-strip')?.textContent ?? '').includes('32'));
+      clickIn(doc.querySelector('[data-tile="col:principles"]')); await sleep(400);
+      check('acting: opening a collection reveals its chapters',
+        doc.querySelectorAll('.item-tile').length === ACTING_COLLECTIONS[0].lessons.length
+        && doc.body.textContent.includes('Behavior Comes From the Situation'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      check('acting: the Library contains no scored exercise or game',
+        !doc.querySelector('main .mode-card, main [data-check], main .sp-check')
+        && !/\bXP\b/.test(doc.querySelector('main')?.textContent ?? ''));
+
+      clickIn(side('Practice')); await sleep(400);
+      check('acting: Practice holds the three categories',
+        String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
+          === 'Scene Study,Acting Arcade,Practice My Text');
+      clickIn(doc.getElementById('acp-arcade')); await sleep(400);
+      check('acting: every acting game lives in Practice',
+        doc.querySelectorAll('[data-agame]').length === ACTING_GAMES.length);
+
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Studio')); await sleep(400);
+      check('acting: the Actor’s Studio leads with the current-project card and its ten tools',
+        doc.querySelector('.page-h')?.textContent === 'Actor’s Studio'
+        && !!doc.querySelector('.sp-wt-card')
+        && doc.querySelectorAll('.hub-card').length === 10
+        && doc.body.textContent.includes('Playable Actions'));
+      check('acting: opening the workspace duplicated no Studio project',
+        (await listProjects()).length === projectsBefore);
+
+      clickIn(side('Progress')); await sleep(400);
+      check('acting: Acting Progress is interpretive-safe and free of IPA measures',
+        doc.querySelector('.page-h')?.textContent === 'Acting Progress'
+        && !doc.querySelector('main')?.textContent.includes('Weak sounds')
+        && !/\b\d+%/.test(doc.querySelector('main')?.textContent ?? ''));
+
+      // Speech no longer owns the acting drafts.
+      await pickWs('speech');
+      clickIn(side('Library')); await sleep(400);
+      check('acting: the four approach drafts no longer count as Speech drafts',
+        (() => {
+          const t = doc.querySelector('.review-strip')?.textContent ?? '';
+          return t.includes(String(SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).length))
+            && !t.includes('Acting');
+        })(), doc.querySelector('.review-strip')?.textContent?.replace(/\s+/g, ' ').trim());
+      clickIn(side('Library')); await sleep(400);
+      check('acting: Approaches to Acting has left the Speech Library',
+        !doc.body.textContent.includes('Approaches to Acting'));
+
+      // IPA and Accents & Dialects are untouched.
+      await pickWs('ipa');
+      check('acting: the IPA workspace is unchanged and still accent-neutral',
+        !!doc.getElementById('ipa-context') && !doc.getElementById('course-chip'));
+      await pickWs('accents');
+      check('acting: Accents & Dialects keeps its accent selector',
+        !!doc.getElementById('course-chip'));
+      check('acting: zero microphone calls across the Acting drive', mic20 === 0);
+    } catch (err) {
+      bad('Acting workspace drive', String(err?.stack ?? err).slice(0, 220));
+    } finally {
+      try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+    }
+  } else {
+    ok('Acting workspace drive (runner only — run tests/run-all.html)');
   }
 
   // ── 18. The FIRST-TIME preface: concise three-panel opening ─
@@ -1982,16 +2764,19 @@ export async function run({ navDoc = document } = {}) {
   // then restores everything exactly as it was.
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');
-    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sleep = scSleep;
     const snapshot = {};
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
       snapshot[k] = localStorage.getItem(k);
     }
     try {
-      // Leftover projects or takes would grandfather a fresh profile past
-      // the wall. The drives clean up after themselves — prove it.
-      check('first-run preface: clean slate (no leftover projects or takes)',
+      // Any leftover project or take would grandfather a fresh profile
+      // past the wall, so the drive clears IndexedDB content first and
+      // restores localStorage afterwards.
+      for (const p of await listProjects()) await deleteProject(p.id).catch(() => {});
+      for (const t of await listAllTakes()) await deleteTake(t.id).catch(() => {});
+      check('first-run preface: clean slate for the wall',
         (await listProjects()).length === 0 && (await listAllTakes()).length === 0);
       localStorage.clear();
       frame.contentWindow.location.reload();
@@ -2053,7 +2838,7 @@ export async function run({ navDoc = document } = {}) {
         && !wall().querySelector('.th-quote'));
       check('first-run preface: zero microphone calls', mic18 === 0);
     } catch (err) {
-      bad('first-run preface drive', String(err));
+      bad('first-run preface drive', String(err?.stack ?? err).slice(0, 220));
     } finally {
       localStorage.clear();
       for (const [k, v] of Object.entries(snapshot)) localStorage.setItem(k, v);
@@ -2063,6 +2848,313 @@ export async function run({ navDoc = document } = {}) {
   } else {
     ok('first-run preface drive (runner only — run tests/run-all.html)');
   }
+
+  // ── 21. (retired) Learn-into-Library consolidation ───────────
+  // Superseded: a later owner order restored the guided Learn pathways
+  // for Speech and Acting. Section 23 covers the restored structure.
+
+  // ── 22. Owner-approved pre-review revisions (six chapters) ───
+  {
+    // Each entry: [id, every approved sentence, every required source URL].
+    const APPROVED = [
+    ['sp-f-instrument', ['Speech begins with airflow from the respiratory system. In voiced speech, that airflow helps set the vocal folds in the larynx vibrating. The vocal tract and articulators then shape airflow and sound into recognizable speech.', 'The respiratory system supplies and regulates airflow for speech through the coordinated action of the diaphragm, rib cage and other breathing muscles.', 'The larynx houses the vocal folds, which vibrate during voiced sound.', 'The vocal tract—the pharynx, mouth and nasal cavity—filters the source sound, strengthening some frequencies and reducing others.', 'The jaw, tongue, lips and soft palate coordinate to form consonants and vowels.', 'Speechcraft’s Your Instrument reference shows these structures with diagrams. This chapter is a working tour of what each area contributes and where later chapters explore it in greater detail.', 'Speaking requires coordinated muscular activity. The aim is adaptable effort suited to the task and the individual speaker, without unnecessary strain—not complete relaxation.'], ['https://www.nidcd.nih.gov/health/speech-and-language', 'https://www.asha.org/practice-portal/clinical-topics/voice-disorders/', 'https://www.asha.org/practice-portal/clinical-topics/resonance-disorders/']],
+    ['sp-f-breath', ['Airflow for speech comes from the respiratory system. The diaphragm and other breathing muscles change the size and pressure of the chest cavity, moving air into and out of the lungs. Most speech happens during exhalation, coordinated with voicing and the length and shape of the phrase.', 'Bodies differ, and so do the sensations people report when breathing works well. This course does not teach one universal “proper support” feeling. It offers explorations and asks you to notice what changes.', 'As a starting observation, notice what your breathing does before a long thought and before a short one. Do not try to manufacture a particular kind of breath. Simply notice when you inhale, whether you hold the breath and whether the phrase feels comfortably supplied. Different speakers will notice different patterns.'], ['https://www.asha.org/practice-portal/clinical-topics/voice-disorders/', 'https://www.nidcd.nih.gov/health/taking-care-your-voice']],
+    ['sp-f-effort', ['All speech requires coordinated muscular activity, but it does not need to feel strained. The useful question is whether the activity supports the sound or adds work the speaker does not need.', 'Some muscular activity produces the intended sound; other activity may interfere with comfortable, flexible speech. Stress, environmental demands and individual habits may sometimes coincide with breath holding, jaw clenching or increased effort around the neck and throat. These experiences have many possible causes and should not be self-diagnosed from sensation alone.', 'The practice routines ask you to notice sensations of effort without diagnosing their cause or trying to force them away. This course never asks you to press, massage or manipulate your throat.', 'If speaking regularly feels unusually effortful, painful or tiring, consult a qualified healthcare professional. An otolaryngologist can evaluate possible medical causes, and a speech-language pathologist with voice expertise can assess how the voice is being used.'], ['https://www.asha.org/practice-portal/clinical-topics/voice-disorders/', 'https://www.nidcd.nih.gov/health/taking-care-your-voice']],
+    ['sp-f-jaw', ['The jaw, tongue and neck participate in the detailed coordination of speech. During connected speech, the tongue continually changes its shape and position to form and connect different sounds. There is no single “correct tongue position” for speaking, and this course will never teach one.', 'The tongue shapes sound; it does not supply airflow. Airflow comes from the respiratory system. Pushing harder with the mouth does not create more air. If phrases repeatedly feel short of air, notice the coordination of breathing and phrasing; persistent difficulty deserves professional evaluation.', 'Bruxism may contribute to tooth damage, jaw soreness or fatigue. Temporomandibular disorders may involve jaw pain, stiffness, limited movement, locking or painful clicking. Clicking without pain is common and does not by itself indicate a disorder.', 'If you have persistent jaw pain, locking, limited movement, tooth damage or concerns about frequent grinding or clenching, consult a dentist or physician. Speech or tongue-movement concerns may also warrant assessment by a speech-language pathologist. Speechcraft teaches speaking skills; it does not diagnose or treat these conditions.'], ['https://www.nidcr.nih.gov/health-info/tmd', 'https://www.nidcr.nih.gov/health-info/bruxism', 'https://www.asha.org/practice-portal/clinical-topics/orofacial-myofunctional-disorders/']],
+    ['sp-f-voice', ['Voiced sound begins when airflow from the lungs helps set the vocal folds in the larynx vibrating. The resulting sound contains many frequencies. The voice we hear reflects both this vocal-fold source and the way the vocal tract filters it.', 'Resonance is the modification of that source sound by the vocal tract. The size and shape of the pharynx, mouth and—when acoustically connected—nasal cavity strengthen some frequencies and reduce others.', 'Changes in jaw opening, tongue shape and lip position alter the vocal tract and therefore the resulting sound. These changes can affect the voice without deliberately pushing more air.', 'Every voice reflects an individual body, history and way of speaking. Speechcraft’s training goal is to help you explore range and choice within your own voice—not imitate a single ideal sound.'], ['https://www.nidcd.nih.gov/health/taking-care-your-voice', 'https://www.asha.org/practice-portal/clinical-topics/resonance-disorders/']],
+    ['sp-f-articulation', ['Articulation is the coordinated movement and placement of structures such as the tongue, lips, jaw and soft palate to produce speech sounds. Some sounds use vocal-fold vibration and others do not.', 'Articulatory precision can contribute to clarity, but clarity also depends on pace, phrasing, loudness, context, the environment and the needs of the listener. Increasing volume alone does not guarantee understanding. Depending on the situation, a speaker may benefit from adjusting articulation, pace, phrasing, distance or amplification.', 'If you have worked in Speechcraft’s IPA courses, you have already studied how speech sounds are identified, described and contrasted. This chapter connects that knowledge to connected speech.', 'No accent or natural speech pattern is inherently unclear or inferior. The goal is not maximum articulation or the removal of identity. It is having options when a particular listener, space or speaking task calls for greater precision.', 'Increasing articulatory precision can help in some situations, but excessive precision may sound unnatural or distract from the message in others. The useful degree depends on the speaker, listener and context.'], ['https://www.asha.org/practice-portal/clinical-topics/dysarthria-in-adults/', 'https://www.asha.org/practice-portal/clinical-topics/articulation-and-phonology/', 'https://www.asha.org/practice-portal/professional-issues/accent-modification/']],
+    ];
+    check('approved copy: all six revised chapters carry the approved wording verbatim',
+      APPROVED.every(([id, sents]) => {
+        const l = speechLessonById(id);
+        if (!l) return false;
+        const text = l.body.map(b => b.p ?? b.h ?? (b.list ?? []).join(' ') ?? '').join(' ');
+        return sents.every(sen => text.includes(sen));
+      }), APPROVED.map(([id]) => id).join());
+    check('approved copy: every professional-verification source is recorded',
+      APPROVED.every(([id, , urls]) => {
+        const src = (speechLessonById(id)?.sources ?? []).join(' ');
+        return urls.every(u => src.includes(u));
+      }));
+    check('approved copy: the shared safety line is rendered once, via the safety flag',
+      APPROVED.every(([id]) => {
+        const l = speechLessonById(id);
+        const literal = l.body.filter(b => (b.p ?? '').includes('Stop if you experience pain')).length;
+        return literal === 0 && l.body.filter(b => b.safety).length === 1;
+      }));
+    check('approved copy: all six remain professional-review DRAFTS, none approved',
+      APPROVED.every(([id]) => {
+        const l = speechLessonById(id);
+        return l.requiredReviewer === 'voice-professional'
+          && !speechApproved(id) && !speechBodyVisible(l);
+      }));
+    check('approved copy: the review ledger still holds no entry for any of them',
+      APPROVED.every(([id]) => speechReviewFor(id) === null));
+    check('approved copy: the review inventory still lists all seven Speech drafts',
+      SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).length === 7);
+    check('approved copy: Vocal Health and When to Stop was not touched',
+      (() => {
+        const h = speechLessonById('sp-f-health');
+        return !!h && h.requiredReviewer === 'voice-professional'
+          && h.body.some(b => (b.p ?? '').includes('Voices are resilient, and they have limits.'))
+          && (h.sources ?? []).some(s => s.includes('Taking Care of Your Voice'));
+      })());
+    check('approved copy: Learn and Library read the same revised records',
+      APPROVED.every(([id]) => {
+        const viaModule = speechLessonsFor('foundation').some(l => l.id === id);
+        const viaCollection = SPEECH_COLLECTIONS.some(c =>
+          speechLessonsFor(c.stage).some(l => l.id === id));
+        return viaModule && viaCollection && speechLessonById(id) === SPEECH_LESSONS.find(l => l.id === id);
+      }));
+  }
+
+  // ── 23. Speech Course grouping (presentation only) ───────────
+  {
+    const SPEC = {
+      1: [['How the course works', 1], ['Understanding fluency', 3]],
+      2: [['Air and voice', 3], ['Ease and coordination', 2], ['Clarity and care', 2]],
+      3: [['Purpose and action', 3], ['Rhythm and structure', 2]],
+      4: [['Body and attention', 2], ['Putting everything together', 2]],
+    };
+    check('grouping: every module lists the approved groups in the approved order',
+      Object.entries(SPEC).every(([n, want]) =>
+        String(speechModuleGroups(+n).map(g => [g.title, g.lessons.length]))
+          === String(want)));
+    check('grouping: purpose and action precedes rhythm and structure',
+      speechModuleGroups(3)[0].title === 'Purpose and action'
+      && speechModuleGroups(3)[1].title === 'Rhythm and structure');
+    check('grouping: module chapter counts are 4, 7, 5 and 4',
+      String(SPEECH_MODULES.map(m => speechLessonsFor(m.stage).length)) === '4,7,5,4');
+    check('grouping: every chapter appears in exactly one group, none invented',
+      (() => {
+        const listed = [1, 2, 3, 4].flatMap(n => speechModuleGroups(n).flatMap(g => g.lessons));
+        return listed.length === SPEECH_LESSONS.length
+          && new Set(listed).size === listed.length
+          && listed.every(id => !!speechLessonById(id));
+      })());
+    check('grouping: a group never crosses a module boundary',
+      [1, 2, 3, 4].every(n => {
+        const stage = SPEECH_MODULES.find(m => m.n === n).stage;
+        return speechModuleGroups(n).every(g =>
+          g.lessons.every(id => speechLessonById(id).stage === stage));
+      }));
+    check('grouping: authoritative ids and canonical order are untouched',
+      SPEECH_LESSONS.every(l => typeof l.order === 'number' && /^sp-/.test(l.id))
+      && speechLessonsFor('meaning').map(l => l.id).join()
+        === 'sp-m-pace,sp-m-emphasis,sp-m-intention,sp-m-want,sp-m-urgency');
+    check('grouping: every group carries one short explanatory sentence',
+      [1, 2, 3, 4].every(n => speechModuleGroups(n).every(g =>
+        typeof g.blurb === 'string' && g.blurb.length > 20 && g.blurb.length < 120)));
+  }
+
+  // ── 24. Speech chapters are read, never tested ───────────────
+  {
+    const available = SPEECH_LESSONS.filter(l => speechBodyVisible(l));
+    const framed = available.filter(l => !!speechReading(l.id));
+    // Publication (2026-08-14) made eight further chapters visible. The
+    // reading renderer degrades gracefully without framing metadata, so
+    // this asserts the framing is VALID wherever it exists and records
+    // how many chapters still lack it — a follow-up editorial item, not
+    // a silent pass.
+    check('reading: framing metadata is valid wherever it exists',
+      framed.every(l => {
+        const r = speechReading(l.id);
+        return !!r.idea && !!r.why && Array.isArray(r.takeaways) && r.takeaways.length >= 2;
+      }));
+    check('reading: takeaways stay concise (2–3 per framed chapter)',
+      framed.every(l => {
+        const t = speechReading(l.id).takeaways;
+        return t.length >= 2 && t.length <= 3;
+      }));
+    check('reading: the optional notice never asks for a submitted answer',
+      framed.every(l => {
+        const n = speechReading(l.id).notice ?? '';
+        return n.length > 0 && !/\bscore|correct|answer\b/i.test(n);
+      }));
+    check(`reading: ${available.length - framed.length} published chapter(s) still need reading framing (follow-up)`,
+      available.length - framed.length === 8,
+      `${framed.length} of ${available.length} framed`);
+    check('reading: legacy check data survives in the record but Speech no longer renders it',
+      typeof SPEECH_LESSON_EXTRAS['sp-start-parts'].check === 'object');
+  }
+
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = scSleep;
+    try {
+      let doc = frame.contentDocument;
+      const clickIn = el => el?.dispatchEvent(new (frame.contentWindow.MouseEvent)('click', { bubbles: true }));
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const pickWs = async id => {
+        clickIn(doc.getElementById('ws-chip')); await sleep(150);
+        clickIn(doc.querySelector(`[data-ws="${id}"]`)); await sleep(420);
+      };
+      let mic24 = 0;
+      const w24 = frame.contentWindow;
+      if (w24.navigator.mediaDevices?.getUserMedia) {
+        const o24 = w24.navigator.mediaDevices.getUserMedia.bind(w24.navigator.mediaDevices);
+        w24.navigator.mediaDevices.getUserMedia = (...a) => { mic24++; return o24(...a); };
+      }
+      const doneBefore = JSON.parse(localStorage.getItem('speechcraft-speech-done') ?? '{}');
+      const probe = 'sp-m-pace';
+      delete doneBefore[probe];
+      localStorage.setItem('speechcraft-speech-done', JSON.stringify(doneBefore));
+
+      await pickWs('speech');
+      clickIn(side('Learn')); await sleep(400);
+      clickIn(doc.querySelector('[data-tile="mod:3"]')); await sleep(380);
+      check('reading: a chapter opens directly from its module, no gate to pass',
+        !!doc.querySelector(`[data-item="${probe}"]`));
+      clickIn(doc.querySelector(`[data-item="${probe}"]`)); await sleep(400);
+      const xpBefore = store.xp, heartsBefore = store.hearts;
+      check('reading: the chapter opens as reading — central idea, screen count, no quiz',
+        !!doc.querySelector('.sp-idea')
+        && /^\d+ of \d+$/.test(doc.querySelector('.sp-count')?.textContent ?? '')
+        && !doc.querySelector('.sp-check') && !doc.querySelector('[data-check]')
+        && doc.querySelectorAll('.choice').length === 0
+        && !/\bCheck\b/.test(doc.querySelector('main h2')?.textContent ?? ''));
+      check('reading: the content column stays readable, not full-bleed',
+        !!doc.querySelector('.sp-read'));
+      // Page to the end.
+      for (let i = 0; i < 8; i++) {
+        const nx = doc.getElementById('sp-next');
+        if (!nx) break;
+        clickIn(nx); await sleep(220);
+      }
+      check('reading: the last screen offers the optional notice and the takeaways',
+        !!doc.querySelector('.sp-notice')
+        && (doc.querySelector('.sp-notice')?.textContent ?? '').includes('Optional')
+        && (doc.querySelector('.sp-notice')?.textContent ?? '').includes('nothing is submitted'.replace('n', 'N'))
+        && doc.querySelectorAll('.sp-takeaway li').length >= 2);
+      check('reading: navigation offers Mark as read, Next chapter and Return to module',
+        !!doc.getElementById('sp-done') && !!doc.getElementById('sp-to-module'));
+      clickIn(doc.getElementById('sp-done')); await sleep(260);
+      check('reading: marking as read costs nothing — no XP, no hearts, no correctness',
+        store.xp === xpBefore && store.hearts === heartsBefore
+        && doc.getElementById('sp-done').disabled
+        && !/correct|passed|failed|score/i.test(doc.getElementById('sp-done-note')?.textContent ?? ''));
+      check('reading: reading progress is stored, so it survives a refresh',
+        JSON.parse(localStorage.getItem('speechcraft-speech-done') ?? '{}')[probe] > 0);
+      clickIn(doc.getElementById('sp-to-module')); await sleep(380);
+      check('reading: Return to module lands back on the module page',
+        doc.querySelector('.page-h')?.textContent === 'Shaping Meaning');
+      clickIn(doc.querySelector(`[data-item="${probe}"]`)); await sleep(380);
+      check('reading: a completed chapter reopens freely, never locked',
+        !!doc.querySelector('.sp-idea') && !doc.querySelector('[aria-disabled="true"]'));
+      check('reading: a draft chapter stays gated by its review status',
+        (() => {
+          const draft = SPEECH_LESSONS.find(l => !speechBodyVisible(l));
+          return !!draft && !speechApproved(draft.id);
+        })());
+      check('reading: zero microphone calls across the reading drive', mic24 === 0);
+    } catch (err) {
+      bad('Speech reading drive', String(err?.stack ?? err).slice(0, 220));
+    }
+  } else {
+    ok('Speech reading drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 25. The Speechcraft Textbook ─────────────────────────────
+  {
+    const EXPECTED = [
+      ['I', 'Speechcraft Principles', ['The Importance of Speech', 'Practice the Parts. Communicate as a Whole.',
+        'The Alphabet Experiment', 'Fluency Frees the Speaker', 'General Fluency and Prepared Speaking']],
+      ['II', 'Your Speaking Instrument', ['Your Instrument', 'Tension', 'Anatomy', 'Breath',
+        'Resonance', 'Articulation & Clarity', 'Vocal Health and When to Stop']],
+      ['III', 'What & Why?', ['Thought & Intention', 'What Do You Want?', 'Why Now? Understanding Urgency',
+        'Pace & Pause', 'Emphasis & Phrasing']],
+      ['IV', 'Mix It', ['Movement & Speech', 'Presence & Persuasion', 'Integration', 'Let It Go']],
+    ];
+    check('textbook: four parts, in the approved order, with the approved titles',
+      String(TEXTBOOK_PARTS.map(p => [p.n, p.title])) === String(EXPECTED.map(e => [e[0], e[1]])));
+    check('textbook: every chapter title and order matches the specification',
+      TEXTBOOK_PARTS.every((p, i) =>
+        String(textbookPartChapters(p).map(chapterTitle)) === String(EXPECTED[i][2])),
+      TEXTBOOK_PARTS.map(p => textbookPartChapters(p).map(chapterTitle).join(',')).join(' | '));
+    check('textbook: Part III keeps purpose before the Rhythm subsection',
+      TEXTBOOK_PARTS[2].subsections[0].title === 'Rhythm'
+      && String(TEXTBOOK_PARTS[2].chapters.map(chapterTitle))
+        === 'Thought & Intention,What Do You Want?,Why Now? Understanding Urgency');
+    check('textbook: every chapter appears exactly once across the whole book',
+      (() => {
+        const all = textbookOrder();
+        return new Set(all).size === all.length
+          && all.filter(id => id !== 'wsm').length === SPEECH_LESSONS.length;
+      })());
+    check('textbook: renames are display-only — stable ids and canonical order untouched',
+      SPEECH_LESSONS.every(l => /^sp-/.test(l.id) && typeof l.order === 'number')
+      && speechLessonById('sp-f-instrument').title === 'The Speaking Instrument'
+      && chapterTitle('sp-f-instrument') === 'Your Instrument');
+    check('textbook: the retired public titles are gone from navigation',
+      ['Why Speech Matters', 'Effort & Tension', 'Jaw, Tongue & Neck', 'Body & Breath',
+       'Voice & Resonance', 'Applying Technique Without Managing It']
+        .every(old => !textbookOrder().map(chapterTitle).includes(old)));
+    check('textbook: Learn follows the same chapter order as Part I',
+      String(speechModuleGroups(1).flatMap(g => g.lessons))
+        === String(TEXTBOOK_PARTS[0].chapters.filter(id => id !== 'wsm')));
+    check('textbook: end matter is reserved, not published',
+      TEXTBOOK_END_MATTER.map(e => e.title).join() === 'Key Ideas,Glossary,Sources & Further Reading,Continue Your Work');
+    check('textbook: the alphabet experiment is one continuous block, no stepper',
+      (() => {
+        const e = speechLessonById('sp-start-alphabet').body.find(b => b.experiment)?.experiment;
+        return !!e && e.steps.length === 5 && !!e.noticing && !!e.then && !!e.compare;
+      })());
+  }
+
+  // ── 26. A timed-out IndexedDB probe must not wall the user ───
+  {
+    // hasIdbTraces() races a probe against a 150ms timeout. If the probe
+    // hangs, the answer is UNKNOWN — and treating unknown as "no traces"
+    // would show an existing user the first-run preface and block them.
+    // The timeout therefore resolves TRUE.
+    const race = async (probe, timeoutResolves) => {
+      const timeout = new Promise(r => setTimeout(() => r(timeoutResolves), 20));
+      return (await Promise.race([probe, timeout])) === true;
+    };
+    const hang = new Promise(() => {});
+    check('idb probe: a never-resolving probe reports traces, so the preface stays away',
+      (await race(hang, true)) === true);
+    check('idb probe: the old behaviour would have walled the user (guard against regression)',
+      (await race(hang, false)) === false);
+    check('idb probe: a fast negative still reports no traces',
+      (await race(Promise.resolve(false), true)) === false);
+    check('idb probe: a fast positive still reports traces',
+      (await race(Promise.resolve(true), true)) === true);
+    // And the shipped source must not have drifted back to false.
+    const src = await fetch('../js/main.js').then(r => r.text());
+    check('idb probe: main.js resolves the timeout to TRUE, not false',
+      /setTimeout\(\(\) => r\(true\), 150\)/.test(src)
+      && !/setTimeout\(\(\) => r\(false\), 150\)/.test(src));
+
+    // Dialect in Action must never advertise "0 pieces": with nothing
+    // approved the card counts the drafts and badges them "In review",
+    // and every route into the shelf falls back to the pending page.
+    check('dialect action: unapproved card counts drafts, badged "In review"',
+      /count: actionFor\(d\)\.length \|\| actionDrafts\(\)\.filter/.test(src)
+      && /badge: actionFor\(d\)\.length \? null : \{ cls: 'is-pending', label: 'In review' \}/.test(src));
+    check('dialect action: renderDialectAction delegates when nothing is approved',
+      /if \(!pieces\.length\) return renderDialectActionPending\(d\);/.test(src));
+
+    // About-the-Accent removal: no page, no routes, no dead facet buttons,
+    // and no copy anywhere still sending a learner to one.
+    const dialectSrc = await fetch('../js/data/dialects.js').then(r => r.text());
+    const facetSrc = await fetch('../js/data/speech/dialects.js').then(r => r.text());
+    const bridgeSrc = await fetch('../js/data/bridge.js').then(r => r.text());
+    check('about removal: renderAboutCourse and its about-* routes are gone',
+      !/renderAboutCourse/.test(src) && !/'about-(target|features|voice|context)'/.test(src));
+    check('about removal: no aboutTitle fields remain', !/aboutTitle/.test(dialectSrc));
+    check('about removal: no facet still renders an about-* surface',
+      !/renders: 'about-/.test(facetSrc));
+    check('about removal: no learner-facing copy points at an About page',
+      ![src, facetSrc, bridgeSrc].some(t =>
+        /Library → About|About the Accent|About page|About Neutral American|About Traditional RP|About Standard British|About General Australian/.test(t)));
+    check('ssbe intro: says it appears only on the first visit',
+      /This introduction appears only on your first visit\./.test(src)
+      && !/reread this any time/.test(src));
+  }
+
+  if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');
+  else localStorage.setItem('speechcraft-workspace', workspaceBefore);
 
   const failed = results.filter(r => !r.pass);
   console.log(`regression tests: ${results.length - failed.length}/${results.length} passed`);

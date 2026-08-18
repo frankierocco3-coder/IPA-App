@@ -197,7 +197,7 @@ export const BRIDGE_ROUTES = [
     to: 'ssbe',
     title: 'Neutral American → Standard British',
     intro: 'The same journey as the RP route, one generation on: the classic non-rhotic skeleton, worn with today’s habits — a steadied SQUARE, fused yods, and a /t/ that relaxes where RP’s stayed crisp.',
-    sourceNote: 'Restates the Neutral American and Standard British course targets — full citations under About Neutral American and About Standard British in the Library.',
+    sourceNote: 'Restates the Neutral American and Standard British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -334,7 +334,7 @@ export const BRIDGE_ROUTES = [
     to: 'aus',
     title: 'Neutral American → Australian',
     intro: 'Two moves carry most of the distance: the r after a vowel disappears, and the closing diphthongs re-aim — Australian FACE, MOUTH and GOAT all launch from different places than yours.',
-    sourceNote: 'Restates the Neutral American and General Australian course targets — full citations under About Neutral American and About General Australian in the Library.',
+    sourceNote: 'Restates the Neutral American and General Australian course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -471,7 +471,7 @@ export const BRIDGE_ROUTES = [
     to: 'nam',
     title: 'Traditional RP → Neutral American',
     intro: 'Mostly the RP journey run backwards: every written r returns and colours its vowel, BATH flattens, LOT unrounds — and the careful /t/ learns to relax between vowels.',
-    sourceNote: 'Restates the Traditional RP and Neutral American course targets — full citations under About Traditional RP and About Neutral American in the Library.',
+    sourceNote: 'Restates the Traditional RP and Neutral American course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -608,7 +608,7 @@ export const BRIDGE_ROUTES = [
     to: 'ssbe',
     title: 'Traditional RP → Standard British',
     intro: 'The shortest route in the app: the skeleton — non-rhoticity, BATH, LOT, GOAT — is shared. What changes is a generation of habits: SQUARE steadies, happY tenses, yods fuse, and the /t/ relaxes when off duty.',
-    sourceNote: 'Restates the Traditional RP and Standard British course targets — full citations under About Traditional RP and About Standard British in the Library.',
+    sourceNote: 'Restates the Traditional RP and Standard British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'square',
@@ -709,7 +709,7 @@ export const BRIDGE_ROUTES = [
     to: 'aus',
     title: 'Traditional RP → Australian',
     intro: 'Keep the skeleton — both accents are non-rhotic with a BATH split — and re-aim the vowels: every closing diphthong launches from somewhere new, GOOSE moves to the front, and the open vowels centralise.',
-    sourceNote: 'Restates the Traditional RP and General Australian course targets — full citations under About Traditional RP and About General Australian in the Library.',
+    sourceNote: 'Restates the Traditional RP and General Australian course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',
@@ -846,7 +846,7 @@ export const BRIDGE_ROUTES = [
     to: 'nam',
     title: 'Standard British → Neutral American',
     intro: 'Every written r returns and colours its vowel, BATH flattens, LOT unrounds — and where your /t/ relaxes to a glottal catch, American relaxes it the other way, into a tap.',
-    sourceNote: 'Restates the Standard British and Neutral American course targets — full citations under About Standard British and About Neutral American in the Library.',
+    sourceNote: 'Restates the Standard British and Neutral American course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -983,7 +983,7 @@ export const BRIDGE_ROUTES = [
     to: 'rp',
     title: 'Standard British → Traditional RP',
     intro: 'One generation back. The skeleton you already have is RP’s — what changes is discipline: the /t/ goes back on duty everywhere, the yods separate, SQUARE learns to glide, and happY relaxes.',
-    sourceNote: 'Restates the Standard British and Traditional RP course targets — full citations under About Standard British and About Traditional RP in the Library.',
+    sourceNote: 'Restates the Standard British and Traditional RP course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'square',
@@ -1084,7 +1084,7 @@ export const BRIDGE_ROUTES = [
     to: 'aus',
     title: 'Standard British → Australian',
     intro: 'The frame barely moves — both accents are non-rhotic, fuse their yods and link their r’s. The vowels do the travelling: diphthongs re-aim, and the short back vowels all sit one notch higher.',
-    sourceNote: 'Restates the Standard British and General Australian course targets — full citations under About Standard British and About General Australian in the Library.',
+    sourceNote: 'Restates the Standard British and General Australian course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',
@@ -1221,7 +1221,7 @@ export const BRIDGE_ROUTES = [
     to: 'nam',
     title: 'Australian → Neutral American',
     intro: 'Two big jobs: every written r returns — the hardest habit to build — and the diphthongs re-aim to their American launches. The open vowels move back from your central positions.',
-    sourceNote: 'Restates the General Australian and Neutral American course targets — full citations under About General Australian and About Neutral American in the Library.',
+    sourceNote: 'Restates the General Australian and Neutral American course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -1358,7 +1358,7 @@ export const BRIDGE_ROUTES = [
     to: 'rp',
     title: 'Australian → Traditional RP',
     intro: 'Stay non-rhotic — that instinct transfers whole — and move the vowels back and up: the diphthongs return to their conservative launches, GOOSE retreats, and the yods separate into period precision.',
-    sourceNote: 'Restates the General Australian and Traditional RP course targets — full citations under About General Australian and About Traditional RP in the Library.',
+    sourceNote: 'Restates the General Australian and Traditional RP course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',
@@ -1495,7 +1495,7 @@ export const BRIDGE_ROUTES = [
     to: 'ssbe',
     title: 'Australian → Standard British',
     intro: 'The frame transfers whole — non-rhotic, fused yods, linking r. The work is vowel aim: launches lift, the back ladder steps down a rung, and the long front vowel opens a shade.',
-    sourceNote: 'Restates the General Australian and Standard British course targets — full citations under About General Australian and About Standard British in the Library.',
+    sourceNote: 'Restates the General Australian and Standard British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',

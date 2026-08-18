@@ -11,7 +11,6 @@
 
 export const DIALECT_INFO = {
   nam: {
-    aboutTitle: 'About Neutral American',
     icon: '🇺🇸',
     color: '#b05f4d',
     target: 'A performance target based on broadly regionally unmarked U.S. speech. It is rhotic and avoids strongly identifiable regional features — but no single pronunciation represents every American speaker. This course teaches one consistent target while identifying the common areas of variation.',
@@ -46,7 +45,6 @@ export const DIALECT_INFO = {
   },
 
   rp: {
-    aboutTitle: 'About Traditional RP',
     icon: '🎩',
     color: '#6b7fa3',
     target: 'The historical prestige accent associated with twentieth-century British broadcasting, upper- and upper-middle-class speech, and classical stage performance — including the later performance traditions for writers such as Shakespeare, Wilde and Shaw.',
@@ -82,7 +80,6 @@ export const DIALECT_INFO = {
   },
 
   ssbe: {
-    aboutTitle: 'About Standard British',
     icon: '🇬🇧',
     color: '#7d6b9e',
     target: 'A modern pronunciation target for present-day British roles and conversation — the mainstream, present-day counterpart to Traditional RP. It keeps the classic non-rhotic skeleton while including the pronunciation patterns most of today’s speakers actually use.',
@@ -118,7 +115,6 @@ export const DIALECT_INFO = {
   },
 
   aus: {
-    aboutTitle: 'About General Australian',
     icon: '🇦🇺',
     color: '#5f8a86',
     target: 'General Australian English — the mainstream variety most Australians speak — described with the revised (HCE-style) Australian transcription system used in Australian phonetics references.',

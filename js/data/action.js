@@ -268,9 +268,17 @@ export const DIALECT_ACTION = [
   },
 ];
 
-// Learner-facing: ONLY approved pieces, for this course. While nothing is
-// approved the Library shows no Dialect in Action entry at all — an honest
-// absence, not an empty shelf.
+// ── Kill switch (2026-08-17, owner decision) ──────────────────
+// Dialect in Action is withdrawn from the learner-facing app "for now".
+// NOTHING is deleted: the 8 written pieces, their review records and every
+// renderer stay exactly as they are. Flip this to true and the Library
+// card, the Dialects-in-Speech facet and the Acting shortcut all return.
+export const DIALECT_ACTION_LIVE = false;
+
+// Learner-facing: ONLY approved pieces, for this course. Nothing here is
+// ever borrowed from another accent. While nothing is approved the Library
+// entry stays visible but reads "In review" and opens the pending page —
+// an honest "written, not cleared yet", never a readable-looking shelf.
 export const actionFor = courseId =>
   DIALECT_ACTION.filter(p => p.courseId === courseId && p.reviewStatus === 'approved');
 

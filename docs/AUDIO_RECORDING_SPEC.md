@@ -49,6 +49,13 @@ by ear in `#audit`.
 
 | Clip | Problem | Required |
 | --- | --- | --- |
+> **Isolated phonemes use a different path convention.** Word audio uses
+> the per-voice keys below (`f`, `m`, and `alyx`/`peach` for ssbe).
+> Isolated phonemes use ONE reference voice per dialect:
+> `audio/phonemes/<dialect>/reference/<slug>.mp3` — never `f`/`m`.
+> See `docs/PHONEME_RECORDING_PLAN.md` and
+> `tools/phoneme_manifest_nam.json`.
+
 | `audio/nam/f/strut.mp3` | vowel drifts toward "stroot" | /strʌt/ |
 | `audio/nam/f/car.mp3` | uvular/French-sounding R | /kɑr/, American approximant |
 | `audio/nam/f/care.mp3` | rejected in the 2026-07-30 ear-check | /ker/ |

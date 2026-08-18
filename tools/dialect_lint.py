@@ -12,7 +12,8 @@ Zero-dependency (Python 3.9). Fails the deploy when:
      broad transcriptions, and are never counted as phonemes.
   5. A WORDS entry contains a symbol missing from PHONEMES entirely.
   6. Duplicate track or unit ids (duplicate lesson ids: launch_lint).
-  7. A dialect course is missing its DIALECT_INFO record (About page data).
+  7. A dialect course is missing its DIALECT_INFO record (the Dialect
+     Accuracy Standard behind the IPA inventory and Sources & Credits).
   8. A practice-sentence word has no untagged reference transcription.
 
 Every failure names the course/accent, the lesson or word, and the symbol.

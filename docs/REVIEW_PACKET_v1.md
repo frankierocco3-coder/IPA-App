@@ -43,7 +43,7 @@ file is authoritative if they ever drift):
 - **Macquarie** — Macquarie University Dept. of Linguistics, phonemic
   transcription of Australian English; *Australian Voices* (variation).
 
-These are the same works cited on the course About pages; Part C attaches
+These are the same works cited under More → Sources & Credits; Part C attaches
 them claim-by-claim as required — a generic About-page link is NOT
 sufficient for approval.
 
