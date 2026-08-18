@@ -1678,7 +1678,18 @@ export function playableComparisons(route, hasClip) {
 // Approved routes INTO a target accent that hold at least one playable
 // comparison — the honest existence test for the Practice card. Draft
 // routes can never appear here: routeFor() already drops them.
+// ── Kill switch (2026-08-17, owner decision) ──────────────────
+// Accent Bridge is withdrawn from the learner-facing app "for now".
+// NOTHING is deleted: every route, its review record and the whole
+// exercise renderer stay exactly as they are, and bridgeDrafts() still
+// feeds the owner review tool. Flip this to true and the Practice card
+// and the Dialects-in-Speech comparison facet both return.
+export const BRIDGE_LIVE = false;
+
+// The single learner-facing gate: with the switch off no surface can
+// find a playable route, so no entry point can advertise one.
 export function playableRoutesInto(target, hasClip) {
+  if (!BRIDGE_LIVE) return [];
   return BRIDGE_ROUTES
     .filter(r => r.to === target && routeStatus(r.from, r.to) === 'approved')
     .map(r => routeFor(r.from, r.to))

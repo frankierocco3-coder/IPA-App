@@ -17,8 +17,6 @@ export const DIALECT_FACETS = {
   ipa: [
     { id: 'sounds', title: 'Sound system & IPA', renders: 'inventory',
       note: 'Every vowel and consonant of the course target, with tongue placement, realizations and rhythm.' },
-    { id: 'compare', title: 'Articulation & sound comparisons', renders: 'bridge-practice',
-      note: 'Side-by-side comparisons where a reviewed route exists (Accent Bridge).' },
   ],
   speech: [
     { id: 'words', title: 'Vocabulary & expressions', renders: 'idioms',

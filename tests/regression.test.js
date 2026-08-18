@@ -1531,8 +1531,11 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Library')); await sleep(350);
-      check('build D UI: Dialect in Action is listed, and says honestly that its pieces await review',
-        !!card('Dialect in Action'));
+      // Withdrawn 2026-08-17 behind DIALECT_ACTION_LIVE. The card must be
+      // ABSENT while the flag is false — not merely empty.
+      check('build D UI: Dialect in Action stays withdrawn from the Library',
+        !card('Dialect in Action')
+        && ![...doc.querySelectorAll('.tile')].some(t => /Dialect in Action/.test(t.textContent)));
 
       // Practice page structure on Neutral American (no playable route in).
       clickIn(side('Practice')); await sleep(400);
@@ -1575,11 +1578,16 @@ export async function run({ navDoc = document } = {}) {
         && ![...fromSel().options].some(o => o.value === 'rp')
         && doc.body.textContent.includes('8 comparisons ready to play')
         && doc.body.textContent.includes('review by a qualified dialect reviewer'));
-      fromSel().value = 'rp';
-      fromSel().dispatchEvent(new (frame.contentWindow.Event)('change', { bubbles: true }));
-      await sleep(150);
+      // Guarded: when the setup never opened, record that as the failure it
+      // is and keep the drive alive. An unguarded deref here used to abort
+      // the whole of Build D, taking ~16 unrelated checks down with it.
+      if (fromSel()) {
+        fromSel().value = 'rp';
+        fromSel().dispatchEvent(new (frame.contentWindow.Event)('change', { bubbles: true }));
+        await sleep(150);
+      }
       check('bridge UI: an injected same-accent value snaps straight back',
-        fromSel().value === 'nam');
+        !!fromSel() && fromSel().value === 'nam');
       clickIn(doc.getElementById('nav-back')); await sleep(300);
       check('bridge UI: Back from setup returns to Practice',
         !!doc.getElementById('quick-practice'));
