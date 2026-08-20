@@ -5,9 +5,14 @@ for this repository. Deeper detail lives in `docs/`.
 
 ## What this is
 
-A **speech, acting and dialect trainer** — four workspaces (Speech, Acting,
+A **speech, acting and dialect trainer** — three live workspaces (Acting,
 IPA, Accents & Dialects), four accent courses, and a rehearsal workspace for
-real text.
+real text. A fourth workspace, Speech, is fully built but WITHDRAWN behind
+SPEECH_LIVE=false in js/main.js (owner order 2026-08-19: content too thin to
+stand alone; full build deferred). Its Speechcraft Textbook (21 chapters) and
+Rhetoric & Oratory shelve in the Acting Library as Shared cards meanwhile; a
+stored workspace of 'speech' falls back to 'acting'. Flip the flag and Speech
+returns whole.
 
 Live: <https://frankierocco3-coder.github.io/IPA-App/>
 Repo: `frankierocco3-coder/IPA-App` (public). Owner: Frankie.
@@ -729,10 +734,12 @@ zero cross-dialect leakage), Rhetoric & Oratory, Your Instrument,
 Vowel Map. There is NO About-the-Accent card or page (removed
 2026-08-17): DIALECT_INFO survives as the Dialect Accuracy Standard
 behind the IPA inventory, dialect_lint and Sources & Credits, but
-has no learner-facing page and no aboutTitle field. Studio = hub of EXACTLY 5
+has no learner-facing page and no aboutTitle field. Studio = hub of EXACTLY 4
 title-only cards: Scripts & Speeches (all text collections,
-renderTextsPage), Question Everything (the textbook), Playable
-Actions, Custom Work, Personal Dictionary. The old Studio landing is
+renderTextsPage), Playable Actions, Custom Work, Personal Dictionary.
+Question Everything (the dissection textbook) moved to the ACTING
+Library on 2026-08-19 (tile key 'col:question', 6 sections) — it is
+reading, so it shelves. The old Studio landing is
 now renderCustomWork()/customWorkPane() — same project area, NO OCR
 claims. Featured Texts shelf REMOVED without deleting content.
 Accent Bridge moved to Practice (#hub-bridge row). Learn suppresses

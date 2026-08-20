@@ -1776,13 +1776,17 @@ export async function run({ navDoc = document } = {}) {
         && doc.body.textContent.includes('Actors get dedicated tools'));
 
       // The TEXTBOOK: readable end to end, no project, no interactivity.
-      // IA revision: it lives on the Studio hub, titled Question Everything.
+      // Moved 2026-08-19: it shelves in the ACTING Library (key
+      // 'col:question'), not the Studio hub — it is reading, not a tool.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
-      clickIn(side('Studio')); await sleep(350);
-      check('textbook: a permanent Question Everything card sits on the Studio hub',
-        !!card('Question Everything'));
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
+      clickIn(side('Library')); await sleep(350);
+      const qeTile = () => doc.querySelector('[data-tile="col:question"]');
+      check('textbook: a permanent Question Everything card shelves in the Acting Library',
+        !!qeTile() && qeTile().textContent.includes('Question Everything'));
       const dissBefore = (await idbAll(STORES.dissections)).length;
-      clickIn(card('Question Everything'));
+      clickIn(qeTile());
       await until(() => !!doc.getElementById('sd-title'));
       check('textbook: the page is titled Question Everything, never Speech Dissection',
         doc.getElementById('sd-title')?.textContent === 'Question Everything'
@@ -1839,7 +1843,7 @@ export async function run({ navDoc = document } = {}) {
         `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
       frame.style.width = oldW; await sleep(200);
       clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('textbook: Back returns to the Studio hub', !!card('Question Everything'));
+      check('textbook: Back returns to the Acting Library shelf', !!qeTile());
 
       // The Custom Work worksheet keeps ALL the interactivity — and its
       // saved answers — with Back returning to the same project.
@@ -1909,7 +1913,11 @@ export async function run({ navDoc = document } = {}) {
       // "<Name> Library" heading, a #lib-search field, and .tile cards
       // (never .track-card). Titles are exact: the emoji sits in its own
       // .tile-emoji span, so the tile's text nodes carry the bare title.
+      // Self-contained: the previous drive ends in the acting workspace,
+      // so pin the accents workspace before reading its Library.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(400);
       clickIn(side('Library')); await sleep(350);
       const tileTitles = () => [...doc.querySelectorAll('.tile-grid .tile .tile-title')]
         .map(t => [...t.childNodes].filter(n => n.nodeType === 3)
@@ -1938,9 +1946,9 @@ export async function run({ navDoc = document } = {}) {
 
       // Studio: the five approved cards, exact order, title-only.
       clickIn(side('Studio')); await sleep(350);
-      check('IA: Studio hub shows exactly the five cards in the approved order',
+      check('IA: Studio hub shows exactly the four cards in the approved order',
         JSON.stringify(hubTitles()) === JSON.stringify(['Scripts & Speeches',
-          'Question Everything', 'Playable Actions', 'Custom Work', 'Personal Dictionary']),
+          'Playable Actions', 'Custom Work', 'Personal Dictionary']),
         hubTitles().join(' | '));
       check('IA: Studio hub cards are title-only',
         [...doc.querySelectorAll('.track-card .track-info')]
@@ -2661,10 +2669,10 @@ export async function run({ navDoc = document } = {}) {
 
       // The Studio working-text card uses the same state, no duplication.
       clickIn(side('Studio')); await sleep(400);
-      check('studio: a compact My Working Text card sits above the preserved five cards',
+      check('studio: a compact My Working Text card sits above the preserved four cards',
         !!doc.querySelector('.sp-wt-card')
         && String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
-          === 'Scripts & Speeches,Question Everything,Playable Actions,Custom Work,Personal Dictionary');
+          === 'Scripts & Speeches,Playable Actions,Custom Work,Personal Dictionary');
 
       check('speech: zero microphone calls across the entire Speech drive', mic19 === 0);
     } catch (err) {
@@ -2782,7 +2790,7 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 32 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:principles,col:scene,col:rehearsal,col:approaches,col:scenes,col:speech,col:ipa'
+          === 'col:principles,col:scene,col:rehearsal,col:question,col:approaches,col:scenes,col:speech,col:ipa'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));

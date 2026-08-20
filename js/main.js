@@ -273,6 +273,16 @@ const WORKSPACES = [
   { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
     context: 'Accent and dialect courses' },
 ];
+// ── Kill switch (2026-08-19, owner decision) ──────────────────
+// The Speech workspace is withdrawn from the learner-facing app "for
+// now": its content is thin next to Acting, and the full Speech build
+// is deferred. NOTHING is deleted — every renderer, record, review and
+// practice surface stays. The Speechcraft Textbook and Rhetoric &
+// Oratory shelve in the Acting Library meanwhile. Flip to true and the
+// Speech workspace returns whole.
+const SPEECH_LIVE = false;
+const liveWorkspaces = () => WORKSPACES.filter(w => SPEECH_LIVE || w.id !== 'speech');
+
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
 const ACCENTLESS_WORKSPACES = ['speech', 'acting'];
@@ -280,11 +290,13 @@ const WORKSPACE_KEY = 'speechcraft-workspace';
 const activeWorkspace = () => {
   try {
     const v = localStorage.getItem(WORKSPACE_KEY);
+    if (v === 'speech' && !SPEECH_LIVE) return 'acting';
     if (WORKSPACES.some(w => w.id === v)) return v;
     // Migration from the retired page-level tabs, then inference from
     // the stored course — existing users land exactly where they were.
     if (localStorage.getItem('speechcraft-learn-mode') === 'speech'
-      || localStorage.getItem('speechcraft-practice-mode') === 'speech') return 'speech';
+      || localStorage.getItem('speechcraft-practice-mode') === 'speech')
+      return SPEECH_LIVE ? 'speech' : 'acting';
     return activeCourse() === 'core' ? 'ipa' : 'accents';
   } catch { return 'accents'; }
 };
@@ -431,7 +443,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
     </button>
     <div class="course-menu ws-menu" id="ws-menu" role="menu" hidden>
       <p class="course-menu-h">Workspaces</p>
-      ${WORKSPACES.map(w => `
+      ${liveWorkspaces().map(w => `
         <button class="course-row ${w.id === ws ? 'on' : ''}" data-ws="${w.id}" role="menuitem" type="button">
           <span class="course-icon">${w.icon}</span>
           <span class="course-row-info"><b>${esc(w.label)}</b><small>${esc(w.context)}</small></span>
@@ -3031,7 +3043,7 @@ function renderActingChapter(id) {
 
 // Opens the ONE authoritative record a shared concept lives in.
 function openSharedRecord(ws, id) {
-  if (ws === 'speech') { setWorkspace('speech'); return renderSpeechChapter(id); }
+  if (ws === 'speech') { if (SPEECH_LIVE) setWorkspace('speech'); return renderSpeechChapter(id); }
   if (id === 'playable-actions') return renderPlayableActions();
   if (id === 'question-everything') return renderDissectTextbook();
   goSection('library');
@@ -3112,6 +3124,13 @@ function actingLibraryPane(el) {
       keywords: c.lessons.map(id => actingLessonById(id)?.title ?? '').join(' '),
       go: () => renderActingCollection(c.id),
     })),
+    // Question Everything — the text-dissection textbook. Moved here from
+    // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
+    // on the shelf. Count = the six numbered DISSECT_SECTIONS.
+    { key: 'col:question', tone: 'is-lavender', emoji: '🔍', title: 'Question Everything',
+      count: 6, unit: 'section',
+      keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
+      go: renderDissectTextbook },
     { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
       count: ACTING_APPROACHES.length, unit: 'introduction',
       keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
@@ -3119,13 +3138,17 @@ function actingLibraryPane(el) {
       count: Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0), unit: 'text',
       keywords: 'scene monologue soliloquy dramatic speech character play author',
       go: renderTextsPage },
-    { key: 'col:speech', tone: 'is-sage', emoji: '🗣', title: 'Speech for Actors',
-      count: 8, unit: 'chapter', badge: { cls: '', label: 'Shared' },
-      keywords: 'breath voice articulation fluency pace movement technique',
-      go: renderSpeechForActors },
+    // The whole Speechcraft Textbook, shelved here while the Speech
+    // workspace is withdrawn (owner order, 2026-08-19). Same records,
+    // never copied — it supersedes the 8-chapter Speech for Actors
+    // subset, whose renderer stays dormant behind SPEECH_LIVE.
+    { key: 'col:textbook', tone: 'is-sage', emoji: '📗', title: 'Speechcraft Textbook',
+      count: textbookOrder().length, unit: 'chapter', badge: { cls: '', label: 'Shared' },
+      keywords: 'speech breath voice articulation fluency pace principles instrument meaning presence textbook',
+      go: renderTextbook },
     { key: 'col:ipa', tone: 'is-blue', emoji: 'ʃə', title: 'IPA & Dialect Tools',
-      count: 4, unit: 'reference', badge: { cls: '', label: 'Shared' },
-      keywords: 'ipa chart accent dialect in action pronunciation',
+      count: 3, unit: 'reference', badge: { cls: '', label: 'Shared' },
+      keywords: 'ipa chart accent dialect pronunciation',
       go: renderActorIpaTools, wide: true },
   ];
   workspaceLibrary(el, { workspace: 'Acting', cards, state: libState.acting });
@@ -3157,7 +3180,7 @@ function renderSpeechForActors() {
          state: speechBodyVisible(l) ? '' : 'is-pending' })).join('')}
      </div>`);
   app.querySelectorAll('[data-item]').forEach(b =>
-    b.addEventListener('click', () => { setWorkspace('speech'); renderSpeechChapter(b.dataset.item); }));
+    b.addEventListener('click', () => { if (SPEECH_LIVE) setWorkspace('speech'); renderSpeechChapter(b.dataset.item); }));
 }
 
 // IPA and dialect resources for actors — links only.
@@ -3403,7 +3426,7 @@ function actorStudioPane(el) {
   const ref = workingTextRef();
   const cards = [
     { icon: '📜', title: 'Scenes & Monologues', go: renderTextsPage },
-    { icon: '🎬', title: 'Scene Study', go: () => actingProject() ? renderSceneStudy() : renderWorkingTextPicker(() => renderSceneStudy()) },
+    { icon: '🎬', title: 'Scene Study', go: () => renderArcadeTextPicker(() => renderSceneStudy()) },
     { icon: '🔍', title: 'Question Everything', go: () => openProjectDissection() },
     { icon: '🧭', title: 'Objectives, Obstacles & Stakes', go: () => renderSceneStudy('objective') },
     { icon: '🧱', title: 'Beats & Turns', go: () => renderSceneStudy('beats') },
@@ -3715,7 +3738,7 @@ function libraryMain(el, course, ws = activeWorkspace()) {
     { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', title: 'Rhetoric & Oratory',
       count: 3, unit: 'dialogue', badge: { cls: '', label: 'Shared' },
       keywords: 'plato gorgias phaedrus republic persuasion',
-      go: () => { setWorkspace('speech'); renderReadingPathway(); } },
+      go: () => { if (SPEECH_LIVE) setWorkspace('speech'); renderReadingPathway(); } },
     { key: 'instrument', tone: 'is-sage', emoji: '🎭', title: 'Your Instrument',
       count: 1, unit: 'reference', keywords: 'vocal tract anatomy diagram', go: renderInstrument },
     { key: 'vowels', tone: 'is-blue', emoji: '📐', title: 'Vowel Map',
@@ -4717,6 +4740,9 @@ function renderThreshold(step = 0, opts = {}) {
           setCourse(sel.accent ?? 'nam');
           skipCourseIntroOnce = true;                    // no modal on the landing render
         }
+        if (!replay) setWorkspace(choice === 'craft'
+          ? (sel.accent === 'core' ? 'ipa' : 'accents')
+          : 'acting');
         goSection(choice === 'craft' ? 'learn' : 'studio');
       }));
   }
@@ -4959,7 +4985,7 @@ function renderContentReview() {
       <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
-      <p class="pane-note">Owner tool. Everything below is DRAFT — original Speechcraft writing that no learner can see. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
+      <p class="pane-note">Owner tool, reached by typing <code>#review</code> — it is NOT authenticated, so treat everything here as public. Nothing below is on a learner surface. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
 
       <h1>The original 23-item queue</h1>
       <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>
@@ -5737,7 +5763,6 @@ function studioMain(el) {
   const inSpeech = activeWorkspace() === 'speech';
   const cards = [
     { icon: '📜', title: 'Scripts & Speeches', go: renderTextsPage },
-    { icon: '🔍', title: 'Question Everything', go: renderDissectTextbook },
     { icon: '🎯', title: 'Playable Actions', go: renderPlayableActions },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
     { icon: '📕', title: 'Personal Dictionary', go: renderDictionary },
