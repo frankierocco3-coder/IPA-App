@@ -5023,11 +5023,11 @@ function renderContentReview() {
         are never learner-facing while draft; editorial-tier drafts may show while pending. Claude may
         never approve his own writing.</p>
 
-      <h2 class="guide-heading">Stage 1 anatomy &amp; vocal health — ${SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional' && !speechApproved(l.id)).length} draft lesson(s)</h2>
+      <h2 class="guide-heading">Stage 1 anatomy &amp; vocal health — ${SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional' && !speechApproved(l.id)).length} lesson(s) awaiting voice-professional review</h2>
       <p class="pane-note">Required reviewer: an appropriately qualified <b>voice professional or speech-language pathologist</b>. Sources are paraphrased from NIDCD, ASHA and NIDCR public guidance — the reviewer confirms accuracy, non-diagnostic framing and the absence of prescriptive treatment.</p>
       ${SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional' && !speechApproved(l.id)).map(l => `
         <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(l.id)}</code> · ${esc(l.title)} · status <b>draft</b> · requires voice-professional review</p>
+          <p class="sonnet-hint">id <code>${esc(l.id)}</code> · ${esc(l.title)} · status <b>${speechPublished(l.id) ? 'published (owner approval)' : 'draft'}</b> · awaiting voice-professional review</p>
           ${l.body.map(b => b.p ? `<p class="guide-text">${esc(b.p)}</p>`
             : b.h ? `<p class="guide-text"><b>${esc(b.h)}</b></p>`
             : b.list ? `<ul class="th-list">${b.list.map(li => `<li>${esc(li)}</li>`).join('')}</ul>`
@@ -5036,11 +5036,11 @@ function renderContentReview() {
           ${(l.sources ?? []).map(s => `<p class="pane-note">Source: ${esc(s)}</p>`).join('')}
         </section>`).join('')}
 
-      <h2 class="guide-heading">Approaches to Acting — ${ACTING_APPROACHES.filter(a => !speechApproved(a.id)).length} draft introduction(s)</h2>
+      <h2 class="guide-heading">Approaches to Acting — ${ACTING_APPROACHES.filter(a => !speechApproved(a.id)).length} introduction(s) awaiting acting-professional review</h2>
       <p class="pane-note">Required reviewer: a qualified <b>acting teacher or coach</b> — accuracy of history, principles and terminology; no flattened slogans; no implied affiliation.</p>
       ${ACTING_APPROACHES.filter(a => !speechApproved(a.id)).map(a => `
         <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(a.id)}</code> · ${esc(a.name)} · ${esc(a.era)} · status <b>draft</b> · requires acting-professional review</p>
+          <p class="sonnet-hint">id <code>${esc(a.id)}</code> · ${esc(a.name)} · ${esc(a.era)} · status <b>${speechPublished(a.id) ? 'published (owner approval)' : 'draft'}</b> · awaiting acting-professional review</p>
           ${['background', 'principles', 'terminology', 'considers', 'misunderstandings', 'sources']
             .map(k => `<p class="guide-text"><b>${esc(k)}:</b> ${esc(a.sections[k])}</p>`).join('')}
           <ul class="th-list">${a.sections.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul>

@@ -41,26 +41,33 @@
 // recorded truthfully as the product owner — no clinical or acting
 // professional has reviewed anything, and no name or credential is
 // invented. Acting drafts are untouched and remain in review.
+//
+// MIGRATED 2026-08-19: these entries originally used verdict 'approved',
+// which speechApproved() reads as SPECIALIST sign-off — so the seven
+// chapters silently left the awaiting-specialist queue while their own
+// notes said no specialist had reviewed them. They now carry the
+// 'owner-approved' verdict the Acting order introduced: published
+// exactly as before, specialist review honestly still outstanding.
 export const SPEECH_REVIEWS = {
-  'sp-f-instrument': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-instrument': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
-  'sp-f-breath': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-breath': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
-  'sp-f-effort': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-effort': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
-  'sp-f-jaw': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-jaw': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
-  'sp-f-voice': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-voice': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
-  'sp-f-articulation': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-articulation': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
-  'sp-f-health': { verdict: 'approved', reviewerType: 'product-owner', reviewer: 'Product owner',
+  'sp-f-health': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
 
