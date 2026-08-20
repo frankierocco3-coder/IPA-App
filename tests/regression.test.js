@@ -99,6 +99,14 @@ export async function run({ navDoc = document } = {}) {
   const workspaceBefore = localStorage.getItem('speechcraft-workspace');
   try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
 
+  // The Speech workspace is withdrawn behind SPEECH_LIVE (js/main.js).
+  // The suite mirrors the app's own switch instead of rewriting the
+  // Speech drives: while the flag is false those drives are SKIPPED and
+  // replaced by withdrawal assertions; flip the flag and they run again,
+  // unchanged. Read from source so the two can never drift apart.
+  const speechLive = await fetch('../js/main.js').then(r => r.text())
+    .then(src => /const SPEECH_LIVE = true\b/.test(src)).catch(() => false);
+
   // Spy on the APP's getUserMedia for the whole run (runner only): every
   // journey driven below must finish with this still at zero.
   let gumCalls = 0;
@@ -750,15 +758,16 @@ export async function run({ navDoc = document } = {}) {
       const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
 
       // Reading pathway: Library card → credited PD pathway → back.
-      // Rhetoric & Oratory is authoritative in the SPEECH Library.
+      // With Speech withdrawn, the accent Library shelves Rhetoric &
+      // Oratory as a Shared card and opens it WITHOUT a workspace hop.
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
-      clickIn(doc.querySelector('[data-ws="speech"]')); await sleep(420);
+      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(420);
       clickIn(side('Library')); await sleep(400);
       // The Library is the ONE shared workspaceLibrary now — .tile cards
       // in a .tile-grid, and the rhetoric card's key is plain 'rhetoric'.
       const rhet = doc.querySelector('[data-tile="rhetoric"]');
-      check('pathway: the Speech Library shelves Rhetoric & Oratory',
-        !!rhet && doc.querySelector('.page-h')?.textContent === 'Speech Library');
+      check('pathway: the accent Library shelves Rhetoric & Oratory',
+        !!rhet && (doc.querySelector('.page-h')?.textContent ?? '').endsWith(' Library'));
       clickIn(rhet); await sleep(400);
       const pageText = doc.body.textContent;
       check('pathway: all three dialogues present, in reading order',
@@ -779,11 +788,9 @@ export async function run({ navDoc = document } = {}) {
       check('pathway: a pathway, not an ebook shelf',
         pageText.includes('not an ebook shelf'));
       clickIn(doc.getElementById('nav-back')); await sleep(350);
-      check('pathway: Back returns to the Speech Library shelf',
-        doc.querySelector('.page-h')?.textContent === 'Speech Library'
+      check('pathway: Back returns to the accent Library shelf',
+        (doc.querySelector('.page-h')?.textContent ?? '').endsWith(' Library')
         && !!doc.querySelector('[data-tile="rhetoric"]'));
-      clickIn(doc.getElementById('ws-chip')); await sleep(150);
-      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(420);
 
       // Preface replay through the PERMANENT More card — full walk, Esc out,
       // and proof that nothing about the profile changed.
@@ -2138,7 +2145,8 @@ export async function run({ navDoc = document } = {}) {
     return { total: seq.length, done: seq.filter(l => speechLessonDone(l.id)).length };
   };
   // ── 19b. The Speech system: the driven journeys ──────────────
-  if (navDoc !== document) {
+  // Skipped while the workspace is withdrawn — see `speechLive` above.
+  if (navDoc !== document && speechLive) {
     const frame = document.querySelector('iframe');
     const sleep = scSleep;
     let spProj = null;
@@ -2683,6 +2691,21 @@ export async function run({ navDoc = document } = {}) {
       else localStorage.setItem('speechcraft-working-text', modesBefore[0]);
       try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
     }
+  } else if (navDoc !== document) {
+    // Withdrawn: prove the workspace is genuinely gone from the UI while
+    // its records stay whole, so flipping SPEECH_LIVE restores it intact.
+    const fdoc = document.querySelector('iframe').contentDocument;
+    fdoc.getElementById('ws-chip')?.dispatchEvent(
+      new (document.querySelector('iframe').contentWindow.MouseEvent)('click', { bubbles: true }));
+    await scSleep(200);
+    const wsRows = [...fdoc.querySelectorAll('[data-ws]')].map(b => b.dataset.ws);
+    check('speech: the workspace is withdrawn — three live workspaces, no Speech row',
+      String(wsRows) === 'acting,ipa,accents');
+    check('speech: withdrawal is a flag, not a deletion — every record survives it',
+      SPEECH_LESSONS.length === 21 && textbookOrder().length === 21
+      && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional')
+        .every(l => speechReviewFor(l.id)?.verdict === 'owner-approved' && !speechApproved(l.id)));
+    ok('Speech system drive (skipped — SPEECH_LIVE is false)');
   } else {
     ok('Speech system drive (runner only — run tests/run-all.html)');
   }
@@ -2748,9 +2771,9 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(200);
-      check('acting: the selector offers four workspaces in the approved order',
+      check('acting: the selector offers the three live workspaces, Speech withdrawn',
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join()
-          === 'Speech,Acting,IPA,Accents & Dialects');
+          === 'Acting,IPA,Accents & Dialects');
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
       check('acting: the workspace keeps its guided course and its Library',
@@ -2790,7 +2813,7 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 32 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:principles,col:scene,col:rehearsal,col:question,col:approaches,col:scenes,col:speech,col:ipa'
+          === 'col:principles,col:scene,col:rehearsal,col:question,col:approaches,col:scenes,col:textbook,col:ipa'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -2839,19 +2862,19 @@ export async function run({ navDoc = document } = {}) {
         && !doc.querySelector('main')?.textContent.includes('Weak sounds')
         && !/\b\d+%/.test(doc.querySelector('main')?.textContent ?? ''));
 
-      // Speech no longer owns the acting records at all.
-      await pickWs('speech');
-      clickIn(side('Library')); await sleep(400);
+      // Speech no longer owns the acting records at all. Pure record
+      // check now — the Speech shelf is withdrawn, and this never needed
+      // a DOM to be true.
       check('acting: the four approaches are acting records, never counted as Speech drafts',
         ACTING_APPROACHES.length === 4
         && ACTING_APPROACHES.every(a => !speechLessonById(a.id))
         && SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).length === 0
-        && doc.querySelector('.page-h')?.textContent === 'Speech Library'
         && !doc.querySelector('.review-strip'),
         doc.querySelector('.review-strip')?.textContent?.replace(/\s+/g, ' ').trim());
       clickIn(side('Library')); await sleep(400);
-      check('acting: Approaches to Acting has left the Speech Library',
-        !doc.body.textContent.includes('Approaches to Acting'));
+      check('acting: Approaches to Acting is shelved by Acting, never by Speech',
+        !!doc.querySelector('[data-tile="col:approaches"]')
+        && ACTING_APPROACHES.every(a => !speechLessonById(a.id)));
 
       // IPA and Accents & Dialects are untouched.
       await pickWs('ipa');
@@ -3122,7 +3145,8 @@ export async function run({ navDoc = document } = {}) {
       typeof SPEECH_LESSON_EXTRAS['sp-start-parts'].check === 'object');
   }
 
-  if (navDoc !== document) {
+  // Skipped while the Speech workspace is withdrawn — see `speechLive`.
+  if (navDoc !== document && speechLive) {
     const frame = document.querySelector('iframe');
     const sleep = scSleep;
     try {
@@ -3205,6 +3229,13 @@ export async function run({ navDoc = document } = {}) {
     } catch (err) {
       bad('Speech reading drive', String(err?.stack ?? err).slice(0, 220));
     }
+  } else if (navDoc !== document) {
+    // The guided Learn pathway lives inside the withdrawn workspace; its
+    // reading metadata must survive so the flag-flip restores it whole.
+    check('reading: the guided pathway is dormant, its metadata intact',
+      SPEECH_LESSONS.filter(l => l.id !== 'wsm')
+        .every(l => (SPEECH_LESSON_EXTRAS[l.id]?.objective ?? '').length > 20));
+    ok('Speech reading drive (skipped — SPEECH_LIVE is false)');
   } else {
     ok('Speech reading drive (runner only — run tests/run-all.html)');
   }
