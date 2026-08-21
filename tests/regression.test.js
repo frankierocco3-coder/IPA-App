@@ -1806,7 +1806,9 @@ export async function run({ navDoc = document } = {}) {
          '5. What changes?', '6. What happens after?',
          'Keep Returning to the Text'].every(h => tbText().includes(h)));
       check('textbook: the full bullet inventory renders (all Ask lists complete)',
-        tb().querySelectorAll('.sd-asks li').length === 16 + 12 + 15 + 1 + 16 + 15 + 9
+        // Section 4 is a single question, stated inline — it contributes no
+        // bullet, so the list total covers sections 1,2,3,5,6 + Returning.
+        tb().querySelectorAll('.sd-asks li').length === 16 + 12 + 15 + 16 + 15 + 9
         && tbText().includes('What circumstances must I reasonably imagine?')
         && tbText().includes('Can I describe my objective as an active attempt to affect another person?')
         && tbText().includes('Why has the problem not already been solved?')
@@ -1815,6 +1817,15 @@ export async function run({ navDoc = document } = {}) {
         && tbText().includes('What might actually happen instead?')
         && tbText().includes('What new question should I take back to the text?'),
         `lis=${tb().querySelectorAll('.sd-asks li').length}`);
+      check('textbook: section 4 states its single question inline, not as a lone bullet',
+        tb().querySelectorAll('.sd-ask-one').length === 1
+        && tb().querySelector('.sd-ask-one').textContent
+             .includes('Which action best describes what I am trying to accomplish?')
+        && ![...tb().querySelectorAll('.sd-asks')].some(ul => ul.children.length === 1),
+        `askOne=${tb().querySelectorAll('.sd-ask-one').length}`);
+      check('textbook: the closing note names the button that actually exists',
+        tbText().includes('press 🔍 Question Everything')
+        && !tbText().includes('Dissect This'));
       check('textbook: verbatim frame copy present',
         tbText().includes('A script gives you the words.')
         && tbText().includes('“I am angry” describes a feeling.')

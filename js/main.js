@@ -3698,8 +3698,14 @@ function renderSceneStudy(focusArea) {
     // so the whole question set is workable here, on this scene, without
     // leaving for the textbook.
     const qe = area.qeSection != null ? DISSECT_SECTIONS[area.qeSection] : null;
-    const asks = document.createElement('ul');
-    if (qe) {
+    // One question is stated as a line; a one-item bullet list reads as a
+    // list that lost its other items. Matches the textbook's asksHtml.
+    const single = qe && (qe.asks ?? []).length === 1;
+    const asks = document.createElement(single ? 'p' : 'ul');
+    if (qe && single) {
+      asks.className = 'guide-text ss-ask-one';
+      asks.textContent = qe.asks[0];
+    } else if (qe) {
       asks.className = 'th-list ss-asks';
       for (const a of qe.asks ?? []) {
         const li = document.createElement('li');
@@ -6831,8 +6837,10 @@ function wireAutosave(stateEl, collect) {
 // Strict separation: this page is educational reference only. Every
 // interactive response feature — textareas, answer states, autosave,
 // coverage, saved dissections — lives EXCLUSIVELY in the Studio
-// worksheet (project → Dissect This). This page imports nothing from
-// dissect.js and never creates, reads or updates a dissection record.
+// worksheet (project → Question Everything). This page takes only the
+// question DATA from dissect.js (DISSECT_SECTIONS, shared with the
+// worksheet since 2026-08-20 so the two can never drift) and never
+// creates, reads or updates a dissection record.
 // The copy below is the owner-supplied textbook text, verbatim.
 function renderDissectTextbook() {
   record(renderDissectTextbook);
@@ -6845,7 +6853,11 @@ function renderDissectTextbook() {
     'Does it increase the urgency of speaking?', 'Can the other person affect me?',
     'Am I allowing my actions to change?', 'What remains uncertain?',
     'What new question should I take back to the text?'];
-  const asksHtml = list => `
+  // A section with a single question states it inline — "Ask:" over a
+  // one-item bullet list reads as a list that lost its other items.
+  const asksHtml = list => list.length === 1
+    ? `<p class="guide-text sd-ask-one"><b>Ask:</b> ${esc(list[0])}</p>`
+    : `
       <p class="pane-note">Ask:</p>
       <ul class="sd-asks">${list.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>`;
   app.innerHTML = `
@@ -6865,7 +6877,7 @@ function renderDissectTextbook() {
       <p class="guide-text">As you work, continue asking:</p>
       <ul class="sd-asks">${RETURNING.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>
       <p class="guide-text">Question Everything is not about locking the performance into one answer. It gives the actor a specific, playable understanding from which discovery can continue.</p>
-      <p class="pane-note">To work these questions on your own text, open a Studio project and press <b>🔍 Dissect This</b>.</p>
+      <p class="pane-note">To work these questions on your own text, open a Studio project and press <b>🔍 Question Everything</b>.</p>
     </main>`;
   wireBrandHome();
   // Written link only — never recommends an action or analyzes any text.
