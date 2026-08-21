@@ -26,12 +26,14 @@ Rules, same as before:
   universally "correct" accent. Accent modification adds choice and
   flexibility — it never "corrects" an inferior way of speaking.
 
-Flow: panels 1–3 below → course picker (kept, with 🔊 samples — a
-functional onboarding screen, NOT a preface panel) → choice screen
-(kept: "Both take you into the same app. You can change your mind at
-any time." / "The guided path stays available whenever you want it.").
-The progress dots count ONLY the three content panels; the picker and
-choice screens show no preface dots.
+Flow (owner order 2026-08-20): panels 1–3 below, and that is ALL. The
+preface ENDS on panel 3, "Speech Reveals Thought" — its button reads
+"Enter Speechcraft" on a first run and "Done" on a replay. The course
+picker and the "Choose your way in" screen are REMOVED: the preface is
+reading, not a form, and nothing is asked of the reader at its close.
+A new user lands in the Acting workspace on Neutral American, both
+changeable from the chips at the top. The progress dots count the three
+panels, which are now the whole flow.
 
 **TWO VARIANTS (owner order 2026-08-12, second revision):** the
 FIRST-TIME preface uses the CONCISE panels below ("First-time opening");

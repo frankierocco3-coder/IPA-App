@@ -32,8 +32,11 @@ export const ACTING_PRINCIPLE =
   'A character’s behavior and dialogue arise from the situation they are in, what they want within that situation, and how each situation serves the larger movement of the story.';
 
 export const ACTING_MODULES = [
+  // Being Off Book opens Module 1 (owner order, 2026-08-20). It used to
+  // close it, which was backwards: none of the rest can be worked while
+  // an actor is still holding the script.
   { n: 1, id: 'work', title: 'The Actor’s Work',
-    blurb: 'Where behavior comes from: circumstances, objective, obstacle, stakes — and the preparation that frees you to play them.' },
+    blurb: 'Securing the text first, then where behavior comes from: circumstances, objective, obstacle, stakes.' },
   { n: 2, id: 'text', title: 'Investigating the Text',
     blurb: 'Reading a scene for what it actually gives you: facts, relationship, turns, subtext, action.' },
   { n: 3, id: 'listening', title: 'Listening and Responding',
@@ -45,7 +48,7 @@ export const ACTING_MODULES = [
 export const ACTING_LESSONS = [
 
   // ── Module 1 · The Actor’s Work ───────────────────────────────
-  { id: 'ac-behavior', module: 'work', order: 1,
+  { id: 'ac-behavior', module: 'work', order: 2,
     title: 'Behavior Comes From the Situation',
     requiredReviewer: 'acting-professional',
     objective: 'Understand behavior as a product of circumstance and pursuit, not a decision about mood.',
@@ -64,7 +67,7 @@ export const ACTING_LESSONS = [
       { p: 'None of these is a moral failing — they are simply less useful than the alternative, because they replace a living situation with a fixed decision.' },
     ] },
 
-  { id: 'ac-circumstances', module: 'work', order: 2,
+  { id: 'ac-circumstances', module: 'work', order: 3,
     title: 'Given Circumstances',
     requiredReviewer: 'acting-professional',
     objective: 'Gather the facts a text establishes before inventing anything.',
@@ -85,7 +88,7 @@ export const ACTING_LESSONS = [
       { p: 'Speechcraft’s Question Everything framework, in the Actor’s Studio, walks this systematically for a text you are working on.' },
     ] },
 
-  { id: 'ac-facts', module: 'work', order: 3,
+  { id: 'ac-facts', module: 'work', order: 4,
     title: 'Facts, Assumptions and Unknowns',
     requiredReviewer: 'acting-professional',
     objective: 'Separate what the text states from what you have quietly assumed — and name what nobody can know.',
@@ -103,7 +106,7 @@ export const ACTING_LESSONS = [
       { p: 'Nothing here is scored. Two skilled actors will sort the same scene differently and both may be right.' },
     ] },
 
-  { id: 'ac-objective', module: 'work', order: 4,
+  { id: 'ac-objective', module: 'work', order: 5,
     title: 'Objective',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The shared definition of objective — and the everyday-speaking version of the same idea — lives in the Speech chapter “What Do You Want?”. This lesson is its acting application.',
@@ -123,7 +126,7 @@ export const ACTING_LESSONS = [
       ] },
     ] },
 
-  { id: 'ac-obstacle', module: 'work', order: 5,
+  { id: 'ac-obstacle', module: 'work', order: 6,
     title: 'Obstacle',
     requiredReviewer: 'acting-professional',
     objective: 'Identify what stands between the character and what they want.',
@@ -137,7 +140,7 @@ export const ACTING_LESSONS = [
       { p: 'If a scene feels flat in rehearsal, the objective is often fine and the obstacle has gone missing — the actor has quietly assumed the other person will cooperate. Restore the resistance and the scene usually starts moving again.' },
     ] },
 
-  { id: 'ac-stakes', module: 'work', order: 6,
+  { id: 'ac-stakes', module: 'work', order: 7,
     title: 'Stakes',
     requiredReviewer: 'acting-professional',
     objective: 'Know what this character stands to win or lose, and let that calibrate the scene.',
@@ -154,7 +157,7 @@ export const ACTING_LESSONS = [
       ] },
     ] },
 
-  { id: 'ac-urgency', module: 'work', order: 7,
+  { id: 'ac-urgency', module: 'work', order: 8,
     title: 'Urgency',
     requiredReviewer: 'acting-professional',
     sharedNote: 'Urgency as a general speaking principle is taught in the Speech chapter “Why Now? Understanding Urgency”. This lesson applies it to dramatic circumstances.',
@@ -175,7 +178,7 @@ export const ACTING_LESSONS = [
       ] },
     ] },
 
-  { id: 'ac-offbook', module: 'work', order: 8,
+  { id: 'ac-offbook', module: 'work', order: 1,
     title: 'Being Off Book',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The general principle — that fluency frees attention — is taught in the Speech chapter “Fluency Frees the Speaker”. This lesson is the actor’s specific obligation.',
@@ -410,7 +413,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-applying', module: 'performance', order: 5,
-    title: 'Applying Technique Without Managing It',
+    title: 'Applying Technique in a Scene',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The general principle is taught in the Speech chapter “Applying Technique Without Managing It”.',
     sharedFrom: { workspace: 'speech', id: 'sp-w-applying', label: 'Applying Technique Without Managing It (Speech)' },
@@ -453,9 +456,11 @@ export function actingLessonNumber(l) {
 // The same lesson records, shelved for browsing. Approaches to Acting
 // is listed separately because it is drafted in its own record file.
 export const ACTING_COLLECTIONS = [
+  // Same order the Learn module teaches: Being Off Book first. The shelf
+  // and the pathway must not disagree about what comes first.
   { id: 'principles', icon: '🎯', title: 'Acting Principles',
-    lessons: ['ac-behavior', 'ac-circumstances', 'ac-facts', 'ac-objective', 'ac-obstacle',
-              'ac-stakes', 'ac-urgency', 'ac-attention', 'ac-receiving', 'ac-offbook'] },
+    lessons: ['ac-offbook', 'ac-behavior', 'ac-circumstances', 'ac-facts', 'ac-objective',
+              'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-attention', 'ac-receiving'] },
   { id: 'scene', icon: '🔍', title: 'Text Investigation',
     lessons: ['ac-question', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
               'ac-beats', 'ac-subtext', 'ac-monologue', 'ac-scene'] },

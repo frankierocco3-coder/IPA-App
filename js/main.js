@@ -34,6 +34,7 @@ import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
          OBJECTIVE_DECK, OBSTACLE_DECK, TEMPO_DECK } from './data/speech/arcade.js';
 import { SPEECH_TEXTS, speechTextById, speechTextBody } from './data/speech/texts.js';
+import { parseScript, speechUnits, unitText, cuedSpeeches } from './script.js';
 import { speechApproved, speechPublished, speechBodyVisible, speechReviewFor } from './data/speech/reviews.js';
 import { SPEECH_GOALS, speechGoal, setSpeechGoal, speechLessonDone,
          markSpeechLessonDone, speechDoneCount, speechHistory, recordSpeechPractice,
@@ -64,11 +65,12 @@ import { saveTake, listTakes, deleteTake, updateTake, setBestTake, takeUrl,
          releaseAllUrls, playUrl, RATINGS, deleteTakesFor, listAllTakes, deleteAllTakes,
          takesPresence } from './recordings.js';
 import { dbSupported, STORES, idbClear, CONTENT_STORES, dbErrorMessage } from './db.js';
-import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
+import { QUICK_QUESTIONS, DISSECT_SECTIONS, dissectQuestions, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
          saveAnswer, deleteDissection, deleteDissectionsFor, materialTypeFrom,
          coverageLine, createSaver, MAX_ANSWER_LEN, attachImportedDissection } from './dissect.js';
 import { questRows, claimQuest, onLessonFinished } from './quests.js';
-import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, GOVERNING_QUESTION,
+import { PLAYABLE_ACTIONS, ACTION_VERBS, ACTION_VERB_FRAME, taughtActionFor,
+         ACTION_PAIRS, ACTION_CATEGORIES, GOVERNING_QUESTION,
          ACTION_DISTINCTION, PAIR_LESSON, actionById, pairById, pairIndexOf,
          searchActions } from './data/playable.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
@@ -734,36 +736,13 @@ function ipaLearnPane(el, course) {
   // diagnostic has been taken or declined (never on mere XP). This offer
   // card is the diagnostic's ONLY doorway — the Practice-page shortcut
   // was removed by owner order 2026-08-12.
-  const invite = store.threshold?.source === 'grandfathered' && !store.thresholdInviteSeen ? `
-    <section class="continue-card th-invite" aria-label="New: Why Speech Matters">
-      <div class="cc-info">
-        <span class="cc-stage">✨ New</span>
-        <h2>New: Why Speech Matters</h2>
-        <p class="cc-meta">A short preface on the power and responsibility of speech. It takes about three minutes, and your progress is untouched either way.</p>
-      </div>
-      <div class="th-invite-actions">
-        <button class="btn btn-primary" id="th-invite-read" type="button">Read it</button>
-        <button class="btn-lite" id="th-invite-later" type="button">Not now</button>
-      </div>
-    </section>` : '';
-  const diag = store.onboarding.diagnostic == null ? `
-    <section class="continue-card th-diag" aria-label="Quick diagnostic">
-      <div class="cc-info">
-        <span class="cc-stage">🎯 Optional</span>
-        <h2>Take a quick diagnostic</h2>
-        <p class="cc-meta">≈8 quick questions — it can’t cost hearts, and it seeds your weak-sound tracking.</p>
-      </div>
-      <div class="th-invite-actions">
-        <button class="btn btn-primary" id="th-diag-take" type="button">Take it</button>
-        <button class="btn-lite" id="th-diag-later" type="button">Not now</button>
-      </div>
-    </section>` : '';
+  // No optional offer cards (owner order, 2026-08-20). Learn opens on the
+  // course, not on things to decline. The preface lives permanently in
+  // More → Why Speech Matters; the diagnostic in More → Preferences.
 
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
-    ${invite}
     ${cc ? cc.html : ''}
-    ${diag}
     ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
       <div class="track-progress">
@@ -775,22 +754,6 @@ function ipaLearnPane(el, course) {
   cc?.wire(el);
   wireWhatIsIpaCard(el);
   path.wire(el);
-  el.querySelector('#th-invite-read')?.addEventListener('click', () => {
-    store.dismissThresholdInvite();
-    renderThreshold(0, { replay: true });
-  });
-  el.querySelector('#th-invite-later')?.addEventListener('click', () => {
-    store.dismissThresholdInvite();
-    goSection('learn');
-  });
-  el.querySelector('#th-diag-take')?.addEventListener('click', () => {
-    store.saveOnboarding({ diagnostic: 'taken' });
-    startLesson(practiceLesson(track));
-  });
-  el.querySelector('#th-diag-later')?.addEventListener('click', () => {
-    store.saveOnboarding({ diagnostic: 'declined' });
-    goSection('learn');
-  });
   if (course.id === 'ssbe' && !store.introsSeen.ssbe && !skipCourseIntroOnce) showSsbeIntro(course);
 }
 
@@ -1449,8 +1412,13 @@ async function resolveWorkingText() {
 // the arcade opens with it already loaded. Exactly two ways in — the
 // pieces we ship, and your own pasted work. No provided Speechcraft
 // practice texts here; those belong to Speech, which still offers them.
-function renderArcadeTextPicker(onChosen) {
-  record(() => renderArcadeTextPicker(onChosen));
+function renderArcadeTextPicker(onChosen, opts = {}) {
+  // `only` narrows YOUR OWN work to one content type (owner order,
+  // 2026-08-20): custom monologues, scenes, speeches and the rest stay
+  // in their own lanes. Studio → Custom Work is the one place that
+  // shows everything, grouped.
+  const only = opts.only ?? null;
+  record(() => renderArcadeTextPicker(onChosen, opts));
   stopSpeech();
   // Two levels, the way a shelf actually works: authors first, then that
   // author's texts. `col` null = the shelf; a key = inside one collection.
@@ -1472,7 +1440,7 @@ function renderArcadeTextPicker(onChosen) {
               <p>${c.count} text${c.count === 1 ? '' : 's'} · ${esc(c.note)}</p></div>
             <div class="track-arrow">›</div>
           </button>`).join('')}
-        <h2 class="chart-h">Paste or upload Custom Work</h2>
+        <h2 class="chart-h">Paste or upload Custom Work${only ? ` — ${esc(contentTypeLabel(only))}s` : ''}</h2>
         <div id="atp-projects"><p class="pane-note">Loading your own texts…</p></div>`;
   };
 
@@ -1548,7 +1516,11 @@ function renderArcadeTextPicker(onChosen) {
         return;
       }
       let projects = [];
-      try { projects = (await listProjects()).filter(x => (x.text ?? '').trim()); }
+      try {
+        projects = (await listProjects())
+          .filter(x => (x.text ?? '').trim())
+          .filter(x => !only || (x.contentType ?? 'other') === only);
+      }
       catch {
         listEl.innerHTML = '<p class="pane-note pane-warn">Could not read your Studio projects just now.</p>';
         listEl.appendChild(addBtn());
@@ -2338,15 +2310,28 @@ function renderSpeechReflection({ heading, sub, compatible }) {
 // Scene-line detection for Studio text: strict "NAME: line" per line.
 // Ambiguity is NEVER guessed through — if the pattern doesn't hold,
 // the text is treated as a monologue and the user is told why.
+// Two speaker conventions are accepted, tried in order: "Name: line"
+// (the form Speechcraft's own texts use) and "NAME line" — the all-caps
+// prefix printed plays and screenplays actually use. The caps name must
+// be two characters or more, so an ordinary sentence opening on "I" can
+// never be read as a speaker. EVERY line must parse and there must be
+// 2–6 distinct speakers, which is what keeps prose out.
 function detectSceneLines(text) {
   const lines = String(text).split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-  const parsed = lines.map(ln => {
-    const m = ln.match(/^([A-Za-z][\w .''-]{0,30}?):\s+(.*)$/);
-    return m ? { who: m[1].trim(), text: m[2] } : null;
-  });
-  if (parsed.some(x => !x)) return null;
-  const chars = [...new Set(parsed.map(x => x.who))];
-  return chars.length >= 2 && chars.length <= 6 ? { lines: parsed, characters: chars } : null;
+  const forms = [
+    /^([A-Za-z][\w .''-]{0,30}?):\s+(.*)$/,
+    /^([A-Z][A-Z.'’-]+(?:\s+[A-Z][A-Z.'’-]+)*)\s+(\S.*)$/,
+  ];
+  for (const re of forms) {
+    const parsed = lines.map(ln => {
+      const m = ln.match(re);
+      return m ? { who: m[1].trim(), text: m[2] } : null;
+    });
+    if (parsed.some(x => !x)) continue;
+    const chars = [...new Set(parsed.map(x => x.who))];
+    if (chars.length >= 2 && chars.length <= 6) return { lines: parsed, characters: chars };
+  }
+  return null;
 }
 
 // ── Passage selection from a Studio project (Phase 10) ────────
@@ -3131,13 +3116,28 @@ function actingLibraryPane(el) {
       count: 6, unit: 'section',
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
       go: renderDissectTextbook },
+    { key: 'col:actions', tone: 'is-gold', emoji: '🎯', title: 'Playable Actions',
+      count: ACTION_VERBS.length, unit: 'verb',
+      keywords: 'action verb tactic objective doing not feeling playable',
+      go: renderPlayableActions },
     { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
       count: ACTING_APPROACHES.length, unit: 'introduction',
       keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
-    { key: 'col:scenes', tone: 'is-gold', emoji: '📜', title: 'Scenes & Monologues',
-      count: Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0), unit: 'text',
-      keywords: 'scene monologue soliloquy dramatic speech character play author',
+    // Monologues and Scenes are separate shelves (owner order,
+    // 2026-08-20). Everything we ship today is a monologue; the Scenes
+    // shelf is honest about being empty until scenes are added.
+    { key: 'col:monologues', tone: 'is-gold', emoji: '📜', title: 'Monologues',
+      count: Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0), unit: 'monologue',
+      keywords: 'monologue soliloquy speech character play author chekhov ibsen wilde oneill pirandello',
       go: renderTextsPage },
+    { key: 'col:scenes', tone: 'is-terracotta', emoji: '🎭', title: 'Scenes',
+      count: PROVIDED_SCENES.length, unit: 'scene',
+      keywords: 'scene two-hander dialogue partner work',
+      go: renderScenesShelf },
+    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', title: 'The Four Lists',
+      count: 4, unit: 'list',
+      keywords: 'character facts says about others reading five times building a character',
+      go: () => renderFourListsLesson() },
     // The whole Speechcraft Textbook, shelved here while the Speech
     // workspace is withdrawn (owner order, 2026-08-19). Same records,
     // never copied — it supersedes the 8-chapter Speech for Actors
@@ -3146,10 +3146,6 @@ function actingLibraryPane(el) {
       count: textbookOrder().length, unit: 'chapter', badge: { cls: '', label: 'Shared' },
       keywords: 'speech breath voice articulation fluency pace principles instrument meaning presence textbook',
       go: renderTextbook },
-    { key: 'col:ipa', tone: 'is-blue', emoji: 'ʃə', title: 'IPA & Dialect Tools',
-      count: 3, unit: 'reference', badge: { cls: '', label: 'Shared' },
-      keywords: 'ipa chart accent dialect pronunciation',
-      go: renderActorIpaTools, wide: true },
   ];
   workspaceLibrary(el, { workspace: 'Acting', cards, state: libState.acting });
 }
@@ -3273,14 +3269,20 @@ function actingPracticePane(el) {
     <p class="pane-note sp-wt-line">${proj
       ? `Working on: <b>${esc(proj.title)}</b> <button class="linkish" id="ac-change" type="button">change</button>`
       : 'No scene or monologue selected — exercises will ask, or <button class="linkish" id="ac-pick" type="button">choose one now</button>.'}</p>
+    ${SCENE_STUDY_LIVE ? `
     <button class="track-card hub-card" id="acp-scene" type="button">
       <div class="track-glyph">🎬</div>
       <div class="track-info"><h2>Scene Study</h2></div>
       <div class="track-arrow">›</div>
-    </button>
+    </button>` : ''}
     <button class="track-card hub-card" id="acp-arcade" type="button">
       <div class="track-glyph">🕹</div>
       <div class="track-info"><h2>Acting Arcade</h2></div>
+      <div class="track-arrow">›</div>
+    </button>
+    <button class="track-card hub-card" id="acp-cards" type="button">
+      <div class="track-glyph">🃏</div>
+      <div class="track-info"><h2>Flash Cards</h2></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-mytext" type="button">
@@ -3292,12 +3294,186 @@ function actingPracticePane(el) {
     renderArcadeTextPicker(() => goSection('practice')));
   el.querySelector('#ac-pick')?.addEventListener('click', () =>
     renderArcadeTextPicker(() => goSection('practice')));
-  el.querySelector('#acp-scene').addEventListener('click', () =>
+  el.querySelector('#acp-scene')?.addEventListener('click', () =>
     renderArcadeTextPicker(() => renderSceneStudy()));
   el.querySelector('#acp-arcade').addEventListener('click', () =>
     renderArcadeTextPicker(() => renderActingArcade()));
+  el.querySelector('#acp-cards').addEventListener('click', () =>
+    renderArcadeTextPicker(t => renderFlashCards(t)));
   el.querySelector('#acp-mytext').addEventListener('click', () =>
     renderArcadeTextPicker(() => renderActingArcade()));
+}
+
+// ── Flash Cards: the cue-line drill actors actually use ───────
+// Front = the line BEFORE yours. Back = your line. In a scene you pick
+// your character and every one of their lines becomes a card, cued by
+// whatever precedes it. In a monologue each line is cued by the line
+// before it — the same way a monologue is learned off its own spine.
+// Nothing is scored: you turn a card over and judge for yourself.
+function flashCardsFor(text, who) {
+  const scene = text.scene ?? detectSceneLines(text.body);
+  if (scene && who) {
+    return scene.lines
+      .map((l, i) => ({ l, prev: scene.lines[i - 1] ?? null }))
+      .filter(x => x.l.who === who)
+      .map(x => ({
+        cueWho: x.prev ? x.prev.who : null,
+        cue: x.prev ? x.prev.text : 'Top of the scene — you open.',
+        line: x.l.text,
+      }));
+  }
+  const lines = String(text.body).split(/\r?\n/).map(t => t.trim()).filter(Boolean);
+  return lines.map((line, i) => ({
+    cueWho: null,
+    cue: i === 0 ? 'Top of the piece — you open.' : lines[i - 1],
+    line,
+  }));
+}
+
+// The same drill as renderFlashCards, rendered INSIDE a project tab so
+// it never leaves the page you are working on. State is local to the
+// pane — nothing is stored, because a flash card has no progress worth
+// keeping, only a stack you go round again.
+function paneFlashCards(pane, p) {
+  const text = { title: p.title || 'Untitled project', body: String(p.text ?? ''), scene: null };
+  const scene = detectSceneLines(text.body);
+  let who = scene ? null : '';
+  let n = 0, shown = false;
+
+  const draw = () => {
+    if (!text.body.trim()) { pane.innerHTML = emptyText(); return; }
+    if (scene && who === null) {
+      pane.innerHTML = `
+        <p class="pane-note">A scene — pick your part and every one of its lines becomes a card,
+          cued by the line before it.</p>
+        <div class="item-grid">
+          ${scene.characters.map(c => `
+            <button class="tile" data-who="${esc(c)}" type="button">
+              <span class="tile-emoji" aria-hidden="true">🎭</span>
+              <span class="tile-title">${esc(c)}</span>
+              <span class="tile-meta">${scene.lines.filter(l => l.who === c).length} lines</span>
+            </button>`).join('')}
+        </div>`;
+      pane.querySelectorAll('[data-who]').forEach(b =>
+        b.addEventListener('click', () => { who = b.dataset.who; n = 0; shown = false; draw(); }));
+      return;
+    }
+    const cards = flashCardsFor({ ...text, scene }, who || null);
+    if (!cards.length) {
+      pane.innerHTML = '<p class="pane-note">No lines to make cards from yet — add text on the Text tab.</p>';
+      return;
+    }
+    n = Math.min(Math.max(n, 0), cards.length - 1);
+    const c = cards[n];
+    pane.innerHTML = `
+      <p class="pane-note">Card ${n + 1} of ${cards.length}${who ? ` · ${esc(who)}` : ''} —
+        read the cue, say your line, then turn it over. Nothing here is scored.
+        ${scene ? '<button class="linkish" id="fcp-part" type="button">change part</button>' : ''}</p>
+      <section class="sp-passage" aria-label="Cue line">
+        <span class="cc-stage">${c.cueWho ? esc(c.cueWho) : 'Cue'}</span>
+        <div class="sp-passage-text" id="fcp-cue"></div>
+      </section>
+      <section class="sp-passage ${shown ? '' : 'is-hidden-card'}" aria-label="Your line" aria-live="polite">
+        <span class="cc-stage">${who ? esc(who) : 'Your line'}</span>
+        <div class="sp-passage-text" id="fcp-line">${shown ? '' : '· · ·'}</div>
+      </section>
+      <div class="practice-row">
+        ${shown
+          ? `<button class="btn btn-primary" id="fcp-next" type="button">${n + 1 < cards.length ? 'Next card ›' : 'Start again'}</button>`
+          : '<button class="btn btn-primary" id="fcp-show" type="button">Show my line</button>'}
+        <button class="btn-lite" id="fcp-prev" type="button" ${n === 0 ? 'disabled' : ''}>‹ Previous</button>
+      </div>`;
+    // textContent, never innerHTML — a pasted script stays inert.
+    pane.querySelector('#fcp-cue').textContent = c.cue;
+    if (shown) pane.querySelector('#fcp-line').textContent = c.line;
+    pane.querySelector('#fcp-show')?.addEventListener('click', () => { shown = true; draw(); });
+    pane.querySelector('#fcp-next')?.addEventListener('click', () => {
+      n = n + 1 < cards.length ? n + 1 : 0; shown = false; draw();
+    });
+    pane.querySelector('#fcp-prev')?.addEventListener('click', () => { n -= 1; shown = false; draw(); });
+    pane.querySelector('#fcp-part')?.addEventListener('click', () => { who = null; n = 0; shown = false; draw(); });
+  };
+  draw();
+}
+
+function renderFlashCards(text, who = null, i = 0, shown = false) {
+  record(() => renderFlashCards(text, who, i, shown));
+  stopSpeech();
+  const scene = text.scene ?? detectSceneLines(text.body);
+
+  // A scene needs to know which part is yours before it can cue you.
+  if (scene && !who) {
+    workspacePage(
+      pageTopbar('🃏 Flash Cards', '#8a6d3b'),
+      `<div class="ws-head">
+         <h1 class="page-h">Which part is yours?</h1>
+         <p class="ws-sub">${esc(text.title)} · every line of your part becomes a card, cued by the line before it.</p>
+       </div>`,
+      `<div class="item-grid">
+         ${scene.characters.map(c => `
+           <button class="tile" data-who="${esc(c)}" type="button">
+             <span class="tile-emoji" aria-hidden="true">🎭</span>
+             <span class="tile-title">${esc(c)}</span>
+             <span class="tile-meta">${scene.lines.filter(l => l.who === c).length} lines</span>
+           </button>`).join('')}
+       </div>`);
+    app.querySelectorAll('[data-who]').forEach(b =>
+      b.addEventListener('click', () => renderFlashCards(text, b.dataset.who, 0, false)));
+    return;
+  }
+
+  const cards = flashCardsFor(text, who);
+  if (!cards.length) {
+    workspacePage(
+      pageTopbar('🃏 Flash Cards', '#8a6d3b'),
+      `<div class="ws-head"><h1 class="page-h">Flash Cards</h1></div>`,
+      `<p class="pane-note">This text has no lines to make cards from. Choose another from
+         <button class="linkish" id="fc-other" type="button">Scripts &amp; Speeches or your own work</button>.</p>`);
+    document.getElementById('fc-other')?.addEventListener('click', () =>
+      renderArcadeTextPicker(t => renderFlashCards(t)));
+    return;
+  }
+
+  const n = Math.min(Math.max(i, 0), cards.length - 1);
+  const c = cards[n];
+  app.innerHTML = `
+    ${pageTopbar('🃏 Flash Cards', '#8a6d3b')}
+    <main class="guide sp-game">
+      <h1>${esc(text.title)}${who ? ` · ${esc(who)}` : ''}</h1>
+      <p class="pane-note">Card ${n + 1} of ${cards.length} — read the cue, say your line, then turn it over.
+        Nothing here is scored.</p>
+      <section class="sp-passage" aria-label="Cue line">
+        <span class="cc-stage">${c.cueWho ? esc(c.cueWho) : 'Cue'}</span>
+        <div class="sp-passage-text" id="fc-cue"></div>
+      </section>
+      <section class="sp-passage ${shown ? '' : 'is-hidden-card'}" aria-label="Your line" aria-live="polite">
+        <span class="cc-stage">${who ? esc(who) : 'Your line'}</span>
+        <div class="sp-passage-text" id="fc-line">${shown ? '' : '· · ·'}</div>
+      </section>
+      <div class="practice-row">
+        ${shown
+          ? `<button class="btn btn-primary" id="fc-next" type="button">${n + 1 < cards.length ? 'Next card ›' : 'Start again'}</button>`
+          : '<button class="btn btn-primary" id="fc-show" type="button">Show my line</button>'}
+        <button class="btn-lite" id="fc-prev" type="button" ${n === 0 ? 'disabled' : ''}>‹ Previous</button>
+        <button class="btn-lite" id="fc-change" type="button">Change text</button>
+      </div>
+    </main>`;
+  wireBrandHome();
+  // textContent, never innerHTML — a pasted script is inert here, always.
+  document.getElementById('fc-cue').textContent = c.cue;
+  if (shown) document.getElementById('fc-line').textContent = c.line;
+
+  document.getElementById('fc-show')?.addEventListener('click', () => {
+    navStack.pop(); renderFlashCards(text, who, n, true);
+  });
+  document.getElementById('fc-next')?.addEventListener('click', () => {
+    navStack.pop(); renderFlashCards(text, who, n + 1 < cards.length ? n + 1 : 0, false);
+  });
+  document.getElementById('fc-prev')?.addEventListener('click', () => {
+    navStack.pop(); renderFlashCards(text, who, n - 1, false);
+  });
+  document.getElementById('fc-change')?.addEventListener('click', () =>
+    renderArcadeTextPicker(t => renderFlashCards(t)));
 }
 
 function renderActingArcade() {
@@ -3337,8 +3513,11 @@ function runActingGame(gameId, text) {
   stopSpeech();
   const game = actingGameById(gameId);
   if (!game) return renderActingArcade();
+  // The action deck: the twelve taught actions with their objectives,
+  // then the wider vocabulary as bare verbs (owner order, 2026-08-20).
   const deck = game.deck === 'actions'
-    ? PLAYABLE_ACTIONS.map(a => `${a.verb} — ${a.objective}`)
+    ? [...PLAYABLE_ACTIONS.map(a => `${a.verb} — ${a.objective}`),
+       ...ACTION_VERBS.filter(v => !taughtActionFor(v))]
     : (ACTING_DECKS[game.deck] ?? []);
 
   app.innerHTML = `
@@ -3424,17 +3603,13 @@ function actingProject() { return workingText(); }
 function actorStudioPane(el) {
   const proj = actingProject();
   const ref = workingTextRef();
+  // Two ways in (owner order, 2026-08-20): the texts we ship, and your
+  // own. Everything the Studio used to list — Scene Study, Question
+  // Everything, beats, actions, notes — is reached ON a script now, from
+  // the rail on its own page, where it belongs.
   const cards = [
     { icon: '📜', title: 'Scenes & Monologues', go: renderTextsPage },
-    { icon: '🎬', title: 'Scene Study', go: () => renderArcadeTextPicker(() => renderSceneStudy()) },
-    { icon: '🔍', title: 'Question Everything', go: () => openProjectDissection() },
-    { icon: '🧭', title: 'Objectives, Obstacles & Stakes', go: () => renderSceneStudy('objective') },
-    { icon: '🧱', title: 'Beats & Turns', go: () => renderSceneStudy('beats') },
-    { icon: '🎯', title: 'Playable Actions', go: renderPlayableActions },
-    { icon: '🔗', title: 'Relationships & Circumstances', go: () => renderSceneStudy('relationship') },
-    { icon: '📝', title: 'Rehearsal Notes', go: () => renderSceneStudy('notes') },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
-    { icon: '📕', title: 'Personal Dictionary', go: renderDictionary },
   ];
   el.innerHTML = `
     <h1 class="page-h">Actor’s Studio</h1>
@@ -3468,7 +3643,7 @@ function actorStudioPane(el) {
         <div class="track-info"><h2>${esc(c.title)}</h2></div>
         <div class="track-arrow">›</div>
       </button>`).join('')}`;
-  el.querySelector('#ac-open')?.addEventListener('click', () => renderProject(ref.id, 'text'));
+  el.querySelector('#ac-open')?.addEventListener('click', () => renderScript(ref.id));
   el.querySelector('#ac-change')?.addEventListener('click', () => renderWorkingTextPicker());
   el.querySelector('#ac-choose')?.addEventListener('click', () => renderWorkingTextPicker());
   el.querySelector('#ac-scene')?.addEventListener('click', () => renderSceneStudy());
@@ -3519,6 +3694,19 @@ function renderSceneStudy(focusArea) {
     const p = document.createElement('p');
     p.className = 'guide-text';
     p.textContent = area.prompt;
+    // Six areas carry the questions of their Question Everything section,
+    // so the whole question set is workable here, on this scene, without
+    // leaving for the textbook.
+    const qe = area.qeSection != null ? DISSECT_SECTIONS[area.qeSection] : null;
+    const asks = document.createElement('ul');
+    if (qe) {
+      asks.className = 'th-list ss-asks';
+      for (const a of qe.asks ?? []) {
+        const li = document.createElement('li');
+        li.textContent = a;
+        asks.appendChild(li);
+      }
+    }
     const label = document.createElement('label');
     label.className = 'field';
     const span = document.createElement('span');
@@ -3545,7 +3733,9 @@ function renderSceneStudy(focusArea) {
       }, 400);
     });
     label.append(span, ta);
-    sec.append(h, p, label, status);
+    sec.append(h, p);
+    if (qe) sec.append(asks);
+    sec.append(label, status);
     if (area.id === 'actions') {
       const link = document.createElement('button');
       link.className = 'btn-lite'; link.type = 'button';
@@ -3843,10 +4033,33 @@ function renderPlayableActions() {
         placeholder="Search actions…" aria-label="Search playable actions"
         value="${esc(playableQuery)}" autocomplete="off">
       <div id="pa-list" aria-live="polite"></div>
+
+      <h2 class="guide-heading">The action vocabulary — ${ACTION_VERBS.length} verbs</h2>
+      <p class="guide-text">${esc(ACTION_VERB_FRAME.objective)}
+        ${esc(ACTION_VERB_FRAME.method)} <b>${esc(ACTION_VERB_FRAME.rule)}</b></p>
+      <p class="pane-note">Words to reach for when none of the twelve above is the verb you mean.
+        A verb in <b>bold</b> has a written lesson — tap it. The rest are vocabulary, not lessons.</p>
+      <div class="pa-verbs" id="pa-verbs" aria-live="polite"></div>
     </main>`;
   wireBrandHome();
   const listEl = document.getElementById('pa-list');
+  const verbsEl = document.getElementById('pa-verbs');
+  const drawVerbs = () => {
+    const q = playableQuery.trim().toLowerCase();
+    const hits = q ? ACTION_VERBS.filter(v => v.toLowerCase().includes(q)) : ACTION_VERBS;
+    verbsEl.innerHTML = hits.length
+      ? hits.map(v => {
+          const taught = taughtActionFor(v);
+          return taught
+            ? `<button class="pa-verb is-taught" data-taught="${esc(taught.id)}" type="button">${esc(v)}</button>`
+            : `<span class="pa-verb">${esc(v)}</span>`;
+        }).join('')
+      : `<p class="pane-note">No verb matches “${esc(playableQuery)}”.</p>`;
+    verbsEl.querySelectorAll('[data-taught]').forEach(b =>
+      b.addEventListener('click', () => renderPlayableAction(b.dataset.taught)));
+  };
   const draw = () => {
+    drawVerbs();
     const hits = searchActions(playableQuery);
     if (!hits.length) {
       // Honest empty state — a message and a way back, never a bare page.
@@ -4546,26 +4759,6 @@ const THRESHOLD_PANELS_FULL = [
     ] },
 ];
 
-// Verbatim panel-7 copy (the choice) — rendered by the final screen.
-const THRESHOLD_CHOICE = {
-  title: 'Choose your way in',
-  options: [
-    { id: 'craft', label: 'Learn the Craft',
-      blurb: 'Follow the guided path from sound and knowledge to intention, speech, and performance.' },
-    { id: 'tools', label: 'Use the Tools',
-      blurb: 'Go straight to Speechcraft\'s practical tools. The guided path stays available whenever you want it.' },
-  ],
-  note: 'Both take you into the same app. You can change your mind at any time.',
-};
-
-const ONBOARD_ACCENTS = [
-  { id: 'nam', icon: '🇺🇸', label: 'Neutral American', blurb: 'The screen standard — every R spoken, flat BATH, open LOT.', sample: true },
-  { id: 'rp', icon: '🎩', label: 'Traditional RP', blurb: 'The classic British stage standard — non-rhotic, broad BATH.', sample: true },
-  { id: 'ssbe', icon: '🇬🇧', label: 'Standard British', blurb: 'A modern British target for present-day roles and conversation.', sample: false },
-  { id: 'aus', icon: '🇦🇺', label: 'Australian', blurb: 'Forward vowels and a rising line — the hardest to fake.', sample: true },
-  { id: 'core', icon: 'ʃə', label: 'IPA Foundations', blurb: 'Start with the alphabet of sounds, no accent attached.', sample: false },
-];
-
 // Words whose clips make the accents' differences audible side by side.
 const SAMPLE_WORDS = ['dance', 'water', 'nurse'];
 
@@ -4663,36 +4856,8 @@ function renderThreshold(step = 0, opts = {}) {
       ${p.body.map(t => `<p class="guide-text th-text">${t}</p>`).join('')}
       ${p.list ? `<ul class="th-list">${p.list.map(li => `<li>${li}</li>`).join('')}</ul>` : ''}
       ${(p.after ?? []).map(t => `<p class="guide-text th-text">${t}</p>`).join('')}
-      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button">Continue</button></div>`;
-  } else if (step === PANELS.length) {
-    // Course picker — kept as it was, samples included.
-    body = `
-      <h1>Pick your first course</h1>
-      <p class="ob-lede">You can switch or add the others any time from the flag at the top.</p>
-      <div class="ob-options" role="radiogroup" aria-label="First course">
-        ${ONBOARD_ACCENTS.map(a => `
-          <div class="ob-option-row">
-            <button class="ob-option ${sel.accent === a.id ? 'on' : ''}" data-accent="${a.id}" type="button"
-                    role="radio" aria-checked="${sel.accent === a.id}">
-              <span class="ob-opt-icon">${a.icon}</span>
-              <span class="ob-opt-text"><b>${esc(a.label)}</b><small>${esc(a.blurb)}</small></span>
-            </button>
-            ${a.sample ? `<button class="word-chip ob-sample" data-sample="${a.id}" type="button"
-              aria-label="Hear a ${esc(a.label)} sample">🔊 Sample</button>` : ''}
-          </div>`).join('')}
-      </div>
-      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button" ${sel.accent ? '' : 'disabled'}>Continue</button></div>`;
-  } else {
-    // The choice. Equal visual weight — deliberately no primary styling.
-    body = `
-      <h1>${THRESHOLD_CHOICE.title}</h1>
-      <div class="ob-options" aria-label="Choose your way in">
-        ${THRESHOLD_CHOICE.options.map(o => `
-          <button class="ob-option th-way" data-choice="${o.id}" type="button">
-            <span class="ob-opt-text"><b>${esc(o.label)}</b><small>${esc(o.blurb)}</small></span>
-          </button>`).join('')}
-      </div>
-      <p class="th-note"><i>${THRESHOLD_CHOICE.note}</i></p>`;
+      <div class="ob-actions"><button class="btn btn-primary" id="ob-next" type="button">${
+        step === PANELS.length - 1 ? (replay ? 'Done' : 'Enter Speechcraft') : 'Continue'}</button></div>`;
   }
 
   app.innerHTML = `
@@ -4714,44 +4879,18 @@ function renderThreshold(step = 0, opts = {}) {
   });
 
   if (step < PANELS.length) {
-    document.getElementById('ob-next').addEventListener('click', () => go(step + 1));
-  } else if (step === PANELS.length) {
-    app.querySelectorAll('[data-accent]').forEach(b =>
-      b.addEventListener('click', () => go(step, { accent: b.dataset.accent })));
-    app.querySelectorAll('.ob-sample').forEach(b =>
-      b.addEventListener('click', () => {
-        const d = b.dataset.sample;
-        speakSequence(SAMPLE_WORDS.map(w => ({ text: w, clipUrl: `audio/${d}/f/${w}.mp3` })),
-          { lang: ACCENT_LANG[d] });
-      }));
     document.getElementById('ob-next').addEventListener('click', () => {
-      if (replay && sel.accent) setCourse(sel.accent);   // "Run setup again" honors the pick
-      go(step + 1);
+      if (step < PANELS.length - 1) return go(step + 1);
+      // Last panel = the end of the preface (owner order, 2026-08-20).
+      if (replay) { store.markThresholdReplay('read'); return goBack(); }
+      store.completeThreshold({ choice: 'read', source: 'first-run' });
+      store.saveOnboarding({ done: true, accent: sel.accent ?? null });
+      setCourse(sel.accent ?? 'nam');       // changeable from the course chip
+      setWorkspace('acting');               // the workspace the app is built around
+      skipCourseIntroOnce = true;           // no modal on the landing render
+      goSection('learn');
     });
-  } else {
-    app.querySelectorAll('[data-choice]').forEach(b =>
-      b.addEventListener('click', () => {
-        const choice = b.dataset.choice;
-        if (replay) {
-          store.markThresholdReplay(choice);             // navigate — never rewrite `choice`
-        } else {
-          store.completeThreshold({ choice, source: 'first-run' });
-          store.saveOnboarding({ done: true, accent: sel.accent ?? null });
-          setCourse(sel.accent ?? 'nam');
-          skipCourseIntroOnce = true;                    // no modal on the landing render
-        }
-        if (!replay) setWorkspace(choice === 'craft'
-          ? (sel.accent === 'core' ? 'ipa' : 'accents')
-          : 'acting');
-        goSection(choice === 'craft' ? 'learn' : 'studio');
-      }));
   }
-
-  // Focus the heading (visible ring via .threshold h1:focus) and start
-  // each screen at the top.
-  window.scrollTo(0, 0);
-  const h = app.querySelector('h1');
-  if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
 }
 
 // Preferences. The old "Your goal" picker is gone: the stored goal value
@@ -4776,8 +4915,13 @@ function renderPreferences() {
                   aria-pressed="${speechGoal() === g.id}">${g.icon} ${esc(g.label)}</button>`).join('')}
       </div>
       <h2 class="guide-heading">First-run setup</h2>
-      <p class="pane-note">Runs the preface and course picker again. Your progress is untouched.</p>
-      <button class="btn" id="pref-rerun" type="button">Run setup again</button>
+      <p class="pane-note">Reads the preface again. Your progress is untouched.</p>
+      <button class="btn" id="pref-rerun" type="button">Read the preface again</button>
+
+      <h2 class="guide-heading">Quick diagnostic</h2>
+      <p class="pane-note">≈8 questions on the active course. It cannot cost hearts, and it seeds
+        your weak-sound tracking. Optional, and repeatable.</p>
+      <button class="btn" id="pref-diag" type="button">Take the diagnostic</button>
     </main>`;
   wireBrandHome();
   app.querySelectorAll('[data-course]').forEach(b =>
@@ -4789,6 +4933,10 @@ function renderPreferences() {
       renderPreferences();
     }));
   document.getElementById('pref-rerun').addEventListener('click', () => renderThreshold(0, { replay: true }));
+  document.getElementById('pref-diag').addEventListener('click', () => {
+    store.saveOnboarding({ diagnostic: 'taken' });
+    startLesson(practiceLesson(trackFor(activeCourse())));
+  });
 }
 
 // ── Audio audit: the owner's ear-check grid (#audit) ──────────
@@ -5761,9 +5909,10 @@ let projectQuery = '';
 function studioMain(el) {
   if (activeWorkspace() === 'acting') return actorStudioPane(el);
   const inSpeech = activeWorkspace() === 'speech';
+  // Playable Actions is acting work — it shelves in the Acting Library
+  // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
   const cards = [
     { icon: '📜', title: 'Scripts & Speeches', go: renderTextsPage },
-    { icon: '🎯', title: 'Playable Actions', go: renderPlayableActions },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
     { icon: '📕', title: 'Personal Dictionary', go: renderDictionary },
   ];
@@ -5843,11 +5992,18 @@ async function customWorkPane(el) {
     }
     if (!rows.length) { listEl.innerHTML = '<p class="pane-note">No projects match that search.</p>'; return; }
 
+    // Grouped by content type (owner order, 2026-08-20): the Studio holds
+    // ALL your own work, but a monologue and a scene are different jobs
+    // and should not be shuffled together in one undifferentiated list.
+    const groupsOf = list => CONTENT_TYPES
+      .map(([v, label]) => [label, list.filter(x => (x.contentType ?? 'other') === v)])
+      .filter(([, xs]) => xs.length);
+
     const preview = t => {
       const s = String(t || '').replace(/\s+/g, ' ').trim();
       return s ? esc(s.slice(0, 110)) + (s.length > 110 ? '…' : '') : '<i>No text yet</i>';
     };
-    listEl.innerHTML = rows.map(p => `
+    const cardHtml = p => `
       <div class="proj-card" data-id="${p.id}">
         <button class="proj-open" type="button" data-act="open">
           <span class="proj-main">
@@ -5868,14 +6024,21 @@ async function customWorkPane(el) {
           <button class="btn-lite" type="button" data-act="export">Export</button>
           <button class="btn-lite btn-danger" type="button" data-act="del">Delete</button>
         </div>
-      </div>`).join('');
+      </div>`;
+
+    const groups = groupsOf(rows);
+    listEl.innerHTML = groups.length > 1
+      ? groups.map(([label, xs]) => `
+          <h2 class="sec-h">${esc(label)}${xs.length > 1 ? 's' : ''} · ${xs.length}</h2>
+          ${xs.map(cardHtml).join('')}`).join('')
+      : rows.map(cardHtml).join('');
 
     listEl.querySelectorAll('.proj-card').forEach(card => {
       card.addEventListener('click', async e => {
         const btn = e.target.closest('button[data-act]'); if (!btn) return;
         const id = card.dataset.id;
         const act = btn.dataset.act;
-        if (act === 'open') renderProject(id);
+        if (act === 'open') renderScript(id);
         else if (act === 'dup') { await duplicateProject(id); draw(); }
         else if (act === 'export') exportProject(id);
         else if (act === 'del') {
@@ -5968,7 +6131,7 @@ function renderNewProject() {
       accent,
       text,
     });
-    renderProject(p.id);
+    renderScript(p.id);
   });
 }
 
@@ -5979,6 +6142,569 @@ function relDate(ts) {
   if (days === 1) return 'yesterday';
   if (days < 30) return `${days} days ago`;
   return new Date(ts).toLocaleDateString();
+}
+
+// Restored 2026-08-20: these three were collateral damage when the
+// Notes and Difficult Words panes were removed — a span-based delete
+// walked past them to the next `function`, taking every `const` in
+// between. LIBRARIES alone is read by nine call sites.
+// `accent` is the dialect a collection opens in; `narrated` lists the dialects
+// that actually have recorded narrator audio. Every dialect stays playable —
+// the rest simply read in the device voice — but we only look for clip files
+// where they exist, and we say so rather than leaving the change unexplained.
+const LIBRARIES = {
+  chekhov: { data: CHEKHOV, icon: '🎭', title: 'Chekhov · Monologues', accent: 'rp',
+             narrated: ['rp'], note: 'public domain · tr. Fell & West' },
+  oneill:  { data: ONEILL,  icon: '⚓', title: 'O’Neill · Monologues', accent: 'nam',
+             narrated: ['nam'], note: 'public domain in the US' },
+  wilde:   { data: WILDE,   icon: '🎩', title: 'Wilde · Monologues',   accent: 'rp',
+             narrated: ['rp'], note: 'public domain' },
+  pirandello: { data: PIRANDELLO, icon: '🎪', title: 'Pirandello · Monologues', accent: 'rp',
+             narrated: ['rp'], note: 'public domain in the US · tr. Storer & Livingston' },
+  ibsen:   { data: IBSEN,   icon: '🕯️', title: 'Ibsen · Monologues', accent: 'rp',
+             narrated: ['rp'], note: 'public domain · tr. Archer, Gosse, Sharp & Marx Aveling' },
+};
+
+// Which narrator voice reads each dialect, for the "you're hearing X" note.
+
+// Which narrator voice reads each dialect, for the "you're hearing X" note.
+const NARRATOR_NAMES = { nam: 'American Bass', rp: 'Mark', aus: 'Jimbo' };
+
+const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
+
+// `accent` is the dialect a collection opens in; `narrated` lists the dialects
+// that actually have recorded narrator audio. Every dialect stays playable —
+// the rest simply read in the device voice — but we only look for clip files
+// where they exist, and we say so rather than leaving the change unexplained.
+
+// Bracketed stage directions removed for anything SPOKEN — narration
+// like "[He exits]" is never read aloud or transcribed.
+const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
+
+// ── Scenes ────────────────────────────────────────────────────
+// A shelf of our own two-hander scenes. Empty until scenes are written
+// and cleared — and it says so plainly rather than showing an inviting
+// card behind which there is nothing.
+const PROVIDED_SCENES = [];
+
+function renderScenesShelf() {
+  record(renderScenesShelf);
+  stopSpeech();
+  workspacePage(
+    pageTopbar('🎭 Scenes', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">Scenes</h1>
+       <p class="ws-sub">Two-hander scenes for partner work.</p>
+     </div>`,
+    PROVIDED_SCENES.length
+      ? `<div class="tile-grid">${PROVIDED_SCENES.map(sc => tileHtml({
+           key: sc.id, tone: 'is-terracotta', emoji: '🎭', title: sc.title,
+           meta: `${sc.characters.length} characters`,
+         })).join('')}</div>`
+      : `<p class="pane-note">No scenes here yet — none have been written and cleared for use.
+           Your own scenes work fully today:
+           <button class="linkish" id="sc-shelf-mine" type="button">open one of yours</button>,
+           or paste a new one in
+           <button class="linkish" id="sc-shelf-custom" type="button">Custom Work</button>.</p>`);
+  document.getElementById('sc-shelf-custom')?.addEventListener('click', renderCustomWork);
+  document.getElementById('sc-shelf-mine')?.addEventListener('click', () =>
+    renderArcadeTextPicker(() => {
+      const ref = workingTextRef();
+      if (ref?.source === 'studio') renderScript(ref.id);
+    }, { only: 'scene' }));
+}
+
+// ── The Four Lists ────────────────────────────────────────────
+// The Library card opens the EXPLANATION (owner order, 2026-08-20): what
+// the method is and what each list is for. Working the lists on your own
+// text is offered at the foot, not in place of the reading.
+function renderFourListsLesson() {
+  record(renderFourListsLesson);
+  stopSpeech();
+  workspacePage(
+    pageTopbar('📋 The Four Lists', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">The Four Lists</h1>
+       <p class="ws-sub">Five read-throughs, four inventories — where a character comes from.</p>
+     </div>`,
+    `<p><span class="sp-badge">${esc(ACTING_DRAFT_BADGE)}</span></p>
+
+     <p class="guide-text">You read the whole play five times. Not the scene — the play. A character
+       is built from everything the text knows about them, and most of that sits outside the pages
+       you happen to be in.</p>
+     <p class="guide-text">The <b>first reading is just reading</b>. No pen, no marking, no
+       decisions. You are finding out what happens. Every choice you make before you know the story
+       is a choice made in the dark, and you will defend it later out of pride rather than sense.</p>
+     <p class="guide-text">Each reading after that has exactly one job. One list at a time, because
+       the four are genuinely different kinds of evidence, and mixing them is how an assumption ends
+       up filed as a fact.</p>
+
+     <h2 class="guide-heading">2. The incontrovertible facts about your character</h2>
+     <p class="guide-text">Only what the text states outright. Age, job, where they live, who they
+       are related to, what they did. Not what you infer, not what you would like to be true — what
+       could be read aloud in court without argument.</p>
+     <p class="guide-text">This list is usually shorter than actors expect, and that is the point.
+       Everything not on it is interpretation, and knowing which is which is what lets you change
+       your mind later without losing your footing.</p>
+
+     <h2 class="guide-heading">3. What your character says about themselves</h2>
+     <p class="guide-text">Their own account of who they are. Write it down whether or not you
+       believe it. A character lying about themselves is telling you something exact — about what
+       they need other people to think, and about what they cannot afford to say.</p>
+     <p class="guide-text">Watch for the gap between this list and the first one. That gap is often
+       the part worth playing.</p>
+
+     <h2 class="guide-heading">4. What your character says about others</h2>
+     <p class="guide-text">How they describe everyone else. What they notice first, what they never
+       mention, whether the description changes depending on who is listening.</p>
+     <p class="guide-text">People reveal themselves most carelessly when they are talking about
+       someone else. This list is frequently the richest of the four.</p>
+
+     <h2 class="guide-heading">5. What others say about your character</h2>
+     <p class="guide-text">Everything said about you — to your face, and behind your back. Again:
+       record it, do not yet settle whether it is fair. Who says it matters as much as what is said.</p>
+     <p class="guide-text">When the last list contradicts the second, you have found the argument the
+       play is actually having about this person.</p>
+
+     <h2 class="guide-heading">What the lists are not</h2>
+     <p class="guide-text">They are not a character biography, and finishing them does not finish the
+       work. They are evidence, gathered before interpretation, so that the choices you make later
+       are made against the text rather than against your first impression of it.</p>
+
+     <p class="pane-note">Work the lists on one of your own texts:
+       <button class="linkish" id="fl-start" type="button">open The Four Lists</button>.
+       They save with that project.</p>`);
+  document.getElementById('fl-start')?.addEventListener('click', () => {
+    const ref = workingTextRef();
+    if (ref?.source === 'studio') return renderFourLists(ref.id);
+    renderArcadeTextPicker(() => {
+      const r2 = workingTextRef();
+      if (r2?.source === 'studio') return renderFourLists(r2.id);
+      // A shipped text is read-only; the lists need somewhere to save.
+      renderCustomWork();
+    });
+  });
+}
+
+
+// The Four Lists as its own page, saved onto a project you own.
+async function renderFourLists(id) {
+  record(() => renderFourLists(id));
+  stopSpeech();
+  const p = await getProject(id);
+  if (!p) return renderCustomWork();
+    const fl = p.fourLists ?? {};
+    const reads = fl.reads ?? 0;
+    const html = `
+      <p class="guide-text">Read the play five times. The first time, just read it — no pen.
+        After that, one list per reading.</p>
+      <div class="sc-reads" role="group" aria-label="Read-throughs completed">
+        ${[1, 2, 3, 4, 5].map(n => `
+          <button class="sc-read ${n <= reads ? 'on' : ''}" data-read="${n}" type="button"
+                  aria-pressed="${n <= reads}">${n}</button>`).join('')}
+        <span class="pane-note">${reads} of 5 read-throughs${reads === 0 ? ' — start with a plain read' : ''}</span>
+      </div>
+      ${FOUR_LISTS.map(l => `
+        <section class="sp-step">
+          <h2 class="guide-heading">${l.n}. ${esc(l.title)}</h2>
+          <p class="guide-text">${esc(l.prompt)}</p>
+          <label class="field">
+            <span class="field-label">Your list (one per line)</span>
+            <textarea class="input-sel sp-note fl-note" data-list="${l.id}" rows="5"
+              aria-label="${esc(l.title)}"></textarea>
+          </label>
+        </section>`).join('')}
+      <p class="pane-note" id="fl-state" role="status" aria-live="polite"></p>`;
+
+  workspacePage(
+    pageTopbar('📋 The Four Lists', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">The Four Lists</h1>
+       <p class="ws-sub">${esc(p.title || 'Untitled project')}</p>
+     </div>`,
+    html);
+
+  const flNow = () => p.fourLists ?? {};
+  const state = document.getElementById('fl-state');
+  // Values go in through .value, never innerHTML — inert by construction.
+  app.querySelectorAll('.fl-note').forEach(t => { t.value = flNow()[t.dataset.list] ?? ''; });
+  let timer = null;
+  app.querySelectorAll('.fl-note').forEach(t =>
+    t.addEventListener('input', () => {
+      clearTimeout(timer);
+      state.textContent = 'Saving…';
+      timer = setTimeout(async () => {
+        const fresh = await getProject(id);
+        const next = { ...(fresh.fourLists ?? {}), [t.dataset.list]: t.value };
+        await saveProject({ ...fresh, fourLists: next });
+        p.fourLists = next;
+        state.textContent = 'Saved ✓';
+      }, 600);
+    }));
+  app.querySelectorAll('[data-read]').forEach(b =>
+    b.addEventListener('click', async () => {
+      const n = +b.dataset.read;
+      const fresh = await getProject(id);
+      const cur = fresh.fourLists?.reads ?? 0;
+      // Tapping the current count clears back to the one below it.
+      await saveProject({ ...fresh, fourLists: { ...(fresh.fourLists ?? {}), reads: cur === n ? n - 1 : n } });
+      navStack.pop(); renderFourLists(id);
+    }));
+}
+
+// ── The script page ───────────────────────────────────────────
+// A project opens AS A SCRIPT (owner order, 2026-08-20): typeset the way
+// a script is read, with a rail of ways to work on it. Everything the
+// rail produces — highlights, beats, notes, flash-card progress — is
+// written straight back to the project record, so nothing a learner
+// marks up disappears when they leave the page.
+//
+// Marks anchor to a parsed BLOCK index plus a character range inside
+// that block's spoken text, and carry the marked text itself. Editing
+// one speech therefore cannot silently drag the marks on another, and a
+// mark whose text has changed underneath it is dropped rather than left
+// pointing at the wrong words.
+
+const MARK_COLORS = [
+  ['is-yellow', '#f4e3a1', 'Yellow'], ['is-green', '#cfe3c4', 'Green'],
+  ['is-blue', '#c9dcec', 'Blue'], ['is-pink', '#eecfdd', 'Pink'],
+];
+
+// The Four Lists — the reading method the whole exercise is named for.
+// You read the play FIVE times: the first straight through, then once
+// for each list. The lists are deliberately in this order, because each
+// one is harder to be honest about than the last.
+const FOUR_LISTS = [
+  { id: 'facts', n: 2, title: 'The incontrovertible facts about your character',
+    prompt: 'Only what the text states outright. Not what you infer, not what you would like to be true — what could be read aloud in court.' },
+  { id: 'saysSelf', n: 3, title: 'What your character says about themselves',
+    prompt: 'Their own account of who they are. Note it whether or not you believe it — a character lying about themselves is telling you something.' },
+  { id: 'saysOthers', n: 4, title: 'What your character says about others',
+    prompt: 'How they describe everyone else. What they notice, what they never mention, and how that changes depending on who is listening.' },
+  { id: 'othersSay', n: 5, title: 'What others say about your character',
+    prompt: 'Everything said about you, to your face and behind your back. Again: record it, do not settle yet whether it is fair.' },
+];
+
+// ── Kill switch (2026-08-20, owner decision) ──────────────────
+// Scene Study is withdrawn: ten note fields that never became the tool
+// they were meant to be. NOTHING is deleted — renderSceneStudy, its
+// areas and every saved note stay exactly as they are. Flip to true and
+// it returns, now carrying all 97 Question Everything questions.
+const SCENE_STUDY_LIVE = false;
+
+const scriptState = {};   // per-project view state, not persisted
+
+/**
+ * One block's text, with its beats shown as slashes and (in beats mode)
+ * every gap between words offered as a tap target. A beat is a POSITION
+ * inside the line — "I see they're gettin' / work allatime" — so it is
+ * stored as a character offset, not a range.
+ */
+function blockTextHtml(text, marks, mode) {
+  const beats = new Set(marks.filter(m => m.kind === 'beat').map(m => m.offset));
+  // A beat can go BEFORE the first word, between any two words, and
+  // AFTER the last — "/ not for anything to eat. / I have nearly three
+  // hundred dollars. / catherine? /". So the gap list is: offset 0,
+  // every run of whitespace, and the end of the line.
+  const gaps = [0];
+  const re = /\s+/g; let m;
+  while ((m = re.exec(text))) gaps.push(m.index);
+  gaps.push(text.length);
+
+  // A slash keeps the spacing a reader expects: "/ word", "word / word",
+  // "word /". An unmarked start/end target is a zero-width hit area.
+  const gapHtml = (offset, where) => {
+    const on = beats.has(offset);
+    const glyph = on
+      ? (where === 'start' ? '/\u00a0' : where === 'end' ? '\u00a0/' : '\u00a0/\u00a0')
+      : (where === 'mid' ? ' ' : '\u200b');
+    if (mode === 'beats') {
+      return `<button class="sc-gap ${on ? 'on' : ''}" data-gap="${offset}" type="button"
+        aria-label="${on ? 'Remove beat here' : 'Add a beat here'}">${glyph}</button>`;
+    }
+    return on ? `<span class="sc-slash">${glyph}</span>` : (where === 'mid' ? ' ' : '');
+  };
+
+  let out = gapHtml(0, 'start');               // the onset of the line
+  let at = 0;
+  for (let i = 1; i < gaps.length - 1; i++) {
+    const g = gaps[i];
+    out += esc(text.slice(at, g));
+    out += gapHtml(g, 'mid');
+    at = g + text.slice(g).match(/^\s+/)[0].length;
+  }
+  out += esc(text.slice(at));
+  out += gapHtml(text.length, 'end');          // the end of the line
+  return out;
+}
+
+/** Drop marks that no longer fit their block — never point at wrong words. */
+function liveMarks(p, parsed) {
+  return (p.marks ?? []).filter(m => {
+    const b = parsed.blocks[m.block];
+    if (!b) return false;
+    if (m.kind === 'beat') return m.offset <= (b.text ?? '').length;
+    return true;                                 // highlight/note: block-level
+  });
+}
+
+async function renderScript(id, mode = 'read') {
+  record(() => renderScript(id, mode));
+  stopSpeech();
+  const p = await getProject(id);
+  if (!p) return renderCustomWork();
+  const parsed = parseScript(p.text ?? '');
+  const marks = liveMarks(p, parsed);
+  const st = (scriptState[id] ??= {});
+
+  const save = async patch => {
+    const fresh = await getProject(id);
+    await saveProject({ ...fresh, ...patch });
+  };
+
+  // Owner order 2026-08-20. Highlight and Beats are SEPARATE tools —
+  // highlighting is a tap on a line, beats are taps between words — so
+  // neither can be triggered by reaching for the other.
+  const RAIL = [
+    ['read', '📖', 'Read'], ['cards', '🃏', 'Flash Cards'],
+    ['highlight', '🖍', 'Highlight'], ['beats', '❘', 'Beats'],
+    ['exercises', '🎲', 'Exercises'], ['ipa', '🔤', 'IPA'],
+    ['question', '🔍', 'Question Everything'],
+  ];
+
+  // ONE rendered line per source line. The parser annotates; it never
+  // reflows, merges or re-orders, because doing that is exactly what
+  // destroyed the flow of a real script.
+  const blockHtml = (b, i) => {
+    const mine = marks.filter(m => m.block === i);
+    const hl = mine.find(m => m.kind === 'highlight');
+    const cls = hl ? ` is-hl ${esc(hl.color ?? 'is-yellow')}` : '';
+    if (b.kind === 'blank') return '<div class="sc-gapline"></div>';
+    if (b.kind === 'heading') return `<h2 class="sc-heading" data-b="${i}">${esc(b.text)}</h2>`;
+    if (b.kind === 'speaker') return `<p class="sc-who" data-b="${i}">${esc(b.who)}</p>`;
+    if (b.kind === 'speech') {
+      return `
+        <div class="sc-speech">
+          <p class="sc-who">${esc(b.who)}</p>
+          <p class="sc-line${cls}" data-b="${i}">${blockTextHtml(b.text, mine, mode)}</p>
+        </div>`;
+    }
+    return `<p class="sc-line${cls}" data-b="${i}">${blockTextHtml(b.text, mine, mode)}</p>`;
+  };
+
+  const scriptHtml = parsed.blocks.length
+    ? parsed.blocks.map(blockHtml).join('')
+    : '<p class="pane-note">No text yet — use Edit to paste the script.</p>';
+
+  let panel = '';
+  if (mode === 'highlight') {
+    const active = st.color ?? 'is-yellow';
+    panel = `
+      <p class="pane-note">Pick a colour, then tap any line to highlight it. Tap it again to clear
+        it. Saved to this project.</p>
+      <div class="sc-tools">
+        ${MARK_COLORS.map(([c, hex, label]) => `
+          <button class="sc-swatch ${c} ${c === active ? 'on' : ''}" data-color="${c}" type="button"
+                  style="--sw:${hex}" aria-label="${label}" aria-pressed="${c === active}"></button>`).join('')}
+        <span class="sc-tool-label">${marks.filter(m => m.kind === 'highlight').length} highlighted</span>
+        ${marks.some(m => m.kind === 'highlight') ? '<button class="linkish" id="sc-clear-hl" type="button">clear all</button>' : ''}
+      </div>`;
+  } else if (mode === 'beats') {
+    panel = `
+      <p class="pane-note">Tap the gap between any two words to drop a beat — <b>I see they're gettin'
+        / work allatime.</b> Tap a beat again to remove it. Saved to this project.</p>
+      <p class="pane-note">${marks.filter(m => m.kind === 'beat').length} beat(s)
+        ${marks.some(m => m.kind === 'beat') ? '<button class="linkish" id="sc-clear-beats" type="button">clear all</button>' : ''}</p>`;
+  } else if (mode === 'ipa') {
+    panel = '<div id="sc-ipa"><p class="pane-note">Loading the pronunciation dictionary…</p></div>';
+  } else if (mode === 'exercises') {
+    panel = parsed.isScript || (p.text ?? '').trim()
+      ? `<p class="pane-note">Every exercise runs on this script's lines, as written.</p>
+         <div class="mode-grid">
+           ${ACTING_GAMES.map(g => `
+             <button class="mode-card" data-sgame="${g.id}" type="button">
+               <span class="mode-icon" aria-hidden="true">${g.icon}</span>
+               <span class="mode-title">${esc(g.title)}</span>
+               <span class="mode-blurb">${esc(g.blurb)}</span>
+             </button>`).join('')}
+         </div>`
+      : '<p class="pane-note">Add the script first — Edit is at the top of the page.</p>';
+  } else if (mode === 'cards') {
+    panel = '<div id="sc-cards"></div>';
+  }
+  const showsScript = mode !== 'exercises' && mode !== 'cards' && mode !== 'ipa';
+
+  app.innerHTML = `
+    ${pageTopbar('🎬 ' + esc(p.title || 'Untitled'), '#8a6d3b')}
+    <main class="guide script-page">
+      <div class="piece-meta">
+        <h1 class="piece-title">${esc(p.title || 'Untitled project')}</h1>
+        <p class="piece-source">${esc([p.character, p.source, p.author, p.scene].filter(Boolean).join(' · ') || 'No source details yet')}</p>
+        <div class="piece-tags">
+          <span class="tag">${esc(contentTypeLabel(p.contentType))}</span>
+          <span class="tag tag-dialect">🗣 ${esc(dialectName(p.accent) || p.accent)}</span>
+          ${parsed.isScript ? `<span class="tag">${parsed.characters.length} characters</span>` : ''}
+          <span class="tag">${speechUnits(parsed).length} speeches</span>
+        </div>
+        <div class="piece-actions">
+          <button class="btn" id="sc-edit" type="button">✏️ Edit</button>
+        </div>
+      </div>
+      <div class="script-shell">
+        <nav class="script-rail" aria-label="Ways to work on this script">
+          ${RAIL.map(([k, icon, label]) => `
+            <button class="sc-rail-btn ${k === mode ? 'on' : ''}" data-mode="${k}" type="button">
+              <span aria-hidden="true">${icon}</span> ${label}
+            </button>`).join('')}
+        </nav>
+        <div class="script-main">
+          ${panel ? `<section class="script-panel">${panel}</section>` : ''}
+          ${showsScript ? `<article class="script-body is-${mode}" id="sc-body">${scriptHtml}</article>` : ''}
+        </div>
+      </div>
+    </main>`;
+  wireBrandHome();
+
+  app.querySelectorAll('[data-mode]').forEach(b =>
+    b.addEventListener('click', () => {
+      // Question Everything is the project's own worksheet — a full page
+      // of its own, with Back returning here.
+      if (b.dataset.mode === 'question') return renderDissect(id);
+      navStack.pop(); renderScript(id, b.dataset.mode);
+    }));
+  document.getElementById('sc-edit').addEventListener('click', () => renderProject(id, 'text'));
+
+  if (mode === 'highlight') {
+    app.querySelectorAll('[data-color]').forEach(b =>
+      b.addEventListener('click', () => { st.color = b.dataset.color; navStack.pop(); renderScript(id, 'highlight'); }));
+    document.getElementById('sc-clear-hl')?.addEventListener('click', async () => {
+      await save({ marks: marks.filter(m => m.kind !== 'highlight') });
+      navStack.pop(); renderScript(id, 'highlight');
+    });
+    // A tap anywhere on a line toggles the active colour on that line.
+    app.querySelectorAll('#sc-body [data-b]').forEach(el =>
+      el.addEventListener('click', async () => {
+        const i = +el.dataset.b;
+        const has = marks.find(m => m.kind === 'highlight' && m.block === i);
+        const color = st.color ?? 'is-yellow';
+        const next = has && has.color === color
+          ? marks.filter(m => m !== has)                      // same colour = clear
+          : [...marks.filter(m => !(m.kind === 'highlight' && m.block === i)),
+             { id: uidMark(), kind: 'highlight', block: i, color }];
+        await save({ marks: next });
+        navStack.pop(); renderScript(id, 'highlight');
+      }));
+  }
+  if (mode === 'beats') {
+    document.getElementById('sc-clear-beats')?.addEventListener('click', async () => {
+      await save({ marks: marks.filter(m => m.kind !== 'beat') });
+      navStack.pop(); renderScript(id, 'beats');
+    });
+    app.querySelectorAll('#sc-body [data-gap]').forEach(g =>
+      g.addEventListener('click', async e => {
+        e.stopPropagation();
+        const block = +g.closest('[data-b]').dataset.b;
+        const offset = +g.dataset.gap;
+        const has = marks.find(m => m.kind === 'beat' && m.block === block && m.offset === offset);
+        const next = has ? marks.filter(m => m !== has)
+          : [...marks, { id: uidMark(), kind: 'beat', block, offset }];
+        await save({ marks: next });
+        navStack.pop(); renderScript(id, 'beats');
+      }));
+  }
+  if (mode === 'ipa') {
+    const lines = speechUnits(parsed).map(unitText).filter(Boolean);
+    const host = document.getElementById('sc-ipa');
+    if (!lines.length) host.innerHTML = '<p class="pane-note">No spoken lines to transcribe yet.</p>';
+    else fillSound(lines, p.accent, host, { projectId: id });
+  }
+  if (mode === 'exercises') {
+    app.querySelectorAll('[data-sgame]').forEach(b =>
+      b.addEventListener('click', () => runActingGame(b.dataset.sgame, {
+        source: 'project', id, title: p.title || 'Untitled project',
+        body: speechUnits(parsed).map(unitText).filter(Boolean).join('\n')
+          || String(p.text ?? ''),
+        scene: null,
+      })));
+  }
+  if (mode === 'cards') drawScriptCards(id, p, parsed, save);
+
+}
+
+const uidMark = () => 'mk-' + Math.random().toString(36).slice(2, 10);
+
+function drawScriptCards(id, p, parsed, save) {
+  const host = document.getElementById('sc-cards');
+  const saved = p.cards ?? {};
+  const st = (scriptState[id] ??= {});
+  st.who ??= saved.who ?? null;
+  st.n ??= 0;
+  st.shown ??= false;
+
+  const draw = () => {
+    if (parsed.isScript && !st.who) {
+      host.innerHTML = `
+        <p class="pane-note">Pick your part — every one of its speeches becomes a card, cued by
+          the line before it.</p>
+        <div class="item-grid">
+          ${parsed.characters.map(c => `
+            <button class="tile" data-who="${esc(c)}" type="button">
+              <span class="tile-emoji" aria-hidden="true">🎭</span>
+              <span class="tile-title">${esc(c)}</span>
+              <span class="tile-meta">${cuedSpeeches(parsed, c).length} speeches</span>
+            </button>`).join('')}
+        </div>`;
+      host.querySelectorAll('[data-who]').forEach(b =>
+        b.addEventListener('click', async () => {
+          st.who = b.dataset.who; st.n = 0; st.shown = false;
+          await save({ cards: { ...saved, who: st.who } });
+          draw();
+        }));
+      return;
+    }
+    const cards = cuedSpeeches(parsed, st.who);
+    if (!cards.length) { host.innerHTML = '<p class="pane-note">No speeches to make cards from yet.</p>'; return; }
+    st.n = Math.min(Math.max(st.n, 0), cards.length - 1);
+    const c = cards[st.n];
+    const known = (p.cards?.known ?? {})[c.index] === true;
+    host.innerHTML = `
+      <p class="pane-note">Card ${st.n + 1} of ${cards.length}${st.who ? ` · ${esc(st.who)}` : ''} ·
+        ${Object.keys(p.cards?.known ?? {}).length} marked known
+        ${parsed.isScript ? '<button class="linkish" id="sc-part">change part</button>' : ''}</p>
+      <section class="sp-passage" aria-label="Cue">
+        <span class="cc-stage">${c.cue ? esc(c.cue.who) : 'Cue'}</span>
+        <div class="sp-passage-text" id="sc-cue"></div>
+      </section>
+      <section class="sp-passage ${st.shown ? '' : 'is-hidden-card'}" aria-label="Your line" aria-live="polite">
+        <span class="cc-stage">${esc(st.who || 'Your line')}</span>
+        <div class="sp-passage-text" id="sc-line">${st.shown ? '' : '· · ·'}</div>
+      </section>
+      <div class="practice-row">
+        ${st.shown
+          ? `<button class="btn btn-primary" id="sc-next" type="button">${st.n + 1 < cards.length ? 'Next card ›' : 'Start again'}</button>
+             <button class="btn ${known ? 'btn-lite' : ''}" id="sc-known" type="button">${known ? 'Known ✓' : 'Mark known'}</button>`
+          : '<button class="btn btn-primary" id="sc-show" type="button">Show my line</button>'}
+        <button class="btn-lite" id="sc-prev" type="button" ${st.n === 0 ? 'disabled' : ''}>‹ Previous</button>
+      </div>`;
+    // textContent, never innerHTML — a pasted script stays inert.
+    host.querySelector('#sc-cue').textContent = c.cue ? unitText(c.cue) : 'Top of the script — you open.';
+    if (st.shown) host.querySelector('#sc-line').textContent = unitText(c.block);
+    host.querySelector('#sc-show')?.addEventListener('click', () => { st.shown = true; draw(); });
+    host.querySelector('#sc-next')?.addEventListener('click', () => {
+      st.n = st.n + 1 < cards.length ? st.n + 1 : 0; st.shown = false; draw();
+    });
+    host.querySelector('#sc-prev')?.addEventListener('click', () => { st.n -= 1; st.shown = false; draw(); });
+    host.querySelector('#sc-part')?.addEventListener('click', () => { st.who = null; st.n = 0; draw(); });
+    host.querySelector('#sc-known')?.addEventListener('click', async () => {
+      const fresh = await getProject(id);
+      const k = { ...(fresh.cards?.known ?? {}) };
+      if (k[c.index]) delete k[c.index]; else k[c.index] = true;
+      await save({ cards: { ...(fresh.cards ?? {}), who: st.who, known: k } });
+      p.cards = { ...(fresh.cards ?? {}), who: st.who, known: k };
+      draw();
+    });
+  };
+  draw();
 }
 
 // ── Project detail ────────────────────────────────────────────
@@ -5995,8 +6721,11 @@ async function renderProject(id, tab = 'text') {
   const takesTab = CAPABILITIES.learnerSpeaking
     ? ['perform', '🎙 Perform']
     : (await takesPresence({ projectId: id })) === 'empty' ? null : ['perform', '🎬 Takes'];
-  const tabs = [['text', '📄 Text'], ['ipa', '🔤 Transcribe to IPA'], ['scan', '📐 Scan'],
-    takesTab, ['notes', '📝 Notes'], ['words', '🧩 Difficult Words']].filter(Boolean);
+  // Edit is for editing (owner order, 2026-08-20): the Text tab alone.
+  // Reading, IPA, highlighting, beats, flash cards and exercises all
+  // live on the script page. The Takes tab is kept ONLY when this
+  // project actually has recordings — dropping it would strand them.
+  const tabs = [['text', '📄 Text'], takesTab].filter(Boolean);
 
   app.innerHTML = `
     ${pageTopbar('🎬 ' + esc(p.title || 'Untitled'), '#8a6d3b')}
@@ -6011,8 +6740,7 @@ async function renderProject(id, tab = 'text') {
           ${p.lines.length ? `<span class="tag">${p.lines.length} lines</span>` : ''}
         </div>
         <div class="piece-actions">
-          <button class="btn" id="proj-dissect" type="button">🔍 Dissect This</button>
-          <button class="btn" id="proj-practice" type="button">🧭 Practice This Text</button>
+          <button class="btn" id="proj-dissect" type="button">🔍 Question Everything</button>
           <span class="pane-note" id="proj-diss-note"></span>
         </div>
       </div>
@@ -6033,13 +6761,6 @@ async function renderProject(id, tab = 'text') {
   document.getElementById('proj-dissect').addEventListener('click', () => renderDissect(id));
   // Practice This Text: select a passage, choose a routine or game,
   // and finish back at THIS project (speechReturnTo).
-  document.getElementById('proj-practice').addEventListener('click', () => {
-    speechReturnTo = { projectId: id };
-    renderPassagePicker(p, {
-      title: 'Practice This Text', needsScene: false,
-      onPick: text => renderSpeechExerciseChooser(text),
-    });
-  });
   const dissNote = document.getElementById('proj-diss-note');
   dissectionFor('project', id)
     .then(d => { if (d && dissNote.isConnected) dissNote.textContent = coverageLine(d); })
@@ -6048,8 +6769,7 @@ async function renderProject(id, tab = 'text') {
   const fresh = async () => getProject(id);
 
   if (tab === 'text') paneText(pane, p, id);
-  else if (tab === 'notes') paneNotes(pane, p, id);
-  else if (tab === 'words') paneWords(pane, p, id);
+  else if (tab === 'cards') paneFlashCards(pane, p);
   else if (tab === 'scan') pane.innerHTML = p.lines.length ? scanPane(p.lines, false) : emptyText();
   else if (tab === 'ipa') {
     if (!p.lines.length) pane.innerHTML = emptyText();
@@ -6117,75 +6837,7 @@ function wireAutosave(stateEl, collect) {
 function renderDissectTextbook() {
   record(renderDissectTextbook);
   stopSpeech();
-  const DISSECT_SECTIONS = [
-    { h: '1. What is happening?',
-      lead: 'Begin with facts before interpretation.',
-      asks: ['Where am I?', 'When is this happening?', 'Who am I speaking to?',
-        'What is our relationship?', 'What has just happened?', 'Why am I speaking now?',
-        'What does each person know?', 'What does each person not know?',
-        'What has already been said or done?', 'What are the immediate circumstances?',
-        'What is at stake?', 'What might happen if nothing changes?', 'Is anyone else present?',
-        'Are there social, physical or practical limitations affecting the conversation?',
-        'What facts come directly from the text?', 'What circumstances must I reasonably imagine?'],
-      close: ['Keep facts, reasonable assumptions and personal interpretation clearly distinguished.'] },
-    { h: '2. What does the speaker want?',
-      lead: 'Identify the change the speaker wants to create.',
-      asks: ['What do I want from the other person?', 'What do I want them to understand?',
-        'What do I want them to feel?', 'What do I want them to admit?',
-        'What do I want them to decide?', 'What do I want them to do next?',
-        'Why do I need this from them now?', 'What happens if I succeed?',
-        'What happens if I fail?', 'Is my stated goal different from what I truly want?',
-        'Does my objective change during the text?',
-        'Can I describe my objective as an active attempt to affect another person?'],
-      close: ['An emotion is not necessarily an objective. “I am angry” describes a feeling. “I want them to admit what they did” gives the actor something playable.'] },
-    { h: '3. What is resisting the speaker?',
-      lead: 'Find what prevents the speaker from getting what they want.',
-      asks: ['What does the other person want?', 'Why might they refuse me?', 'What do they fear?',
-        'What do I fear?', 'What truth is being avoided?', 'Is someone protecting a secret?',
-        'Is pride preventing honesty?', 'Are status or social rules limiting what can be said?',
-        'Is time running out?', 'Is there a practical or physical obstacle?',
-        'Am I working against my own behavior?', 'Do I want two conflicting things?',
-        'What would make giving in dangerous for the other person?',
-        'What makes this conversation difficult?', 'Why has the problem not already been solved?'],
-      close: ['Resistance creates dramatic pressure. The stronger the resistance, the more urgently and inventively the speaker must act.'] },
-    { h: '4. What is the speaker doing to change them?',
-      lead: 'Examine what the speaker is doing with the words.',
-      asks: ['Am I reassuring?', 'Am I confronting?', 'Am I confessing?', 'Am I justifying?',
-        'Am I forgiving?', 'Am I punishing?', 'Am I drawing the other person out?',
-        'Am I dismissing them?', 'Am I persuading?', 'Am I warning?', 'Am I challenging?',
-        'Am I comforting?', 'Am I seducing?', 'Am I provoking?', 'Am I bargaining?',
-        'Am I testing them?', 'Am I distracting them?', 'Am I concealing something?',
-        'Am I demanding an answer?', 'Am I trying to restore control?',
-        'Which action best describes what I am trying to accomplish?',
-        'Does the action affect the other person, or does it merely describe my emotion?',
-        'When one action fails, what new action do I try?'],
-      close: ['The same words can produce completely different scenes when the speaker’s action changes.'],
-      playable: true },
-    { h: '5. What changes?',
-      lead: 'Find the turns, discoveries and shifts inside the text.',
-      asks: ['Where does a new thought begin?', 'Where does the subject change?',
-        'Where does the speaker receive new information?', 'Where does a tactic fail?',
-        'Where does the speaker try a different action?',
-        'Where does the emotional temperature change?',
-        'Where does the speaker become more direct?', 'Where do they retreat or protect themselves?',
-        'Where is something finally admitted?', 'Where does a memory alter the present moment?',
-        'Where do the stakes increase?', 'Where does the balance of power change?',
-        'Where does the speaker contradict themselves?',
-        'Where does the rhythm or sentence structure suggest a shift?',
-        'Which words signal a turn?', 'What is different after the change?'],
-      close: ['These shifts create the beats of the scene. A beat is not merely a pause; it marks a change in thought, action, information or relationship.'] },
-    { h: '6. What happens after?',
-      lead: 'Imagine the immediate consequence of the final line.',
-      asks: ['What do I expect the other person to do?', 'What response am I waiting for?',
-        'What decision have I forced?', 'What remains unresolved?', 'What would silence mean?',
-        'What would agreement mean?', 'What would rejection mean?', 'Has the relationship changed?',
-        'Has power shifted?', 'What action might I take next?',
-        'Am I preparing to stay, leave, fight, confess, forgive or withdraw?',
-        'What new problem has been created?',
-        'Does the final line complete an action or begin one?',
-        'What does the speaker believe will happen?', 'What might actually happen instead?'],
-      close: ['The final line is rarely the end of the dramatic event. It is usually the speaker’s last attempt to make something happen next.'] },
-  ];
+
   const RETURNING = ['What evidence supports my choice?',
     'Am I playing the words or imposing an unrelated idea?',
     'Am I making a specific choice or relying on a general emotion?',
@@ -6255,10 +6907,12 @@ async function paneDissect(pane, p, id) {
 
   pane.innerHTML = `
     <div class="proj-form">
-      <p class="pane-note">Six questions to run on this text. <b>“I don’t know yet” is a real answer</b> — an honest open question is worth more than a guess. Nothing here is scored.</p>
+      <p class="pane-note">The whole of <b>Question Everything</b>, run on this text — six sections
+        and every question under them. <b>“I don’t know yet” is a real answer</b>: an honest open
+        question is worth more than a guess. Nothing here is scored.</p>
       <p class="diss-coverage" id="diss-cov" aria-live="polite"></p>
       <div id="diss-list">
-        ${QUICK_QUESTIONS.map(({ id: qid, q }, i) => `
+        ${dissectQuestions().map(({ id: qid, q }, i) => `
         <section class="diss-q" data-q="${qid}">
           <h3 class="diss-h">
             <button class="diss-head" type="button" aria-expanded="false" aria-controls="db-${i}">
@@ -6275,6 +6929,7 @@ async function paneDissect(pane, p, id) {
             <div class="diss-marks">
               <button class="btn-lite diss-mark" data-mark="unknown" type="button" aria-pressed="false">🤔 I don’t know yet</button>
               <button class="btn-lite diss-mark" data-mark="na" type="button" aria-pressed="false">Not relevant</button>
+              <button class="btn-lite diss-clear" type="button">Clear</button>
             </div>
             ${qid === 'quick.doing' ? `
             <p class="pane-note diss-pa">Looking for the verb underneath the line?
@@ -6283,7 +6938,6 @@ async function paneDissect(pane, p, id) {
         </section>`).join('')}
       </div>
       <p class="pane-note" id="diss-state" role="status" aria-live="polite"></p>
-      <p><button class="btn-lite diss-del" id="diss-del" type="button" hidden>Delete this dissection</button></p>
     </div>`;
 
   const stateEl = pane.querySelector('#diss-state');
@@ -6293,7 +6947,6 @@ async function paneDissect(pane, p, id) {
   const refresh = () => {
     covEl.textContent = d ? coverageLine(d)
       : 'Nothing explored yet — open a question to start.';
-    pane.querySelector('#diss-del').hidden = !d;
     for (const sec of sections) {
       const st = stOf(sec.dataset.q);
       sec.querySelector('.diss-status').dataset.st = st;
@@ -6356,6 +7009,14 @@ async function paneDissect(pane, p, id) {
     text.addEventListener('input', () =>
       saver.touch(job(() => saveAnswer(d.id, qid, { value: text.value }))));
 
+    // Clear THIS question — its text and any mark. Nothing else in the
+    // dissection is touched; there is no delete-everything any more.
+    sec.querySelector('.diss-clear').addEventListener('click', () => {
+      if (!text.value && stOf(qid) === 'blank') return;
+      text.value = '';
+      saver.now(job(() => saveAnswer(d.id, qid, { value: '', status: null })));
+    });
+
     // One-tap marks. Tapping the active mark releases it (back to whatever
     // the text implies); marking never erases typed text.
     for (const btn of sec.querySelectorAll('.diss-mark'))
@@ -6370,13 +7031,6 @@ async function paneDissect(pane, p, id) {
   // recommendation, nothing stored. Back returns to this screen.
   pane.querySelector('[data-pa-link]')?.addEventListener('click', () => renderPlayableActions());
 
-  pane.querySelector('#diss-del').addEventListener('click', async () => {
-    if (!d) return;
-    if (!confirm('Delete this dissection?\n\nThe project and its text are untouched. This cannot be undone.')) return;
-    await deleteDissection(d.id);
-    d = null;
-    paneDissect(pane, p, id);   // fresh blank pane
-  });
 
   refresh();
 }
@@ -6450,189 +7104,9 @@ function paneText(pane, p, id) {
 
   pane.querySelector('#f-save').addEventListener('click', async () => {
     await auto.flush();
-    renderProject(id, 'text');
+    renderScript(id);
   });
 }
-
-function paneNotes(pane, p, id) {
-  pane.innerHTML = `
-    <label class="field"><span class="field-label">Acting Notes</span>
-      <textarea class="ct-area" id="n-notes" placeholder="Beats, objectives, tactics, operative words, thought groups, what the director said…">${esc(p.notes)}</textarea></label>
-    <label class="field"><span class="field-label">Pronunciation Notes</span>
-      <textarea class="ct-area short" id="n-pron" placeholder="Stress, intonation, linking, breath points, tricky vowels, dialect reminders, names…">${esc(p.pronunciationNotes)}</textarea></label>
-    <div class="form-actions">
-      <button class="btn btn-primary" id="n-save" type="button">Save now</button>
-      <span class="save-state" id="n-state" role="status" aria-live="polite">Autosaves as you type.</span>
-    </div>`;
-  const auto = wireAutosave(pane.querySelector('#n-state'), async () => ({
-    ...(await getProject(id)),
-    notes: pane.querySelector('#n-notes').value,
-    pronunciationNotes: pane.querySelector('#n-pron').value,
-  }));
-  pane.querySelectorAll('#n-notes, #n-pron').forEach(elm =>
-    elm.addEventListener('input', () => auto.touch()));
-  pane.querySelector('#n-save').addEventListener('click', () => auto.flush());
-}
-
-function paneWords(pane, p, id) {
-  const draw = (list) => list.length
-    ? list.map((w, i) => `
-        <div class="word-card">
-          <div><b>${esc(w.word)}</b>${w.note ? `<span class="word-note"> — ${esc(w.note)}</span>` : ''}</div>
-          <button class="btn-lite btn-danger" type="button" data-del="${i}">Remove</button>
-        </div>`).join('')
-    : '<p class="pane-note">No difficult words yet. Add the ones that keep tripping you up.</p>';
-
-  pane.innerHTML = `
-    <div class="word-add">
-      <input class="input-text" id="w-word" placeholder="Word or phrase" aria-label="Word">
-      <input class="input-text" id="w-note" placeholder="Note (optional)" aria-label="Note">
-      <button class="btn btn-primary" id="w-add" type="button">Add</button>
-    </div>
-    <div id="w-list">${draw(p.difficultWords ?? [])}</div>`;
-
-  const listEl = pane.querySelector('#w-list');
-  const refresh = async () => {
-    const cur = await getProject(id);
-    listEl.innerHTML = draw(cur.difficultWords ?? []);
-  };
-  pane.querySelector('#w-add').addEventListener('click', async () => {
-    const word = pane.querySelector('#w-word').value.trim();
-    if (!word) return;
-    const cur = await getProject(id);
-    cur.difficultWords = [...(cur.difficultWords ?? []), { word, note: pane.querySelector('#w-note').value.trim() }];
-    await saveProject(cur);
-    pane.querySelector('#w-word').value = ''; pane.querySelector('#w-note').value = '';
-    refresh();
-  });
-  listEl.addEventListener('click', async e => {
-    const b = e.target.closest('button[data-del]'); if (!b) return;
-    const cur = await getProject(id);
-    cur.difficultWords = (cur.difficultWords ?? []).filter((_, i) => i !== +b.dataset.del);
-    await saveProject(cur);
-    refresh();
-  });
-}
-
-// ── Export / import ───────────────────────────────────────────
-
-async function exportProject(id) {
-  const p = await getProject(id);
-  if (!p) return;
-  const takes = await listTakes({ projectId: id });
-  const diss = await dissectionFor('project', id).catch(() => null);
-  // Explicit allow-list: only these fields are ever written to a shared file.
-  // No internal database ids, no object URLs, no device information.
-  const payload = {
-    format: 'speechcraft-project',
-    formatVersion: 1,
-    exportedAt: new Date().toISOString(),
-    audioIncluded: false,
-    note: 'Audio is never included. Recordings stay on the device that made them.',
-    projects: [{
-      title: p.title, source: p.source, author: p.author,
-      character: p.character, scene: p.scene, accent: p.accent,
-      contentType: p.contentType ?? 'other',
-      text: p.text, notes: p.notes, pronunciationNotes: p.pronunciationNotes,
-      difficultWords: (p.difficultWords ?? []).map(w => ({ word: w.word, note: w.note ?? '' })),
-      overrides: {
-        words: p.overrides?.words ?? {},
-        occurrence: p.overrides?.occurrence ?? {},
-      },
-      status: p.status,
-      createdAt: p.createdAt,
-      // Metadata only, and deliberately without blob ids: a file cannot claim
-      // audio it does not carry.
-      recordings: takes.map(t => ({
-        level: t.level, label: t.label, rating: t.rating,
-        note: t.note, durationMs: t.durationMs, createdAt: t.createdAt,
-      })),
-      // The project's dissection travels with it — allow-listed fields
-      // only, no internal ids or target keys (import rebuilds those
-      // around the NEW project id).
-      ...(diss ? { dissection: {
-        schemaVersion: 1,
-        materialType: diss.materialType,
-        createdAt: diss.createdAt,
-        answers: Object.fromEntries(QUICK_QUESTIONS.flatMap(({ id: qid }) => {
-          const a = diss.answers?.[qid];
-          return a ? [[qid, { value: a.value, status: a.status, updatedAt: a.updatedAt }]] : [];
-        })),
-      } } : {}),
-    }],
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase().slice(0, 60)}.speechcraft.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-/**
- * Import projects from an untrusted file.
- * Nothing from the file is merged into existing state: it is validated
- * against js/validate.js, rebuilt as fresh plain objects with new ids, and
- * only then written. Existing projects are never overwritten or replaced.
- */
-async function importProjectFile(file) {
-  const raw = await readJsonFile(file);
-  const projects = validateProjectBundle(raw, { newId: () => emptyProject().id });
-
-  const dropped = projects.reduce((n, p) => n + (p.droppedRecordings || 0), 0);
-  const withDiss = projects.filter(p => p.dissection).length;
-  const summary = [
-    `Import ${projects.length} project${projects.length === 1 ? '' : 's'}?`,
-    '',
-    ...projects.slice(0, 8).map(p => `  \u2022 ${p.title}`),
-    projects.length > 8 ? `  \u2026and ${projects.length - 8} more` : '',
-    '',
-    'These are added alongside your existing projects \u2014 nothing is replaced.',
-    withDiss ? `${withDiss} project${withDiss === 1 ? ' carries its' : 's carry their'} dissection.` : '',
-    dropped ? `Audio is never included in project files, so ${dropped} recording reference${dropped === 1 ? '' : 's'} will be skipped.` : '',
-  ].filter(Boolean).join('\n');
-  if (!confirm(summary)) return { count: 0, droppedDissections: 0 };
-
-  let n = 0, droppedDiss = 0;
-  for (const p of projects) {
-    const { droppedRecordings, dissection, dissectionDropped, ...clean } = p;
-    await saveProject(clean);
-    // Rebuilt around the NEW project id (never the file's) \u2014 see dissect.js.
-    if (dissection) await attachImportedDissection(clean.id, clean.title, dissection);
-    if (dissectionDropped) droppedDiss++;
-    n++;
-  }
-  return { count: n, droppedDissections: droppedDiss };
-}
-
-// ── Curated speech libraries (Chekhov, O'Neill, Wilde) ────────
-// All three share one browser and one reader; they differ only in their data,
-// their icon, and the dialect a piece is most naturally played in.
-
-// Stage directions like "[Looking at his watch]" are shown but never spoken.
-const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
-const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}`;
-
-// `accent` is the dialect a collection opens in; `narrated` lists the dialects
-// that actually have recorded narrator audio. Every dialect stays playable —
-// the rest simply read in the device voice — but we only look for clip files
-// where they exist, and we say so rather than leaving the change unexplained.
-const LIBRARIES = {
-  chekhov: { data: CHEKHOV, icon: '🎭', title: 'Chekhov · Monologues', accent: 'rp',
-             narrated: ['rp'], note: 'public domain · tr. Fell & West' },
-  oneill:  { data: ONEILL,  icon: '⚓', title: 'O’Neill · Monologues', accent: 'nam',
-             narrated: ['nam'], note: 'public domain in the US' },
-  wilde:   { data: WILDE,   icon: '🎩', title: 'Wilde · Monologues',   accent: 'rp',
-             narrated: ['rp'], note: 'public domain' },
-  pirandello: { data: PIRANDELLO, icon: '🎪', title: 'Pirandello · Monologues', accent: 'rp',
-             narrated: ['rp'], note: 'public domain in the US · tr. Storer & Livingston' },
-  ibsen:   { data: IBSEN,   icon: '🕯️', title: 'Ibsen · Monologues', accent: 'rp',
-             narrated: ['rp'], note: 'public domain · tr. Archer, Gosse, Sharp & Marx Aveling' },
-};
-
-// Which narrator voice reads each dialect, for the "you're hearing X" note.
-const NARRATOR_NAMES = { nam: 'American Bass', rp: 'Mark', aus: 'Jimbo' };
 
 function renderLibraryList(key) {
   record(() => renderLibraryList(key));

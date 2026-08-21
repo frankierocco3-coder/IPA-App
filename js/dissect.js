@@ -28,6 +28,86 @@ export const QUICK_QUESTIONS = [
   { id: 'quick.after',     q: 'What is different at the end?' },
 ];
 
+// The Question Everything question set — the textbook AND the per-project
+// worksheet run on these exact sections and asks (owner order,
+// 2026-08-20: a project gets everything from Question Everything,
+// not a six-question summary of it).
+export const DISSECT_SECTIONS = [
+  { h: '1. What is happening?',
+    lead: 'Begin with facts before interpretation.',
+    asks: ['Where am I?', 'When is this happening?', 'Who am I speaking to?',
+      'What is our relationship?', 'What has just happened?', 'Why am I speaking now?',
+      'What does each person know?', 'What does each person not know?',
+      'What has already been said or done?', 'What are the immediate circumstances?',
+      'What is at stake?', 'What might happen if nothing changes?', 'Is anyone else present?',
+      'Are there social, physical or practical limitations affecting the conversation?',
+      'What facts come directly from the text?', 'What circumstances must I reasonably imagine?'],
+    close: ['Keep facts, reasonable assumptions and personal interpretation clearly distinguished.'] },
+  { h: '2. What does the speaker want?',
+    lead: 'Identify the change the speaker wants to create.',
+    asks: ['What do I want from the other person?', 'What do I want them to understand?',
+      'What do I want them to feel?', 'What do I want them to admit?',
+      'What do I want them to decide?', 'What do I want them to do next?',
+      'Why do I need this from them now?', 'What happens if I succeed?',
+      'What happens if I fail?', 'Is my stated goal different from what I truly want?',
+      'Does my objective change during the text?',
+      'Can I describe my objective as an active attempt to affect another person?'],
+    close: ['An emotion is not necessarily an objective. “I am angry” describes a feeling. “I want them to admit what they did” gives the actor something playable.'] },
+  { h: '3. What is resisting the speaker?',
+    lead: 'Find what prevents the speaker from getting what they want.',
+    asks: ['What does the other person want?', 'Why might they refuse me?', 'What do they fear?',
+      'What do I fear?', 'What truth is being avoided?', 'Is someone protecting a secret?',
+      'Is pride preventing honesty?', 'Are status or social rules limiting what can be said?',
+      'Is time running out?', 'Is there a practical or physical obstacle?',
+      'Am I working against my own behavior?', 'Do I want two conflicting things?',
+      'What would make giving in dangerous for the other person?',
+      'What makes this conversation difficult?', 'Why has the problem not already been solved?'],
+    close: ['Resistance creates dramatic pressure. The stronger the resistance, the more urgently and inventively the speaker must act.'] },
+  { h: '4. What is the speaker doing to change them?',
+    lead: 'Examine what the speaker is doing with the words.',
+    asks: ['Which action best describes what I am trying to accomplish?'],
+    close: ['The same words can produce completely different scenes when the speaker’s action changes.'],
+    playable: true },
+  { h: '5. What changes?',
+    lead: 'Find the turns, discoveries and shifts inside the text.',
+    asks: ['Where does a new thought begin?', 'Where does the subject change?',
+      'Where does the speaker receive new information?', 'Where does a tactic fail?',
+      'Where does the speaker try a different action?',
+      'Where does the emotional temperature change?',
+      'Where does the speaker become more direct?', 'Where do they retreat or protect themselves?',
+      'Where is something finally admitted?', 'Where does a memory alter the present moment?',
+      'Where do the stakes increase?', 'Where does the balance of power change?',
+      'Where does the speaker contradict themselves?',
+      'Where does the rhythm or sentence structure suggest a shift?',
+      'Which words signal a turn?', 'What is different after the change?'],
+    close: ['These shifts create the beats of the scene. A beat is not merely a pause; it marks a change in thought, action, information or relationship.'] },
+  { h: '6. What happens after?',
+    lead: 'Imagine the immediate consequence of the final line.',
+    asks: ['What do I expect the other person to do?', 'What response am I waiting for?',
+      'What decision have I forced?', 'What remains unresolved?', 'What would silence mean?',
+      'What would agreement mean?', 'What would rejection mean?', 'Has the relationship changed?',
+      'Has power shifted?', 'What action might I take next?',
+      'Am I preparing to stay, leave, fight, confess, forgive or withdraw?',
+      'What new problem has been created?',
+      'Does the final line complete an action or begin one?',
+      'What does the speaker believe will happen?', 'What might actually happen instead?'],
+    close: ['The final line is rarely the end of the dramatic event. It is usually the speaker’s last attempt to make something happen next.'] },
+];
+
+// The project worksheet's questions: every section of Question Everything
+// and every ask beneath it. The six original headline ids are preserved
+// exactly, so any answer written before this expanded the set is still
+// found and still shown.
+export function dissectQuestions() {
+  const out = [];
+  DISSECT_SECTIONS.forEach((sec, si) => {
+    const head = QUICK_QUESTIONS[si];
+    if (head) out.push({ id: head.id, q: `${sec.h.replace(/^\d+\.\s*/, '')}`, section: sec.h });
+    (sec.asks ?? []).forEach((a, ai) => out.push({ id: `qe.${si}.${ai}`, q: a, section: sec.h }));
+  });
+  return out;
+}
+
 export const ANSWER_STATUS = { answered: 'answered', unknown: 'unknown', na: 'na' };
 
 // Per-answer ceiling. The spec calls analyses "large, unbounded" as the
@@ -91,7 +171,10 @@ export const putDissection = (d) => idbPut(STORES.dissections, { ...d, updatedAt
 export async function saveAnswer(id, questionId, { value, status } = {}) {
   const d = await getDissection(id);
   if (!d) throw new Error('no such dissection');
-  if (!QUICK_QUESTIONS.some(q => q.id === questionId)) throw new Error('unknown question id');
+  // The worksheet asks the WHOLE Question Everything set (2026-08-20), so
+  // the guard has to know all of them — it previously knew only the
+  // original six and threw on every other answer, silently losing it.
+  if (!dissectQuestions().some(q => q.id === questionId)) throw new Error('unknown question id');
   const text = String(value ?? '').slice(0, MAX_ANSWER_LEN);
   const st = status ?? (text.trim() ? ANSWER_STATUS.answered : null);
   if (st === null) delete d.answers[questionId];
@@ -112,8 +195,9 @@ export async function deleteDissectionsFor(projectId) {
 
 /** Coverage, never a score: how many of the six are explored, and how. */
 export function coverageOf(d) {
-  const counts = { answered: 0, unknown: 0, na: 0, blank: 0, total: QUICK_QUESTIONS.length };
-  for (const { id } of QUICK_QUESTIONS) {
+  const qs = dissectQuestions();
+  const counts = { answered: 0, unknown: 0, na: 0, blank: 0, total: qs.length };
+  for (const { id } of qs) {
     const a = d?.answers?.[id];
     if (!a) counts.blank++;
     else if (a.status === ANSWER_STATUS.unknown) counts.unknown++;

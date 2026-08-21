@@ -38,10 +38,6 @@ export const ACTING_GAMES = [
     blurb: 'Why now? Change the answer and play it again.',
     how: 'Each card supplies a different reason this must happen now. Urgency is not automatically faster or louder — see what it actually does to your pursuit.',
     deck: 'urgency' },
-  { id: 'ac-find-beat', title: 'Find the Beat', icon: '🧱',
-    blurb: 'Mark where the scene turns.',
-    how: 'Mark beat boundaries wherever the thought, tactic, circumstance or resistance changes. Different actors divide the same scene differently — your divisions are choices to explore.',
-    tool: 'beats' },
   { id: 'ac-subtext', title: 'Same Words, Different Subtext', icon: '🎚',
     blurb: 'One line, several things going on underneath it.',
     how: 'The game supplies what the character is actually pursuing while saying this. The surface meaning never changes; what sits under it does.',
@@ -124,25 +120,34 @@ export const ACTING_DECKS = {
 // Ten areas, completed in ANY order. Coverage is reported as
 // exploration ("6 of 10 areas explored · 2 still open"), never as a
 // score, and completing them never makes an interpretation correct.
+// Scene Study areas. Six of the ten carry the questions of the matching
+// Question Everything section (owner order, 2026-08-20) — between them
+// all six sections are covered, each question appearing exactly once.
 export const SCENE_STUDY_AREAS = [
   { id: 'circumstances', title: 'Given circumstances',
-    prompt: 'What does the text establish as true? Where, when, who, and what has already happened?' },
+    prompt: 'What does the text establish as true? Where, when, who, and what has already happened?',
+    qeSection: 0 },
   { id: 'facts', title: 'Facts, assumptions and unknowns',
     prompt: 'Sort what you know: what the text states, what you have supplied, and what it deliberately leaves open.' },
   { id: 'relationship', title: 'Relationship',
     prompt: 'Who are these people to each other — history, power, what is habitually unsaid?' },
   { id: 'objective', title: 'What the character wants',
-    prompt: 'What are you trying to get from the other person in this scene? Write it as “I want you to ___.”' },
+    prompt: 'What are you trying to get from the other person in this scene? Write it as “I want you to ___.”',
+    qeSection: 1 },
   { id: 'obstacle', title: 'Obstacle',
-    prompt: 'What resists — the other person, the situation, or something in your character?' },
+    prompt: 'What resists — the other person, the situation, or something in your character?',
+    qeSection: 2 },
   { id: 'stakes', title: 'Stakes and urgency',
     prompt: 'What does the outcome cost? And why must this happen now rather than tomorrow?' },
   { id: 'beats', title: 'Changes, beats and turns',
-    prompt: 'Where does the scene turn — new information, a failed tactic, a shift of power?' },
+    prompt: 'Where does the scene turn — new information, a failed tactic, a shift of power?',
+    qeSection: 4 },
   { id: 'actions', title: 'Playable actions',
-    prompt: 'What are you DOING to the other person, beat by beat? Name it in verbs you can play.' },
+    prompt: 'What are you DOING to the other person, beat by beat? Name it in verbs you can play.',
+    qeSection: 3 },
   { id: 'questions', title: 'Unresolved questions',
-    prompt: 'What can you not answer alone? These are what rehearsal is for.' },
+    prompt: 'What can you not answer alone? These are what rehearsal is for.',
+    qeSection: 5 },
   { id: 'notes', title: 'Rehearsal notes',
     prompt: 'What do you want to try, watch for, or ask about next time you work on this?' },
 ];

@@ -123,13 +123,14 @@ def main():
                 "adding choice and flexibility",
                 "taking responsibility for its effect",
                 "Speech reveals thought. It reveals what we understand",
-                "relationship between thought and expression",
-                "Both take you into the same app. You can change your mind at any time.",
-                "The guided path stays available whenever you want it."]:
+                "relationship between thought and expression"]:
         if pin not in main_js:
             fail("preface copy drifted from docs/WHY_SPEECH_MATTERS_COPY.md: missing %r" % pin[:60])
-    # The removed panels stay removed — under any name.
-    for gone in ["Why Actors Train This Way", "The Journey"]:
+    # The removed panels stay removed — under any name. The preface now
+    # ENDS on "Speech Reveals Thought" (owner order 2026-08-20): no course
+    # picker, no "choose your way in", nothing asked of the reader.
+    for gone in ["Why Actors Train This Way", "The Journey",
+                 "Choose your way in", "Both take you into the same app"]:
         if gone in main_js:
             fail("a removed preface panel resurfaced: %r" % gone)
 
@@ -147,13 +148,16 @@ def main():
             fail("reading-pathway credit/PD/excerpt missing: %r" % pin)
 
     # 6e: Speech Dissection stays a thinking tool — the one-tap honest
-    # answers and the separate-from-project delete are pinned
+    # answers are pinned. The whole-dissection delete was replaced by a
+    # per-question Clear on 2026-08-20 (owner order): losing one answer
+    # by mistake is recoverable, losing 103 is not.
     for pin in ["I don’t know yet",
                 "Not relevant",
-                "Delete this dissection",
-                "The project and its text are untouched."]:
+                "diss-clear"]:
         if pin not in main_js:
             fail("Speech Dissection lost a first-class control: %r" % pin)
+    if "Delete this dissection" in main_js:
+        fail("the whole-dissection delete returned — Clear is per-question now")
     # …and stays OFF the Studio tab strip (approved spec: an action and a
     # focused screen, never another tab)
     if "'dissect', '🔍 Dissect This'" in main_js or '"dissect", "🔍' in main_js:

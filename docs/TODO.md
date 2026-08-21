@@ -5,6 +5,16 @@ older notes. Items marked ⚠ are ones I previously reported wrongly and have co
 
 ---
 
+## Next up — the programme's next part
+
+**BUILDING A CHARACTER** (owner order, 2026-08-20). The next part of the
+programme to be added. The Four Lists shipped on the same day as its first
+piece — the five read-throughs and the four inventories a character is built
+from — and lives on a script's own rail. What follows it is still to be
+scoped: the work that turns those lists into a played character.
+
+---
+
 ## Open now — small, visible, do first
 
 | # | Item | Where | Size |

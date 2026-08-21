@@ -1806,11 +1806,11 @@ export async function run({ navDoc = document } = {}) {
          '5. What changes?', '6. What happens after?',
          'Keep Returning to the Text'].every(h => tbText().includes(h)));
       check('textbook: the full bullet inventory renders (all Ask lists complete)',
-        tb().querySelectorAll('.sd-asks li').length === 16 + 12 + 15 + 23 + 16 + 15 + 9
+        tb().querySelectorAll('.sd-asks li').length === 16 + 12 + 15 + 1 + 16 + 15 + 9
         && tbText().includes('What circumstances must I reasonably imagine?')
         && tbText().includes('Can I describe my objective as an active attempt to affect another person?')
         && tbText().includes('Why has the problem not already been solved?')
-        && tbText().includes('When one action fails, what new action do I try?')
+        && tbText().includes('Which action best describes what I am trying to accomplish?')
         && tbText().includes('Which words signal a turn?')
         && tbText().includes('What might actually happen instead?')
         && tbText().includes('What new question should I take back to the text?'),
@@ -2728,7 +2728,7 @@ export async function run({ navDoc = document } = {}) {
     check('acting: the ten approved arcade games exist and none is scored',
       ACTING_GAMES.length === 10
       && ['Same Line, Different Circumstances', 'Objective Switch', 'Action Swap',
-          'Relationship Shift', 'Stakes Ladder', 'Change the Urgency', 'Find the Beat',
+          'Relationship Shift', 'Stakes Ladder', 'Change the Urgency',
           'Same Words, Different Subtext', 'What Changed?', 'Same Line Three Ways']
         .every(t => ACTING_GAMES.some(g => g.title === t)));
     check('acting: the scene-study workflow holds the ten areas',
@@ -2813,7 +2813,7 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 32 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:principles,col:scene,col:rehearsal,col:question,col:approaches,col:scenes,col:textbook,col:ipa'
+          === 'col:principles,col:scene,col:rehearsal,col:question,col:actions,col:approaches,col:monologues,col:scenes,col:lists,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));

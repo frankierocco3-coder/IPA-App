@@ -1632,3 +1632,88 @@ body.modal-open { overflow: hidden; }
 .chip-prefix { font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase;
   color: var(--muted); margin-right: 6px; }
 .rail-actions .btn, .rail-actions .btn-lite { flex: 0 0 auto; }
+
+/* Flash Cards: the unturned side. The line is present in the DOM only
+   once you ask for it, so this is a resting state, not a spoiler. */
+.sp-passage.is-hidden-card { opacity: .55; border-style: dashed; }
+.sp-passage.is-hidden-card .sp-passage-text { letter-spacing: .35em; text-align: center; }
+
+/* ── The script page ──────────────────────────────────────────
+   A script has to LOOK like a script: names above their lines,
+   stage directions set apart and never mistakable for dialogue. */
+.script-shell { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+@media (min-width: 820px) {
+  .script-shell { grid-template-columns: 11rem 1fr; align-items: start; }
+  .script-rail { position: sticky; top: 1rem; }
+}
+.script-rail { display: flex; flex-wrap: wrap; gap: .4rem; }
+@media (min-width: 820px) { .script-rail { flex-direction: column; } }
+.sc-rail-btn {
+  flex: 1 1 auto; text-align: left; padding: .55rem .7rem; border-radius: .6rem;
+  border: 1px solid var(--line, #d9d2c2); background: transparent;
+  font: inherit; color: inherit; cursor: pointer;
+}
+.sc-rail-btn.on { background: var(--accent-soft, #e6ecdd); border-color: var(--accent, #6f8657); font-weight: 600; }
+.script-panel { margin-bottom: 1rem; }
+.script-body { line-height: 1.6; }
+.sc-heading { font-size: 1rem; letter-spacing: .12em; text-transform: uppercase; margin: 1.4rem 0 .6rem; }
+.sc-speech { margin: 0 0 .9rem; }
+.sc-who { margin: 0; font-weight: 700; letter-spacing: .08em; }
+.sc-line { margin: .1rem 0 0; }
+.sc-note { margin: .2rem 0 .6rem; font-size: .92em; opacity: .85; }
+.sc-beat { text-align: center; letter-spacing: .5em; opacity: .5; margin: .5rem 0; }
+.sc-hl { border-radius: .2em; padding: 0 .1em; background: var(--sw, #f4e3a1); color: inherit; }
+.sc-hl.is-yellow { background: #f4e3a1; } .sc-hl.is-green { background: #cfe3c4; }
+.sc-hl.is-blue { background: #c9dcec; }  .sc-hl.is-pink { background: #eecfdd; }
+.sc-tools { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin: .5rem 0; }
+.sc-tool-label { font-size: .85em; opacity: .75; }
+.sc-swatch { width: 1.6rem; height: 1.6rem; border-radius: 50%; border: 1px solid var(--line, #d9d2c2);
+  background: var(--sw); cursor: pointer; }
+
+/* Highlight is a tap on the whole line; beats are taps between words. */
+.sc-line.is-hl {
+  border-radius: .25em; padding: .1em .3em; margin-left: -.3em;
+}
+.is-hl.is-yellow { background: #f4e3a1; } .is-hl.is-green { background: #cfe3c4; }
+.is-hl.is-blue   { background: #c9dcec; } .is-hl.is-pink  { background: #eecfdd; }
+.script-body.is-highlight .sc-line { cursor: pointer; }
+.sc-swatch.on { outline: 2px solid var(--accent, #6f8657); outline-offset: 2px; }
+.sc-slash { opacity: .55; font-weight: 700; }
+.sc-gap {
+  display: inline; border: 0; background: transparent; font: inherit; color: inherit;
+  cursor: pointer; padding: 0 .12em; border-radius: .2em; white-space: pre;
+  /* Line-start and line-end targets carry no space of their own, so give
+     them a hit area a finger can actually find. */
+  min-width: .5em;
+}
+.script-body.is-beats .sc-gap { outline: 1px dashed color-mix(in srgb, currentColor 22%, transparent); }
+.script-body.is-beats .sc-gap:hover,
+.script-body.is-beats .sc-gap:focus-visible { outline-style: solid; }
+.sc-gap:hover, .sc-gap:focus-visible { background: var(--accent-soft, #e6ecdd); outline: none; }
+.sc-gap.on { color: var(--accent, #6f8657); font-weight: 700; }
+/* Faithful script flow: one rendered line per pasted line. */
+.sc-gapline { height: .55rem; }
+.script-body .sc-who { margin: .55rem 0 0; }
+.script-body .sc-speech { margin: .55rem 0 0; }
+.script-body .sc-speech .sc-who { margin: 0; }
+.script-body .sc-line { margin: 0; }
+
+/* The action vocabulary: words, not cards. Taught verbs stand out. */
+.pa-verbs { display: flex; flex-wrap: wrap; gap: .35rem .5rem; margin: .6rem 0 1rem; }
+.pa-verb {
+  display: inline-block; padding: .2rem .5rem; border-radius: .4rem;
+  border: 1px solid var(--line, #d9d2c2); font-size: .93em; background: transparent;
+  font-family: inherit; color: inherit;
+}
+.pa-verb.is-taught { font-weight: 700; border-color: var(--accent, #6f8657); cursor: pointer; }
+.pa-verb.is-taught:hover { background: var(--accent-soft, #e6ecdd); }
+/* Question Everything's asks, working inside a Scene Study area. */
+.ss-asks { margin: .3rem 0 .6rem 1.1rem; opacity: .88; }
+.ss-asks li { margin: .12rem 0; }
+/* The Four Lists: five read-throughs, then four inventories. */
+.sc-reads { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; margin: .6rem 0 1rem; }
+.sc-read {
+  width: 2rem; height: 2rem; border-radius: 50%; cursor: pointer;
+  border: 1px solid var(--line, #d9d2c2); background: transparent; font: inherit; color: inherit;
+}
+.sc-read.on { background: var(--accent, #6f8657); border-color: var(--accent, #6f8657); color: #fff; font-weight: 700; }

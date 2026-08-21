@@ -705,7 +705,10 @@ strict separation of the two Dissection surfaces. Library → 'Speech
 Dissection' card = renderDissectTextbook, a READ-ONLY textbook
 carrying the owner-supplied copy VERBATIM (intro + six numbered
 sections each with lead line, Ask-list and close, + 'Keep Returning
-to the Text' — 106 bullets total, count test-pinned). The textbook
+to the Text' — 84 bullets total, count test-pinned; section 4 was cut to a
+SINGLE ask, 'Which action best describes what I am trying to accomplish?',
+2026-08-21 by owner order — the twenty 'Am I …?' tactic prompts and the two
+follow-ups are gone; do not restore them). The textbook
 imports NOTHING from dissect.js, contains no
 textarea/marks/autosave/coverage/example/selector/create-button, and
 never touches IndexedDB; its only actions are the written 'Explore

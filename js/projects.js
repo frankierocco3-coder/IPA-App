@@ -40,6 +40,20 @@ export function emptyProject(patch = {}) {
     text: '',
     lines: [],
     notes: '',
+    // Script markup that must OUTLIVE the session (owner order,
+    // 2026-08-20). Marks anchor to a parsed block index plus a character
+    // range inside that block, and carry the marked text so an edit
+    // elsewhere in the script cannot silently move or lose them.
+    //   marks: [{ id, kind: 'highlight'|'beat'|'note', block, start, end,
+    //             quote, color?, body? }]
+    //   cards: { who, known: { '<blockIndex>': true } } — flash-card work
+    marks: [],
+    cards: {},
+    // The Four Lists (owner order, 2026-08-20). You read the play five
+    // times: once just reading, then once for each list. Stored per
+    // project, like every other piece of work on a script.
+    //   fourLists: { reads: 0, facts, saysSelf, saysOthers, othersSay }
+    fourLists: {},
     difficultWords: [],  // [{ word, note }]
     pronunciationNotes: '',
     overrides: {},       // see overrides.js — project-scope IPA overrides

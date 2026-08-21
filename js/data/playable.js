@@ -136,6 +136,66 @@ export const PLAYABLE_ACTIONS = [
   },
 ];
 
+
+// ── The action vocabulary ─────────────────────────────────────
+// 185 action verbs from "ACTION WORDS / VERBS / TACTICS — THE DOING NOT
+// THE FEELING" (Charles E. Underhill), supplied by the owner 2026-08-20.
+//
+// These are a VOCABULARY, not lessons. The twelve entries above are
+// written teaching material with an objective, a resistance and coaching;
+// these are words to reach for when none of the twelve is the verb you
+// mean. Kept as the source has them, except two plain misspellings
+// ("assult", "exhalt") corrected so nothing teaches a wrong word.
+export const ACTION_VERB_FRAME = {
+  objective: 'First identify the main objective: I want him/her to ______',
+  method: 'You pursue that objective through a series of actions.',
+  rule: 'The doing, not the feeling.',
+};
+
+export const ACTION_VERBS = [
+  'To Accost', 'To Accuse', 'To Advise', 'To Alarm', 'To Allure',
+  'To Amuse', 'To Analyze', 'To Annihilate', 'To Appease', 'To Arouse',
+  'To Assault', 'To Attack', 'To Avoid', 'To Awaken', 'To Badger',
+  'To Bait', 'To Balance', 'To Bang', 'To Beat', 'To Beguile',
+  'To Belittle', 'To Bend', 'To Bewitch', 'To Blitz', 'To Bombard',
+  'To Bury', 'To Cajole', 'To Caress', 'To Celebrate', 'To Challenge',
+  'To Charm', 'To Choke', 'To Close', 'To Clue In', 'To Comfort',
+  'To Command', 'To Conceal', 'To Confront', 'To Conquer', 'To Console',
+  'To Consume', 'To Contest', 'To Control', 'To Corrupt', 'To Criticize',
+  'To Dazzle', 'To Defend', 'To Deflate', 'To Defy', 'To Delight',
+  'To Demean', 'To Devastate', 'To Devour', 'To Dismiss', 'To Distract',
+  'To Dominate', 'To Elevate', 'To Embarrass', 'To Embrace',
+  'To Encourage', 'To Erupt', 'To Eviscerate', 'To Exalt', 'To Examine',
+  'To Excite', 'To Expose', 'To Feed', 'To Fill', 'To Flatten',
+  'To Flatter', 'To Force', 'To Goad', 'To Grab', 'To Grasp', 'To Harass',
+  'To Hassle', 'To Heal', 'To Humiliate', 'To Humor', 'To Illuminate',
+  'To Implore', 'To Impress', 'To Induce', 'To Inflame', 'To Inflate',
+  'To Inform', 'To Inspire', 'To Interrogate', 'To Intimidate',
+  'To Intrigue', 'To Invite', 'To Irritate', 'To Jolt', 'To Kick',
+  'To Kiss', 'To Lift', 'To Manipulate', 'To Mock', 'To Mold',
+  'To Mystify', 'To Nail', 'To Negotiate', 'To Notify', 'To Nurture',
+  'To Offer', 'To Oil', 'To Open', 'To Oppose', 'To Overwhelm',
+  'To Pacify', 'To Patronize', 'To Penetrate', 'To Peruse', 'To Pinch',
+  'To Pity', 'To Placate', 'To Please', 'To Poison', 'To Poke',
+  'To Ponder', 'To Possess', 'To Praise', 'To Primp', 'To Probe',
+  'To Protect', 'To Protest', 'To Provoke', 'To Pull', 'To Punish',
+  'To Purge', 'To Push', 'To Quash', 'To Quench', 'To Question',
+  'To Reject', 'To Repel', 'To Reprimand', 'To Rip', 'To Rouse', 'To Rule',
+  'To Savor', 'To Scare', 'To Scold', 'To Screw', 'To Search', 'To Seduce',
+  'To Seize', 'To Shake', 'To Shame', 'To Shine', 'To Shock', 'To Slap',
+  'To Soil', 'To Soothe', 'To Stalk', 'To Stop', 'To Strengthen',
+  'To Strip', 'To Subdue', 'To Surmount', 'To Tantalize', 'To Taste',
+  'To Teach', 'To Tear', 'To Tease', 'To Tell', 'To Tempt', 'To Terrify',
+  'To Test', 'To Threaten', 'To Titillate', 'To Torment', 'To Transcend',
+  'To Trap', 'To Trick', 'To Twist', 'To Uncover', 'To Understand',
+  'To Unite', 'To Uplift', 'To Urge', 'To Vilify', 'To Warn', 'To Win',
+  'To Wring'
+];
+
+/** A taught action for this verb, when one exists. */
+export const taughtActionFor = verb =>
+  PLAYABLE_ACTIONS.find(a => a.verb.toLowerCase() === String(verb).toLowerCase()) ?? null;
+
 export const actionById = (id) => PLAYABLE_ACTIONS.find(a => a.id === id) ?? null;
 export const pairById = (id) => ACTION_PAIRS.find(p => p.id === id) ?? null;
 export const pairIndexOf = (pairId) => ACTION_PAIRS.findIndex(p => p.id === pairId);
