@@ -23,10 +23,10 @@ import { dbSupported, CONTENT_STORES, openRaw, dbErrorMessage } from '../js/db.j
 import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
          getDissection, saveAnswer, deleteDissection, deleteDissectionsFor,
          materialTypeFrom, coverageOf, coverageLine, createSaver, MAX_ANSWER_LEN,
-         attachImportedDissection } from '../js/dissect.js';
+         attachImportedDissection, dissectQuestions, DISSECT_SECTIONS } from '../js/dissect.js';
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
-         searchActions } from '../js/data/playable.js';
+         searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
 import { store } from '../js/state.js';
@@ -840,13 +840,15 @@ export async function run({ navDoc = document } = {}) {
         && !wall().textContent.includes('Plato'));
       check('preface: no quiz apparatus on any panel',
         !wall().querySelector('#choices, #feedback, .choice'));
-      clickIn(doc.getElementById('ob-next')); await sleep(250);
-      check('preface: course picker kept (functional screen, not a preface panel), preselected on replay',
-        !!wall()?.querySelector('[data-accent]') && doc.getElementById('ob-next')?.disabled === false
-        && !wall().querySelector('.ob-dots') && !wall().querySelector('.th-quote'));
-      clickIn(doc.getElementById('ob-next')); await sleep(250);
-      check('preface: choice screen kept with both ways in',
-        wall()?.querySelectorAll('[data-choice]').length === 2);
+      // The preface ENDS on panel 3 (owner order, 2026-08-20): the course
+      // picker and the "choose your way in" screen are retired, and the
+      // last panel's button finishes instead of advancing.
+      check('preface: ends on the last panel — no course picker, no choice screen',
+        !wall().querySelector('[data-accent]') && !wall().querySelector('[data-choice]')
+        && doc.getElementById('ob-next')?.textContent.trim() === 'Done');
+      check('preface: nothing is asked of the reader at its close',
+        !doc.body.textContent.includes('Pick your first course')
+        && !doc.body.textContent.includes('Choose your way in'));
       wall()?.dispatchEvent(new w.KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
       await sleep(300);
       check('preface: Esc returns to the page it was opened from, card intact',
@@ -886,9 +888,14 @@ export async function run({ navDoc = document } = {}) {
     d2.answers['quick.wants'] = { value: '', status: ANSWER_STATUS.unknown, updatedAt: 1 };
     d2.answers['quick.resisting'] = { value: '', status: ANSWER_STATUS.na, updatedAt: 1 };
     const c = coverageOf(d2);
+    // The worksheet asks the whole of Question Everything now, so coverage
+    // counts that set — the six original ids are still among them.
+    const total = dissectQuestions().length;
     check('dissect: coverage counts all four states, never a score',
-      c.answered === 1 && c.unknown === 1 && c.na === 1 && c.blank === 3
-      && coverageLine(d2).includes('3 of 6 explored') && !coverageLine(d2).includes('%'));
+      c.answered === 1 && c.unknown === 1 && c.na === 1
+      && c.blank === total - 3 && c.total === total
+      && coverageLine(d2).includes(`3 of ${total} explored`)
+      && !coverageLine(d2).includes('%'));
   }
 
   if (dbSupported()) {
@@ -1099,7 +1106,9 @@ export async function run({ navDoc = document } = {}) {
         clickIn([...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === 'Custom Work'));
         await sleep(400);
         const card = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === projId);
-        clickIn(card?.querySelector('button[data-act="open"]') ?? card); await sleep(450);
+        clickIn(card?.querySelector('button[data-act="open"]') ?? card); await sleep(500);
+        // A project opens AS A SCRIPT (2026-08-20); Edit reaches the form.
+        clickIn(doc.getElementById('sc-edit')); await sleep(450);
       };
       const openDissect = async () => {
         await openProject();
@@ -1108,14 +1117,17 @@ export async function run({ navDoc = document } = {}) {
       await openProject();
       check('dissect UI: an action in the project view, NOT a Studio tab',
         !!doc.getElementById('proj-dissect')
+        && doc.getElementById('proj-dissect').textContent.includes('Question Everything')
         && ![...doc.querySelectorAll('.proj-tabs .son-tab')].some(b => b.dataset.tab === 'dissect'));
       clickIn(doc.getElementById('proj-dissect')); await sleep(450);
       const qSec = qid => doc.querySelector(`.diss-q[data-q="${qid}"]`);
-      check('dissect UI: a dedicated focused screen with six questions behind real labels',
+      check('dissect UI: a dedicated focused screen carrying the whole question set',
         !doc.querySelector('.proj-tabs')                       // not inside the project view
         && !!doc.getElementById('nav-back')                    // normal Back affordance
-        && doc.querySelectorAll('.diss-q').length === 6
-        && doc.querySelectorAll('#diss-list label.field .field-label').length === 6);
+        && doc.querySelectorAll('.diss-q').length === dissectQuestions().length
+        && doc.querySelectorAll('#diss-list label.field .field-label').length === dissectQuestions().length
+        && doc.querySelectorAll('.diss-clear').length === dissectQuestions().length
+        && !doc.body.textContent.includes('Delete this dissection'));
       const answer = async (qid, textVal) => {
         clickIn(qSec(qid).querySelector('.diss-head')); await sleep(150);
         const ta = qSec(qid).querySelector('.diss-text');
@@ -1344,13 +1356,23 @@ export async function run({ navDoc = document } = {}) {
       const h1 = () => doc.querySelector('main h1')?.textContent ?? '';
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
-      // IA revision: Playable Actions is a Studio hub card now.
-      clickIn(side('Studio')); await sleep(350);
-      clickIn(card('Playable Actions')); await sleep(350);
+      // Playable Actions shelves in the ACTING Library now (2026-08-20),
+      // not on the Studio hub.
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
+      clickIn(side('Library')); await sleep(400);
+      clickIn(doc.querySelector('[data-tile="col:actions"]')); await sleep(400);
       check('playable UI: the section opens with the governing question and all twelve',
         doc.body.textContent.includes('What are you doing to the other person through these words?')
         && rows().length === 12
         && doc.querySelectorAll('#pa-list .guide-heading').length === 7);
+      // The twelve are TAUGHT actions; the wider verb list is vocabulary
+      // beneath them, and the two must not be conflated.
+      check('playable UI: the action vocabulary sits beneath the twelve, marked as vocabulary',
+        doc.querySelectorAll('.pa-verb').length === ACTION_VERBS.length
+        && doc.querySelectorAll('.pa-verb.is-taught').length
+           === ACTION_VERBS.filter(v => taughtActionFor(v)).length
+        && doc.body.textContent.includes('The doing, not the feeling.'));
       check('playable UI: entirely written — no audio affordances anywhere',
         !doc.querySelector('main audio')
         && !doc.querySelector('main').textContent.includes('🔊')
@@ -1873,7 +1895,8 @@ export async function run({ navDoc = document } = {}) {
       clickIn(side('Studio')); await sleep(400);
       clickIn(card('Custom Work')); await sleep(400);
       const pc = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === hubProj.id);
-      clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(450);
+      clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(500);
+      clickIn(doc.getElementById('sc-edit')); await sleep(450);   // script → Edit
       clickIn(doc.getElementById('proj-dissect'));
       await until(() => doc.body.textContent.includes('Dissect: __regression hub'));
       clickIn(doc.querySelector('.diss-q[data-q="quick.wants"] .diss-head')); await sleep(200);
@@ -1962,11 +1985,11 @@ export async function run({ navDoc = document } = {}) {
           'Playable Actions', 'Speech Dissection', 'Question Everything',
           'Personal Dictionary'].every(gone => !tileTitles().some(t => t.startsWith(gone))));
 
-      // Studio: the five approved cards, exact order, title-only.
+      // Studio: the approved cards, exact order, title-only.
       clickIn(side('Studio')); await sleep(350);
-      check('IA: Studio hub shows exactly the four cards in the approved order',
+      check('IA: Studio hub shows exactly the three cards in the approved order',
         JSON.stringify(hubTitles()) === JSON.stringify(['Scripts & Speeches',
-          'Playable Actions', 'Custom Work', 'Personal Dictionary']),
+          'Custom Work', 'Personal Dictionary']),
         hubTitles().join(' | '));
       check('IA: Studio hub cards are title-only',
         [...doc.querySelectorAll('.track-card .track-info')]
@@ -2736,15 +2759,24 @@ export async function run({ navDoc = document } = {}) {
       ACTING_LESSONS.filter(l => l.sharedFrom).every(l =>
         l.sharedFrom.workspace !== 'speech' || !!speechLessonById(l.sharedFrom.id))
       && ACTING_LESSONS.some(l => l.sharedFrom?.id === 'sp-m-want'));
-    check('acting: the ten approved arcade games exist and none is scored',
-      ACTING_GAMES.length === 10
+    check('acting: the nine approved arcade games exist and none is scored',
+      ACTING_GAMES.length === 9
       && ['Same Line, Different Circumstances', 'Objective Switch', 'Action Swap',
           'Relationship Shift', 'Stakes Ladder', 'Change the Urgency',
           'Same Words, Different Subtext', 'What Changed?', 'Same Line Three Ways']
-        .every(t => ACTING_GAMES.some(g => g.title === t)));
-    check('acting: the scene-study workflow holds the ten areas',
+        .every(t => ACTING_GAMES.some(g => g.title === t))
+      && !ACTING_GAMES.some(g => g.title === 'Find the Beat'));
+    check('acting: the scene-study workflow holds the ten areas, carrying every QE question',
       SCENE_STUDY_AREAS.length === 10
-      && SCENE_STUDY_AREAS.every(a => a.id && a.title && a.prompt));
+      && SCENE_STUDY_AREAS.every(a => a.id && a.title && a.prompt)
+      // Six areas map to a Question Everything section; between them the
+      // six sections are covered once each, so no question is lost or
+      // asked twice.
+      && new Set(SCENE_STUDY_AREAS.filter(a => a.qeSection != null)
+           .map(a => a.qeSection)).size === DISSECT_SECTIONS.length
+      && SCENE_STUDY_AREAS.filter(a => a.qeSection != null)
+           .reduce((n, a) => n + DISSECT_SECTIONS[a.qeSection].asks.length, 0)
+         === DISSECT_SECTIONS.reduce((n, sec) => n + sec.asks.length, 0));
     check('acting: the Library collections cover the lessons without duplication',
       ACTING_COLLECTIONS.length === 3
       && (() => {
@@ -2758,7 +2790,7 @@ export async function run({ navDoc = document } = {}) {
       !speechLessonById('sp-start-responsibility')
       && !!actingLessonById('ac-offbook'));
     check('acting: Speech keeps a general fluency chapter, not an actor one',
-      speechLessonById('sp-start-offbook')?.title === 'General Fluency and Prepared Speaking');
+      speechLessonById('sp-start-offbook')?.title === 'Prepared Speaking and Fixed Words');
   }
 
   if (navDoc !== document) {
@@ -2838,9 +2870,9 @@ export async function run({ navDoc = document } = {}) {
         && !/\bXP\b/.test(doc.querySelector('main')?.textContent ?? ''));
 
       clickIn(side('Practice')); await sleep(400);
-      check('acting: Practice holds the three categories',
+      check('acting: Practice holds the three categories, Scene Study withdrawn',
         String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
-          === 'Scene Study,Acting Arcade,Practice My Text');
+          === 'Acting Arcade,Flash Cards,Practice My Text');
       clickIn(doc.getElementById('acp-arcade')); await sleep(400);
       // The Arcade is text-first: a two-level picker (collections, then
       // that collection's texts) opens before any game grid appears.
@@ -3255,7 +3287,7 @@ export async function run({ navDoc = document } = {}) {
   {
     const EXPECTED = [
       ['I', 'Speechcraft Principles', ['The Importance of Speech', 'Practice the Parts. Communicate as a Whole.',
-        'The Alphabet Experiment', 'Fluency Frees the Speaker', 'General Fluency and Prepared Speaking']],
+        'The Alphabet Experiment', 'Fluency Frees the Speaker', 'Prepared Speaking and Fixed Words']],
       ['II', 'Your Speaking Instrument', ['Your Instrument', 'Tension', 'Anatomy', 'Breath',
         'Resonance', 'Articulation & Clarity', 'Vocal Health and When to Stop']],
       ['III', 'What & Why?', ['Thought & Intention', 'What Do You Want?', 'Why Now? Understanding Urgency',
