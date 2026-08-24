@@ -35,6 +35,7 @@ import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
          OBJECTIVE_DECK, OBSTACLE_DECK, TEMPO_DECK } from './data/speech/arcade.js';
 import { SPEECH_TEXTS, speechTextById, speechTextBody } from './data/speech/texts.js';
 import { parseScript, speechUnits, unitText, cuedSpeeches } from './script.js';
+import { mountNotebook } from './notebook.js';
 import { speechApproved, speechPublished, speechBodyVisible, speechReviewFor } from './data/speech/reviews.js';
 import { SPEECH_GOALS, speechGoal, setSpeechGoal, speechLessonDone,
          markSpeechLessonDone, speechDoneCount, speechHistory, recordSpeechPractice,
@@ -9375,6 +9376,9 @@ if (!framedHostile) {
 
   // Recorded-take object URLs are per-session; let them go on unload.
   window.addEventListener('pagehide', () => { try { teardownAV(); releaseTryIt(); } catch {} });
+
+  // The notebook mounts OUTSIDE #app, once, so it survives every render.
+  mountNotebook().catch(err => console.warn('notebook unavailable:', err));
 
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool

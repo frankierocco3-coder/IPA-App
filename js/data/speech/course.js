@@ -41,13 +41,13 @@ export const SPEECH_SAFETY_LINE =
 
 // Movement/comfort framing reused by physical explorations (Phase 13).
 export const SPEECH_COMFORT_LINE =
-  'Do this seated or standing, whichever suits you. Every step is optional — adapt or skip anything that isn’t comfortable, and breathe through your mouth, your nose or both, however you breathe best.';
+  'Do this seated or standing, whichever suits you. Every step is optional: adapt or skip anything that isn’t comfortable, and breathe through your mouth, your nose or both, however you breathe best.';
 
 // Internal stage ids order the Learn pathway. The LIBRARY presents the
 // same records as four named collections (2026-08-13 IA order) — never
 // labelled "Stage 1/2/3" there. One set of records, two arrangements.
 export const SPEECH_STAGES = [
-  { id: 'start', title: 'Start Here', blurb: 'How this course works — and why parts-then-whole practice is the fastest honest route.' },
+  { id: 'start', title: 'Start Here', blurb: 'How this course works, and why parts-then-whole practice is the fastest honest route.' },
   { id: 'foundation', title: 'The Speaking Instrument', blurb: 'Body, breath, effort, voice, articulation — and knowing when to stop.' },
   { id: 'meaning', title: 'Shaping Meaning', blurb: 'Pace, pause, emphasis, intention, urgency — choices, not rules.' },
   { id: 'whole', title: 'The Whole Speaker', blurb: 'Putting it back together while you think, listen, move and respond.' },
@@ -58,7 +58,7 @@ export const SPEECH_STAGES = [
 // are numbered 1–4 and lessons inside them 1.1…4.4, with no gaps.
 export const SPEECH_MODULES = [
   { n: 1, stage: 'start', title: 'Speechcraft Principles',
-    blurb: 'Why this course practises parts before wholes — and what fluency buys you.' },
+    blurb: 'Why this course practises parts before wholes, and what fluency buys you.' },
   { n: 2, stage: 'foundation', title: 'Your Speaking Instrument',
     blurb: 'Body, breath, effort, voice, articulation — and knowing when to stop.' },
   { n: 3, stage: 'meaning', title: 'What & Why?',
@@ -183,10 +183,10 @@ export const SPEECH_LESSONS = [
         'prepare a speech, scene, monologue or presentation',
         'investigate how language creates action',
       ] },
-      { p: 'No app can erase who you are, guarantee confidence, or hand you the one “correct” accent — no such accent exists. What deliberate training can do is give you more choices, and more command of the choices you already make.' },
+      { p: 'No app can erase who you are, guarantee confidence, or hand you the one “correct” accent. No such accent exists. What deliberate training can do is give you more choices, and more command of the choices you already make.' },
       { h: 'Speech Is Action' },
-      { p: 'Speaking is something we do to another person. A speaker may set out to persuade, reassure, challenge, inspire, inform, confront, entertain, comfort, negotiate, command, question, reveal, conceal — or simply connect.' },
-      { p: 'The same words can land completely differently depending on intention, relationship, timing, rhythm, emphasis and delivery. That is as true in everyday conversation, teaching, leadership and interviews as it is in public speaking, presentations, advocacy, rhetoric, performance — and the difficult personal conversations that matter most.' },
+      { p: 'Speaking is something we do to another person. A speaker may set out to persuade, reassure, challenge, inspire, inform, confront, entertain, comfort, negotiate, command, question, reveal, conceal, or simply connect.' },
+      { p: 'The same words can land completely differently depending on intention, relationship, timing, rhythm, emphasis and delivery. That is as true in everyday conversation, teaching, leadership and interviews as it is in public speaking, presentations, advocacy, rhetoric, performance, and the difficult personal conversations that matter most.' },
       { p: 'Powerful speech can clarify and connect. It can also pressure, mislead or manipulate. Developing your speech includes taking responsibility for its effect.' },
       { h: 'Speech Reveals Thought' },
       { p: 'Speech reveals thought. It reveals what we understand and what remains uncertain, how our ideas are organized, what we value, what we avoid, how we see the person in front of us — and how clearly we have examined our own position.' },
@@ -202,9 +202,9 @@ export const SPEECH_LESSONS = [
     glossary: ['automaticity'],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'Speaking well involves many elements at once: breath, voice, articulation, pace, emphasis, intention, listening, movement. Trying to improve all of them at the same time usually improves none of them — there is too much to attend to at once.' },
+      { p: 'Speaking well involves many elements at once: breath, voice, articulation, pace, emphasis, intention, listening, movement. Trying to improve all of them at the same time usually improves none of them. There is simply too much to attend to.' },
       { p: PRACTICE_PRINCIPLE_LONG },
-      { p: 'That is the whole method of this course. Isolate one element until you can recognize it and control it. Then put it back inside real speaking — where your attention belongs to what you are saying and to the person you are saying it to.' },
+      { p: 'That is the whole method of this course. Isolate one element until you can recognize it and control it. Then put it back inside real speaking, where your attention belongs to what you are saying and to the person you are saying it to.' },
       { p: PRACTICE_PRINCIPLE_SHORT },
       { h: 'What this looks like in practice' },
       { list: [
@@ -212,7 +212,7 @@ export const SPEECH_LESSONS = [
         'A tennis player isolates the toss, then serves.',
         'A speaker explores pause placement in one sentence, then gives the toast.',
       ] },
-      { p: 'The isolation is never the goal. The conversation, the presentation, the scene — the whole — is the goal. Isolation is just the fastest honest way to build a part strong enough to survive inside the whole.' },
+      { p: 'The isolation is never the goal. The whole is the goal: the conversation, the presentation, the scene. Isolation is just the fastest honest way to build a part strong enough to survive inside it.' },
     ],
   },
   {
@@ -222,9 +222,9 @@ export const SPEECH_LESSONS = [
     glossary: ['automaticity'],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'When something you know becomes fluent — automatic, second nature — it stops consuming your attention. You do not sound out familiar words letter by letter; reading them is automatic, which frees you to think about what the sentence means.' },
-      { p: 'Speech works the same way. Whatever is not yet fluent — the next word, the structure of the argument, the name you keep forgetting — pulls attention away from thinking, listening and responding. Whatever is fluent gives that attention back.' },
-      { p: 'Psychologists call this automaticity: with enough of the right practice, a skill runs with little conscious effort. (This is a property of practiced memory and skill — a different thing entirely from the body systems that run on their own, like digestion.)' },
+      { p: 'Something you know well becomes automatic. Second nature. When it does, it stops consuming your attention: you no longer sound out familiar words letter by letter, and that leaves you free to think about what the sentence means.' },
+      { p: 'Speech works the same way. The next word, the shape of the argument, the name you keep forgetting: whatever is not yet fluent pulls attention away from thinking, listening and responding. Whatever is fluent gives that attention back.' },
+      { p: 'Psychologists call this automaticity: with enough of the right practice, a skill runs with little conscious effort. (It is a property of practiced memory and skill, not of the body systems that run on their own, like digestion.)' },
       { p: 'This course keeps returning to that trade: spend effort in practice, where effort is cheap, so that effort is not demanded from you in the moment of speaking, where attention is precious.' },
     ],
   },
@@ -235,7 +235,7 @@ export const SPEECH_LESSONS = [
     glossary: ['automaticity'],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'Here is a two-minute experiment you can run on yourself. It needs no preparation — just the alphabet you have known since childhood.' },
+      { p: 'Here is a two-minute experiment you can run on yourself. It needs no preparation, just the alphabet you have known since childhood.' },
       { experiment: {
           // Rendered as an interactive, self-paced sequence. No scoring,
           // no timing, no recording — self-observation only. No personal
@@ -247,24 +247,24 @@ export const SPEECH_LESSONS = [
             'Now the 16th.',
             'Now the 23rd.',
           ],
-          noticing: 'What did you notice while you searched? Where did your attention go? What happened to your breath? Did anything in your body work harder than it needed to? People notice different things here — there is no sensation you are supposed to have.',
+          noticing: 'What did you notice while you searched? Where did your attention go? What happened to your breath? Did anything in your body work harder than it needed to? People notice different things here. There is no sensation you are supposed to have.',
           then: 'Now recite the alphabet straight through, as you normally would.',
-          compare: 'Compare the two experiences. The letters were identical — the same 26 items, in the same memory. What changed was the kind of retrieval: effortful search versus fluent sequence. Fluent recall left your attention free; effortful search spent it.',
+          compare: 'Compare the two experiences. The letters were identical: the same 26 items, in the same memory. What changed was the kind of retrieval, effortful search versus fluent sequence. Fluent recall left your attention free; effortful search spent it.',
         } },
-      { p: 'Everything in this course aims at that difference. Whatever you will need while speaking — words, structure, technique — serves you best when it is fluent enough that you are not searching for it.' },
+      { p: 'Everything in this course aims at that difference. Words, structure, technique: whatever you will need while speaking serves you best when it is fluent enough that you are not searching for it.' },
     ],
   },
   {
     id: 'sp-start-offbook', stage: 'start', order: 4,
-    title: 'General Fluency and Prepared Speaking',
+    title: 'Prepared Speaking and Fixed Words',
     kind: 'lesson', application: { general: true, acting: true },
     glossary: ['automaticity'],
     requiredReviewer: 'editorial',
     body: [
       { h: 'General prepared speaking' },
-      { p: 'For a presentation, a toast, an interview or a difficult conversation, fluency may mean internalizing ideas, structure, transitions and essential language rather than memorizing every word. You secure the skeleton — the order of thoughts, the key sentences, the phrases that must land exactly — and speak the rest freshly each time.' },
+      { p: 'For a presentation, a toast, an interview or a difficult conversation, fluency may mean internalizing ideas, structure, transitions and essential language rather than memorizing every word. You secure the skeleton, the order of thoughts, the key sentences, the phrases that must land exactly, and speak the rest freshly each time.' },
       { h: 'When the words are fixed' },
-      { p: 'Some speaking has fixed words — a legal statement, a liturgy, a script. There, fluency means the exact language, secure enough that you are not searching for the next word. Actors carry the strongest version of this obligation; the Acting workspace teaches it as Being Off Book.' },
+      { p: 'Some speaking has fixed words: a legal statement, a liturgy, a script. There, fluency means the exact language, secure enough that you are not searching for the next word. Actors carry the strongest version of this obligation; the Acting workspace teaches it as Being Off Book.' },
       { p: 'The two kinds of preparation are different jobs. Confusing them causes trouble in both directions: memorizing a conversation word-for-word makes it brittle; paraphrasing a fixed text breaks it.' },
     ],
   },
@@ -401,9 +401,9 @@ export const SPEECH_LESSONS = [
       'ASHA Practice Portal — Voice Disorders (signs that warrant evaluation, paraphrased)',
     ],
     body: [
-      { p: 'Voices are resilient, and they have limits. Extended loud use, shouting over noise, smoking or vaping, dehydration and speaking through illness all ask more of the vocal folds than they are built to give indefinitely. Stress can add its own load — jaw clenching and effortful speech often travel with it.' },
+      { p: 'Voices are resilient, and they have limits. Extended loud use, shouting over noise, smoking or vaping, dehydration and speaking through illness all ask more of the vocal folds than they are built to give indefinitely. Stress can add its own load; jaw clenching and effortful speech often travel with it.' },
       { p: 'General care that voice-health organizations consistently recommend: hydration, vocal rest after heavy use, amplification instead of shouting where possible, and attention to how your voice feels after work.' },
-      { p: 'Know the signals that deserve professional evaluation rather than more practice: hoarseness that persists beyond a couple of weeks, pain with speaking, a voice that tires dramatically faster than it used to, or losing notes you used to have. None of these is a diagnosis — they are reasons to see a qualified professional, such as an otolaryngologist or a speech-language pathologist.' },
+      { p: 'Know the signals that deserve professional evaluation rather than more practice: hoarseness that persists beyond a couple of weeks, pain with speaking, a voice that tires dramatically faster than it used to, or losing notes you used to have. None of these is a diagnosis. They are reasons to see a qualified professional, such as an otolaryngologist or a speech-language pathologist.' },
       { p: 'Every practice routine in this course assumes one rule outranks the routine:' },
       { safety: true },
     ],
@@ -418,8 +418,8 @@ export const SPEECH_LESSONS = [
     requiredReviewer: 'editorial',
     body: [
       { p: 'There is no universally correct pace, pause, emphasis or phrasing. These choices depend on who is speaking, what they want, who they are addressing and the circumstances surrounding the communication.' },
-      { p: 'Pace is how quickly thoughts arrive; pauses are where thinking, landing and listening happen. A pause can hand the listener time to catch up, mark the edge of a thought, apply pressure, or simply be the moment you find the next idea. The same pause reads differently in different circumstances — which is why no list of “pause rules” survives contact with real speaking.' },
-      { p: 'What CAN be trained: control. Being able to place a pause where you choose, hold it as long as you choose, and change tempo without losing the thought. The Practice section trains exactly that, one variable at a time — then puts it back into whole speech.' },
+      { p: 'Pace is how quickly thoughts arrive; pauses are where thinking, landing and listening happen. A pause can hand the listener time to catch up, mark the edge of a thought, apply pressure, or simply be the moment you find the next idea. The same pause reads differently in different circumstances, which is why no list of “pause rules” survives contact with real speaking.' },
+      { p: 'What CAN be trained: control. Being able to place a pause where you choose, hold it as long as you choose, and change tempo without losing the thought. The Practice section trains exactly that, one variable at a time, then puts it back into whole speech.' },
     ],
   },
   {
@@ -429,7 +429,7 @@ export const SPEECH_LESSONS = [
     glossary: ['operative-word'],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'In any sentence, some words carry the thought and others carry the grammar. The operative word is the one the thought turns on — and changing it changes the thought: “I never said she took it” means seven different things depending on which word does the work.' },
+      { p: 'In any sentence, some words carry the thought and others carry the grammar. The operative word is the one the thought turns on, and changing it changes the thought: “I never said she took it” means seven different things depending on which word does the work.' },
       { p: 'Phrasing is grouping: which words travel together as one unit of thought. Group them one way and the idea is plain; group them another way and a different idea appears, or none at all.' },
       { p: 'Neither emphasis nor phrasing has a single correct answer, because both express what the SPEAKER means, and speakers mean different things with the same words. The Arcade game “Change the Word, Change the Thought” lets you feel this directly.' },
     ],
@@ -441,9 +441,9 @@ export const SPEECH_LESSONS = [
     glossary: ['objective', 'action'],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'Delivery choices — pace, pause, emphasis, tone — are downstream of something simpler: what you are trying to DO to the person listening. Speech aimed at reassuring moves differently from speech aimed at warning, even with identical words.' },
+      { p: 'Delivery choices are downstream of something simpler. Pace, pause, emphasis, tone: all of them follow from what you are trying to DO to the person listening. Speech aimed at reassuring moves differently from speech aimed at warning, even with identical words.' },
       { p: 'This is why this course never teaches delivery as decoration. Decide what you want your words to do, and many delivery choices start making themselves. Fail to decide, and no amount of technique will make the speech land anywhere in particular.' },
-      { p: 'The next two lessons make this concrete — first for everyday speaking, then for working on scripted text.' },
+      { p: 'The next two lessons make this concrete, first for everyday speaking, then for working on scripted text.' },
     ],
   },
   {
@@ -457,27 +457,27 @@ export const SPEECH_LESSONS = [
         everyday: {
           label: 'Everyday Speaking',
           items: [
-            { h: 'Purpose', p: 'What is this communication for? Inform, persuade, repair, warn, celebrate, ask — name it in one sentence.' },
+            { h: 'Purpose', p: 'What is this communication for? Inform, persuade, repair, warn, celebrate, ask. Name it in one sentence.' },
             { h: 'Audience', p: 'Who exactly is listening, and what do they already believe, know and feel about this?' },
             { h: 'Desired result', p: 'If this goes well, what does the listener DO afterward? “They understand” is weaker than “they approve the budget” or “they forgive me.”' },
-            { h: 'Resistance', p: 'What stands between you and that result — doubt, competing interests, history, fatigue? Speaking that ignores resistance bounces off it.' },
+            { h: 'Resistance', p: 'What stands between you and that result? Doubt, competing interests, history, fatigue. Speaking that ignores resistance bounces off it.' },
             { h: 'Stakes', p: 'What happens if this communication fails? What becomes possible if it succeeds? Stakes calibrate how much this moment matters.' },
             { h: 'Why now', p: 'Why must this happen today, in this conversation, rather than someday? If there is no answer, the listener will feel that too.' },
           ],
         },
         acting: {
           label: 'Acting & Text',
-          intro: 'The playwright supplies the dialogue. The actor’s behavior, timing and actions grow from the circumstances, the objective, the obstacles and the responses encountered while pursuing what the character wants. “Be angry” or “be sad” is not an objective — emotional states are weather, not destinations. An objective is something you are trying to get from the other person.',
+          intro: 'The playwright supplies the dialogue. The actor’s behavior, timing and actions grow from the circumstances, the objective, the obstacles and the responses encountered while pursuing what the character wants. “Be angry” or “be sad” is not an objective; emotional states are weather, not destinations. An objective is something you are trying to get from the other person.',
           items: [
             { h: '1 · Given circumstances', p: 'The facts the text establishes: who, where, when, relationships, events already past, what each person knows.' },
-            { h: '2 · Overall objective', p: 'What the character wants across the whole play — the long arc every scene serves.' },
+            { h: '2 · Overall objective', p: 'What the character wants across the whole play: the long arc every scene serves.' },
             { h: '3 · Scene objective', p: 'What the character wants from the other person in THIS scene, now.' },
-            { h: '4 · Obstacle', p: 'What resists — the other person, the situation, the character’s own conflict. No obstacle, no scene.' },
+            { h: '4 · Obstacle', p: 'What resists: the other person, the situation, the character’s own conflict. No obstacle, no scene.' },
             { h: '5 · Playable action / tactic', p: 'What the character DOES to get what they want: to reassure, to confront, to draw out. (Speechcraft’s Playable Actions library lives in the Studio.)' },
-            { h: '6 · Response', p: 'What actually comes back from the other person — which the actor must genuinely receive, not merely wait through.' },
+            { h: '6 · Response', p: 'What actually comes back from the other person, which the actor must genuinely receive rather than merely wait through.' },
             { h: '7 · Adjustment', p: 'What the character changes because of that response. Pursuit is a live negotiation, not a plan executed regardless.' },
             { h: '8 · Beat', p: 'A unit of the scene where one action or subject holds; a new beat begins where the thought, tactic or circumstance turns.' },
-            { h: '9 · Outcome', p: 'What the character has won, lost or learned by scene’s end — the launch point of the next scene.' },
+            { h: '9 · Outcome', p: 'What the character has won, lost or learned by scene’s end, and the launch point of the next scene.' },
           ],
         },
       } },
@@ -502,7 +502,7 @@ export const SPEECH_LESSONS = [
             { h: 'Repetition', p: 'refusing to let the key point slip past.' },
             { h: 'Stillness or silence', p: 'stopping everything until the listener actually engages.' },
             { h: 'Interruption', p: 'the cost of waiting has exceeded the cost of rudeness.' },
-            { h: 'Greater focus on the listener', p: 'checking, reading, adjusting — because their response is the whole point.' },
+            { h: 'Greater focus on the listener', p: 'checking, reading, adjusting, because their response is the whole point.' },
             { h: 'A change of action', p: 'abandoning the approach that isn’t working, mid-sentence if necessary.' },
           ],
         },
@@ -523,10 +523,10 @@ export const SPEECH_LESSONS = [
     glossary: [],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'Speech happens in a body that is usually doing something else at the same time — walking to the whiteboard, setting down a glass, crossing to the window, holding someone’s eye. Isolated practice happens standing still; speaking mostly doesn’t.' },
+      { p: 'Speech happens in a body that is usually doing something else at the same time: walking to the whiteboard, setting down a glass, crossing to the window, holding someone’s eye. Isolated practice happens standing still; speaking mostly doesn’t.' },
       { comfort: true },
-      { p: 'The training question is whether a skill survives motion. A pause you can hold while standing still but lose the moment you gesture is not yours yet. The Apply routines in Speech Practice add movement deliberately — walk and speak, handle an object and speak, change your distance from the listener and speak — always within what is comfortable for your body.' },
-      { p: 'Movement is also meaning. Approaching, retreating, turning away, stopping: listeners read all of it as part of the message. There is no one correct way to move while speaking — but there is a difference between movement you chose and movement that leaked.' },
+      { p: 'The training question is whether a skill survives motion. A pause you can hold while standing still but lose the moment you gesture is not yours yet. The Apply routines in Speech Practice add movement deliberately: walk and speak, handle an object and speak, change your distance from the listener and speak, always within what is comfortable for your body.' },
+      { p: 'Movement is also meaning. Approaching, retreating, turning away, stopping: listeners read all of it as part of the message. There is no one correct way to move while speaking. There is, though, a difference between movement you chose and movement that leaked.' },
     ],
   },
   {
@@ -537,8 +537,8 @@ export const SPEECH_LESSONS = [
     requiredReviewer: 'editorial',
     body: [
       { p: 'Presence is not a mystery and not a gift. Most of what audiences call presence is attention, pointed outward: a speaker fully engaged with the people in front of them, rather than with their own performance, reads as present.' },
-      { p: 'Everything this course isolates — breath that doesn’t need managing, words that don’t need searching for, pace that responds to the listener — buys back the attention that presence is made of. Fluency is upstream of presence.' },
-      { p: 'Persuasion adds direction to that attention: knowing what you want the listener to think, feel or do, and shaping the speaking toward it. Speechcraft’s full study of persuasive structure — the classical craft of rhetoric and oratory — lives in the Library, and rewards a visit when you are ready to go deep.' },
+      { p: 'Breath that doesn’t need managing, words that don’t need searching for, pace that responds to the listener: everything this course isolates buys back the attention that presence is made of. Fluency is upstream of presence.' },
+      { p: 'Persuasion adds direction to that attention: knowing what you want the listener to think, feel or do, and shaping the speaking toward it. Speechcraft’s full study of persuasive structure, the classical craft of rhetoric and oratory, lives in the Library, and rewards a visit when you are ready to go deep.' },
     ],
   },
   {
@@ -548,8 +548,8 @@ export const SPEECH_LESSONS = [
     glossary: ['automaticity'],
     requiredReviewer: 'editorial',
     body: [
-      { p: 'Isolated practice is temporary by design. The goal was never to speak while thinking about breath — it was for breath to take care of itself while you think, listen, move and respond.' },
-      { p: 'Integration has a simple test: add the other demands back and see what survives. Speak the passage while walking. While really listening for the response. While the circumstances change under you (the Arcade is built for exactly this). A skill that survives is integrated; a skill that collapses goes back into focused practice — no verdict attached, that is simply the loop.' },
+      { p: 'Isolated practice is temporary by design. The goal was never to speak while thinking about breath. It was for breath to take care of itself while you think, listen, move and respond.' },
+      { p: 'Integration has a simple test: add the other demands back and see what survives. Speak the passage while walking. While really listening for the response. While the circumstances change under you (the Arcade is built for exactly this). A skill that survives is integrated; a skill that collapses goes back into focused practice, no verdict attached. That is simply the loop.' },
       { p: PRACTICE_PRINCIPLE_SHORT },
     ],
   },
@@ -561,8 +561,8 @@ export const SPEECH_LESSONS = [
     requiredReviewer: 'editorial',
     body: [
       { p: 'In the moment of real speaking, technique belongs in the background. A speaker consciously managing pace, breath, emphasis and posture at once has no attention left for the only things that cannot be automated: this thought, this listener, this moment.' },
-      { p: 'Trust the preparation. If practice made a skill fluent, it will be there without supervision — and if it isn’t there yet, mid-speech is not where it gets built. Notice what wobbled, finish the speaking with your attention where it belongs, and take the wobble back to practice afterward.' },
-      { p: 'That is the whole course in one loop: isolate, secure, integrate, speak — and let the speaking itself tell you what to practice next.' },
+      { p: 'Trust the preparation. If practice made a skill fluent, it will be there without supervision, and if it isn’t there yet, mid-speech is not where it gets built. Notice what wobbled, finish the speaking with your attention where it belongs, and take the wobble back to practice afterward.' },
+      { p: 'That is the whole course in one loop: isolate, secure, integrate, speak. Then let the speaking itself tell you what to practice next.' },
     ],
   },
 ];
@@ -574,7 +574,7 @@ export const SPEECH_LESSONS = [
 // and a Practice link where a routine or game trains the skill.
 export const SPEECH_LESSON_EXTRAS = {
   'sp-start-parts': {
-    objective: 'Understand why this course isolates one element at a time — and why isolation is never the goal.',
+    objective: 'Understand why this course isolates one element at a time, and why isolation is never the goal.',
     check: { q: 'In this course, what is isolated practice FOR?',
       choices: ['Replacing whole communication with drills',
                 'Building a part strong enough to survive inside whole communication',
@@ -587,7 +587,7 @@ export const SPEECH_LESSON_EXTRAS = {
                 'A guarantee of confidence'], answer: 1 },
   },
   'sp-start-alphabet': {
-    objective: 'Feel the difference between effortful retrieval and fluent sequential recall — in your own attention.',
+    objective: 'Feel the difference between effortful retrieval and fluent sequential recall, in your own attention.',
   },
   'sp-start-offbook': {
     objective: 'Distinguish preparing your own words from preparing words that are fixed.',
@@ -599,7 +599,7 @@ export const SPEECH_LESSON_EXTRAS = {
   'sp-f-instrument': { objective: 'Tour the physical chain of speech: breath, larynx, vocal tract, articulators.' },
   'sp-f-breath': { objective: 'Understand the exhale as the power source speech manages.',
     practice: { kind: 'routine', ref: 'rt-breath-train', label: 'Body & Breath — Train' } },
-  'sp-f-effort': { objective: 'Tell useful effort from friction — without chasing total relaxation.' },
+  'sp-f-effort': { objective: 'Tell useful effort from friction, without chasing total relaxation.' },
   'sp-f-jaw': { objective: 'Know what the jaw, tongue and neck do in speech, and which conditions deserve professional care.' },
   'sp-f-voice': { objective: 'Understand vocal-fold sound and resonance as shaping, not forcing.',
     practice: { kind: 'routine', ref: 'rt-voice-train', label: 'Voice & Resonance — Train' } },
@@ -612,13 +612,13 @@ export const SPEECH_LESSON_EXTRAS = {
     practice: { kind: 'game', ref: 'operative', label: 'Change the Word, Change the Thought' } },
   'sp-m-intention': { objective: 'Put intention upstream of delivery: decide what the words should DO.',
     practice: { kind: 'routine', ref: 'rt-int-train', label: 'Thought & Intention — Train' } },
-  'sp-m-want': { objective: 'Name purpose, audience, result and resistance — or circumstances, objective and obstacle on text.',
+  'sp-m-want': { objective: 'Name purpose, audience, result and resistance, or circumstances, objective and obstacle on text.',
     practice: { kind: 'game', ref: 'objective-swap', label: 'Change the Objective' } },
-  'sp-m-urgency': { objective: 'Understand urgency as the need to affect something now — in all its shapes.',
+  'sp-m-urgency': { objective: 'Understand urgency as the need to affect something now, in all its shapes.',
     practice: { kind: 'game', ref: 'tempo', label: 'Change the Tempo' } },
   'sp-w-movement': { objective: 'Test whether a skill survives motion, and choose movement instead of leaking it.',
     practice: { kind: 'routine', ref: 'rt-move-train', label: 'Movement & Speech — Train' } },
-  'sp-w-presence': { objective: 'Treat presence as attention pointed outward — and fluency as what frees it.',
+  'sp-w-presence': { objective: 'Treat presence as attention pointed outward, and fluency as what frees it.',
     practice: { kind: 'routine', ref: 'rt-pres-train', label: 'Presence & Persuasion — Train' } },
   'sp-w-integration': { objective: 'Use the add-it-back test: a skill is yours when it survives thinking, listening, moving and responding.' },
   'sp-w-applying': { objective: 'Let technique run in the background while attention stays on this thought, this listener.' },
@@ -641,7 +641,7 @@ export function lessonKeywords(l) {
 export const SPEECH_READING = {
   'sp-start-parts': {
     idea: 'Improve one element at a time, then put it back into whole speaking.',
-    why: 'Trying to fix everything at once usually fixes nothing — there is too much to attend to.',
+    why: 'Trying to fix everything at once usually fixes nothing. There is too much to attend to.',
     notice: 'Next time you speak, notice how many things you are trying to manage at once.',
     takeaways: ['Isolation is a method, never the goal.',
       'A part is ready when it survives inside the whole.',
@@ -665,14 +665,14 @@ export const SPEECH_READING = {
     takeaways: ['Your own words: secure the structure, speak the rest freshly.',
       'Fixed words: secure the exact language.'] },
   'sp-m-pace': {
-    idea: 'There is no universally correct pace or pause — only choices that suit the moment.',
+    idea: 'There is no universally correct pace or pause, only choices that suit the moment.',
     why: 'Rules about speed collapse the moment the situation changes.',
     notice: 'Try a sentence quickly, then allow space between its thoughts.',
     takeaways: ['Pace and pause answer the situation, not a rule.',
       'What can be trained is control, not one correct speed.'] },
   'sp-m-emphasis': {
     idea: 'The word you land on decides what the sentence means.',
-    why: 'Emphasis is not decoration — it is where the thought actually turns.',
+    why: 'Emphasis is not decoration. It is where the thought actually turns.',
     notice: 'Say one sentence three times, landing a different word each time.',
     takeaways: ['Every emphasis answers a different question.',
       'Grouping words changes the idea as much as stressing them.'] },
@@ -689,7 +689,7 @@ export const SPEECH_READING = {
     takeaways: ['Purpose, audience, result and resistance shape everything else.',
       'On text, circumstances and objective do the same work.'] },
   'sp-m-urgency': {
-    idea: 'Urgency is the need to affect something now — not speed or volume.',
+    idea: 'Urgency is the need to affect something now, not speed or volume.',
     why: 'Real urgency can slow speech down as easily as speed it up.',
     notice: 'Ask why a conversation you are avoiding cannot simply wait.',
     takeaways: ['Urgency comes from stakes and timing, not from performance.',
@@ -708,14 +708,14 @@ export const SPEECH_READING = {
       'Persuasion adds direction to that attention.'] },
   'sp-w-integration': {
     idea: 'Add the other demands back and see what survives.',
-    why: 'Integration is the whole point — isolation was always temporary.',
+    why: 'Integration is the whole point; isolation was always temporary.',
     notice: 'Speak a prepared passage while genuinely listening for a reply.',
-    takeaways: ['What collapses goes back to focused practice — no verdict attached.',
+    takeaways: ['What collapses goes back to focused practice, no verdict attached.',
       'What survives is genuinely yours.'] },
   'sp-w-applying': {
     idea: 'In the moment, technique belongs in the background.',
     why: 'Attention spent supervising your craft is attention taken from the listener.',
-    notice: 'Afterwards, note what wobbled — not during.',
+    notice: 'Afterwards, note what wobbled. Not during.',
     takeaways: ['Trust the preparation while speaking.',
       'Mid-speech is not where a skill gets built.'] },
 };
