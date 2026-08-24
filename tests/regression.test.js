@@ -1158,8 +1158,9 @@ export async function run({ navDoc = document } = {}) {
         && st('quick.change') === 'blank' && st('quick.after') === 'blank',
         [st('quick.happening'), st('quick.wants'), st('quick.resisting'), st('quick.doing'), st('quick.change')].join(','));
       check('dissect UI: coverage reads as words, not a score',
-        doc.getElementById('diss-cov').textContent.includes('4 of 6 explored')
-        && doc.getElementById('diss-cov').textContent.includes('1 still open'));
+        doc.getElementById('diss-cov').textContent.includes(`4 of ${dissectQuestions().length} explored`)
+        && doc.getElementById('diss-cov').textContent.includes('1 still open')
+        && !doc.getElementById('diss-cov').textContent.includes('%'));
       clickIn(qSec('quick.wants').querySelector('.diss-head')); await sleep(150);
       check('dissect UI: stored XSS payload renders inert',
         qSec('quick.wants').querySelector('.diss-text').value.includes('<img src=x')
@@ -1194,14 +1195,19 @@ export async function run({ navDoc = document } = {}) {
       check('dissect UI: Back returns to the same Studio project',
         !!doc.getElementById('proj-dissect') && !!doc.querySelector('.proj-tabs'));
 
-      // Delete the dissection alone; the project must survive.
+      // Clear is PER QUESTION now, and there is no delete-everything.
+      // Clearing one answer must leave the others and the project intact.
       await openDissect();
-      frame.contentWindow.confirm = () => true;
-      clickIn(doc.getElementById('diss-del')); await sleep(400);
-      check('dissect UI: delete resets the pane and spares the project',
-        (await dissectionFor('project', projId)) == null
-        && (await getProject(projId))?.id === projId
-        && doc.getElementById('diss-cov').textContent.includes('Nothing explored yet'));
+      const before = (await dissectionFor('project', projId))?.answers ?? {};
+      const beforeCount = Object.keys(before).length;
+      clickIn(qSec('quick.happening').querySelector('.diss-head')); await sleep(150);
+      clickIn(qSec('quick.happening').querySelector('.diss-clear')); await sleep(600);
+      const after = (await dissectionFor('project', projId))?.answers ?? {};
+      check('dissect UI: Clear empties one question and spares the rest and the project',
+        !doc.body.textContent.includes('Delete this dissection')
+        && !after['quick.happening']
+        && Object.keys(after).length === beforeCount - 1
+        && (await getProject(projId))?.id === projId);
 
       // Privacy discloses dissection storage. Read-only checks: the wipe
       // buttons are NEVER clicked here — they would destroy real data.
@@ -1416,8 +1422,10 @@ export async function run({ navDoc = document } = {}) {
       check('playable UI: Back returns to the list with the search intact',
         doc.getElementById('pa-search')?.value === 'forgive'
         && rows().some(r => r.textContent.includes('To Forgive')));
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('playable UI: Back again lands on the Studio hub', !!card('Playable Actions') && !!card('Custom Work'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      check('playable UI: Back again lands on the Acting Library shelf',
+        !!doc.querySelector('[data-tile="col:actions"]')
+        && doc.querySelector('.page-h')?.textContent === 'Acting Library');
 
       // The dissection doorway: navigation only, and Back comes home.
       paProj = await createProject({ title: '__regression playable link (safe to delete)', text: 'Sit down.' });
@@ -1425,7 +1433,8 @@ export async function run({ navDoc = document } = {}) {
       clickIn(side('Studio')); await sleep(400);
       clickIn(card('Custom Work')); await sleep(400);
       const pc = [...doc.querySelectorAll('.proj-card')].find(c => c.dataset.id === paProj.id);
-      clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(450);
+      clickIn(pc?.querySelector('button[data-act="open"]') ?? pc); await sleep(500);
+      clickIn(doc.getElementById('sc-edit')); await sleep(450);   // script → Edit
       clickIn(doc.getElementById('proj-dissect')); await sleep(450);
       clickIn(doc.querySelector('.diss-q[data-q="quick.doing"] .diss-head')); await sleep(150);
       const link = doc.querySelector('[data-pa-link]');
@@ -1435,7 +1444,7 @@ export async function run({ navDoc = document } = {}) {
         doc.body.textContent.includes('What are you doing to the other person through these words?'));
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       check('playable UI: Back from the doorway returns to the dissection screen',
-        doc.querySelectorAll('.diss-q').length === 6);
+        doc.querySelectorAll('.diss-q').length === dissectQuestions().length);
       check('playable UI: visiting the doorway stored nothing',
         (await dissectionFor('project', paProj.id)) == null);
     } catch (err) {
@@ -1583,7 +1592,12 @@ export async function run({ navDoc = document } = {}) {
         w().navigator.mediaDevices.getUserMedia = (...a) => { mic14++; return orig14(...a); };
       }
 
+      // Self-contained: the drive before this one now ends in the acting
+      // workspace, and this block reads ACCENT surfaces. Pin the
+      // workspace rather than inheriting whatever ran last.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(400);
       clickIn(side('Library')); await sleep(350);
       // Withdrawn 2026-08-17 behind DIALECT_ACTION_LIVE. The card must be
       // ABSENT while the flag is false — not merely empty.
@@ -1738,8 +1752,11 @@ export async function run({ navDoc = document } = {}) {
         return fn();
       };
 
+      // Self-contained: the Studio hub differs by workspace (the Actor's
+      // Studio is its own pane), so pin the accents workspace first.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
-      // IA revision: Scripts & Speeches is a Studio hub card now.
+      clickIn(doc.getElementById('ws-chip')); await sleep(150);
+      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(400);
       clickIn(side('Studio')); await sleep(350);
       clickIn(card('Scripts & Speeches')); await sleep(400);
       check('editions UI: no Featured Texts shelf — collections only',
@@ -2891,11 +2908,11 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Studio')); await sleep(400);
-      check('acting: the Actor’s Studio leads with the current-project card and its ten tools',
+      check('acting: the Actor’s Studio leads with the current-project card and its two ways in',
         doc.querySelector('.page-h')?.textContent === 'Actor’s Studio'
         && !!doc.querySelector('.sp-wt-card')
-        && doc.querySelectorAll('.hub-card').length === 10
-        && doc.body.textContent.includes('Playable Actions'));
+        && String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
+           === 'Scenes & Monologues,Custom Work');
       check('acting: opening the workspace duplicated no Studio project',
         (await listProjects()).length === projectsBefore);
 
@@ -3008,12 +3025,14 @@ export async function run({ navDoc = document } = {}) {
       check('first-run preface: the removed panels never appear', !removedHit);
       check('first-run preface: concise panels 2 and 3 carry the ordered copy',
         wallText().includes('It shows what we understand, value, question or avoid.'));
-      clickIn(doc.getElementById('ob-next')); await sleep(250);
-      check('first-run preface: the picker follows as a functional screen — no dots, no essay',
-        h1() === 'Pick your first course'
-        && !!wall()?.querySelector('[data-accent]')
-        && !wall().querySelector('.ob-dots')
-        && !wall().querySelector('.th-quote'));
+      check('first-run preface: the last panel ENDS it — nothing is asked of the reader',
+        !wall().querySelector('[data-accent]') && !wall().querySelector('[data-choice]')
+        && doc.getElementById('ob-next')?.textContent.trim() === 'Enter Speechcraft');
+      clickIn(doc.getElementById('ob-next')); await sleep(500);
+      check('first-run preface: entering lands in the app, not another form',
+        !doc.querySelector('.threshold')
+        && !doc.body.textContent.includes('Pick your first course')
+        && !doc.body.textContent.includes('Choose your way in'));
       check('first-run preface: zero microphone calls', mic18 === 0);
     } catch (err) {
       bad('first-run preface drive', String(err?.stack ?? err).slice(0, 220));
