@@ -29,6 +29,9 @@ DIRS = {
     'css':   {'.css'},
     'js':    {'.js', '.mjs', '.json'},
     'audio': {'.mp3', '.json'},
+    # Articulation artwork. .json ships so the symbol-to-drawing manifest
+    # stays checkable on the live site, the same way it is in the repo.
+    'img':   {'.jpg', '.png', '.svg', '.json'},
 }
 
 # Never publish, whatever the extension says.
