@@ -47,7 +47,9 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
 import { ACTING_GAMES, ACTING_DECKS, actingGameById,
          SCENE_STUDY_AREAS } from './data/acting/practice.js';
 import { sceneStudyNotes, saveSceneStudyNote } from './data/acting/store.js';
-import { articulationSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
+import { articulationSVG, guideSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
+import { articulationFor } from './data/articulation.js';
+import { artFor, chartFor } from './data/articulation-art.js';
 import { SONNETS } from './data/sonnets.js';
 import { CHEKHOV } from './data/chekhov.js';
 import { ONEILL } from './data/oneill.js';
@@ -8358,11 +8360,11 @@ function renderChart() {
   record(renderChart);
   const syms = Object.entries(PHONEMES);
   const groups = [
-    { title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the accent-specific variants.',
+    { key: 'vowels', title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the accent-specific variants.',
       items: syms.filter(([, p]) => p.type === 'vowel' && !p.weak && !p.allophone) },
-    { title: 'Diphthongs', note: 'Vowels that glide from one position to another.',
+    { key: 'diphthongs', title: 'Diphthongs', note: 'Vowels that glide from one position to another.',
       items: syms.filter(([, p]) => p.type === 'diphthong' && !p.weak && !p.allophone) },
-    { title: 'Consonants', note: 'The consonant phonemes of English.',
+    { key: 'consonants', title: 'Consonants', note: 'The consonant phonemes of English.',
       items: syms.filter(([, p]) => p.type === 'consonant' && !p.allophone) },
     { title: 'Weak vowels', note: 'The vowels of unstressed syllables, counted apart from the full vowel system.',
       items: syms.filter(([, p]) => p.weak && !p.allophone) },
@@ -8374,6 +8376,15 @@ function renderChart() {
     <section class="chart-section">
       <h2 class="chart-h">${esc(g.title)} <span>${g.items.length}</span></h2>
       <p class="chart-note">${esc(g.note)}</p>
+      ${(() => {
+        // The section's overview chart, where the artwork pack has one.
+        // Sections it does not cover (weak vowels, realizations) simply
+        // go without rather than borrowing a chart that omits them.
+        const c = chartFor(g.key);
+        return c ? `<figure class="chart-overview">
+          <img src="${esc(c.src)}" alt="${esc(c.title)} overview chart" decoding="async">
+        </figure>` : '';
+      })()}
       <div class="chart-grid">
         ${g.items.map(([sym, p]) => `
           <button class="chart-chip" data-sym="${esc(sym)}" title="How “${esc(sym)}” is made">
@@ -8575,8 +8586,37 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
           </div>
         </div>
       </div>
-      ${diagram ? `<div class="artic-wrap">${diagram}
-        <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''}
+      ${(() => {
+        // The picture of how this sound is made.
+        //
+        // A hand-drawn illustration REPLACES the generated diagram
+        // outright wherever one exists. The generated one was only ever
+        // a stand-in for artwork that had not been drawn yet, and
+        // showing both would just be two answers to the same question.
+        const art = artFor(sym);
+        const g = articulationFor(sym);
+        const picture = art
+          ? `<figure class="artic-wrap artic-figure">
+               <img class="artic-art" src="${esc(art)}"
+                    alt="How the mouth makes ${esc(sym)}" decoding="async">
+             </figure>`
+          // No artwork yet: fall back to the generated diagram, with the
+          // cues on leader lines when there is written guidance to hang.
+          : (g ? `<div class="artic-wrap">${guideSVG(sym, g.cues)}</div>`
+               : (diagram ? `<div class="artic-wrap">${diagram}
+                   <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''));
+        if (!g) return picture;
+        return `
+        <section class="sp-step guide-block" aria-label="How to make this sound">
+          <h2 class="guide-heading">How to make it</h2>
+          <p class="guide-text">${esc(g.summary)}</p>
+          ${picture}
+          <ol class="guide-steps">${g.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ol>
+          ${g.contrast ? `<p class="pane-note"><b>Against /${esc(g.contrast.sym)}/:</b> ${esc(g.contrast.note)}</p>` : ''}
+          ${g.watch ? `<p class="pane-note">⚠︎ ${esc(g.watch)}</p>` : ''}
+          <p><span class="sp-badge">Prepared draft, awaiting review by a qualified voice professional</span></p>
+        </section>`;
+      })()}
       ${articulationVideoHtml(videoFor(acc, sym, 'isolated'), 'Isolated Sound')}
       ${articulationVideoHtml(videoFor(acc, sym, 'word'), 'Example Word')}
       <h2 class="guide-heading">Hear it in words</h2>

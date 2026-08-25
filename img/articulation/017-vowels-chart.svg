@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200" role="img" aria-labelledby="title description">
+  <title id="title">Vowels</title>
+  <desc id="description">Twelve English vowels with example words.</desc>
+  <rect width="1600" height="1200" fill="#fbf4e8"/>
+  <rect width="1600" height="150" fill="#222628"/>
+  <rect x="72" y="47" width="12" height="56" rx="6" fill="#ef573c"/>
+  <text x="112" y="94" fill="#ffffff" font-family="DejaVu Sans, Arial, sans-serif" font-size="62" font-weight="700">Vowels</text>
+
+  <g font-family="DejaVu Sans, Arial, sans-serif" text-anchor="middle">
+    <g transform="translate(70 185)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">iː</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">bean</text>
+    </g>
+    <g transform="translate(442 185)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ɪ</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">tip</text>
+    </g>
+    <g transform="translate(814 185)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">uː</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">moon</text>
+    </g>
+    <g transform="translate(1186 185)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ʊ</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">shook</text>
+    </g>
+
+    <g transform="translate(70 505)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ə</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">the</text>
+    </g>
+    <g transform="translate(442 505)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ɜː</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">sir</text>
+    </g>
+    <g transform="translate(814 505)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ɔː</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">shore</text>
+    </g>
+    <g transform="translate(1186 505)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">e</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">met</text>
+    </g>
+
+    <g transform="translate(70 825)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ʌ</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">fun</text>
+    </g>
+    <g transform="translate(442 825)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ɒ</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">lock</text>
+    </g>
+    <g transform="translate(814 825)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">æ</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">pan</text>
+    </g>
+    <g transform="translate(1186 825)">
+      <rect width="344" height="270" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="132" fill="#222628" font-size="88" font-weight="700">ɑː</text>
+      <text x="172" y="215" fill="#59666c" font-size="40" font-weight="600">card</text>
+    </g>
+  </g>
+</svg>

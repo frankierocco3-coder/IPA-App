@@ -100,6 +100,207 @@ function consonantDiagram(sym) {
   </svg>`;
 }
 
+
+// ── Guide diagrams: the sagittal a learner can act on ─────────
+// The phoneme facts this file already holds (vowel height, backness
+// and rounding; consonant place, manner and voicing) drive a side view
+// with the tongue actually in position, the lips doing what they do
+// for this sound, and each written cue on a leader line.
+//
+// Vowels get a sagittal here rather than the abstract trapezoid,
+// because "front of the tongue up" is something a learner can DO. A
+// dot in a vowel space is not. All original drawing.
+//
+// The view is cropped to the LOWER FACE — nose, mouth, jaw, throat. A
+// whole head was tried first and failed at the one job the picture
+// has: with a realistic cranium the oral cavity became a sliver, and
+// /iː/ and /ɑː/ came out looking the same. Cropping lets the mouth
+// fill the frame, so height and backness are visible at a glance.
+//
+// Frame: 560 x 280. The face fills x 0-300 facing LEFT; the callout
+// column runs from x 316.
+
+/** A DOM-safe id from an IPA symbol, which may be non-ASCII. */
+const phonemeSlugSafe = sym =>
+  [...String(sym)].map(ch => ch.codePointAt(0).toString(36)).join('');
+
+// Where each named cue anchor sits. The teaching file names anchors,
+// never numbers, so the face can be redrawn without touching a word.
+const CUE_AT = {
+  lips: [28, 130], teeth: [54, 114], tongueFront: [84, 128], tongueBack: [142, 126],
+  jaw: [90, 178], voicebox: [182, 230], airflow: [104, 96],
+};
+
+// Where the constriction sits, by place of articulation.
+const GUIDE_PLACE = {
+  bilabial: [28, 130], labiodental: [38, 132], dental: [56, 126], alveolar: [64, 106],
+  postalveolar: [88, 88], palatal: [120, 62], velar: [174, 70], glottal: [182, 226],
+};
+
+// How the tongue sits for a consonant, in the same {height, backness}
+// language the vowels use, so one curve serves both. `tip` raises the
+// tongue tip to the ridge for the sounds that are made with it.
+const CONS_SHAPE = {
+  bilabial: { h: 0.62, b: 0.5 }, labiodental: { h: 0.62, b: 0.5 },
+  dental: { h: 0.5, b: 0.1, tip: 118 }, alveolar: { h: 0.45, b: 0.08, tip: 110 },
+  postalveolar: { h: 0.38, b: 0.24, tip: 116 }, palatal: { h: 0.2, b: 0.34 },
+  velar: { h: 0.24, b: 0.96 }, glottal: { h: 0.6, b: 0.5 },
+};
+
+/**
+ * The tongue. Tip, body and root ALL move with height — an earlier
+ * version pinned the ends and the mouth could not actually open or
+ * close, which is the one thing the picture exists to show. Backness
+ * then decides which part of the body rises: a front vowel lifts the
+ * front control, a back vowel the back one.
+ *
+ * The underside traces the floor of the mouth, so the cream left above
+ * the tongue is the air space that is genuinely there.
+ */
+function tonguePath(h, b, tip) {
+  const mid = lerp(66, 138, h);
+  const tipY = tip ?? lerp(140, 154, h);
+  const rootY = lerp(78, 138, h);
+  const c1y = mid - 22 * (1 - b);       // front of the tongue
+  const c2y = mid - 22 * b;             // back of the tongue
+  return `M44 ${tipY.toFixed(1)} C86 ${c1y.toFixed(1)} 134 ${c2y.toFixed(1)} 162 ${rootY.toFixed(1)}
+          C176 ${(rootY + 30).toFixed(1)} 182 180 172 214
+          C166 198 140 170 96 152 L44 ${tipY.toFixed(1)} Z`;
+}
+
+/** The lips in profile. For /p/ and /v/ the lips ARE the sound. */
+function lipsSagittal(kind) {
+  const upper = 'M50 102 C40 101 26 108 29 118 C39 124 45 115 51 108 Z';
+  const lower = 'M50 158 C40 157 26 150 29 140 C39 134 45 143 51 150 Z';
+  if (kind === 'closed') return `
+    <path d="M50 102 C40 101 24 110 27 123 C38 130 45 117 51 108 Z" class="guide-lip"/>
+    <path d="M50 158 C40 157 24 148 27 135 C38 128 45 141 51 150 Z" class="guide-lip"/>
+    <line x1="22" y1="129" x2="54" y2="129" stroke="var(--ink)" stroke-width="3" stroke-linecap="round"/>`;
+  if (kind === 'teeth') return `
+    <path d="M50 90 C40 89 26 96 29 106 C39 112 45 103 51 96 Z" class="guide-lip"/>
+    <path d="${lower}" class="guide-lip"/>
+    <rect x="30" y="128" width="13" height="17" rx="2.5" fill="#fff" stroke="var(--ink)" stroke-width="1.6"/>`;
+  return `<path d="${upper}" class="guide-lip"/><path d="${lower}" class="guide-lip"/>`;
+}
+
+/** The lips seen face on, where rounding and spreading are visible. */
+function lipsFrontal(kind) {
+  if (kind === 'round') return `
+    <ellipse cx="0" cy="0" rx="15" ry="16" fill="#5f3730"/>
+    <ellipse cx="0" cy="0" rx="15" ry="16" fill="none" stroke="#d9a89c" stroke-width="9"/>`;
+  if (kind === 'spread') return `
+    <path d="M-42 0 Q0 -15 42 0 Q0 15 -42 0 Z" fill="#5f3730" stroke="#d9a89c" stroke-width="5"/>
+    <rect x="-24" y="-9" width="48" height="8" rx="2" fill="#fbfaf4"/>`;
+  if (kind === 'closed') return `
+    <path d="M-34 -4 Q0 -16 34 -4 Q0 2 -34 -4 Z" class="guide-lip"/>
+    <path d="M-34 4 Q0 16 34 4 Q0 -2 -34 4 Z" class="guide-lip"/>`;
+  if (kind === 'teeth') return `
+    <path d="M-34 -14 Q0 -26 34 -14 Q0 -8 -34 -14 Z" class="guide-lip"/>
+    <path d="M-32 12 Q0 24 32 12 Q0 2 -32 12 Z" class="guide-lip"/>
+    <rect x="-21" y="-7" width="13" height="14" rx="2" fill="#fff" stroke="var(--ink)" stroke-width="1.3"/>
+    <rect x="-6" y="-7" width="13" height="14" rx="2" fill="#fff" stroke="var(--ink)" stroke-width="1.3"/>
+    <rect x="9" y="-7" width="13" height="14" rx="2" fill="#fff" stroke="var(--ink)" stroke-width="1.3"/>`;
+  return `<path d="M-34 0 Q0 -16 34 0 Q0 16 -34 0 Z" fill="#5f3730" stroke="#d9a89c" stroke-width="5"/>`;
+}
+
+function lipKindFor(sym) {
+  const v = VOWELS[sym];
+  if (v) return v.round ? 'round' : (v.b < 0.45 && v.h < 0.55 ? 'spread' : 'neutral');
+  const c = CONS[sym];
+  if (!c) return 'neutral';
+  if (c[0] === 'labiodental') return 'teeth';
+  if (c[0] === 'bilabial') return c[1] === 'approximant' ? 'round' : 'closed';
+  return 'neutral';
+}
+
+const FRONTAL_CAP = {
+  round: 'lips rounded', spread: 'lips spread', closed: 'lips closed',
+  teeth: 'teeth on the lip', neutral: 'lips relaxed',
+};
+
+// The air space: lips, alveolar ridge, hard palate, velum, pharynx,
+// then forward again along the floor of the mouth. Doubles as the clip
+// for the tongue, so the tongue can never render through the palate.
+const AIRWAY = 'M18 114 L62 104 C92 62 138 50 172 62 C190 70 198 92 200 116 '
+  + 'C204 150 206 200 200 240 L170 240 C170 200 140 168 96 154 L20 138 Z';
+
+/**
+ * The guide view. `cues` come from js/data/articulation.js — this
+ * function supplies geometry only, never wording.
+ */
+export function guideSVG(sym, cues = []) {
+  const v = VOWELS[sym];
+  const c = CONS[sym];
+  if (!v && !c) return '';
+  const voiced = v ? true : !!c[2];
+  const shape = v ?? CONS_SHAPE[c[0]] ?? { h: 0.6, b: 0.5 };
+  const lipKind = lipKindFor(sym);
+  // A ring marks where the action is — except at the lips, where the
+  // lips themselves already show it and a ring on top is just noise.
+  const lipMade = !v && (c[0] === 'bilabial' || c[0] === 'labiodental');
+  const place = v ? null : (GUIDE_PLACE[c[0]] ?? null);
+  const ring = lipMade ? null : place;
+  const stopped = !v && (c[1] === 'plosive' || c[1] === 'nasal');
+  // Only caption the voicing when no cue already says it, so a learner
+  // never reads "voice on" twice on one picture.
+  const cuesVoicing = cues.some(q => q.at === 'voicebox');
+  // Clip ids must be unique per diagram: two guides on one page sharing
+  // an id would both clip to whichever rendered first.
+  const cid = phonemeSlugSafe(sym);
+
+  const DX = 6, DY = 0;
+  const leader = (cue, i) => {
+    const a = CUE_AT[cue.at] ?? CUE_AT.lips;
+    const [ax, ay] = [a[0] + DX, a[1] + DY];
+    const ty = 46 + i * 36;
+    return `<path d="M${ax} ${ay} L306 ${ty - 5} L314 ${ty - 5}" class="guide-lead"/>
+      <circle cx="${ax}" cy="${ay}" r="5" class="guide-dot"/>
+      <text x="322" y="${ty}" class="guide-lbl">${cue.text}</text>`;
+  };
+
+  return `<svg viewBox="0 0 560 280" class="guide-svg" role="img"
+       aria-label="Side view of the mouth showing how ${sym} is made">
+    <defs><clipPath id="gclip-${cid}"><path d="${AIRWAY}"/></clipPath></defs>
+    <g transform="translate(${DX} ${DY})">
+      <!-- lower face in profile, facing left: nose, lips, chin, jaw, throat -->
+      <path d="M84 0 C74 20 68 40 60 52 L14 86 C6 92 12 101 24 100 L54 100
+               L26 108 L30 120 L26 132 L20 146 C24 168 34 182 56 192
+               C96 212 152 216 184 206 L194 280 L250 280
+               C272 200 276 80 260 0 Z"
+            fill="#e9d6c0" stroke="#ab9781" stroke-width="2.2"/>
+      <!-- the air space -->
+      <path d="${AIRWAY}" fill="#fffdf8" stroke="#9c8a72" stroke-width="1.8"/>
+      <!-- tongue, placed from this sound's own height and backness,
+           clipped so it can never cross the roof of the mouth -->
+      <g clip-path="url(#gclip-${cid})">
+        <path d="${tonguePath(shape.h, shape.b, shape.tip)}"
+              fill="#cf9a94" stroke="#a8736d" stroke-width="2.6"/>
+      </g>
+      <!-- teeth last, so the tongue never buries them -->
+      <rect x="54" y="102" width="11" height="19" rx="2.5" fill="#fff" stroke="#8d7c66" stroke-width="1.6"/>
+      <rect x="54" y="138" width="11" height="18" rx="2.5" fill="#fff" stroke="#8d7c66" stroke-width="1.6"/>
+      ${lipsSagittal(lipKind)}
+      <!-- air on its way out, or stopped dead at the closure -->
+      ${stopped
+        ? `<line x1="${place[0] + 14}" y1="${place[1] - 20}" x2="${place[0] + 14}" y2="${place[1] + 20}"
+                 stroke="#a4443a" stroke-width="4" stroke-linecap="round"/>`
+        : `<path d="M172 196 C136 164 104 142 42 130" class="guide-air"/>
+           <path d="M56 121 L36 130 L56 140" class="guide-air"/>`}
+      ${ring ? `<circle cx="${ring[0]}" cy="${ring[1]}" r="13" class="guide-place"/>` : ''}
+      <!-- voicing, at the larynx -->
+      <g opacity="${voiced ? 1 : 0.26}">
+        <path d="M176 220 q10 9 0 17" fill="none" stroke="#6f8657" stroke-width="2.8"/>
+        <path d="M189 216 q13 12 0 25" fill="none" stroke="#6f8657" stroke-width="2.8"/>
+      </g>
+    </g>
+    ${cuesVoicing ? '' : `<text x="212" y="252" class="guide-lbl">${voiced ? 'voice on' : 'voice off'}</text>`}
+    <!-- the lips seen face on, where rounding and spreading show -->
+    <g transform="translate(456 214)">${lipsFrontal(lipKind)}</g>
+    <text x="456" y="258" class="guide-lbl" text-anchor="middle">${FRONTAL_CAP[lipKind]}</text>
+    ${cues.map(leader).join('')}
+  </svg>`;
+}
+
 export function articulationSVG(sym) {
   if (VOWELS[sym] || DIPHTHONGS[sym]) return vowelDiagram(sym);
   if (CONS[sym]) return consonantDiagram(sym);

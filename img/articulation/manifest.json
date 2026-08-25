@@ -1,0 +1,446 @@
+{
+  "collection": "IPA Articulation Assets",
+  "status": "complete",
+  "expected_assets": 47,
+  "completed_assets": 47,
+  "ipa_symbol_verification": {
+    "status": "verified",
+    "articulation_headers": 44,
+    "overview_charts": 3,
+    "source_of_truth": "Each articulation header is rendered from its asset's symbol field; chart symbols are rendered from the editable SVG sources."
+  },
+  "assets": [
+    {
+      "index": 1,
+      "symbol": "/s/",
+      "slug": "s",
+      "category": "articulation",
+      "source_file": "IMG_8406.jpeg",
+      "file": "images/001-ipa-s.png",
+      "status": "completed"
+    },
+    {
+      "index": 2,
+      "symbol": "/ð/",
+      "slug": "eth-voiced",
+      "category": "articulation",
+      "source_file": "IMG_8405.jpeg",
+      "file": "images/002-ipa-eth-voiced.png",
+      "status": "completed"
+    },
+    {
+      "index": 3,
+      "symbol": "/θ/",
+      "slug": "theta-voiceless",
+      "category": "articulation",
+      "source_file": "IMG_8404.jpeg",
+      "file": "images/003-ipa-theta-voiceless.png",
+      "status": "completed"
+    },
+    {
+      "index": 4,
+      "symbol": "/v/",
+      "slug": "v-voiced",
+      "category": "articulation",
+      "source_file": "IMG_8403.jpeg",
+      "file": "images/004-ipa-v-voiced.png",
+      "status": "completed"
+    },
+    {
+      "index": 5,
+      "symbol": "/f/",
+      "slug": "f-voiceless",
+      "category": "articulation",
+      "source_file": "IMG_8402.jpeg",
+      "file": "images/005-ipa-f-voiceless.png",
+      "status": "completed"
+    },
+    {
+      "index": 6,
+      "title": "Diphthongs",
+      "slug": "diphthongs-chart",
+      "category": "chart",
+      "source_file": "IMG_8401.jpeg",
+      "file": "images/006-diphthongs-chart.png",
+      "editable_source": "images/006-diphthongs-chart.svg",
+      "symbols": ["eə", "ɪə", "eɪ", "aʊ", "əʊ", "aɪ", "ʊə", "ɔɪ"],
+      "examples": ["hair", "dear", "same", "loud", "go", "hide", "curious", "choice"],
+      "status": "completed"
+    },
+    {
+      "index": 7,
+      "symbol": "/ʊə/",
+      "slug": "diphthong-upsilon-schwa",
+      "category": "articulation",
+      "source_file": "IMG_8399.jpeg",
+      "file": "images/007-diphthong-upsilon-schwa.png",
+      "status": "completed"
+    },
+    {
+      "index": 8,
+      "symbol": "/aɪ/",
+      "slug": "diphthong-a-small-cap-i",
+      "category": "articulation",
+      "source_file": "IMG_8398.jpeg",
+      "file": "images/008-diphthong-a-small-cap-i.png",
+      "status": "completed"
+    },
+    {
+      "index": 9,
+      "symbol": "/ɔɪ/",
+      "slug": "diphthong-open-o-small-cap-i",
+      "category": "articulation",
+      "source_file": "IMG_8400.jpeg",
+      "file": "images/009-diphthong-open-o-small-cap-i.png",
+      "status": "completed"
+    },
+    {
+      "index": 10,
+      "symbol": "/əʊ/",
+      "slug": "diphthong-schwa-upsilon",
+      "category": "articulation",
+      "source_file": "IMG_8397.jpeg",
+      "file": "images/010-diphthong-schwa-upsilon.png",
+      "status": "completed"
+    },
+    {
+      "index": 11,
+      "symbol": "/aʊ/",
+      "slug": "diphthong-a-upsilon",
+      "category": "articulation",
+      "source_file": "IMG_8396.jpeg",
+      "file": "images/011-diphthong-a-upsilon.png",
+      "status": "completed"
+    },
+    {
+      "index": 12,
+      "symbol": "/ɪə/",
+      "slug": "diphthong-small-cap-i-schwa",
+      "category": "articulation",
+      "source_file": "IMG_8394.jpeg",
+      "file": "images/012-diphthong-small-cap-i-schwa.png",
+      "status": "completed"
+    },
+    {
+      "index": 13,
+      "symbol": "/eɪ/",
+      "slug": "diphthong-e-small-cap-i",
+      "category": "articulation",
+      "source_file": "IMG_8395.jpeg",
+      "file": "images/013-diphthong-e-small-cap-i.png",
+      "status": "completed"
+    },
+    {
+      "index": 14,
+      "symbol": "/eə/",
+      "slug": "diphthong-e-schwa",
+      "category": "articulation",
+      "source_file": "IMG_8393.jpeg",
+      "file": "images/014-diphthong-e-schwa.png",
+      "status": "completed"
+    },
+    {
+      "index": 15,
+      "symbol": "/iː/",
+      "slug": "vowel-long-i",
+      "category": "articulation",
+      "source_file": "IMG_8380.jpeg",
+      "file": "images/015-vowel-long-i.png",
+      "status": "completed"
+    },
+    {
+      "index": 16,
+      "symbol": "/ɪ/",
+      "slug": "vowel-small-cap-i",
+      "category": "articulation",
+      "source_file": "IMG_8381.jpeg",
+      "file": "images/016-vowel-small-cap-i.png",
+      "status": "completed"
+    },
+    {
+      "index": 17,
+      "title": "Vowels",
+      "slug": "vowels-chart",
+      "category": "chart",
+      "source_file": "IMG_8392.jpeg",
+      "file": "images/017-vowels-chart.png",
+      "editable_source": "images/017-vowels-chart.svg",
+      "symbols": ["iː", "ɪ", "uː", "ʊ", "ə", "ɜː", "ɔː", "e", "ʌ", "ɒ", "æ", "ɑː"],
+      "examples": ["bean", "tip", "moon", "shook", "the", "sir", "shore", "met", "fun", "lock", "pan", "card"],
+      "status": "completed"
+    },
+    {
+      "index": 18,
+      "symbol": "/ɑː/",
+      "slug": "vowel-long-script-a",
+      "category": "articulation",
+      "source_file": "IMG_8391.jpeg",
+      "file": "images/018-vowel-long-script-a.png",
+      "status": "completed"
+    },
+    {
+      "index": 19,
+      "symbol": "/æ/",
+      "slug": "vowel-ash",
+      "category": "articulation",
+      "source_file": "IMG_8390.jpeg",
+      "file": "images/019-vowel-ash.png",
+      "status": "completed"
+    },
+    {
+      "index": 20,
+      "symbol": "/ʌ/",
+      "slug": "vowel-turned-v",
+      "category": "articulation",
+      "source_file": "IMG_8388.jpeg",
+      "file": "images/020-vowel-turned-v.png",
+      "status": "completed"
+    },
+    {
+      "index": 21,
+      "symbol": "/e/",
+      "slug": "vowel-e",
+      "category": "articulation",
+      "source_file": "IMG_8387.jpeg",
+      "file": "images/021-vowel-e.png",
+      "status": "completed"
+    },
+    {
+      "index": 22,
+      "symbol": "/ɔː/",
+      "slug": "vowel-long-open-o",
+      "category": "articulation",
+      "source_file": "IMG_8386.jpeg",
+      "file": "images/022-vowel-long-open-o.png",
+      "status": "completed"
+    },
+    {
+      "index": 23,
+      "symbol": "/ɒ/",
+      "slug": "vowel-turned-script-a",
+      "category": "articulation",
+      "source_file": "IMG_8389.jpeg",
+      "file": "images/023-vowel-turned-script-a.png",
+      "status": "completed"
+    },
+    {
+      "index": 24,
+      "symbol": "/ʊ/",
+      "slug": "vowel-upsilon",
+      "category": "articulation",
+      "source_file": "IMG_8383.jpeg",
+      "file": "images/024-vowel-upsilon.png",
+      "status": "completed"
+    },
+    {
+      "index": 25,
+      "symbol": "/ɜː/",
+      "slug": "vowel-long-reversed-e",
+      "category": "articulation",
+      "source_file": "IMG_8385.jpeg",
+      "file": "images/025-vowel-long-reversed-e.png",
+      "status": "completed"
+    },
+    {
+      "index": 26,
+      "symbol": "/ə/",
+      "slug": "vowel-schwa",
+      "category": "articulation",
+      "source_file": "IMG_8384.jpeg",
+      "file": "images/026-vowel-schwa.png",
+      "status": "completed"
+    },
+    {
+      "index": 27,
+      "symbol": "/uː/",
+      "slug": "vowel-long-u",
+      "category": "articulation",
+      "source_file": "IMG_8382.jpeg",
+      "file": "images/027-vowel-long-u.png",
+      "status": "completed"
+    },
+    {
+      "index": 28,
+      "symbol": "/m/",
+      "slug": "consonant-m",
+      "category": "articulation",
+      "source_file": "IMG_8423.jpeg",
+      "file": "images/028-consonant-m.png",
+      "status": "completed"
+    },
+    {
+      "index": 29,
+      "symbol": "/w/",
+      "slug": "consonant-w",
+      "category": "articulation",
+      "source_file": "IMG_8419.jpeg",
+      "file": "images/029-consonant-w.png",
+      "status": "completed"
+    },
+    {
+      "index": 30,
+      "symbol": "/g/",
+      "slug": "consonant-g",
+      "category": "articulation",
+      "source_file": "IMG_8416.jpeg",
+      "file": "images/030-consonant-g.png",
+      "status": "completed"
+    },
+    {
+      "index": 31,
+      "symbol": "/dʒ/",
+      "slug": "consonant-dzh",
+      "category": "articulation",
+      "source_file": "IMG_8418.jpeg",
+      "file": "images/031-consonant-dzh.png",
+      "status": "completed"
+    },
+    {
+      "index": 32,
+      "symbol": "/r/",
+      "slug": "consonant-r",
+      "category": "articulation",
+      "source_file": "IMG_8420.jpeg",
+      "file": "images/032-consonant-r.png",
+      "status": "completed"
+    },
+    {
+      "index": 33,
+      "symbol": "/l/",
+      "slug": "consonant-l",
+      "category": "articulation",
+      "source_file": "IMG_8422.jpeg",
+      "file": "images/033-consonant-l.png",
+      "status": "completed"
+    },
+    {
+      "index": 34,
+      "symbol": "/ŋ/",
+      "slug": "consonant-eng",
+      "category": "articulation",
+      "source_file": "IMG_8425.jpeg",
+      "file": "images/034-consonant-eng.png",
+      "status": "completed"
+    },
+    {
+      "index": 35,
+      "symbol": "/n/",
+      "slug": "consonant-n",
+      "category": "articulation",
+      "source_file": "IMG_8424.jpeg",
+      "file": "images/035-consonant-n.png",
+      "status": "completed"
+    },
+    {
+      "index": 36,
+      "symbol": "/j/",
+      "slug": "consonant-j",
+      "category": "articulation",
+      "source_file": "IMG_8421.jpeg",
+      "file": "images/036-consonant-j.png",
+      "status": "completed"
+    },
+    {
+      "index": 37,
+      "symbol": "/tʃ/",
+      "slug": "consonant-tsh",
+      "category": "articulation",
+      "source_file": "IMG_8417.jpeg",
+      "file": "images/037-consonant-tsh.png",
+      "status": "completed"
+    },
+    {
+      "index": 38,
+      "title": "Consonants",
+      "slug": "consonants-chart",
+      "category": "chart",
+      "source_file": "IMG_8426.jpeg",
+      "file": "images/038-consonants-chart.png",
+      "editable_source": "images/038-consonants-chart.svg",
+      "symbols": ["f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "h", "p", "b", "t", "d", "k", "g", "tʃ", "dʒ", "w", "r", "j", "l", "m", "n", "ŋ"],
+      "examples": ["first", "van", "thick", "these", "saw", "zen", "she", "casual", "hat", "pick", "bed", "team", "dine", "code", "get", "choose", "jet", "watch", "rug", "yet", "look", "mode", "neck", "song"],
+      "status": "completed"
+    },
+    {
+      "index": 39,
+      "symbol": "/k/",
+      "slug": "consonant-k",
+      "category": "articulation",
+      "source_file": "IMG_8415.jpeg",
+      "file": "images/039-consonant-k.png",
+      "status": "completed"
+    },
+    {
+      "index": 40,
+      "symbol": "/d/",
+      "slug": "consonant-d",
+      "category": "articulation",
+      "source_file": "IMG_8414.jpeg",
+      "file": "images/040-consonant-d.png",
+      "status": "completed"
+    },
+    {
+      "index": 41,
+      "symbol": "/p/",
+      "slug": "consonant-p",
+      "category": "articulation",
+      "source_file": "IMG_8411.jpeg",
+      "file": "images/041-consonant-p.png",
+      "status": "completed"
+    },
+    {
+      "index": 42,
+      "symbol": "/t/",
+      "slug": "consonant-t",
+      "category": "articulation",
+      "source_file": "IMG_8413.jpeg",
+      "file": "images/042-consonant-t.png",
+      "status": "completed"
+    },
+    {
+      "index": 43,
+      "symbol": "/b/",
+      "slug": "consonant-b",
+      "category": "articulation",
+      "source_file": "IMG_8412.jpeg",
+      "file": "images/043-consonant-b.png",
+      "status": "completed"
+    },
+    {
+      "index": 44,
+      "symbol": "/h/",
+      "slug": "consonant-h",
+      "category": "articulation",
+      "source_file": "IMG_8410.jpeg",
+      "file": "images/044-consonant-h.png",
+      "status": "completed"
+    },
+    {
+      "index": 45,
+      "symbol": "/ʒ/",
+      "slug": "consonant-ezh",
+      "category": "articulation",
+      "source_file": "IMG_8409.jpeg",
+      "file": "images/045-consonant-ezh.png",
+      "status": "completed"
+    },
+    {
+      "index": 46,
+      "symbol": "/ʃ/",
+      "slug": "consonant-esh",
+      "category": "articulation",
+      "source_file": "IMG_8408.jpeg",
+      "file": "images/046-consonant-esh.png",
+      "status": "completed"
+    },
+    {
+      "index": 47,
+      "symbol": "/z/",
+      "slug": "consonant-z",
+      "category": "articulation",
+      "source_file": "IMG_8407.jpeg",
+      "file": "images/047-consonant-z.png",
+      "status": "completed"
+    }
+  ]
+}

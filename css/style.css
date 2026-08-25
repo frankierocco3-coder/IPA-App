@@ -1775,3 +1775,30 @@ body.nb-full #app { display: none; }
   background: transparent; color: inherit;
 }
 .nb-state { margin: 0; padding: 0 .75rem .5rem; font-size: .8rem; opacity: .7; min-height: 1.1em; }
+
+/* Sound guides: the diagram a learner can act on. */
+.guide-svg { width: 100%; max-width: 30rem; height: auto; display: block; margin: .5rem auto; }
+.guide-lead { stroke: var(--ink, #2c2a25); stroke-width: 1; fill: none; opacity: .5; }
+.guide-air { stroke: var(--accent, #6f8657); stroke-width: 2; fill: none; stroke-dasharray: 5 4; }
+.guide-place { fill: none; stroke: var(--red, #a4443a); stroke-width: 2.4; }
+.guide-dot { fill: var(--accent, #6f8657); }
+.guide-lbl { font-size: 11px; fill: var(--ink, #2c2a25); font-family: inherit; }
+.guide-steps { margin: .6rem 0 .4rem 1.1rem; line-height: 1.55; }
+.guide-steps li { margin: .3rem 0; }
+.guide-block { margin-bottom: 1rem; }
+.guide-lip { fill: #d9a89c; stroke: var(--ink, #2c2a25); stroke-width: 1.4; }
+.guide-air { stroke: #6f8657; stroke-width: 2.2; fill: none; stroke-dasharray: 6 4; stroke-linecap: round; }
+/* Articulation artwork: 4:5 portrait, shown whole and never cropped.
+   Bounded by HEIGHT, because a portrait image sized by width alone runs
+   off the bottom of a phone screen. */
+.artic-figure { margin: .4rem 0; text-align: center; }
+.artic-art { display: inline-block; max-width: min(100%, 22rem); max-height: 27rem;
+  width: auto; height: auto; object-fit: contain; }
+.guide-cues { list-style: none; margin: .5rem auto 0; padding: 0; max-width: 34rem;
+  display: flex; flex-wrap: wrap; gap: .4rem; justify-content: center; }
+.guide-cues li { background: var(--panel-2, #f3ede0); border: 1px solid var(--line, #d9d2c2);
+  border-radius: 999px; padding: .18rem .6rem; font-size: .88rem; }
+/* Overview chart for a section of the IPA chart. Landscape, full width. */
+.chart-overview { margin: .6rem 0 1rem; }
+.chart-overview img { display: block; width: 100%; max-width: 44rem; height: auto;
+  margin: 0 auto; border-radius: .5rem; }

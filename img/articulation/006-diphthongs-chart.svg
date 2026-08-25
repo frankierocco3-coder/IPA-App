@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="960" viewBox="0 0 1600 960" role="img" aria-labelledby="title description">
+  <title id="title">Diphthongs</title>
+  <desc id="description">Eight English diphthongs with example words.</desc>
+  <rect width="1600" height="960" fill="#fbf4e8"/>
+  <rect width="1600" height="160" fill="#222628"/>
+  <rect x="72" y="52" width="12" height="56" rx="6" fill="#ef573c"/>
+  <text x="112" y="99" fill="#ffffff" font-family="Arial, Helvetica Neue, sans-serif" font-size="62" font-weight="700">Diphthongs</text>
+
+  <g font-family="Arial, Helvetica Neue, sans-serif" text-anchor="middle">
+    <g transform="translate(70 210)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">eə</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">hair</text>
+    </g>
+    <g transform="translate(442 210)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">ɪə</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">dear</text>
+    </g>
+    <g transform="translate(814 210)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">eɪ</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">same</text>
+    </g>
+    <g transform="translate(1186 210)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">aʊ</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">loud</text>
+    </g>
+
+    <g transform="translate(70 555)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">əʊ</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">go</text>
+    </g>
+    <g transform="translate(442 555)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">aɪ</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">hide</text>
+    </g>
+    <g transform="translate(814 555)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">ʊə</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">curious</text>
+    </g>
+    <g transform="translate(1186 555)">
+      <rect width="344" height="305" rx="34" fill="#dbe4e8" stroke="#313638" stroke-width="4"/>
+      <rect x="28" y="28" width="66" height="10" rx="5" fill="#ef573c"/>
+      <text x="172" y="146" fill="#222628" font-size="94" font-weight="700">ɔɪ</text>
+      <text x="172" y="230" fill="#59666c" font-size="42" font-weight="600">choice</text>
+    </g>
+  </g>
+</svg>
