@@ -9,10 +9,25 @@ rather than quietly dropped.
 
 ## Next up — the programme's next part
 
-**BUILDING A CHARACTER** (owner order, 2026-08-20). The Four Lists shipped as
-its first piece: the five read-throughs and the four inventories a character is
-built from, living on a script's own rail. What follows — the work that turns
-those lists into a played character — is still unscoped.
+**BUILDING A CHARACTER (owner order, 2026-08-20) — built 2026-08-26.** Two new
+Acting modules in `js/data/acting/course.js`: Module 4 Building a Character
+(7 lessons: the Four Lists as entry, then improvisation-based character work,
+recording on the learner's own phone, off-app by design) and Module 5
+Tempo-Rhythm (6 lessons). Preparing the Performance moved from module 4 to 6;
+lesson ids did not change, so nothing stored breaks. All 13 lessons are
+`requiredReviewer: 'acting-professional'` and were owner-approved on 2026-08-26
+(same editorial decision as the original 28 Acting lessons; specialist review is
+still owed and the ledger notes say so). They are live in the Acting Library.
+
+Copy sources: docs/BUILD_CHARACTER_COPY.md and docs/BUILD_TEMPO_RHYTHM_COPY.md.
+House rule held: no practitioner named in any lesson; the Sources & Credits
+addition proposed at the end of BUILD_CHARACTER_COPY.md still needs owner
+sign-off. Design history in docs/BUILD_CHARACTER_BOGOSIAN.md and
+docs/BUILD_TEMPO_RHYTHM.md.
+
+Still open from the design: the two tools (two-track rhythm marking on the
+script rail; rhythm cards in Acting Practice), and four regression pins that
+still assert the old four-module shape.
 
 ---
 

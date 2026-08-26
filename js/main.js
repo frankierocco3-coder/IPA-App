@@ -3100,8 +3100,10 @@ function renderActingLesson(id) {
 }
 
 // ── Acting → Library ──────────────────────────────────────────
-const ACTING_COLLECTION_TONE = { principles: 'is-sage', scene: 'is-blue', rehearsal: 'is-lavender' };
-const ACTING_COLLECTION_EMOJI = { principles: '🎯', scene: '🔍', rehearsal: '🎬' };
+const ACTING_COLLECTION_TONE = { principles: 'is-sage', scene: 'is-blue', rehearsal: 'is-lavender',
+  character: 'is-terracotta', rhythm: 'is-gold' };
+const ACTING_COLLECTION_EMOJI = { principles: '🎯', scene: '🔍', rehearsal: '🎬',
+  character: '🧍', rhythm: '🎼' };
 
 function actingLibraryPane(el) {
   const cards = [
