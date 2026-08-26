@@ -38,29 +38,49 @@ no Accent Bridge card appears in the Listening group for any dialect.
 
 ## Content review — the critical path, human-bound
 
-Real counts, read from the modules:
+**798 items await a named human reviewer.** Full breakdown by reviewer, with
+what each one covers, is in `docs/WHAT_NEEDS_REVIEW.md`.
 
-| Source | Unapproved | Total |
-|---|---|---|
-| `js/data/bridge.js` comparisons | 73 | 81 |
-| `js/data/action.js` pieces | 8 | 8 |
-| `js/data/recasts.js` transpositions | 5 | 5 |
-| Articulation guides (`js/data/articulation.js`) | 3 | 3 |
+| What | Items | Reviewer | Learner-visible now? |
+|---|---:|---|---|
+| Sonnet learning editions (`js/data/editions/`) | 616 | literary; plus dialect for the voice versions | No |
+| Accent Bridge comparisons (`js/data/bridge.js`) | 73 | dialect, per accent | No |
+| Articulation guides (`js/data/articulation.js`) | 62 | voice professional or SLP | **Yes**, badged draft |
+| Speech chapters (`js/data/speech/reviews.js`) | 39 | voice professional or SLP; acting teacher | **Yes**, owner-approved |
+| Dialect in Action pieces (`js/data/action.js`) | 8 | literary AND dialect | No |
 
-Two gates are still empty, and both are audio/video, not text:
+An earlier version of this file gave the queue as 89 items and then 148. Both
+were wrong: they missed the sonnet editions entirely, and counted the recast
+transpositions as 5 when there are 15 (five sonnets by three dialects) which are
+themselves inside the 616. The 616 is 154 sonnets by four versions each, and
+`js/data/edition-reviews.js` is empty, so every one reads as draft.
+
+**101 of these are already in front of learners.** The 62 articulation guides
+carry a draft badge; the 39 Speech chapters are published under owner approval
+and still await a specialist. Reviewing those two blocks validates content
+already in use. The other 697 are invisible until approved, so reviewing them
+unlocks content instead.
+
+If only one reviewer can be found, make it the voice professional: they cover
+the 62 guides and most of the 39 chapters, which is everything currently live.
+
+Two gates are still empty, and both are audio/video rather than text:
 `APPROVED_PHONEMES = []` (`js/data/audio-flags.js`), `ARTICULATION_VIDEOS = []`
 (`js/data/media-videos.js`).
 
-- [ ] **Line up native-speaker reviewers for NAM, RP, SSBE, AUS.** Unresolved,
-      and it blocks everything below it.
-- [ ] Decide the Bridge's fate: review the 73 and bring it back, or cut it.
-      It has been off since 2026-08-17 and the drafts have not moved.
-- [ ] Review in dialect batches — one reviewer takes that accent's bridge
-      comparisons, action piece and transposition together, not feature by
+- [ ] **Line up reviewers.** A voice professional or SLP first, then dialect
+      reviewers for NAM, RP, SSBE and AUS, then a literary reviewer for the
+      sonnet editions. Unresolved, and it blocks everything below it.
+- [ ] Decide the Bridge's fate: review the 73 and bring it back, or cut it. It
+      has been off since 2026-08-17 and the drafts have not moved. Approving
+      them does not by itself surface them; `BRIDGE_LIVE` is still false.
+- [ ] Review in dialect batches. One reviewer takes that accent's bridge
+      comparisons, action piece and sonnet voices together, not feature by
       feature.
-- [ ] Record the reviewer's name per item. Batch approval does not count.
-- [ ] Set a per-workspace floor: at least one complete zero-draft collection
-      in each workspace before launch.
+- [ ] Record the reviewer's name and date per item. Batch approval does not
+      count and an unnamed reviewer does not count.
+- [ ] Set a per-workspace floor: at least one complete zero-draft collection in
+      each workspace before launch.
 
 ---
 
@@ -79,9 +99,20 @@ filename. Both batches are recorded in `img/articulation/manifest.json`.
 Storage: baseline JPEG q90 at the delivered pixel dimensions, 11.9 MB for 65
 files. Baseline specifically — progressive JPEGs decode fine but do not paint.
 
-**Written guidance still exists for 3 sounds only** — `/v/`, `/p/`, `/iː/` — all
-badged draft awaiting a qualified voice professional. The other 59 show artwork
-with no written steps. That is the remaining gap on this surface.
+**Written guidance now covers all 62 sounds**: a one-line summary, three steps
+you can act on, a contrast against the nearest confusable sound, and a watch-out
+note. Every entry is badged draft awaiting a qualified voice professional,
+because it tells a learner what to do with their body.
+
+Two deliberate choices in the writing, recorded so a reviewer knows they were
+choices. Every step is something to do or feel, not a description to read
+(pinch your nose, hold a hand in front of your mouth, say bed then bad). And the
+watch-out line usually says "that is normal" rather than "do not do that":
+terminal devoicing, dark /l/, monophthongal FACE, h-dropping and /ŋg/ are real
+English, and calling them errors would be wrong.
+
+`cues` is no longer written. It placed leader labels on the generated diagram,
+which nothing reaches now that all 62 have artwork.
 
 Three sounds used to render nothing at all: `/ɛː/`, `/i/` and `/ʔ/` were missing
 from the diagram tables, so the fallback returned an empty string and those pages
