@@ -70,6 +70,29 @@ export const ART = {
   'ʒ': '045-consonant-ezh.jpg',
   'ʃ': '046-consonant-esh.jpg',
   'z': '047-consonant-z.jpg',
+
+  // Batch 2 (048-065): the accent-specific and allophonic sounds. Shipped
+  // with no manifest, so each symbol here was read off its own image's
+  // header bar and checked against the app inventory, never guessed from
+  // the filename.
+  'ɛː': '048-vowel-long-open-mid-front-square.jpg',
+  'i': '049-vowel-happy-short-i.jpg',
+  'ʔ': '050-consonant-glottal-stop.jpg',
+  'ɑ': '051-vowel-american-lot-palm.jpg',
+  'oʊ': '052-diphthong-american-goat.jpg',
+  'ɝ': '053-vowel-american-nurse-rhotacized.jpg',
+  'ɚ': '054-vowel-american-letter-rhotacized-schwa.jpg',
+  'ɐ': '055-vowel-australian-strut.jpg',
+  'ɐː': '056-vowel-australian-palm-bath.jpg',
+  'ɔ': '057-vowel-australian-lot.jpg',
+  'oː': '058-vowel-australian-thought.jpg',
+  'eː': '059-vowel-australian-square.jpg',
+  'æɔ': '060-diphthong-australian-mouth.jpg',
+  'æɪ': '061-diphthong-australian-face.jpg',
+  'ɑe': '062-diphthong-australian-price.jpg',
+  'oɪ': '063-diphthong-australian-choice.jpg',
+  'əʉ': '064-diphthong-australian-goat.jpg',
+  'ʉː': '065-vowel-australian-goose.jpg',
 };
 
 // The three overview charts that came with the drawings, kept as PNG:

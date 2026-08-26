@@ -12,6 +12,10 @@ const VOWELS = {
   'ʌ': { h: 0.62, b: 0.68 }, 'ʊ': { h: 0.22, b: 0.72, round: 1 }, 'ɒ': { h: 0.92, b: 0.90, round: 1 },
   'ə': { h: 0.50, b: 0.50 }, 'iː': { h: 0.06, b: 0.10 }, 'ɑː': { h: 0.95, b: 0.88 },
   'ɔː': { h: 0.60, b: 0.92, round: 1 }, 'uː': { h: 0.10, b: 0.90, round: 1 }, 'ɜː': { h: 0.50, b: 0.50 },
+  // Contemporary SQUARE: the monophthongised /eə/, open-mid front and long,
+  // a shade more open than DRESS. happY: close front, in the gap between
+  // KIT and FLEECE. Both were missing, so their pages drew nothing at all.
+  'ɛː': { h: 0.55, b: 0.16 }, 'i': { h: 0.12, b: 0.14 },
   // American
   'ɑ': { h: 0.94, b: 0.85 }, 'ɝ': { h: 0.50, b: 0.55, r: 1 }, 'ɚ': { h: 0.52, b: 0.52, r: 1 },
   // Australian (HCE/revised symbols)
@@ -41,6 +45,9 @@ const CONS = {
   'ð': ['dental', 'fricative', 1], s: ['alveolar', 'fricative', 0], z: ['alveolar', 'fricative', 1],
   'ʃ': ['postalveolar', 'fricative', 0], 'ʒ': ['postalveolar', 'fricative', 1], h: ['glottal', 'fricative', 0],
   'tʃ': ['postalveolar', 'affricate', 0], 'dʒ': ['postalveolar', 'affricate', 1],
+  // The glottal stop closes the vocal folds themselves. Nothing happens in
+  // the mouth, which is exactly what the diagram should show.
+  'ʔ': ['glottal', 'plosive', 0],
   l: ['alveolar', 'lateral', 1], r: ['postalveolar', 'approximant', 1],
   w: ['bilabial', 'approximant', 1], j: ['palatal', 'approximant', 1],
 };

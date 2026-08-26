@@ -69,7 +69,7 @@ excludes it).
 
 ```
 index.html          CSP lives here (meta tag, must stay first in <head>)
-js/main.js          ALL views + routing (~8.9k lines, 71% of app JS —
+js/main.js          ALL views + routing (~9.4k lines, 71% of app JS —
                     a split is planned; see docs/PRE_RELEASE_PUNCH_LIST.md B-R1).
                     Views are render*() fns
 js/engine.js        16 exercise generators
@@ -83,7 +83,11 @@ js/overrides.js     pronunciation override chain + personal dictionary
 js/validate.js      import validation/sanitisation (untrusted input)
 js/audio.js         clip playback + speech-synthesis fallback
 js/scan.js          syllabification / scansion
-js/diagram.js       articulation diagrams (inline SVG)
+js/diagram.js       generated articulation diagrams (inline SVG) — now a
+                    fallback only; all 62 sounds have real artwork
+img/articulation/   65 hand-drawn diagrams + 3 overview charts (baseline
+                    JPEG q90; registry js/data/articulation-art.js maps
+                    symbol -> file, sourced from the pack manifest)
 js/pron.js          lazy-loads the 2.8MB pronunciation dictionary
 js/data/            course, phonemes, 6 text libraries, pron.json
 audio/              8,419 pre-generated MP3s (~288MB)

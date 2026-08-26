@@ -1,77 +1,141 @@
 # Speechcraft — to-do
 
-Current as of `67a63e1`, verified against the working tree — not carried over from
-older notes. Items marked ⚠ are ones I previously reported wrongly and have corrected.
+Rewritten at `93b9b9d`. Every number below was measured against the working
+tree or read out of the running app, not carried over from the previous
+version of this file. Where the old list was wrong, the correction is stated
+rather than quietly dropped.
 
 ---
 
 ## Next up — the programme's next part
 
-**BUILDING A CHARACTER** (owner order, 2026-08-20). The next part of the
-programme to be added. The Four Lists shipped on the same day as its first
-piece — the five read-throughs and the four inventories a character is built
-from — and lives on a script's own rail. What follows it is still to be
-scoped: the work that turns those lists into a played character.
+**BUILDING A CHARACTER** (owner order, 2026-08-20). The Four Lists shipped as
+its first piece: the five read-throughs and the four inventories a character is
+built from, living on a script's own rail. What follows — the work that turns
+those lists into a played character — is still unscoped.
 
 ---
 
-## Open now — small, visible, do first
+## What is switched off right now
 
-| # | Item | Where | Size |
+Four surfaces are hidden behind kill switches. Nothing is deleted; each is one
+flag away from returning. Verified in the running app, not just in source.
+
+| Surface | Flag | File | Content behind it |
 |---|---|---|---|
-| 1 | Rename app to "Speechcraft — Find your voice" | `index.html:32`, `manifest.json:2` | 2 lines |
-| 2 | **The Build 01 IndexedDB fix never landed** — still `r(false)`, still fails closed and walls users with projects but no localStorage | `js/main.js:4621` | 1 char + test |
-| 3 | "Ready" badge reads as a content claim; means `done === 0`. Change to "Not started" | `js/main.js:2858` | 1 line |
-| 4 | Acting hero shows an empty progress bar with no numbers; the renderer with counts already exists | `js/main.js:1091` vs Acting hero | small |
-| 5 | Confirm the epigraph change to "— Socrates, Book II (377a–b)" was intentional and the launch-lint verbatim pins match | `js/main.js:3816`, `tools/launch_lint.py` | check |
-| 6 | Rename shadowed `const SECTIONS` (nav config at :284 vs dissection headings at :6133) | `js/main.js` | small |
-| 7 | Delete vestigial abstractions: `NO_LEARN_WORKSPACES = []`, `sectionsFor = () => SECTIONS`, `defaultSectionFor = () => 'learn'` | `js/main.js:300-304` | small |
-| 8 | Code comment lists three workspaces; there are four | `js/main.js:311` | 1 line |
+| Accent Bridge | `BRIDGE_LIVE = false` | `js/data/bridge.js` | 12 routes, 81 comparisons, 73 unapproved |
+| Dialect in Action | `DIALECT_ACTION_LIVE = false` | `js/data/action.js` | 8 pieces, 8 draft |
+| Speech workspace | `SPEECH_LIVE = false` | `js/main.js` | textbook now shared into Acting |
+| Scene Study | `SCENE_STUDY_LIVE = false` | `js/main.js` | — |
 
----
-
-## Consistency pass — makes four workspaces feel like one app
-
-| # | Item | Detail |
-|---|---|---|
-| 9 | **One Library component** | Speech has search + card grid + counts; Acting has card grid + counts, no search; Accents has full-width rows, no search, no counts, and is titled just "Library" |
-| 10 | **One right-hand rail** | Speech/Acting show "Next step"; Accents shows "Daily Quests". Two unrelated widgets in one slot |
-| 11 | **Decide: is the economy global or dialect-only?** | Streak/gems/hearts appear only in Accents. An hour in Acting earns nothing. **Product decision — yours** |
-| 12 | Scope the working-text panel to Learn | It currently follows the user into the Library and points away from the content |
-| 13 | One convention for shared content | "7 shared Speech chapters" vs "(shared Speech resource)" — and decide whether shared chapters render in place or navigate |
-| 14 | Differentiate the two chips in Accents | Workspace selector and course selector look like peers |
-| 15 | Fix thin top-level cards | Acting Glossary (6 terms), Dialects in Speech (1 topic) — grow or fold in |
-| 16 | One count-label grammar | Currently 9 different patterns across cards |
+The Bridge switch sits at the single function every entry point calls
+(`playableRoutesInto`), so the Practice card, the listener that would open it
+and the Dialects-in-Speech facet all go together. Confirmed by driving the app:
+no Accent Bridge card appears in the Listening group for any dialect.
+`bridgeDrafts()` still feeds the owner review tool, which is intended.
 
 ---
 
 ## Content review — the critical path, human-bound
 
-**87 items are invisible to learners because they are `draft`:**
+Real counts, read from the modules:
 
-| Source | Drafts |
+| Source | Unapproved | Total |
+|---|---|---|
+| `js/data/bridge.js` comparisons | 73 | 81 |
+| `js/data/action.js` pieces | 8 | 8 |
+| `js/data/recasts.js` transpositions | 5 | 5 |
+| Articulation guides (`js/data/articulation.js`) | 3 | 3 |
+
+Two gates are still empty, and both are audio/video, not text:
+`APPROVED_PHONEMES = []` (`js/data/audio-flags.js`), `ARTICULATION_VIDEOS = []`
+(`js/data/media-videos.js`).
+
+- [ ] **Line up native-speaker reviewers for NAM, RP, SSBE, AUS.** Unresolved,
+      and it blocks everything below it.
+- [ ] Decide the Bridge's fate: review the 73 and bring it back, or cut it.
+      It has been off since 2026-08-17 and the drafts have not moved.
+- [ ] Review in dialect batches — one reviewer takes that accent's bridge
+      comparisons, action piece and transposition together, not feature by
+      feature.
+- [ ] Record the reviewer's name per item. Batch approval does not count.
+- [ ] Set a per-workspace floor: at least one complete zero-draft collection
+      in each workspace before launch.
+
+---
+
+## Articulation artwork — complete
+
+**All 62 sounds have hand-drawn artwork**, plus three overview charts on the IPA
+chart. The generated diagram in `js/diagram.js` is now a fallback that nothing
+reaches; it stays as the safety net if a file ever goes missing.
+
+Delivered in two batches: 44 (`93b9b9d`) covering the general inventory, then 18
+covering the accent-specific and allophonic sounds. The second batch shipped
+without a manifest, so every symbol was read off its own image's header bar and
+cross-checked against the app inventory before wiring — never inferred from the
+filename. Both batches are recorded in `img/articulation/manifest.json`.
+
+Storage: baseline JPEG q90 at the delivered pixel dimensions, 11.9 MB for 65
+files. Baseline specifically — progressive JPEGs decode fine but do not paint.
+
+**Written guidance still exists for 3 sounds only** — `/v/`, `/p/`, `/iː/` — all
+badged draft awaiting a qualified voice professional. The other 59 show artwork
+with no written steps. That is the remaining gap on this surface.
+
+Three sounds used to render nothing at all: `/ɛː/`, `/i/` and `/ʔ/` were missing
+from the diagram tables, so the fallback returned an empty string and those pages
+had no picture area whatsoever. Fixed by adding them to `VOWELS` and `CONS`.
+
+---
+
+## Open now — small and visible
+
+| # | Item | Where |
+|---|---|---|
+| 1 | Rename shadowed `const SECTIONS` — nav config vs dissection headings | `js/main.js:245` |
+| 2 | Disambiguate duplicate module basenames: three `course.js`, two `dialects.js`, two `store.js` | `js/data/` |
+| 3 | Scope the working-text panel to Learn; it follows the user into the Library and points away from the content | `js/main.js` |
+
+Items 1, 3, 7 and 8 from the previous version of this file are **done**: the app
+is renamed, the "Ready" badge is gone, and `NO_LEARN_WORKSPACES` /
+`defaultSectionFor` are deleted. The Build 01 IndexedDB `r(false)` fix has also
+landed — the old list called it outstanding, and it is not.
+
+---
+
+## Consistency pass — makes four workspaces feel like one app
+
+| # | Item |
 |---|---|
-| `js/data/bridge.js` | **73** |
-| `js/data/action.js` | 8 |
-| `js/data/recasts.js` | 6 |
-
-Plus two empty gates: `APPROVED_PHONEMES = []`, `ARTICULATION_VIDEOS = []`.
-
-- [ ] Triage the 73 bridge comparisons: ships / cut / defer
-- [ ] Set a per-workspace floor — at least one complete zero-draft collection each
-- [ ] Review in dialect batches (one reviewer covers that accent's bridge + action piece + transposition), not feature by feature
-- [ ] Record the reviewer's name per item — batch approval doesn't count
-- [ ] Line up native-speaker reviewers for NAM, RP, SSBE, AUS — **still unresolved, still blocking**
+| 4 | **One Library component.** Speech has search + card grid + counts; Acting has grid + counts, no search; Accents has full-width rows, no search, no counts |
+| 5 | **One right-hand rail.** Speech/Acting show "Next step"; Accents shows "Daily Quests" — two unrelated widgets in one slot |
+| 6 | One convention for shared content: "7 shared Speech chapters" vs "(shared Speech resource)" |
+| 7 | Differentiate the two chips in Accents — workspace selector and course selector look like peers |
+| 8 | Fix thin top-level cards: Acting Glossary (6 terms), Dialects in Speech (1 topic) |
+| 9 | One count-label grammar — currently nine patterns across cards |
+| 10 | Chapter-level Library search, lost when the libraries were unified |
 
 ---
 
 ## Code restructure
 
-| # | Item | Size | Note |
-|---|---|---|---|
-| 17 | **Split `js/main.js`** — 8,913 lines, 71% of app JS, 84 render functions | L | Split by workspace: `views/speech.js`, `views/acting.js`, `views/dialect.js`, `views/studio.js`, `views/reference.js`, `views/dissect.js`, `views/admin.js`. Extract shared helpers to `js/ui.js` first, in its own commit. Do it while the 111-check suite still covers the behavior |
-| 18 | Disambiguate module names | S | Three `course.js`; `action.js` (Dialect in Action) vs `playable.js` (Playable Actions); `dialects.js` vs `speech/dialects.js` |
-| 19 | Split `css/style.css` (1,626 lines) | M | Optional before release — CSS conflicts surface immediately, JS ones don't |
+**Splitting `js/main.js` is now overdue and getting worse.**
+
+| | Then | Now |
+|---|---|---|
+| `js/main.js` | 8,913 lines | **9,434** |
+| `js/ui.js` | — | 213 lines |
+| `css/style.css` | 1,626 | 1,804 |
+
+Stage 3a landed: shared vocabulary lives in `js/ui.js`. Stage 3b did not —
+`js/views/` does not exist. The plan stands: `views/speech.js`,
+`views/acting.js`, `views/dialect.js`, `views/studio.js`, `views/reference.js`,
+`views/dissect.js`, `views/admin.js`, moved while the 441-check suite still
+covers the behaviour.
+
+Splitting `css/style.css` is optional before release. CSS conflicts surface
+immediately; JS ones do not.
 
 ---
 
@@ -79,12 +143,15 @@ Plus two empty gates: `APPROVED_PHONEMES = []`, `ARTICULATION_VIDEOS = []`.
 
 | # | Item | Note |
 |---|---|---|
-| 20 | **Fix the phoneme voice-key tables** | Still say `f/m` and `alyx/peach`; the real convention is a single `reference` voice. **57 files could be recorded to the wrong path.** Do before any recording session |
-| 21 | `CLAUDE.md` says `main.js` is "~2.5k lines" | It's 8,913 |
-| 22 | `docs/ROADMAP.md` (mine) is stale | Asserts a nav and workspace model that no longer exist |
-| 23 | Reconcile the 15 conflicts from the planning report | None resolved yet |
-| 24 | Reconcile three new untracked docs | `CHATGPT_REVIEW_PROMPT.md`, `REVIEW_PENDING_CONTENT.md`, `SPEECH_REVIEW.md` |
-| 25 | Lift the header-comment specs into `docs/` | Accent Bridge, Dialect in Action, Shakespeare editions, Speech and Acting workspaces — all specced only inside source files |
+| 11 | `docs/ROADMAP.md` is stale | Asserts a nav and workspace model that no longer exists |
+| 12 | Reconcile the 15 conflicts from the planning report | None resolved |
+| 13 | Lift header-comment specs into `docs/` | Accent Bridge, Dialect in Action, Shakespeare editions, Speech and Acting workspaces are specced only inside source files |
+
+Three items are now **resolved**: `CLAUDE.md` states the real `main.js` size and
+records `img/articulation/`; the phoneme voice-key tables in
+`docs/PHONEME_RECORDING_PLAN.md` now state the single `reference` convention and
+explicitly warn against the `f`/`m`/`alyx`/`peach` path, and the three
+"untracked" review docs are all tracked.
 
 ---
 
@@ -92,30 +159,41 @@ Plus two empty gates: `APPROVED_PHONEMES = []`, `ARTICULATION_VIDEOS = []`.
 
 | Item | Blocked on |
 |---|---|
-| Cross-browser: Firefox, Safari, iOS, iPadOS | Your devices. **NOT TESTED.** Safari MediaRecorder is the biggest untested risk |
+| Cross-browser: Firefox, Safari, iOS, iPadOS | Your devices. **Still not tested.** Safari MediaRecorder is the biggest untested risk |
 | Owner audio ear-check | You only. Gates production |
-| Isolated phoneme audio | Human recording (16-slug NAM pilot), then per-slug ear verdict |
-| Articulation video | Filming + articulation review + a repo-size decision (589 MB against a ~1 GB limit) |
-| Studio Phase 3 (scene partner / TTS) | An explicit backend decision. No stub may ship before it |
-| The speaking exercise | Needs an approved spec. Still the biggest product gap — 73+ lessons, 14 games, none ask the user to make a sound |
+| Isolated phoneme audio | Human recording (16-slug NAM pilot), then a per-slug ear verdict. `APPROVED_PHONEMES` stays `[]` until then |
+| Articulation video | Filming, articulation review, and a repo-size decision |
+| A voice professional for the articulation guides | The three written guides cannot lose their draft badge without one |
+| Studio Phase 3 (scene partner / TTS) | An explicit backend decision. No stub ships before it |
+| **The speaking exercise** | Needs an approved spec. Still the largest product gap: 73+ lessons, 14 games, and none asks the user to make a sound |
 
 ---
 
-## Done since this session started
+## The decisions only you can make
 
-- Before You Speak / Why Speech Matters preface — shipped, revised to 3 panels with a fuller replay variant
-- ⚠ **Speech Dissection — shipped** (I earlier reported it as not in code; it's built, and the textbook is now titled "Question Everything")
-- ⚠ **Playable Actions — shipped** and wired, including an `action-swap` practice deck
-- ⚠ **"Why Speech Matters" — shipped** (I earlier reported the name existed nowhere)
-- Sonnet learning editions — catalog complete, all 154, lazy-loaded in 10 chunks
-- IndexedDB v2 with the `dissections` store — migration is additive-only, project deletion cascades correctly
-- Four-workspace IA — Speech, Acting, IPA, Accents & Dialects
-- Words & Expressions — 388 idiom entries plus false friends, U/non-U, MLE, dialogues, situations
-- Accent Bridge — grew from 1 route to 74 comparisons (73 awaiting review)
+1. **Is the economy global or dialect-only?** Streak, gems and hearts appear
+   only in Accents. An hour in Acting earns nothing.
+2. **Do shared chapters render in place or navigate?** Decides whether the
+   Library component needs a "you are now in Speech" transition.
+3. **Does the Accent Bridge come back?** 73 unreviewed comparisons are waiting
+   on the answer, and it has been off since 2026-08-17.
 
 ---
 
-## The two decisions only you can make
+## Corrections to the previous version of this file
 
-1. **Is the economy global or dialect-only?** Changes whether Acting and Speech award XP.
-2. **Do shared chapters render in place or navigate?** Decides whether the Library component needs a "you are now in Speech" transition.
+Kept deliberately, so the same mistakes are not re-reported.
+
+- It listed the app rename, the "Ready" badge, the vestigial constants and the
+  Build 01 IndexedDB fix as open. All four are done.
+- It gave the review backlog as "87 items" with bridge at 73 drafts, action at
+  8 and recasts at 6. Measured: bridge has **73 unapproved comparisons across
+  81**, action **8 of 8**, recasts **5 of 5**. The recast figure in the old
+  file was wrong.
+- It described the Accent Bridge as having "grown to 74 comparisons". There are
+  **12 routes and 81 comparisons**, and the surface has been switched off since
+  2026-08-17.
+- Counting the string `'draft'` in a source file is not a review count. Several
+  numbers in the old file appear to have come from that, and it overcounts —
+  comments and unrelated fields match. Read the module's own accessor instead
+  (`bridgeDrafts()`, `actionDrafts()`, `approvedTranspositions()`).

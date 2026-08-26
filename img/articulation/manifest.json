@@ -1,8 +1,8 @@
 {
   "collection": "IPA Articulation Assets",
   "status": "complete",
-  "expected_assets": 47,
-  "completed_assets": 47,
+  "expected_assets": 65,
+  "completed_assets": 65,
   "ipa_symbol_verification": {
     "status": "verified",
     "articulation_headers": 44,
@@ -63,8 +63,26 @@
       "source_file": "IMG_8401.jpeg",
       "file": "images/006-diphthongs-chart.png",
       "editable_source": "images/006-diphthongs-chart.svg",
-      "symbols": ["eə", "ɪə", "eɪ", "aʊ", "əʊ", "aɪ", "ʊə", "ɔɪ"],
-      "examples": ["hair", "dear", "same", "loud", "go", "hide", "curious", "choice"],
+      "symbols": [
+        "eə",
+        "ɪə",
+        "eɪ",
+        "aʊ",
+        "əʊ",
+        "aɪ",
+        "ʊə",
+        "ɔɪ"
+      ],
+      "examples": [
+        "hair",
+        "dear",
+        "same",
+        "loud",
+        "go",
+        "hide",
+        "curious",
+        "choice"
+      ],
       "status": "completed"
     },
     {
@@ -165,8 +183,34 @@
       "source_file": "IMG_8392.jpeg",
       "file": "images/017-vowels-chart.png",
       "editable_source": "images/017-vowels-chart.svg",
-      "symbols": ["iː", "ɪ", "uː", "ʊ", "ə", "ɜː", "ɔː", "e", "ʌ", "ɒ", "æ", "ɑː"],
-      "examples": ["bean", "tip", "moon", "shook", "the", "sir", "shore", "met", "fun", "lock", "pan", "card"],
+      "symbols": [
+        "iː",
+        "ɪ",
+        "uː",
+        "ʊ",
+        "ə",
+        "ɜː",
+        "ɔː",
+        "e",
+        "ʌ",
+        "ɒ",
+        "æ",
+        "ɑː"
+      ],
+      "examples": [
+        "bean",
+        "tip",
+        "moon",
+        "shook",
+        "the",
+        "sir",
+        "shore",
+        "met",
+        "fun",
+        "lock",
+        "pan",
+        "card"
+      ],
       "status": "completed"
     },
     {
@@ -357,8 +401,58 @@
       "source_file": "IMG_8426.jpeg",
       "file": "images/038-consonants-chart.png",
       "editable_source": "images/038-consonants-chart.svg",
-      "symbols": ["f", "v", "θ", "ð", "s", "z", "ʃ", "ʒ", "h", "p", "b", "t", "d", "k", "g", "tʃ", "dʒ", "w", "r", "j", "l", "m", "n", "ŋ"],
-      "examples": ["first", "van", "thick", "these", "saw", "zen", "she", "casual", "hat", "pick", "bed", "team", "dine", "code", "get", "choose", "jet", "watch", "rug", "yet", "look", "mode", "neck", "song"],
+      "symbols": [
+        "f",
+        "v",
+        "θ",
+        "ð",
+        "s",
+        "z",
+        "ʃ",
+        "ʒ",
+        "h",
+        "p",
+        "b",
+        "t",
+        "d",
+        "k",
+        "g",
+        "tʃ",
+        "dʒ",
+        "w",
+        "r",
+        "j",
+        "l",
+        "m",
+        "n",
+        "ŋ"
+      ],
+      "examples": [
+        "first",
+        "van",
+        "thick",
+        "these",
+        "saw",
+        "zen",
+        "she",
+        "casual",
+        "hat",
+        "pick",
+        "bed",
+        "team",
+        "dine",
+        "code",
+        "get",
+        "choose",
+        "jet",
+        "watch",
+        "rug",
+        "yet",
+        "look",
+        "mode",
+        "neck",
+        "song"
+      ],
       "status": "completed"
     },
     {
@@ -441,6 +535,194 @@
       "source_file": "IMG_8407.jpeg",
       "file": "images/047-consonant-z.png",
       "status": "completed"
+    },
+    {
+      "index": 48,
+      "symbol": "/ɛː/",
+      "slug": "vowel-long-open-mid-front-square",
+      "category": "articulation",
+      "file": "images/048-vowel-long-open-mid-front-square.png",
+      "stored_as": "048-vowel-long-open-mid-front-square.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 49,
+      "symbol": "/i/",
+      "slug": "vowel-happy-short-i",
+      "category": "articulation",
+      "file": "images/049-vowel-happy-short-i.png",
+      "stored_as": "049-vowel-happy-short-i.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 50,
+      "symbol": "/ʔ/",
+      "slug": "consonant-glottal-stop",
+      "category": "articulation",
+      "file": "images/050-consonant-glottal-stop.png",
+      "stored_as": "050-consonant-glottal-stop.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 51,
+      "symbol": "/ɑ/",
+      "slug": "vowel-american-lot-palm",
+      "category": "articulation",
+      "file": "images/051-vowel-american-lot-palm.png",
+      "stored_as": "051-vowel-american-lot-palm.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 52,
+      "symbol": "/oʊ/",
+      "slug": "diphthong-american-goat",
+      "category": "articulation",
+      "file": "images/052-diphthong-american-goat.png",
+      "stored_as": "052-diphthong-american-goat.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 53,
+      "symbol": "/ɝ/",
+      "slug": "vowel-american-nurse-rhotacized",
+      "category": "articulation",
+      "file": "images/053-vowel-american-nurse-rhotacized.png",
+      "stored_as": "053-vowel-american-nurse-rhotacized.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 54,
+      "symbol": "/ɚ/",
+      "slug": "vowel-american-letter-rhotacized-schwa",
+      "category": "articulation",
+      "file": "images/054-vowel-american-letter-rhotacized-schwa.png",
+      "stored_as": "054-vowel-american-letter-rhotacized-schwa.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 55,
+      "symbol": "/ɐ/",
+      "slug": "vowel-australian-strut",
+      "category": "articulation",
+      "file": "images/055-vowel-australian-strut.png",
+      "stored_as": "055-vowel-australian-strut.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 56,
+      "symbol": "/ɐː/",
+      "slug": "vowel-australian-palm-bath",
+      "category": "articulation",
+      "file": "images/056-vowel-australian-palm-bath.png",
+      "stored_as": "056-vowel-australian-palm-bath.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 57,
+      "symbol": "/ɔ/",
+      "slug": "vowel-australian-lot",
+      "category": "articulation",
+      "file": "images/057-vowel-australian-lot.png",
+      "stored_as": "057-vowel-australian-lot.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 58,
+      "symbol": "/oː/",
+      "slug": "vowel-australian-thought",
+      "category": "articulation",
+      "file": "images/058-vowel-australian-thought.png",
+      "stored_as": "058-vowel-australian-thought.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 59,
+      "symbol": "/eː/",
+      "slug": "vowel-australian-square",
+      "category": "articulation",
+      "file": "images/059-vowel-australian-square.png",
+      "stored_as": "059-vowel-australian-square.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 60,
+      "symbol": "/æɔ/",
+      "slug": "diphthong-australian-mouth",
+      "category": "articulation",
+      "file": "images/060-diphthong-australian-mouth.png",
+      "stored_as": "060-diphthong-australian-mouth.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 61,
+      "symbol": "/æɪ/",
+      "slug": "diphthong-australian-face",
+      "category": "articulation",
+      "file": "images/061-diphthong-australian-face.png",
+      "stored_as": "061-diphthong-australian-face.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 62,
+      "symbol": "/ɑe/",
+      "slug": "diphthong-australian-price",
+      "category": "articulation",
+      "file": "images/062-diphthong-australian-price.png",
+      "stored_as": "062-diphthong-australian-price.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 63,
+      "symbol": "/oɪ/",
+      "slug": "diphthong-australian-choice",
+      "category": "articulation",
+      "file": "images/063-diphthong-australian-choice.png",
+      "stored_as": "063-diphthong-australian-choice.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 64,
+      "symbol": "/əʉ/",
+      "slug": "diphthong-australian-goat",
+      "category": "articulation",
+      "file": "images/064-diphthong-australian-goat.png",
+      "stored_as": "064-diphthong-australian-goat.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    },
+    {
+      "index": 65,
+      "symbol": "/ʉː/",
+      "slug": "vowel-australian-goose",
+      "category": "articulation",
+      "file": "images/065-vowel-australian-goose.png",
+      "stored_as": "065-vowel-australian-goose.jpg",
+      "symbol_source": "rendered header bar",
+      "status": "completed"
+    }
+  ],
+  "batches": [
+    {
+      "batch": 2,
+      "range": "048-065",
+      "count": 18,
+      "note": "Second batch, the accent-specific and allophonic sounds the first pack did not cover. Delivered without a manifest, so every symbol below was read off the rendered header bar of its own image and cross-checked against the app inventory before wiring."
     }
   ]
 }
