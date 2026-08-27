@@ -3107,14 +3107,25 @@ const ACTING_COLLECTION_EMOJI = { principles: '🎯', scene: '🔍', rehearsal: 
   character: '🧍', rhythm: '🎼', professional: '💼' };
 
 function actingLibraryPane(el) {
-  const cards = [
-    ...ACTING_COLLECTIONS.map(c => ({
+  // Shelf order is the owner's reading order (2026-08-27): the craft arc
+  // first (principles, character, investigation and its tools, actions,
+  // rhythm, the job), then the texts, then the shared shelves. Collection
+  // tiles and standalone tiles interleave, so the order is one literal
+  // list rather than a mapped array.
+  const colTile = id => {
+    const c = ACTING_COLLECTIONS.find(x => x.id === id);
+    return {
       key: `col:${c.id}`, tone: ACTING_COLLECTION_TONE[c.id],
       emoji: ACTING_COLLECTION_EMOJI[c.id], title: c.title,
       count: c.lessons.length, unit: 'chapter',
-      keywords: c.lessons.map(id => actingLessonById(id)?.title ?? '').join(' '),
+      keywords: c.lessons.map(lid => actingLessonById(lid)?.title ?? '').join(' '),
       go: () => renderActingCollection(c.id),
-    })),
+    };
+  };
+  const cards = [
+    colTile('principles'),
+    colTile('character'),
+    colTile('scene'),
     // Question Everything — the text-dissection textbook. Moved here from
     // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
     // on the shelf. Count = the six numbered DISSECT_SECTIONS.
@@ -3122,13 +3133,13 @@ function actingLibraryPane(el) {
       count: 6, unit: 'section',
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
       go: renderDissectTextbook },
+    colTile('rehearsal'),
     { key: 'col:actions', tone: 'is-gold', emoji: '🎯', title: 'Playable Actions',
       count: ACTION_VERBS.length, unit: 'verb',
       keywords: 'action verb tactic objective doing not feeling playable',
       go: renderPlayableActions },
-    { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
-      count: ACTING_APPROACHES.length, unit: 'introduction',
-      keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
+    colTile('rhythm'),
+    colTile('professional'),
     // Monologues and Scenes are separate shelves (owner order,
     // 2026-08-20). Everything we ship today is a monologue; the Scenes
     // shelf is honest about being empty until scenes are added.
@@ -3140,6 +3151,9 @@ function actingLibraryPane(el) {
       count: PROVIDED_SCENES.length, unit: 'scene',
       keywords: 'scene two-hander dialogue partner work',
       go: renderScenesShelf },
+    { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
+      count: ACTING_APPROACHES.length, unit: 'introduction',
+      keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
     { key: 'col:lists', tone: 'is-lavender', emoji: '📋', title: 'The Four Lists',
       count: 4, unit: 'list',
       keywords: 'character facts says about others reading five times building a character',

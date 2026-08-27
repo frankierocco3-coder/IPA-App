@@ -204,10 +204,10 @@ export const SPEECH_REVIEWS = {
   // Module 4 rebuild (two roads, ten lessons) and The Professional
   // Actor collection, owner-approved 2026-08-27 by the same editorial
   // decision as the rest of Acting. Specialist review is still owed.
-  'ac-character': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+  'ac-fourlists': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-27', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-27. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
-  'ac-hired': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+  'ac-character': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-27', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-27. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
   'ac-analysis': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
