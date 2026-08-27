@@ -11,11 +11,12 @@ rather than quietly dropped.
 
 **BUILDING A CHARACTER (owner order, 2026-08-20) — built 2026-08-26.** Two new
 Acting modules in `js/data/acting/course.js`: Module 4 Building a Character
-(6 lessons of improvisation-based character work; the Four Lists lesson was
-cut from the module by owner order, its Library tile stays) and Module 5
-Tempo-Rhythm (6 lessons). All copy simplified 2026-08-26 by owner order:
-about 8 words per sentence. Preparing the Performance moved from module 4 to 6;
-lesson ids did not change, so nothing stored breaks. All 12 lessons are
+(rebuilt 2026-08-27 as ten lessons in the workshop voice: the two-roads
+structure, What You Are Hired For, archetypes, and the improvisation road)
+and Module 5 Tempo-Rhythm (6 lessons, workshop voice). Plus The Professional
+Actor, an eight-chapter Library-only collection on the job itself. All
+owner-approved 2026-08-27; specialist review still owed on all of it. Preparing the Performance moved from module 4 to 6;
+lesson ids did not change, so nothing stored breaks. All 30 Acting items from this arc are
 `requiredReviewer: 'acting-professional'` and were owner-approved on 2026-08-26
 (same editorial decision as the original 28 Acting lessons; specialist review is
 still owed and the ledger notes say so). They are live in the Acting Library.

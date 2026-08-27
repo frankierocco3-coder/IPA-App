@@ -3013,7 +3013,8 @@ function renderActingChapter(id) {
       ${l.sharedFrom ? `<p class="pane-note">${esc(l.sharedNote ?? '')}
         <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
       ${glossaryChips(l.glossary)}
-      <p class="pane-note"><button class="linkish" id="ac-study" type="button">Study this in Learn</button></p>
+      ${actingModuleFor(l) ? `<p class="pane-note"><button class="linkish" id="ac-study" type="button">Study this in Learn</button></p>`
+        : ''}
       <nav class="sp-chapter-nav" aria-label="Chapter navigation">
         ${prev ? `<button class="btn btn-lite" id="ac-prev" type="button">‹ ${esc(prev.title)}</button>` : '<span></span>'}
         ${nxt ? `<button class="btn btn-lite" id="ac-next" type="button">${esc(nxt.title)} ›</button>` : '<span></span>'}
@@ -3101,9 +3102,9 @@ function renderActingLesson(id) {
 
 // ── Acting → Library ──────────────────────────────────────────
 const ACTING_COLLECTION_TONE = { principles: 'is-sage', scene: 'is-blue', rehearsal: 'is-lavender',
-  character: 'is-terracotta', rhythm: 'is-gold' };
+  character: 'is-terracotta', rhythm: 'is-gold', professional: 'is-sage' };
 const ACTING_COLLECTION_EMOJI = { principles: '🎯', scene: '🔍', rehearsal: '🎬',
-  character: '🧍', rhythm: '🎼' };
+  character: '🧍', rhythm: '🎼', professional: '💼' };
 
 function actingLibraryPane(el) {
   const cards = [
