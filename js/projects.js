@@ -54,6 +54,14 @@ export function emptyProject(patch = {}) {
     // project, like every other piece of work on a script.
     //   fourLists: { reads: 0, facts, saysSelf, saysOthers, othersSay }
     fourLists: {},
+    // Tempo-rhythm marking (owner order, 2026-08-26; lesson 5.3). Per
+    // speech unit, keyed by the unit's starting block index the same way
+    // cards.known is keyed: an OUTER speed (what the audience sees), an
+    // INNER speed (what runs underneath), and one note naming what makes
+    // the pair true. Speeds are 1..5; the gap between the two tracks is
+    // derived, never stored.
+    //   rhythm: { '<blockIndex>': { outer, inner, note } }
+    rhythm: {},
     difficultWords: [],  // [{ word, note }]
     pronunciationNotes: '',
     overrides: {},       // see overrides.js — project-scope IPA overrides

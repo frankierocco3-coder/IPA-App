@@ -3290,11 +3290,18 @@ function actingPracticePane(el) {
       <div class="track-info"><h2>Flash Cards</h2></div>
       <div class="track-arrow">›</div>
     </button>
+    <button class="track-card hub-card" id="acp-rhythm" type="button">
+      <div class="track-glyph">🎼</div>
+      <div class="track-info"><h2>Rhythm Cards</h2></div>
+      <div class="track-arrow">›</div>
+    </button>
     <button class="track-card hub-card" id="acp-mytext" type="button">
       <div class="track-glyph">📄</div>
       <div class="track-info"><h2>Practice My Text</h2></div>
       <div class="track-arrow">›</div>
     </button>`;
+  el.querySelector('#acp-rhythm')?.addEventListener('click', () =>
+    proj ? renderRhythmCards() : renderArcadeTextPicker(() => renderRhythmCards()));
   el.querySelector('#ac-change')?.addEventListener('click', () =>
     renderArcadeTextPicker(() => goSection('practice')));
   el.querySelector('#ac-pick')?.addEventListener('click', () =>
@@ -6479,6 +6486,7 @@ async function renderScript(id, mode = 'read') {
   const RAIL = [
     ['read', '📖', 'Read'], ['cards', '🃏', 'Flash Cards'],
     ['highlight', '🖍', 'Highlight'], ['beats', '❘', 'Beats'],
+    ['rhythm', '🎼', 'Rhythm'],
     ['exercises', '🎲', 'Exercises'], ['ipa', '🔤', 'IPA'],
     ['question', '🔍', 'Question Everything'],
   ];
@@ -6542,8 +6550,11 @@ async function renderScript(id, mode = 'read') {
       : '<p class="pane-note">Add the script first — Edit is at the top of the page.</p>';
   } else if (mode === 'cards') {
     panel = '<div id="sc-cards"></div>';
+  } else if (mode === 'rhythm') {
+    panel = '<div id="sc-rhythm"></div>';
   }
-  const showsScript = mode !== 'exercises' && mode !== 'cards' && mode !== 'ipa';
+  const showsScript = mode !== 'exercises' && mode !== 'cards' && mode !== 'ipa'
+    && mode !== 'rhythm';
 
   app.innerHTML = `
     ${pageTopbar('🎬 ' + esc(p.title || 'Untitled'), '#8a6d3b')}
@@ -6639,10 +6650,187 @@ async function renderScript(id, mode = 'read') {
       })));
   }
   if (mode === 'cards') drawScriptCards(id, p, parsed, save);
+  if (mode === 'rhythm') drawScriptRhythm(id, p, parsed, save);
 
 }
 
 const uidMark = () => 'mk-' + Math.random().toString(36).slice(2, 10);
+
+// ── Rhythm Cards (lesson 5.2's exercise) ──────────────────────
+// Take a speech from the working text, deal a tempo-rhythm and a
+// circumstance that would justify it, and read the speech aloud under
+// that instruction. Then deal again: same words, different rhythm, and
+// notice what changes. Interpretive work, so nothing is scored, nothing
+// is recorded and nothing pays out; the exercise IS the payoff.
+const RHYTHM_CARDS = [
+  { speed: 'Very slow', why: 'You are explaining this to someone you must not frighten.' },
+  { speed: 'Very slow', why: 'Every word costs you something to say.' },
+  { speed: 'Slow', why: 'You are choosing each word in front of someone who will quote you.' },
+  { speed: 'Slow', why: 'You are not sure they are listening, and you need them to be.' },
+  { speed: 'Steady', why: 'You have said this many times before. It is routine.' },
+  { speed: 'Steady', why: 'You are hiding how much this matters.' },
+  { speed: 'Quick', why: 'You have thirty seconds before someone interrupts.' },
+  { speed: 'Quick', why: 'You are thinking of the next thing while saying this one.' },
+  { speed: 'Racing', why: 'If you stop, you will lose your nerve.' },
+  { speed: 'Racing', why: 'The other person is already walking away.' },
+  { speed: 'Slow, then quick', why: 'Halfway through, you realize what this actually means.' },
+  { speed: 'Quick, then slow', why: 'Halfway through, you see their face change.' },
+];
+
+async function renderRhythmCards() {
+  record(renderRhythmCards);
+  // The sync view exists for headers and may be a title-only stub with
+  // no body; a Studio project's text is re-read live by the async
+  // resolver. Take the sync answer only when it actually carries text.
+  let wt = workingText();
+  if (!(wt?.body ?? '').trim()) wt = await resolveWorkingText();
+  if (!wt) return renderArcadeTextPicker(() => renderRhythmCards());
+  const parsed = parseScript(wt.body ?? '');
+  const units = speechUnits(parsed);
+  const st = (rhythmCardState.id === wt.id ? rhythmCardState
+    : Object.assign(rhythmCardState, { id: wt.id, u: 0, c: -1 }));
+
+  // no speeches at all: a sonnet or plain paragraph still works — treat
+  // the whole text as one speech rather than turning the tool away.
+  const pool = units.length ? units : [{ who: wt.title, blocks: [] }];
+  const speechText = units.length
+    ? unitText(pool[st.u % pool.length])
+    : (wt.body ?? '').trim();
+  const unit = pool[st.u % pool.length];
+
+  const dealCard = () => {
+    let n;
+    do { n = Math.floor(Math.random() * RHYTHM_CARDS.length); } while (n === st.c);
+    st.c = n;
+  };
+  if (st.c < 0) dealCard();
+  const card = RHYTHM_CARDS[st.c];
+
+  app.innerHTML = `
+    ${pageTopbar('🎼 Rhythm Cards', '#8a6d3b')}
+    <main class="guide">
+      <h1 class="page-h">Rhythm Cards</h1>
+      <p class="pane-note">Read the speech aloud under the card. Then deal a new card: same
+        words, different rhythm. Notice what changes. Nothing is scored and nothing listens.</p>
+      <section class="sp-step">
+        <p class="rh-card-speed">${esc(card.speed)}</p>
+        <p class="rh-card-why">${esc(card.why)}</p>
+      </section>
+      <section class="sp-step">
+        <p class="sc-who">${esc(unit.who ?? wt.title)}</p>
+        <p class="rh-card-text">${esc(speechText.length > 900 ? speechText.slice(0, 900) + '…' : speechText)}</p>
+      </section>
+      <div class="sc-tools">
+        <button class="btn btn-primary" id="rhc-card" type="button">🎴 New rhythm</button>
+        ${units.length > 1 ? '<button class="btn" id="rhc-speech" type="button">💬 New speech</button>' : ''}
+        <button class="btn" id="rhc-done" type="button">Done</button>
+      </div>
+      <p class="pane-note">Working on: <b>${esc(wt.title)}</b></p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('rhc-card').addEventListener('click', () => {
+    dealCard(); navStack.pop(); renderRhythmCards();
+  });
+  document.getElementById('rhc-speech')?.addEventListener('click', () => {
+    st.u = (st.u + 1 + Math.floor(Math.random() * Math.max(1, pool.length - 1))) % pool.length;
+    navStack.pop(); renderRhythmCards();
+  });
+  document.getElementById('rhc-done').addEventListener('click', goBack);
+}
+const rhythmCardState = { id: null, u: 0, c: -1 };
+
+// ── Rhythm marking: two tracks per speech (lesson 5.3) ────────
+// Outer is what the audience sees. Inner is what runs underneath. The
+// tool's whole point is the GAP: where the two differ, the speech gets a
+// visible chip, because that distance is the playable thing. Speeds are
+// a five-step scale; one note per speech names what makes the pair true.
+// Everything autosaves onto the project like every other mark.
+const RHYTHM_SPEEDS = [
+  [1, 'Very slow'], [2, 'Slow'], [3, 'Steady'], [4, 'Quick'], [5, 'Racing'],
+];
+
+function drawScriptRhythm(id, p, parsed, save) {
+  const host = document.getElementById('sc-rhythm');
+  const units = speechUnits(parsed);
+  if (!units.length) {
+    host.innerHTML = '<p class="pane-note">Add the script first — Edit is at the top of the page.</p>';
+    return;
+  }
+  const data = { ...(p.rhythm ?? {}) };
+  const noteTimers = {};
+
+  const commit = () => save({ rhythm: data });
+
+  const speedRow = (key, track, current) => `
+    <div class="rh-track">
+      <span class="rh-track-label">${track === 'outer' ? 'Outer' : 'Inner'}</span>
+      ${RHYTHM_SPEEDS.map(([v, label]) => `
+        <button class="rh-speed ${current === v ? 'on' : ''}" type="button"
+          data-rh="${key}" data-track="${track}" data-v="${v}"
+          aria-pressed="${current === v}" title="${label}">${v}</button>`).join('')}
+      <span class="rh-speed-name">${RHYTHM_SPEEDS.find(([v]) => v === current)?.[1] ?? ''}</span>
+    </div>`;
+
+  const unitHtml = u => {
+    const key = String(u.start);
+    const r = data[key] ?? {};
+    const gap = r.outer && r.inner && r.outer !== r.inner;
+    const preview = unitText(u);
+    return `
+      <div class="rh-unit" data-unit="${key}">
+        <p class="rh-who">${esc(u.who)}
+          ${gap ? '<span class="tag rh-gap">inner ≠ outer</span>' : ''}</p>
+        <p class="rh-preview">${esc(preview.length > 110 ? preview.slice(0, 110) + '…' : preview)}</p>
+        ${speedRow(key, 'outer', r.outer)}
+        ${speedRow(key, 'inner', r.inner)}
+        <input class="input-text rh-note" type="text" maxlength="200"
+          data-rhnote="${key}" value="${esc(r.note ?? '')}"
+          placeholder="What makes this pair true?">
+      </div>`;
+  };
+
+  const marked = Object.values(data).filter(r => r.outer || r.inner).length;
+  const gaps = Object.values(data).filter(r => r.outer && r.inner && r.outer !== r.inner).length;
+  host.innerHTML = `
+    <p class="pane-note">Two speeds per speech. <b>Outer</b> is what the audience sees.
+      <b>Inner</b> is what runs underneath. Where they differ you get a chip: that gap is
+      the playable thing. One note says what makes the pair true. Saved to this project.</p>
+    <p class="rh-count" id="rh-count">${marked} of ${units.length} speeches marked · ${gaps} gap${gaps === 1 ? '' : 's'}</p>
+    <div id="rh-units">${units.map(unitHtml).join('')}</div>`;
+
+  const refreshUnit = key => {
+    const u = units.find(x => String(x.start) === key);
+    const el = host.querySelector(`[data-unit="${key}"]`);
+    if (u && el) el.outerHTML = unitHtml(u);
+    wireUnit(key);
+    const m = Object.values(data).filter(r => r.outer || r.inner).length;
+    const g = Object.values(data).filter(r => r.outer && r.inner && r.outer !== r.inner).length;
+    host.querySelector('#rh-count').textContent =
+      `${m} of ${units.length} speeches marked · ${g} gap${g === 1 ? '' : 's'}`;
+  };
+
+  const wireUnit = key => {
+    const scope = key ? host.querySelector(`[data-unit="${key}"]`) : host;
+    if (!scope) return;
+    scope.querySelectorAll('[data-rh]').forEach(b =>
+      b.addEventListener('click', () => {
+        const k = b.dataset.rh, track = b.dataset.track, v = Number(b.dataset.v);
+        const r = (data[k] ??= {});
+        r[track] = r[track] === v ? undefined : v;   // tap again to clear
+        if (!r.outer && !r.inner && !(r.note ?? '').trim()) delete data[k];
+        commit();
+        refreshUnit(k);
+      }));
+    scope.querySelectorAll('[data-rhnote]').forEach(inp =>
+      inp.addEventListener('input', () => {
+        const k = inp.dataset.rhnote;
+        (data[k] ??= {}).note = inp.value;
+        clearTimeout(noteTimers[k]);
+        noteTimers[k] = setTimeout(commit, 600);
+      }));
+  };
+  wireUnit(null);
+}
 
 function drawScriptCards(id, p, parsed, save) {
   const host = document.getElementById('sc-cards');

@@ -2889,9 +2889,9 @@ export async function run({ navDoc = document } = {}) {
         && !/\bXP\b/.test(doc.querySelector('main')?.textContent ?? ''));
 
       clickIn(side('Practice')); await sleep(400);
-      check('acting: Practice holds the three categories, Scene Study withdrawn',
+      check('acting: Practice holds the four categories, Scene Study withdrawn',
         String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
-          === 'Acting Arcade,Flash Cards,Practice My Text');
+          === 'Acting Arcade,Flash Cards,Rhythm Cards,Practice My Text');
       clickIn(doc.getElementById('acp-arcade')); await sleep(400);
       // The Arcade is text-first: a two-level picker (collections, then
       // that collection's texts) opens before any game grid appears.

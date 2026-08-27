@@ -1802,3 +1802,25 @@ body.nb-full #app { display: none; }
 .chart-overview { margin: .6rem 0 1rem; }
 .chart-overview img { display: block; width: 100%; max-width: 44rem; height: auto;
   margin: 0 auto; border-radius: .5rem; }
+
+/* Rhythm marking: two speed tracks per speech, the gap chip, one note. */
+.rh-unit { border: 1px solid var(--line, #d9d2c2); border-radius: .6rem;
+  padding: .7rem .8rem; margin: .6rem 0; background: var(--panel, #faf6ec); }
+.rh-who { font-weight: 700; margin: 0 0 .15rem; }
+.rh-preview { color: var(--muted, #6b6455); font-size: .88rem; margin: 0 0 .5rem; }
+.rh-track { display: flex; align-items: center; gap: .3rem; margin: .25rem 0; flex-wrap: wrap; }
+.rh-track-label { width: 3.4rem; font-size: .8rem; font-weight: 700;
+  color: var(--muted, #6b6455); text-transform: uppercase; letter-spacing: .04em; }
+.rh-speed { width: 2rem; height: 2rem; border-radius: .45rem;
+  border: 1px solid var(--line, #d9d2c2); background: var(--panel-2, #f3ede0);
+  font-weight: 700; cursor: pointer; }
+.rh-speed.on { background: #8a6d3b; color: #fff; border-color: #8a6d3b; }
+.rh-speed-name { font-size: .8rem; color: var(--muted, #6b6455); }
+.rh-gap { background: #a4443a; color: #fff; margin-left: .4rem; }
+.rh-note { margin-top: .45rem; width: 100%; font-size: .9rem; }
+.rh-count { font-size: .85rem; color: var(--muted, #6b6455); margin: .2rem 0 .6rem; }
+
+/* Rhythm Cards: the dealt instruction and the speech under it. */
+.rh-card-speed { font-size: 1.5rem; font-weight: 700; margin: 0 0 .25rem; }
+.rh-card-why { font-size: 1.05rem; margin: 0; }
+.rh-card-text { white-space: pre-wrap; line-height: 1.65; margin: .3rem 0 0; }
