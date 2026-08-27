@@ -1,5 +1,11 @@
 # Module 4 · Building a Character — draft copy
 
+> **Superseded 2026-08-26 (same day):** the owner ordered the Four Lists lesson
+> removed from this module (the Library tile stays) and all copy simplified.
+> The live text is in `js/data/acting/course.js`, Module 4, lessons 4.1 to 4.6.
+> This file preserves the longer first draft.
+
+
 Seven lessons. Written to the existing Acting lesson shape: `objective`,
 `orientation`, `reflection`, and a `body` of three or four paragraphs. House style
 matched, which in `js/data/acting/course.js` means no em dashes, no

@@ -164,9 +164,6 @@ export const SPEECH_REVIEWS = {
   // Building a Character (4.1-4.7) and Tempo-Rhythm (5.1-5.6),
   // owner-approved 2026-08-26 by the same editorial decision as the
   // original 28 Acting lessons. Specialist review is still owed.
-  'ac-lists': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
-    reviewer: 'Product owner', date: '2026-08-26', version: 1,
-    notes: 'Editorially approved by the product owner for preview publication on 2026-08-26. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
   'ac-inside': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-26', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-26. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },

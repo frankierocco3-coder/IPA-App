@@ -2763,7 +2763,7 @@ export async function run({ navDoc = document } = {}) {
 
   // ── 20. The Acting workspace ─────────────────────────────────
   {
-    check('acting: six modules holding all 41 lessons, numbered without gaps',
+    check('acting: six modules holding all 40 lessons, numbered without gaps',
       ACTING_MODULES.length === 6
       && String(ACTING_MODULES.map(m => m.title))
         === 'The Actor’s Work,Investigating the Text,Listening and Responding,Building a Character,Tempo-Rhythm,Preparing the Performance'
@@ -2843,16 +2843,16 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !doc.getElementById('freeplay'));
-      check('acting: all 45 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 44 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
-          // item (28 original lessons + 13 Building a Character /
+          // item (28 original lessons + 12 Building a Character /
           // Tempo-Rhythm lessons owner-approved 2026-08-26 + 4 approaches)
           // carries the owner's editorial verdict, none claims a
           // specialist, and no reviewer name is invented — so the draft
           // strip has nothing to count and must be gone.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 45
+          return items.length === 44
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'

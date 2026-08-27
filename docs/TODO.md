@@ -11,10 +11,11 @@ rather than quietly dropped.
 
 **BUILDING A CHARACTER (owner order, 2026-08-20) — built 2026-08-26.** Two new
 Acting modules in `js/data/acting/course.js`: Module 4 Building a Character
-(7 lessons: the Four Lists as entry, then improvisation-based character work,
-recording on the learner's own phone, off-app by design) and Module 5
-Tempo-Rhythm (6 lessons). Preparing the Performance moved from module 4 to 6;
-lesson ids did not change, so nothing stored breaks. All 13 lessons are
+(6 lessons of improvisation-based character work; the Four Lists lesson was
+cut from the module by owner order, its Library tile stays) and Module 5
+Tempo-Rhythm (6 lessons). All copy simplified 2026-08-26 by owner order:
+about 8 words per sentence. Preparing the Performance moved from module 4 to 6;
+lesson ids did not change, so nothing stored breaks. All 12 lessons are
 `requiredReviewer: 'acting-professional'` and were owner-approved on 2026-08-26
 (same editorial decision as the original 28 Acting lessons; specialist review is
 still owed and the ledger notes say so). They are live in the Acting Library.

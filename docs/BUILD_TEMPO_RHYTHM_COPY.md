@@ -1,5 +1,10 @@
 # Module 4 · Building a Character — draft copy
 
+> **Superseded 2026-08-26 (same day):** the owner ordered all copy simplified.
+> The live text is in `js/data/acting/course.js`, Module 5, lessons 5.1 to 5.6.
+> This file preserves the longer first draft.
+
+
 Six lessons, 4.2 to 4.7. Lesson 4.1 depends on the open question about whether
 the module opens with the Four Lists, so it is not written yet.
 
