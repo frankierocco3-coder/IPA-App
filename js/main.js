@@ -3126,6 +3126,12 @@ function actingLibraryPane(el) {
     colTile('principles'),
     colTile('character'),
     colTile('scene'),
+    // The Four Lists tool sits with the collection it serves (owner
+    // order, 2026-08-27): investigation first, then its worksheet.
+    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', title: 'The Four Lists',
+      count: 4, unit: 'list',
+      keywords: 'character facts says about others reading five times building a character',
+      go: () => renderFourListsLesson() },
     // Question Everything — the text-dissection textbook. Moved here from
     // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
     // on the shelf. Count = the six numbered DISSECT_SECTIONS.
@@ -3154,10 +3160,6 @@ function actingLibraryPane(el) {
     { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
       count: ACTING_APPROACHES.length, unit: 'introduction',
       keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
-    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', title: 'The Four Lists',
-      count: 4, unit: 'list',
-      keywords: 'character facts says about others reading five times building a character',
-      go: () => renderFourListsLesson() },
     // The whole Speechcraft Textbook, shelved here while the Speech
     // workspace is withdrawn (owner order, 2026-08-19). Same records,
     // never copied — it supersedes the 8-chapter Speech for Actors
