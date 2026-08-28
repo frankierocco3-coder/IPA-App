@@ -117,7 +117,7 @@ def main():
     # in BOTH Alyx and Peach. This keeps the no-TTS rule honest forever.
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
     from generate_voices import words as all_words, idiom_texts, clip_name
-    speakable = set(all_words()) | set(idiom_texts().get("ssbe", []))
+    speakable = set(all_words("ssbe")) | set(idiom_texts().get("ssbe", []))
     for v in ("alyx", "peach"):
         have = set(index.get("ssbe", {}).get(v, []))
         missing = sorted(t for t in speakable if clip_name(t) not in have)

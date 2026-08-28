@@ -306,6 +306,46 @@ export const WORDS = [
   { word: 'near', ipa: ['n', 'ɪə'], accent: 'ssbe', note: 'NEAR often smooths toward a long /ɪː/ — the glide is fading' },
   { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'ssbe', note: 'FACE as in RP — the glide survives here' },
   { word: 'lot', ipa: ['l', 'ɒ', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /lɒt/ — LOT stays rounded /ɒ/; final /t/ often as [ʔ]' },
+
+  // ── Cockney ─────────────────────────────────────────────────
+  // Cockney shares Standard British's broad system; what defines it is
+  // the realizations, so most entries are narrow: true and display in
+  // square brackets. TH-fronted, glottal and h-dropped forms all keep
+  // their underlying phonemes in the note. The diphthong shift (FACE
+  // [æɪ], PRICE [ɑɪ], GOAT [æʊ]) is taught in lesson copy over the broad
+  // symbols, exactly as ssbe teaches fronted GOOSE.
+  { word: 'think', ipa: ['f', 'ɪ', 'ŋ', 'k'], accent: 'cockney', narrow: true, note: 'phonemically /θɪŋk/: TH-fronting says the /θ/ as [f]' },
+  { word: 'three', ipa: ['f', 'r', 'iː'], accent: 'cockney', narrow: true, note: 'phonemically /θriː/: fronted TH makes three and free sound alike' },
+  { word: 'thing', ipa: ['f', 'ɪ', 'ŋ'], accent: 'cockney', narrow: true, note: 'phonemically /θɪŋ/: TH fronted to [f]' },
+  { word: 'nothing', ipa: ['n', 'ʌ', 'f', 'ɪ', 'ŋ'], accent: 'cockney', narrow: true, note: 'phonemically /nʌθɪŋ/: the medial TH fronts to [f]' },
+  { word: 'brother', ipa: ['b', 'r', 'ʌ', 'v', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /brʌðə/: non-initial /ð/ fronts to [v]' },
+  { word: 'mother', ipa: ['m', 'ʌ', 'v', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /mʌðə/: /ð/ fronted to [v]' },
+  { word: 'with', ipa: ['w', 'ɪ', 'v'], accent: 'cockney', narrow: true, note: 'phonemically /wɪð/: final /ð/ fronts to [v]' },
+  { word: 'mouth', ipa: ['m', 'aʊ', 'f'], accent: 'cockney', narrow: true, note: 'phonemically /maʊθ/: fronted final TH; broad speakers also flatten MOUTH toward [æː]' },
+  { word: 'bath', ipa: ['b', 'ɑː', 'f'], accent: 'cockney', narrow: true, note: 'phonemically /bɑːθ/: the broad London BATH vowel with the TH fronted to [f]' },
+  { word: 'butter', ipa: ['b', 'ʌ', 'ʔ', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /bʌtə/: the glottal stop is the Cockney norm, not a relaxed option' },
+  { word: 'water', ipa: ['w', 'ɔː', 'ʔ', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /wɔːtə/: glottal [ʔ] between vowels' },
+  { word: 'better', ipa: ['b', 'e', 'ʔ', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /betə/: glottal [ʔ] between vowels' },
+  { word: 'little', ipa: ['l', 'ɪ', 'ʔ', 'ə', 'l'], accent: 'cockney', narrow: true, note: 'phonemically /lɪtəl/: [ʔ] before the weak final syllable; the dark final /l/ often vocalizes toward [o]' },
+  { word: 'what', ipa: ['w', 'ɒ', 'ʔ'], accent: 'cockney', narrow: true, note: 'phonemically /wɒt/: final /t/ closes to [ʔ]' },
+  { word: 'got', ipa: ['g', 'ɒ', 'ʔ'], accent: 'cockney', narrow: true, note: 'phonemically /gɒt/: final glottal stop' },
+  { word: 'market', ipa: ['m', 'ɑː', 'k', 'ɪ', 'ʔ'], accent: 'cockney', narrow: true, note: 'phonemically /mɑːkɪt/: final /t/ as [ʔ], long non-rhotic /ɑː/' },
+  { word: 'city', ipa: ['s', 'ɪ', 'ʔ', 'i'], accent: 'cockney', narrow: true, note: 'phonemically /sɪti/: glottal between vowels, tense happY /i/ at the end' },
+  { word: 'house', ipa: ['aʊ', 's'], accent: 'cockney', narrow: true, note: 'phonemically /haʊs/: the /h/ drops in content words' },
+  { word: 'hammer', ipa: ['æ', 'm', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /hæmə/: h-dropping' },
+  { word: 'horse', ipa: ['ɔː', 's'], accent: 'cockney', narrow: true, note: 'phonemically /hɔːs/: h-dropped, THOUGHT vowel as in Standard British' },
+  { word: 'hair', ipa: ['ɛː'], accent: 'cockney', narrow: true, note: 'phonemically /hɛː/: h-dropped, with the steady SQUARE /ɛː/ London shares with Standard British' },
+  { word: 'home', ipa: ['əʊ', 'm'], accent: 'cockney', narrow: true, note: 'phonemically /həʊm/: h-dropped; broad speakers also shift GOAT toward [æʊ]' },
+  { word: 'fair', ipa: ['f', 'ɛː'], accent: 'cockney', note: 'steady SQUARE /ɛː/, shared with Standard British' },
+  { word: 'there', ipa: ['ð', 'ɛː'], accent: 'cockney', note: 'steady SQUARE; word-initial /ð/ usually survives fronting' },
+  { word: 'tune', ipa: ['tʃ', 'uː', 'n'], accent: 'cockney', note: 'yod-coalescence, shared with Standard British: “choon”' },
+  { word: 'Tuesday', ipa: ['tʃ', 'uː', 'z', 'd', 'eɪ'], accent: 'cockney', note: 'yod-coalescence: “Chewsday”; broad speakers also shift the final FACE vowel toward [æɪ]' },
+  { word: 'duty', ipa: ['dʒ', 'uː', 'ʔ', 'i'], accent: 'cockney', narrow: true, note: 'phonemically /djuːti/: fused yod /dʒ/ and a glottal between vowels' },
+  { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'cockney', note: 'broad /eɪ/ names the phoneme; the Cockney diphthong shift speaks it [æɪ], toward “fice”' },
+  { word: 'day', ipa: ['d', 'eɪ'], accent: 'cockney', note: 'FACE shifted [æɪ] in broad Cockney: the symbol stays /eɪ/' },
+  { word: 'price', ipa: ['p', 'r', 'aɪ', 's'], accent: 'cockney', note: 'PRICE spoken [ɑɪ], starting further back; the broad symbol stays /aɪ/' },
+  { word: 'night', ipa: ['n', 'aɪ', 'ʔ'], accent: 'cockney', narrow: true, note: 'phonemically /naɪt/: shifted PRICE onset [ɑɪ] and a final glottal stop' },
+  { word: 'go', ipa: ['g', 'əʊ'], accent: 'cockney', note: 'GOAT spoken [æʊ] in broad Cockney; the broad symbol stays /əʊ/' },
 ];
 
 // Minimal pairs for listening discrimination.

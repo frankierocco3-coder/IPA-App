@@ -114,6 +114,46 @@ export const DIALECT_INFO = {
     ],
   },
 
+  cockney: {
+    icon: '🚕',
+    color: '#a8825a',
+    target: 'Broad working-class London speech: the accent of the East End market, the black cab and a century of London stage and screen. A first-class audition dialect, taught with its full feature set rather than a softened stage version.',
+    period: 'Contemporary, with traditional features labelled where they are receding. The accent has been described continuously since the nineteenth century and is still alive across London and the estuary towns.',
+    context: 'For characters who are London working class, past or present. Real speakers range from full broad Cockney to milder Estuary blends; this course teaches the broad end and labels every feature honestly so an actor can dial the strength to the role.',
+    notClaim: 'It does not claim that Cockney is careless or incorrect English: it is a rule-governed accent with its own system, and this course treats it with the same respect as any other. It is also not Multicultural London English, a newer London variety with a different feature set.',
+    core: [
+      'TH-fronting: /θ/ realized [f] and non-initial /ð/ realized [v]: think [fɪŋk], brother [ˈbrʌvə]',
+      '/t/ realized as a glottal stop [ʔ] between vowels and word-finally: butter [ˈbʌʔə], what [wɒʔ]',
+      'H-dropping in content words: house [aʊs], hammer [ˈæmə]',
+      'L-vocalization: dark /l/ becomes an [o]-like vowel: milk [mɪok], well [weo]',
+      'Yod coalescence: tune [tʃuːn], Tuesday [ˈtʃuːzdeɪ], duty [ˈdʒuːʔi]',
+      'The diphthong shift: FACE realized [æɪ], PRICE realized [ɑɪ], GOAT realized [æʊ]',
+      'Non-rhotic with broad BATH /ɑː/: the London skeleton underneath is shared with Standard British',
+    ],
+    common: [
+      'Word-initial /ð/ in function words realized [d] or dropped: the, them',
+      'MOUTH flattened toward a long [æː]: mouth [mæːf], about [əˈbæːʔ]',
+      'Final unstressed -er opened toward [ɐ]: dinner [ˈdɪnɐ]',
+      'me for my in casual speech: me brother — grammar, taught with the expressions rather than drilled',
+      'innit as an all-purpose tag question',
+    ],
+    variable: [
+      'How far the diphthong shift travels: broad speakers go further than young Estuary-leaning ones',
+      'Hypercorrect h-insertion in careful speech by natural h-droppers',
+      'Rhyming slang in live use: recognition is essential for an actor, active use varies hugely by speaker and generation',
+      'TH-fronting of initial /ð/: this, that keep [ð] or [d] more often than [v]',
+    ],
+    convention: 'Broad symbols are shared with Standard British: the phoneme system underneath is the same, and what makes Cockney is the realizations. So drills write Cockney forms in square brackets: think is still /θɪŋk/ underneath, and [fɪŋk] is how the accent says it. The diphthong shift is taught the same way: FACE keeps its broad /eɪ/, spoken [æɪ].',
+    rhythm: 'Quick, forward and heavily linked, with strong reduction of function words and the glottal stop carrying much of the consonant rhythm. Intonation is lively, with wide rises on the innit-style tags. Register matters: the same speaker glottals and fronts more at the market than at a job interview.',
+    differsFrom: { id: 'ssbe', label: 'Standard British', how: 'Cockney and Standard British share a skeleton: non-rhotic, broad BATH, rounded LOT. Cockney then goes where Standard British does not: TH-fronting, h-dropping, the full diphthong shift, and glottal replacement as the norm rather than a relaxed-speech option. Standard British reads neutral and professional; Cockney reads local, working class and unmistakably London.' },
+    sources: [
+      'Wells, J. C. — Accents of English 2: The British Isles (Cambridge University Press): the London chapter this course follows for the feature set and the diphthong shift.',
+      'Sivertsen, E. — Cockney Phonology (Oslo University Press): the classic descriptive study.',
+      'Matthews, W. — Cockney Past and Present (Routledge): history and lexicon.',
+      'Lindsey, G. — English After RP: Standard British Pronunciation Today (Palgrave Macmillan): the contemporary London backdrop and the Estuary boundary.',
+    ],
+  },
+
   aus: {
     icon: '🇦🇺',
     color: '#5f8a86',

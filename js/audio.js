@@ -41,7 +41,7 @@ function pickVoice(lang) {
 speechSynthesis.onvoiceschanged = () => { Object.keys(voiceCache).forEach(k => delete voiceCache[k]); };
 
 // Map an accent id to the TTS language that should voice it.
-export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-GB' };
+export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-GB', cockney: 'en-GB' };
 
 // …and back again, so a spoken language picks the right clip folder. Two
 // accents can share a TTS language (Traditional RP and Standard British are both

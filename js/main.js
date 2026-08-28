@@ -206,7 +206,7 @@ function modeLesson(mode, accent = null) {
   };
 }
 
-const TRACK_ACCENT = { nam: 'nam', rp: 'rp', aus: 'aus', ssbe: 'ssbe' };
+const TRACK_ACCENT = { nam: 'nam', rp: 'rp', aus: 'aus', ssbe: 'ssbe', cockney: 'cockney' };
 
 // A synthetic lesson drawing on everything the track teaches.
 function practiceLesson(track) {
@@ -233,13 +233,19 @@ function practiceLesson(track) {
 // exactly like switching languages. Leaderboards are deliberately absent:
 // there are no accounts, so there is nobody real to rank against.
 
+// Cockney is a strict-audio course (Bob and Lizzie): until its clips are
+// generated and ear-approved, the course stays hidden behind this switch —
+// data lives, no learner can select it. Flip to launch.
+const COCKNEY_LIVE = false;
 const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
   { id: 'rp', icon: '🎩', label: 'Traditional RP' },
   { id: 'ssbe', icon: '🇬🇧', label: 'Standard British' },
+  { id: 'cockney', icon: '🚕', label: 'Cockney' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
+const visibleCourses = () => COURSES.filter(c => COCKNEY_LIVE || c.id !== 'cockney');
 // The ONE ordered nav config: the desktop sidebar and the mobile bottom
 // nav both render straight from this array, so the two can never drift.
 const SECTIONS = [
@@ -260,7 +266,7 @@ const LEGACY_SECTIONS = { textbook: 'library', texts: 'library', quests: 'progre
 // reading them.
 const activeCourse = () => {
   const c = localStorage.getItem('speechcraft-course');
-  return COURSES.some(x => x.id === c) ? c : 'nam';
+  return visibleCourses().some(x => x.id === c) ? c : 'nam';
 };
 
 // ── Workspaces: Speech · Acting · IPA · Accents & Dialects ──
@@ -467,7 +473,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
     ${ws === 'accents' ? `
     <div class="course-menu" id="course-menu" role="menu" hidden>
       <p class="course-menu-h">My accent courses</p>
-      ${COURSES.filter(c => c.id !== 'core').map(c => {
+      ${visibleCourses().filter(c => c.id !== 'core').map(c => {
         const t = trackFor(c.id);
         const { done, total } = trackProgress(t);
         return `<button class="course-row ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
@@ -4939,7 +4945,7 @@ function renderPreferences() {
     <main class="guide">
       <h2 class="guide-heading">Active course</h2>
       <div class="chip-row" id="pref-courses">
-        ${COURSES.map(c => `<button class="chip-pick ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" type="button"
+        ${visibleCourses().map(c => `<button class="chip-pick ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" type="button"
           aria-pressed="${c.id === course.id}">${c.icon} ${esc(c.label)}</button>`).join('')}
       </div>
       <h2 class="guide-heading">What are you working toward?</h2>

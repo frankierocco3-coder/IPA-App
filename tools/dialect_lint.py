@@ -150,7 +150,7 @@ def main():
         fail("course.js TRACKS: duplicate track id %r" % t)
 
     # 7: every dialect course has About data
-    for d in ("nam", "rp", "ssbe", "aus"):
+    for d in ("nam", "rp", "ssbe", "aus", "cockney"):
         if not re.search(r"^  %s: \{" % d, dialects_src, re.M):
             fail("dialects.js: missing DIALECT_INFO record for course %r" % d)
 

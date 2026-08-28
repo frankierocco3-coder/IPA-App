@@ -288,6 +288,55 @@ export const COURSE = [
       { id: 'ssbe-final', title: 'Standard British final', accent: 'ssbe', shiftTo: 'ssbe', count: 12, guide: 'Twelve questions across everything: glottal stops, steady SQUARE, coalesced yods, fronted GOOSE, happY tensing, the classic skeleton underneath, shifts from Traditional RP forms, ear checks — and the conversational expressions in short exchanges, because an accent lives in dialogue, not word lists.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'ɒ', 'əʊ', 'uː'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar', 'idiomDialogue', 'idiomLiteral'] },
     ],
   },
+
+  // ── Cockney ─────────────────────────────────────────────────
+  {
+    id: 'ck-intro',
+    title: 'Stage 1 · Orientation',
+    color: '#a8825a',
+    icon: '📍',
+    blurb: 'What Cockney is, what it is not, and why actors train it.',
+    lessons: [
+      { id: 'ck-0', title: 'Hear Cockney', accent: 'cockney', guide: 'Cockney is broad working-class London speech: the East End market, the black cab, a century of London stage and screen. It is a rule-governed accent, not careless English, and this course teaches it with the same respect as any other. Its CORE TARGET features are big and hearable: TH-fronting (think spoken [fɪŋk]), the glottal stop as the normal /t/ between vowels and at word ends, h-dropping (house spoken [aʊs]), and a diphthong shift that moves FACE toward [æɪ] and PRICE toward [ɑɪ]. Underneath sits the same London skeleton as Standard British: non-rhotic, broad BATH /ɑː/. The notation contract holds throughout: / / marks the phonemes underneath, [ ] marks how Cockney says them.', phonemes: ['f', 'v', 'ʔ', 'ɑː', 'aʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+    ],
+  },
+  {
+    id: 'ck',
+    title: 'Stage 2 · The Sounds',
+    color: '#a8825a',
+    icon: '🚕',
+    accent: true,
+    blurb: 'TH-fronting, the glottal stop, dropped aitches and the vowel shift — the full feature set, labelled honestly.',
+    lessons: [
+      { id: 'ck-1', title: 'TH becomes F and V', accent: 'cockney', guide: 'CORE TARGET. Cockney fronts the TH sounds: /θ/ is spoken [f] and non-initial /ð/ is spoken [v]. Think is [fɪŋk], three sounds like free, brother is [ˈbrʌvə], with is [wɪv]. The phonemes underneath do not change, which is why these forms sit in square brackets: think is still /θɪŋk/ under the accent. One boundary matters: word-initial /ð/ in the, this and that usually stays [ð] or becomes [d], not [v]. Fronting everything is the give-away of an actor who learned the rule but not the boundary.', phonemes: ['f', 'v', 'θ', 'ð'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
+      { id: 'ck-2', title: 'The glottal stop, everywhere', accent: 'cockney', guide: 'CORE TARGET. Standard British treats the glottal stop as a relaxed-speech option; Cockney treats it as the norm. Between vowels and at word ends, /t/ closes to [ʔ]: butter [ˈbʌʔə], water [ˈwɔːʔə], what [wɒʔ], market [ˈmɑːkɪʔ]. The vocal folds shut and release where the tongue tip would have tapped. Word-initial /t/ stays [t]: tea is still /tiː/. If you already carry the Standard British glottal habit, Cockney simply removes the hesitation: where Standard British might glottal, Cockney does.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'ck-3', title: 'Dropping the aitch', accent: 'cockney', guide: 'CORE TARGET. In content words the /h/ goes: house [aʊs], hammer [ˈæmə], horse [ɔːs], hair [ɛː]. The word keeps its /h/ phonemically, and the accent leaves it silent, which is why these forms sit in brackets. Two honest notes. First, h-dropping carries social freight in Britain, and a character who drops aitches is telling the audience something; that is exactly why the feature matters to actors. Second, real Cockney speakers sometimes INSERT an h in careful speech where none belongs, a VARIABLE FEATURE called hypercorrection, and a script may ask you for it.', phonemes: ['h', 'aʊ', 'ɔː', 'ɛː'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'fillBlank'] },
+      { id: 'ck-4', title: 'The vowel shift', accent: 'cockney', guide: 'CORE TARGET. The Cockney diphthongs have rotated one position around the mouth. FACE starts open: /eɪ/ is spoken [æɪ], so day leans toward the sound of dye. PRICE starts back: /aɪ/ is spoken [ɑɪ], so price leans toward the sound of poise without reaching it. GOAT starts front: /əʊ/ is spoken [æʊ]. And MOUTH flattens toward a long [æː] in broad speakers: mouth toward [mæːf]. The broad symbols stay put because the phonemes underneath are the same ones; the symbol names the phoneme, not the exact journey. How far the shift travels is a VARIABLE FEATURE: broad older speakers go furthest, young Estuary-leaning speakers less far.', phonemes: ['eɪ', 'aɪ', 'əʊ', 'aʊ'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'minimalPair'] },
+      { id: 'ck-5', title: 'Chewsday: the fused yods', accent: 'cockney', guide: 'CORE TARGET, shared with Standard British. /tj/ and /dj/ fuse: tune [tʃuːn], Tuesday [ˈtʃuːzdeɪ], duty [ˈdʒuːʔi] with the glottal riding along. A listening cue: Chewsday. Cockney also vocalizes dark /l/: milk toward [mɪok], well toward [weo], little ending in a vowel where the tongue tip never rises. The l-vocalization is taught here by ear and in lesson copy rather than in symbols, because the broad transcription keeps /l/ in place.', phonemes: ['tʃ', 'dʒ', 'uː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
+      { id: 'ck-6', title: 'Reading the accent', accent: 'cockney', guide: 'Full Cockney forms, mixed: fronted TH, glottal stops, dropped aitches, shifted vowels, fused yods. Read them cold, type the words, transcribe back the other way. This is where the features stop being a list and become one voice. Keep the register honest: the same speaker fronts and glottals more at the market than in a job interview, so an actor needs the dial, not just the extreme.', phonemes: ['f', 'v', 'ʔ', 'ɛː', 'ɑː', 'eɪ'], types: ['typeWord', 'symbolToWord', 'gapBuild', 'fillBlank'] },
+    ],
+  },
+  {
+    id: 'ck-shift',
+    title: 'Stage 3 · Shift Work',
+    color: '#a8825a',
+    icon: '🔧',
+    blurb: 'Reference forms to Cockney and back — the classic actor transformation, drilled both ways.',
+    lessons: [
+      { id: 'ck-s1', title: 'Into Cockney', shiftTo: 'cockney', guide: 'Given the reference form, produce the Cockney one: front the TH, close the /t/ to [ʔ], drop the aitch. The traps are the careful habits: /θɪŋk/, /bʌtə/ and /haʊs/ are each one feature short of the accent. Work feature by feature until the transformation runs whole words at a time.', phonemes: ['f', 'v', 'ʔ', 'ɑː'], types: ['shiftChoice', 'shiftBuild'] },
+      { id: 'ck-s2', title: 'Placing the speaker', shiftTo: 'cockney', guide: 'Ear work: hear a form cold and place it. The tells are reliable: one fronted TH, one glottal stop, one dropped aitch, one shifted FACE vowel. An actor who hears the strength of each feature can dial a character from mild Estuary to full broad Cockney by degrees, and hear at once when a fellow performer overshoots.', phonemes: ['ʔ', 'f', 'v', 'eɪ'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
+    ],
+  },
+  {
+    id: 'ck-mastery',
+    title: 'Stage 4 · Mastery',
+    color: '#a8825a',
+    icon: '🏆',
+    blurb: 'The final: the whole accent, mixed and at speed.',
+    lessons: [
+      { id: 'ck-final', title: 'Cockney final', accent: 'cockney', shiftTo: 'cockney', count: 12, guide: 'Twelve questions across everything: fronted TH, glottal stops, dropped aitches, the vowel shift, fused yods, the London skeleton underneath, shifts from reference forms and ear checks. An accent lives in whole speech, not word lists, so the mix comes fast and unlabelled, the way a script does.', phonemes: ['f', 'v', 'ʔ', 'ɛː', 'ɑː', 'eɪ', 'aɪ', 'tʃ'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
+    ],
+  },
 ];
 
 // Top-level navigation: each track is a self-contained section with its
@@ -336,6 +385,15 @@ export const TRACKS = [
     accent: true,
     blurb: 'A modern British target for contemporary characters, conversation, film and TV.',
     unitIds: ['ssbe-intro', 'ssbe', 'ssbe-shift', 'ssbe-mastery'],
+  },
+  {
+    id: 'cockney',
+    title: 'Cockney',
+    icon: '🚕',
+    color: '#a8825a',
+    accent: true,
+    blurb: 'Broad working-class London — a first-class audition dialect with its full feature set.',
+    unitIds: ['ck-intro', 'ck', 'ck-shift', 'ck-mastery'],
   },
   {
     id: 'shift',

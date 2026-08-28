@@ -35,6 +35,10 @@ const ACCENT_FOREIGN = {
   // Standard British shares RP's system but SQUARE is the monophthong
   // /ɛː/, so the old /eə/ diphthong never appears.
   ssbe: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'eə'],
+  // Cockney is taught as realizations over the Standard British system
+  // (broad symbols shared; th-fronting, glottal and l-vocalized forms are
+  // narrow-bracket entries), so its foreign list mirrors ssbe's.
+  cockney: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'eə'],
 };
 
 const poolFor = accent => {
@@ -58,7 +62,7 @@ export const phonemesForAccent = accent =>
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
-const ACCENT_NAMES = { rp: 'Traditional RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'Standard British' };
+const ACCENT_NAMES = { rp: 'Traditional RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'Standard British', cockney: 'Cockney' };
 
 // Word pairs that exist in both accents: the raw material for shift
 // drills. The RP form is the rp-tagged entry, or the untagged one
@@ -243,6 +247,16 @@ const ACCENT_ERRORS = {
     // American habits: rhotic r after long vowels, flat BATH
     ipa => ipa.flatMap(p => (p === 'ɑː' ? ['æ'] : ['ɜː', 'ɔː'].includes(p) ? [p, 'r'] : [p])),
   ],
+  cockney: [
+    // too careful: restoring the careful [t] and the glided SQUARE
+    ipa => ipa.map(p => (p === 'ʔ' ? 't' : p === 'ɛː' ? 'eə' : p)),
+    // un-fronted error: putting the TH back where Cockney fronts it
+    ipa => ipa.map(p => (p === 'f' ? 'θ' : p === 'v' ? 'ð' : p)),
+    // hypercorrect h-insertion on a vowel-initial word, else a yod slip
+    ipa => (['aʊ', 'æ', 'ɔː', 'ɛː', 'əʊ', 'ɑː'].includes(ipa[0])
+      ? ['h', ...ipa]
+      : ipa.flatMap(p => (p === 'tʃ' ? ['t', 'j'] : p === 'dʒ' ? ['d', 'j'] : [p]))),
+  ],
 };
 
 function genAccentFact(accent) {
@@ -273,6 +287,7 @@ function genAccentFact(accent) {
 function genFillBlank(lessonPhonemes, accent) {
   const pool = (accent ? WORDS.filter(w => w.accent === accent) : poolFor(null))
     .filter(w => w.ipa.length >= 2 && playableWord(w.word, accent));
+  if (!pool.length) return null;   // an accent with no playable words yet
   const preferred = pool.filter(w => w.ipa.some(p => lessonPhonemes.includes(p)));
   const entry = pick(preferred.length ? preferred : pool);
   const targetable = entry.ipa

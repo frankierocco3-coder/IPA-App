@@ -158,14 +158,22 @@ def voice_map() -> dict:
     return voices
 
 
-def words():
-    """Every distinct word the app can speak (WORDS + phoneme examples)."""
+def words(accent=None):
+    """Every distinct word the app can speak (WORDS + phoneme examples).
+
+    With `accent`, WORDS entries tagged for a DIFFERENT accent are
+    excluded — a course only ever surfaces its own and the untagged
+    reference words, so its strict-coverage promise stops there.
+    Phoneme examples are untagged reference material and always count.
+    """
     src = PHONEMES_JS.read_text()
     found = set()
     for line in src.splitlines():
         m = re.search(r"word:\s*'([^']+)'", line)
         if m:
-            found.add(m.group(1))
+            tag = re.search(r"accent:\s*'(\w+)'", line)
+            if accent is None or tag is None or tag.group(1) == accent:
+                found.add(m.group(1))
         for block in re.findall(r"examples:\s*\[([^\]]+)\]", line):
             found.update(re.findall(r"'([^']+)'", block))
     return sorted(found)
