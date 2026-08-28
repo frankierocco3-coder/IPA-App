@@ -1,0 +1,15 @@
+{
+  "_comment": "Spoken-text steering per accent: {accent: {'*': {word: spoken}, '<voice key>': {word: spoken}}}. '*' applies to every voice; a voice key's map wins. Filenames and the app always keep the real spelling. ONLY ear-proven recipes belong here (owner ear-check, tools/street_pilot.py) — candidates go through a pilot round first.",
+  "cockney": {
+    "*": {
+      "Tuesday": "Chewsday",
+      "tune": "chewn"
+    },
+    "bob": {
+      "butter": "buh-uh"
+    },
+    "lizzie": {
+      "butter": "buh-ah"
+    }
+  }
+}

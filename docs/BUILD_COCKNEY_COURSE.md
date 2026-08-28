@@ -23,10 +23,26 @@ pool; it now returns null like its siblings. Audio-dependent exercise
 types honestly return null until clips exist; reading-based lessons
 already generate.
 
-Phase B remaining: idiom set (everyday + rhyming slang), pron.js
-toCockney, respelling layer in the generator, audio batches (review →
-ear-check → bulk → ear-check), #audit filter, validate.js accent,
-regression pins, launch flip.
+Phase B in progress (2026-08-28): SHIPPED — 60-entry COCKNEY idiom set
+in idiom.js (30 everyday + 30 rhyming slang, flags applied, clip rule
+noted per rhyme); the generator respelling layer (`tools/respell.json`,
+`respell_map`/`apply_respell` in generate_voices.py — spoken text
+steered, filenames and index keep real spelling) seeded with the three
+ear-proven recipes; `cockney` added to the generator's ACCENTS so
+idiom_texts() serves its 120 texts; pron.js toCockney (yod fusing,
+h-dropping, TH-fronting, non-initial ð→v, intervocalic/final glottal)
+wired into ipaFor. Known ≈ limitation, same as rp/ssbe: words whose
+General American source already dropped the yod (Tuesday, tune) cannot
+recover /tʃ/ by rule.
+
+Phase B remaining: audio pilot for isolated th/h word respellings
+(fink, fing, free, nuffink, wiv, mouf, barf — UNPROVEN, need the
+owner's ear; brother/mother proven impossible isolated and may need
+cutting from the drilled bank or phrase-carrier clips), then review
+batch → ear-check → bulk → ear-check; TEXT_DIALECTS + validate.js
+accent (deliberately deferred to launch so Studio does not offer a
+hidden course); #audit filter option; regression pins for the course;
+launch flip of COCKNEY_LIVE.
 
 The earlier working title "Street British" is superseded by the spine
 decision. Course copy names Cockney honestly and never calls it slang-only,

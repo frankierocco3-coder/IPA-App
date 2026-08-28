@@ -106,6 +106,24 @@ function toSsbe(s, word) {
   return toRP(s, word).replace(/eə/g, 'ɛː');
 }
 
+// Standard British → Cockney: the SPOKEN realizations, because with this
+// accent the realizations ARE the target (Dialect Accuracy Standard,
+// dialects.js). TH-fronting, h-dropping, intervocalic and final glottal
+// /t/, yod coalescence. The diphthong shift stays in the broad symbols
+// (taught in lesson copy), matching the course convention. Approximate,
+// like every derived accent.
+function toCockney(s, word) {
+  s = toSsbe(s, word);
+  s = s.replace(/tj/g, 'tʃ').replace(/dj/g, 'dʒ');            // Chewsday
+  s = s.replace(/^([ˈˌ]?)h/, '$1');                            // h-dropping, word-initial
+  s = s.replace(/θ/g, 'f');                                    // TH-fronting
+  s = s.replace(/(.)ð/g, '$1v');                               // non-initial /ð/ → v
+  const VOW = 'ɪeæʌʊɒəiuɛɜɑɔaː';
+  s = s.replace(new RegExp('([' + VOW + '])t(?=[' + VOW + '])', 'g'), '$1ʔ');   // butter
+  s = s.replace(new RegExp('([' + VOW + '])t$'), '$1ʔ');                        // what
+  return s;
+}
+
 // Returns { ipa, approx } or null if the word isn't in the dictionary.
 export function ipaFor(word, accent) {
   if (!PRON) return null;
@@ -114,6 +132,7 @@ export function ipaFor(word, accent) {
   if (!am) return null;
   if (accent === 'rp') return { ipa: toRP(am, key), approx: true };
   if (accent === 'ssbe') return { ipa: toSsbe(am, key), approx: true };
+  if (accent === 'cockney') return { ipa: toCockney(am, key), approx: true };
   if (accent === 'aus') return { ipa: toAus(am, key), approx: true };
   return { ipa: am, approx: false };            // nam / General American (exact)
 }

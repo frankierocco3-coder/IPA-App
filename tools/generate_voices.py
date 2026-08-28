@@ -42,7 +42,34 @@ KEY_FILE = TOOLS / ".elevenlabs_key"
 
 API = "https://api.elevenlabs.io/v1"
 MODEL = "eleven_multilingual_v2"
-ACCENTS = ["rp", "nam", "aus", "ssbe"]
+ACCENTS = ["rp", "nam", "aus", "ssbe", "cockney"]
+
+# ── Respelling layer ──────────────────────────────────────────
+# Some accents need the SPOKEN text steered while the filename and the
+# app keep the real spelling (the Cockney voices cannot say an isolated
+# "Tuesday" with the right liquid U, but say "Chewsday" perfectly —
+# owner-ear-proven recipes, tools/street_pilot.py). tools/respell.json:
+#   {accent: {"*": {word: spoken}, "<voice key>": {word: spoken}}}
+# "*" applies to every voice; a voice key's map wins on conflict. Applied
+# whole-word, case-sensitive first then case-insensitive, to ALL text for
+# that accent. The clip index never sees a respelling.
+RESPELL_FILE = TOOLS / "respell.json"
+
+
+def respell_map(accent, vkey):
+    if not RESPELL_FILE.exists():
+        return {}
+    table = json.loads(RESPELL_FILE.read_text()).get(accent, {})
+    merged = dict(table.get("*", {}))
+    merged.update(table.get(vkey, {}))
+    return merged
+
+
+def apply_respell(text, mapping):
+    for word, spoken in mapping.items():
+        text = re.sub(r"\b%s\b" % re.escape(word), spoken, text)
+        text = re.sub(r"\b%s\b" % re.escape(word), spoken, text, flags=re.I)
+    return text
 
 # ── Contemporary British review batch ─────────────────────────
 # Per the SSBE spec: a small diagnostic set is generated and EAR-APPROVED
@@ -359,6 +386,7 @@ def main() -> None:
                 continue
             folder.mkdir(parents=True, exist_ok=True)
             print(f"\n{accent}/{vkey}: {len(texts)} clip(s) → {folder.relative_to(ROOT)}")
+            respell = respell_map(accent, vkey)
             for text in texts:
                 if args.limit is not None and made >= args.limit:
                     print("  (limit reached)")
@@ -367,9 +395,10 @@ def main() -> None:
                 if dest.exists() and not args.force:
                     skipped += 1
                     continue
-                dest.write_bytes(synthesize(text, voice_id, settings))
+                spoken = apply_respell(text, respell)
+                dest.write_bytes(synthesize(spoken, voice_id, settings))
                 made += 1
-                print(f"  ✓ {text}")
+                print(f"  ✓ {text}" + (f"  (spoken: “{spoken}”)" if spoken != text else ""))
 
     if args.dry_run:
         print(f"\nDRY RUN — nothing generated. Total: ~{dry_chars} characters "
