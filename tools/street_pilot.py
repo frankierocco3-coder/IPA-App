@@ -61,6 +61,40 @@ PILOT = [
     # sentences included. The respelling dictionary applies to all text
     # before synthesis, not just isolated words.
     ("tuesday-sentence", "It's Chewsday, innit.", "liquid-u-respelled-context", None),
+    # Round 8 (Cockney course, owner-approved spend): isolated-word
+    # candidates for the drilled Cockney bank. Closed syllables this time,
+    # unlike the failed vowel-final round-1 spellings. Survivors enter
+    # tools/respell.json; failures become phrase-only drills.
+    ("think", "fink", "th-isolated", None),
+    ("thing", "fing", "th-isolated", None),
+    ("three", "free", "th-isolated", None),
+    ("with", "wiv", "th-isolated", None),
+    ("bath", "barf", "th-isolated", None),
+    ("hair", "air", "h-drop", None),
+    ("better", "beh-uh", "glottal-b", ["bob"]),
+    ("better", "beh-ah", "glottal-c", ["lizzie"]),
+    # Round 8 verdicts (owner ear): fink, fing, free, wiv, barf, air,
+    # beh-uh, beh-ah PASSED. Failed: ammer (→ try ama), orse (read
+    # "horse-a"), ouse (read "housey"), mouf, nuffink (→ nuffing per
+    # owner), waw-uh/waw-ah. Round 9 candidates:
+    ("hammer", "ama", "h-drop", None),
+    ("mouth", "mowf", "th-isolated", None),
+    ("nothing", "nuffing", "th-isolated", None),
+    ("water", "wor-uh", "glottal-b", ["bob"]),
+    # Round 9 verdicts: ama, mowf, nuffing, wor-uh, wor-ah PASSED.
+    # awss (read oddly) and owss failed. Round 10 — two spellings each.
+    # Round 10 verdicts: orss PASSED both voices; 'ouse PASSED for Bob
+    # only; owse and aws failed. Round 11: ous PASSED for Lizzie.
+    # RECIPE BOOK COMPLETE 2026-08-28 — tools/respell.json holds every
+    # proven recipe; brother/mother remain phrase-only (isolated
+    # respelling proven impossible in rounds 1-5).
+    ("house", "'ouse", "h-drop-a", ["bob"]),
+    ("horse", "orss", "h-drop-a", None),
+    ("house", "ous", "h-drop-c", ["lizzie"]),
+    # Round 12: Lizzie's water — waw-ah (r8) and wor-ah (r9, failed on
+    # re-listen at review) are out. Verdict: wau-ah PASSED. Book closed
+    # again 2026-08-28; every drilled word has an ear-proven recipe.
+    ("water", "wau-ah", "glottal-f", ["lizzie"]),
 ]
 # Round 4 verdicts: anuvva rejected for Bob (another open for BOTH voices
 # again); boo-ah rejected and deleted; Bob's buh-uh reconfirmed.

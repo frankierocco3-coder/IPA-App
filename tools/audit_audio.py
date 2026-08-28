@@ -23,7 +23,7 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 AUDIO = ROOT / "audio"
 FLAGS = ROOT / "js" / "data" / "audio-flags.js"
-WORD_DIALECTS = ["rp", "nam", "aus", "ssbe"]
+WORD_DIALECTS = ["rp", "nam", "aus", "ssbe", "cockney"]
 
 failures = []
 
@@ -51,7 +51,7 @@ def main():
 
     # Voice keys are course-bound: named speakers for ssbe, f/m elsewhere.
     COURSE_VOICES = {"rp": {"f", "m"}, "nam": {"f", "m"}, "aus": {"f", "m"},
-                     "ssbe": {"alyx", "peach"}}
+                     "ssbe": {"alyx", "peach"}, "cockney": {"bob", "lizzie"}}
 
     # 1 + 5: index entries exist, never reach into phonemes/, and only use
     # that course's own approved voice keys (no silent cross-course voices)

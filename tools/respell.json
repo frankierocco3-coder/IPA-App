@@ -3,13 +3,29 @@
   "cockney": {
     "*": {
       "Tuesday": "Chewsday",
-      "tune": "chewn"
+      "tune": "chewn",
+      "think": "fink",
+      "thing": "fing",
+      "three": "free",
+      "with": "wiv",
+      "bath": "barf",
+      "hair": "air",
+      "hammer": "ama",
+      "mouth": "mowf",
+      "nothing": "nuffing",
+      "horse": "orss"
     },
     "bob": {
-      "butter": "buh-uh"
+      "butter": "buh-uh",
+      "better": "beh-uh",
+      "water": "wor-uh",
+      "house": "'ouse"
     },
     "lizzie": {
-      "butter": "buh-ah"
+      "butter": "buh-ah",
+      "better": "beh-ah",
+      "house": "ous",
+      "water": "wau-ah"
     }
   }
 }

@@ -77,6 +77,20 @@ def apply_respell(text, mapping):
 # The rp lines exist so RP-vs-Contemporary comparisons use a real RP voice
 # on the RP side — never Alyx-vs-Peach passed off as RP-vs-SSBE.
 REVIEW_BATCH = {
+    "cockney": [
+        # every respelled recipe word (the respelling layer steers these)
+        "think", "nothing", "with", "bath", "hair", "hammer", "mouth",
+        "horse", "house", "butter", "water", "better", "Tuesday", "tune",
+        # plain-spelled bank words: vowel shift and skeleton by the voices' own read
+        "day", "face", "price", "night", "go", "market", "city", "fair",
+        # sentences: fronting in context, register, rhyming slang
+        "Me bruvva works down the market.",
+        "That's anuvva story, innit.",
+        "Have a butcher's at this, it's brilliant.",
+        "Old Bill were round the estate all morning.",
+        "Would you Adam and Eve it - he's only gone and won.",
+        "Up the apples and pears to bed with you.",
+    ],
     "ssbe": [
         # course sample sentence (also the voice-selector sample line)
         "Alright? Welcome to Standard British - let's get you sounding like Britain now.",
@@ -329,7 +343,6 @@ def main() -> None:
     if not targets:
         sys.exit("No accents to generate — add voice ids to tools/voices.json.")
 
-    all_words = words()
     per_accent = idiom_texts() if args.idioms else (REVIEW_BATCH if args.review_batch else None)
     if args.review_batch:
         targets = [a for a in targets if a in REVIEW_BATCH]
@@ -370,7 +383,9 @@ def main() -> None:
         if not raw:
             print(f"! no voice for '{accent}', skipping")
             continue
-        texts = per_accent[accent] if per_accent is not None else all_words
+        # Word batches are accent-aware: a course only speaks its own and
+        # the untagged reference words, so it only generates those.
+        texts = per_accent[accent] if per_accent is not None else words(accent)
         for vkey, spec in voice_variants(raw).items():
             voice_id, settings = voice_entry(spec)
             if not voice_id:
