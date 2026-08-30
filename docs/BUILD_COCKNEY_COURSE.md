@@ -35,14 +35,29 @@ wired into ipaFor. Known ≈ limitation, same as rp/ssbe: words whose
 General American source already dropped the yod (Tuesday, tune) cannot
 recover /tʃ/ by rule.
 
-Phase B remaining: audio pilot for isolated th/h word respellings
-(fink, fing, free, nuffink, wiv, mouf, barf — UNPROVEN, need the
-owner's ear; brother/mother proven impossible isolated and may need
-cutting from the drilled bank or phrase-carrier clips), then review
-batch → ear-check → bulk → ear-check; TEXT_DIALECTS + validate.js
-accent (deliberately deferred to launch so Studio does not offer a
-hidden course); #audit filter option; regression pins for the course;
-launch flip of COCKNEY_LIVE.
+Phase C — AUDIO COMPLETE (2026-08-28/29): twelve pilot rounds settled
+the full recipe book (tools/respell.json; brother/mother stay
+phrase-only). Review batch (56 clips) passed the owner's ear — three
+bad rolls replaced by their approved pilot masters, Lizzie's water
+re-piloted to wau-ah. Bulk generated: 330 clips per voice (208
+accent-filtered words + 120 expression texts + review sentences),
+~7.7k credits total, stability 0.85. Where a fresh roll fails and an
+approved pilot master exists, THE MASTER WINS — no re-roll roulette.
+
+LAUNCH INTEGRATION (2026-08-29): strict coverage generalized in
+audit_audio.py (STRICT = ssbe + cockney, both voices, gate-enforced);
+#audit dialect filter gained cockney; validate.js accepts accent
+'cockney'; TEXT_DIALECTS carries Cockney ONLY when COCKNEY_LIVE is
+true (a hidden course never leaks through Studio); COCKNEY_LIVE is
+exported so the suite mirrors it; regression section 27 pins the
+gates, track shape, Accuracy Standard, 60 expressions, toCockney
+derivation and Bob/Lizzie clip-set parity in both flag states.
+
+Remaining: the owner flips COCKNEY_LIVE in js/main.js — one word to
+true — then a fronted suite run and push. Post-launch niceties:
+per-course intro overlay (ssbe-style) if wanted, isolated phonemes
+for the cockney inventory (deferred product-wide), specialist dialect
+review of lessons and expressions (owner-approved only today).
 
 The earlier working title "Street British" is superseded by the spine
 decision. Course copy names Cockney honestly and never calls it slang-only,

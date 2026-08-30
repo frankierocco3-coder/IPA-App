@@ -233,10 +233,11 @@ function practiceLesson(track) {
 // exactly like switching languages. Leaderboards are deliberately absent:
 // there are no accounts, so there is nobody real to rank against.
 
-// Cockney is a strict-audio course (Bob and Lizzie): until its clips are
-// generated and ear-approved, the course stays hidden behind this switch —
-// data lives, no learner can select it. Flip to launch.
-const COCKNEY_LIVE = false;
+// Cockney is a strict-audio course (Bob and Lizzie). Launched by owner
+// order 2026-08-29 after the full ear-gated audio pipeline (review batch,
+// bulk, recipe book in tools/respell.json). Exported so the regression
+// suite can assert visibility matches the flag.
+export const COCKNEY_LIVE = true;
 const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
   { id: 'rp', icon: '🎩', label: 'Traditional RP' },
@@ -5060,7 +5061,7 @@ async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', sta
     <main class="guide audit-page">
       <p class="pane-note">Owner tool. Play each clip, mark it — <b>Good</b> means a learner may hear it, <b>Bad</b> quarantines it. Export writes a new <code>js/data/audio-flags.js</code> to commit.</p>
       <div class="audit-filters">
-        ${sel('af-d', ['all', 'nam', 'rp', 'aus', 'ssbe'], f.d)}
+        ${sel('af-d', ['all', 'nam', 'rp', 'aus', 'ssbe', 'cockney'], f.d)}
         ${sel('af-v', ['all', ...new Set(rows.map(r => r.v))], f.v)}
         ${sel('af-kind', ['all', 'word', 'phoneme'], f.kind)}
         ${sel('af-status', ['all', 'unreviewed', 'good', 'bad', 'missing'], f.status)}
@@ -5648,6 +5649,9 @@ const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
   { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🎩' },
   { id: 'ssbe', label: 'Standard British', lang: 'en-GB', flag: '🇬🇧' },
+  // Cockney joins the Studio dialect pickers only when its course is live —
+  // a hidden course must never leak through a project screen.
+  ...(COCKNEY_LIVE ? [{ id: 'cockney', label: 'Cockney', lang: 'en-GB', flag: '🚕' }] : []),
   { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;

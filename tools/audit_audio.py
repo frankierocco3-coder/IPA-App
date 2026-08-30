@@ -112,19 +112,22 @@ def main():
         if (AUDIO / (entry + ".mp3")).is_file():
             fail("approved phoneme id collides with a word path: %s" % entry)
 
-    # 6: STRICT course coverage — Standard British promises real clips for
+    # 6: STRICT course coverage — a strict course promises real clips for
     # everything its controls can speak, so every speakable text must exist
-    # in BOTH Alyx and Peach. This keeps the no-TTS rule honest forever.
+    # in BOTH of its voices. This keeps the no-TTS rule honest forever.
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
     from generate_voices import words as all_words, idiom_texts, clip_name
-    speakable = set(all_words("ssbe")) | set(idiom_texts().get("ssbe", []))
-    for v in ("alyx", "peach"):
-        have = set(index.get("ssbe", {}).get(v, []))
-        missing = sorted(t for t in speakable if clip_name(t) not in have)
-        for t in missing[:10]:
-            fail("strict ssbe coverage: no %s clip for '%s'" % (v, t))
-        if len(missing) > 10:
-            fail("strict ssbe coverage: ...and %d more missing for %s" % (len(missing) - 10, v))
+    STRICT = {"ssbe": ("alyx", "peach"), "cockney": ("bob", "lizzie")}
+    for course, voices in STRICT.items():
+        speakable = set(all_words(course)) | set(idiom_texts().get(course, []))
+        for v in voices:
+            have = set(index.get(course, {}).get(v, []))
+            missing = sorted(t for t in speakable if clip_name(t) not in have)
+            for t in missing[:10]:
+                fail("strict %s coverage: no %s clip for '%s'" % (course, v, t))
+            if len(missing) > 10:
+                fail("strict %s coverage: ...and %d more missing for %s"
+                     % (course, len(missing) - 10, v))
 
     print("Audio integrity: %d word clips indexed, %d quarantined, %d phonemes approved"
           % (sum(len(c) for vs in index.values() for c in vs.values()), len(known_bad), len(approved)))

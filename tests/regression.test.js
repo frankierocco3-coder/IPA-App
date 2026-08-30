@@ -3409,6 +3409,46 @@ export async function run({ navDoc = document } = {}) {
       && !/reread this any time/.test(src));
   }
 
+  // ── 27. The Cockney course: gate, data, derivation, audio parity ─
+  // The course hides behind COCKNEY_LIVE (js/main.js), mirroring the
+  // SPEECH_LIVE pattern: the flag is read from source so the suite and
+  // the app can never drift. Data invariants hold in BOTH flag states.
+  {
+    const mainSrc = await fetch('../js/main.js').then(r => r.text());
+    check('cockney: visibility gates exist — course picker and Studio dialects both honor COCKNEY_LIVE',
+      /COCKNEY_LIVE \|\| c\.id !== 'cockney'/.test(mainSrc)
+      && /COCKNEY_LIVE \? \[\{ id: 'cockney'/.test(mainSrc));
+    const { TRACKS, COURSE } = await import('../js/data/course.js');
+    const { DIALECT_INFO } = await import('../js/data/dialects.js');
+    const track = TRACKS.find(t => t.id === 'cockney');
+    check('cockney: track registered — 🚕, accent course, four stages',
+      !!track && track.icon === '🚕' && track.accent === true && track.unitIds.length === 4);
+    const lessons = COURSE.filter(u => (track?.unitIds ?? []).includes(u.id)).flatMap(u => u.lessons);
+    check('cockney: ten lessons, ck-0 through ck-final',
+      lessons.length === 10 && lessons[0]?.id === 'ck-0' && lessons[9]?.id === 'ck-final',
+      lessons.map(l => l.id).join(','));
+    const info = DIALECT_INFO.cockney;
+    check('cockney: Accuracy Standard — tiers, realization convention, respect statement',
+      !!info && info.core.length >= 6 && info.common.length >= 4 && info.variable.length >= 3
+      && /square brackets/.test(info.convention) && /careless or incorrect/.test(info.notClaim));
+    const cockneyIdioms = IDIOM.filter(e => e.dialect === 'cockney');
+    check('cockney: 60 expressions with stable unique ids and the register flags',
+      cockneyIdioms.length === 60
+      && new Set(cockneyIdioms.map(e => e.id)).size === 60
+      && cockneyIdioms.every(e => /^COCKNEY-\d{3}$/.test(e.id))
+      && cockneyIdioms.find(e => e.term === 'bent')?.flag === 'dated-offensive');
+    check('cockney: toCockney derivation — fronting, glottal, h-drop; initial ð survives',
+      ipaFor('think', 'cockney')?.ipa === 'fɪŋk'
+      && ipaFor('butter', 'cockney')?.ipa.includes('ʔ')
+      && ipaFor('house', 'cockney')?.ipa[0] !== 'h'
+      && ipaFor('the', 'cockney')?.ipa.includes('ð'));
+    const idx = await fetch('../audio/index.json').then(r => r.json());
+    const bob = idx.cockney?.bob ?? [], lizzie = idx.cockney?.lizzie ?? [];
+    check('cockney: strict audio parity — Bob and Lizzie carry identical clip sets, 300+ each',
+      bob.length >= 300 && JSON.stringify([...bob].sort()) === JSON.stringify([...lizzie].sort()),
+      `bob=${bob.length} lizzie=${lizzie.length}`);
+  }
+
   if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');
   else localStorage.setItem('speechcraft-workspace', workspaceBefore);
 
