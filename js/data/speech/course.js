@@ -87,6 +87,9 @@ export const SPEECH_MODULE_GROUPS = {
     { title: 'Ease and coordination',
       blurb: 'Useful effort, and the parts that do the most work.',
       lessons: ['sp-f-effort', 'sp-f-jaw'] },
+    { title: 'Tension and release',
+      blurb: 'Where unintentional effort hides, what it costs, and how to invite it out.',
+      lessons: ['sp-f-hides', 'sp-f-costs', 'sp-f-diaphragm', 'sp-f-ease'] },
     { title: 'Clarity and care',
       blurb: 'Being understood, and knowing when to stop.',
       lessons: ['sp-f-articulation', 'sp-f-health'] },
@@ -139,6 +142,10 @@ export const collectionForLesson = l =>
 export const SPEECH_REVIEW_WHY = {
   'sp-f-instrument': 'Describes respiratory, laryngeal and vocal-tract anatomy; a voice professional must confirm the description is accurate and appropriately general.',
   'sp-f-breath': 'Teaches breath-for-speech concepts; must be confirmed as physiologically accurate and free of one-size-fits-all “support” claims.',
+  'sp-f-hides': 'Describes bodily tension patterns and their possible effects on breathing; a voice professional must confirm the descriptions are accurate and safely framed.',
+  'sp-f-costs': 'Describes how excess muscular effort may affect vocal function across pitch, timbre, dynamics and endurance; requires confirmation that the claims are accurate and appropriately hedged.',
+  'sp-f-diaphragm': 'Teaches diaphragm anatomy and breathing coordination and corrects common instructions; a voice professional must confirm the physiology and the corrections.',
+  'sp-f-ease': 'Recommends gentle release and semi-occluded practices; a voice professional must confirm the practices are safe, appropriately framed and free of therapeutic claims.',
   'sp-f-effort': 'Discusses muscular effort and tension in speaking; must be confirmed as accurate and non-diagnostic.',
   'sp-f-jaw': 'Mentions TMD and bruxism (paraphrased from NIDCR/ASHA guidance); a professional must confirm the health information is accurate, current and non-prescriptive.',
   'sp-f-voice': 'Describes vocal-fold function and resonance; must be confirmed as anatomically accurate at the intended level.',
@@ -333,7 +340,81 @@ export const SPEECH_LESSONS = [
     ],
   },
   {
-    id: 'sp-f-jaw', stage: 'foundation', order: 4,
+    id: 'sp-f-hides', stage: 'foundation', order: 4,
+    title: 'Where Tension Hides',
+    kind: 'lesson', application: { general: true, acting: true },
+    glossary: [],
+    requiredReviewer: 'voice-professional',
+    sources: [
+      'ASHA — Voice Disorders — https://www.asha.org/practice-portal/clinical-topics/voice-disorders/',
+      'NIDCD — Taking Care of Your Voice — https://www.nidcd.nih.gov/health/taking-care-your-voice',
+    ],
+    body: [
+      { p: 'Speaking takes muscular work, and the goal is never a limp body. The working principle of this whole arc fits in one sentence: keep the effort that contributes to the sound, and release the effort that does not. Unintentional tension is exactly that second kind, and its defining feature is that you do not know it is there. Nobody decides to clench. The jaw tightens during a difficult conversation, the shoulders creep up under bright lights, the breath goes shallow the moment attention arrives, and none of it announces itself.' },
+      { p: 'The usual hiding places are worth knowing by name. The jaw, held slightly closed even while speaking. The root of the tongue, gripping low in the mouth where you cannot see it working. The neck and shoulders, braced as if sound needed lifting. The hands, curled or locked. The brow, doing expressive work the voice should be doing. And the breath itself, held or rationed.' },
+      { p: 'Notice that most of that list sits nowhere near the larynx, and it can still reach the voice, because tension can interfere with the air before the air ever arrives. Raised, rigid shoulders may invite shallow, upper-chest breathing. A locked rib cage has less room to expand and less finesse on the way out. An abdomen held constantly in can make breath management rigid; a collapsed slump takes away the space the ribs need; a head carried forward may recruit the neck muscles for balance, and the neck is exactly where the larynx lives. The voice runs on regulated air, and posture is part of the regulator.' },
+      { p: 'The skill this chapter asks for is an inventory, not a fix. Several times a day, in ordinary moments, scan the list: jaw, tongue, shoulders, hands, brow, breath. Notice what you find and change nothing yet. Sensations of effort have many possible causes, and noticing is not diagnosing. The next chapters take up what the findings may cost and how to work toward ease.' },
+      { safety: true },
+    ],
+  },
+  {
+    id: 'sp-f-costs', stage: 'foundation', order: 5,
+    title: 'What Tension Costs',
+    kind: 'lesson', application: { general: true, acting: true },
+    glossary: [],
+    requiredReviewer: 'voice-professional',
+    sources: [
+      'Mechanics of Human Voice Production and Control — https://pmc.ncbi.nlm.nih.gov/articles/PMC5412481/',
+      'Vocal Tract Resonances in Speech and Singing — https://pmc.ncbi.nlm.nih.gov/articles/PMC2689615/',
+      'NIDCD — Taking Care of Your Voice — https://www.nidcd.nih.gov/health/taking-care-your-voice',
+    ],
+    body: [
+      { p: 'The voice is a coordination of three jobs: breath supplies and regulates the energy, the vocal folds turn that energy into vibration, and the spaces above them, throat, mouth and sometimes nose, shape the vibration into the sound people actually hear. Unneeded effort anywhere in that chain may surface anywhere else, and the costs are specific.' },
+      { p: 'Sound: squeezing in or around the larynx may disturb the vibration itself, and the result varies by person, pressed in one voice, breathy or unstable in another. Color: a gripped jaw, a retracted tongue or a tightened throat changes the shape of the spaces that give the voice its character, which can turn a sound pinched, thin, muffled or harsh without the speaker choosing any of it. Pitch and range: pitch runs on tiny, fast adjustments in the folds, and bracing nearby can make high notes and register changes unreliable. A range that shrinks is information, and pushing harder at it is the wrong response. Agility: quick, precise speech needs small movements with nothing extra joining in; a braced tongue or jaw makes everything heavier and later. Dynamics: tension tends to substitute force for efficiency, so quiet speech goes unstable and loud speech gets pushed. And endurance: an inefficient voice spends more to buy the same sound, tires sooner, and then recruits more effort to compensate, a cycle that feeds itself.' },
+      { p: 'For a performer the bill runs past the sound. Tension is visible: an audience reads a held body as a held person, whatever the words claim, and a camera reads it from across the room. And it runs a mental loop worth naming: worry invites bracing, bracing makes the sound less reliable, the unreliable sound invites monitoring and forcing, and the forcing invites more bracing. When unneeded effort drops, the loop runs backward. Attention stops being spent on defensive management and becomes available for listening, language and intention, which is the same trade this app teaches about lines: what you stop spending on the mechanics, you get to spend on the acting.' },
+      { p: 'One honest boundary keeps this chapter from becoming a style police. Some choices deliberately use compression, breathiness, brightness or grit, and muscular activity is not automatically a problem. The working questions are about freedom, not purity: is the sound chosen, repeatable and easy to step back out of, or is it imposed by a habit you cannot put down? Freedom means being able to choose and vary the effort, not being trapped in one setting.' },
+      { safety: true },
+    ],
+  },
+  {
+    id: 'sp-f-diaphragm', stage: 'foundation', order: 6,
+    title: 'The Diaphragm, Without the Myths',
+    kind: 'lesson', application: { general: true, acting: true },
+    glossary: [],
+    requiredReviewer: 'voice-professional',
+    sources: [
+      'NCBI Bookshelf — Anatomy of the Diaphragm — https://www.ncbi.nlm.nih.gov/books/NBK519558/',
+      'Breathing and Singing: Breathing Patterns in Classical Singers — https://pmc.ncbi.nlm.nih.gov/articles/PMC4861272/',
+      'The Physiology of Singing and Respiratory–Laryngeal Coordination — https://pmc.ncbi.nlm.nih.gov/articles/PMC8587358/',
+    ],
+    body: [
+      { p: 'Every actor has been told to breathe from the diaphragm, support from the diaphragm, push from the diaphragm. The instruction usually arrives with great confidence and no anatomy, so it is worth knowing what the muscle actually is. The diaphragm is a broad dome of muscle and tendon under the lungs, separating the chest from the abdomen. When it contracts, the dome flattens downward while the rib muscles help the ribs widen, the chest cavity grows, and air flows in. That is its job: it is the principal muscle of breathing in. What people call belly breathing is not air in the stomach. Air only ever enters the lungs; the belly moves because the descending diaphragm gently displaces what sits beneath it, and an unforced breath may widen the lower ribs, the waist and the back as well.' },
+      { p: 'Now the corrections, because the myths cost real effort. You cannot flex the diaphragm the way you flex an arm: it sits deep in the torso, largely out of reach of direct command, and most sensations credited to it actually come from the ribs, the belly wall or the back. You influence it indirectly, by organizing the in-breath, letting the ribs and belly move, and pacing the phrase. Pushing from it aims at the wrong muscle: forceful exhaling is mostly abdominal work, and more push does not mean more voice. The diaphragm makes no pitch, no resonance and no diction, so when the sound is not working, extra pressure from below tends to add squeeze rather than power. More air is not more sound. And support does not mean strength: healthy speakers rarely lack breathing muscle; what practice builds is timing and coordination.' },
+      { p: 'What coordinated breathing may feel like, loosely and differently in every body: a quiet in-breath with no grab in the throat; expansion that spreads around the lower ribs and waist instead of hoisting the chest; a belly that yields on the way in and joins gradually on a long phrase; the ability to start a sound without holding the air back or blasting it. The belly wall is a partner, not an enemy, and both standing orders, hold it out and pull it in, are wrong as permanent rules. No single sensation proves the system is working. The test is whether the phrase gets what it needs without the neck taking over.' },
+      { safety: true },
+    ],
+  },
+  {
+    id: 'sp-f-ease', stage: 'foundation', order: 7,
+    title: 'Working Toward Ease',
+    kind: 'lesson', application: { general: true, acting: true },
+    glossary: [],
+    requiredReviewer: 'voice-professional',
+    sources: [
+      'Contributions of Auditory and Somatosensory Feedback to Vocal Motor Control — https://pmc.ncbi.nlm.nih.gov/articles/PMC7838841/',
+      'Auditory Traits of One’s Own Voice and Bone Conduction — https://pmc.ncbi.nlm.nih.gov/articles/PMC6019673/',
+      'NIDCD — Taking Care of Your Voice — https://www.nidcd.nih.gov/health/taking-care-your-voice',
+    ],
+    body: [
+      { p: 'Everything here follows one rule: awareness first, ease invited, nothing forced. Release is not something you do to a muscle. It is what a muscle does when it is no longer being asked to work. So the work is subtraction, and it is quiet.' },
+      { p: 'Gentle practices that performers have trusted for generations: let the jaw hang loose for a slow breath and notice what lets go with it. Let one full breath in and out reset whatever the inventory found. Shake out the hands and shoulders before speaking. Yawn, genuinely, and feel the space it makes. And use the family of half-closed sounds that tend to make voicing feel easier: humming, lip trills, a sustained vvv or zzz, or speaking a phrase through a drinking straw. Partly closing the mouth this way changes the conditions the vocal folds work against, and many speakers find the voice arrives with less effort there; carry that ease back into an open sentence and notice the difference. None of these practices press on anything, none target the throat, and none need to be done hard to work.' },
+      { p: 'Two calibrations keep the work honest. First, there is no single correct posture and no magic sensation to chase. Bodies differ; useful alignment is balance that stays mobile, stable enough to support the sound and free enough to breathe, gesture and respond. Second, what you feel is feedback, not proof. A buzzing cheekbone or a warm chest tells you something is happening, but your own ears hear your voice partly through your bones, which is why recordings sound different and why they, and a trusted outside ear, are worth more than chasing someone else’s inner sensation.' },
+      { p: 'And the standing boundaries. This course never asks you to press, massage or manipulate your throat or neck, and no exercise that demands it belongs in your warm-up. If speaking regularly feels effortful, painful or tiring, or the voice keeps needing rewarming and recovering slowly, that is not a discipline problem to push through. It is information, and the professionals who read it, an ear, nose and throat physician for the instrument itself and a voice-specialized speech-language pathologist for how it is being used, are real and reachable. The Tension chapter carries the fuller health picture.' },
+      { safety: true },
+    ],
+  },
+  {
+    id: 'sp-f-jaw', stage: 'foundation', order: 8,
     title: 'Jaw, Tongue & Neck',
     kind: 'lesson', application: { general: true, acting: true },
     glossary: ['articulation'],
@@ -353,7 +434,7 @@ export const SPEECH_LESSONS = [
     ],
   },
   {
-    id: 'sp-f-voice', stage: 'foundation', order: 5,
+    id: 'sp-f-voice', stage: 'foundation', order: 9,
     title: 'Voice & Resonance',
     kind: 'lesson', application: { general: true, acting: true },
     glossary: ['resonance'],
@@ -371,7 +452,7 @@ export const SPEECH_LESSONS = [
     ],
   },
   {
-    id: 'sp-f-articulation', stage: 'foundation', order: 6,
+    id: 'sp-f-articulation', stage: 'foundation', order: 10,
     title: 'Articulation & Clarity',
     kind: 'lesson', application: { general: true, acting: true },
     glossary: ['articulation', 'operative-word'],
@@ -391,7 +472,7 @@ export const SPEECH_LESSONS = [
     ],
   },
   {
-    id: 'sp-f-health', stage: 'foundation', order: 7,
+    id: 'sp-f-health', stage: 'foundation', order: 11,
     title: 'Vocal Health and When to Stop',
     kind: 'lesson', application: { general: true, acting: true },
     glossary: [],
@@ -573,6 +654,18 @@ export const SPEECH_LESSONS = [
 // emotional effect, phrasing and playable actions are NEVER scored);
 // and a Practice link where a routine or game trains the skill.
 export const SPEECH_LESSON_EXTRAS = {
+  'sp-f-hides': {
+    objective: 'Learn the usual hiding places of unintentional tension and build the habit of scanning for them without fixing anything yet.',
+  },
+  'sp-f-costs': {
+    objective: 'Understand how unneeded effort can reach the sound, the range, the stamina and the performance, and how to tell chosen effects from stuck habits.',
+  },
+  'sp-f-diaphragm': {
+    objective: 'Know what the diaphragm actually does, retire the common myths about it, and recognize the loose signs of coordinated breathing.',
+  },
+  'sp-f-ease': {
+    objective: 'Practise inviting ease without forcing it, using gentle release and half-closed sounds, inside the course’s standing safety boundaries.',
+  },
   'sp-start-parts': {
     objective: 'Understand why this course isolates one element at a time, and why isolation is never the goal.',
     check: { q: 'In this course, what is isolated practice FOR?',
@@ -745,7 +838,8 @@ export const TEXTBOOK_PARTS = [
     chapters: ['wsm', 'sp-start-parts', 'sp-start-alphabet',
                'sp-start-fluency', 'sp-start-offbook'] },
   { n: 'II', title: 'Your Speaking Instrument', tone: 'is-terracotta',
-    chapters: ['sp-f-instrument', 'sp-f-effort', 'sp-f-jaw', 'sp-f-breath',
+    chapters: ['sp-f-instrument', 'sp-f-effort', 'sp-f-hides', 'sp-f-costs',
+               'sp-f-diaphragm', 'sp-f-ease', 'sp-f-jaw', 'sp-f-breath',
                'sp-f-voice', 'sp-f-articulation', 'sp-f-health'] },
   { n: 'III', title: 'What & Why?', tone: 'is-blue',
     chapters: ['sp-m-intention', 'sp-m-want', 'sp-m-urgency'],

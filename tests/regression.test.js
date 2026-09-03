@@ -2077,8 +2077,8 @@ export async function run({ navDoc = document } = {}) {
   {
     const stageCounts = ['start', 'foundation', 'meaning', 'whole'].map(s => speechLessonsFor(s).length);
     check('speech: 21 chapters — 5 Principles, 7 Instrument, 5 Meaning, 4 Presence',
-      String(stageCounts) === '5,7,5,4' && SPEECH_LESSONS.length === 21
-      && TEXTBOOK_PARTS.length === 4 && textbookOrder().length === 21, stageCounts.join(','));
+      String(stageCounts) === '5,11,5,4' && SPEECH_LESSONS.length === 25
+      && TEXTBOOK_PARTS.length === 4 && textbookOrder().length === 25, stageCounts.join(','));
     const courseText = JSON.stringify(SPEECH_LESSONS);
     check('speech: both central practice statements preserved exactly',
       courseText.includes('Practice one element at a time so you can recognize and control it. Then carry that skill into thought, listening, movement and response.')
@@ -2093,12 +2093,12 @@ export async function run({ navDoc = document } = {}) {
       && !/Frankie|Rocco|invented|my teacher/i.test(alphaText)
       && alphaText.includes('no sensation you are supposed to have'));
     check('speech: anatomy bodies publish only through the ledger — an unlisted draft never renders',
-      speechLessonsFor('foundation').length === 7
+      speechLessonsFor('foundation').length === 11
       && speechLessonsFor('foundation').every(l =>
         l.requiredReviewer === 'voice-professional'
         && speechBodyVisible(l)
         && speechReviewFor(l.id)?.reviewerType === 'product-owner'
-        && speechReviewFor(l.id)?.date === '2026-08-14'
+        && ['2026-08-14', '2026-09-03'].includes(speechReviewFor(l.id)?.date)
         && speechReviewFor(l.id)?.notes?.includes('not a clinical sign-off'))
       // the gate itself must survive the publication: a professional-tier
       // record absent from the ledger never shows its body to learners
@@ -2151,7 +2151,7 @@ export async function run({ navDoc = document } = {}) {
       && SPEECH_LESSONS.every(l => !!collectionForLesson(l)));
     check('speech: every professional-tier chapter carries a stated reason for specialist review',
       speechLessonsFor('foundation').every(l => (SPEECH_REVIEW_WHY[l.id] ?? '').length > 40)
-      && Object.keys(SPEECH_REVIEW_WHY).length === 7);
+      && Object.keys(SPEECH_REVIEW_WHY).length === 11);
     check('speech: understanding checks exist only where an answer is objectively correct',
       Object.entries(SPEECH_LESSON_EXTRAS).every(([id, x]) =>
         !x.check || (Array.isArray(x.check.choices)
@@ -2175,7 +2175,7 @@ export async function run({ navDoc = document } = {}) {
       && lessonKeywords(speechLessonById('sp-f-jaw')).includes('jaw'));
     const nonPreface = SPEECH_LESSONS.filter(l => l.id !== 'wsm');
     check('speech: every chapter beyond the preface states an objective for the Learn pathway',
-      nonPreface.length === 20
+      nonPreface.length === 24
       && nonPreface.every(l => (SPEECH_LESSON_EXTRAS[l.id]?.objective ?? '').length > 20)
       // 'wsm' is the promoted preface, routed to its authoritative reading
       // (course.js) — deliberately the only chapter without Learn extras
@@ -2482,12 +2482,12 @@ export async function run({ navDoc = document } = {}) {
           .includes('Speechcraft Textbook')
         && doc.querySelector('.tile-grid [data-tile="textbook"] .tile-meta')?.textContent
           === `${textbookOrder().length} chapters`
-        && textbookOrder().length === 21,
+        && textbookOrder().length === 25,
         [...doc.querySelectorAll('.tile-title')].map(t => t.textContent).join(' | '));
       check('library: no review strip — every chapter published, specialist review honestly outstanding',
         !doc.querySelector('.review-strip')
         && SPEECH_LESSONS.every(l => speechBodyVisible(l))
-        && SPEECH_LESSONS.filter(l => l.requiredReviewer !== 'editorial').length === 7
+        && SPEECH_LESSONS.filter(l => l.requiredReviewer !== 'editorial').length === 11
         && SPEECH_LESSONS.filter(l => l.requiredReviewer !== 'editorial')
           .every(l => speechReviewFor(l.id)?.verdict === 'owner-approved' && !speechApproved(l.id)));
       clickIn(doc.querySelector('[data-tile="textbook"]')); await sleep(400);
@@ -2753,7 +2753,7 @@ export async function run({ navDoc = document } = {}) {
     check('speech: the workspace is withdrawn — three live workspaces, no Speech row',
       String(wsRows) === 'acting,ipa,accents');
     check('speech: withdrawal is a flag, not a deletion — every record survives it',
-      SPEECH_LESSONS.length === 21 && textbookOrder().length === 21
+      SPEECH_LESSONS.length === 25 && textbookOrder().length === 25
       && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional')
         .every(l => speechReviewFor(l.id)?.verdict === 'owner-approved' && !speechApproved(l.id)));
     ok('Speech system drive (skipped — SPEECH_LIVE is false)');
@@ -3114,9 +3114,9 @@ export async function run({ navDoc = document } = {}) {
     // must still be TRACKED as awaiting a qualified specialist. The
     // seven fell out of that queue once (verdict 'approved' before the
     // 2026-08-19 migration); this pins them back in it.
-    check('approved copy: nothing hidden, all seven professional-tier chapters still await a specialist',
+    check('approved copy: nothing hidden, all eleven professional-tier chapters still await a specialist',
       SPEECH_LESSONS.filter(l => !speechBodyVisible(l)).length === 0
-      && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional').length === 7
+      && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional').length === 11
       && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional')
         .every(l => speechReviewFor(l.id)?.verdict === 'owner-approved' && !speechApproved(l.id)));
     check('approved copy: Vocal Health and When to Stop was not touched',
@@ -3141,7 +3141,7 @@ export async function run({ navDoc = document } = {}) {
     // the Textbook restructure, so 'How the course works' holds two.
     const SPEC = {
       1: [['How the course works', 2], ['Understanding fluency', 3]],
-      2: [['Air and voice', 3], ['Ease and coordination', 2], ['Clarity and care', 2]],
+      2: [['Air and voice', 3], ['Ease and coordination', 2], ['Tension and release', 4], ['Clarity and care', 2]],
       3: [['Purpose and action', 3], ['Rhythm and structure', 2]],
       4: [['Body and attention', 2], ['Putting everything together', 2]],
     };
@@ -3153,7 +3153,7 @@ export async function run({ navDoc = document } = {}) {
       speechModuleGroups(3)[0].title === 'Purpose and action'
       && speechModuleGroups(3)[1].title === 'Rhythm and structure');
     check('grouping: module chapter counts are 5, 7, 5 and 4',
-      String(SPEECH_MODULES.map(m => speechLessonsFor(m.stage).length)) === '5,7,5,4');
+      String(SPEECH_MODULES.map(m => speechLessonsFor(m.stage).length)) === '5,11,5,4');
     check('grouping: every chapter appears in exactly one group, none invented',
       (() => {
         const listed = [1, 2, 3, 4].flatMap(n => speechModuleGroups(n).flatMap(g => g.lessons));
@@ -3206,7 +3206,7 @@ export async function run({ navDoc = document } = {}) {
         return n.length > 0 && !/\bscore|correct|answer\b/i.test(n);
       }));
     check(`reading: ${available.length - framed.length} published chapter(s) still need reading framing (follow-up)`,
-      available.length - framed.length === 8,
+      available.length - framed.length === 12,
       `${framed.length} of ${available.length} framed`);
     check('reading: legacy check data survives in the record but Speech no longer renders it',
       typeof SPEECH_LESSON_EXTRAS['sp-start-parts'].check === 'object');
@@ -3312,8 +3312,9 @@ export async function run({ navDoc = document } = {}) {
     const EXPECTED = [
       ['I', 'Speechcraft Principles', ['The Importance of Speech', 'Practice the Parts. Communicate as a Whole.',
         'The Alphabet Experiment', 'Fluency Frees the Speaker', 'Prepared Speaking and Fixed Words']],
-      ['II', 'Your Speaking Instrument', ['Your Instrument', 'Tension', 'Anatomy', 'Breath',
-        'Resonance', 'Articulation & Clarity', 'Vocal Health and When to Stop']],
+      ['II', 'Your Speaking Instrument', ['Your Instrument', 'Tension', 'Where Tension Hides',
+        'What Tension Costs', 'The Diaphragm, Without the Myths', 'Working Toward Ease',
+        'Anatomy', 'Breath', 'Resonance', 'Articulation & Clarity', 'Vocal Health and When to Stop']],
       ['III', 'What & Why?', ['Thought & Intention', 'What Do You Want?', 'Why Now? Understanding Urgency',
         'Pace & Pause', 'Emphasis & Phrasing']],
       ['IV', 'Mix It', ['Movement & Speech', 'Presence & Persuasion', 'Integration', 'Let It Go']],
