@@ -1836,9 +1836,6 @@ function renderSpeechChapter(id) {
       <h1 tabindex="-1" id="sp-h">${esc(chapterTitle(l.id))}</h1>
       ${speechChapterBlocks(l)}
       ${glossaryChips(l.glossary)}
-      ${(l.sources ?? []).length ? `
-        <h2 class="guide-heading">Sources consulted</h2>
-        <ul class="th-list">${l.sources.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
       ${inCourse ? `
         <p class="pane-note"><button class="linkish" id="sp-study" type="button">Study this in Learn</button>
           — the guided lesson adds an objective, practice and progress.</p>` : ''}
