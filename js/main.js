@@ -1720,7 +1720,10 @@ function speechChapterBlocks(l, { interactive = true } = {}) {
       <footer class="th-attrib">${esc(b.attribution ?? '')}</footer></blockquote>`;
     if (b.p) return `<p class="guide-text">${esc(b.p)}</p>`;
     if (b.list) return `<ul class="th-list">${b.list.map(li => `<li>${esc(li)}</li>`).join('')}</ul>`;
-    if (b.safety) return `<p class="pane-note pane-warn sp-safety">${esc(SPEECH_SAFETY_LINE)}</p>`;
+    // Owner order 2026-09-03: reading pages carry no warning boxes. The
+    // safety flag stays in the data (pinned, shown to reviewers) and the
+    // safety line still guards every practice surface that asks for action.
+    if (b.safety) return '';
     if (b.comfort) return `<p class="pane-note">${esc(SPEECH_COMFORT_LINE)}</p>`;
     if (b.experiment) {
       // One uninterrupted read: prompts, noticing, recital and contrast
@@ -1898,7 +1901,9 @@ function speechBlockHtml(b, i) {
     <footer class="th-attrib">${esc(b.attribution ?? '')}</footer></blockquote>`;
   if (b.p) return `<p class="guide-text">${esc(b.p)}</p>`;
   if (b.list) return `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
-  if (b.safety) return `<p class="pane-note pane-warn sp-safety">${esc(SPEECH_SAFETY_LINE)}</p>`;
+  // Reading pages carry no warning boxes (owner order 2026-09-03); the
+  // flag survives in data and on practice surfaces.
+  if (b.safety) return '';
   if (b.comfort) return `<p class="pane-note">${esc(SPEECH_COMFORT_LINE)}</p>`;
   if (b.experiment) {
     const e = b.experiment;
