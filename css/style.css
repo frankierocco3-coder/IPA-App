@@ -1830,3 +1830,6 @@ body.nb-full #app { display: none; }
 .rh-card-speed { font-size: 1.5rem; font-weight: 700; margin: 0 0 .25rem; }
 .rh-card-why { font-size: 1.05rem; margin: 0; }
 .rh-card-text { white-space: pre-wrap; line-height: 1.65; margin: .3rem 0 0; }
+
+/* The Line You Know: rule sub-heads inside the verbatim memory lesson. */
+.guide-subhead { font-size: 1.02rem; font-weight: 700; margin: 18px 0 6px; }

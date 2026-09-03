@@ -2878,7 +2878,7 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 52 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:principles,col:character,col:scene,col:lists,col:question,col:rehearsal,col:actions,col:rhythm,col:professional,col:monologues,col:scenes,col:approaches,col:textbook'
+          === 'col:lines,col:principles,col:character,col:scene,col:lists,col:question,col:rehearsal,col:actions,col:rhythm,col:professional,col:monologues,col:scenes,col:approaches,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -3407,6 +3407,29 @@ export async function run({ navDoc = document } = {}) {
     check('ssbe intro: says it appears only on the first visit',
       /This introduction appears only on your first visit\./.test(src)
       && !/reread this any time/.test(src));
+  }
+
+  // ── 26b. The verbatim memory lesson (owner-supplied copy) ─────
+  // "The Line You Know vs. The Line You Can Find" ships word for word
+  // by owner order (2026-09-03). Data-level pins; launch_lint carries
+  // the full spot-line set.
+  {
+    const { LINE_LESSON } = await import('../js/data/acting/lines.js');
+    check('memory lesson: six sections plus a five-step practice set, title verbatim',
+      LINE_LESSON.title === 'The Line You Know vs. The Line You Can Find'
+      && LINE_LESSON.sections.length === 6
+      && LINE_LESSON.practice.steps.length === 5);
+    const text = JSON.stringify(LINE_LESSON);
+    check('memory lesson: verbatim voice intact — contractions and em dashes survive, names present',
+      text.includes('Not fuzzy — gone.')
+      && text.includes('you haven’t learned the scene — you’ve learned the rehearsal')
+      && text.includes('Helga Noice') && text.includes('Michael Caine')
+      && text.includes('That’s the whole trade.'));
+    const mainSrc2 = await fetch('../js/main.js').then(r => r.text());
+    check('memory lesson: read-only page — renderer exists, no controls, tile shelved',
+      /function renderLineLesson/.test(mainSrc2)
+      && !/renderLineLesson[\s\S]{0,1600}<(textarea|input|select)/.test(mainSrc2.slice(mainSrc2.indexOf('function renderLineLesson')))
+      && /key: 'col:lines'/.test(mainSrc2));
   }
 
   // ── 27. The Cockney course: gate, data, derivation, audio parity ─

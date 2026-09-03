@@ -386,6 +386,29 @@ def main():
         if banned in _strip_comments(main_js):
             fail("the deferred combined experience grew a UI surface: %r" % banned)
 
+    # 6n: The Line You Know vs. The Line You Can Find — owner-supplied
+    # VERBATIM copy (2026-09-03). Spot lines pin the exact wording so no
+    # future pass can paraphrase it; the page stays read-only.
+    lines_js = (ROOT / "js" / "data" / "acting" / "lines.js").read_text(encoding="utf-8")
+    for pin in [
+        "The Line You Know vs. The Line You Can Find",
+        "A Speechcraft lesson on memory, retrieval, and why running lines can lie to you.",
+        "Not fuzzy — gone. And the worst part isn’t the blank.",
+        "**How available something is right now**",
+        "**How deeply it’s actually built**",
+        "Helga Noice, a cognitive psychologist, and Tony Noice, an actor and director",
+        "**“You take it off the other actor’s face.”**",
+        "The struggle *is* the learning.",
+        "you haven’t learned the scene — you’ve learned the rehearsal",
+        "They were only accessible.",
+        "That’s the whole trade.",
+        "**Come back in two days** Not tomorrow. Two days. Start again at step 1.",
+    ]:
+        if pin not in lines_js:
+            fail("verbatim memory lesson lost a pinned line: %r" % pin)
+    if "renderLineLesson" not in main_js or "col:lines" not in main_js:
+        fail("the memory lesson lost its Library tile or renderer")
+
     # 6i: the Build F sonnet-edition catalog
     import hashlib as _hl
     sonnets_sha = _hl.sha256((ROOT / "js" / "data" / "sonnets.js").read_bytes()).hexdigest()

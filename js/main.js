@@ -29,6 +29,7 @@ import { SPEECH_STAGES, SPEECH_MODULES, speechModuleGroups, speechReading,
          PRACTICE_PRINCIPLE_SHORT, SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE } from './data/speech/course.js';
 import { glossaryTerm } from './data/speech/glossary.js';
 import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from './data/acting/approaches.js';
+import { LINE_LESSON } from './data/acting/lines.js';
 import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
@@ -3130,6 +3131,14 @@ function actingLibraryPane(el) {
     };
   };
   const cards = [
+    // Lines & Memory leads the shelf (owner order, 2026-09-03): the first
+    // thing an actor should understand is being off book — what real
+    // knowledge of the lines means and what counts as evidence of it.
+    // Owner-supplied verbatim lesson; count = six sections + practice set.
+    { key: 'col:lines', tone: 'is-lavender', emoji: '🧠', title: 'Lines & Memory',
+      count: 7, unit: 'section',
+      keywords: 'the line you know vs the line you can find memory memorize lines retrieval storage fluency couch test off book practice set noice active experiencing',
+      go: renderLineLesson },
     colTile('principles'),
     colTile('character'),
     colTile('scene'),
@@ -7062,6 +7071,34 @@ function wireAutosave(stateEl, collect) {
 // worksheet since 2026-08-20 so the two can never drift) and never
 // creates, reads or updates a dissection record.
 // The copy below is the owner-supplied textbook text, verbatim.
+// The Line You Know vs. The Line You Can Find — owner-supplied VERBATIM
+// copy (js/data/acting/lines.js; never paraphrase). Read-only page, the
+// Question Everything textbook pattern: no controls, no storage, Back
+// returns to the Library. The draft's own **bold** and *italic* markers
+// render as emphasis, applied AFTER esc() so the text stays inert.
+function renderLineLesson() {
+  record(renderLineLesson);
+  stopSpeech();
+  const fmt = t => esc(t)
+    .replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>')
+    .replace(/\*([^*]+)\*/g, '<i>$1</i>');
+  const block = b => b.h3 ? `<h3 class="guide-subhead">${esc(b.h3)}</h3>`
+    : b.li ? `<ul class="sd-asks">${b.li.map(x => `<li class="guide-text">${fmt(x)}</li>`).join('')}</ul>`
+    : `<p class="guide-text">${fmt(b.p)}</p>`;
+  app.innerHTML = `
+    ${pageTopbar('🧠 Lines & Memory', '#8a6d3b')}
+    <main class="guide" id="line-lesson">
+      <h1>${esc(LINE_LESSON.title)}</h1>
+      <p class="pane-note"><i>${esc(LINE_LESSON.subtitle)}</i></p>
+      ${LINE_LESSON.sections.map(s => `
+      <h2 class="guide-heading">${esc(s.h)}</h2>
+      ${s.blocks.map(block).join('')}`).join('')}
+      <h2 class="guide-heading">${esc(LINE_LESSON.practice.h)}</h2>
+      <ol class="sd-asks">${LINE_LESSON.practice.steps.map(x => `<li class="guide-text">${fmt(x)}</li>`).join('')}</ol>
+    </main>`;
+  wireBrandHome();
+}
+
 function renderDissectTextbook() {
   record(renderDissectTextbook);
   stopSpeech();
