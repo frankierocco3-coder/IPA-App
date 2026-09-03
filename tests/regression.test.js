@@ -2836,7 +2836,7 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('ws-chip')); await sleep(200);
       check('acting: the selector offers the three live workspaces, Speech withdrawn',
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join()
-          === 'Acting,IPA,Accents & Dialects');
+          === 'Acting,Voice & Speech,Accents & Dialects');
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
       check('acting: the workspace keeps its guided course and its Library',

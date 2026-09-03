@@ -281,8 +281,11 @@ const WORKSPACES = [
     context: 'Clarity, confidence, persuasion and vocal freedom' },
   { id: 'acting', icon: '🎭', label: 'Acting',
     context: 'Scene study, character, text and rehearsal' },
-  { id: 'ipa', icon: 'ʃə', label: 'IPA',
-    context: 'IPA Foundations — accent-neutral sound study' },
+  // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
+  // the conservatory class name. The internal id stays 'ipa' (stored
+  // values, lint pins); the IPA Foundations course chip stays inside.
+  { id: 'ipa', icon: 'ʃə', label: 'Voice & Speech',
+    context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
   { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
     context: 'Accent and dialect courses' },
 ];
@@ -1110,6 +1113,26 @@ function renderSpeechIpaReference() {
     vowels: renderVowelMap, dialects: renderDialectsInSpeech };
   app.querySelectorAll('[data-item]').forEach(b =>
     b.addEventListener('click', () => (go[b.dataset.item] ?? renderChart)()));
+}
+
+// ── Your Speaking Instrument: the collection, shelved in Voice &
+// Speech (owner order, 2026-09-03). The seven anatomy-and-instrument
+// chapters over the ONE set of speech records — linked, never copied.
+function renderInstrumentCollection() {
+  record(renderInstrumentCollection);
+  stopSpeech();
+  const chapters = speechLessonsFor('foundation');
+  workspacePage(
+    pageTopbar('🫁 Your Speaking Instrument', '#6f8657'),
+    `<div class="ws-head">
+       <h1 class="page-h">Your Speaking Instrument</h1>
+       <p class="ws-sub">${chapters.length} chapters · how the body makes sound, and how to keep it working.</p>
+     </div>`,
+    `<div class="item-grid">
+       ${chapters.map(l => itemTileHtml({ key: l.id, title: chapterTitle(l.id) })).join('')}
+     </div>`);
+  app.querySelectorAll('[data-item]').forEach(b =>
+    b.addEventListener('click', () => renderSpeechChapter(b.dataset.item)));
 }
 
 // ── The Speechcraft Textbook: one table of contents ───────────
@@ -3998,8 +4021,17 @@ function libraryMain(el, course, ws = activeWorkspace()) {
     { key: 'chart', tone: 'is-blue', emoji: '📖', title: 'IPA Chart',
       count: Object.keys(PHONEMES).length, unit: 'sound',
       keywords: 'phoneme consonant vowel', go: renderChart },
+    // The Voice & Speech workspace is the instrument's home (owner order,
+    // 2026-09-03): the seven Speaking Instrument chapters shelve here as
+    // Shared cards over the ONE set of speech records — linked, never
+    // copied. Bodies show under the owner-approved badge policy.
+    { key: 'speaking-instrument', tone: 'is-sage', emoji: '🫁', title: 'Your Speaking Instrument',
+      count: speechLessonsFor('foundation').length, unit: 'chapter',
+      badge: { cls: '', label: 'Shared' },
+      keywords: 'anatomy breath larynx vocal folds jaw tongue articulation vocal health tension',
+      go: renderInstrumentCollection },
     { key: 'instrument', tone: 'is-terracotta', emoji: '🎭', title: 'Your Instrument',
-      count: 1, unit: 'reference', keywords: 'vocal tract anatomy', go: renderInstrument },
+      count: 1, unit: 'reference', keywords: 'vocal tract anatomy diagram', go: renderInstrument },
     { key: 'vowels', tone: 'is-lavender', emoji: '📐', title: 'Vowel Map',
       count: 1, unit: 'reference', keywords: 'vowel space', go: renderVowelMap },
   ]);

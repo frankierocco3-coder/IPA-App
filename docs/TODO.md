@@ -35,16 +35,18 @@ still assert the old four-module shape.
 
 ## Queued by owner (2026-09-03)
 
-- [ ] **Voice & Speech workspace.** Rename the IPA workspace to Voice &
-      Speech (the conservatory class name; stored `ipa` value migrates) and
-      make it the home for the instrument: the seven gated Speaking
-      Instrument chapters resurfaced, a new tension arc (where unintentional
-      tension lives, how it caps the voice, releasing it), and over time the
-      articulation pages, Vowel Map and Your Instrument card. BLOCKED on one
-      owner policy call: anatomy/body content is professional-tier — publish
-      visible-with-draft-badge (the articulation-guide precedent) or hold
-      for an SLP signature (the Speaking Instrument precedent). Tess
-      recommends the badge route.
+- [x] **Voice & Speech workspace — phase 1 (2026-09-03).** Owner chose
+      the badge route. Workspace label renamed (internal id stays 'ipa');
+      Your Speaking Instrument shelves in the Voice & Speech Library as a
+      Shared card over the speech records (renderInstrumentCollection).
+      Discovery: the seven instrument chapters were already owner-approved
+      2026-08-14 — the badge policy was already their reality.
+- [ ] **Voice & Speech phase 2: the tension arc.** Three new Part II
+      chapters drafted in docs/BUILD_TENSION_COPY.md (Where Tension Hides /
+      What Tension Costs / Working Toward Ease) — performance complement to
+      the health-framed Effort & Tension chapter, same safety register.
+      AWAITING owner copy review. Install moves pinned counts (Foundation
+      7→10, SPEECH_LESSONS 21→24, lint 6l + suite).
 - [ ] **School-mapping module blurbs.** Under the pocket-theater-school
       framing, each Acting module blurb could carry its conservatory
       equivalent (the analysis course, the scene-study semester) so trained
