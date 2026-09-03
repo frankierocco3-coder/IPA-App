@@ -38,20 +38,20 @@ export const ACTING_MODULES = [
   { n: 1, id: 'work', title: 'The Actor’s Work',
     blurb: 'Securing the text first, then where behavior comes from: circumstances, objective, obstacle, stakes.' },
   { n: 2, id: 'text', title: 'Investigating the Text',
-    blurb: 'Reading a scene for what it actually gives you: facts, relationship, turns, subtext, action.' },
+    blurb: 'The script-analysis course: what a scene actually gives you. Facts, relationship, turns, subtext, action.' },
   { n: 3, id: 'listening', title: 'Listening and Responding',
-    blurb: 'The live half of acting: receiving the other person before you answer them.' },
+    blurb: 'The scene-partner work: the live half of acting, receiving the other person before you answer them.' },
   // Building a Character and Tempo-Rhythm were inserted here (owner order,
   // 2026-08-26). Read as an arc the course used to jump from listening
   // straight to rehearsal, with nowhere that built the person doing the
   // work. Preparing the Performance moved from 4 to 6; lesson ids did not
   // change, so nothing already stored on a device breaks.
   { n: 4, id: 'character', title: 'Building a Character',
-    blurb: 'Two roads to a person, through analysis and through feeling, and the goal is both.' },
+    blurb: 'The character-study semester: two roads to a person, through analysis and through feeling, and the goal is both.' },
   { n: 5, id: 'rhythm', title: 'Tempo-Rhythm',
     blurb: 'How a character moves through time, in speech and in silence.' },
   { n: 6, id: 'performance', title: 'Preparing the Performance',
-    blurb: 'Monologue and scene work, rehearsal, and carrying it all into the room.' },
+    blurb: 'The rehearsal-and-production course: monologue and scene work, and carrying it all into the room.' },
 ];
 
 export const ACTING_LESSONS = [
@@ -97,7 +97,7 @@ export const ACTING_LESSONS = [
       { p: 'Speechcraft’s Question Everything framework, in the Actor’s Studio, walks this systematically for a text you are working on.' },
     ] },
 
-  { id: 'ac-facts', module: 'work', order: 4,
+  { id: 'ac-facts', module: 'text', order: 2,
     title: 'Facts, Assumptions and Unknowns',
     requiredReviewer: 'acting-professional',
     objective: 'Separate what the text states from what you have quietly assumed, and name what nobody can know.',
@@ -115,7 +115,7 @@ export const ACTING_LESSONS = [
       { p: 'Nothing here is scored. Two skilled actors will sort the same scene differently and both may be right.' },
     ] },
 
-  { id: 'ac-objective', module: 'work', order: 5,
+  { id: 'ac-objective', module: 'work', order: 4,
     title: 'Objective',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The shared definition of objective, and the everyday-speaking version of the same idea, lives in the Speech chapter “What Do You Want?”. This lesson is its acting application.',
@@ -135,7 +135,7 @@ export const ACTING_LESSONS = [
       ] },
     ] },
 
-  { id: 'ac-obstacle', module: 'work', order: 6,
+  { id: 'ac-obstacle', module: 'work', order: 5,
     title: 'Obstacle',
     requiredReviewer: 'acting-professional',
     objective: 'Identify what stands between the character and what they want.',
@@ -149,7 +149,7 @@ export const ACTING_LESSONS = [
       { p: 'If a scene feels flat in rehearsal, the objective is often fine and the obstacle has gone missing. The actor has quietly assumed the other person will cooperate. Restore the resistance and the scene usually starts moving again.' },
     ] },
 
-  { id: 'ac-stakes', module: 'work', order: 7,
+  { id: 'ac-stakes', module: 'work', order: 6,
     title: 'Stakes',
     requiredReviewer: 'acting-professional',
     objective: 'Know what this character stands to win or lose, and let that calibrate the scene.',
@@ -166,7 +166,7 @@ export const ACTING_LESSONS = [
       ] },
     ] },
 
-  { id: 'ac-urgency', module: 'work', order: 8,
+  { id: 'ac-urgency', module: 'work', order: 7,
     title: 'Urgency',
     requiredReviewer: 'acting-professional',
     sharedNote: 'Urgency as a general speaking principle is taught in the Speech chapter “Why Now? Understanding Urgency”. This lesson applies it to dramatic circumstances.',
@@ -206,7 +206,9 @@ export const ACTING_LESSONS = [
         'A rehearsal room that can work on the scene rather than on the lines.',
       ] },
       { p: 'Speechcraft’s Practice section holds text-based recall exercises: Vanishing Text, Cue Pickup, First-Letter Recall, built for exactly this stage of the work.' },
-    ] },
+      { p: 'One warning before you trust a clean run: feeling fluent and knowing the lines are two different measurements, and the first one lies. The Library’s Lines & Memory lesson shows why, and how to test which one you actually have.' },
+    ],
+    doorway: { id: 'lines-memory', label: 'Lines & Memory' } },
 
   // ── Module 2 · Investigating the Text ─────────────────────────
   { id: 'ac-fourlists', module: 'text', order: 0,
@@ -234,7 +236,7 @@ export const ACTING_LESSONS = [
       { p: 'The framework is shared across Speechcraft: the same questions, the same saved answers, whether you reach them from Speech or from Acting. In the Actor’s Studio they apply to your selected project, with optional answers, “I don’t know yet” and “Not relevant” always available. Nothing is required, and no answer is scored.' },
     ] },
 
-  { id: 'ac-who', module: 'text', order: 2,
+  { id: 'ac-who', module: 'text', order: 3,
     title: 'Who Am I Speaking To?',
     requiredReviewer: 'acting-professional',
     objective: 'Let the specific listener shape everything the character says.',
@@ -245,7 +247,7 @@ export const ACTING_LESSONS = [
       { p: 'For a monologue the same question applies with more force, because the answer is not standing in front of you. Who is this addressed to: another character, an absent person, the audience as confidant, the character’s own mind? Each produces a different piece.' },
     ] },
 
-  { id: 'ac-before', module: 'text', order: 3,
+  { id: 'ac-before', module: 'text', order: 4,
     title: 'What Happened Before?',
     requiredReviewer: 'acting-professional',
     objective: 'Establish the moment before, so the scene starts already in motion.',
@@ -256,7 +258,7 @@ export const ACTING_LESSONS = [
       { p: 'Some of this the text gives you. The rest is a choice, and it is one of the most useful choices available: a specific prior moment makes the opening of a scene concrete instead of generic.' },
     ] },
 
-  { id: 'ac-changed', module: 'text', order: 4,
+  { id: 'ac-changed', module: 'text', order: 5,
     title: 'What Has Changed?',
     requiredReviewer: 'acting-professional',
     objective: 'Track what is different by the end, for the character, the relationship and the situation.',
@@ -267,7 +269,7 @@ export const ACTING_LESSONS = [
       { p: 'Change also gives you the shape of the pursuit. If you know where the character ends up, you can see what they tried, in what order, and where it stopped working.' },
     ] },
 
-  { id: 'ac-relationships', module: 'text', order: 5,
+  { id: 'ac-relationships', module: 'text', order: 6,
     title: 'Relationships',
     requiredReviewer: 'acting-professional',
     objective: 'Define the relationship in terms specific enough to play.',
@@ -278,7 +280,7 @@ export const ACTING_LESSONS = [
       { p: 'Useful specifics: how long they have known each other, who has power and over what, what they have done for each other, what they have failed to do, what is habitually left unspoken, and what each wants the other to believe about them.' },
     ] },
 
-  { id: 'ac-beats', module: 'text', order: 6,
+  { id: 'ac-beats', module: 'text', order: 7,
     title: 'Beats and Turns',
     requiredReviewer: 'acting-professional',
     objective: 'Divide the scene where the thought, tactic or circumstance turns.',
@@ -291,7 +293,7 @@ export const ACTING_LESSONS = [
       { p: 'The Beat Builder exercise in Practice lets you mark turns on your own text.' },
     ] },
 
-  { id: 'ac-subtext', module: 'text', order: 7,
+  { id: 'ac-subtext', module: 'text', order: 8,
     title: 'Subtext',
     requiredReviewer: 'acting-professional',
     objective: 'Work with the distance between what is said and what is meant.',
@@ -303,7 +305,7 @@ export const ACTING_LESSONS = [
       { p: 'The Same Words, Different Subtext exercise in Practice explores this on a fixed line. As everywhere in Acting, there is no correct reading to find.' },
     ] },
 
-  { id: 'ac-actions', module: 'text', order: 8,
+  { id: 'ac-actions', module: 'text', order: 9,
     title: 'Playable Actions',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The Playable Actions library, twelve actions and six contrast pairs, is a single shared record used unchanged.',
@@ -752,10 +754,10 @@ export const ACTING_COLLECTIONS = [
   // Same order the Learn module teaches: Being Off Book first. The shelf
   // and the pathway must not disagree about what comes first.
   { id: 'principles', icon: '🎯', title: 'Acting Principles',
-    lessons: ['ac-offbook', 'ac-behavior', 'ac-circumstances', 'ac-facts', 'ac-objective',
+    lessons: ['ac-offbook', 'ac-behavior', 'ac-circumstances', 'ac-objective',
               'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-attention', 'ac-receiving'] },
   { id: 'scene', icon: '🔍', title: 'Text Investigation',
-    lessons: ['ac-fourlists', 'ac-question', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
+    lessons: ['ac-fourlists', 'ac-question', 'ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
               'ac-beats', 'ac-subtext', 'ac-monologue', 'ac-scene'] },
   { id: 'rehearsal', icon: '🎬', title: 'Actions & Rehearsal',
     lessons: ['ac-actions', 'ac-moment', 'ac-newinfo', 'ac-repetition', 'ac-playing',

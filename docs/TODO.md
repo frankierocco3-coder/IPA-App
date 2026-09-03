@@ -33,6 +33,24 @@ still assert the old four-module shape.
 
 ---
 
+## Queued by owner (2026-09-03)
+
+- [ ] **Voice & Speech workspace.** Rename the IPA workspace to Voice &
+      Speech (the conservatory class name; stored `ipa` value migrates) and
+      make it the home for the instrument: the seven gated Speaking
+      Instrument chapters resurfaced, a new tension arc (where unintentional
+      tension lives, how it caps the voice, releasing it), and over time the
+      articulation pages, Vowel Map and Your Instrument card. BLOCKED on one
+      owner policy call: anatomy/body content is professional-tier — publish
+      visible-with-draft-badge (the articulation-guide precedent) or hold
+      for an SLP signature (the Speaking Instrument precedent). Tess
+      recommends the badge route.
+- [ ] **School-mapping module blurbs.** Under the pocket-theater-school
+      framing, each Acting module blurb could carry its conservatory
+      equivalent (the analysis course, the scene-study semester) so trained
+      actors recognize the map and untrained ones receive it. Owner wants to
+      discuss; sample copy drafted in conversation 2026-09-03.
+
 ## What is switched off right now
 
 Four surfaces are hidden behind kill switches. Nothing is deleted; each is one

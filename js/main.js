@@ -3020,6 +3020,11 @@ function renderActingChapter(id) {
       ${actingChapterBlocks(l)}
       ${l.sharedFrom ? `<p class="pane-note">${esc(l.sharedNote ?? '')}
         <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
+      ${l.doorway ? `<p class="pane-note">${esc(l.doorway.note ?? '')}
+        <button class="linkish" data-shared="${esc(l.doorway.id)}" data-shared-ws="acting" type="button">Open ${esc(l.doorway.label)}</button></p>` : ''}
+      ${l.reflection ? `<h2 class="guide-heading">Reflection</h2>
+      <p class="guide-text">${esc(l.reflection)}</p>
+      <p class="pane-note">A question to sit with — there is no answer to submit and nothing here is scored.</p>` : ''}
       ${glossaryChips(l.glossary)}
       ${actingModuleFor(l) ? `<p class="pane-note"><button class="linkish" id="ac-study" type="button">Study this in Learn</button></p>`
         : ''}
@@ -3040,6 +3045,7 @@ function renderActingChapter(id) {
 
 // Opens the ONE authoritative record a shared concept lives in.
 function openSharedRecord(ws, id) {
+  if (id === 'lines-memory') return renderLineLesson();
   if (ws === 'speech') { if (SPEECH_LIVE) setWorkspace('speech'); return renderSpeechChapter(id); }
   if (id === 'playable-actions') return renderPlayableActions();
   if (id === 'question-everything') return renderDissectTextbook();
@@ -3076,6 +3082,8 @@ function renderActingLesson(id) {
         ${actingChapterBlocks(l)}
         ${l.sharedFrom ? `<p class="pane-note">${esc(l.sharedNote ?? '')}
           <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
+        ${l.doorway ? `<p class="pane-note">${esc(l.doorway.note ?? '')}
+          <button class="linkish" data-shared="${esc(l.doorway.id)}" data-shared-ws="acting" type="button">Open ${esc(l.doorway.label)}</button></p>` : ''}
       </section>
       <section class="sp-step" aria-label="Reflection">
         <h2 class="guide-heading">Reflection</h2>
