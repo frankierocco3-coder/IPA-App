@@ -63,14 +63,18 @@ export function goBack() {
   if (prev) prev(); else homeHandler();
 }
 
-// Standard header for a sub-page: back + brand (→ home) + centered title + stats.
+// Standard header for a sub-page: back + brand (→ home) + centered title.
+// No XP chip (owner order 2026-09-03): sub-pages are reading and
+// reference surfaces where progress numbers are noise; XP lives on the
+// shell stats bar and the lesson screens. The empty stats div stays as
+// the flex spacer that keeps the title centered.
 export function pageTopbar(title, color) {
   return `
     <header class="topbar">
       <button class="backbtn" id="nav-back" aria-label="Back" title="Back">‹</button>
       ${BRAND_BTN}
       <div class="track-title" style="color:${color}">${title}</div>
-      <div class="stats"><span class="stat">⚡ ${store.xp} XP</span></div>
+      <div class="stats"></div>
     </header>`;
 }
 
