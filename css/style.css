@@ -1833,3 +1833,7 @@ body.nb-full #app { display: none; }
 
 /* The Line You Know: rule sub-heads inside the verbatim memory lesson. */
 .guide-subhead { font-size: 1.02rem; font-weight: 700; margin: 18px 0 6px; }
+
+/* Voice-science figures inside chapters and references. */
+.sp-fig { margin: 18px 0; }
+.sp-fig img { width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(0,0,0,.08); }

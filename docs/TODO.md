@@ -41,6 +41,18 @@ still assert the old four-module shape.
       Shared card over the speech records (renderInstrumentCollection).
       Discovery: the seven instrument chapters were already owner-approved
       2026-08-14 — the badge policy was already their reality.
+- [x] **Voice-science figures installed (2026-09-04).** Six of the owner's
+      anatomy illustrations (source folder: Documents/ChatGPT/Speech
+      Craft/images/voice-science, label-checked at full resolution,
+      converted to baseline JPEG q90 in img/voice-science/): body → Your
+      Instrument chapter, diaphragm 3-panel → Diaphragm chapter, tension →
+      What Tension Costs, vocal folds → Resonance chapter, resonance
+      sensation → Working Toward Ease, mouth articulators → the Your
+      Instrument reference page. Registry js/data/voice-art.js; chapter
+      bodies carry { fig } blocks. PARKED (in the owner's folder, not the
+      repo): brain-controls, onset-and-release, environment-and-recovery —
+      no chapter teaches their content yet; they join the enrichment pass.
+      Figures share the chapters' awaiting-specialist status.
 - [ ] **Voice & Speech phase 2: the tension arc.** Three new Part II
       chapters drafted in docs/BUILD_TENSION_COPY.md (Where Tension Hides /
       What Tension Costs / Working Toward Ease) — performance complement to

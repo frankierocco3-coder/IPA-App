@@ -30,6 +30,7 @@ import { SPEECH_STAGES, SPEECH_MODULES, speechModuleGroups, speechReading,
 import { glossaryTerm } from './data/speech/glossary.js';
 import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from './data/acting/approaches.js';
 import { LINE_LESSON } from './data/acting/lines.js';
+import { voiceFigure, VOICE_ATLAS } from './data/voice-art.js';
 import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
@@ -1720,6 +1721,8 @@ function speechChapterBlocks(l, { interactive = true } = {}) {
       <footer class="th-attrib">${esc(b.attribution ?? '')}</footer></blockquote>`;
     if (b.p) return `<p class="guide-text">${esc(b.p)}</p>`;
     if (b.list) return `<ul class="th-list">${b.list.map(li => `<li>${esc(li)}</li>`).join('')}</ul>`;
+    const f = b.fig && voiceFigure(b.fig);
+    if (b.fig) return f ? `<figure class="sp-fig"><img src="${f.src}" alt="${esc(f.alt)}"></figure>` : '';
     // Owner order 2026-09-03: reading pages carry no warning boxes. The
     // safety flag stays in the data (pinned, shown to reviewers) and the
     // safety line still guards every practice surface that asks for action.
@@ -1901,6 +1904,8 @@ function speechBlockHtml(b, i) {
     <footer class="th-attrib">${esc(b.attribution ?? '')}</footer></blockquote>`;
   if (b.p) return `<p class="guide-text">${esc(b.p)}</p>`;
   if (b.list) return `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  const f2 = b.fig && voiceFigure(b.fig);
+  if (b.fig) return f2 ? `<figure class="sp-fig"><img src="${f2.src}" alt="${esc(f2.alt)}"></figure>` : '';
   // Reading pages carry no warning boxes (owner order 2026-09-03); the
   // flag survives in data and on practice surfaces.
   if (b.safety) return '';
@@ -4014,7 +4019,7 @@ function libraryMain(el, course, ws = activeWorkspace()) {
       keywords: 'plato gorgias phaedrus republic persuasion',
       go: () => { if (SPEECH_LIVE) setWorkspace('speech'); renderReadingPathway(); } },
     { key: 'instrument', tone: 'is-sage', emoji: '🎭', title: 'Your Instrument',
-      count: 1, unit: 'reference', keywords: 'vocal tract anatomy diagram', go: renderInstrument },
+      count: VOICE_ATLAS.length, unit: 'diagram', keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension onset brain', go: renderInstrument },
     { key: 'vowels', tone: 'is-blue', emoji: '📐', title: 'Vowel Map',
       count: 1, unit: 'reference', keywords: 'vowel space chart', go: renderVowelMap },
   ] : [
@@ -4033,7 +4038,7 @@ function libraryMain(el, course, ws = activeWorkspace()) {
       keywords: 'anatomy breath larynx vocal folds jaw tongue articulation vocal health tension',
       go: renderInstrumentCollection },
     { key: 'instrument', tone: 'is-terracotta', emoji: '🎭', title: 'Your Instrument',
-      count: 1, unit: 'reference', keywords: 'vocal tract anatomy diagram', go: renderInstrument },
+      count: VOICE_ATLAS.length, unit: 'diagram', keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension', go: renderInstrument },
     { key: 'vowels', tone: 'is-lavender', emoji: '📐', title: 'Vowel Map',
       count: 1, unit: 'reference', keywords: 'vowel space', go: renderVowelMap },
   ]);
@@ -5668,11 +5673,22 @@ function renderInstrument() {
     ['Pharynx', 'the throat cavity; its size colours the vowel.'],
     ['Vocal folds (glottis)', 'buzz for voiced sounds, open for voiceless — and make /h/.'],
   ];
+  // The full visual atlas (owner order, 2026-09-04): every voice-science
+  // figure, in teaching order, each under its own title. The generated
+  // vocal-tract SVG stays in code as the articulation fallback but this
+  // page now shows the real artwork.
+  const fig = key => {
+    const f = voiceFigure(key);
+    return f ? `
+      <h2 class="guide-heading">${esc(f.title)}</h2>
+      <figure class="sp-fig"><img src="${f.src}" alt="${esc(f.alt)}"></figure>` : '';
+  };
   app.innerHTML = `
     ${pageTopbar('🎭 Your Instrument', '#64748b')}
     <main class="guide instrument">
-      <p class="track-blurb">You don’t play the voice — you <b>are</b> the instrument. Here’s the workshop.</p>
-      <div class="anat-wrap">${vocalTractSVG()}</div>
+      <p class="track-blurb">You don’t play the voice — you <b>are</b> the instrument. Here’s the workshop, in pictures.</p>
+      ${VOICE_ATLAS.map(fig).join('')}
+      <h2 class="guide-heading">The Working Parts</h2>
       <dl class="anat-list">
         ${parts.map(([t, d]) => `<div><dt>${esc(t)}</dt><dd>${esc(d)}</dd></div>`).join('')}
       </dl>
