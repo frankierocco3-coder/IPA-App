@@ -8925,8 +8925,7 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
           ${picture}
           <ol class="guide-steps">${g.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ol>
           ${g.contrast ? `<p class="pane-note"><b>Against /${esc(g.contrast.sym)}/:</b> ${esc(g.contrast.note)}</p>` : ''}
-          ${g.watch ? `<p class="pane-note">⚠︎ ${esc(g.watch)}</p>` : ''}
-          <p><span class="sp-badge">Prepared draft, awaiting review by a qualified voice professional</span></p>
+          ${g.watch ? `<p class="pane-note">${esc(g.watch)}</p>` : ''}
         </section>`;
       })()}
       ${articulationVideoHtml(videoFor(acc, sym, 'isolated'), 'Isolated Sound')}
