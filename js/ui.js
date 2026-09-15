@@ -155,13 +155,18 @@ export function runStepSequence({ mount, steps, onFinish }) {
 
 // A collection/module tile. `emoji` is optional and belongs ONLY at the
 // collection level — chapter and lesson tiles never carry one.
-export function tileHtml({ key, tone, emoji, title, meta, badge, progress, wide }) {
+export function tileHtml({ key, tone, emoji, img, title, meta, badge, progress, wide }) {
   const pct = progress && progress.total
     ? Math.round(progress.done / progress.total * 100) : null;
+  // `img` (an illustrated icon from img/ui/) outranks the emoji when
+  // both exist; the emoji stays in the data as the fallback.
+  const mark = img
+    ? `<span class="tile-img" aria-hidden="true"><img src="${esc(img)}" alt=""></span>`
+    : (emoji ? `<span class="tile-emoji" aria-hidden="true">${emoji}</span>` : '');
   return `
     <button class="tile ${tone ?? ''} ${wide ? 'tile-wide' : ''}" data-tile="${esc(key)}" type="button">
       <span class="tile-body">
-        <span class="tile-title">${emoji ? `<span class="tile-emoji" aria-hidden="true">${emoji}</span>` : ''}${esc(title)}</span>
+        <span class="tile-title">${mark}${esc(title)}</span>
         ${badge ? `<span><span class="badge ${badge.cls}">${esc(badge.label)}</span></span>` : ''}
         ${meta ? `<span class="tile-meta">${esc(meta)}</span>` : ''}
         ${pct === null ? '' : `<span class="bar" role="img"

@@ -688,13 +688,17 @@ function continueCard(track, course) {
     };
   }
   const started = store.hasEarnedAnything || done > 0;
+  // The card and the ringed path node are the SAME fact (owner UI pass
+  // 2026-09-15): both say "Current lesson", both name it, and the card
+  // states the position the ring marks on the path below.
+  const at = chain.indexOf(next);
   return {
     html: `
-    <section class="continue-card" aria-label="Continue learning">
+    <section class="continue-card is-current" aria-label="Continue learning">
       <div class="cc-info">
-        <span class="cc-stage">${course.icon} ${esc(course.label)} · ${esc(next.unit.title)}</span>
+        <span class="cc-stage">Current lesson · ${esc(next.unit.title)}</span>
         <h2>${esc(next.title)}</h2>
-        <p class="cc-meta">${esc(lessonKindName(next))} · ~${estMinutes(next)} min · ${done}/${total} lessons done</p>
+        <p class="cc-meta">Lesson ${at + 1} of ${total} · ${esc(lessonKindName(next))} · ~${estMinutes(next)} min</p>
       </div>
       <button class="btn btn-primary cc-go" id="cc-go" type="button">${started ? 'Continue' : 'Start here'}</button>
     </section>`,
@@ -1104,7 +1108,7 @@ function speechLibraryPane(el) {
       count: SONNETS.length + Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0),
       unit: 'text', keywords: 'sonnets scenes monologues speeches shakespeare',
       go: renderTextsPage },
-    { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', title: 'Rhetoric & Oratory',
+    { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', img: 'img/ui/rhetoric.png', title: 'Rhetoric & Oratory',
       count: 3, unit: 'dialogue', keywords: 'plato gorgias phaedrus republic jowett persuasion',
       go: renderReadingPathway },
     // Dialects in Speech folded in here — a one-topic card is an honest
@@ -2876,7 +2880,7 @@ function workspaceLibrary(el, { workspace, cards, state }) {
       // consecutive runs — search results always render flat, since a
       // heading over one stray match is noise. Order is the cards' own.
       const tile = c => tileHtml({
-        key: c.key, tone: c.tone, emoji: c.emoji, title: c.title, wide: c.wide,
+        key: c.key, tone: c.tone, emoji: c.emoji, img: c.img, title: c.title, wide: c.wide,
         badge: c.badge, meta: countLabel(c),
       });
       if (q || !shown.some(c => c.group)) return `<div class="tile-grid">${shown.map(tile).join('')}</div>`;
@@ -3241,11 +3245,18 @@ function actingLibraryPane(el) {
   // rhythm, the job), then the texts, then the shared shelves. Collection
   // tiles and standalone tiles interleave, so the order is one literal
   // list rather than a mapped array.
+  // Owner art intake 2026-09-15: every collection card carries its
+  // illustrated icon; the emoji survives in data as the fallback.
+  const COL_ART = {
+    principles: 'img/ui/principles.png', character: 'img/ui/character.png',
+    scene: 'img/ui/text-investigation.png', rehearsal: 'img/ui/rehearsal.png',
+    rhythm: 'img/ui/rhythm.png', professional: 'img/ui/professional.png',
+  };
   const colTile = id => {
     const c = ACTING_COLLECTIONS.find(x => x.id === id);
     return {
       key: `col:${c.id}`, tone: ACTING_COLLECTION_TONE[c.id],
-      emoji: ACTING_COLLECTION_EMOJI[c.id], title: c.title,
+      emoji: ACTING_COLLECTION_EMOJI[c.id], img: COL_ART[c.id], title: c.title,
       count: c.lessons.length, unit: 'chapter',
       keywords: c.lessons.map(lid => actingLessonById(lid)?.title ?? '').join(' '),
       go: () => renderActingCollection(c.id),
@@ -3259,28 +3270,28 @@ function actingLibraryPane(el) {
         G3 = 'Find material', G4 = 'Deepen your practice';
   const cards = [
     // Owner-supplied verbatim lesson; count = six sections + practice set.
-    { key: 'col:lines', tone: 'is-lavender', emoji: '🧠', title: 'Lines & Memory',
+    { key: 'col:lines', tone: 'is-lavender', emoji: '🧠', img: 'img/ui/lines-memory.png', title: 'Lines & Memory',
       group: G1, count: 7, unit: 'section',
       keywords: 'the line you know vs the line you can find memory memorize lines retrieval storage fluency couch test off book practice set noice active experiencing',
       go: renderLineLesson },
     { ...colTile('scene'), group: G1 },
     // The Four Lists tool sits with the collection it serves (owner
     // order, 2026-08-27): investigation first, then its worksheet.
-    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', title: 'The Four Lists',
+    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', img: 'img/ui/four-lists.png', title: 'The Four Lists',
       group: G1, count: 4, unit: 'list',
       keywords: 'character facts says about others reading five times building a character',
       go: () => renderFourListsLesson() },
     // Question Everything — the text-dissection textbook. Moved here from
     // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
     // on the shelf. Count = the six numbered DISSECT_SECTIONS.
-    { key: 'col:question', tone: 'is-lavender', emoji: '🔍', title: 'Question Everything',
+    { key: 'col:question', tone: 'is-lavender', emoji: '🔍', img: 'img/ui/question.png', title: 'Question Everything',
       group: G1, count: 6, unit: 'section',
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
       go: renderDissectTextbook },
     { ...colTile('principles'), group: G2 },
     { ...colTile('character'), group: G2 },
     { ...colTile('rehearsal'), group: G2 },
-    { key: 'col:actions', tone: 'is-gold', emoji: '🎯', title: 'Playable Actions',
+    { key: 'col:actions', tone: 'is-gold', emoji: '🎯', img: 'img/ui/actions.png', title: 'Playable Actions',
       group: G2, count: ACTION_VERBS.length, unit: 'verb',
       keywords: 'action verb tactic objective doing not feeling playable',
       go: renderPlayableActions },
@@ -3288,15 +3299,15 @@ function actingLibraryPane(el) {
     // Monologues and Scenes are separate shelves (owner order,
     // 2026-08-20). Everything we ship today is a monologue; the Scenes
     // shelf is honest about being empty until scenes are added.
-    { key: 'col:monologues', tone: 'is-gold', emoji: '📜', title: 'Monologues',
+    { key: 'col:monologues', tone: 'is-gold', emoji: '📜', img: 'img/ui/scripts.png', title: 'Monologues',
       group: G3, count: Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0), unit: 'monologue',
       keywords: 'monologue soliloquy speech character play author chekhov ibsen wilde oneill pirandello',
       go: renderTextsPage },
-    { key: 'col:scenes', tone: 'is-terracotta', emoji: '🎭', title: 'Scenes',
+    { key: 'col:scenes', tone: 'is-terracotta', emoji: '🎭', img: 'img/ui/scenes.png', title: 'Scenes',
       group: G3, count: PROVIDED_SCENES.length, unit: 'scene',
       keywords: 'scene two-hander dialogue partner work',
       go: renderScenesShelf },
-    { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
+    { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', img: 'img/ui/approaches.png', title: 'Approaches to Acting',
       group: G4, count: ACTING_APPROACHES.length, unit: 'introduction',
       keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
     { ...colTile('professional'), group: G4 },
@@ -3304,7 +3315,7 @@ function actingLibraryPane(el) {
     // workspace is withdrawn (owner order, 2026-08-19). Same records,
     // never copied — it supersedes the 8-chapter Speech for Actors
     // subset, whose renderer stays dormant behind SPEECH_LIVE.
-    { key: 'col:textbook', tone: 'is-sage', emoji: '📗', title: 'Speechcraft Textbook',
+    { key: 'col:textbook', tone: 'is-sage', emoji: '📗', img: 'img/ui/textbook.png', title: 'Speechcraft Textbook',
       group: G4, count: textbookOrder().length, unit: 'chapter', badge: { cls: '', label: 'Shared' },
       keywords: 'speech breath voice articulation fluency pace principles instrument meaning presence textbook',
       go: renderTextbook },
@@ -4087,10 +4098,10 @@ function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'speech') return speechLibraryPane(el);
   const d = course.id === 'core' ? null : course.id;
   const cards = (d ? [
-    { key: 'ipa', tone: 'is-lavender', emoji: '📖', title: 'IPA for This Accent',
+    { key: 'ipa', tone: 'is-lavender', emoji: '📖', img: 'img/ui/ipa.png', title: 'IPA for This Accent',
       count: phonemesForAccent(d).length, unit: 'sound', keywords: 'phoneme chart transcription',
       go: () => renderInventory(d) },
-    { key: 'words', tone: 'is-terracotta', emoji: '🗣', title: 'Words & Expressions',
+    { key: 'words', tone: 'is-terracotta', emoji: '🗣', img: 'img/ui/words.png', title: 'Words & Expressions',
       count: IDIOM.filter(e => e.dialect === d).length, unit: 'expression',
       keywords: 'idiom slang vocabulary', go: () => renderIdioms(d) },
     ...(DIALECT_ACTION_LIVE ? [{ key: 'action', tone: 'is-blue', emoji: '🎭', title: 'Dialect in Action',
@@ -4100,18 +4111,18 @@ function libraryMain(el, course, ws = activeWorkspace()) {
       unit: 'piece', badge: actionFor(d).length ? null : { cls: 'is-pending', label: 'In review' },
       keywords: 'scene monologue',
       go: () => actionFor(d).length ? renderDialectAction(d) : renderDialectActionPending(d) }] : []),
-    { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', title: 'Rhetoric & Oratory',
+    { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', img: 'img/ui/rhetoric.png', title: 'Rhetoric & Oratory',
       count: 3, unit: 'dialogue', badge: { cls: '', label: 'Shared' },
       keywords: 'plato gorgias phaedrus republic persuasion',
       go: () => { if (SPEECH_LIVE) setWorkspace('speech'); renderReadingPathway(); } },
-    { key: 'instrument', tone: 'is-sage', emoji: '🎭', title: 'Your Instrument',
+    { key: 'instrument', tone: 'is-sage', emoji: '🎭', img: 'img/ui/instrument.png', title: 'Your Instrument',
       count: VOICE_ATLAS.length, unit: 'diagram', keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension onset brain', go: renderInstrument },
-    { key: 'vowels', tone: 'is-blue', emoji: '📐', title: 'Vowel Map',
+    { key: 'vowels', tone: 'is-blue', emoji: '📐', img: 'img/ui/vowel-map.png', title: 'Vowel Map',
       count: 1, unit: 'reference', keywords: 'vowel space chart', go: renderVowelMap },
   ] : [
     { key: 'what', tone: 'is-sage', emoji: 'ʃə', title: 'What Is IPA?',
       count: 1, unit: 'reference', keywords: 'alphabet sounds introduction', go: renderChart },
-    { key: 'chart', tone: 'is-blue', emoji: '📖', title: 'IPA Chart',
+    { key: 'chart', tone: 'is-blue', emoji: '📖', img: 'img/ui/ipa.png', title: 'IPA Chart',
       count: Object.keys(PHONEMES).length, unit: 'sound',
       keywords: 'phoneme consonant vowel', go: renderChart },
     // The Voice & Speech workspace is the instrument's home (owner order,
@@ -4123,9 +4134,9 @@ function libraryMain(el, course, ws = activeWorkspace()) {
       badge: { cls: '', label: 'Shared' },
       keywords: 'anatomy breath larynx vocal folds jaw tongue articulation vocal health tension',
       go: renderInstrumentCollection },
-    { key: 'instrument', tone: 'is-terracotta', emoji: '🎭', title: 'Your Instrument',
+    { key: 'instrument', tone: 'is-terracotta', emoji: '🎭', img: 'img/ui/instrument.png', title: 'Your Instrument',
       count: VOICE_ATLAS.length, unit: 'diagram', keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension', go: renderInstrument },
-    { key: 'vowels', tone: 'is-lavender', emoji: '📐', title: 'Vowel Map',
+    { key: 'vowels', tone: 'is-lavender', emoji: '📐', img: 'img/ui/vowel-map.png', title: 'Vowel Map',
       count: 1, unit: 'reference', keywords: 'vowel space', go: renderVowelMap },
   ]);
   libState.dialect.query = libState.dialect.query ?? '';
@@ -4479,17 +4490,6 @@ function progressMain(el) {
       <p>${doneCount} of ${rows.length} daily quests done — they reset at midnight.</p></div>
       <span class="quest-banner-emoji">📈</span>
     </section>
-    <h2 class="chart-h">Statistics</h2>
-    <div class="summary-row">
-      <div class="summary-card"><span class="summary-n">🔥 ${store.displayStreak}</span><span class="summary-l">day streak</span></div>
-      <div class="summary-card"><span class="summary-n">⚡ ${store.xp}</span><span class="summary-l">total XP</span></div>
-      <div class="summary-card"><span class="summary-n">💎 ${store.gems}</span><span class="summary-l">gems</span></div>
-    </div>
-    <div class="summary-row">
-      <div class="summary-card"><span class="summary-n">${store.completed.size}</span><span class="summary-l">lessons done</span></div>
-      <div class="summary-card"><span class="summary-n">${t.daysPractised}</span><span class="summary-l">days practised</span></div>
-      <div class="summary-card"><span class="summary-n">${t.attempts}</span><span class="summary-l">answers given</span></div>
-    </div>
     <h2 class="chart-h">Daily Quests</h2>
     ${rows.map(r => `
       <div class="quest-row">
@@ -4513,6 +4513,17 @@ function progressMain(el) {
       </div>`).join('')
       : '<p class="pane-note">Not enough data yet — answer some real exercises and this fills in.</p>'}
     <button class="btn-lite" id="prog-weak-full" type="button">Full weak-sounds report ›</button>
+    <h2 class="chart-h">Statistics</h2>
+    <div class="summary-row">
+      <div class="summary-card"><span class="summary-n">🔥 ${store.displayStreak}</span><span class="summary-l">day streak</span></div>
+      <div class="summary-card"><span class="summary-n">⚡ ${store.xp}</span><span class="summary-l">total XP</span></div>
+      <div class="summary-card"><span class="summary-n">💎 ${store.gems}</span><span class="summary-l">gems</span></div>
+    </div>
+    <div class="summary-row">
+      <div class="summary-card"><span class="summary-n">${store.completed.size}</span><span class="summary-l">lessons done</span></div>
+      <div class="summary-card"><span class="summary-n">${t.daysPractised}</span><span class="summary-l">days practised</span></div>
+      <div class="summary-card"><span class="summary-n">${t.attempts}</span><span class="summary-l">answers given</span></div>
+    </div>
     <h2 class="chart-h">Achievements</h2>
     ${achievementRows().map(a => `
       <div class="ach-row">

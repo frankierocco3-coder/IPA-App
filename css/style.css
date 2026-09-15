@@ -1961,3 +1961,15 @@ body.nb-full #app { display: none; }
    emoji needed. Emoji-glyph cards keep the old treatment untouched. */
 .track-glyph.has-img { background: var(--accent-tint); border: 1px solid var(--line); box-shadow: none; }
 .track-glyph.has-img img { width: 46px; height: 46px; object-fit: contain; display: block; }
+
+/* Illustrated tile icons (Library shelves, 2026-09-15): the drawn icon
+   leads the title the way the emoji did, just bigger and with room. */
+.tile-title { display: flex; align-items: center; gap: 10px; }
+.tile-img { flex: none; }
+.tile-img img { width: 42px; height: 42px; object-fit: contain; display: block; }
+.tile-title .tile-emoji { margin-right: 0; }
+
+/* The current-lesson card wears the same deep green as the path ring —
+   one treatment for one fact (owner UI pass 2026-09-15). */
+.continue-card.is-current { border-color: var(--green-dark); }
+.continue-card.is-current .cc-stage { color: var(--green-dark); }
