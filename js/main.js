@@ -275,6 +275,14 @@ const NAV_ICONS = {
   more: `<svg ${NAV_ICON_ATTRS}><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>`,
 };
 const navIcon = s => NAV_ICONS[s.id] ?? s.icon;
+
+// Illustrated card icons (owner art intake 2026-09-15, generated to the
+// house palette and label-checked like all AI art). A card carries
+// `img` when a drawn icon exists in img/ui/; the emoji stays as data so
+// any card without art still renders.
+const cardGlyph = c => c.img
+  ? `<div class="track-glyph has-img"><img src="${c.img}" alt="" width="46" height="46"></div>`
+  : `<div class="track-glyph">${c.icon}</div>`;
 // Shop and Profile live under More but are still full shell sections.
 const OFF_NAV_SECTIONS = ['shop', 'profile'];
 // Older saved states point at sections that have since moved.
@@ -1858,6 +1866,12 @@ function renderSpeechChapter(id) {
     ${pageTopbar('📖 ' + esc(l.title), '#6f8657')}
     <main class="guide sp-chapter">
       <p class="pane-note">${esc(col?.title ?? 'Speech Library')}</p>
+      ${(() => {
+        // The jump list covers real chapters only ('wsm' is the preface
+        // pointer, which keeps its own doorway under More).
+        const ch = flat.filter(x => x !== 'wsm').map(x => ({ id: x, title: chapterTitle(x) }));
+        return chapterListHtml(ch, ch.findIndex(x => x.id === l.id));
+      })()}
       <h1 tabindex="-1" id="sp-h">${esc(chapterTitle(l.id))}</h1>
       ${speechChapterBlocks(l)}
       ${glossaryChips(l.glossary)}
@@ -1878,6 +1892,7 @@ function renderSpeechChapter(id) {
   document.getElementById('sp-to-contents')?.addEventListener('click', renderTextbook);
   document.getElementById('sp-prev')?.addEventListener('click', () => { navStack.pop(); renderSpeechChapter(prev.id); });
   document.getElementById('sp-next-ch')?.addEventListener('click', () => { navStack.pop(); renderSpeechChapter(nxt.id); });
+  wireChapterList(renderSpeechChapter);
 }
 
 // ── LEARN: the guided lesson step ──────────────────────────────
@@ -3082,6 +3097,7 @@ function renderActingChapter(id) {
     ${pageTopbar('📖 ' + esc(l.title), '#8a6d3b')}
     <main class="guide sp-chapter">
       <p class="pane-note">${esc(col?.title ?? 'Acting Library')}</p>
+      ${chapterListHtml(sibs, at)}
       <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
       ${actingChapterBlocks(l)}
       ${l.sharedFrom ? `<p class="pane-note">${esc(l.sharedNote ?? '')}
@@ -3107,6 +3123,32 @@ function renderActingChapter(id) {
   document.getElementById('ac-study')?.addEventListener('click', () => renderActingLesson(l.id));
   document.getElementById('ac-prev')?.addEventListener('click', () => { navStack.pop(); renderActingChapter(prev.id); });
   document.getElementById('ac-next')?.addEventListener('click', () => { navStack.pop(); renderActingChapter(nxt.id); });
+  wireChapterList(renderActingChapter);
+}
+
+// ── The Chapters control (owner order 2026-09-15) ─────────────
+// A reading page names its place in the collection and unfolds the
+// full chapter list on demand. Native <details>, so keyboard and
+// screen-reader behavior come free; picking a chapter REPLACES the
+// page in navStack (the sound-page pattern) so one Back still returns
+// to wherever the reader came from.
+function chapterListHtml(items, at, noun = 'Chapter') {
+  if (at < 0 || items.length < 2) return '';
+  return `
+    <details class="ch-list">
+      <summary>${esc(noun)} ${at + 1} of ${items.length} <span class="ch-caret" aria-hidden="true">▾</span></summary>
+      <div class="ch-list-items">
+        ${items.map((x, i) => `
+          <button class="ch-item ${i === at ? 'on' : ''}" data-ch="${esc(x.id)}" type="button"
+            ${i === at ? 'aria-current="page"' : ''}>
+            <span class="ch-item-n">${i + 1}</span><span class="ch-item-t">${esc(x.title)}</span>
+          </button>`).join('')}
+      </div>
+    </details>`;
+}
+function wireChapterList(go) {
+  app.querySelectorAll('[data-ch]').forEach(b =>
+    b.addEventListener('click', () => { navStack.pop(); go(b.dataset.ch); }));
 }
 
 // Opens the ONE authoritative record a shared concept lives in.
@@ -3135,6 +3177,10 @@ function renderActingLesson(id) {
     ${pageTopbar('🎭 ' + esc(l.title), '#8a6d3b')}
     <main class="guide sp-lesson">
       <p class="pane-note">Module ${m?.n} · ${esc(m?.title ?? '')} · Lesson ${esc(actingLessonNumber(l))}</p>
+      ${m ? (() => {
+        const mods = actingLessonsFor(m.id).filter(actingVisible);
+        return chapterListHtml(mods, mods.findIndex(x => x.id === l.id), 'Lesson');
+      })() : ''}
       <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
       <section class="sp-step" aria-label="Objective">
         <h2 class="guide-heading">Objective</h2>
@@ -3172,6 +3218,7 @@ function renderActingLesson(id) {
   document.getElementById('ac-next-lesson')?.addEventListener('click', () => {
     navStack.pop(); renderActingLesson(nxt.id);
   });
+  wireChapterList(renderActingLesson);
   document.getElementById('ac-done').addEventListener('click', () => {
     if (!markSpeechLessonDone(id)) return;
     store.addXp(5);
@@ -3730,8 +3777,8 @@ function actorStudioPane(el) {
   // Everything, beats, actions, notes — is reached ON a script now, from
   // the rail on its own page, where it belongs.
   const cards = [
-    { icon: '📜', title: 'Scenes & Monologues', go: renderTextsPage },
-    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
+    { icon: '📜', img: 'img/ui/scripts.png', title: 'Scenes & Monologues', go: renderTextsPage },
+    { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
     <h1 class="page-h">Actor’s Studio</h1>
@@ -3761,7 +3808,7 @@ function actorStudioPane(el) {
       </section>`}
     ${cards.map((c, i) => `
       <button class="track-card hub-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
-        <div class="track-glyph">${c.icon}</div>
+        ${cardGlyph(c)}
         <div class="track-info"><h2>${esc(c.title)}</h2></div>
         <div class="track-arrow">›</div>
       </button>`).join('')}`;
@@ -5475,20 +5522,20 @@ function moreMain(el) {
   // (profile, settings, their data), then talking to us, then reading
   // about the app, and the Shop last — bookkeeping never leads.
   const cards = [
-    { icon: '👤', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
-    { icon: '⚙️', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
-    { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
-    { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
+    { icon: '👤', img: 'img/ui/profile.png', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
+    { icon: '⚙️', img: 'img/ui/preferences.png', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
+    { icon: '🔒', img: 'img/ui/privacy.png', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
+    { icon: '✉️', img: 'img/ui/feedback.png', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     // Permanent doorway to the preface — never retired by onboarding state.
     // Replaying only touches the replay timestamps (state.js guarantees it).
-    { icon: '✨', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
-    { icon: 'ℹ️', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
-    { icon: '📚', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
-    { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
+    { icon: '✨', img: 'img/ui/why-speech.png', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
+    { icon: 'ℹ️', img: 'img/ui/about.png', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
+    { icon: '📚', img: 'img/ui/credits.png', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
+    { icon: '🛍️', img: 'img/ui/shop.png', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
-      <div class="track-glyph">${c.icon}</div>
+      ${cardGlyph(c)}
       <div class="track-info"><h2>${esc(c.title)}</h2><p>${esc(c.blurb)}</p></div>
       <div class="track-arrow">›</div>
     </button>`).join('');
@@ -6066,15 +6113,15 @@ function studioMain(el) {
   // Playable Actions is acting work — it shelves in the Acting Library
   // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
   const cards = [
-    { icon: '📜', title: 'Scripts & Speeches', go: renderTextsPage },
-    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
-    { icon: '📕', title: 'Personal Dictionary', go: renderDictionary },
+    { icon: '📜', img: 'img/ui/scripts.png', title: 'Scripts & Speeches', go: renderTextsPage },
+    { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
+    { icon: '📕', img: 'img/ui/dictionary.png', title: 'Personal Dictionary', go: renderDictionary },
   ];
   el.innerHTML = `<h1 class="page-h">Studio</h1>`
     + (inSpeech ? workingTextCardHtml(workingText()) : '')
     + cards.map((c, i) => `
     <button class="track-card hub-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
-      <div class="track-glyph">${c.icon}</div>
+      ${cardGlyph(c)}
       <div class="track-info"><h2>${esc(c.title)}</h2></div>
       <div class="track-arrow">›</div>
     </button>`).join('');
