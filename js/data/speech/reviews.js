@@ -172,6 +172,12 @@ export const SPEECH_REVIEWS = {
   'ac-performance': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-17', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-17. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  // Using the Fourth Wall (6.6), owner-approved 2026-09-14 after a
+  // full read of the draft copy (docs/BUILD_FOURTH_WALL.md). Same
+  // editorial decision as the rest of the Acting course.
+  'ac-fourthwall': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-14', version: 1,
+    notes: 'Editorially approved by the product owner for publication on 2026-09-14. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
 
   // Building a Character (4.1-4.7) and Tempo-Rhythm (5.1-5.6),
   // owner-approved 2026-08-26 by the same editorial decision as the

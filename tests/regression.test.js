@@ -2763,12 +2763,12 @@ export async function run({ navDoc = document } = {}) {
 
   // ── 20. The Acting workspace ─────────────────────────────────
   {
-    check('acting: six modules hold the 44 path lessons; 8 Professional chapters shelve outside the path',
+    check('acting: six modules hold the 45 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 6
       && String(ACTING_MODULES.map(m => m.title))
         === 'The Actor’s Work,Investigating the Text,Listening and Responding,Building a Character,Tempo-Rhythm,Preparing the Performance'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 44
-      && ACTING_LESSONS.length === 52
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 45
+      && ACTING_LESSONS.length === 53
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
         .every(l => l.module === 'professional')
       && ACTING_MODULES.every(m => actingLessonsFor(m.id)
@@ -2846,16 +2846,17 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !doc.getElementById('freeplay'));
-      check('acting: all 56 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 57 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
           // item (28 original + 16 Building a Character/Tempo-Rhythm + 8 Professional Actor Character /
-          // Tempo-Rhythm lessons owner-approved 2026-08-26 + 4 approaches)
+          // Tempo-Rhythm lessons owner-approved 2026-08-26 + Using the
+          // Fourth Wall owner-approved 2026-09-14 + 4 approaches)
           // carries the owner's editorial verdict, none claims a
           // specialist, and no reviewer name is invented — so the draft
           // strip has nothing to count and must be gone.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 56
+          return items.length === 57
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -2875,7 +2876,7 @@ export async function run({ navDoc = document } = {}) {
       // The shared right rail legitimately names the next acting chapter
       // in its "Next step" card on every section, so chapter titles are
       // asserted absent from the Library pane itself, never the whole body.
-      check('acting: the Library landing shows collections only, never all 52 items at once',
+      check('acting: the Library landing shows collections only, never all 53 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
           === 'col:lines,col:principles,col:character,col:scene,col:lists,col:question,col:rehearsal,col:actions,col:rhythm,col:professional,col:monologues,col:scenes,col:approaches,col:textbook'
