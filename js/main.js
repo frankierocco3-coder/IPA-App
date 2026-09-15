@@ -259,6 +259,22 @@ const SECTIONS = [
   { id: 'progress', icon: '📈', label: 'Progress' },
   { id: 'more', icon: '⋯', label: 'More' },
 ];
+
+// One-color inline nav icons (owner UI pass 2026-09-15): the six emoji
+// rendered differently on every platform and fought the editorial
+// theme. These inherit currentColor, so the active state colors them
+// with the label. The emoji stay in SECTIONS as the fallback for any
+// section without a drawn icon.
+const NAV_ICON_ATTRS = 'viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"';
+const NAV_ICONS = {
+  learn: `<svg ${NAV_ICON_ATTRS}><path d="M3 11.2 12 4l9 7.2"/><path d="M5.4 9.8V20h13.2V9.8"/><path d="M9.8 20v-5.4h4.4V20"/></svg>`,
+  practice: `<svg ${NAV_ICON_ATTRS}><circle cx="12" cy="12" r="8.2"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>`,
+  studio: `<svg ${NAV_ICON_ATTRS}><path d="M3.6 9.4h16.8V19a1.6 1.6 0 0 1-1.6 1.6H5.2A1.6 1.6 0 0 1 3.6 19Z"/><path d="M3.8 9.3 4.9 4.6l15.6 1.9-.9 3.4"/><path d="m8.6 5.1-1.2 3.9"/><path d="m13.4 5.7-1.2 3.8"/><path d="m18.1 6.3-1.1 3.6"/></svg>`,
+  library: `<svg ${NAV_ICON_ATTRS}><path d="M12 6.2C10.2 4.9 7.4 4.4 3.6 4.8v13.6c3.8-.4 6.6.1 8.4 1.4 1.8-1.3 4.6-1.8 8.4-1.4V4.8c-3.8-.4-6.6.1-8.4 1.4Z"/><path d="M12 6.2v13.6"/></svg>`,
+  progress: `<svg ${NAV_ICON_ATTRS}><path d="M4 4.6V19.4h16"/><path d="m6.8 14.6 3.6-3.8 2.8 2.6 4.9-5.6"/><path d="M15.6 7.6h2.6v2.6"/></svg>`,
+  more: `<svg ${NAV_ICON_ATTRS}><circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/><circle cx="19" cy="12" r="1.5" fill="currentColor" stroke="none"/></svg>`,
+};
+const navIcon = s => NAV_ICONS[s.id] ?? s.icon;
 // Shop and Profile live under More but are still full shell sections.
 const OFF_NAV_SECTIONS = ['shop', 'profile'];
 // Older saved states point at sections that have since moved.
@@ -383,7 +399,7 @@ function renderShell(section) {
         <nav aria-label="Sections">
           ${SECTIONS.map(s => `
             <button class="side-item ${s.id === section ? 'on' : ''}" data-sec="${s.id}" type="button">
-              <span class="side-icon">${s.icon}</span><span class="side-label">${s.label}</span>
+              <span class="side-icon">${navIcon(s)}</span><span class="side-label">${s.label}</span>
             </button>`).join('')}
         </nav>
       </aside>
@@ -399,7 +415,7 @@ function renderShell(section) {
     </div>
     <nav class="bottom-nav" aria-label="Sections">
       ${SECTIONS.map(s => `<button class="bn-item ${s.id === section ? 'on' : ''}" data-sec="${s.id}" type="button">
-          <span class="bn-icon">${s.icon}</span><span class="bn-label">${s.label}</span></button>`).join('')}
+          <span class="bn-icon">${navIcon(s)}</span><span class="bn-label">${s.label}</span></button>`).join('')}
     </nav>`;
 
   document.getElementById('brand-home').addEventListener('click', () => goSection('learn'));
@@ -573,7 +589,10 @@ function drawRail(section) {
         note: 'Every chapter is free to read in any order.',
         actions: [['Open the Library', () => goSection('library'), true]] });
     }
-  } else {
+  } else if (section !== 'learn') {
+    // On Learn itself the path IS the next step — an "Open Learn" card
+    // beside it was a door to the room you are standing in (owner UI
+    // pass 2026-09-15). Everywhere else the pointer stays.
     const track = trackFor(activeCourse());
     const { done, total } = trackProgress(track);
     cards.push({ h: 'Next step',
@@ -2834,13 +2853,30 @@ function workspaceLibrary(el, { workspace, cards, state }) {
              placeholder="Collection or topic…" autocomplete="off">
     </label>
     ${state.extraHtml ?? ''}
-    ${q ? `<p class="pane-note" aria-live="polite">${shown.length} result${shown.length === 1 ? '' : 's'} for “${esc(state.query)}”</p>` : '<h2 class="sec-h">Collections</h2>'}
-    <div class="tile-grid">
-      ${shown.map(c => tileHtml({
+    ${q ? `<p class="pane-note" aria-live="polite">${shown.length} result${shown.length === 1 ? '' : 's'} for “${esc(state.query)}”</p>`
+        : (shown.some(c => c.group) ? '' : '<h2 class="sec-h">Collections</h2>')}
+    ${(() => {
+      // Cards may carry a `group` heading (the Acting shelf does; the
+      // dialect shelves stay flat). Groups render as plain headings over
+      // consecutive runs — search results always render flat, since a
+      // heading over one stray match is noise. Order is the cards' own.
+      const tile = c => tileHtml({
         key: c.key, tone: c.tone, emoji: c.emoji, title: c.title, wide: c.wide,
         badge: c.badge, meta: countLabel(c),
-      })).join('')}
-    </div>
+      });
+      if (q || !shown.some(c => c.group)) return `<div class="tile-grid">${shown.map(tile).join('')}</div>`;
+      let out = '', open = false, at = null;
+      for (const c of shown) {
+        if (c.group !== at) {
+          if (open) out += '</div>';
+          at = c.group;
+          out += `<h2 class="sec-h">${esc(at ?? 'Collections')}</h2><div class="tile-grid">`;
+          open = true;
+        }
+        out += tile(c);
+      }
+      return out + (open ? '</div>' : '');
+    })()}
     ${!shown.length ? `<p class="pane-note">Nothing matches “${esc(state.query)}”.
       <button class="linkish" id="lib-clear" type="button">Clear the search</button></p>` : ''}`;
 
@@ -3168,58 +3204,61 @@ function actingLibraryPane(el) {
       go: () => renderActingCollection(c.id),
     };
   };
+  // The shelf reads in four purpose groups (owner UI pass 2026-09-15):
+  // prepare the text, develop the performance, find material, deepen
+  // the practice. Lines & Memory still leads the shelf (owner order,
+  // 2026-09-03) — it opens the first group. Search stays flat.
+  const G1 = 'Prepare the text', G2 = 'Develop the performance',
+        G3 = 'Find material', G4 = 'Deepen your practice';
   const cards = [
-    // Lines & Memory leads the shelf (owner order, 2026-09-03): the first
-    // thing an actor should understand is being off book — what real
-    // knowledge of the lines means and what counts as evidence of it.
     // Owner-supplied verbatim lesson; count = six sections + practice set.
     { key: 'col:lines', tone: 'is-lavender', emoji: '🧠', title: 'Lines & Memory',
-      count: 7, unit: 'section',
+      group: G1, count: 7, unit: 'section',
       keywords: 'the line you know vs the line you can find memory memorize lines retrieval storage fluency couch test off book practice set noice active experiencing',
       go: renderLineLesson },
-    colTile('principles'),
-    colTile('character'),
-    colTile('scene'),
+    { ...colTile('scene'), group: G1 },
     // The Four Lists tool sits with the collection it serves (owner
     // order, 2026-08-27): investigation first, then its worksheet.
     { key: 'col:lists', tone: 'is-lavender', emoji: '📋', title: 'The Four Lists',
-      count: 4, unit: 'list',
+      group: G1, count: 4, unit: 'list',
       keywords: 'character facts says about others reading five times building a character',
       go: () => renderFourListsLesson() },
     // Question Everything — the text-dissection textbook. Moved here from
     // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
     // on the shelf. Count = the six numbered DISSECT_SECTIONS.
     { key: 'col:question', tone: 'is-lavender', emoji: '🔍', title: 'Question Everything',
-      count: 6, unit: 'section',
+      group: G1, count: 6, unit: 'section',
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
       go: renderDissectTextbook },
-    colTile('rehearsal'),
+    { ...colTile('principles'), group: G2 },
+    { ...colTile('character'), group: G2 },
+    { ...colTile('rehearsal'), group: G2 },
     { key: 'col:actions', tone: 'is-gold', emoji: '🎯', title: 'Playable Actions',
-      count: ACTION_VERBS.length, unit: 'verb',
+      group: G2, count: ACTION_VERBS.length, unit: 'verb',
       keywords: 'action verb tactic objective doing not feeling playable',
       go: renderPlayableActions },
-    colTile('rhythm'),
-    colTile('professional'),
+    { ...colTile('rhythm'), group: G2 },
     // Monologues and Scenes are separate shelves (owner order,
     // 2026-08-20). Everything we ship today is a monologue; the Scenes
     // shelf is honest about being empty until scenes are added.
     { key: 'col:monologues', tone: 'is-gold', emoji: '📜', title: 'Monologues',
-      count: Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0), unit: 'monologue',
+      group: G3, count: Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0), unit: 'monologue',
       keywords: 'monologue soliloquy speech character play author chekhov ibsen wilde oneill pirandello',
       go: renderTextsPage },
     { key: 'col:scenes', tone: 'is-terracotta', emoji: '🎭', title: 'Scenes',
-      count: PROVIDED_SCENES.length, unit: 'scene',
+      group: G3, count: PROVIDED_SCENES.length, unit: 'scene',
       keywords: 'scene two-hander dialogue partner work',
       go: renderScenesShelf },
     { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', title: 'Approaches to Acting',
-      count: ACTING_APPROACHES.length, unit: 'introduction',
+      group: G4, count: ACTING_APPROACHES.length, unit: 'introduction',
       keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
+    { ...colTile('professional'), group: G4 },
     // The whole Speechcraft Textbook, shelved here while the Speech
     // workspace is withdrawn (owner order, 2026-08-19). Same records,
     // never copied — it supersedes the 8-chapter Speech for Actors
     // subset, whose renderer stays dormant behind SPEECH_LIVE.
     { key: 'col:textbook', tone: 'is-sage', emoji: '📗', title: 'Speechcraft Textbook',
-      count: textbookOrder().length, unit: 'chapter', badge: { cls: '', label: 'Shared' },
+      group: G4, count: textbookOrder().length, unit: 'chapter', badge: { cls: '', label: 'Shared' },
       keywords: 'speech breath voice articulation fluency pace principles instrument meaning presence textbook',
       go: renderTextbook },
   ];
@@ -5432,17 +5471,20 @@ function renderCredits() {
 }
 
 function moreMain(el) {
+  // Order (owner UI pass 2026-09-15): the user's own things first
+  // (profile, settings, their data), then talking to us, then reading
+  // about the app, and the Shop last — bookkeeping never leads.
   const cards = [
     { icon: '👤', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
-    { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
     { icon: '⚙️', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
+    { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
+    { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     // Permanent doorway to the preface — never retired by onboarding state.
     // Replaying only touches the replay timestamps (state.js guarantees it).
     { icon: '✨', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
-    { icon: '✉️', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
-    { icon: '🔒', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
     { icon: '📚', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
+    { icon: '🛍️', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
@@ -6092,12 +6134,20 @@ async function customWorkPane(el) {
     catch (err) { listEl.innerHTML = `<p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>`; return; }
 
     const rows = sortProjects(searchProjects(all, projectQuery), projectSort);
-    if (!all.length) {
+    // Search and sorting are tools for a shelf with things on it: with
+    // zero projects they hide, and the first-visit screen leads with
+    // starting a script (owner UI pass 2026-09-15).
+    const empty = !all.length;
+    for (const sel of ['#proj-search', 'label[for="proj-sort"]', '#proj-sort']) {
+      const node = el.querySelector(sel);
+      if (node) node.style.display = empty ? 'none' : '';
+    }
+    if (empty) {
       listEl.innerHTML = `
         <div class="empty-state">
           <p class="empty-emoji">🎬</p>
-          <h2>Your first project starts here</h2>
-          <p>Paste a piece you're working on — an audition speech, a presentation, a scene, a monologue, song lyrics. You'll get the text, its IPA in your chosen dialect, scansion, and a place for your working and pronunciation notes.</p>
+          <h2>Start your first script</h2>
+          <p>Paste a piece you're working on — an audition speech, a presentation, a scene, a monologue, song lyrics — and you get the text, its IPA in your chosen dialect, scansion, and a place for your notes. Use <b>+ New Project</b> above, or Import a project file.</p>
           <p class="pane-note">Example: <b>Stanley Audition</b> — A Streetcar Named Desire · Monologue · Neutral American</p>
         </div>`;
       return;
@@ -9060,6 +9110,7 @@ function buildTrackPath(track, opts = {}) {
       return `
         <div class="path-row" style="--dx:${dx}px">
           <button class="path-node ${state} ${l.checkpoint ? 'checkpoint' : ''}" data-lesson="${l.id}"
+                  ${isActive ? 'aria-current="step"' : ''}
                   ${unlocked ? '' : 'aria-disabled="true"'}
                   style="--dx:${dx}px; --node-color:${unit.color}" title="${esc(l.title)}" aria-label="${esc(a11y)}">
             ${isActive ? '<span class="start-flag">START</span>' : ''}

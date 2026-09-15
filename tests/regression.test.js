@@ -2879,7 +2879,7 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 53 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:lines,col:principles,col:character,col:scene,col:lists,col:question,col:rehearsal,col:actions,col:rhythm,col:professional,col:monologues,col:scenes,col:approaches,col:textbook'
+          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:character,col:rehearsal,col:actions,col:rhythm,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
