@@ -1973,3 +1973,13 @@ body.nb-full #app { display: none; }
    one treatment for one fact (owner UI pass 2026-09-15). */
 .continue-card.is-current { border-color: var(--green-dark); }
 .continue-card.is-current .cc-stage { color: var(--green-dark); }
+
+/* ── Provided scene reading page (pilot, 2026-09-15) ───────────── */
+.sc-scene { max-width: 65ch; margin-top: 10px; }
+.sc-turn { font-size: 18px; line-height: 1.65; margin: 0 0 16px; }
+.sc-speaker {
+  display: block; font-size: 13px; font-weight: 800; letter-spacing: 0.08em;
+  color: var(--green-dark); margin-bottom: 2px;
+}
+.sc-direction { font-size: 16px; font-style: italic; color: var(--muted); margin: 0 0 16px; }
+.sc-text { font-size: 18px; line-height: 1.65; margin: 0 0 16px; }

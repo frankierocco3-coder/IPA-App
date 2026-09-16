@@ -2004,9 +2004,9 @@ export async function run({ navDoc = document } = {}) {
 
       // Studio: the approved cards, exact order, title-only.
       clickIn(side('Studio')); await sleep(350);
-      check('IA: Studio hub shows exactly the three cards in the approved order',
+      check('IA: Studio hub shows exactly the four cards in the approved order',
         JSON.stringify(hubTitles()) === JSON.stringify(['Scripts & Speeches',
-          'Custom Work', 'Personal Dictionary']),
+          'Scenes', 'Custom Work', 'Personal Dictionary']),
         hubTitles().join(' | '));
       check('IA: Studio hub cards are title-only',
         [...doc.querySelectorAll('.track-card .track-info')]
@@ -2559,10 +2559,11 @@ export async function run({ navDoc = document } = {}) {
       // No working text yet: the exercise must ASK, never invent one.
       localStorage.removeItem('speechcraft-working-text');
       clickIn(doc.getElementById('sp-run')); await sleep(400);
-      check('speech: an exercise needing text asks honestly, offering all four sources',
+      check('speech: an exercise needing text asks honestly, offering every source',
         doc.querySelector('main h1')?.textContent === 'My Working Text'
         && !!doc.querySelector('[data-builtin]')
-        && !!doc.getElementById('wt-scripts')
+        && !!doc.getElementById('wt-mono')
+        && !!doc.getElementById('wt-scenes')
         && !!doc.getElementById('wt-projects')
         && !!doc.getElementById('wt-custom'));
       clickIn(doc.querySelector('[data-builtin="st-line-3"]')); await sleep(350);
@@ -2900,7 +2901,7 @@ export async function run({ navDoc = document } = {}) {
       // The Arcade is text-first: a two-level picker (collections, then
       // that collection's texts) opens before any game grid appears.
       check('acting: the Arcade opens on the text picker, collections first',
-        doc.querySelectorAll('[data-col]').length === 6
+        doc.querySelectorAll('[data-col]').length === 7
         && !doc.querySelector('[data-agame]'));
       const wt20 = localStorage.getItem('speechcraft-working-text');
       clickIn(doc.querySelector('[data-col]')); await sleep(350);
@@ -2914,11 +2915,11 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Studio')); await sleep(400);
-      check('acting: the Actor’s Studio leads with the current-project card and its two ways in',
+      check('acting: the Actor’s Studio leads with the current-project card and its three ways in',
         doc.querySelector('.page-h')?.textContent === 'Actor’s Studio'
         && !!doc.querySelector('.sp-wt-card')
         && String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
-           === 'Scenes & Monologues,Custom Work');
+           === 'Monologues,Scenes,Custom Work');
       check('acting: opening the workspace duplicated no Studio project',
         (await listProjects()).length === projectsBefore);
 

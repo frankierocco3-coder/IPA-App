@@ -1,6 +1,7 @@
 import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { DIALECT_INFO } from './data/dialects.js';
+import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack,
@@ -1413,6 +1414,13 @@ function scriptPieces() {
         sub: `${p.character} · ${p.work}`, body: (p.lines ?? []).join('\n') });
     }
   }
+  // Provided scenes work as practice texts too. The body is the verbatim
+  // source with only the _emphasis_ markers dropped — stage directions
+  // stay in [brackets], which stripStage() already handles for speaking.
+  for (const sc of PROVIDED_SCENES) {
+    out.push({ id: `scene:${sc.id}`, title: sc.title,
+      sub: `${sc.play} · scene`, body: sc.text.replace(/_/g, '') });
+  }
   return out;
 }
 
@@ -1428,6 +1436,7 @@ function scriptCollections() {
     { key: 'sonnet', icon: '📜', title: 'Shakespeare’s Sonnets', note: 'All 154' },
     ...Object.entries(LIBRARIES).map(([key, lib]) =>
       ({ key, icon: lib.icon, title: lib.title, note: lib.note })),
+    { key: 'scene', icon: '🎭', title: 'Scenes', note: 'Two-hander scenes' },
   ].map(c => ({ ...c, count: scriptPiecesIn(c.key).length }));
 }
 
@@ -1488,7 +1497,9 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
   stopSpeech();
   // Two levels, the way a shelf actually works: authors first, then that
   // author's texts. `col` null = the shelf; a key = inside one collection.
-  const state = { col: null, q: '' };
+  // `startCol` opens directly inside one (its back button still reaches
+  // the full shelf).
+  const state = { col: opts.startCol ?? null, q: '' };
   const choose = ref => {
     setWorkingTextRef(ref);
     const t = workingText();
@@ -1626,11 +1637,17 @@ function renderWorkingTextPicker(onChosen) {
       <p class="track-blurb">Choose the text you want to work on. It stays with you across Speech lessons, practice and the Studio until you change it. Nothing is copied — Studio projects are read live from your own records.</p>
       <h2 class="chart-h">Use a provided Speechcraft text</h2>
       <div id="wt-builtin"></div>
-      <h2 class="chart-h">Choose from Scripts &amp; Speeches</h2>
-      <button class="track-card" id="wt-scripts" type="button">
+      <h2 class="chart-h">Choose from the Speechcraft collections</h2>
+      <button class="track-card" id="wt-mono" type="button">
         <div class="track-glyph">📜</div>
-        <div class="track-info"><h2>Open Scripts &amp; Speeches</h2>
-          <p>Sonnets and the monologue collections — open a piece, then use its Practice action.</p></div>
+        <div class="track-info"><h2>Monologues &amp; Speeches</h2>
+          <p>Sonnets and the monologue collections — pick a piece and it becomes your working text.</p></div>
+        <div class="track-arrow">›</div>
+      </button>
+      <button class="track-card" id="wt-scenes" type="button">
+        <div class="track-glyph">🎭</div>
+        <div class="track-info"><h2>Scenes</h2>
+          <p>Two-hander scenes — pick one and it becomes your working text.</p></div>
         <div class="track-arrow">›</div>
       </button>
       <h2 class="chart-h">Use one of my Studio projects</h2>
@@ -1660,7 +1677,18 @@ function renderWorkingTextPicker(onChosen) {
     });
     bEl.appendChild(btn);
   }
-  document.getElementById('wt-scripts').addEventListener('click', renderTextsPage);
+  // The collection doors open the in-place picker, so one tap on a piece
+  // actually SETS the working text (the old door only led to the reading
+  // shelf). Without a caller to return to, drop both picker pages from
+  // history so Back lands where My Working Text was opened.
+  const chosen = t => {
+    if (onChosen) return onChosen(t);
+    navStack.pop(); goBack();
+  };
+  document.getElementById('wt-mono').addEventListener('click',
+    () => renderArcadeTextPicker(chosen));
+  document.getElementById('wt-scenes').addEventListener('click',
+    () => renderArcadeTextPicker(chosen, { startCol: 'scene' }));
   document.getElementById('wt-custom').addEventListener('click', renderCustomWork);
 
   (async () => {
@@ -3787,8 +3815,11 @@ function actorStudioPane(el) {
   // own. Everything the Studio used to list — Scene Study, Question
   // Everything, beats, actions, notes — is reached ON a script now, from
   // the rail on its own page, where it belongs.
+  // Monologues and Scenes are separate doors (owner order 2026-09-16),
+  // matching the Library's Find-material split.
   const cards = [
-    { icon: '📜', img: 'img/ui/scripts.png', title: 'Scenes & Monologues', go: renderTextsPage },
+    { icon: '📜', img: 'img/ui/scripts.png', title: 'Monologues', go: renderTextsPage },
+    { icon: '🎭', img: 'img/ui/scenes.png', title: 'Scenes', go: renderScenesShelf },
     { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
@@ -3798,7 +3829,7 @@ function actorStudioPane(el) {
         <div class="sp-wt-info">
           <span class="cc-stage">Current acting project</span>
           <h2>${esc(proj.title)}</h2>
-          <p class="cc-meta">${esc(proj.scene ? 'Scene' : 'Monologue or speech')}${proj.source === 'studio' ? ' · from my Studio projects' : ' · provided Speechcraft text'}${proj.scene ? ` · ${esc(proj.scene.characters.join(', '))}` : ''}</p>
+          <p class="cc-meta">${esc(proj.scene || String(proj.id).startsWith('scene:') ? 'Scene' : 'Monologue or speech')}${proj.source === 'studio' ? ' · from my Studio projects' : ' · provided Speechcraft text'}${proj.scene ? ` · ${esc(proj.scene.characters.join(', '))}` : ''}</p>
         </div>
         <div class="sp-wt-actions">
           ${ref?.source === 'studio' ? '<button class="btn-lite" id="ac-open" type="button">Open project</button>' : ''}
@@ -5514,7 +5545,7 @@ function renderCredits() {
     <main class="guide">
       <h1>Sources &amp; Credits</h1>
       <h2 class="guide-heading">Texts</h2>
-      <p class="guide-text">Shakespeare’s sonnets and the included plays by Chekhov, Ibsen, Wilde, O’Neill and Pirandello are public-domain works; some translations are public domain <b>in the United States</b> specifically (noted on each collection: Fell &amp; West, Storer &amp; Livingston, Archer, Gosse, Sharp &amp; Marx Aveling).</p>
+      <p class="guide-text">Shakespeare’s sonnets and plays, and the included plays by Chekhov, Ibsen, Wilde, O’Neill, Pirandello, Shaw and Glaspell, are public-domain works; some translations are public domain <b>in the United States</b> specifically (noted on each collection: Fell &amp; West, Storer &amp; Livingston, Archer, Gosse, Sharp &amp; Marx Aveling). Provided scene texts are taken verbatim from the Project Gutenberg editions cited on each scene.</p>
       <h2 class="guide-heading">Plain Meaning guides</h2>
       <p class="guide-text">The Plain Meaning summaries are <b>original Speechcraft educational content</b>, written for this app — faithful prose explanations, not translations or performances.</p>
       <h2 class="guide-heading">Audio</h2>
@@ -5746,6 +5777,7 @@ function textSpeechPane(pane) {
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
     ...libs,
+    { icon: '🎭', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
     { icon: '🎬', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
   ];
   const shown = cards.filter(Boolean);
@@ -6125,6 +6157,7 @@ function studioMain(el) {
   // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
   const cards = [
     { icon: '📜', img: 'img/ui/scripts.png', title: 'Scripts & Speeches', go: renderTextsPage },
+    { icon: '🎭', img: 'img/ui/scenes.png', title: 'Scenes', go: renderScenesShelf },
     { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
     { icon: '📕', img: 'img/ui/dictionary.png', title: 'Personal Dictionary', go: renderDictionary },
   ];
@@ -6405,7 +6438,7 @@ const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim(
 // A shelf of our own two-hander scenes. Empty until scenes are written
 // and cleared — and it says so plainly rather than showing an inviting
 // card behind which there is nothing.
-const PROVIDED_SCENES = [];
+// PROVIDED_SCENES moved to js/data/scenes.js (pilot install 2026-09-15).
 
 function renderScenesShelf() {
   record(renderScenesShelf);
@@ -6417,21 +6450,107 @@ function renderScenesShelf() {
        <p class="ws-sub">Two-hander scenes for partner work.</p>
      </div>`,
     PROVIDED_SCENES.length
-      ? `<div class="tile-grid">${PROVIDED_SCENES.map(sc => tileHtml({
-           key: sc.id, tone: 'is-terracotta', emoji: '🎭', title: sc.title,
-           meta: `${sc.characters.length} characters`,
-         })).join('')}</div>`
+      ? `${(() => {
+          // Shelved by author (owner order 2026-09-16), in record order.
+          let out = '', open = false, at = null;
+          for (const sc of PROVIDED_SCENES) {
+            if (sc.authorGroup !== at) {
+              if (open) out += '</div>';
+              at = sc.authorGroup;
+              out += `<h2 class="sec-h">${esc(at ?? 'Scenes')}</h2><div class="tile-grid">`;
+              open = true;
+            }
+            out += tileHtml({
+              key: sc.id, tone: 'is-terracotta', emoji: '🎭', title: sc.title,
+              meta: `${esc(sc.play)} · ${sc.characters.length} characters`,
+            });
+          }
+          return out + (open ? '</div>' : '');
+        })()}
+         <p class="pane-note">Public-domain texts, shown verbatim from their cited sources. Your own scenes work fully too — paste one in <button class="linkish" id="sc-shelf-custom" type="button">Custom Work</button>.</p>`
       : `<p class="pane-note">No scenes here yet — none have been written and cleared for use.
            Your own scenes work fully today:
            <button class="linkish" id="sc-shelf-mine" type="button">open one of yours</button>,
            or paste a new one in
            <button class="linkish" id="sc-shelf-custom" type="button">Custom Work</button>.</p>`);
+  app.querySelectorAll('[data-tile]').forEach(b =>
+    b.addEventListener('click', () => renderProvidedScene(b.dataset.tile)));
   document.getElementById('sc-shelf-custom')?.addEventListener('click', renderCustomWork);
   document.getElementById('sc-shelf-mine')?.addEventListener('click', () =>
     renderArcadeTextPicker(() => {
       const ref = workingTextRef();
       if (ref?.source === 'studio') renderScript(ref.id);
     }, { only: 'scene' }));
+}
+
+// ── One provided scene (reading page) ─────────────────────────
+// The stored text is verbatim source (js/data/scenes.js rules). This
+// renderer only RE-FLOWS it for reading: blank-line blocks become
+// speaker turns and stage directions; hard-wrapped lines inside a
+// block are joined with spaces. Words are never altered, omitted or
+// reordered, and everything passes through esc().
+function renderProvidedScene(id) {
+  record(() => renderProvidedScene(id));
+  stopSpeech();
+  const sc = providedSceneById(id);
+  if (!sc) return renderScenesShelf();
+  const isSpeaker = line => /^[A-Z][A-Z .\u2019']*\.$/.test(line.trim());
+  // The sources mark emphasis with _underscores_; shown as italics.
+  // esc() runs FIRST, so only our own <em> tags reach the DOM.
+  const emify = s => esc(s).replace(/_([^_]+)_/g, '<em>$1</em>');
+  const blocks = sc.text.split(/\n\s*\n/).map(b => b.split('\n'));
+  // Prose sources are hard-wrapped, so lines JOIN into paragraphs.
+  // Verse (sc.verse) keeps every line break: the lines ARE the metre.
+  const body = ls => sc.verse
+    ? ls.map(l => emify(l.trim())).join('<br>')
+    : emify(ls.join(' ').replace(/\s+/g, ' ').trim());
+  const blockHtml = ls => {
+    const flat = ls.join(' ').replace(/\s+/g, ' ').trim();
+    if (isSpeaker(ls[0])) {
+      return `<p class="sc-turn"><span class="sc-speaker">${esc(ls[0].trim())}</span> ${body(ls.slice(1))}</p>`;
+    }
+    // Mixed-case inline speakers ("Mrs. Alving. ..."), matched ONLY
+    // against the scene's own declared labels — plain sentences also
+    // start with a capitalized word and a period, so no guessing.
+    if (sc.speakerLabels) {
+      const lab = sc.speakerLabels.find(n => flat.startsWith(n + '.') || flat.startsWith(n + ' ('));
+      if (lab) {
+        const dot = flat[lab.length] === '.' ? 1 : 0;
+        return `<p class="sc-turn"><span class="sc-speaker">${esc(flat.slice(0, lab.length + dot))}</span>${emify(flat.slice(lab.length + dot))}</p>`;
+      }
+    }
+    // Inline prefixes: "MRS HALE: ..." (one-act convention) and
+    // "TREPLIEFF. ..." (the Chekhov editions). SCENE/ACT headings are
+    // structure, not speakers.
+    const m = flat.match(/^([A-Z][A-Z .\u2019']{1,30}?):\s+(.*)$/s);
+    if (m) return `<p class="sc-turn"><span class="sc-speaker">${esc(m[1])}:</span> ${emify(m[2])}</p>`;
+    const md = flat.match(/^([A-Z][A-Z\u2019']{1,28}?)\.\s+(.*)$/s);
+    if (md && !/^(SCENE|ACT)$/.test(md[1])) {
+      return `<p class="sc-turn"><span class="sc-speaker">${esc(md[1])}.</span> ${emify(md[2])}</p>`;
+    }
+    if (/^[\[(]/.test(flat)) {
+      // A block can open with a complete bracketed direction and continue
+      // into speech ("[_Exit_ ALICE.]  What can you have to say…") — split
+      // the presentation; the words themselves are untouched.
+      const sp = flat.match(/^(\[[^\]]*\])\s+(.+)$/s);
+      if (sp) return `<p class="sc-direction">${emify(sp[1])}</p><p class="sc-text">${emify(sp[2])}</p>`;
+      return `<p class="sc-direction">${emify(flat)}</p>`;
+    }
+    return `<p class="sc-text">${body(ls)}</p>`;
+  };
+  workspacePage(
+    pageTopbar('🎭 ' + esc(sc.title), '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">${esc(sc.title)}</h1>
+       <p class="ws-sub">${esc(sc.play)} · ${esc(sc.author)} · ${esc(sc.location)}</p>
+     </div>`,
+    `<p class="pane-note">Characters: ${sc.characters.map(esc).join(', ')}. ${esc(sc.cutNote)}</p>
+     ${sc.context ? `<p class="pane-note">Context (Speechcraft, not part of the text): ${esc(sc.context)}</p>` : ''}
+     ${sc.contentNote ? `<p class="pane-note">Content note: ${esc(sc.contentNote)}</p>` : ''}
+     <section class="sc-scene" aria-label="Scene text">
+       ${blocks.map(blockHtml).join('')}
+     </section>
+     <p class="pane-note">${esc(sc.source)} · ${esc(sc.rightsNote)} Shown verbatim; reading layout only.</p>`);
 }
 
 // ── The Four Lists ────────────────────────────────────────────
