@@ -280,7 +280,28 @@ export const ACTING_LESSONS = [
       { p: 'Useful specifics: how long they have known each other, who has power and over what, what they have done for each other, what they have failed to do, what is habitually left unspoken, and what each wants the other to believe about them.' },
     ] },
 
-  { id: 'ac-beats', module: 'text', order: 7,
+  { id: 'ac-objective-text', module: 'text', order: 7,
+    title: 'Finding the Objective',
+    requiredReviewer: 'acting-professional',
+    objective: 'Read the scene for evidence of what your character wants from the other person.',
+    orientation: 'The objective is not chosen from taste. The text argues for it, and the argument is checkable.',
+    reflection: 'Name your character’s objective in one sentence aimed at the other person. What in the text supports it, and what pushes against it?',
+    glossary: ['objective'],
+    body: [
+      { p: 'Acting Principles defines the objective: what your character wants from the other person, here and now. Investigation asks a different question. Not what an objective is, but which one this text actually supports.' },
+      { p: 'The evidence is concrete. What does the character ask for, in the lines? What do they repeat? What do they refuse to drop even when the subject changes? A person reveals what they want by what they return to, and writers build that return into the dialogue.' },
+      { h: 'Reading for the want' },
+      { list: [
+        'Requests and demands: everything the character explicitly asks the other person to do, say or admit.',
+        'Returns: the subject the character keeps steering back to, however far the conversation drifts.',
+        'Reactions: where an answer satisfies them, and where it leaves them still pressing. Pressing past an answer means the stated question was not the real want.',
+        'The exit: what would let the character stop talking and leave. A scene usually ends when someone gets their objective or gives it up.',
+      ] },
+      { p: 'Write the objective as one sentence aimed at the other person: I want you to stay, I want you to admit it, I want you to forgive me. If the sentence has no you in it, it is a mood, not an objective, and it will not survive contact with a scene partner.' },
+      { p: 'Hold it lightly. The text supports a small number of readings, never exactly one, and rehearsal will test yours. The Objective Switch exercise in Practice runs several different wants through the same passage, which is the fastest way to feel what the choice changes.' },
+    ] },
+
+  { id: 'ac-beats', module: 'text', order: 8,
     title: 'Beats and Turns',
     requiredReviewer: 'acting-professional',
     objective: 'Divide the scene where the thought, tactic or circumstance turns.',
@@ -293,7 +314,7 @@ export const ACTING_LESSONS = [
       { p: 'The Beat Builder exercise in Practice lets you mark turns on your own text.' },
     ] },
 
-  { id: 'ac-subtext', module: 'text', order: 8,
+  { id: 'ac-subtext', module: 'text', order: 9,
     title: 'Subtext',
     requiredReviewer: 'acting-professional',
     objective: 'Work with the distance between what is said and what is meant.',
@@ -305,7 +326,7 @@ export const ACTING_LESSONS = [
       { p: 'The Same Words, Different Subtext exercise in Practice explores this on a fixed line. As everywhere in Acting, there is no correct reading to find.' },
     ] },
 
-  { id: 'ac-actions', module: 'text', order: 9,
+  { id: 'ac-actions', module: 'text', order: 10,
     title: 'Playable Actions',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The Playable Actions library, twelve actions and six contrast pairs, is a single shared record used unchanged.',
@@ -791,9 +812,12 @@ export const ACTING_COLLECTIONS = [
               'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-attention', 'ac-receiving'] },
   { id: 'scene', icon: '🔍', title: 'Text Investigation',
     lessons: ['ac-fourlists', 'ac-question', 'ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
-              'ac-beats', 'ac-subtext', 'ac-monologue', 'ac-scene'] },
+              'ac-objective-text', 'ac-beats', 'ac-subtext'] },
+  // Monologue Work and Scene Work shelve here, matching their Learn
+  // module (Preparing the Performance) — the shelf and the path must
+  // not disagree about what these chapters are (owner fix, 2026-09-16).
   { id: 'rehearsal', icon: '🎬', title: 'Actions & Rehearsal',
-    lessons: ['ac-actions', 'ac-moment', 'ac-newinfo', 'ac-repetition', 'ac-playing',
+    lessons: ['ac-actions', 'ac-monologue', 'ac-scene', 'ac-moment', 'ac-newinfo', 'ac-repetition', 'ac-playing',
               'ac-rehearsal', 'ac-integrating', 'ac-applying', 'ac-fourthwall',
               'ac-performance'] },
   { id: 'character', icon: '🧍', title: 'Building a Character',

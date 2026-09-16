@@ -2764,12 +2764,12 @@ export async function run({ navDoc = document } = {}) {
 
   // ── 20. The Acting workspace ─────────────────────────────────
   {
-    check('acting: six modules hold the 45 path lessons; 8 Professional chapters shelve outside the path',
+    check('acting: six modules hold the 46 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 6
       && String(ACTING_MODULES.map(m => m.title))
         === 'The Actor’s Work,Investigating the Text,Listening and Responding,Building a Character,Tempo-Rhythm,Preparing the Performance'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 45
-      && ACTING_LESSONS.length === 53
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 46
+      && ACTING_LESSONS.length === 54
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
         .every(l => l.module === 'professional')
       && ACTING_MODULES.every(m => actingLessonsFor(m.id)
@@ -2784,7 +2784,7 @@ export async function run({ navDoc = document } = {}) {
       ACTING_GAMES.length === 9
       && ['Same Line, Different Circumstances', 'Objective Switch', 'Action Swap',
           'Relationship Shift', 'Stakes Ladder', 'Change the Urgency',
-          'Same Words, Different Subtext', 'What Changed?', 'Same Line Three Ways']
+          'Same Words, Different Subtext', 'Beat Builder', 'Same Line Three Ways']
         .every(t => ACTING_GAMES.some(g => g.title === t))
       && !ACTING_GAMES.some(g => g.title === 'Find the Beat'));
     check('acting: the scene-study workflow holds the ten areas, carrying every QE question',
@@ -2852,12 +2852,13 @@ export async function run({ navDoc = document } = {}) {
           // Publication and specialist sign-off are separate facts: every
           // item (28 original + 16 Building a Character/Tempo-Rhythm + 8 Professional Actor Character /
           // Tempo-Rhythm lessons owner-approved 2026-08-26 + Using the
-          // Fourth Wall owner-approved 2026-09-14 + 4 approaches)
+          // Fourth Wall owner-approved 2026-09-14 + Finding the
+          // Objective owner-approved 2026-09-16 + 4 approaches)
           // carries the owner's editorial verdict, none claims a
           // specialist, and no reviewer name is invented — so the draft
           // strip has nothing to count and must be gone.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 57
+          return items.length === 58
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -2877,10 +2878,10 @@ export async function run({ navDoc = document } = {}) {
       // The shared right rail legitimately names the next acting chapter
       // in its "Next step" card on every section, so chapter titles are
       // asserted absent from the Library pane itself, never the whole body.
-      check('acting: the Library landing shows collections only, never all 53 items at once',
+      check('acting: the Library landing shows collections only, never all 54 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:character,col:rehearsal,col:actions,col:rhythm,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:character,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -2898,12 +2899,14 @@ export async function run({ navDoc = document } = {}) {
         String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
           === 'Acting Arcade,Flash Cards,Rhythm Cards,Practice My Text');
       clickIn(doc.getElementById('acp-arcade')); await sleep(400);
-      // The Arcade is text-first: a two-level picker (collections, then
-      // that collection's texts) opens before any game grid appears.
-      check('acting: the Arcade opens on the text picker, collections first',
-        doc.querySelectorAll('[data-col]').length === 7
+      // The Arcade is text-first: a three-level picker (Speeches and
+      // Scenes, then collections, then texts) opens before any game grid.
+      check('acting: the Arcade opens on the text picker, Speeches and Scenes first',
+        doc.querySelectorAll('[data-group]').length === 2
+        && !doc.querySelector('[data-col]')
         && !doc.querySelector('[data-agame]'));
       const wt20 = localStorage.getItem('speechcraft-working-text');
+      clickIn(doc.querySelector('[data-group="speeches"]')); await sleep(350);
       clickIn(doc.querySelector('[data-col]')); await sleep(350);
       clickIn(doc.querySelector('[data-piece]')); await sleep(400);
       check('acting: every acting game lives in Practice, loaded on the chosen text',

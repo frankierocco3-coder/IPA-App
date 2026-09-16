@@ -42,7 +42,10 @@ export const ACTING_GAMES = [
     blurb: 'One line, several things going on underneath it.',
     how: 'The game supplies what the character is actually pursuing while saying this. The surface meaning never changes; what sits under it does.',
     deck: 'subtext' },
-  { id: 'ac-what-changed', title: 'What Changed?', icon: '🔀',
+  // Renamed from 'What Changed?' (owner fix, 2026-09-16): the Beats and
+  // Turns lesson names Beat Builder, and the old name collided with the
+  // What Has Changed? chapter, a different subject. The id never changes.
+  { id: 'ac-what-changed', title: 'Beat Builder', icon: '🔀',
     blurb: 'Locate the exact line where something turns.',
     how: 'Work through the passage and mark the moment new information lands or the balance shifts. Then ask what your character does differently after it.',
     tool: 'beats' },

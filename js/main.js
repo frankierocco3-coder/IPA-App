@@ -1495,11 +1495,12 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
   const only = opts.only ?? null;
   record(() => renderArcadeTextPicker(onChosen, opts));
   stopSpeech();
-  // Two levels, the way a shelf actually works: authors first, then that
-  // author's texts. `col` null = the shelf; a key = inside one collection.
-  // `startCol` opens directly inside one (its back button still reaches
-  // the full shelf).
-  const state = { col: opts.startCol ?? null, q: '' };
+  // Three levels, the way the shelf reads (owner order, 2026-09-16):
+  // Speeches and Scenes first, then the author collections inside
+  // Speeches, then that collection's texts. Scenes is one collection,
+  // so its door opens the list directly. `startGroup`/`startCol` open
+  // deeper levels straight away; Back still walks up to the shelf.
+  const state = { group: opts.startGroup ?? null, col: opts.startCol ?? null, q: '' };
   const choose = ref => {
     setWorkingTextRef(ref);
     const t = workingText();
@@ -1508,17 +1509,37 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
 
   const shelfHtml = () => {
     const cols = scriptCollections();
+    const count = f => cols.filter(f).reduce((n, c) => n + c.count, 0);
     return `
-        <h2 class="chart-h">Choose from Scripts &amp; Speeches</h2>
+        <h2 class="chart-h">Choose a provided text</h2>
+        <button class="track-card" data-group="speeches" type="button">
+          <div class="track-glyph">📜</div>
+          <div class="track-info"><h2>Speeches</h2>
+            <p>${count(c => c.key !== 'scene')} texts · sonnets, monologues and speeches</p></div>
+          <div class="track-arrow">›</div>
+        </button>
+        <button class="track-card" data-group="scenes" type="button">
+          <div class="track-glyph">🎭</div>
+          <div class="track-info"><h2>Scenes</h2>
+            <p>${count(c => c.key === 'scene')} texts · two-hander scenes</p></div>
+          <div class="track-arrow">›</div>
+        </button>
+        <h2 class="chart-h">Paste or upload Custom Work${only ? ` — ${esc(contentTypeLabel(only))}s` : ''}</h2>
+        <div id="atp-projects"><p class="pane-note">Loading your own texts…</p></div>`;
+  };
+
+  const groupHtml = () => {
+    const cols = scriptCollections().filter(c => c.key !== 'scene');
+    return `
+        <button class="btn-lite" id="atp-back" type="button">‹ Back</button>
+        <h2 class="chart-h">Speeches</h2>
         ${cols.map(c => `
           <button class="track-card" data-col="${esc(c.key)}" type="button">
             <div class="track-glyph">${c.icon}</div>
             <div class="track-info"><h2>${esc(c.title)}</h2>
               <p>${c.count} text${c.count === 1 ? '' : 's'} · ${esc(c.note)}</p></div>
             <div class="track-arrow">›</div>
-          </button>`).join('')}
-        <h2 class="chart-h">Paste or upload Custom Work${only ? ` — ${esc(contentTypeLabel(only))}s` : ''}</h2>
-        <div id="atp-projects"><p class="pane-note">Loading your own texts…</p></div>`;
+          </button>`).join('')}`;
   };
 
   const listHtml = () => {
@@ -1527,7 +1548,7 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
     const all = scriptPiecesIn(state.col);
     const shown = q ? all.filter(x => `${x.title} ${x.sub}`.toLowerCase().includes(q)) : all;
     return `
-        <button class="btn-lite" id="atp-back" type="button">‹ All collections</button>
+        <button class="btn-lite" id="atp-back" type="button">${state.col === 'scene' ? '‹ Back' : '‹ All collections'}</button>
         <h2 class="chart-h">${esc(col?.title ?? 'Texts')}</h2>
         <label class="field sp-search-field" for="atp-search">
           <span class="field-label">Search ${all.length} text${all.length === 1 ? '' : 's'}</span>
@@ -1550,15 +1571,25 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
         <h1 class="page-h">Choose your text</h1>
         <p class="track-blurb">${state.col
           ? 'Pick the text you want to work on. What you choose opens next, already loaded.'
-          : 'Pick a collection, then the text you want to work on.'}</p>
-        ${state.col ? listHtml() : shelfHtml()}
+          : state.group === 'speeches'
+            ? 'Pick a collection, then the text you want to work on.'
+            : 'Speeches or Scenes — or paste your own work below.'}</p>
+        ${state.col ? listHtml() : state.group === 'speeches' ? groupHtml() : shelfHtml()}
       </main>`;
     wireBrandHome();
 
+    app.querySelectorAll('[data-group]').forEach(b =>
+      b.addEventListener('click', () => {
+        if (b.dataset.group === 'scenes') state.col = 'scene';
+        else state.group = 'speeches';
+        state.q = ''; draw();
+      }));
     app.querySelectorAll('[data-col]').forEach(b =>
       b.addEventListener('click', () => { state.col = b.dataset.col; state.q = ''; draw(); }));
     app.querySelector('#atp-back')?.addEventListener('click', () => {
-      state.col = null; state.q = ''; draw();
+      if (state.col) { if (state.col === 'scene') state.group = null; state.col = null; }
+      else state.group = null;
+      state.q = ''; draw();
     });
     app.querySelectorAll('[data-piece]').forEach(b =>
       b.addEventListener('click', () => {
@@ -1686,7 +1717,7 @@ function renderWorkingTextPicker(onChosen) {
     navStack.pop(); goBack();
   };
   document.getElementById('wt-mono').addEventListener('click',
-    () => renderArcadeTextPicker(chosen));
+    () => renderArcadeTextPicker(chosen, { startGroup: 'speeches' }));
   document.getElementById('wt-scenes').addEventListener('click',
     () => renderArcadeTextPicker(chosen, { startCol: 'scene' }));
   document.getElementById('wt-custom').addEventListener('click', renderCustomWork);
@@ -3319,11 +3350,12 @@ function actingLibraryPane(el) {
     { ...colTile('principles'), group: G2 },
     { ...colTile('character'), group: G2 },
     { ...colTile('rehearsal'), group: G2 },
+    { ...colTile('rhythm'), group: G2 },
+    // Playable Actions follows Tempo-Rhythm (owner order, 2026-09-16).
     { key: 'col:actions', tone: 'is-gold', emoji: '🎯', img: 'img/ui/actions.png', title: 'Playable Actions',
       group: G2, count: ACTION_VERBS.length, unit: 'verb',
       keywords: 'action verb tactic objective doing not feeling playable',
       go: renderPlayableActions },
-    { ...colTile('rhythm'), group: G2 },
     // Monologues and Scenes are separate shelves (owner order,
     // 2026-08-20). Everything we ship today is a monologue; the Scenes
     // shelf is honest about being empty until scenes are added.
@@ -3716,11 +3748,62 @@ function renderActingArcade() {
     }));
 }
 
-function runActingGame(gameId, text) {
-  record(() => runActingGame(gameId, text));
+// On a long text (a full scene), the game opens with a passage step:
+// pick the chunk you are working on today, or take the whole text.
+// Units are blank-line blocks (speech turns), falling back to lines.
+const GAME_PASSAGE_THRESHOLD = 700;
+
+function renderGamePassageStep(gameId, text) {
+  record(() => renderGamePassageStep(gameId, text));
   stopSpeech();
   const game = actingGameById(gameId);
   if (!game) return renderActingArcade();
+  const full = String(text.body ?? '');
+  let units = full.split(/\n\s*\n/).map(u => u.trim()).filter(Boolean);
+  if (units.length < 2) units = full.split(/\r?\n/).map(u => u.trim()).filter(Boolean);
+  app.innerHTML = `
+    ${pageTopbar(`${game.icon} ${esc(game.title)}`, '#8a6d3b')}
+    <main class="guide">
+      <h1>Select a passage</h1>
+      <p class="pane-note">${esc(text.title)} is a long text. Tap the part you want to work on — selections stay in order — or take it whole.</p>
+      <div class="practice-row">
+        <button class="btn btn-primary" id="ag-use" type="button" disabled>Use selection</button>
+        <button class="btn-lite" id="ag-all" type="button">Use the whole text</button>
+      </div>
+      <div class="sp-select" id="ag-units"></div>
+    </main>`;
+  wireBrandHome();
+  const unitsEl = document.getElementById('ag-units');
+  const chosen = new Set();
+  units.forEach((u, i) => {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'sp-unit'; b.setAttribute('aria-pressed', 'false');
+    b.textContent = u;                                     // inert — untrusted text
+    b.addEventListener('click', () => {
+      const on = !chosen.has(i);
+      if (on) chosen.add(i); else chosen.delete(i);
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', String(on));
+      document.getElementById('ag-use').disabled = chosen.size === 0;
+    });
+    unitsEl.appendChild(b);
+  });
+  document.getElementById('ag-use').addEventListener('click', () =>
+    runActingGame(gameId, text, [...chosen].sort((a, b) => a - b).map(i => units[i]).join('\n\n')));
+  document.getElementById('ag-all').addEventListener('click', () =>
+    runActingGame(gameId, text, full));
+}
+
+function runActingGame(gameId, text, passage) {
+  const game = actingGameById(gameId);
+  if (!game) return renderActingArcade();
+  const full = String(text.body ?? '');
+  if (passage === undefined && full.length > GAME_PASSAGE_THRESHOLD) {
+    return renderGamePassageStep(gameId, text);
+  }
+  record(() => runActingGame(gameId, text, passage));
+  stopSpeech();
+  const body = String(passage ?? full);
   // The action deck: the twelve taught actions with their objectives,
   // then the wider vocabulary as bare verbs (owner order, 2026-08-20).
   const deck = game.deck === 'actions'
@@ -3728,28 +3811,45 @@ function runActingGame(gameId, text) {
        ...ACTION_VERBS.filter(v => !taughtActionFor(v))]
     : (ACTING_DECKS[game.deck] ?? []);
 
+  // Exercise-first layout: the tool and its controls sit on top; the
+  // text sits under them as reference. The beat tool's tappable copy IS
+  // the text, so it renders exactly once.
+  const repick = full.length > GAME_PASSAGE_THRESHOLD
+    ? ' · <button class="linkish" id="ac-repick" type="button">change passage</button>' : '';
   app.innerHTML = `
     ${pageTopbar(`${game.icon} ${esc(game.title)}`, '#8a6d3b')}
     <main class="guide sp-game">
       <h1>${esc(game.title)}</h1>
       <p class="pane-note">${esc(game.how)}</p>
-      <section class="sp-passage" aria-label="Your text"><div class="sp-passage-text" id="ac-fixed"></div></section>
+      ${game.deck === 'actions' ? '<p class="pane-note">The full vocabulary, with coaching, is <button class="linkish" id="ac-lib" type="button">Playable Actions</button> in the Acting Library.</p>' : ''}
+      <p class="pane-note">Playing on: <b>${esc(text.title)}</b>${repick}</p>
       ${game.tool === 'beats' ? `
         <p class="guide-text">Tap between words to mark where the scene turns.</p>
-        <div id="ac-beats"></div>
-        <p class="pane-note" id="ac-beat-note" aria-live="polite">No turns marked yet — different actors divide the same scene differently.</p>`
-      : `<div class="sp-deal" id="ac-deal" aria-live="polite"></div>`}
-      <div class="practice-row">
-        ${game.tool === 'beats' ? '<button class="btn-lite" id="ac-clear" type="button">Clear marks</button>'
-          : '<button class="btn btn-primary" id="ac-deal-btn" type="button">Deal</button>'}
-        <button class="btn" id="ac-game-done" type="button">Done</button>
-      </div>
+        <div class="practice-row">
+          <button class="btn-lite" id="ac-clear" type="button">Clear marks</button>
+          <button class="btn" id="ac-game-done" type="button">Done</button>
+        </div>
+        <p class="pane-note" id="ac-beat-note" aria-live="polite">No turns marked yet — different actors divide the same scene differently.</p>
+        <div id="ac-beats"></div>`
+      : `
+        <div class="practice-row">
+          <button class="btn btn-primary" id="ac-deal-btn" type="button">Deal</button>
+          <button class="btn" id="ac-game-done" type="button">Done</button>
+        </div>
+        <div class="sp-deal" id="ac-deal" aria-live="polite"></div>
+        <section class="sp-passage" aria-label="Your text"><div class="sp-passage-text" id="ac-fixed"></div></section>`}
     </main>`;
   wireBrandHome();
-  document.getElementById('ac-fixed').textContent = text.body;   // inert, always
+  const fixed = document.getElementById('ac-fixed');
+  if (fixed) fixed.textContent = body;                     // inert, always
+  document.getElementById('ac-lib')?.addEventListener('click', renderPlayableActions);
+  document.getElementById('ac-repick')?.addEventListener('click', () => {
+    navStack.pop();                              // replace this run in history
+    renderGamePassageStep(gameId, text);
+  });
 
   if (game.tool === 'beats') {
-    const tokens = String(text.body).split(/(\s+)/);
+    const tokens = String(body).split(/(\s+)/);
     const box = document.createElement('div');
     box.className = 'sp-passage-text';
     let count = 0;

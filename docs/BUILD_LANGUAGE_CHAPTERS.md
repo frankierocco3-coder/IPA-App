@@ -19,7 +19,9 @@ deliberately left out.
 ## Placement
 
 1. **The Words They Choose** — Module 2 · Investigating the Text,
-   `order: 9` (after Subtext; Playable Actions moves 9 → 10). Reading a
+   `order: 10` (after Subtext; Playable Actions moves 10 → 11 —
+   numbering updated 2026-09-16 after Finding the Objective shipped as
+   2.8). Reading a
    character's softened language as evidence is text investigation.
    Id: `ac-wordschoice`. Shelf: the `scene` collection, after subtext.
 2. **Three Ways to Move Someone** — Module 3 · Listening and
@@ -32,7 +34,7 @@ deliberately left out.
 
 Both `requiredReviewer: 'acting-professional'`; owner-approved ledger
 entries on install (standard badge-route wording); suite pins move
-45 → 47 path lessons, 53 → 55 records, 57 → 59 published items.
+46 → 48 path lessons, 54 → 56 records, 58 → 60 published items.
 
 ## Credit debt
 
@@ -43,7 +45,7 @@ euphemism and cliché analysis). Neither is named in the bodies.
 ## Chapter 1 — The Words They Choose
 
 ```js
-{ id: 'ac-wordschoice', module: 'text', order: 9,
+{ id: 'ac-wordschoice', module: 'text', order: 10,
   title: 'The Words They Choose',
   requiredReviewer: 'acting-professional',
   objective: 'Read a character’s euphemisms and clichés as evidence of what they cannot afford to say.',
@@ -92,14 +94,14 @@ euphemism and cliché analysis). Neither is named in the bodies.
 ## Install checklist (on approval)
 
 1. `js/data/acting/course.js` — insert both records; `ac-actions` moves
-   to `order: 10`; add `'ac-wordschoice'` to the `scene` collection
+   to `order: 11`; add `'ac-wordschoice'` to the `scene` collection
    after `'ac-subtext'` and `'ac-appeals'` to the `rehearsal`
    collection after `'ac-playing'`.
 2. `js/data/speech/reviews.js` — two owner-approved entries, standard
    no-specialist wording.
 3. Sources & Credits batch — Aristotle (Rhetoric), George Orwell
    (Politics and the English Language).
-4. Suite pins: 45 → 47 path lessons, 53 → 55 records, 57 → 59 items;
+4. Suite pins: 46 → 48 path lessons, 54 → 56 records, 58 → 60 items;
    acting shelf order string unchanged in keys (collections only
    reorder internally by lesson list, which is not pinned).
 5. Gates + full suite; push only on "push it".
