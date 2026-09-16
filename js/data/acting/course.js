@@ -343,6 +343,7 @@ export const ACTING_LESSONS = [
 
   // ── Module 3 · Listening and Responding ───────────────────────
   { id: 'ac-attention', module: 'listening', order: 1,
+    partnerWork: true,
     title: 'Attention on the Other Person',
     requiredReviewer: 'acting-professional',
     objective: 'Move attention off your own performance and onto your partner.',
@@ -354,6 +355,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-receiving', module: 'listening', order: 2,
+    partnerWork: true,
     title: 'Receiving Before Responding',
     requiredReviewer: 'acting-professional',
     objective: 'Let what your partner does land before you answer it.',
@@ -365,6 +367,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-moment', module: 'listening', order: 3,
+    partnerWork: true,
     title: 'Moment-to-Moment Behavior',
     requiredReviewer: 'acting-professional',
     objective: 'Play the scene as it happens rather than as it was planned.',
@@ -376,6 +379,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-newinfo', module: 'listening', order: 4,
+    partnerWork: true,
     title: 'Allowing New Information to Affect You',
     requiredReviewer: 'acting-professional',
     objective: 'Let what you learn in the scene change what you do next.',
@@ -387,6 +391,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-repetition', module: 'listening', order: 5,
+    partnerWork: true,
     title: 'Repetition Without Predetermining Delivery',
     requiredReviewer: 'acting-professional',
     objective: 'Repeat the work without freezing it.',
@@ -398,6 +403,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-playing', module: 'listening', order: 6,
+    partnerWork: true,
     title: 'Playing the Objective Instead of Displaying Emotion',
     requiredReviewer: 'acting-professional',
     objective: 'Pursue something, and let feeling arrive as a consequence.',
@@ -421,6 +427,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-scene', module: 'performance', order: 2,
+    partnerWork: true,
     title: 'Scene Work',
     requiredReviewer: 'acting-professional',
     objective: 'Bring the whole investigation into two-person work.',
@@ -457,6 +464,7 @@ export const ACTING_LESSONS = [
     ] },
 
   { id: 'ac-applying', module: 'performance', order: 5,
+    partnerWork: true,
     title: 'Applying Technique in a Scene',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The general principle is taught in the Speech chapter “Applying Technique Without Managing It”.',

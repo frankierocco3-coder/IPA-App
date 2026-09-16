@@ -3167,6 +3167,8 @@ function renderActingChapter(id) {
         <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
       ${l.doorway ? `<p class="pane-note">${esc(l.doorway.note ?? '')}
         <button class="linkish" data-shared="${esc(l.doorway.id)}" data-shared-ws="acting" type="button">Open ${esc(l.doorway.label)}</button></p>` : ''}
+      ${l.partnerWork ? `<p class="pane-note">This chapter is partner work. Try it on a two-hander from the
+        <button class="linkish" id="ac-scenes-door" type="button">Scenes shelf</button> — public-domain scenes, shown verbatim.</p>` : ''}
       ${l.reflection ? `<h2 class="guide-heading">Reflection</h2>
       <p class="guide-text">${esc(l.reflection)}</p>
       <p class="pane-note">A question to sit with — there is no answer to submit and nothing here is scored.</p>` : ''}
@@ -3183,6 +3185,7 @@ function renderActingChapter(id) {
   app.querySelector('#ac-h').focus();
   app.querySelectorAll('[data-shared]').forEach(b =>
     b.addEventListener('click', () => openSharedRecord(b.dataset.sharedWs, b.dataset.shared)));
+  document.getElementById('ac-scenes-door')?.addEventListener('click', renderScenesShelf);
   document.getElementById('ac-study')?.addEventListener('click', () => renderActingLesson(l.id));
   document.getElementById('ac-prev')?.addEventListener('click', () => { navStack.pop(); renderActingChapter(prev.id); });
   document.getElementById('ac-next')?.addEventListener('click', () => { navStack.pop(); renderActingChapter(nxt.id); });
