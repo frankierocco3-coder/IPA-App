@@ -1,14 +1,22 @@
-// Provided scenes — verbatim public-domain dramatic texts for the
-// Scenes shelf (owner-approved, 2026-09-15; packet:
-// docs/SCENE_PACKET_v2.md). RULES, from the packet and binding:
-//   • The `text` field is the SOURCE TEXT, verbatim from the cited
-//     Project Gutenberg edition, verified line-for-line on the date
-//     in `verified`. Never edit it, modernize it, or swap in another
-//     edition without an owner-approved, logged change. The Shaw act
-//     keeps this edition's own printing errors on purpose.
+// Provided scenes — public-domain dramatic texts for the Scenes shelf
+// (owner-approved, 2026-09-15; packet: docs/SCENE_PACKET_v2.md).
+// RULES, binding:
+//   • The `text` field is the SOURCE TEXT from the cited Project
+//     Gutenberg edition, verified line-for-line on the date in
+//     `verified`. Corrected-reprint policy (owner order 2026-09-17):
+//     obvious MECHANICAL printing errors (typesetting/OCR artifacts,
+//     misprinted speaker labels, editorial bracket marks) may be
+//     corrected, and EVERY correction is recorded in that record's
+//     `corrections` field as [from, to] pairs — the text must equal
+//     the source with exactly those corrections applied, nothing
+//     more. Period spelling, dialect, grammar and punctuation STYLE
+//     are the play's voice and are never touched. Never modernize,
+//     never swap editions without an owner-approved, logged change.
 //   • Speechcraft's own words live ONLY outside `text` (title, notes).
-//   • `rightsNote` ships with the scene. Public-domain status is
-//     US-scoped, matching the app's existing Gutenberg statements.
+//   • `rightsNote` and `source` stay in the data as the provenance of
+//     record (US-scoped, matching the app's Gutenberg statements);
+//     reading pages no longer display them (owner order 2026-09-17) —
+//     learner-facing credit lives on Sources & Credits.
 //   • `contentNote` is shown, never used to rewrite the work.
 // Rendering may reflow hard-wrapped lines and show the source's
 // _underscore_ emphasis as italics; it must never alter, omit or
@@ -2301,7 +2309,8 @@ serious about meals. It is so shallow of them.`,
     characters: ['Cecily Cardew', 'Gwendolen Fairfax'],
     source: 'Project Gutenberg eBook #844',
     verified: '2026-09-16',
-    rightsNote: 'Public domain in the United States. Text taken verbatim from the Project Gutenberg plain-text edition and verified against it line for line. NOTE: this Gutenberg edition contains its own printing error “lorgnettte,” preserved rather than silently corrected. Readers elsewhere should check the copyright law where they live.',
+    corrections: [['lorgnettte', 'lorgnette']],
+    rightsNote: 'Public domain in the United States. Text taken from the Project Gutenberg plain-text edition and verified against it line for line. Obvious mechanical printing errors in that edition are corrected; each correction is recorded in this record. Readers elsewhere should check the copyright law where they live.',
     cutNote: 'The cut opens on Gwendolen’s entrance after Merriman announces her and ends on “our social spheres have been widely different,” the beat before the servants enter with tea. It is the private confrontation, not the complete tea scene.',
     context: 'Gwendolen visits Cecily expecting a cordial meeting. Each soon believes she is engaged to the same man, and their courtesy becomes a contest.',
     contentNote: null,
@@ -2461,7 +2470,7 @@ misconception. Ernest proposed to me exactly ten minutes ago. [Shows
 diary.]
 
 GWENDOLEN.
-[Examines diary through her lorgnettte carefully.] It is certainly very
+[Examines diary through her lorgnette carefully.] It is certainly very
 curious, for he asked me to be his wife yesterday afternoon at 5.30. If
 you would care to verify the incident, pray do so. [Produces diary of
 her own.] I never travel without my diary. One should always have
@@ -2715,7 +2724,8 @@ cloak?  [_Getting it from sofa_.]  Here.  Put it on.  Come at once!`,
     speakerLabels: ['LORD GORING', 'MRS. CHEVELEY'],
     source: 'Project Gutenberg eBook #885',
     verified: '2026-09-16',
-    rightsNote: 'Public domain in the United States. Text taken verbatim from the Project Gutenberg plain-text edition and verified against it line for line. NOTE: this Gutenberg edition contains its own printing errors (including “finds is empty” and the spacing in “It was . . a present.”); they are preserved rather than silently corrected. Readers elsewhere should check the copyright law where they live.',
+    corrections: [['finds is', 'finds it'], ['It was . . a present', 'It was . . . a present']],
+    rightsNote: 'Public domain in the United States. Text taken from the Project Gutenberg plain-text edition and verified against it line for line. Obvious mechanical printing errors in that edition are corrected; each correction is recorded in this record. Readers elsewhere should check the copyright law where they live.',
     cutNote: 'The cut opens on Mrs. Cheveley’s mock curtsey after Sir Robert leaves and ends on “You shall not leave my room till I have got it.”, the moment before she reaches the bell and Phipps enters.',
     context: 'Mrs. Cheveley holds evidence that could ruin Sir Robert Chiltern. Lord Goring tries to outmaneuver her, but both have more than one piece of leverage.',
     contentNote: null,
@@ -2956,7 +2966,7 @@ leaving.  [_Goes over to the writing-table and pulls out the drawers_.]
 It is in this drawer.  No, that one.  This is the brooch, isn’t it?
 [_Holds up the brooch_.]
 
-MRS. CHEVELEY.  Yes.  I am so glad to get it back.  It was . . a present.
+MRS. CHEVELEY.  Yes.  I am so glad to get it back.  It was . . . a present.
 
 LORD GORING.  Won’t you wear it?
 
@@ -3086,7 +3096,7 @@ LORD GORING.  Love-letter?
 MRS. CHEVELEY.  [_Laughing_.]  ‘I want you.  I trust you.  I am coming to
 you.  Gertrude.’
 
-[LORD GORING _rushes to the bureau and takes up the envelope_, _finds is
+[LORD GORING _rushes to the bureau and takes up the envelope_, _finds it
 empty_, _and turns round_.]
 
 LORD GORING.  You wretched woman, must you always be thieving?  Give me
@@ -4148,10 +4158,11 @@ Dr. Stockmann (controlling himself). Peter—if you were not my brother—`,
     author: 'Henrik Ibsen, translated by R. Farquharson Sharp',
     location: 'Act II: an uninterrupted exchange, not the full act',
     characters: ['Mrs. Alving', 'Pastor Manders'],
-    speakerLabels: ['Mrs. Alving', 'Manders', 'Menders'],
+    speakerLabels: ['Mrs. Alving', 'Manders'],
     source: 'Project Gutenberg eBook #2467',
     verified: '2026-09-16',
-    rightsNote: 'Project Gutenberg identifies this R. Farquharson Sharp translation as public domain in the United States. Text taken verbatim and verified line for line. NOTE: this Gutenberg edition contains its own printing errors (including “Menders” for “Manders” in several speaker labels); they are preserved rather than silently corrected. Readers elsewhere should check the copyright law where they live.',
+    corrections: [['Menders', 'Manders'], ['\nManders, I don', '\nManders. I don'], ['taping', 'tapping'], [' lust ', ' just ']],
+    rightsNote: 'Public domain in the United States. Text taken from the Project Gutenberg plain-text edition and verified against it line for line. Obvious mechanical printing errors in that edition are corrected; each correction is recorded in this record. Readers elsewhere should check the copyright law where they live.',
     cutNote: 'Opens after Oswald and Regina leave and runs to the knock at the hall door that precedes Engstrand’s entrance.',
     context: 'Mrs. Alving and Manders fear that old family secrets are repeating themselves. They disagree over whether protecting a son’s ideals matters more than telling him the truth.',
     contentNote: 'Frank period discussion of infidelity, illegitimacy and a possible union between half-siblings.',
@@ -4273,7 +4284,7 @@ for my freedom.
 
 Manders. What do you mean?
 
-Mrs. Alving (taping on the window panes). I ought never to have
+Mrs. Alving (tapping on the window panes). I ought never to have
 concealed what sort of a life my husband led. But I had not the courage
 to do otherwise then--for my own sake, either. I was too much of a
 coward.
@@ -4348,7 +4359,7 @@ Manders. In what way? I don't understand.
 Mrs. Alving. But that is impossible; Regina is not equal to it,
 unfortunately.
 
-Manders, I don't understand: What do you mean?
+Manders. I don't understand: What do you mean?
 
 Mrs. Alving. If I were not such a miserable coward, I would say to him:
 "Marry her, or make any arrangement you like with her--only let there
@@ -4409,10 +4420,10 @@ has borne--this abominable, subversive, free-thinking literature!
 Mrs. Alving. You are wrong there, my friend. You are the one who made
 me begin to think; and I owe you my best thanks for it.
 
-Menders. I!
+Manders. I!
 
 Mrs. Alving. Yes, by forcing me to submit to what you called my duty
-and my obligations; by praising as right and lust what my whole soul
+and my obligations; by praising as right and just what my whole soul
 revolted against, as it would against something abominable. That was
 what led me to examine your teachings critically. I only wanted to
 unravel one point in them; but as soon as I had got that unravelled,
@@ -4435,7 +4446,7 @@ your lawful husband, when you came to me half distracted and crying:
 
 Mrs. Alving. I think it was.
 
-Menders. We two do not understand one another.
+Manders. We two do not understand one another.
 
 Mrs. Alving. Not now, at all events.
 
@@ -5120,6 +5131,1742 @@ whispers.] Thea--all this must remain between you and me.
 MRS. ELVSTED.
 
 [Springing up.] Oh yes--yes! For heaven's sake--!`,
+  },
+  {
+    id: 'pygmalion-slippers',
+    authorGroup: 'Shaw',
+    title: 'The Slippers',
+    play: 'Pygmalion',
+    author: 'George Bernard Shaw',
+    location: 'Act IV: an uninterrupted exchange, not the full act',
+    characters: ['Eliza Doolittle', 'Henry Higgins'],
+    speakerLabels: ['HIGGINS', 'LIZA'],
+    source: 'Project Gutenberg eBook #3825',
+    verified: '2026-09-17',
+    rightsNote: 'Public domain in the United States. Text taken verbatim from the Project Gutenberg plain-text edition and verified against it line for line. Readers elsewhere should check the copyright law where they live.',
+    cutNote: 'The cut opens on the stage direction after Higgins goes up to bed and ends on the final direction of the act, completed through “look for the ring.”, the moment before Act V.',
+    context: 'The experiment has succeeded and the party is over. Higgins comes back for his slippers, and Eliza, no longer able to stay silent, asks what is to become of her. The scene asks who owns the results of her education.',
+    contentNote: 'Includes a physical struggle and threatened violence within the scene.',
+    text: `Eliza tries to control herself and feel indifferent as she rises and
+walks across to the hearth to switch off the lights. By the time she
+gets there she is on the point of screaming. She sits down in Higgins’s
+chair and holds on hard to the arms. Finally she gives way and flings
+herself furiously on the floor raging.
+
+HIGGINS [in despairing wrath outside] What the devil have I done with
+my slippers? [He appears at the door].
+
+LIZA [snatching up the slippers, and hurling them at him one after the
+other with all her force] There are your slippers. And there. Take your
+slippers; and may you never have a day’s luck with them!
+
+HIGGINS [astounded] What on earth—! [He comes to her]. What’s the
+matter? Get up. [He pulls her up]. Anything wrong?
+
+LIZA [breathless] Nothing wrong—with YOU. I’ve won your bet for you,
+haven’t I? That’s enough for you. _I_ don’t matter, I suppose.
+
+HIGGINS. YOU won my bet! You! Presumptuous insect! _I_ won it. What did
+you throw those slippers at me for?
+
+LIZA. Because I wanted to smash your face. I’d like to kill you, you
+selfish brute. Why didn’t you leave me where you picked me out of—in
+the gutter? You thank God it’s all over, and that now you can throw me
+back again there, do you? [She crisps her fingers, frantically].
+
+HIGGINS [looking at her in cool wonder] The creature IS nervous, after
+all.
+
+LIZA [gives a suffocated scream of fury, and instinctively darts her
+nails at his face]!!
+
+HIGGINS [catching her wrists] Ah! would you? Claws in, you cat. How
+dare you show your temper to me? Sit down and be quiet. [He throws her
+roughly into the easy-chair].
+
+LIZA [crushed by superior strength and weight] What’s to become of me?
+What’s to become of me?
+
+HIGGINS. How the devil do I know what’s to become of you? What does it
+matter what becomes of you?
+
+LIZA. You don’t care. I know you don’t care. You wouldn’t care if I was
+dead. I’m nothing to you—not so much as them slippers.
+
+HIGGINS [thundering] THOSE slippers.
+
+LIZA [with bitter submission] Those slippers. I didn’t think it made
+any difference now.
+
+A pause. Eliza hopeless and crushed. Higgins a little uneasy.
+
+HIGGINS [in his loftiest manner] Why have you begun going on like this?
+May I ask whether you complain of your treatment here?
+
+LIZA. No.
+
+HIGGINS. Has anybody behaved badly to you? Colonel Pickering? Mrs.
+Pearce? Any of the servants?
+
+LIZA. No.
+
+HIGGINS. I presume you don’t pretend that I have treated you badly.
+
+LIZA. No.
+
+HIGGINS. I am glad to hear it. [He moderates his tone]. Perhaps you’re
+tired after the strain of the day. Will you have a glass of champagne?
+[He moves towards the door].
+
+LIZA. No. [Recollecting her manners] Thank you.
+
+HIGGINS [good-humored again] This has been coming on you for some days.
+I suppose it was natural for you to be anxious about the garden party.
+But that’s all over now. [He pats her kindly on the shoulder. She
+writhes]. There’s nothing more to worry about.
+
+LIZA. No. Nothing more for you to worry about. [She suddenly rises and
+gets away from him by going to the piano bench, where she sits and
+hides her face]. Oh God! I wish I was dead.
+
+HIGGINS [staring after her in sincere surprise] Why? in heaven’s name,
+why? [Reasonably, going to her] Listen to me, Eliza. All this
+irritation is purely subjective.
+
+LIZA. I don’t understand. I’m too ignorant.
+
+HIGGINS. It’s only imagination. Low spirits and nothing else. Nobody’s
+hurting you. Nothing’s wrong. You go to bed like a good girl and sleep
+it off. Have a little cry and say your prayers: that will make you
+comfortable.
+
+LIZA. I heard YOUR prayers. “Thank God it’s all over!”
+
+HIGGINS [impatiently] Well, don’t you thank God it’s all over? Now you
+are free and can do what you like.
+
+LIZA [pulling herself together in desperation] What am I fit for? What
+have you left me fit for? Where am I to go? What am I to do? What’s to
+become of me?
+
+HIGGINS [enlightened, but not at all impressed] Oh, that’s what’s
+worrying you, is it? [He thrusts his hands into his pockets, and walks
+about in his usual manner, rattling the contents of his pockets, as if
+condescending to a trivial subject out of pure kindness]. I shouldn’t
+bother about it if I were you. I should imagine you won’t have much
+difficulty in settling yourself, somewhere or other, though I hadn’t
+quite realized that you were going away. [She looks quickly at him: he
+does not look at her, but examines the dessert stand on the piano and
+decides that he will eat an apple]. You might marry, you know. [He
+bites a large piece out of the apple, and munches it noisily]. You see,
+Eliza, all men are not confirmed old bachelors like me and the Colonel.
+Most men are the marrying sort (poor devils!); and you’re not
+bad-looking; it’s quite a pleasure to look at you sometimes—not now,
+of course, because you’re crying and looking as ugly as the very devil;
+but when you’re all right and quite yourself, you’re what I should call
+attractive. That is, to the people in the marrying line, you
+understand. You go to bed and have a good nice rest; and then get up
+and look at yourself in the glass; and you won’t feel so cheap.
+
+Eliza again looks at him, speechless, and does not stir.
+
+The look is quite lost on him: he eats his apple with a dreamy
+expression of happiness, as it is quite a good one.
+
+HIGGINS [a genial afterthought occurring to him] I daresay my mother
+could find some chap or other who would do very well—
+
+LIZA. We were above that at the corner of Tottenham Court Road.
+
+HIGGINS [waking up] What do you mean?
+
+LIZA. I sold flowers. I didn’t sell myself. Now you’ve made a lady of
+me I’m not fit to sell anything else. I wish you’d left me where you
+found me.
+
+HIGGINS [slinging the core of the apple decisively into the grate]
+Tosh, Eliza. Don’t you insult human relations by dragging all this cant
+about buying and selling into it. You needn’t marry the fellow if you
+don’t like him.
+
+LIZA. What else am I to do?
+
+HIGGINS. Oh, lots of things. What about your old idea of a florist’s
+shop? Pickering could set you up in one: he’s lots of money.
+[Chuckling] He’ll have to pay for all those togs you have been wearing
+today; and that, with the hire of the jewellery, will make a big hole
+in two hundred pounds. Why, six months ago you would have thought it
+the millennium to have a flower shop of your own. Come! you’ll be all
+right. I must clear off to bed: I’m devilish sleepy. By the way, I came
+down for something: I forget what it was.
+
+LIZA. Your slippers.
+
+HIGGINS. Oh yes, of course. You shied them at me. [He picks them up,
+and is going out when she rises and speaks to him].
+
+LIZA. Before you go, sir—
+
+HIGGINS [dropping the slippers in his surprise at her calling him sir]
+Eh?
+
+LIZA. Do my clothes belong to me or to Colonel Pickering?
+
+HIGGINS [coming back into the room as if her question were the very
+climax of unreason] What the devil use would they be to Pickering?
+
+LIZA. He might want them for the next girl you pick up to experiment on.
+
+HIGGINS [shocked and hurt] Is THAT the way you feel towards us?
+
+LIZA. I don’t want to hear anything more about that. All I want to know
+is whether anything belongs to me. My own clothes were burnt.
+
+HIGGINS. But what does it matter? Why need you start bothering about
+that in the middle of the night?
+
+LIZA. I want to know what I may take away with me. I don’t want to be
+accused of stealing.
+
+HIGGINS [now deeply wounded] Stealing! You shouldn’t have said that,
+Eliza. That shows a want of feeling.
+
+LIZA. I’m sorry. I’m only a common ignorant girl; and in my station I
+have to be careful. There can’t be any feelings between the like of you
+and the like of me. Please will you tell me what belongs to me and what
+doesn’t?
+
+HIGGINS [very sulky] You may take the whole damned houseful if you
+like. Except the jewels. They’re hired. Will that satisfy you? [He
+turns on his heel and is about to go in extreme dudgeon].
+
+LIZA [drinking in his emotion like nectar, and nagging him to provoke a
+further supply] Stop, please. [She takes off her jewels]. Will you take
+these to your room and keep them safe? I don’t want to run the risk of
+their being missing.
+
+HIGGINS [furious] Hand them over. [She puts them into his hands]. If
+these belonged to me instead of to the jeweler, I’d ram them down your
+ungrateful throat. [He perfunctorily thrusts them into his pockets,
+unconsciously decorating himself with the protruding ends of the
+chains].
+
+LIZA [taking a ring off] This ring isn’t the jeweler’s: it’s the one
+you bought me in Brighton. I don’t want it now. [Higgins dashes the
+ring violently into the fireplace, and turns on her so threateningly
+that she crouches over the piano with her hands over her face, and
+exclaims] Don’t you hit me.
+
+HIGGINS. Hit you! You infamous creature, how dare you accuse me of such
+a thing? It is you who have hit me. You have wounded me to the heart.
+
+LIZA [thrilling with hidden joy] I’m glad. I’ve got a little of my own
+back, anyhow.
+
+HIGGINS [with dignity, in his finest professional style] You have
+caused me to lose my temper: a thing that has hardly ever happened to
+me before. I prefer to say nothing more tonight. I am going to bed.
+
+LIZA [pertly] You’d better leave a note for Mrs. Pearce about the
+coffee; for she won’t be told by me.
+
+HIGGINS [formally] Damn Mrs. Pearce; and damn the coffee; and damn you;
+and damn my own folly in having lavished MY hard-earned knowledge and
+the treasure of my regard and intimacy on a heartless guttersnipe. [He
+goes out with impressive decorum, and spoils it by slamming the door
+savagely].
+
+Eliza smiles for the first time; expresses her feelings by a wild
+pantomime in which an imitation of Higgins’s exit is confused with her
+own triumph; and finally goes down on her knees on the hearthrug to
+look for the ring.`,
+  },
+  {
+    id: 'pariah-complete',
+    authorGroup: 'Strindberg',
+    title: 'The Unpunished',
+    play: 'Pariah',
+    author: 'August Strindberg, translated by Edwin Björkman',
+    location: 'A complete one-act play',
+    characters: ['Mr. X', 'Mr. Y'],
+    speakerLabels: ['MR. X', 'MR. Y'],
+    source: 'Project Gutenberg eBook #5053',
+    verified: '2026-09-17',
+    corrections: [['ME. X.', 'MR. X.'], ['ME. Y.', 'MR. Y.'], ['MR. X,', 'MR. X.'], ['alchohol', 'alcohol'], ['otter preliminaries', 'other preliminaries'], ['For tins', 'For this']],
+    rightsNote: 'Public domain in the United States. Text taken from the Project Gutenberg plain-text edition and verified against it line for line. Obvious mechanical printing errors in that edition are corrected; each correction is recorded in this record. Readers elsewhere should check the copyright law where they live.',
+    cutNote: 'This is the complete play, from the opening stage directions to the curtain.',
+    context: 'An archaeologist and a travelling collector wait out a thunderstorm. What begins as talk about guilt and punishment becomes an attempted blackmail, and each man learns exactly what the other is.',
+    contentNote: 'Frank discussion of forgery, blackmail and an unpunished killing.',
+    text: `SCENE
+
+(A simply furnished room in a farmhouse. The door and the windows in the
+background open on a landscape. In the middle of the room stands a
+big dining-table, covered at one end by books, writing materials,
+and antiquities; at the other end, by a microscope, insect cases, and
+specimen jars full of alcohol.)
+
+(On the left side hangs a bookshelf. Otherwise the furniture is that of
+a well-to-do farmer.)
+
+(MR. Y. enters in his shirt-sleeves, carrying a butterfly-net and a
+botany-can. He goes straight up to the bookshelf and takes down a book,
+which he begins to read on the spot.)
+
+(The landscape outside and the room itself are steeped in sunlight. The
+ringing of church bells indicates that the morning services are just
+over. Now and then the cackling of hens is heard from the outside.)
+
+(MR. X. enters, also in his shirt-sleeves.)
+
+(MR. Y. starts violently, puts the book back on the shelf upside-down,
+and pretends to be looking for another volume.)
+
+MR. X. This heat is horrible. I guess we are going to have a
+thunderstorm.
+
+MR. Y. What makes you think so?
+
+MR. X. The bells have a kind of dry ring to them, the flies are sticky,
+and the hens cackle. I meant to go fishing, but I couldn't find any
+worms. Don't you feel nervous?
+
+MR. Y. [Cautiously] I?--A little.
+
+MR. X. Well, for that matter, you always look as if you were expecting
+thunderstorms.
+
+MR. Y. [With a start] Do I?
+
+MR. X. Now, you are going away tomorrow, of course, so it is not to be
+wondered at that you are a little "journey-proud."--Anything new?--Oh,
+there's the mail! [Picks up some letters from the table] My, I have
+palpitation of the heart every time I open a letter! Nothing but debts,
+debts, debts! Have you ever had any debts?
+
+MR. Y. [After some reflection] N-no.
+
+MR. X. Well, then you don't know what it means to receive a lot of
+overdue bills. [Reads one of the letters] The rent unpaid--the landlord
+acting nasty--my wife in despair. And here am I sitting waist-high in
+gold! [He opens an iron-banded box that stands on the table; then both
+sit down at the table, facing each other] Just look--here I have
+six thousand crowns' worth of gold which I have dug up in the last
+fortnight. This bracelet alone would bring me the three hundred and
+fifty crowns I need. And with all of it I might make a fine career for
+myself. Then I could get the illustrations made for my treatise at once;
+I could get my work printed, and--I could travel! Why don't I do it, do
+you suppose?
+
+MR. Y. I suppose you are afraid to be found out.
+
+MR. X. That, too, perhaps. But don't you think an intelligent fellow
+like myself might fix matters so that he was never found out? I am alone
+all the time--with nobody watching me--while I am digging out there in
+the fields. It wouldn't be strange if I put something in my own pockets
+now and then.
+
+MR. Y. Yes, but the worst danger lies in disposing of the stuff.
+
+MR. X. Pooh! I'd melt it down, of course--every bit of it--and then I'd
+turn it into coins--with just as much gold in them as genuine ones, of
+course---
+
+MR. Y. Of course!
+
+MR. X. Well, you can easily see why. For if I wanted to dabble in
+counterfeits, then I need not go digging for gold first. [Pause] It is a
+strange thing anyhow, that if anybody else did what I cannot make myself
+do, then I'd be willing to acquit him--but I couldn't possibly acquit
+myself. I might even make a brilliant speech in defence of the thief,
+proving that this gold was res nullius, or nobody's, as it had been
+deposited at a time when property rights did not yet exist; that even
+under existing rights it could belong only to the first finder of it, as
+the ground-owner has never included it in the valuation of his property;
+and so on.
+
+MR. Y. And probably it would be much easier for you to do this if
+the--hm!--the thief had not been prompted by actual need, but by a
+mania for collecting, for instance--or by scientific aspirations--by the
+ambition to keep a discovery to himself. Don't you think so?
+
+MR. X. You mean that I could not acquit him if actual need had been the
+motive? Yes, for that's the only motive which the law will not accept in
+extenuation. That motive makes a plain theft of it.
+
+MR. Y. And this you couldn't excuse?
+
+MR. X. Oh, excuse--no, I guess not, as the law wouldn't. On the other
+hand, I must admit that it would be hard for me to charge a collector
+with theft merely because he had appropriated some specimen not yet
+represented in his own collection.
+
+MR. Y. So that vanity or ambition might excuse what could not be excused
+by need?
+
+MR. X. And yet need ought to be the more telling excuse--the only
+one, in fact? But I feel as I have said. And I can no more change this
+feeling than I can change my own determination not to steal under any
+circumstances whatever.
+
+MR. Y. And I suppose you count it a great merit that you
+cannot--hm!--steal?
+
+MR. X. No, my disinclination to steal is just as irresistible as the
+inclination to do so is irresistible with some people. So it cannot be
+called a merit. I cannot do it, and the other one cannot refrain!--But
+you understand, of course, that I am not without a desire to own this
+gold. Why don't I take it then? Because I cannot! It's an inability--and
+the lack of something cannot be called a merit. There!
+
+[Closes the box with a slam. Stray clouds have cast their shadows on the
+landscape and darkened the room now and then. Now it grows quite dark as
+when a thunderstorm is approaching.]
+
+MR. X. How close the air is! I guess the storm is coming all right.
+
+[MR. Y. gets up and shuts the door and all the windows.]
+
+MR. X. Are you afraid of thunder?
+
+MR. Y. It's just as well to be careful.
+
+(They resume their seats at the table.)
+
+MR. X. You're a curious chap! Here you come dropping down like a bomb
+a fortnight ago, introducing yourself as a Swedish-American who is
+collecting flies for a small museum---
+
+MR. Y. Oh, never mind me now!
+
+MR. X. That's what you always say when I grow tired of talking about
+myself and want to turn my attention to you. Perhaps that was the reason
+why I took to you as I did--because you let me talk about myself? All at
+once we seemed like old friends. There were no angles about you against
+which I could bump myself, no pins that pricked. There was something
+soft about your whole person, and you overflowed with that tact which
+only well-educated people know how to show. You never made a noise when
+you came home late at night or got up early in the morning. You were
+patient in small things, and you gave in whenever a conflict seemed
+threatening. In a word, you proved yourself the perfect companion! But
+you were entirely too compliant not to set me wondering about you in the
+long run--and you are too timid, too easily frightened. It seems almost
+as if you were made up of two different personalities. Why, as I sit
+here looking at your back in the mirror over there--it is as if I were
+looking at somebody else.
+
+(MR. Y. turns around and stares at the mirror.)
+
+MR. X. No, you cannot get a glimpse of your own back, man!--In front you
+appear like a fearless sort of fellow, one meeting his fate with bared
+breast, but from behind--really, I don't want to be impolite, but--you
+look as if you were carrying a burden, or as if you were crouching to
+escape a raised stick. And when I look at that red cross your suspenders
+make on your white shirt--well, it looks to me like some kind of emblem,
+like a trade-mark on a packing-box--
+
+MR. Y. I feel as if I'd choke--if the storm doesn't break soon--
+
+MR. X. It's coming--don't you worry!--And your neck! It looks as if
+there ought to be another kind of face on top of it, a face quite
+different in type from yours. And your ears come so close together
+behind that sometimes I wonder what race you belong to. [A flash of
+lightning lights up the room] Why, it looked as if that might have
+struck the sheriff's house!
+
+MR. Y. [Alarmed] The sheriff's!
+
+MR. X. Oh, it just looked that way. But I don't think we'll get much of
+this storm. Sit down now and let us have a talk, as you are going away
+to-morrow. One thing I find strange is that you, with whom I have become
+so intimate in this short time--that you are one of those whose image
+I cannot call up when I am away from them. When you are not here, and
+I happen to think of you, I always get the vision of another
+acquaintance--one who does not resemble you, but with whom you have
+certain traits in common.
+
+MR. Y. Who is he?
+
+MR. X. I don't want to name him, but--I used for several years to take
+my meals at a certain place, and there, at the side-table where they
+kept the whiskey and the other preliminaries, I met a little blond man,
+with blond, faded eyes. He had a wonderful faculty for making his way
+through a crowd, without jostling anybody or being jostled himself. And
+from his customary place down by the door he seemed perfectly able to
+reach whatever he wanted on a table that stood some six feet away from
+him. He seemed always happy just to be in company. But when he met
+anybody he knew, then the joy of it made him roar with laughter, and he
+would hug and pat the other fellow as if he hadn't seen a human face
+for years. When anybody stepped on his foot, he smiled as if eager to
+apologise for being in the way. For two years I watched him and amused
+myself by guessing at his occupation and character. But I never asked
+who he was; I didn't want to know, you see, for then all the fun would
+have been spoiled at once. That man had just your quality of being
+indefinite. At different times I made him out to be a teacher who
+had never got his licence, a non-commissioned officer, a druggist, a
+government clerk, a detective--and like you, he looked as if made out of
+two pieces, for the front of him never quite fitted the back. One day
+I happened to read in a newspaper about a big forgery committed by
+a well-known government official. Then I learned that my indefinite
+gentleman had been a partner of the forger's brother, and that his name
+was Strawman. Later on I learned that the aforesaid Strawman used to run
+a circulating library, but that he was now the police reporter of a big
+daily. How in the world could I hope to establish a connection between
+the forgery, the police, and my little man's peculiar manners? It was
+beyond me; and when I asked a friend whether Strawman had ever been
+punished for something, my friend couldn't answer either yes or no--he
+just didn't know! [Pause.]
+
+MR. Y. Well, had he ever been--punished?
+
+MR. X. No, he had not. [Pause.]
+
+MR. Y. And that was the reason, you think, why the police had such an
+attraction for him, and why he was so afraid of offending people?
+
+MR. X. Exactly!
+
+MR. Y. And did you become acquainted with him afterward?
+
+MR. X. No, I didn't want to. [Pause.]
+
+MR. Y. Would you have been willing to make his acquaintance if he had
+been--punished?
+
+MR. X. Perfectly!
+
+(MR. Y. rises and walks back and forth several times.)
+
+MR. X. Sit still! Why can't you sit still?
+
+MR. Y. How did you get your liberal view of human conditions? Are you a
+Christian?
+
+MR. X. Oh, can't you see that I am not?
+
+(MR. Y. makes a face.)
+
+MR. X. The Christians require forgiveness. But I require punishment in
+order that the balance, or whatever you may call it, be restored. And
+you, who have served a term, ought to know the difference.
+
+MR. Y. [Stands motionless and stares at MR. X., first with wild, hateful
+eyes, then with surprise and admiration] How--could--you--know--that?
+
+MR. X. Why, I could see it.
+
+MR. Y. How? How could you see it?
+
+MR. X. Oh, with a little practice. It is an art, like many others. But
+don't let us talk of it any more. [He looks at his watch, arranges a
+document on the table, dips a pen in the ink-well, and hands it to MR.
+Y.] I must be thinking of my tangled affairs. Won't you please witness
+my signature on this note here? I am going to turn it in to the bank at
+Malmo tomorrow, when I go to the city with you.
+
+MR. Y. I am not going by way of Malmo.
+
+MR. X. Oh, you are not?
+
+MR. Y. No.
+
+MR. X. But that need not prevent you from witnessing my signature.
+
+MR. Y. N-no!--I never write my name on papers of that kind--
+
+MR. X.--any longer! This is the fifth time you have refused to write
+your own name. The first time nothing more serious was involved than the
+receipt for a registered letter. Then I began to watch you. And since
+then I have noticed that you have a morbid fear of a pen filled with
+ink. You have not written a single letter since you came here--only a
+post-card, and that you wrote with a blue pencil. You understand now
+that I have figured out the exact nature of your slip? Furthermore! This
+is something like the seventh time you have refused to come with me to
+Malmo, which place you have not visited at all during all this time. And
+yet you came the whole way from America merely to have a look at Malmo!
+And every morning you walk a couple of miles, up to the old mill, just
+to get a glimpse of the roofs of Malmo in the distance. And when you
+stand over there at the right-hand window and look out through the third
+pane from the bottom on the left side, you can see the spired turrets of
+the castle and the tall chimney of the county jail.--And now I hope you
+see that it's your own stupidity rather than my cleverness which has
+made everything clear to me.
+
+MR. Y. This means that you despise me?
+
+MR. X. Oh, no!
+
+MR. Y. Yes, you do--you cannot but do it!
+
+MR. X. No--here's my hand.
+
+(MR. Y. takes hold of the outstretched hand and kisses it.)
+
+MR. X. [Drawing back his hand] Don't lick hands like a dog!
+
+MR. Y. Pardon me, sir, but you are the first one who has let me touch
+his hand after learning--
+
+MR. X. And now you call me "sir!"--What scares me about you is that you
+don't feel exonerated, washed clean, raised to the old level, as good
+as anybody else, when you have suffered your punishment. Do you care to
+tell me how it happened? Would you?
+
+MR. Y. [Twisting uneasily] Yes, but you won't believe what I say. But
+I'll tell you. Then you can see for yourself that I am no ORDINARY
+criminal. You'll become convinced, I think, that there are errors which,
+so to speak, are involuntary--[twisting again] which seem to commit
+themselves--spontaneously--without being willed by oneself, and for
+which one cannot be held responsible--May I open the door a little now,
+since the storm seems to have passed over?
+
+MR. X. Suit yourself.
+
+MR. Y. [Opens the door; then he sits down at the table and begins to
+speak with exaggerated display of feeling, theatrical gestures, and a
+good deal of false emphasis] Yes, I'll tell you! I was a student in the
+university at Lund, and I needed to get a loan from a bank. I had no
+pressing debts, and my father owned some property--not a great deal, of
+course. However, I had sent the note to the second man of the two who
+were to act as security, and, contrary to expectations, it came back
+with a refusal. For a while I was completely stunned by the blow, for it
+was a very unpleasant surprise--most unpleasant! The note was lying in
+front of me on the table, and the letter lay beside it. At first my eyes
+stared hopelessly at those lines that pronounced my doom--that is, not a
+death-doom, of course, for I could easily find other securities, as many
+as I wanted--but as I have already said, it was very annoying just
+the same. And as I was sitting there quite unconscious of any evil
+intention, my eyes fastened upon the signature of the letter, which
+would have made my future secure if it had only appeared in the right
+place. It was an unusually well-written signature--and you know how
+sometimes one may absent-mindedly scribble a sheet of paper full of
+meaningless words. I had a pen in my hand--[picks up a penholder from
+the table] like this. And somehow it just began to run--I don't want
+to claim that there was anything mystical--anything of a spiritualistic
+nature back of it--for that kind of thing I don't believe in! It was
+a wholly unreasoned, mechanical process--my copying of that beautiful
+autograph over and over again. When all the clean space on the letter
+was used up, I had learned to reproduce the signature automatically--and
+then--[throwing away the penholder with a violent gesture] then I forgot
+all about it. That night I slept long and heavily. And when I woke up,
+I could feel that I had been dreaming, but I couldn't recall the dream
+itself. At times it was as if a door had been thrown ajar, and then
+I seemed to see the writing-table with the note on it as in a distant
+memory--and when I got out of bed, I was forced up to the table, just as
+if, after careful deliberation, I had formed an irrevocable decision to
+sign the name to that fateful paper. All thought of the consequences,
+of the risk involved, had disappeared--no hesitation remained--it was
+almost as if I was fulfilling some sacred duty--and so I wrote! [Leaps
+to his feet] What could it be? Was it some kind of outside influence, a
+case of mental suggestion, as they call it? But from whom could it come?
+I was sleeping alone in that room. Could it possibly be my primitive
+self--the savage to whom the keeping of faith is an unknown thing--which
+pushed to the front while my consciousness was asleep--together with the
+criminal will of that self, and its inability to calculate the results
+of an action? Tell me, what do you think of it?
+
+MR. X. [As if he had to force the words out of himself] Frankly
+speaking, your story does not convince me--there are gaps in it, but
+these may depend on your failure to recall all the details--and I
+have read something about criminal suggestion--or I think I have, at
+least--hm! But all that is neither here nor there! You have taken your
+medicine--and you have had the courage to acknowledge your fault. Now we
+won't talk of it any more.
+
+MR. Y. Yes, yes, yes, we must talk of it--till I become sure of my
+innocence.
+
+MR. X. Well, are you not?
+
+MR. Y. No, I am not!
+
+MR. X. That's just what bothers me, I tell you. It's exactly what is
+bothering me!--Don't you feel fairly sure that every human being hides
+a skeleton in his closet? Have we not, all of us, stolen and lied as
+children? Undoubtedly! Well, now there are persons who remain children
+all their lives, so that they cannot control their unlawful desires.
+Then comes the opportunity, and there you have your criminal.--But I
+cannot understand why you don't feel innocent. If the child is not held
+responsible, why should the criminal be regarded differently? It is
+the more strange because--well, perhaps I may come to repent it later.
+[Pause] I, for my part, have killed a man, and I have never suffered any
+qualms on account of it.
+
+MR. Y. [Very much interested] Have--you?
+
+MR. X. Yes, I, and none else! Perhaps you don't care to shake hands with
+a murderer?
+
+MR. Y. [Pleasantly] Oh, what nonsense!
+
+MR. X. Yes, but I have not been punished,
+
+MR. Y. [Growing more familiar and taking on a superior tone] So much the
+better for you!--How did you get out of it?
+
+MR. X. There was nobody to accuse me, no suspicions, no witnesses.
+This is the way it happened. One Christmas I was invited to hunt with
+a fellow-student a little way out of Upsala. He sent a besotted old
+coachman to meet me at the station, and this fellow went to sleep on the
+box, drove the horses into a fence, and upset the whole equipage in
+a ditch. I am not going to pretend that my life was in danger. It was
+sheer impatience which made me hit him across the neck with the edge of
+my hand--you know the way--just to wake him up--and the result was that
+he never woke up at all, but collapsed then and there.
+
+MR. Y. [Craftily] And did you report it?
+
+MR. X. No, and these were my reasons for not doing so. The man left
+no family behind him, or anybody else to whom his life could be of
+the slightest use. He had already outlived his allotted period of
+vegetation, and his place might just as well be filled by somebody more
+in need of it. On the other hand, my life was necessary to the happiness
+of my parents and myself, and perhaps also to the progress of my
+science. The outcome had once for all cured me of any desire to wake up
+people in that manner, and I didn't care to spoil both my own life and
+that of my parents for the sake of an abstract principle of justice.
+
+MR. Y. Oh, that's the way you measure the value of a human life?
+
+MR. X. In the present case, yes.
+
+MR. Y. But the sense of guilt--that balance you were speaking of?
+
+MR. X. I had no sense of guilt, as I had committed no crime. As a boy I
+had given and taken more than one blow of the same kind, and the fatal
+outcome in this particular case was simply caused by my ignorance of the
+effect such a blow might have on an elderly person.
+
+MR. Y. Yes, but even the unintentional killing of a man is punished
+with a two-year term at hard labour--which is exactly what one gets
+for--writing names.
+
+MR. X. Oh, you may be sure I have thought of it. And more than one night
+I have dreamt myself in prison. Tell me now--is it really as bad as they
+say to find oneself behind bolt and bar?
+
+MR. Y. You bet it is!--First of all they disfigure you by cutting off
+your hair, and if you don't look like a criminal before, you are sure
+to do so afterward. And when you catch sight of yourself in a mirror you
+feel quite sure that you are a regular bandit.
+
+MR. X. Isn't it a mask that is being torn off, perhaps? Which wouldn't
+be a bad idea, I should say.
+
+MR. Y. Yes, you can have your little jest about it!--And then they cut
+down your food, so that every day and every hour you become conscious of
+the border line between life and death. Every vital function is more or
+less checked. You can feel yourself shrinking. And your soul, which was
+to be cured and improved, is instead put on a starvation diet--pushed
+back a thousand years into outlived ages. You are not permitted to
+read anything but what was written for the savages who took part in the
+migration of the peoples. You hear of nothing but what will never happen
+in heaven; and what actually does happen on the earth is kept hidden
+from you. You are torn out of your surroundings, reduced from your own
+class, put beneath those who are really beneath yourself. Then you get
+a sense of living in the bronze age. You come to feel as if you were
+dressed in skins, as if you were living in a cave and eating out of a
+trough--ugh!
+
+MR. X. But there is reason back of all that. One who acts as if he
+belonged to the bronze age might surely be expected to don the proper
+costume.
+
+MR. Y. [Irately] Yes, you sneer! You who have behaved like a man from
+the stone age--and who are permitted to live in the golden age.
+
+MR. X. [Sharply, watching him closely] What do you mean with that last
+expression--the golden age?
+
+MR. Y. [With a poorly suppressed snarl] Nothing at all.
+
+MR. X. Now you lie--because you are too much of a coward to say all you
+think.
+
+MR. Y. Am I a coward? You think so? But I was no coward when I dared to
+show myself around here, where I had had to suffer as I did.--But can
+you tell what makes one suffer most while in there?--It is that the
+others are not in there too!
+
+MR. X. What others?
+
+MR. Y. Those that go unpunished.
+
+MR. X. Are you thinking of me?
+
+MR. Y. I am.
+
+MR. X. But I have committed no crime.
+
+MR. Y. Oh, haven't you?
+
+MR. X. No, a misfortune is no crime.
+
+MR. Y. So, it's a misfortune to commit murder?
+
+MR. X. I have not committed murder.
+
+MR. Y. Is it not murder to kill a person?
+
+MR. X. Not always. The law speaks of murder, manslaughter, killing
+in self-defence--and it makes a distinction between intentional and
+unintentional killing. However--now you really frighten me, for it's
+becoming plain to me that you belong to the most dangerous of all human
+groups--that of the stupid.
+
+MR. Y. So you imagine that I am stupid? Well, listen--would you like me
+to show you how clever I am?
+
+MR. X. Come on!
+
+MR. Y. I think you'll have to admit that there is both logic and
+wisdom in the argument I'm now going to give you. You have suffered a
+misfortune which might have brought you two years at hard labor. You
+have completely escaped the disgrace of being punished. And here you see
+before you a man--who has also suffered a misfortune--the victim of an
+unconscious impulse--and who has had to stand two years of hard labor
+for it. Only by some great scientific achievement can this man wipe
+off the taint that has become attached to him without any fault of
+his own--but in order to arrive at some such achievement, he must have
+money--a lot of money--and money this minute! Don't you think that the
+other one, the unpunished one, would bring a little better balance into
+these unequal human conditions if he paid a penalty in the form of a
+fine? Don't you think so?
+
+MR. X. [Calmly] Yes.
+
+MR. Y. Then we understand each other.--Hm! [Pause] What do you think
+would be reasonable?
+
+MR. X. Reasonable? The minimum fine in such a case is fixed by the law
+at fifty crowns. But this whole question is settled by the fact that the
+dead man left no relatives.
+
+MR. Y. Apparently you don't want to understand. Then I'll have to speak
+plainly: it is to me you must pay that fine.
+
+MR. X. I have never heard that forgers have the right to collect fines
+imposed for manslaughter. And, besides, there is no prosecutor.
+
+MR. Y. There isn't? Well--how would I do?
+
+MR. X. Oh, NOW we are getting the matter cleared up! How much do you
+want for becoming my accomplice?
+
+MR. Y. Six thousand crowns.
+
+MR. X. That's too much. And where am I to get them?
+
+(MR. Y. points to the box.)
+
+MR. X. No, I don't want to do that. I don't want to become a thief.
+
+MR. Y. Oh, don't put on any airs now! Do you think I'll believe that you
+haven't helped yourself out of that box before?
+
+MR. X. [As if speaking to himself] Think only, that I could let myself
+be fooled so completely. But that's the way with these soft natures.
+You like them, and then it's so easy to believe that they like you. And
+that's the reason why I have always been on my guard against people I
+take a liking to!--So you are firmly convinced that I have helped myself
+out of the box before?
+
+MR. Y. Certainly! MR. X. And you are going to report me if you don't get
+six thousand crowns?
+
+MR. Y. Most decidedly! You can't get out of it, so there's no use
+trying.
+
+MR. X. You think I am going to give my father a thief for son, my wife
+a thief for husband, my children a thief for father, my fellow-workers a
+thief for colleague? No, that will never happen!--Now I am going over to
+the sheriff to report the killing myself.
+
+MR. Y. [Jumps up and begins to pick up his things] Wait a moment!
+
+MR. X. For what?
+
+MR. Y. [Stammering] Oh, I thought--as I am no longer needed--it wouldn't
+be necessary for me to stay--and I might just as well leave.
+
+MR. X. No, you may not!--Sit down there at the table, where you sat
+before, and we'll have another talk before you go.
+
+MR. Y. [Sits down after having put on a dark coat] What are you up to
+now?
+
+MR. X. [Looking into the mirror back of MR. Y.] Oh, now I have it!
+Oh-h-h!
+
+MR. Y. [Alarmed] What kind of wonderful things are you discovering now?
+
+MR. X. I see in the mirror that you are a thief--a plain, ordinary
+thief! A moment ago, while you had only the white shirt on, I could
+notice that there was something wrong about my book-shelf. I couldn't
+make out just what it was, for I had to listen to you and watch you. But
+as my antipathy increased, my vision became more acute. And now, with
+your black coat to furnish the needed color contrast For the red back
+of the book, which before couldn't be seen against the red of your
+suspenders--now I see that you have been reading about forgeries in
+Bernheim's work on mental suggestion--for you turned the book upsidedown
+in putting it back. So even that story of yours was stolen! For this
+reason I think myself entitled to conclude that your crime must have
+been prompted by need, or by mere love of pleasure.
+
+MR. Y. By need! If you only knew--
+
+MR. X. If YOU only knew the extent of the need I have had to face and
+live through! But that's another story! Let's proceed with your case.
+That you have been in prison--I take that for granted. But it happened
+in America, for it was American prison life you described. Another thing
+may also be taken for granted, namely, that you have not borne your
+punishment on this side.
+
+MR. Y. How can you imagine anything of the kind?
+
+MR. X. Wait until the sheriff gets here, and you'll learn all about it.
+
+(MR. Y. gets up.)
+
+MR. X. There you see! The first time I mentioned the sheriff, in
+connection with the storm, you wanted also to run away. And when a
+person has served out his time he doesn't care to visit an old mill
+every day just to look at a prison, or to stand by the window--in a
+word, you are at once punished and unpunished. And that's why it was so
+hard to make you out. [Pause.]
+
+MR. Y. [Completely beaten] May I go now?
+
+MR. X. Now you can go.
+
+MR. Y. [Putting his things together] Are you angry at me?
+
+MR. X. Yes--would you prefer me to pity you?
+
+MR. Y. [Sulkily] Pity? Do you think you're any better than I?
+
+MR. X. Of course I do, as I AM better than you. I am wiser, and I am
+less of a menace to prevailing property rights.
+
+MR. Y. You think you are clever, but perhaps I am as clever as you. For
+the moment you have me checked, but in the next move I can mate you--all
+the same!
+
+MR. X. [Looking hard at MR. Y.] So we have to have another bout! What
+kind of mischief are you up to now?
+
+MR. Y. That's my secret.
+
+MR. X. Just look at me--oh, you mean to write my wife an anonymous
+letter giving away MY secret!
+
+MR. Y. Well, how are you going to prevent it? You don't dare to have me
+arrested. So you'll have to let me go. And when I am gone, I can do what
+I please.
+
+MR. X. You devil! So you have found my vulnerable spot! Do you want to
+make a real murderer out of me?
+
+MR. Y. That's more than you'll ever become--coward!
+
+MR. X. There you see how different people are. You have a feeling that I
+cannot become guilty of the same kind of acts as you. And that gives you
+the upper hand. But suppose you forced me to treat you as I treated that
+coachman?
+
+[He lifts his hand as if ready to hit MR. Y.]
+
+MR. Y. [Staring MR. X. straight in the face] You can't! It's too much
+for one who couldn't save himself by means of the box over there.
+
+MR. X. So you don't think I have taken anything out of the box?
+
+MR. Y. You were too cowardly--just as you were too cowardly to tell your
+wife that she had married a murderer.
+
+MR. X. You are a different man from what I took you to be--if stronger
+or weaker, I cannot tell--if more criminal or less, that's none of my
+concern--but decidedly more stupid; that much is quite plain. For stupid
+you were when you wrote another person's name instead of begging--as
+I have had to do. Stupid you were when you stole things out of my
+book--could you not guess that I might have read my own books? Stupid
+you were when you thought yourself cleverer than me, and when you
+thought that I could be lured into becoming a thief. Stupid you were
+when you thought balance could be restored by giving the world two
+thieves instead of one. But most stupid of all you were when you thought
+I had failed to provide a safe corner-stone for my happiness. Go ahead
+and write my wife as many anonymous letters as you please about
+her husband having killed a man--she knew that long before we were
+married!--Have you had enough now?
+
+MR. Y. May I go?
+
+MR. X. Now you HAVE to go! And at once! I'll send your things after
+you!--Get out of here!
+
+(Curtain.)`,
+  },
+  {
+    id: 'playboy-story',
+    authorGroup: 'Synge',
+    title: 'The Story He Tells',
+    play: 'The Playboy of the Western World',
+    author: 'J. M. Synge',
+    location: 'Act I: an uninterrupted exchange, not the full act',
+    characters: ['Pegeen Mike', 'Christy Mahon'],
+    source: 'Project Gutenberg eBook #1240',
+    verified: '2026-09-17',
+    rightsNote: 'Public domain in the United States. Text taken verbatim from the Project Gutenberg plain-text edition and verified against it line for line. Readers elsewhere should check the copyright law where they live.',
+    cutNote: 'The cut opens as Pegeen hustles Shawn out and bolts the door, and ends on the knocking, the moment before the Widow Quin calls from outside.',
+    context: 'Christy has arrived with a story: he says he killed his father. Pegeen, unimpressed by every man she knows, draws the story out of him, and the telling begins to make him the man in it.',
+    contentNote: 'The scene turns on a claimed killing, spoken of admiringly.',
+    text: `PEGEEN.
+Go on, I’m saying, and don’t be waking this place with your noise.
+(_She hustles him out and bolts the door._) That lad would wear the
+spirits from the saints of peace. (_Bustles about, then takes off her
+apron and pins it up in the window as a blind. Christy watching her
+timidly. Then she comes to him and speaks with bland good-humour._) Let
+you stretch out now by the fire, young fellow. You should be destroyed
+travelling.
+
+CHRISTY.
+_shyly again, drawing off his boots._—I’m tired, surely, walking wild
+eleven days, and waking fearful in the night. [_He holds up one of his
+feet, feeling his blisters, and looking at them with compassion._]
+
+PEGEEN.
+_standing beside him, watching him with delight._—You should have had
+great people in your family, I’m thinking, with the little, small feet
+you have, and you with a kind of a quality name, the like of what you’d
+find on the great powers and potentates of France and Spain.
+
+CHRISTY.
+_with pride._—We were great surely, with wide and windy acres of rich
+Munster land.
+
+PEGEEN.
+Wasn’t I telling you, and you a fine, handsome young fellow with a
+noble brow?
+
+CHRISTY.
+_with a flash of delighted surprise._—Is it me?
+
+PEGEEN.
+Aye. Did you never hear that from the young girls where you come from
+in the west or south?
+
+CHRISTY.
+_with venom._—I did not then. Oh, they’re bloody liars in the naked
+parish where I grew a man.
+
+PEGEEN.
+If they are itself, you’ve heard it these days, I’m thinking, and you
+walking the world telling out your story to young girls or old.
+
+CHRISTY.
+I’ve told my story no place till this night, Pegeen Mike, and it’s
+foolish I was here, maybe, to be talking free, but you’re decent
+people, I’m thinking, and yourself a kindly woman, the way I wasn’t
+fearing you at all.
+
+PEGEEN.
+_filling a sack with straw._—You’ve said the like of that, maybe, in
+every cot and cabin where you’ve met a young girl on your way.
+
+CHRISTY.
+_going over to her, gradually raising his voice._—I’ve said it nowhere
+till this night, I’m telling you, for I’ve seen none the like of you
+the eleven long days I am walking the world, looking over a low ditch
+or a high ditch on my north or my south, into stony scattered fields,
+or scribes of bog, where you’d see young, limber girls, and fine
+prancing women making laughter with the men.
+
+PEGEEN.
+If you weren’t destroyed travelling, you’d have as much talk and
+streeleen, I’m thinking, as Owen Roe O’Sullivan or the poets of the
+Dingle Bay, and I’ve heard all times it’s the poets are your like, fine
+fiery fellows with great rages when their temper’s roused.
+
+CHRISTY.
+_drawing a little nearer to her._—You’ve a power of rings, God bless
+you, and would there be any offence if I was asking are you single now?
+
+PEGEEN.
+What would I want wedding so young?
+
+CHRISTY.
+_with relief._—We’re alike, so.
+
+PEGEEN.
+_she puts sack on settle and beats it up._—I never killed my father.
+I’d be afeard to do that, except I was the like of yourself with blind
+rages tearing me within, for I’m thinking you should have had great
+tussling when the end was come.
+
+CHRISTY.
+_expanding with delight at the first confidential talk he has ever had
+with a woman._—We had not then. It was a hard woman was come over the
+hill, and if he was always a crusty kind when he’d a hard woman setting
+him on, not the divil himself or his four fathers could put up with him
+at all.
+
+PEGEEN.
+_with curiosity._—And isn’t it a great wonder that one wasn’t fearing
+you?
+
+CHRISTY.
+_very confidentially._—Up to the day I killed my father, there wasn’t a
+person in Ireland knew the kind I was, and I there drinking, waking,
+eating, sleeping, a quiet, simple poor fellow with no man giving me
+heed.
+
+PEGEEN.
+_getting a quilt out of the cupboard and putting it on the sack._—It
+was the girls were giving you heed maybe, and I’m thinking it’s most
+conceit you’d have to be gaming with their like.
+
+CHRISTY.
+_shaking his head, with simplicity._—Not the girls itself, and I won’t
+tell you a lie. There wasn’t anyone heeding me in that place saving
+only the dumb beasts of the field. [_He sits down at fire._]
+
+PEGEEN.
+_with disappointment._—And I thinking you should have been living the
+like of a king of Norway or the Eastern world. [_She comes and sits
+beside him after placing bread and mug of milk on the table._]
+
+CHRISTY.
+_laughing piteously._—The like of a king, is it? And I after toiling,
+moiling, digging, dodging from the dawn till dusk with never a sight of
+joy or sport saving only when I’d be abroad in the dark night poaching
+rabbits on hills, for I was a divil to poach, God forgive me, (_very
+naïvely_) and I near got six months for going with a dung fork and
+stabbing a fish.
+
+PEGEEN.
+And it’s that you’d call sport, is it, to be abroad in the darkness
+with yourself alone?
+
+CHRISTY.
+I did, God help me, and there I’d be as happy as the sunshine of St.
+Martin’s Day, watching the light passing the north or the patches of
+fog, till I’d hear a rabbit starting to screech and I’d go running in
+the furze. Then when I’d my full share I’d come walking down where
+you’d see the ducks and geese stretched sleeping on the highway of the
+road, and before I’d pass the dunghill, I’d hear himself snoring out, a
+loud lonesome snore he’d be making all times, the while he was
+sleeping, and he a man ’d be raging all times, the while he was waking,
+like a gaudy officer you’d hear cursing and damning and swearing oaths.
+
+PEGEEN.
+Providence and Mercy, spare us all!
+
+CHRISTY.
+It’s that you’d say surely if you seen him and he after drinking for
+weeks, rising up in the red dawn, or before it maybe, and going out
+into the yard as naked as an ash tree in the moon of May, and shying
+clods against the visage of the stars till he’d put the fear of death
+into the banbhs and the screeching sows.
+
+PEGEEN.
+I’d be well-nigh afeard of that lad myself, I’m thinking. And there was
+no one in it but the two of you alone?
+
+CHRISTY.
+The divil a one, though he’d sons and daughters walking all great
+states and territories of the world, and not a one of them, to this
+day, but would say their seven curses on him, and they rousing up to
+let a cough or sneeze, maybe, in the deadness of the night.
+
+PEGEEN.
+_nodding her head._—Well, you should have been a queer lot. I never
+cursed my father the like of that, though I’m twenty and more years of
+age.
+
+CHRISTY.
+Then you’d have cursed mine, I’m telling you, and he a man never gave
+peace to any, saving when he’d get two months or three, or be locked in
+the asylums for battering peelers or assaulting men (_with depression_)
+the way it was a bitter life he led me till I did up a Tuesday and
+halve his skull.
+
+PEGEEN.
+_putting her hand on his shoulder._—Well, you’ll have peace in this
+place, Christy Mahon, and none to trouble you, and it’s near time a
+fine lad like you should have your good share of the earth.
+
+CHRISTY.
+It’s time surely, and I a seemly fellow with great strength in me and
+bravery of.... [_Someone knocks._]
+
+CHRISTY.
+_clinging to Pegeen._—Oh, glory! it’s late for knocking, and this last
+while I’m in terror of the peelers, and the walking dead. [_Knocking
+again._]`,
+  },
+  {
+    id: 'trifles-discovery',
+    authorGroup: 'Glaspell',
+    title: 'The Discovery',
+    play: 'Trifles',
+    author: 'Susan Glaspell',
+    location: 'One act: a private exchange, not the full play',
+    characters: ['Mrs. Hale', 'Mrs. Peters'],
+    speakerLabels: ['MRS. HALE', 'MRS. PETERS'],
+    source: 'Project Gutenberg eBook #59432',
+    verified: '2026-09-17',
+    rightsNote: 'Public domain in the United States. Text taken verbatim from the Project Gutenberg plain-text edition and verified against it line for line. Readers elsewhere should check the copyright law where they live.',
+    cutNote: 'The cut opens as the men go out to the barn and ends on the discovery of the bird, before the men return.',
+    context: 'Two women wait in a farmhouse kitchen while their husbands search the property for evidence against the absent Mrs. Wright. The evidence is in the kitchen, in the things the men call trifles.',
+    contentNote: 'The scene turns on an implied killing and a strangled songbird.',
+    text: `MRS. HALE
+
+[_Resentfully._] I don’t know as there’s anything so strange, our
+takin’ up our time with little things while we’re waiting for them to
+get the evidence. [_She sits down at the big table smoothing out a
+block with decision._] I don’t see as it’s anything to laugh about.
+
+MRS. PETERS
+
+[_Apologetically._] Of course they’ve got awful important things on
+their minds.
+
+  [_Pulls up a chair and joins MRS. HALE at the table._
+
+MRS. HALE
+
+[_Examining another block._] Mrs. Peters, look at this one. Here, this
+is the one she was working on, and look at the sewing! All the rest
+of it has been so nice and even. And look at this! It’s all over the
+place! Why, it looks as if she didn’t know what she was about!
+
+  [_After she has said this they look at each other, then start to
+    glance back at the door. After an instant MRS. HALE has pulled at a
+    knot and ripped the sewing._
+
+MRS. PETERS
+
+Oh, what are you doing, Mrs. Hale?
+
+MRS. HALE
+
+[_Mildly._] Just pulling out a stitch or two that’s not sewed very
+good. [_Threading a needle._] Bad sewing always made me fidgety.
+
+MRS. PETERS
+
+[_Nervously._] I don’t think we ought to touch things.
+
+MRS. HALE
+
+I’ll just finish up this end. [_Suddenly stopping and leaning
+forward._] Mrs. Peters?
+
+MRS. PETERS
+
+Yes, Mrs. Hale?
+
+MRS. HALE
+
+What do you suppose she was so nervous about?
+
+MRS. PETERS
+
+Oh--I don’t know. I don’t know as she was nervous. I sometimes sew
+awful queer when I’m just tired. [_MRS. HALE starts to say something,
+looks at MRS. PETERS, then goes on sewing._] Well I must get these
+things wrapped up. They may be through sooner than we think. [_Putting
+apron and other things together._] I wonder where I can find a piece of
+paper, and string.
+
+MRS. HALE
+
+In that cupboard, maybe.
+
+MRS. PETERS
+
+[_Looking in cupboard._] Why, here’s a bird-cage. [_Holds it up._] Did
+she have a bird, Mrs. Hale?
+
+MRS. HALE
+
+Why, I don’t know whether she did or not--I’ve not been here for so
+long. There was a man around last year selling canaries cheap, but I
+don’t know as she took one; maybe she did. She used to sing real pretty
+herself.
+
+MRS. PETERS
+
+[_Glancing around._] Seems funny to think of a bird here. But she must
+have had one, or why would she have a cage? I wonder what happened to
+it.
+
+MRS. HALE
+
+I s’pose maybe the cat got it.
+
+MRS. PETERS
+
+No, she didn’t have a cat. She’s got that feeling some people have
+about cats--being afraid of them. My cat got in her room and she was
+real upset and asked me to take it out.
+
+MRS. HALE
+
+My sister Bessie was like that. Queer, ain’t it?
+
+MRS. PETERS
+
+[_Examining the cage._] Why, look at this door. It’s broke. One hinge
+is pulled apart.
+
+MRS. HALE
+
+[_Looking too._] Looks as if someone must have been rough with it.
+
+MRS. PETERS
+
+Why, yes.
+
+  [_She brings the cage forward and puts it on the table._
+
+MRS. HALE
+
+I wish if they’re going to find any evidence they’d be about it. I
+don’t like this place.
+
+MRS. PETERS
+
+But I’m awful glad you came with me, Mrs. Hale. It would be lonesome
+for me sitting here alone.
+
+MRS. HALE
+
+It would, wouldn’t it? [_Dropping her sewing._] But I tell you what I
+do wish, Mrs. Peters. I wish I had come over sometimes when _she_ was
+here. I--[_Looking around the room_]--wish I had.
+
+MRS. PETERS
+
+But of course you were awful busy, Mrs. Hale--your house and your
+children.
+
+MRS. HALE
+
+I could’ve come. I stayed away because it weren’t cheerful--and that’s
+why I ought to have come. I--I’ve never liked this place. Maybe because
+it’s down in a hollow and you don’t see the road. I dunno what it is,
+but it’s a lonesome place and always was. I wish I had come over to see
+Minnie Foster sometimes. I can see now--
+
+  [_Shakes her head._
+
+MRS. PETERS
+
+Well, you mustn’t reproach yourself, Mrs. Hale. Somehow we just don’t
+see how it is with other folks until--something comes up.
+
+MRS. HALE
+
+Not having children makes less work--but it makes a quiet house, and
+Wright out to work all day, and no company when he did come in. Did you
+know John Wright, Mrs. Peters?
+
+MRS. PETERS
+
+Not to know him; I’ve seen him in town. They say he was a good man.
+
+MRS. HALE
+
+Yes--good; he didn’t drink, and kept his word as well as most, I
+guess, and paid his debts. But he was a hard man, Mrs. Peters. Just to
+pass the time of day with him--[_Shivers._] Like a raw wind that gets
+to the bone. [_Pauses, her eye falling on the cage._] I should think
+she would ’a wanted a bird. But what do you suppose went with it?
+
+MRS. PETERS
+
+I don’t know, unless it got sick and died.
+
+  [_She reaches over and swings the broken door, swings it again, both
+    women watch it._
+
+MRS. HALE
+
+You weren’t raised round here, were you? [_MRS. PETERS shakes her
+head._] You didn’t know--her?
+
+MRS. PETERS
+
+Not till they brought her yesterday.
+
+MRS. HALE
+
+She--come to think of it, she was kind of like a bird
+herself--real sweet and pretty, but kind of timid and--fluttery.
+How?--she--did--change. [_Silence; then as if struck by a happy thought
+and relieved to get back to every day things._] Tell you what, Mrs.
+Peters, why don’t you take the quilt in with you? It might take up her
+mind.
+
+MRS. PETERS
+
+Why, I think that’s a real nice idea, Mrs. Hale. There couldn’t
+possibly be any objection to it, could there? Now, just what would I
+take? I wonder if her patches are in here--and her things.
+
+  [_They look in the sewing basket._
+
+MRS. HALE
+
+Here’s some red. I expect this has got sewing things in it. [_Brings
+out a fancy box._] What a pretty box. Looks like something somebody
+would give you. Maybe her scissors are in here. [_Opens box. Suddenly
+puts her hand to her nose._] Why--[_MRS. PETERS bends nearer, then
+turns her face away._] There’s something wrapped up in this piece of
+silk.
+
+MRS. PETERS
+
+Why, this isn’t her scissors.
+
+MRS. HALE
+
+[_Lifting the silk._] Oh, Mrs. Peters--its--
+
+  [_MRS. PETERS bends closer._
+
+MRS. PETERS
+
+It’s the bird.
+
+MRS. HALE
+
+[_Jumping up._] But, Mrs. Peters--look at it! Its neck! Look at its
+neck! It’s all--other side _to_.
+
+MRS. PETERS
+
+Somebody--wrung--its--neck.`,
+  },
+  {
+    id: 'scandal-teazles',
+    authorGroup: 'Sheridan',
+    title: 'The Daily Jangle',
+    play: 'The School for Scandal',
+    author: 'Richard Brinsley Sheridan',
+    location: 'Act II, Scene I: the complete scene',
+    characters: ['Sir Peter Teazle', 'Lady Teazle'],
+    speakerLabels: ['SIR PETER', 'LADY TEAZLE'],
+    source: 'Project Gutenberg eBook #1929',
+    verified: '2026-09-17',
+    corrections: [['nave married', 'have married'], ['y ou', 'you'], ['naturally [naturedly]', 'naturedly'], ['Humour[,] but', 'Humour, but'], ['me[:] I am sure', 'me: I am sure'], ['forget[,] Lady Teazle', 'forget, Lady Teazle']],
+    rightsNote: 'Public domain in the United States. Text taken from the Project Gutenberg plain-text edition and verified against it line for line. Obvious mechanical printing errors in that edition are corrected; each correction is recorded in this record. Readers elsewhere should check the copyright law where they live.',
+    cutNote: 'The complete scene, ending on Sir Peter alone after Lady Teazle leaves.',
+    context: 'Six months married, the Teazles have their daily quarrel: his money, her fashion, and the question of why she married him at all. Both are enjoying it more than either will admit.',
+    contentNote: null,
+    text: `SCENE I.--SIR PETER and LADY TEAZLE
+
+SIR PETER. Lady Teazle--Lady Teazle I'll not bear it.
+
+LADY TEAZLE. Sir Peter--Sir Peter you--may scold or smile, according to
+your Humour, but I ought to have my own way in everything, and what's
+more I will too--what! tho' I was educated in the country I know very
+well that women of Fashion in London are accountable to nobody after
+they are married.
+
+SIR PETER. Very well! ma'am very well! so a husband is to have no
+influence, no authority?
+
+LADY TEAZLE. Authority! no, to be sure--if you wanted authority over me,
+you should have adopted me and not married me: I am sure you were old
+enough.
+
+SIR PETER. Old enough--aye there it is--well--well--Lady Teazle, tho'
+my life may be made unhappy by your Temper--I'll not be ruined by your
+extravagance--
+
+LADY TEAZLE. My extravagance! I'm sure I'm not more extravagant than a
+woman of Fashion ought to be.
+
+SIR PETER. No no Madam, you shall throw away no more sums on such
+unmeaning Luxury--'Slife to spend as much to furnish your Dressing Room
+with Flowers in winter as would suffice to turn the Pantheon into a
+Greenhouse, and give a Fete Champetre at Christmas.
+
+LADY TEAZLE. Lord! Sir Peter am I to blame because Flowers are dear in
+cold weather? You should find fault with the Climate, and not with me.
+For my Part I'm sure I wish it was spring all the year round--and that
+Roses grew under one's Feet!
+
+SIR PETER. Oons! Madam--if you had been born to those Fopperies I
+shouldn't wonder at your talking thus;--but you forget what your
+situation was when I married you--
+
+LADY TEAZLE. No, no, I don't--'twas a very disagreeable one or I should
+never have married you.
+
+SIR PETER. Yes, yes, madam, you were then in somewhat a humbler
+Style--the daughter of a plain country Squire. Recollect Lady Teazle
+when I saw you first--sitting at your tambour in a pretty figured linen
+gown--with a Bunch of Keys at your side, and your apartment hung round
+with Fruits in worsted, of your own working--
+
+LADY TEAZLE. O horrible!--horrible!--don't put me in mind of it!
+
+SIR PETER. Yes, yes Madam and your daily occupation to inspect
+the Dairy, superintend the Poultry, make extracts from the Family
+Receipt-book, and comb your aunt Deborah's Lap Dog.
+
+LADY TEAZLE. Abominable!
+
+SIR PETER. Yes Madam--and what were your evening amusements? to draw
+Patterns for Ruffles, which you hadn't the materials to make--play Pope
+Joan with the Curate--to read a sermon to your Aunt--or be stuck down to
+an old Spinet to strum your father to sleep after a Fox Chase.
+
+LADY TEAZLE. Scandalous--Sir Peter not a word of it true--
+
+SIR PETER. Yes, Madam--These were the recreations I took you from--and
+now--no one more extravagantly in the Fashion--Every Fopery adopted--a
+head-dress to o'er top Lady Pagoda with feathers pendant horizontal and
+perpendicular--you forget, Lady Teazle--when a little wired gauze with
+a few Beads made you a fly Cap not much bigger than a blew-bottle, and
+your Hair was comb'd smooth over a Roll--
+
+LADY TEAZLE. Shocking! horrible Roll!!
+
+SIR PETER. But now--you must have your coach--Vis-a-vis, and three
+powder'd Footmen before your Chair--and in the summer a pair of white
+cobs to draw you to Kensington Gardens--no recollection when you were
+content to ride double, behind the Butler, on a docked Coach-Horse?
+
+LADY TEAZLE. Horrid!--I swear I never did.
+
+SIR PETER. This, madam, was your situation--and what have I not done
+for you? I have made you woman of Fashion of Fortune of Rank--in short I
+have made you my wife.
+
+LADY TEAZLE. Well then and there is but one thing more you can make me
+to add to the obligation.
+
+SIR PETER. What's that pray?
+
+LADY TEAZLE. Your widow.--
+
+SIR PETER. Thank you Madam--but don't flatter yourself for though your
+ill-conduct may disturb my Peace it shall never break my Heart I promise
+you--however I am equally obliged to you for the Hint.
+
+LADY TEAZLE. Then why will you endeavour to make yourself so
+disagreeable to me--and thwart me in every little elegant expense.
+
+SIR PETER. 'Slife--Madam I pray, had you any of these elegant expenses
+when you married me?
+
+LADY TEAZLE. Lud Sir Peter would you have me be out of the Fashion?
+
+SIR PETER. The Fashion indeed!--what had you to do with the Fashion
+before you married me?
+
+LADY TEAZLE. For my Part--I should think you would like to have your
+wife thought a woman of Taste--
+
+SIR PETER. Aye there again--Taste! Zounds Madam you had no Taste when
+you married me--
+
+LADY TEAZLE. That's very true indeed Sir Peter! after having married you
+I should never pretend to Taste again I allow.
+
+SIR PETER. So--so then--Madam--if these are your Sentiments pray how
+came I to be honour'd with your Hand?
+
+LADY TEAZLE. Shall I tell you the Truth?
+
+SIR PETER. If it's not too great a Favour.
+
+LADY TEAZLE. Why the Fact is I was tired of all those agreeable
+Recreations which you have so good naturedly Described--and
+having a Spirit to spend and enjoy a Fortune--I determined to marry the
+first rich man that would have me.
+
+SIR PETER. A very honest confession--truly--but pray madam was there no
+one else you might have tried to ensnare but me.
+
+LADY TEAZLE. O lud--I drew my net at several but you were the only one I
+could catch.
+
+SIR PETER. This is plain dealing indeed--
+
+LADY TEAZLE. But now Sir Peter if we have finish'd our daily Jangle I
+presume I may go to my engagement at Lady Sneerwell's?
+
+SIR PETER. Aye--there's another Precious circumstance--a charming set of
+acquaintance--you have made there!
+
+LADY TEAZLE. Nay Sir Peter they are People of Rank and Fortune--and
+remarkably tenacious of reputation.
+
+SIR PETER. Yes egad they are tenacious of Reputation with a vengeance,
+for they don't chuse anybody should have a Character but themselves!
+Such a crew! Ah! many a wretch has rid on hurdles who has done less
+mischief than these utterers of forged Tales, coiners of Scandal, and
+clippers of Reputation.
+
+LADY TEAZLE. What would you restrain the freedom of speech?
+
+SIR PETER. Aye they have made you just as bad [as] any one of the
+Society.
+
+LADY TEAZLE. Why--I believe I do bear a Part with a tolerable Grace--But
+I vow I bear no malice against the People I abuse, when I say an
+ill-natured thing, 'tis out of pure Good Humour--and I take it for
+granted they deal exactly in the same manner with me, but Sir Peter you
+know you promised to come to Lady Sneerwell's too.
+
+SIR PETER. Well well I'll call in, just to look after my own character.
+
+LADY TEAZLE. Then, indeed, you must make Haste after me, or you'll be
+too late--so good bye to ye.
+
+SIR PETER. So--I have gain'd much by my intended expostulation--yet
+with what a charming air she contradicts every thing I say--and how
+pleasingly she shows her contempt of my authority--Well tho' I can't
+make her love me, there is certainly a great satisfaction in quarrelling
+with her; and I think she never appears to such advantage as when she is
+doing everything in her Power to plague me.
+
+     [Exit.]`,
+  },
+  {
+    id: 'tartuffe-dorine',
+    authorGroup: 'Molière',
+    title: 'You Will Be Tartuffed',
+    play: 'Tartuffe',
+    author: 'Molière, translated by Jeffrey D. Hoeper',
+    location: 'Act II, Scene III: the complete scene',
+    verse: true,
+    characters: ['Dorine', 'Mariane'],
+    speakerLabels: ['Dorine', 'Mariane'],
+    source: 'Project Gutenberg eBook #28488',
+    verified: '2026-09-17',
+    rightsNote: 'The translator, Jeffrey D. Hoeper, granted this translation to the public domain, as stated in the Project Gutenberg edition itself. Text taken verbatim and verified line for line. Readers elsewhere should check the copyright law where they live.',
+    cutNote: 'The complete scene, in rhymed couplets; it ends as Dorine catches sight of Valere approaching.',
+    context: 'Mariane’s father intends to marry her to Tartuffe. Her maid Dorine, armed only with questions and mockery, refuses to let her accept it quietly.',
+    contentNote: null,
+    text: `SCENE III
+Dorine, Mariane
+
+Dorine.  Have you entirely lost your voice and heart?
+        Why must I continue playing your part?
+        To think you allow such a mad proposal
+        Without voicing even a meek refusal!
+Mariane.  How can I resist such a harsh patriarch?
+Dorine.  By any means!  Don't be an easy mark!
+Mariane.  But how?
+Dorine.                Tell him you can't love on command,
+        That you marry for yourself, not by demand,
+        And since you are most concerned in these affairs
+        You'll choose for yourself the sire of his heirs,
+        And that, if Tartuffe is so charming to him,
+        He can wed him himself--if that's his whim.
+Mariane.  A father, I'm sure, has absolute power;
+        Before him I can only cringe and cower.
+Dorine.  Use your head.  Valere wants to tie the knot.
+        Do you really love him, I ask--or not?
+Mariane.  Your injustice to me has a mortal sting!
+        Dorine, how can you ask me such a thing?
+        Haven't I poured out my whole soul to you,
+        And don't you know yet that my love is true?
+Dorine.  How do I know that your heart echoes your voice
+        And that this love is truly your own choice?
+Mariane.  Your doubts, Dorine, wrong me greatly;
+        My real feelings are shown far too plainly.
+Dorine.  You love him then?
+Mariane.                           Yes, with the strongest passion.
+Dorine.  And he seems to love you in the same fashion?
+Mariane.  I think so.
+Dorine.                  And both of you burn equally
+        For this union in marriage?
+Mariane.                               Certainly.
+Dorine.  And about this other man, what's your intention?
+Mariane.  I'd die before I'd submit to coercion.
+Dorine.  Fine!  I hadn't thought of that recourse.
+        Death would give you such a forcible divorce.
+        What an ingenious remedy!  Geez!
+        I hate to hear such stupid ideas.
+Mariane.  Good Heavens!  What a rotten mood you're in!
+        You have no pity for my pain, Dorine!
+Dorine.  I have no sympathy for foolishness
+        And those who meet a crisis with such weakness.
+Mariane.  But what do you want me to do?  I was born frail.
+Dorine.  A woman in love needs a heart of steel.
+Mariane.  But haven't I kept it free for my lover
+        Whose task it is to win me from my father?
+Dorine.  What!  If your father is a mad fanatic
+        Whose love for Tartuffe is completely lunatic
+        And who has blocked the match you are now bewailing,
+        Is your lover to be damned for failing?
+Mariane.  But am I to display how deeply I'm bitten
+        By rejecting Tartuffe like one who's love-smitten?
+        Am I, because of Valere's strength and beauty,
+        To renounce my modesty and duty?
+        And would you have me show my heart to all . . . ?
+Dorine.  No, no, not at all.  I'm wrong to forestall
+        Your marriage to Tartuffe, and my defiance
+        Is apparent in barring that alliance.
+        What reason have I for my outrageous
+        Attempt to stop something so advantageous?
+        Tartuffe!  Oh!  Isn't he something to behold?
+        Surely Tartuffe is not made from such a mold,
+        If rightly viewed, as to make a person laugh;
+        'Twould be an honor to be his better half.
+        The whole world already crowns him with glory;--
+        Both in physique and character he's laudatory;
+        He has red ears and a florid, flushing face
+        With him for a mate you'd live in joyful grace.
+Mariane.  Dear God!
+Dorine.                   What delight you will feel within
+        To know that you're wed to a man like him.
+Mariane.  Oh!  Please stop talking, and show me the way
+        To avoid this marriage.  I will obey,
+        You've said enough, and I'm ready to be led.
+Dorine.  No.  A good daughter must obey her dad--
+        Even if he wishes her to make love
+        To an ape.  What are you complaining of?
+        You will proceed to his little villa
+        Where you will get your absolute fill of
+        Uncles and cousins to be entertained.
+        Right away you'll move among the most urbane
+        Of hicks.  First you will make some overture
+        To the wives of the judge and the tax assessor,
+        Who will kindly seat you on a folding chair.
+        During Carnival, you may hope to have there
+        A ball with two bagpipes for an orchestra
+        And maybe some puppets and a tame gorilla.
+        But if your husband . . .
+Mariane.                    Oh!  You're killing me.
+        Please help me avoid this catastrophe.
+Dorine.  I am your servant.
+Mariane.                         Oh!  Dorine, mercy . . .
+Dorine.  To punish you, I ought to leave things be.
+Mariane.  My dear girl!
+Dorine.                       No.
+Mariane.                           If I declared my love . . .
+Dorine.  No.  Tartuffe is your man; that's sure enough.
+Mariane.  You know that I've always trusted that you'd
+        Help me . . .
+Dorine.        No. I'm sure you will be tartuffed.
+Mariane.  All right!  Since my fate no longer moves you,
+        Henceforth you may leave me alone and blue;
+        From deep sorrow my heart will draw relief,
+        And I know an absolute cure for my grief.
+[She starts to leave.]
+Dorine.  Whoa! I'm not really angry. Come back,--do.
+        In spite of everything, I pity you.
+Mariane.  If I'm to be the one you crucify,
+        You'll see, Dorine, how quickly I shall die.
+Dorine.  Don't torture yourself.  We can easily
+        Block them. . . . But look!  I think that's Valere I see.`,
   },
 ];
 

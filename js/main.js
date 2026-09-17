@@ -5648,7 +5648,7 @@ function renderCredits() {
     <main class="guide">
       <h1>Sources &amp; Credits</h1>
       <h2 class="guide-heading">Texts</h2>
-      <p class="guide-text">Shakespeare’s sonnets and plays, and the included plays by Chekhov, Ibsen, Wilde, O’Neill, Pirandello, Shaw and Glaspell, are public-domain works; some translations are public domain <b>in the United States</b> specifically (noted on each collection: Fell &amp; West, Storer &amp; Livingston, Archer, Gosse, Sharp &amp; Marx Aveling). Provided scene texts are taken verbatim from the Project Gutenberg editions cited on each scene.</p>
+      <p class="guide-text">Shakespeare’s sonnets and plays, and the included plays by Chekhov, Ibsen, Wilde, O’Neill, Pirandello, Shaw, Glaspell, Strindberg, Synge, Sheridan and Molière, are public-domain works; some translations are public domain <b>in the United States</b> specifically (Fell &amp; West, Storer &amp; Livingston, Archer, Gosse, Sharp &amp; Marx Aveling, Björkman), and the Hoeper translation of Tartuffe was granted to the public domain by its translator. Provided scene texts come from Project Gutenberg editions, verified line for line; obvious mechanical printing errors in those editions are corrected, and every correction is recorded in the app’s data. Readers outside the United States should check the copyright law where they live.</p>
       <h2 class="guide-heading">Plain Meaning guides</h2>
       <p class="guide-text">The Plain Meaning summaries are <b>original Speechcraft educational content</b>, written for this app — faithful prose explanations, not translations or performances.</p>
       <h2 class="guide-heading">Audio</h2>
@@ -6583,7 +6583,7 @@ function renderScenesShelf() {
           }
           return out + (open ? '</div>' : '');
         })()}
-         <p class="pane-note">Public-domain texts, shown verbatim from their cited sources. Your own scenes work fully too — paste one in <button class="linkish" id="sc-shelf-custom" type="button">Custom Work</button>.</p>`
+         <p class="pane-note">Your own scenes work fully too — paste one in <button class="linkish" id="sc-shelf-custom" type="button">Custom Work</button>.</p>`
       : `<p class="pane-note">No scenes here yet — none have been written and cleared for use.
            Your own scenes work fully today:
            <button class="linkish" id="sc-shelf-mine" type="button">open one of yours</button>,
@@ -6620,19 +6620,54 @@ function renderProvidedScene(id) {
   const body = ls => sc.verse
     ? ls.map(l => emify(l.trim())).join('<br>')
     : emify(ls.join(' ').replace(/\s+/g, ' ').trim());
+  // Verse with inline speakers and no blank lines between turns (the
+  // Hoeper Tartuffe): turns split at lines that OPEN with a declared
+  // label. Lines are trimmed but never joined — the lines are the metre.
+  const verseTurns = ls => {
+    const out = [];
+    let cur = null, plain = [];
+    const flush = () => {
+      if (plain.length) { out.push(`<p class="sc-text">${plain.map(emify).join('<br>')}</p>`); plain = []; }
+      if (cur) {
+        out.push(`<p class="sc-turn"><span class="sc-speaker">${esc(cur.head)}</span> ${cur.lines.map(emify).join('<br>')}</p>`);
+        cur = null;
+      }
+    };
+    for (const raw of ls) {
+      const line = raw.trim();
+      if (!line) continue;
+      if (/^[\[(]/.test(line)) { flush(); out.push(`<p class="sc-direction">${emify(line)}</p>`); continue; }
+      const lab = sc.speakerLabels.find(n => line.startsWith(n + '.'));
+      if (lab) {
+        flush();
+        cur = { head: line.slice(0, lab.length + 1), lines: [] };
+        const rest = line.slice(lab.length + 1).trim();
+        if (rest) cur.lines.push(rest);
+      } else if (cur) cur.lines.push(line);
+      else plain.push(line);
+    }
+    flush();
+    return out.join('');
+  };
+
   const blockHtml = ls => {
+    if (sc.verse && sc.speakerLabels) return verseTurns(ls);
     const flat = ls.join(' ').replace(/\s+/g, ' ').trim();
     if (isSpeaker(ls[0])) {
       return `<p class="sc-turn"><span class="sc-speaker">${esc(ls[0].trim())}</span> ${body(ls.slice(1))}</p>`;
     }
-    // Mixed-case inline speakers ("Mrs. Alving. ..."), matched ONLY
-    // against the scene's own declared labels — plain sentences also
-    // start with a capitalized word and a period, so no guessing.
+    // Inline speakers ("Mrs. Alving. ...", "HIGGINS [aside] ...",
+    // "MR. X, ..."), matched ONLY against the scene's own declared
+    // labels — plain sentences also start with a capitalized word and
+    // a period, so no guessing. A block that IS a bare label (the
+    // Glaspell convention) becomes a speaker heading on its own.
     if (sc.speakerLabels) {
-      const lab = sc.speakerLabels.find(n => flat.startsWith(n + '.') || flat.startsWith(n + ' ('));
+      const lab = sc.speakerLabels.find(n => flat === n || flat.startsWith(n + '.')
+        || flat.startsWith(n + ',') || flat.startsWith(n + ' (') || flat.startsWith(n + ' ['));
       if (lab) {
-        const dot = flat[lab.length] === '.' ? 1 : 0;
-        return `<p class="sc-turn"><span class="sc-speaker">${esc(flat.slice(0, lab.length + dot))}</span>${emify(flat.slice(lab.length + dot))}</p>`;
+        if (flat === lab) return `<p class="sc-turn"><span class="sc-speaker">${esc(flat)}</span></p>`;
+        const punct = flat[lab.length] === '.' || flat[lab.length] === ',' ? 1 : 0;
+        return `<p class="sc-turn"><span class="sc-speaker">${esc(flat.slice(0, lab.length + punct))}</span>${emify(flat.slice(lab.length + punct))}</p>`;
       }
     }
     // Inline prefixes: "MRS HALE: ..." (one-act convention) and
@@ -6661,12 +6696,11 @@ function renderProvidedScene(id) {
        <p class="ws-sub">${esc(sc.play)} · ${esc(sc.author)} · ${esc(sc.location)}</p>
      </div>`,
     `<p class="pane-note">Characters: ${sc.characters.map(esc).join(', ')}. ${esc(sc.cutNote)}</p>
-     ${sc.context ? `<p class="pane-note">Context (Speechcraft, not part of the text): ${esc(sc.context)}</p>` : ''}
+     ${sc.context ? `<p class="pane-note">${esc(sc.context)}</p>` : ''}
      ${sc.contentNote ? `<p class="pane-note">Content note: ${esc(sc.contentNote)}</p>` : ''}
      <section class="sc-scene" aria-label="Scene text">
        ${blocks.map(blockHtml).join('')}
-     </section>
-     <p class="pane-note">${esc(sc.source)} · ${esc(sc.rightsNote)} Shown verbatim; reading layout only.</p>`);
+     </section>`);
 }
 
 // ── The Four Lists ────────────────────────────────────────────
