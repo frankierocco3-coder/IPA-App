@@ -1,0 +1,106 @@
+// Parses a PROVIDED scene (js/data/scenes.js) into the app's scene
+// shape — { characters, lines: [{ who, text }] } — so the scene-aware
+// tools (Flash Cards by role, cue work, scene games) can run on the
+// Scenes shelf, not only on strict NAME: Studio scripts.
+//
+// The format rules mirror renderProvidedScene (main.js): blank-line
+// blocks; own-line ALL-CAPS speakers ("JACK."); declared speakerLabels
+// matched inline ("Mrs. Alving. …", "HIGGINS [aside] …", "MR. X, …"),
+// as bare-label headings (the Glaspell convention), and per-line in
+// verse (the rhymed-couplet convention). If the two ever disagree, the
+// renderer is the authority on how a scene LOOKS; this parser only
+// decides who SPEAKS what.
+//
+// Cleaning: cue text is the spoken words only. Bracketed directions,
+// parenthesized italic directions and leading italic directions
+// ("_shyly again._—") are removed; italic EMPHASIS keeps its words
+// ("the _Morning Post_" keeps "Morning Post"). Narrative paragraphs
+// with no speaker (a Shaw stage paragraph, a scene heading) are not
+// attributed to anyone: a wrong cue is worse than a missing one.
+
+const OWN_LINE = /^[A-Z][A-Z .’']*\.$/;
+const HEAD_EXCLUDE = /^(SCENE|ACT)$/;
+
+const cleanText = s => s
+  .replace(/\[[^\]]*\]/g, ' ')            // bracketed directions
+  .replace(/\(_[^)]*_\)/g, ' ')           // parenthesized italic directions
+  .replace(/^\s*_[^_]*\._\s*(?:—|--)?/, ' ') // leading italic direction (ends with a period)
+  .replace(/_/g, '')                      // emphasis markers keep their words
+  .replace(/\s+/g, ' ')
+  .replace(/^[\s.—-]+/, '')
+  .trim();
+
+const cleanWho = h => h.replace(/[.,:]\s*$/, '').trim();
+
+export function parseProvidedScene(sc) {
+  if (!sc || !sc.text) return null;
+  const labels = sc.speakerLabels ?? null;
+  const turns = [];
+  let open = null;                         // heading-style speaker collecting blocks
+
+  const push = (who, raw) => {
+    const text = cleanText(raw);
+    if (text) turns.push({ who: cleanWho(who), text });
+  };
+  const closeOpen = () => {
+    if (open) { push(open.who, open.parts.join(' ')); open = null; }
+  };
+  const startTurn = (who, raw) => {
+    closeOpen();
+    if (cleanText(raw)) push(who, raw);
+    else open = { who, parts: [] };        // bare heading — body follows in later blocks
+  };
+
+  const matchLabel = flat => labels?.find(n => flat === n || flat.startsWith(n + '.')
+    || flat.startsWith(n + ',') || flat.startsWith(n + ' (') || flat.startsWith(n + ' ['));
+
+  for (const block of String(sc.text).split(/\n\s*\n/)) {
+    const ls = block.split('\n');
+    const flat = ls.join(' ').replace(/\s+/g, ' ').trim();
+    if (!flat) continue;
+
+    if (sc.verse && labels) {
+      // Verse with inline speakers: turns split at label-opening lines.
+      for (const raw of ls) {
+        const line = raw.trim();
+        if (!line) continue;
+        if (/^[\[(]/.test(line)) continue;                      // direction line
+        const lab = labels.find(n => line.startsWith(n + '.'));
+        if (lab) { closeOpen(); open = { who: lab, parts: [line.slice(lab.length + 1)] }; }
+        else if (open) open.parts.push(line);
+      }
+      continue;
+    }
+    if (OWN_LINE.test(ls[0].trim()) && !HEAD_EXCLUDE.test(ls[0].trim().slice(0, -1))) {
+      startTurn(ls[0].trim(), ls.slice(1).join(' '));
+      continue;
+    }
+    const lab = matchLabel(flat);
+    if (lab) {
+      if (flat === lab) { closeOpen(); open = { who: lab, parts: [] }; }
+      else {
+        const punct = flat[lab.length] === '.' || flat[lab.length] === ',' ? 1 : 0;
+        startTurn(flat.slice(0, lab.length + punct), flat.slice(lab.length + punct));
+      }
+      continue;
+    }
+    const m = flat.match(/^([A-Z][A-Z .’']{1,30}?):\s+(.*)$/s);
+    if (m) { startTurn(m[1], m[2]); continue; }
+    const md = flat.match(/^([A-Z][A-Z’']{1,28}?)\.\s+(.*)$/s);
+    if (md && !HEAD_EXCLUDE.test(md[1])) { startTurn(md[1], md[2]); continue; }
+    if (/^[\[(]/.test(flat)) {
+      // A block can open with a complete direction and continue into
+      // speech; the speech belongs to the open heading-speaker if any.
+      const sp = flat.match(/^(\[[^\]]*\])\s+(.+)$/s);
+      if (sp && open) open.parts.push(sp[2]);
+      continue;                                               // pure direction — keep `open`
+    }
+    if (open) open.parts.push(flat);                          // continuation of a heading turn
+    // else: narrative paragraph with no speaker — never attributed
+  }
+  closeOpen();
+
+  const characters = [...new Set(turns.map(t => t.who))];
+  if (characters.length < 2 || turns.length < 4) return null;
+  return { characters, lines: turns };
+}

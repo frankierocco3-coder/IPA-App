@@ -2,6 +2,7 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { DIALECT_INFO } from './data/dialects.js';
 import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
+import { parseProvidedScene } from './scene-parse.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack,
@@ -1451,7 +1452,12 @@ function workingText() {
   if (ref.source === 'script') {
     const p = scriptPieceById(ref.id);
     if (!p) return null;
-    workingTextCache = { source: 'script', id: p.id, title: p.title, body: p.body, scene: null };
+    // A provided scene carries real speaker structure: parse it so the
+    // scene-aware tools (Flash Cards by role, cue work, scene games)
+    // work on the Scenes shelf, not only on strict NAME: scripts.
+    const provided = ref.id.startsWith('scene:') ? providedSceneById(ref.id.slice(6)) : null;
+    workingTextCache = { source: 'script', id: p.id, title: p.title, body: p.body,
+      scene: provided ? parseProvidedScene(provided) : null };
     return workingTextCache;
   }
   if (ref.source === 'builtin') {

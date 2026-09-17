@@ -25,6 +25,8 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
          materialTypeFrom, coverageOf, coverageLine, createSaver, MAX_ANSWER_LEN,
          attachImportedDissection, dissectQuestions, DISSECT_SECTIONS } from '../js/dissect.js';
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
+import { PROVIDED_SCENES } from '../js/data/scenes.js';
+import { parseProvidedScene } from '../js/scene-parse.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
@@ -3477,6 +3479,25 @@ export async function run({ navDoc = document } = {}) {
     check('cockney: strict audio parity — Bob and Lizzie carry identical clip sets, 300+ each',
       bob.length >= 300 && JSON.stringify([...bob].sort()) === JSON.stringify([...lizzie].sort()),
       `bob=${bob.length} lizzie=${lizzie.length}`);
+  }
+
+  // ── 21b. Provided scenes parse for the scene-aware tools ─────
+  {
+    check('scenes: every provided scene parses into speakers and cue lines',
+      PROVIDED_SCENES.length >= 27
+      && PROVIDED_SCENES.every(sc => {
+        const p = parseProvidedScene(sc);
+        return p && p.characters.length >= 2 && p.lines.length >= 6
+          && p.lines.every(l => l.who && l.text && !/[\[\]_]/.test(l.text));
+      }));
+    check('scenes: the parser reads all four speaker conventions',
+      (() => {
+        const by = id => parseProvidedScene(PROVIDED_SCENES.find(s2 => s2.id === id));
+        return by('muchado-killclaudio')?.characters.join(',') === 'BENEDICK,BEATRICE'
+          && by('ghosts-alving-manders')?.characters.includes('Mrs. Alving')
+          && by('trifles-discovery')?.characters.join(',') === 'MRS. HALE,MRS. PETERS'
+          && by('tartuffe-dorine')?.characters.join(',') === 'Dorine,Mariane';
+      })());
   }
 
   // ── 22. Offline capability (PWA) ─────────────────────────────
