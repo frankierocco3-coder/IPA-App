@@ -3296,9 +3296,9 @@ function renderActingLesson(id) {
 }
 
 // ── Acting → Library ──────────────────────────────────────────
-const ACTING_COLLECTION_TONE = { principles: 'is-sage', scene: 'is-blue', rehearsal: 'is-lavender',
+const ACTING_COLLECTION_TONE = { principles: 'is-sage', scene: 'is-blue', listening: 'is-blue', rehearsal: 'is-lavender',
   character: 'is-terracotta', rhythm: 'is-gold', professional: 'is-sage' };
-const ACTING_COLLECTION_EMOJI = { principles: '🎯', scene: '🔍', rehearsal: '🎬',
+const ACTING_COLLECTION_EMOJI = { principles: '🎯', scene: '🔍', listening: '👂', rehearsal: '🎬',
   character: '🧍', rhythm: '🎼', professional: '💼' };
 
 function actingLibraryPane(el) {
@@ -3351,6 +3351,7 @@ function actingLibraryPane(el) {
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
       go: renderDissectTextbook },
     { ...colTile('principles'), group: G2 },
+    { ...colTile('listening'), group: G2 },
     { ...colTile('character'), group: G2 },
     { ...colTile('rehearsal'), group: G2 },
     { ...colTile('rhythm'), group: G2 },

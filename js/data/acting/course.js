@@ -380,7 +380,7 @@ export const ACTING_LESSONS = [
 
   { id: 'ac-newinfo', module: 'listening', order: 4,
     partnerWork: true,
-    title: 'Allowing New Information to Affect You',
+    title: 'Let the Information Affect You',
     requiredReviewer: 'acting-professional',
     objective: 'Let what you learn in the scene change what you do next.',
     orientation: 'Characters who learn nothing produce scenes that go nowhere.',
@@ -392,7 +392,7 @@ export const ACTING_LESSONS = [
 
   { id: 'ac-repetition', module: 'listening', order: 5,
     partnerWork: true,
-    title: 'Repetition Without Predetermining Delivery',
+    title: 'Repetition',
     requiredReviewer: 'acting-professional',
     objective: 'Repeat the work without freezing it.',
     orientation: 'Rehearsal repeats the situation, not the reading.',
@@ -404,7 +404,7 @@ export const ACTING_LESSONS = [
 
   { id: 'ac-playing', module: 'listening', order: 6,
     partnerWork: true,
-    title: 'Playing the Objective Instead of Displaying Emotion',
+    title: 'Play the Objective, Not the Emotion',
     requiredReviewer: 'acting-professional',
     objective: 'Pursue something, and let feeling arrive as a consequence.',
     orientation: 'Displayed emotion is a report. Pursuit is an event.',
@@ -438,7 +438,32 @@ export const ACTING_LESSONS = [
       { p: 'Two disciplines matter most: know what YOU want, and genuinely watch what THEY do. A scene in which both actors manage this rarely needs much else.' },
     ] },
 
-  { id: 'ac-rehearsal', module: 'performance', order: 3,
+
+  { id: 'ac-twohander', module: 'performance', order: 3,
+    partnerWork: true,
+    title: 'Working the Two-Hander',
+    requiredReviewer: 'acting-professional',
+    objective: 'Rehearse a two-person scene honestly when the other actor is not in the room.',
+    orientation: 'Most of your rehearsal life happens alone. The danger is not wasted time; it is learning habits a partner will have to break.',
+    reflection: 'Which of your current choices exist only because nobody was there to resist them?',
+    glossary: ['off-book'],
+    body: [
+      { p: 'A scene is built out of what two people do to each other, and most of your preparation happens with the other person absent. That is not a defect of the profession; it is the profession. The skill is knowing what alone-time is for, and what it quietly ruins when it is misused.' },
+      { p: 'What it ruins, when it goes wrong, is listening. Run a scene by yourself often enough and you will set melodies: a fixed reading for every line, timed against cues you deliver to yourself in your head. A partner then becomes an interruption to a performance you have already given. Actors call this being married to a reading, and it is built, line by line, in solitary rehearsal.' },
+      { h: 'What alone-time is for' },
+      { list: [
+        'The whole of Text Investigation: facts, relationships, the objective, the beats. Evidence work needs no partner.',
+        'Getting off book, including the other role: know their lines nearly as well as yours, because their thought, not their last three words, is your cue.',
+        'Choosing what you are DOING in each beat, in playable verbs. What you do can be decided alone; how it will sound cannot.',
+        'Reading the other part aloud once, plainly, to learn what it is doing to you. Their speeches are the circumstances of yours.',
+      ] },
+      { p: 'Give the absent partner a body. A chair, a mark on the wall, an object at eye height: something specific to speak to, at a real distance, so your eyes and voice learn to land on a person instead of drifting into the middle distance. The Using the Fourth Wall chapter builds the same muscle for the audience side of the room.' },
+      { p: 'Protect yourself from your own readings. When you speak the text aloud alone, vary the pursuit on purpose: run a speech as three different actions, raise the stakes, change the urgency. The point is not to find the best version; it is to keep any version from hardening. The Action Swap and Same Line Three Ways exercises in Practice are built for exactly this, and every scene on the Scenes shelf works in them.' },
+      { h: 'When the partner arrives' },
+      { p: 'Everything you decided alone is a hypothesis. The first pass together is for listening, not for showing your homework: expect real contact to kill half of your prepared choices, and let it. The preparation was not wasted; it is what lets you notice what the other actor is actually doing, instead of clinging to what you expected.' },
+    ] },
+
+  { id: 'ac-rehearsal', module: 'performance', order: 4,
     title: 'Rehearsal Preparation',
     requiredReviewer: 'acting-professional',
     objective: 'Arrive with the work that can only be done alone already done.',
@@ -450,8 +475,8 @@ export const ACTING_LESSONS = [
       { p: 'The Actor’s Studio holds Rehearsal Notes alongside your scene study, so the questions and the work live with the text.' },
     ] },
 
-  { id: 'ac-integrating', module: 'performance', order: 4,
-    title: 'Integrating Voice, Thought, Listening and Movement',
+  { id: 'ac-integrating', module: 'performance', order: 5,
+    title: 'Putting It Together',
     requiredReviewer: 'acting-professional',
     sharedNote: 'The general integration principle is taught in the Speech chapter “Voice, Thought, Listening, Movement & Response”. This lesson applies it to scene work.',
     sharedFrom: { workspace: 'speech', id: 'sp-w-integration', label: 'Voice, Thought, Listening, Movement & Response (Speech)' },
@@ -463,7 +488,7 @@ export const ACTING_LESSONS = [
       { p: 'Use the collapse diagnostically. If clarity vanishes under pressure, that is articulation practice, not an acting problem. If the objective vanishes, that is scene work. The Speech workspace holds the general training for each element.' },
     ] },
 
-  { id: 'ac-applying', module: 'performance', order: 5,
+  { id: 'ac-applying', module: 'performance', order: 6,
     partnerWork: true,
     title: 'Applying Technique in a Scene',
     requiredReviewer: 'acting-professional',
@@ -477,7 +502,7 @@ export const ACTING_LESSONS = [
       { p: 'When something wobbles, note it and finish the scene with your attention where it belongs. The wobble is tomorrow’s practice, not tonight’s emergency.' },
     ] },
 
-  { id: 'ac-fourthwall', module: 'performance', order: 6,
+  { id: 'ac-fourthwall', module: 'performance', order: 7,
     title: 'Using the Fourth Wall',
     requiredReviewer: 'acting-professional',
     objective: 'Treat the open side of the stage as part of the character’s world, with real places to look and real distances to focus.',
@@ -510,7 +535,7 @@ export const ACTING_LESSONS = [
       { p: 'None of this seals you off from the house. The audience still gets your voice, your face and most of your body precisely because the missing wall is missing. The convention is a trade: the theatre removes a wall so they can see in, and you rebuild it in imagination so there is something worth seeing.' },
     ] },
 
-  { id: 'ac-performance', module: 'performance', order: 7,
+  { id: 'ac-performance', module: 'performance', order: 8,
     title: 'Taking the Work Into Performance',
     requiredReviewer: 'acting-professional',
     objective: 'Carry preparation into the room without carrying a fixed performance.',
@@ -817,7 +842,12 @@ export const ACTING_COLLECTIONS = [
   // and the pathway must not disagree about what comes first.
   { id: 'principles', icon: '🎯', title: 'Acting Principles',
     lessons: ['ac-offbook', 'ac-behavior', 'ac-circumstances', 'ac-objective',
-              'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-attention', 'ac-receiving'] },
+              'ac-obstacle', 'ac-stakes', 'ac-urgency'] },
+  // Module 3 gets its own shelf (owner order, 2026-09-17): every
+  // collection now mirrors one Learn module.
+  { id: 'listening', icon: '👂', title: 'Listening & Responding',
+    lessons: ['ac-attention', 'ac-receiving', 'ac-moment', 'ac-newinfo',
+              'ac-repetition', 'ac-playing'] },
   { id: 'scene', icon: '🔍', title: 'Text Investigation',
     lessons: ['ac-fourlists', 'ac-question', 'ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
               'ac-objective-text', 'ac-beats', 'ac-subtext'] },
@@ -825,7 +855,7 @@ export const ACTING_COLLECTIONS = [
   // module (Preparing the Performance) — the shelf and the path must
   // not disagree about what these chapters are (owner fix, 2026-09-16).
   { id: 'rehearsal', icon: '🎬', title: 'Actions & Rehearsal',
-    lessons: ['ac-actions', 'ac-monologue', 'ac-scene', 'ac-moment', 'ac-newinfo', 'ac-repetition', 'ac-playing',
+    lessons: ['ac-actions', 'ac-monologue', 'ac-scene', 'ac-twohander',
               'ac-rehearsal', 'ac-integrating', 'ac-applying', 'ac-fourthwall',
               'ac-performance'] },
   { id: 'character', icon: '🧍', title: 'Building a Character',

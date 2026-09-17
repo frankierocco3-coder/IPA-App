@@ -2764,12 +2764,12 @@ export async function run({ navDoc = document } = {}) {
 
   // ── 20. The Acting workspace ─────────────────────────────────
   {
-    check('acting: six modules hold the 46 path lessons; 8 Professional chapters shelve outside the path',
+    check('acting: six modules hold the 47 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 6
       && String(ACTING_MODULES.map(m => m.title))
         === 'The Actor’s Work,Investigating the Text,Listening and Responding,Building a Character,Tempo-Rhythm,Preparing the Performance'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 46
-      && ACTING_LESSONS.length === 54
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 47
+      && ACTING_LESSONS.length === 55
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
         .every(l => l.module === 'professional')
       && ACTING_MODULES.every(m => actingLessonsFor(m.id)
@@ -2799,7 +2799,7 @@ export async function run({ navDoc = document } = {}) {
            .reduce((n, a) => n + DISSECT_SECTIONS[a.qeSection].asks.length, 0)
          === DISSECT_SECTIONS.reduce((n, sec) => n + sec.asks.length, 0));
     check('acting: the Library collections cover the lessons without duplication',
-      ACTING_COLLECTIONS.length === 6
+      ACTING_COLLECTIONS.length === 7
       && (() => {
         const listed = ACTING_COLLECTIONS.flatMap(c => c.lessons);
         return new Set(listed).size === listed.length
@@ -2853,12 +2853,13 @@ export async function run({ navDoc = document } = {}) {
           // item (28 original + 16 Building a Character/Tempo-Rhythm + 8 Professional Actor Character /
           // Tempo-Rhythm lessons owner-approved 2026-08-26 + Using the
           // Fourth Wall owner-approved 2026-09-14 + Finding the
-          // Objective owner-approved 2026-09-16 + 4 approaches)
+          // Objective owner-approved 2026-09-16 + Working the
+          // Two-Hander owner-approved 2026-09-17 + 4 approaches)
           // carries the owner's editorial verdict, none claims a
           // specialist, and no reviewer name is invented — so the draft
           // strip has nothing to count and must be gone.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 58
+          return items.length === 59
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -2878,10 +2879,10 @@ export async function run({ navDoc = document } = {}) {
       // The shared right rail legitimately names the next acting chapter
       // in its "Next step" card on every section, so chapter titles are
       // asserted absent from the Library pane itself, never the whole body.
-      check('acting: the Library landing shows collections only, never all 54 items at once',
+      check('acting: the Library landing shows collections only, never all 55 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:character,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:listening,col:character,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
