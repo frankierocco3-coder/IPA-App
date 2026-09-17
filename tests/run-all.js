@@ -50,7 +50,22 @@ function drawSuite(name, out) {
            : '<p>Per-check detail in the browser console.</p>'}`);
 }
 
+// The suite must never run under a service worker: cached modules would
+// silently test yesterday's build (the stale-tab trap). Registration is
+// production-only, but the dev opt-in flag exists, so clear the decks.
+async function shedServiceWorker() {
+  try {
+    if ('serviceWorker' in navigator) {
+      for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    }
+    if ('caches' in window) {
+      for (const k of await caches.keys()) await caches.delete(k);
+    }
+  } catch { /* nothing registered — fine */ }
+}
+
 (async () => {
+  await shedServiceWorker();
   seedOnboarding();
   const frame = await appFrame();
   const suites = [];

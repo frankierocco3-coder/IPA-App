@@ -6015,6 +6015,18 @@ async function wipeLocalData({ includeProgress }) {
   try { resetAnalytics(); report.push('analytics'); } catch { /* ignore */ }
   try { clearPersonal(); report.push('personal dictionary'); } catch { /* ignore */ }
   try { wipeSpeechData(); report.push('speech practice history & reflections'); } catch { /* ignore */ }
+  // The offline cache (sw.js) holds copies of app files and any audio
+  // played — app content, never personal work, but it is storage this
+  // app created, so a full delete removes it and the worker too.
+  try {
+    if ('caches' in window) {
+      for (const k of await caches.keys()) await caches.delete(k);
+      report.push('offline cache');
+    }
+    if ('serviceWorker' in navigator) {
+      for (const r of await navigator.serviceWorker.getRegistrations()) await r.unregister();
+    }
+  } catch { /* ignore */ }
   // App-state keys that are settings/telemetry, not progress
   for (const k of ['speechcraft-quests-v1', 'speechcraft-audio-audit-v1',
                    'speechcraft-audio-audit-v1-notes', 'speechcraft-voice-prefs',
@@ -6089,6 +6101,7 @@ function renderPrivacy() {
         <div class="stat-row"><span class="stat-name">Audio recordings</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Practice analytics</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Personal dictionary</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Offline copy of app content (for use without a connection)</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
       </section>
@@ -10073,4 +10086,16 @@ if (!framedHostile) {
     if (location.hash === '#audit') renderAudioAudit();
     else if (location.hash === '#review') renderContentReview();
   });
+
+  // Offline capability (sw.js): production only, top window only. The
+  // test runner hosts the app in an iframe and dev servers run on
+  // localhost — a service worker there would serve cached modules to
+  // the regression suite (the stale-tab trap, already bitten once).
+  // Local testing of the worker itself is an explicit opt-in.
+  const swDev = (() => { try { return localStorage.getItem('speechcraft-sw-dev') === 'on'; } catch { return false; } })();
+  const onLocalhost = ['localhost', '127.0.0.1'].includes(location.hostname);
+  if ('serviceWorker' in navigator && window === window.top && (!onLocalhost || swDev)) {
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.warn('offline support unavailable:', err));
+  }
 }

@@ -3478,6 +3478,34 @@ export async function run({ navDoc = document } = {}) {
       `bob=${bob.length} lizzie=${lizzie.length}`);
   }
 
+  // ── 22. Offline capability (PWA) ─────────────────────────────
+  // Static contracts only: the worker itself never registers on
+  // localhost (and the runner sheds any registration first), so what is
+  // pinned here is the shipped material and its guards.
+  {
+    const man = await fetch('../manifest.json').then(r => r.json()).catch(() => null);
+    check('pwa: manifest is served with the installable fields',
+      man?.short_name === 'Speechcraft'
+      && man?.display === 'standalone'
+      && man?.start_url === '.'
+      && (man?.icons ?? []).length >= 2
+      && man.icons.some(i => i.sizes === '512x512'));
+    const sw = await fetch('../sw.js').then(r => r.ok ? r.text() : null).catch(() => null);
+    check('pwa: the service worker ships, same-origin only, versioned caches',
+      !!sw && sw.includes("const VERSION = '")
+      && sw.includes('if (!sameOrigin(url)) return')
+      && sw.includes('caches.delete'));
+    const mainSrc = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+    check('pwa: registration is production-only, top window only',
+      mainSrc.includes("navigator.serviceWorker.register('./sw.js')")
+      && mainSrc.includes('window === window.top')
+      && mainSrc.includes("['localhost', '127.0.0.1'].includes(location.hostname)"));
+    check('pwa: this suite is not running under a service worker',
+      !navigator.serviceWorker?.controller);
+    check('pwa: the full wipe covers the offline cache',
+      mainSrc.includes("report.push('offline cache')"));
+  }
+
   if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');
   else localStorage.setItem('speechcraft-workspace', workspaceBefore);
 
