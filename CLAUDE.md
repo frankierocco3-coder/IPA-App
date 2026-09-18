@@ -948,6 +948,63 @@ their workspaces. Free Play is hidden in Speech (it gates lessons the
 Speech course does not use). The Speech rail is a contextual "Next
 step" panel that never points at review work.
 
+SEPTEMBER 2026 WAVE (2026-09-15 → 09-17, pushed through e8fdf0d; the
+2026-09-17 batch after it is staged): SCENES SYSTEM — 27 verbatim
+public-domain two-handers in js/data/scenes.js across ten authors,
+corrected-reprint policy (mechanical printing errors fixed, every fix
+logged per-record in `corrections`; text must equal source + exactly
+those fixes), reading pages carry NO citation apparatus (provenance in
+data + Sources & Credits), scene parser js/scene-parse.js feeds the
+role-based tools (Flash Cards asks which part is yours on every
+scene). PWA — sw.js offline layer (module-graph runtime caching, no
+precache manifest; registration production-only, dev opt-in
+speechcraft-sw-dev; runner sheds workers; wipe covers caches).
+ACTING — chapters Finding the Objective (2.8) and Working the
+Two-Hander (6.3); 47 path lessons / 55 records / 59 published;
+Listening & Responding collection (every collection maps one module);
+Beat Builder rename; renames Let the Information Affect You /
+Repetition / Play the Objective, Not the Emotion / Putting It
+Together; partner-work chapters carry Scenes-shelf doorways; Warmup
+flow leads Acting Practice (9 steps, +5 XP, safety line, history
+kind 'warmup' skill 'Acting'). ARCADE — passage step on long texts,
+exercise-first layout. PICKERS — Speeches/Scenes doors everywhere.
+TWISTERS & SENTENCES — js/data/twisters.js, 60 original feature-
+targeted drills (6+6 per accent course) on each accent Library with
+per-line ≈IPA (fillSound) and real-clip audio: word chips + full-line
+Hear it buttons, 124 clips generated in all ten course voices
+(cockney respell layer applied; two lines rebuilt to owner ear:
+glottal twister uses better/butter only, h-drop twister uses
+hammer/horse/hair + hand→and recipe; 'water' recipe awaiting
+re-audition). IA — the VOWEL MAP is REMOVED (sound-page diagrams
+carry it); RHETORIC & ORATORY is WITHDRAWN behind RHETORIC_LIVE=false
+in main.js (flag, not deletion — pathway + pinned Jowett copy whole);
+tile counts show ONLY on material shelves (Monologues 178, Scenes 27,
+W&E, Twisters; curricular tiles are title-only — suite pins the
+rule). Accent Library now: IPA for This Accent / Words & Expressions /
+Twisters & Sentences / Your Instrument.
+
+PAGE TRANSITIONS (2026-09-17, staged): `navTo(render, dir)` in js/ui.js
+hands a render to the native View Transitions API — no library, no
+dependency, nothing added to the build (there is no build). Rendering is
+unchanged: the render runs as written, inside the API's callback, so the
+wiring inside each view still runs in its usual order and the DOM lands
+within a frame or two. Two silent ways out, both render directly: a
+browser without `document.startViewTransition`, and a reader who has
+asked for reduced motion. Wired at the structural joints only —
+goBack (every Back press), goSection + renderHome, the hub/module/scene
+tile handlers, and every replace-history Prev/Next (chapters, IPA sound
+pages, Playable Actions pairs), plus chapter jumps and Next lesson —
+NOT at every render call site. The rule for new work: a page turn
+animates, an in-place state change does not. Flash-card flips, script
+mode and highlight-colour switches and rhythm-card deals stay instant,
+because a reader firing them in quick succession should never wait.
+`dir` writes `data-nav` on `<html>` so Back animates the opposite way to
+Forward; css/style.css carries the four keyframes (180ms), a second
+reduced-motion lock, and `view-transition-name` on .side-nav /
+.bottom-nav / .topbar so the furniture holds still while the page moves
+through it. Two elements sharing one name would kill every transition at
+once, so the suite pins name-uniqueness in the live app (section 28).
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

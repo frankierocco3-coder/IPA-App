@@ -2,16 +2,18 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { DIALECT_INFO } from './data/dialects.js';
 import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
+import { WARMUP_STEPS } from './data/warmup.js';
+import { drillsFor } from './data/twisters.js';
 import { parseProvidedScene } from './scene-parse.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
-import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack,
+import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
          pageTopbar, wireBrandHome, EMBLEM, BRAND_BTN, courseProgressHtml,
          runStepSequence, tileHtml, itemTileHtml, reviewStripHtml,
          groupStatus, workspacePage } from './ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
-import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady } from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
@@ -51,7 +53,7 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
 import { ACTING_GAMES, ACTING_DECKS, actingGameById,
          SCENE_STUDY_AREAS } from './data/acting/practice.js';
 import { sceneStudyNotes, saveSceneStudyNote } from './data/acting/store.js';
-import { articulationSVG, guideSVG, vocalTractSVG, vowelSpaceSVG } from './diagram.js';
+import { articulationSVG, guideSVG, vocalTractSVG } from './diagram.js';
 import { articulationFor } from './data/articulation.js';
 import { artFor, chartFor } from './data/articulation-art.js';
 import { SONNETS } from './data/sonnets.js';
@@ -324,6 +326,11 @@ const WORKSPACES = [
 // Oratory shelve in the Acting Library meanwhile. Flip to true and the
 // Speech workspace returns whole.
 const SPEECH_LIVE = false;
+// Rhetoric & Oratory is WITHDRAWN from the accent Library (owner hold,
+// 2026-09-17) — a flag, not a deletion: renderReadingPathway and its
+// pinned Jowett copy stay whole, and the Speech Library reference is
+// untouched behind SPEECH_LIVE. Flip to restore the card.
+const RHETORIC_LIVE = false;
 const liveWorkspaces = () => WORKSPACES.filter(w => SPEECH_LIVE || w.id !== 'speech');
 
 // Workspaces that are about the work, not about an accent — they show
@@ -374,15 +381,15 @@ setHomeHandler(() => renderHome());
 setTeardownHooks(() => releaseTryIt(), () => teardownAV());
 
 function renderHome() {
-  renderShell(activeSection());
+  const section = activeSection();
+  navTo(() => renderShell(section), 'back');     // the brand button is a way out, not a way in
 }
 
 function goSection(id) {
-  const ws = activeWorkspace();
   const target = SECTIONS.some(x => x.id === id) || OFF_NAV_SECTIONS.includes(id)
     ? id : 'learn';
   setSection(target);
-  renderShell(target);
+  navTo(() => renderShell(target));
 }
 
 function renderShell(section) {
@@ -1116,8 +1123,8 @@ function speechLibraryPane(el) {
     // Dialects in Speech folded in here — a one-topic card is an honest
     // label on an unfinished thing, but not a top-level shelf.
     { key: 'ipa', tone: 'is-blue', emoji: 'ʃə', title: 'IPA, Sound & Dialect Reference',
-      count: 5, unit: 'reference',
-      keywords: 'ipa chart vowel map instrument dialects in speech accent',
+      count: 4, unit: 'reference',
+      keywords: 'ipa chart instrument dialects in speech accent',
       go: renderSpeechIpaReference },
   ];
   workspaceLibrary(el, { workspace: 'Speech', cards, state: libState.speech });
@@ -1140,11 +1147,10 @@ function renderSpeechIpaReference() {
        ${itemTileHtml({ key: 'what', title: 'What Is IPA?', note: 'The alphabet of sounds, and why it helps' })}
        ${itemTileHtml({ key: 'chart', title: 'IPA Chart', note: 'Every sound across the courses' })}
        ${itemTileHtml({ key: 'instrument', title: 'Your Instrument', note: 'A tour of the vocal tract' })}
-       ${itemTileHtml({ key: 'vowels', title: 'Vowel Map', note: 'Where every vowel sits in the mouth' })}
        ${itemTileHtml({ key: 'dialects', title: 'Dialects in Speech', note: 'How dialect shapes rhythm, register and use' })}
      </div>`);
   const go = { what: renderChart, chart: renderChart, instrument: renderInstrument,
-    vowels: renderVowelMap, dialects: renderDialectsInSpeech };
+    dialects: renderDialectsInSpeech };
   app.querySelectorAll('[data-item]').forEach(b =>
     b.addEventListener('click', () => (go[b.dataset.item] ?? renderChart)()));
 }
@@ -1959,8 +1965,8 @@ function renderSpeechChapter(id) {
   app.querySelector('#sp-h').focus();
   document.getElementById('sp-study')?.addEventListener('click', () => renderSpeechLesson(l.id));
   document.getElementById('sp-to-contents')?.addEventListener('click', renderTextbook);
-  document.getElementById('sp-prev')?.addEventListener('click', () => { navStack.pop(); renderSpeechChapter(prev.id); });
-  document.getElementById('sp-next-ch')?.addEventListener('click', () => { navStack.pop(); renderSpeechChapter(nxt.id); });
+  document.getElementById('sp-prev')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderSpeechChapter(prev.id); }, 'back'));
+  document.getElementById('sp-next-ch')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderSpeechChapter(nxt.id); }));
   wireChapterList(renderSpeechChapter);
 }
 
@@ -2119,8 +2125,8 @@ function renderSpeechLesson(id, screen = 0) {
   const goScreen = k => { navStack.pop(); renderSpeechLesson(id, k); };
   document.getElementById('sp-next')?.addEventListener('click', () => goScreen(at + 1));
   document.getElementById('sp-prev')?.addEventListener('click', () => goScreen(at - 1));
-  document.getElementById('sp-prev-ch')?.addEventListener('click', () => { navStack.pop(); renderSpeechLesson(prevCh.id); });
-  document.getElementById('sp-next-ch')?.addEventListener('click', () => { navStack.pop(); renderSpeechLesson(nextCh.id); });
+  document.getElementById('sp-prev-ch')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderSpeechLesson(prevCh.id); }, 'back'));
+  document.getElementById('sp-next-ch')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderSpeechLesson(nextCh.id); }));
   document.getElementById('sp-to-module')?.addEventListener('click', () => renderSpeechModule(m?.n ?? 1));
   document.getElementById('sp-done')?.addEventListener('click', () => {
     // Reading progress only — no XP, no hearts, no correctness.
@@ -2980,7 +2986,10 @@ function workspaceLibrary(el, { workspace, cards, state }) {
   });
   state.wire?.(el);
   el.querySelectorAll('[data-tile]').forEach(b =>
-    b.addEventListener('click', () => cards.find(c => c.key === b.dataset.tile)?.go()));
+    b.addEventListener('click', () => {
+      const card = cards.find(c => c.key === b.dataset.tile);
+      if (card) navTo(() => card.go());
+    }));
 }
 
 // ══ THE ACTING WORKSPACE ══════════════════════════════════════
@@ -3096,7 +3105,7 @@ function actingLearnPane(el) {
   el.querySelector('#ac-to-library')?.addEventListener('click', () => goSection('library'));
   el.querySelector('#ac-to-library-2').addEventListener('click', () => goSection('library'));
   el.querySelectorAll('[data-tile]').forEach(b =>
-    b.addEventListener('click', () => renderActingModule(+b.dataset.tile.slice(4))));
+    b.addEventListener('click', () => navTo(() => renderActingModule(+b.dataset.tile.slice(4)))));
 }
 
 function renderActingModule(n) {
@@ -3193,8 +3202,8 @@ function renderActingChapter(id) {
     b.addEventListener('click', () => openSharedRecord(b.dataset.sharedWs, b.dataset.shared)));
   document.getElementById('ac-scenes-door')?.addEventListener('click', renderScenesShelf);
   document.getElementById('ac-study')?.addEventListener('click', () => renderActingLesson(l.id));
-  document.getElementById('ac-prev')?.addEventListener('click', () => { navStack.pop(); renderActingChapter(prev.id); });
-  document.getElementById('ac-next')?.addEventListener('click', () => { navStack.pop(); renderActingChapter(nxt.id); });
+  document.getElementById('ac-prev')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderActingChapter(prev.id); }, 'back'));
+  document.getElementById('ac-next')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderActingChapter(nxt.id); }));
   wireChapterList(renderActingChapter);
 }
 
@@ -3220,7 +3229,7 @@ function chapterListHtml(items, at, noun = 'Chapter') {
 }
 function wireChapterList(go) {
   app.querySelectorAll('[data-ch]').forEach(b =>
-    b.addEventListener('click', () => { navStack.pop(); go(b.dataset.ch); }));
+    b.addEventListener('click', () => navTo(() => { navStack.pop(); go(b.dataset.ch); })));
 }
 
 // Opens the ONE authoritative record a shared concept lives in.
@@ -3287,9 +3296,9 @@ function renderActingLesson(id) {
   app.querySelector('#ac-h').focus();
   app.querySelectorAll('[data-shared]').forEach(b =>
     b.addEventListener('click', () => openSharedRecord(b.dataset.sharedWs, b.dataset.shared)));
-  document.getElementById('ac-next-lesson')?.addEventListener('click', () => {
+  document.getElementById('ac-next-lesson')?.addEventListener('click', () => navTo(() => {
     navStack.pop(); renderActingLesson(nxt.id);
-  });
+  }));
   wireChapterList(renderActingLesson);
   document.getElementById('ac-done').addEventListener('click', () => {
     if (!markSpeechLessonDone(id)) return;
@@ -3325,7 +3334,6 @@ function actingLibraryPane(el) {
     return {
       key: `col:${c.id}`, tone: ACTING_COLLECTION_TONE[c.id],
       emoji: ACTING_COLLECTION_EMOJI[c.id], img: COL_ART[c.id], title: c.title,
-      count: c.lessons.length, unit: 'chapter',
       keywords: c.lessons.map(lid => actingLessonById(lid)?.title ?? '').join(' '),
       go: () => renderActingCollection(c.id),
     };
@@ -3339,21 +3347,21 @@ function actingLibraryPane(el) {
   const cards = [
     // Owner-supplied verbatim lesson; count = six sections + practice set.
     { key: 'col:lines', tone: 'is-lavender', emoji: '🧠', img: 'img/ui/lines-memory.png', title: 'Lines & Memory',
-      group: G1, count: 7, unit: 'section',
+      group: G1,
       keywords: 'the line you know vs the line you can find memory memorize lines retrieval storage fluency couch test off book practice set noice active experiencing',
       go: renderLineLesson },
     { ...colTile('scene'), group: G1 },
     // The Four Lists tool sits with the collection it serves (owner
     // order, 2026-08-27): investigation first, then its worksheet.
     { key: 'col:lists', tone: 'is-lavender', emoji: '📋', img: 'img/ui/four-lists.png', title: 'The Four Lists',
-      group: G1, count: 4, unit: 'list',
+      group: G1,
       keywords: 'character facts says about others reading five times building a character',
       go: () => renderFourListsLesson() },
     // Question Everything — the text-dissection textbook. Moved here from
     // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
     // on the shelf. Count = the six numbered DISSECT_SECTIONS.
     { key: 'col:question', tone: 'is-lavender', emoji: '🔍', img: 'img/ui/question.png', title: 'Question Everything',
-      group: G1, count: 6, unit: 'section',
+      group: G1,
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
       go: renderDissectTextbook },
     { ...colTile('principles'), group: G2 },
@@ -3363,7 +3371,7 @@ function actingLibraryPane(el) {
     { ...colTile('rhythm'), group: G2 },
     // Playable Actions follows Tempo-Rhythm (owner order, 2026-09-16).
     { key: 'col:actions', tone: 'is-gold', emoji: '🎯', img: 'img/ui/actions.png', title: 'Playable Actions',
-      group: G2, count: ACTION_VERBS.length, unit: 'verb',
+      group: G2,
       keywords: 'action verb tactic objective doing not feeling playable',
       go: renderPlayableActions },
     // Monologues and Scenes are separate shelves (owner order,
@@ -3378,7 +3386,7 @@ function actingLibraryPane(el) {
       keywords: 'scene two-hander dialogue partner work',
       go: renderScenesShelf },
     { key: 'col:approaches', tone: 'is-terracotta', emoji: '🎭', img: 'img/ui/approaches.png', title: 'Approaches to Acting',
-      group: G4, count: ACTING_APPROACHES.length, unit: 'introduction',
+      group: G4,
       keywords: ACTING_APPROACHES.map(a => a.name).join(' '), go: renderApproaches },
     { ...colTile('professional'), group: G4 },
     // The whole Speechcraft Textbook, shelved here while the Speech
@@ -3386,7 +3394,7 @@ function actingLibraryPane(el) {
     // never copied — it supersedes the 8-chapter Speech for Actors
     // subset, whose renderer stays dormant behind SPEECH_LIVE.
     { key: 'col:textbook', tone: 'is-sage', emoji: '📗', img: 'img/ui/textbook.png', title: 'Speechcraft Textbook',
-      group: G4, count: textbookOrder().length, unit: 'chapter', badge: { cls: '', label: 'Shared' },
+      group: G4, badge: { cls: '', label: 'Shared' },
       keywords: 'speech breath voice articulation fluency pace principles instrument meaning presence textbook',
       go: renderTextbook },
   ];
@@ -3505,6 +3513,124 @@ function renderActingGlossary() {
 }
 
 // ── Acting → Practice ─────────────────────────────────────────
+// Function words carry no accent feature worth a listen button.
+const DRILL_SMALL_WORDS = new Set(['a', 'an', 'the', 'of', 'to', 'at', 'in', 'on', 'and', 'or', 'it', 'is', 'if', 'by', 'but', 'got', 'get', 'that', 'this']);
+
+// ── Twisters & Sentences: speak-aloud drills per accent ───────
+// Original Speechcraft lines, each leaning on features this course
+// teaches. The learner speaks; nothing plays, listens or scores.
+function renderSpeakDrills(d) {
+  record(() => renderSpeakDrills(d));
+  stopSpeech();
+  const items = drillsFor(d);
+  const row = (x, i) => `
+    <div class="guide-word tw-item">
+      <p class="sp-passage-text">${esc(x.text)}</p>
+      <p class="pane-note">${esc(x.focus)}</p>
+      <p class="pane-note tw-hear" id="tw-hear-${i}" hidden></p>
+      <p class="pane-note"><button class="linkish" data-ipa="${i}" type="button">≈ Show IPA</button></p>
+      <div id="tw-ipa-${i}" hidden></div>
+    </div>`;
+  const section = kind => items.map((x, i) => x.kind === kind ? row(x, i) : '').join('');
+  app.innerHTML = `
+    ${pageTopbar('🗣 Twisters & Sentences', '#8a6d3b')}
+    <main class="guide">
+      <h1>Twisters &amp; Sentences</h1>
+      <h2 class="guide-heading">Tongue twisters</h2>
+      ${section('twister')}
+      <h2 class="guide-heading">Sentences</h2>
+      ${section('sentence')}
+    </main>`;
+  wireBrandHome();
+
+  // IPA on demand, per line — the Dialect in Action pattern: the same
+  // fillSound derivation, loaded only when asked for.
+  app.querySelectorAll('[data-ipa]').forEach(b =>
+    b.addEventListener('click', () => {
+      const i = +b.dataset.ipa;
+      const box = document.getElementById(`tw-ipa-${i}`);
+      const show = box.hidden;
+      box.hidden = !show;
+      b.textContent = show ? '≈ Hide IPA' : '≈ Show IPA';
+      if (show && !box.dataset.filled) {
+        box.dataset.filled = '1';
+        box.innerHTML = '<p class="pane-note">Loading the pronunciation dictionary…</p>';
+        fillSound([items[i].text], d, box);
+      }
+    }));
+
+  // Word listening, real clips only: buttons appear ONLY for words the
+  // course voices have recorded (strict everywhere — never a dead
+  // button, never synthesis). The clip index loads lazily, so the rows
+  // fill when it is ready. The token pins the callback to THIS render:
+  // a queued callback from an earlier drills page (another course)
+  // must never fill this one's rows.
+  const renderToken = Symbol('drills');
+  app.drillsToken = renderToken;
+  indexReady.then(() => {
+    if (app.drillsToken !== renderToken) return;            // superseded render
+    if (!document.getElementById('tw-hear-0')) return;      // navigated away
+    items.forEach((x, i) => {
+      const el = document.getElementById(`tw-hear-${i}`);
+      if (!el) return;
+      // The whole line, when its recording exists (the Words &
+      // Expressions pattern) — then single feature words as backup.
+      const line = hasWordClip(x.text, d)
+        ? `<button class="word-chip" data-hear="${esc(x.text)}" type="button" aria-label="Hear the whole line">🔊 Hear it</button> ` : '';
+      const words = [...new Set(x.text.toLowerCase().split(/[^a-z’']+/).filter(Boolean))]
+        .filter(w => !DRILL_SMALL_WORDS.has(w) && hasWordClip(w, d));
+      if (!line && !words.length) return;
+      el.hidden = false;
+      el.innerHTML = line + (words.length ? 'Words: ' + words.map(w =>
+        `<button class="linkish" data-hear="${esc(w)}" type="button">${esc(w)}</button>`).join(' · ') : '');
+    });
+    app.querySelectorAll('[data-hear]').forEach(b =>
+      b.addEventListener('click', () =>
+        speak(b.dataset.hear, { accent: d, lang: ACCENT_LANG[d] ?? 'en-GB' })));
+  });
+}
+
+// ── The Warmup: a short guided sequence before practice ───────
+// Written guidance on the shared step runner. Completion pays the
+// practice convention (+5 XP, no hearts); nothing here is scored and
+// nothing listens. The comfort and safety lines render verbatim.
+function renderWarmup() {
+  record(renderWarmup);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🔥 Warmup', '#6f8657')}
+    <main class="guide sp-game">
+      <h1>Warmup</h1>
+      <p class="pane-note">About five minutes, before you work. Quiet and gentle throughout: a warmup that feels like effort is being done wrong.</p>
+      <p class="pane-note">${esc(SPEECH_COMFORT_LINE)}</p>
+      <p class="pane-note pane-warn">${esc(SPEECH_SAFETY_LINE)}</p>
+      <div id="wu-seq"></div>
+      <p class="pane-note">Nothing here is scored, and skipping a step costs nothing.</p>
+    </main>`;
+  wireBrandHome();
+  runStepSequence({
+    mount: document.getElementById('wu-seq'),
+    steps: WARMUP_STEPS.map((s, i) => ({ label: `${i + 1} · ${s.title}`, text: s.text })),
+    onFinish: () => {
+      recordSpeechPractice({ kind: 'warmup', ref: 'warmup-v1', title: 'Warmup', skill: 'Acting' });
+      store.addXp(5);
+      app.innerHTML = `
+        ${pageTopbar('🔥 Warmup', '#6f8657')}
+        <main class="guide">
+          <h1>Warm · +5 XP</h1>
+          <p class="guide-text">Completion, not a grade — nothing here measures how you sounded.</p>
+          <div class="practice-row">
+            <button class="btn btn-primary" id="wu-done" type="button">To Practice</button>
+            <button class="btn-lite" id="wu-again" type="button">Run it again</button>
+          </div>
+        </main>`;
+      wireBrandHome();
+      document.getElementById('wu-done').addEventListener('click', () => { navStack.pop(); goSection('practice'); });
+      document.getElementById('wu-again').addEventListener('click', () => { navStack.pop(); renderWarmup(); });
+    },
+  });
+}
+
 function actingPracticePane(el) {
   const proj = actingProject();
   el.innerHTML = `
@@ -3518,6 +3644,11 @@ function actingPracticePane(el) {
       <div class="track-info"><h2>Scene Study</h2></div>
       <div class="track-arrow">›</div>
     </button>` : ''}
+    <button class="track-card hub-card" id="acp-warmup" type="button">
+      <div class="track-glyph">🔥</div>
+      <div class="track-info"><h2>Warmup</h2></div>
+      <div class="track-arrow">›</div>
+    </button>
     <button class="track-card hub-card" id="acp-arcade" type="button">
       <div class="track-glyph">🕹</div>
       <div class="track-info"><h2>Acting Arcade</h2></div>
@@ -3546,6 +3677,7 @@ function actingPracticePane(el) {
     renderArcadeTextPicker(() => goSection('practice')));
   el.querySelector('#acp-scene')?.addEventListener('click', () =>
     renderArcadeTextPicker(() => renderSceneStudy()));
+  el.querySelector('#acp-warmup').addEventListener('click', renderWarmup);
   el.querySelector('#acp-arcade').addEventListener('click', () =>
     renderArcadeTextPicker(() => renderActingArcade()));
   el.querySelector('#acp-cards').addEventListener('click', () =>
@@ -4240,11 +4372,15 @@ function libraryMain(el, course, ws = activeWorkspace()) {
   const d = course.id === 'core' ? null : course.id;
   const cards = (d ? [
     { key: 'ipa', tone: 'is-lavender', emoji: '📖', img: 'img/ui/ipa.png', title: 'IPA for This Accent',
-      count: phonemesForAccent(d).length, unit: 'sound', keywords: 'phoneme chart transcription',
+      keywords: 'phoneme chart transcription',
       go: () => renderInventory(d) },
     { key: 'words', tone: 'is-terracotta', emoji: '🗣', img: 'img/ui/words.png', title: 'Words & Expressions',
       count: IDIOM.filter(e => e.dialect === d).length, unit: 'expression',
       keywords: 'idiom slang vocabulary', go: () => renderIdioms(d) },
+    { key: 'drills', tone: 'is-sage', emoji: '👅', title: 'Twisters & Sentences',
+      count: drillsFor(d).length, unit: 'drill',
+      keywords: 'tongue twister sentence speak aloud articulation drill practice',
+      go: () => renderSpeakDrills(d) },
     ...(DIALECT_ACTION_LIVE ? [{ key: 'action', tone: 'is-blue', emoji: '🎭', title: 'Dialect in Action',
       // While nothing is approved the card counts what EXISTS and says why it
       // is unreadable, so the count can never contradict the page behind it.
@@ -4252,33 +4388,27 @@ function libraryMain(el, course, ws = activeWorkspace()) {
       unit: 'piece', badge: actionFor(d).length ? null : { cls: 'is-pending', label: 'In review' },
       keywords: 'scene monologue',
       go: () => actionFor(d).length ? renderDialectAction(d) : renderDialectActionPending(d) }] : []),
-    { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', img: 'img/ui/rhetoric.png', title: 'Rhetoric & Oratory',
+    ...(RHETORIC_LIVE ? [{ key: 'rhetoric', tone: 'is-gold', emoji: '🏛', img: 'img/ui/rhetoric.png', title: 'Rhetoric & Oratory',
       count: 3, unit: 'dialogue', badge: { cls: '', label: 'Shared' },
       keywords: 'plato gorgias phaedrus republic persuasion',
-      go: () => { if (SPEECH_LIVE) setWorkspace('speech'); renderReadingPathway(); } },
+      go: () => { if (SPEECH_LIVE) setWorkspace('speech'); renderReadingPathway(); } }] : []),
     { key: 'instrument', tone: 'is-sage', emoji: '🎭', img: 'img/ui/instrument.png', title: 'Your Instrument',
-      count: VOICE_ATLAS.length, unit: 'diagram', keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension onset brain', go: renderInstrument },
-    { key: 'vowels', tone: 'is-blue', emoji: '📐', img: 'img/ui/vowel-map.png', title: 'Vowel Map',
-      count: 1, unit: 'reference', keywords: 'vowel space chart', go: renderVowelMap },
+      keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension onset brain', go: renderInstrument },
   ] : [
     { key: 'what', tone: 'is-sage', emoji: 'ʃə', title: 'What Is IPA?',
-      count: 1, unit: 'reference', keywords: 'alphabet sounds introduction', go: renderChart },
+      keywords: 'alphabet sounds introduction', go: renderChart },
     { key: 'chart', tone: 'is-blue', emoji: '📖', img: 'img/ui/ipa.png', title: 'IPA Chart',
-      count: Object.keys(PHONEMES).length, unit: 'sound',
       keywords: 'phoneme consonant vowel', go: renderChart },
     // The Voice & Speech workspace is the instrument's home (owner order,
     // 2026-09-03): the seven Speaking Instrument chapters shelve here as
     // Shared cards over the ONE set of speech records — linked, never
     // copied. Bodies show under the owner-approved badge policy.
     { key: 'speaking-instrument', tone: 'is-sage', emoji: '🫁', title: 'Your Speaking Instrument',
-      count: speechLessonsFor('foundation').length, unit: 'chapter',
       badge: { cls: '', label: 'Shared' },
       keywords: 'anatomy breath larynx vocal folds jaw tongue articulation vocal health tension',
       go: renderInstrumentCollection },
     { key: 'instrument', tone: 'is-terracotta', emoji: '🎭', img: 'img/ui/instrument.png', title: 'Your Instrument',
-      count: VOICE_ATLAS.length, unit: 'diagram', keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension', go: renderInstrument },
-    { key: 'vowels', tone: 'is-lavender', emoji: '📐', img: 'img/ui/vowel-map.png', title: 'Vowel Map',
-      count: 1, unit: 'reference', keywords: 'vowel space', go: renderVowelMap },
+      keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension', go: renderInstrument },
   ]);
   libState.dialect.query = libState.dialect.query ?? '';
   workspaceLibrary(el, {
@@ -4470,14 +4600,14 @@ function renderPlayableAction(id) {
 
   // Direct navigation to the paired opposite: replace this page in history
   // so Back from EITHER half of a pair returns straight to the list.
-  document.getElementById('pa-opposite').addEventListener('click', () => {
+  document.getElementById('pa-opposite').addEventListener('click', () => navTo(() => {
     navStack.pop();
     renderPlayableAction(other.id);
-  });
+  }));
   // Previous/next pair: same replace-history pattern as the sound pages.
-  const goPair = pr => { navStack.pop(); renderPlayableAction(pr.actions[0]); };
-  if (prevPair) document.getElementById('pa-prev').addEventListener('click', () => goPair(prevPair));
-  if (nextPair) document.getElementById('pa-next').addEventListener('click', () => goPair(nextPair));
+  const goPair = (pr, dir) => navTo(() => { navStack.pop(); renderPlayableAction(pr.actions[0]); }, dir);
+  if (prevPair) document.getElementById('pa-prev').addEventListener('click', () => goPair(prevPair, 'back'));
+  if (nextPair) document.getElementById('pa-next').addEventListener('click', () => goPair(nextPair, 'forward'));
 
   window.scrollTo(0, 0);
   const h = document.getElementById('pa-title');
@@ -4915,7 +5045,7 @@ function wiiStepHtml(step, st) {
           </div>
           <p class="mini-result" role="status">${st.answered['cls-' + ph] === true ? '✓ Correct.' : st.answered['cls-' + ph] === false ? 'Not quite — the marked answer is right.' : ''}</p>
         </div>`).join('')}
-      <p class="pane-note">The full landscape lives in the Library: the IPA Chart, the Vowel Map, and Your Instrument (the vocal tract) — every sound with tongue placement and audio.</p>`;
+      <p class="pane-note">The full landscape lives in the Library: the IPA Chart and Your Instrument (the vocal tract) — every sound with tongue placement and audio.</p>`;
     case 6: return `
       <h1>How to use IPA</h1>
       <ol class="wii-steps-list">
@@ -5938,19 +6068,6 @@ function renderInstrument() {
   wireBrandHome();
 }
 
-// "The Vowel Map": every vowel on the quadrilateral.
-function renderVowelMap() {
-  record(renderVowelMap);
-  app.innerHTML = `
-    ${pageTopbar('📐 The Vowel Map', '#64748b')}
-    <main class="guide vowel-map">
-      <p class="track-blurb">Every vowel is just a tongue position. Height runs top (close) to bottom (open); the horizontal is front to back. Rounded vowels are ringed.</p>
-      <div class="anat-wrap">${vowelSpaceSVG()}</div>
-      <p class="artic-cap">Tap any symbol in <b>The IPA Chart</b> to hear it and see its own diagram.</p>
-    </main>`;
-  wireBrandHome();
-}
-
 // ── Text & Delivery: speak real text aloud ────────────────────
 
 // Dialects you can read/scan/transcribe any text in.
@@ -6597,7 +6714,7 @@ function renderScenesShelf() {
            or paste a new one in
            <button class="linkish" id="sc-shelf-custom" type="button">Custom Work</button>.</p>`);
   app.querySelectorAll('[data-tile]').forEach(b =>
-    b.addEventListener('click', () => renderProvidedScene(b.dataset.tile)));
+    b.addEventListener('click', () => navTo(() => renderProvidedScene(b.dataset.tile))));
   document.getElementById('sc-shelf-custom')?.addEventListener('click', renderCustomWork);
   document.getElementById('sc-shelf-mine')?.addEventListener('click', () =>
     renderArcadeTextPicker(() => {
@@ -9252,7 +9369,7 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
   const nextSym = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
   const navLabel = s => `${PHONEMES[s].allophone ? `[${s}]` : `/${s}/`} ${PHONEMES[s].name}`;
   const arrow = (s, dir) => `
-    <button class="sound-step" data-step="${esc(s ?? '')}" type="button" ${s ? '' : 'disabled'}
+    <button class="sound-step" data-step="${esc(s ?? '')}" data-dir="${dir === 'prev' ? 'back' : 'forward'}" type="button" ${s ? '' : 'disabled'}
       aria-label="${s ? `${dir === 'prev' ? 'Previous' : 'Next'} sound: ${esc(navLabel(s))}` : `No ${dir === 'prev' ? 'previous' : 'next'} sound`}"
       title="${s ? esc(navLabel(s)) : ''}">${dir === 'prev' ? '‹' : '›'}</button>`;
 
@@ -9318,9 +9435,9 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
       <div class="chips">${chips}</div>
       ${tryItHtml(`Record yourself saying ${hasIso ? `the sound /${sym}/` : `“${p.examples.find(x => speakableWord(x, acc)) ?? p.examples[0]}”`}, then compare.`)}
       <nav class="sound-footnav" aria-label="Neighbouring sounds">
-        ${prevSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(prevSym)}" type="button"
+        ${prevSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(prevSym)}" data-dir="back" type="button"
           aria-label="Previous sound: ${esc(navLabel(prevSym))}">‹ Previous: ${esc(navLabel(prevSym))}</button>` : '<span></span>'}
-        ${nextSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(nextSym)}" type="button"
+        ${nextSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(nextSym)}" data-dir="forward" type="button"
           aria-label="Next sound: ${esc(navLabel(nextSym))}">Next: ${esc(navLabel(nextSym))} ›</button>` : '<span></span>'}
       </nav>
     </main>`;
@@ -9345,8 +9462,10 @@ function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
   app.querySelectorAll('[data-step]').forEach(b =>
     b.addEventListener('click', () => {
       if (!b.dataset.step) return;
-      navStack.pop();
-      renderSoundDetail(b.dataset.step, accent, { focusHeading: true });
+      navTo(() => {
+        navStack.pop();
+        renderSoundDetail(b.dataset.step, accent, { focusHeading: true });
+      }, b.dataset.dir ?? 'forward');
     }));
 
   window.scrollTo(0, 0);

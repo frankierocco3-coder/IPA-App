@@ -1,31 +1,32 @@
 {
-  "_comment": "Spoken-text steering per accent: {accent: {'*': {word: spoken}, '<voice key>': {word: spoken}}}. '*' applies to every voice; a voice key's map wins. Filenames and the app always keep the real spelling. ONLY ear-proven recipes belong here (owner ear-check, tools/street_pilot.py) — candidates go through a pilot round first.",
-  "cockney": {
-    "*": {
-      "Tuesday": "Chewsday",
-      "tune": "chewn",
-      "think": "fink",
-      "thing": "fing",
-      "three": "free",
-      "with": "wiv",
-      "bath": "barf",
-      "hair": "air",
-      "hammer": "ama",
-      "mouth": "mowf",
-      "nothing": "nuffing",
-      "horse": "orss"
-    },
-    "bob": {
-      "butter": "buh-uh",
-      "better": "beh-uh",
-      "water": "wor-uh",
-      "house": "'ouse"
-    },
-    "lizzie": {
-      "butter": "buh-ah",
-      "better": "beh-ah",
-      "house": "ous",
-      "water": "wau-ah"
-    }
+ "_comment": "Spoken-text steering per accent: {accent: {'*': {word: spoken}, '<voice key>': {word: spoken}}}. '*' applies to every voice; a voice key's map wins. Filenames and the app always keep the real spelling. ONLY ear-proven recipes belong here (owner ear-check, tools/street_pilot.py) — candidates go through a pilot round first.",
+ "cockney": {
+  "*": {
+   "Tuesday": "Chewsday",
+   "tune": "chewn",
+   "think": "fink",
+   "thing": "fing",
+   "three": "free",
+   "with": "wiv",
+   "bath": "barf",
+   "hair": "air",
+   "hammer": "ama",
+   "mouth": "mowf",
+   "nothing": "nuffing",
+   "horse": "orss",
+   "hand": "and"
+  },
+  "bob": {
+   "butter": "buh-uh",
+   "better": "beh-uh",
+   "water": "wor-uh",
+   "house": "'ouse"
+  },
+  "lizzie": {
+   "butter": "buh-ah",
+   "better": "beh-ah",
+   "house": "ous",
+   "water": "wau-ah"
   }
+ }
 }

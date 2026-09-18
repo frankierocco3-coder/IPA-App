@@ -383,23 +383,3 @@ export function vocalTractSVG() {
 }
 
 // All the vowels plotted on the quadrilateral — the classic reference.
-export function vowelSpaceSVG() {
-  const dots = Object.entries(VOWELS)
-    .filter(([, v]) => !v.r) // skip the rhotic duplicates
-    .map(([sym, v]) => {
-      const [x, y] = vowelPoint(v);
-      return `<g><circle cx="${x}" cy="${y}" r="${v.round ? 11 : 7}" fill="${v.round ? 'none' : 'var(--green)'}"
-        stroke="${v.round ? 'var(--lavender)' : 'none'}" stroke-width="2.5"/>
-        <text x="${x}" y="${y + 4.5}" text-anchor="middle" class="vs-sym" fill="${v.round ? 'var(--ink)' : '#fff'}">${sym}</text></g>`;
-    }).join('');
-  return `<svg viewBox="0 0 300 220" class="artic-svg" role="img" aria-label="Vowel space chart">
-    <polygon points="70,40 230,40 205,190 100,190" fill="var(--panel-2)" stroke="var(--line)" stroke-width="2"/>
-    <line x1="150" y1="40" x2="152" y2="190" stroke="var(--line)" stroke-dasharray="3 3"/>
-    <text x="64" y="36" class="artic-lbl" text-anchor="end">close</text>
-    <text x="96" y="205" class="artic-lbl">open</text>
-    <text x="70" y="26" class="artic-lbl">front</text>
-    <text x="230" y="26" class="artic-lbl" text-anchor="end">back</text>
-    <text x="152" y="26" class="artic-lbl" text-anchor="middle">central</text>
-    ${dots}
-  </svg>`;
-}

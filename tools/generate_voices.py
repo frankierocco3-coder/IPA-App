@@ -225,6 +225,28 @@ def clip_name(word):
 
 
 IDIOM_JS = ROOT / "js" / "data" / "idiom.js"
+TWISTERS_JS = ROOT / "js" / "data" / "twisters.js"
+
+
+def drill_texts():
+    """{accent: [texts]} -- every speak-aloud drill line, in its own accent.
+
+    Full lines, spoken exactly as displayed; the Cockney respelling layer
+    applies at synthesis time like everywhere else.
+    """
+    src = TWISTERS_JS.read_text()
+    start = src.index("export const SPEAK_DRILLS = [")
+    src = src[start:src.index("\n];", start)]
+    field = r"'((?:[^'\\]|\\.)*)'"
+    accents = re.findall(r"accent:\s*" + field, src)
+    texts = re.findall(r"text:\s*" + field, src)
+    if len(accents) != len(texts):
+        sys.exit("twisters.js parse mismatch -- accent/text counts differ")
+    un = lambda x: x.replace("\\'", "'").replace("\\\\", "\\")
+    out = {a: set() for a in ACCENTS}
+    for a, t in zip(accents, texts):
+        out[a].add(un(t))
+    return {a: sorted(v) for a, v in out.items()}
 
 
 def idiom_texts():
@@ -325,6 +347,8 @@ def main() -> None:
     ap.add_argument("--index-only", action="store_true", help="just rebuild index.json")
     ap.add_argument("--idioms", action="store_true",
                     help="generate idiom terms + examples (each in its own dialect only)")
+    ap.add_argument("--drills", action="store_true",
+                    help="generate the speak-aloud drill lines (twisters.js, each accent its own)")
     ap.add_argument("--review-batch", action="store_true",
                     help="generate the SSBE diagnostic review set (owner ear-check gate)")
     ap.add_argument("--idiom-pilot", action="store_true",
@@ -343,7 +367,9 @@ def main() -> None:
     if not targets:
         sys.exit("No accents to generate — add voice ids to tools/voices.json.")
 
-    per_accent = idiom_texts() if args.idioms else (REVIEW_BATCH if args.review_batch else None)
+    per_accent = (drill_texts() if args.drills
+                  else idiom_texts() if args.idioms
+                  else REVIEW_BATCH if args.review_batch else None)
     if args.review_batch:
         targets = [a for a in targets if a in REVIEW_BATCH]
     if args.idiom_pilot:

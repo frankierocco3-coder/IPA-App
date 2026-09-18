@@ -62,7 +62,7 @@ export const SPEECH_GLOSSARY = {
   },
   'rhetoric': {
     term: 'Rhetoric',
-    def: 'The craft of effective and persuasive communication — discovering what will move a particular audience and structuring speech accordingly. Speechcraft’s full pathway lives in Library → Rhetoric & Oratory.',
+    def: 'The craft of effective and persuasive communication — discovering what will move a particular audience and structuring speech accordingly.',
   },
   'presence': {
     term: 'Presence',

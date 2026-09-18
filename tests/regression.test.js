@@ -27,6 +27,7 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
 import { PROVIDED_SCENES } from '../js/data/scenes.js';
 import { parseProvidedScene } from '../js/scene-parse.js';
+import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
@@ -759,40 +760,22 @@ export async function run({ navDoc = document } = {}) {
       const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
       const card = title => [...doc.querySelectorAll('.track-card')].find(c => c.querySelector('h2')?.textContent === title);
 
-      // Reading pathway: Library card → credited PD pathway → back.
-      // With Speech withdrawn, the accent Library shelves Rhetoric &
-      // Oratory as a Shared card and opens it WITHOUT a workspace hop.
+      // Rhetoric & Oratory is WITHDRAWN behind RHETORIC_LIVE (owner
+      // hold, 2026-09-17): the card is absent, and withdrawal is a
+      // flag, not a deletion — the credited pathway stays whole in
+      // source, pinned copy included, ready to flip back.
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
       clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(420);
       clickIn(side('Library')); await sleep(400);
-      // The Library is the ONE shared workspaceLibrary now — .tile cards
-      // in a .tile-grid, and the rhetoric card's key is plain 'rhetoric'.
-      const rhet = doc.querySelector('[data-tile="rhetoric"]');
-      check('pathway: the accent Library shelves Rhetoric & Oratory',
-        !!rhet && (doc.querySelector('.page-h')?.textContent ?? '').endsWith(' Library'));
-      clickIn(rhet); await sleep(400);
-      const pageText = doc.body.textContent;
-      check('pathway: all three dialogues present, in reading order',
-        ['Gorgias', 'Phaedrus', 'Republic'].every(t => pageText.includes(t))
-        && pageText.indexOf('Gorgias') < pageText.indexOf('Phaedrus')
-        && pageText.indexOf('Phaedrus') < pageText.indexOf('Republic (Books'));
-      check('pathway: translator credited with PD statement',
-        pageText.includes('Benjamin Jowett')
-        && pageText.includes('public domain in the United States')
-        && pageText.includes('check the copyright law where they live')
-        && pageText.includes('Project Gutenberg'));
-      check('pathway: each dialogue carries its verbatim Jowett excerpt',
-        pageText.includes('persuades the judges in the courts')
-        && pageText.includes('create forgetfulness in the learners')
-        && pageText.includes('the beginning is the most important part of any work'));
-      check('pathway: no external links (house sources policy)',
-        doc.querySelectorAll('main a[href]').length === 0);
-      check('pathway: a pathway, not an ebook shelf',
-        pageText.includes('not an ebook shelf'));
-      clickIn(doc.getElementById('nav-back')); await sleep(350);
-      check('pathway: Back returns to the accent Library shelf',
-        (doc.querySelector('.page-h')?.textContent ?? '').endsWith(' Library')
-        && !!doc.querySelector('[data-tile="rhetoric"]'));
+      check('pathway: Rhetoric & Oratory is withdrawn from the Library while RHETORIC_LIVE is false',
+        !doc.querySelector('[data-tile="rhetoric"]')
+        && (doc.querySelector('.page-h')?.textContent ?? '').endsWith(' Library'));
+      const mainSrc10 = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+      check('pathway: withdrawal is a flag, not a deletion — the credited pathway stays whole in source',
+        mainSrc10.includes('const RHETORIC_LIVE = false')
+        && mainSrc10.includes('function renderReadingPathway')
+        && mainSrc10.includes('persuades the judges in the courts')
+        && mainSrc10.includes('public domain in the United States'));
 
       // Preface replay through the PERMANENT More card — full walk, Esc out,
       // and proof that nothing about the profile changed.
@@ -1986,18 +1969,21 @@ export async function run({ navDoc = document } = {}) {
       // Action while DIALECT_ACTION_LIVE is false — the withdrawn card is
       // ABSENT, not empty. Shared resources say so with a badge instead.
       const wantLib = ['IPA for This Accent', 'Words & Expressions',
-        'Rhetoric & Oratory', 'Your Instrument', 'Vowel Map'];
+        'Twisters & Sentences', 'Your Instrument'];
       check('IA: Library shows exactly the approved cards in the approved order',
         doc.querySelector('.page-h')?.textContent.endsWith(' Library') === true
         && !!doc.getElementById('lib-search')
         && JSON.stringify(tileTitles()) === JSON.stringify(wantLib), tileTitles().join(' | '));
       const libTiles = [...doc.querySelectorAll('.tile-grid .tile')];
-      check('IA: Library tiles are title-led — a unit count on every card, status as badges, no blurbs',
+      check('IA: Library tiles are title-led — counts only on material shelves, no blurbs',
         libTiles.length === wantLib.length
-        && libTiles.every(t => /^\d+ \S+$/.test(t.querySelector('.tile-meta')?.textContent ?? '')
-          && !t.querySelector('p'))
-        && libTiles.some(t => t.textContent.includes('Rhetoric')
-          && t.querySelector('.badge')?.textContent === 'Shared'));
+        && libTiles.every(t => !t.querySelector('p'))
+        && libTiles.every(t => {
+          const meta = t.querySelector('.tile-meta')?.textContent ?? '';
+          const material = /Words & Expressions|Twisters/.test(t.textContent);
+          return material ? /^\d+ \S+$/.test(meta) : meta === '';
+        })
+        && !libTiles.some(t => t.textContent.includes('Rhetoric')));
       check('IA: no retired Library cards remain',
         tileTitles().length > 0
         && ['About', 'Dialect in Action', 'Accent Bridge', 'Scripts & Speeches',
@@ -2898,9 +2884,18 @@ export async function run({ navDoc = document } = {}) {
         && !/\bXP\b/.test(doc.querySelector('main')?.textContent ?? ''));
 
       clickIn(side('Practice')); await sleep(400);
-      check('acting: Practice holds the four categories, Scene Study withdrawn',
+      check('acting: Practice holds the five categories, Scene Study withdrawn',
         String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
-          === 'Acting Arcade,Flash Cards,Rhythm Cards,Practice My Text');
+          === 'Warmup,Acting Arcade,Flash Cards,Rhythm Cards,Practice My Text');
+      // The Warmup: written steps on the shared runner, safety line
+      // verbatim, no audio and no scoring apparatus.
+      clickIn(doc.getElementById('acp-warmup')); await sleep(350);
+      check('acting: the Warmup runs written steps with the safety line, unscored',
+        !!doc.getElementById('step-next')
+        && doc.body.textContent.includes('Stop if you experience pain')
+        && doc.body.textContent.includes('skipping a step costs nothing')
+        && !doc.querySelector('audio, [data-check], .sp-check'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('acp-arcade')); await sleep(400);
       // The Arcade is text-first: a three-level picker (Speeches and
       // Scenes, then collections, then texts) opens before any game grid.
@@ -3500,6 +3495,22 @@ export async function run({ navDoc = document } = {}) {
       })());
   }
 
+  // ── 21c. Speak-aloud drills: a full bank per accent course ───
+  {
+    const accs = ['nam', 'rp', 'ssbe', 'aus', 'cockney'];
+    check('drills: every accent course carries six twisters and six sentences',
+      accs.every(a => {
+        const xs = SPEAK_DRILLS.filter(x => x.accent === a);
+        return xs.filter(x => x.kind === 'twister').length === 6
+          && xs.filter(x => x.kind === 'sentence').length === 6
+          && xs.every(x => x.text && x.focus);
+      }) && SPEAK_DRILLS.length === accs.length * 12);
+    check('drills: focus notes keep house style and honest tiers',
+      SPEAK_DRILLS.every(x => !x.focus.includes('\u2014'))
+      && SPEAK_DRILLS.filter(x => x.accent === 'ssbe' && /glottal|\[\u0294\]/.test(x.focus))
+        .every(x => /option/.test(x.focus)));
+  }
+
   // ── 22. Offline capability (PWA) ─────────────────────────────
   // Static contracts only: the worker itself never registers on
   // localhost (and the runner sheds any registration first), so what is
@@ -3526,6 +3537,55 @@ export async function run({ navDoc = document } = {}) {
       !navigator.serviceWorker?.controller);
     check('pwa: the full wipe covers the offline cache',
       mainSrc.includes("report.push('offline cache')"));
+  }
+
+  // ── 28. Page transitions: the browser's own, used sparingly ──
+  // navTo() hands a render to the View Transitions API, which animates
+  // the paint around it. Every driven section above already walks the
+  // app through navTo, so navigation itself is covered there. What is
+  // pinned here is what would fail SILENTLY: the two ways out, the
+  // superseded-transition rejections, and colliding transition names
+  // (two elements claiming one name kills every transition at once).
+  {
+    const uiSrc28 = await fetch('../js/ui.js').then(r => r.text()).catch(() => '');
+    const cssSrc28 = await fetch('../css/style.css').then(r => r.text()).catch(() => '');
+    const mainSrc28 = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+
+    check('transitions: no API and reduced motion both render straight through',
+      uiSrc28.includes('export function navTo')
+      && uiSrc28.includes("matchMedia('(prefers-reduced-motion: reduce)').matches")
+      && uiSrc28.includes("typeof document.startViewTransition !== 'function'")
+      && uiSrc28.includes('{ render(); return; }'));
+    check('transitions: a superseded transition is never an unhandled rejection',
+      uiSrc28.includes('t.ready.catch(') && uiSrc28.includes('t.finished.catch('));
+    check('transitions: Back travels the opposite way to Forward',
+      uiSrc28.includes("}, 'back');")
+      && cssSrc28.includes(':root[data-nav="back"]::view-transition-old(root)')
+      && cssSrc28.includes(':root[data-nav="back"]::view-transition-new(root)'));
+    check('transitions: section changes and shelf openings go through navTo',
+      mainSrc28.includes('navTo(() => renderShell(target))')
+      && mainSrc28.includes('navTo(() => card.go())'));
+    check('transitions: a page turn stays a page turn, not an effect',
+      /animation-duration:\s*1[0-9]{2}ms/.test(cssSrc28)
+      && cssSrc28.split('@media (prefers-reduced-motion: reduce)')
+        .some(b => b.slice(0, 220).includes('::view-transition-old(root)')),
+      'duration left the 100-199ms range, or reduced motion lost its CSS lock');
+
+    const frame28 = document.querySelector('iframe');
+    if (frame28) {
+      frame28.contentWindow.location.reload();
+      await scSleep(1200);
+      const doc28 = frame28.contentDocument;
+      const win28 = frame28.contentWindow;
+      const names28 = ['.side-nav', '.bottom-nav', '.topbar']
+        .flatMap(sel => [...doc28.querySelectorAll(sel)]
+          .map(el => win28.getComputedStyle(el).viewTransitionName))
+        .filter(n => n && n !== 'none');
+      check('transitions: the shell furniture is lifted out of the page snapshot',
+        names28.includes('sc-side-nav'), `saw: ${names28.join(',') || 'none'}`);
+      check('transitions: no two elements claim one transition name',
+        names28.length === new Set(names28).size, `duplicates in: ${names28.join(',')}`);
+    }
   }
 
   if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');

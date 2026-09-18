@@ -1983,3 +1983,39 @@ body.nb-full #app { display: none; }
 }
 .sc-direction { font-size: 16px; font-style: italic; color: var(--muted); margin: 0 0 16px; }
 .sc-text { font-size: 18px; line-height: 1.65; margin: 0 0 16px; }
+
+/* ── Page transitions (View Transitions API, 2026-09-17) ────────
+   The browser cross-fades the page being left against the page being
+   entered. navTo() in js/ui.js decides whether a transition happens at
+   all: a browser without the API, or a reader who has asked for
+   reduced motion, never reaches these rules. The reduced-motion block
+   below is the second lock on the same door.
+
+   Keep this quick and small. A page turn should read as a page turn,
+   not as an effect. Back travels the opposite way to Forward. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 180ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0.2, 1);
+}
+::view-transition-old(root) { animation-name: sc-page-out; }
+::view-transition-new(root) { animation-name: sc-page-in; }
+:root[data-nav="back"]::view-transition-old(root) { animation-name: sc-page-out-back; }
+:root[data-nav="back"]::view-transition-new(root) { animation-name: sc-page-in-back; }
+
+@keyframes sc-page-in       { from { opacity: 0; transform: translateY(8px); } }
+@keyframes sc-page-out      { to   { opacity: 0; transform: translateY(-4px); } }
+@keyframes sc-page-in-back  { from { opacity: 0; transform: translateY(-8px); } }
+@keyframes sc-page-out-back { to   { opacity: 0; transform: translateY(4px); } }
+
+/* The furniture holds still while the page moves through it. Naming an
+   element lifts it out of the page snapshot and gives it its own, so the
+   nav and the page header stay put instead of fading with the content. */
+.side-nav   { view-transition-name: sc-side-nav; }
+.bottom-nav { view-transition-name: sc-bottom-nav; }
+.topbar     { view-transition-name: sc-topbar; }
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) { animation: none; }
+}

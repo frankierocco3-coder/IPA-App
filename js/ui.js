@@ -55,12 +55,42 @@ export function record(thunk) {
   navStack.push(thunk);
 }
 
+// ── Page transitions ──────────────────────────────────────────
+// The browser's own View Transitions API cross-fades the page being
+// left against the page being entered. Nothing about rendering
+// changes: navTo hands the render straight to the browser, which
+// runs it as written and animates the paint around it, so the
+// wiring code inside each view still runs in its usual order.
+//
+// Two ways out, both silent: a browser without the API, and a reader
+// who has asked for reduced motion. The preference is read fresh on
+// every navigation, so changing it takes effect without a reload.
+// `dir` lets Back travel the opposite way to Forward (see style.css).
+let navSeq = 0;
+export function navTo(render, dir = 'forward') {
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced || typeof document.startViewTransition !== 'function') { render(); return; }
+  const root = document.documentElement;
+  const mine = ++navSeq;
+  root.dataset.nav = dir;
+  const t = document.startViewTransition(render);
+  // A transition started while another is running supersedes it, and
+  // the superseded one rejects. That is ordinary, not an error. Only
+  // the newest transition clears the direction, so a superseded one
+  // finishing late cannot pull the attribute out from under it.
+  t.ready.catch(() => {});
+  t.updateCallbackDone.catch(err => console.error('page render failed', err));
+  t.finished.catch(() => {}).then(() => { if (navSeq === mine) delete root.dataset.nav; });
+}
+
 export function goBack() {
   stopSpeech();
   navStack.pop();                                // drop the current page
   const prev = navStack[navStack.length - 1];
-  navRestoring = true;                           // prev's record() shouldn't re-push
-  if (prev) prev(); else homeHandler();
+  navTo(() => {
+    navRestoring = true;                         // prev's record() shouldn't re-push
+    if (prev) prev(); else homeHandler();
+  }, 'back');
 }
 
 // Standard header for a sub-page: back + brand (→ home) + centered title.
