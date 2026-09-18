@@ -64,6 +64,22 @@ import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
          actingLessonById, actingLessonNumber } from '../js/data/acting/course.js';
 import { ACTING_GAMES, SCENE_STUDY_AREAS } from '../js/data/acting/practice.js';
 
+// The view layer spans js/main.js and the js/views/* modules it imports
+// (the 2026-09 split). Checks that pin shipped copy, a withdrawal flag or
+// a wiring contract care about the CODE, not about which file holds it, so
+// they read the layer as one text. The module list is derived from main.js's
+// own imports, so a new view module joins the checks by existing.
+let viewSrcCache = null;
+async function viewSource() {
+  if (viewSrcCache !== null) return viewSrcCache;
+  const main = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+  const paths = [...main.matchAll(/from '\.(\/views\/[\w-]+\.js)'/g)].map(m => m[1]);
+  const parts = await Promise.all(paths.map(rel =>
+    fetch('../js' + rel).then(r => r.ok ? r.text() : '').catch(() => '')));
+  viewSrcCache = [main, ...parts].join('\n');
+  return viewSrcCache;
+}
+
 // Background tabs clamp setTimeout to as little as one callback per
 // minute, which stalls a drive built from many short waits. MessageChannel
 // tasks are not clamped, so the suite spins the event loop instead — the
@@ -107,7 +123,7 @@ export async function run({ navDoc = document } = {}) {
   // Speech drives: while the flag is false those drives are SKIPPED and
   // replaced by withdrawal assertions; flip the flag and they run again,
   // unchanged. Read from source so the two can never drift apart.
-  const speechLive = await fetch('../js/main.js').then(r => r.text())
+  const speechLive = await viewSource()
     .then(src => /const SPEECH_LIVE = true\b/.test(src)).catch(() => false);
 
   // Spy on the APP's getUserMedia for the whole run (runner only): every
@@ -770,7 +786,7 @@ export async function run({ navDoc = document } = {}) {
       check('pathway: Rhetoric & Oratory is withdrawn from the Library while RHETORIC_LIVE is false',
         !doc.querySelector('[data-tile="rhetoric"]')
         && (doc.querySelector('.page-h')?.textContent ?? '').endsWith(' Library'));
-      const mainSrc10 = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+      const mainSrc10 = await viewSource();
       check('pathway: withdrawal is a flag, not a deletion — the credited pathway stays whole in source',
         mainSrc10.includes('const RHETORIC_LIVE = false')
         && mainSrc10.includes('function renderReadingPathway')
@@ -3381,7 +3397,7 @@ export async function run({ navDoc = document } = {}) {
     check('idb probe: a fast positive still reports traces',
       (await race(Promise.resolve(true), true)) === true);
     // And the shipped source must not have drifted back to false.
-    const src = await fetch('../js/main.js').then(r => r.text());
+    const src = await viewSource();
     check('idb probe: main.js resolves the timeout to TRUE, not false',
       /setTimeout\(\(\) => r\(true\), 150\)/.test(src)
       && !/setTimeout\(\(\) => r\(false\), 150\)/.test(src));
@@ -3429,7 +3445,7 @@ export async function run({ navDoc = document } = {}) {
       && text.includes('you haven’t learned the scene — you’ve learned the rehearsal')
       && text.includes('Helga Noice') && text.includes('Michael Caine')
       && text.includes('That’s the whole trade.'));
-    const mainSrc2 = await fetch('../js/main.js').then(r => r.text());
+    const mainSrc2 = await viewSource();
     check('memory lesson: read-only page — renderer exists, no controls, tile shelved',
       /function renderLineLesson/.test(mainSrc2)
       && !/renderLineLesson[\s\S]{0,1600}<(textarea|input|select)/.test(mainSrc2.slice(mainSrc2.indexOf('function renderLineLesson')))
@@ -3441,7 +3457,7 @@ export async function run({ navDoc = document } = {}) {
   // SPEECH_LIVE pattern: the flag is read from source so the suite and
   // the app can never drift. Data invariants hold in BOTH flag states.
   {
-    const mainSrc = await fetch('../js/main.js').then(r => r.text());
+    const mainSrc = await viewSource();
     check('cockney: visibility gates exist — course picker and Studio dialects both honor COCKNEY_LIVE',
       /COCKNEY_LIVE \|\| c\.id !== 'cockney'/.test(mainSrc)
       && /COCKNEY_LIVE \? \[\{ id: 'cockney'/.test(mainSrc));
@@ -3528,7 +3544,7 @@ export async function run({ navDoc = document } = {}) {
       !!sw && sw.includes("const VERSION = '")
       && sw.includes('if (!sameOrigin(url)) return')
       && sw.includes('caches.delete'));
-    const mainSrc = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+    const mainSrc = await viewSource();
     check('pwa: registration is production-only, top window only',
       mainSrc.includes("navigator.serviceWorker.register('./sw.js')")
       && mainSrc.includes('window === window.top')
@@ -3549,7 +3565,7 @@ export async function run({ navDoc = document } = {}) {
   {
     const uiSrc28 = await fetch('../js/ui.js').then(r => r.text()).catch(() => '');
     const cssSrc28 = await fetch('../css/style.css').then(r => r.text()).catch(() => '');
-    const mainSrc28 = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+    const mainSrc28 = await viewSource();
 
     check('transitions: no API and reduced motion both render straight through',
       uiSrc28.includes('export function navTo')

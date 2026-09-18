@@ -9,6 +9,7 @@
 
 import { stopSpeech } from './audio.js';
 import { store } from './state.js';
+import { PHONEMES } from './data/phonemes.js';
 
 // Shell-owned navigation state. navStack is MUTATED, never
 // reassigned, so importers share one array.
@@ -21,6 +22,15 @@ export function resetNav() { navStack.length = 0; navRestoring = false; }
 // prevents ui.js -> main.js -> ui.js; ui.js imports no view module.
 let homeHandler = () => {};
 export function setHomeHandler(fn) { homeHandler = fn; }
+// Views go home through this, never by importing the shell's renderHome —
+// that is what keeps ui.js free of a cycle back into a view module.
+export function goHome() { homeHandler(); }
+
+// The shell also registers how to change section, for the same reason:
+// views call goSection() without importing the shell that implements it.
+let sectionHandler = () => {};
+export function setSectionHandler(fn) { sectionHandler = fn; }
+export function goSection(id) { sectionHandler(id); }
 
 // Page-scoped media teardown (try-it object URLs, live capture). Owned
 // by the shell; registered here so ui.js imports no view module.
@@ -250,3 +260,50 @@ export function workspacePage(topbar, headingHtml, bodyHtml) {
 // Cards are plain data: { key, tone, emoji, title, count, unit, badge,
 // keywords, wide, go }. Counts follow ONE grammar — "N unit" — with any
 // qualifier moved onto the collection page or a badge, never the count.
+
+// File slug for a phoneme's isolated clip: derived from its display name,
+// same transform the word clips use ("STRUT vowel" → strut_vowel).
+export const phonemeSlug = sym =>
+  PHONEMES[sym] ? PHONEMES[sym].name.toLowerCase().replace(/[^a-z0-9]+/g, '_') : null;
+export function openModal({ title, body, actions = '', onMount }) {
+  const prev = document.activeElement;
+  const wrap = document.createElement('div');
+  wrap.className = 'modal-wrap';
+  wrap.innerHTML = `
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+      <div class="modal-head">
+        <h2>${esc(title)}</h2>
+        <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body">${body}</div>
+      <div class="modal-actions">${actions}</div>
+    </div>`;
+  document.body.appendChild(wrap);
+  document.body.classList.add('modal-open');
+
+  const close = () => {
+    wrap.remove();
+    document.body.classList.remove('modal-open');
+    document.removeEventListener('keydown', onKey, true);
+    prev?.focus?.();
+  };
+  const focusables = () => [...wrap.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled);
+
+  function onKey(e) {
+    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
+    if (e.key !== 'Tab') return;
+    const f = focusables();
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  document.addEventListener('keydown', onKey, true);
+  wrap.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
+
+  onMount?.(wrap, close);
+  (wrap.querySelector('input, button:not([data-close])') ?? wrap.querySelector('button'))?.focus();
+  return close;
+}

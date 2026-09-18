@@ -69,9 +69,24 @@ excludes it).
 
 ```
 index.html          CSP lives here (meta tag, must stay first in <head>)
-js/main.js          ALL views + routing (~9.4k lines, 71% of app JS —
-                    a split is planned; see docs/PRE_RELEASE_PUNCH_LIST.md B-R1).
-                    Views are render*() fns
+js/main.js          the shell, routing, boot, and the views not yet
+                    extracted (~9.7k lines). Views are render*() fns.
+                    The B-R1 split is UNDER WAY — see below.
+js/ui.js            shared UI vocabulary: app, navStack, record, goBack,
+                    navTo, goHome, esc, openModal, phonemeSlug, topbars,
+                    tiles, runStepSequence. Imports NO view module, which
+                    is what keeps the graph free of cycles.
+js/views/           modules extracted from main.js (the 2026-09 split):
+  context.js          course + workspace context, and the maps keyed off
+                      them (shared by every view; not a screen)
+  reference.js        the IPA chart, the sound pages, What Is IPA?, and
+                      the shared bits they own (wordChip, speakableWord,
+                      wireTryIt, the wii* question helpers)
+  ipa-tools.js        fillSound (≈IPA derivation), openWordEditor,
+                      stripStage
+  dialect-action.js   the Dialect in Action shelf, pending notice and page
+  action-piece.js     one Dialect in Action piece, for learner or reviewer
+  admin.js            the owner-only #audit and #review pages
 js/engine.js        16 exercise generators
 js/state.js         localStorage progress (XP, streak, lessons)
 js/db.js            IndexedDB wrapper + schema/migrations
@@ -1004,6 +1019,35 @@ reduced-motion lock, and `view-transition-name` on .side-nav /
 .bottom-nav / .topbar so the furniture holds still while the page moves
 through it. Two elements sharing one name would kill every transition at
 once, so the suite pins name-uniqueness in the live app (section 28).
+
+THE main.js SPLIT (B-R1, begun 2026-09-18, staged): main.js is being
+taken apart along the seams the IA already defines. Three rules hold it
+together. (1) NO CYCLES: a view may import ui.js, views/context.js and
+its sibling views, never main.js. Where a view needs the shell — going
+home, tearing down media — it goes through a callback ui.js owns
+(`goHome`, `goSection`, `setTeardownHooks`), which is the same trick
+that has kept
+ui.js cycle-free since August. The shell's own implementation of
+goSection is now the private `showSection`, registered through
+`setSectionHandler` — the PUBLIC name and behaviour are unchanged for
+all 35 call sites. (2) NOTHING IS REWRITTEN: every moved
+declaration keeps its name and its body, so a move is reviewable as a
+move. (3) THE GRADERS READ THE LAYER, NOT THE FILE: tools/launch_lint.py
+reads main.js plus every js/views/*.js as one text (`views_js`), and the
+suite does the same through `viewSource()`, which derives the module
+list from main.js's own imports — so a new view module joins the checks
+by existing. Pins about shipped copy keep their exact meaning; banned
+copy is now banned across the whole layer, which is stronger.
+
+The moves are scripted, not hand-edited, and the script REFUSES any set
+whose code still needs a name left behind in main.js — that refusal is
+how the acyclic rule is enforced rather than hoped for. Two traps cost
+real time and are worth knowing: a declaration-boundary scanner must
+understand regex literals (`/\[\[([^\]|]+)\|...\]\]/g` silently
+truncated a function and left a stray brace behind), and an alias like
+`KNOWN_BAD as KNOWN_BAD_LIST` must be re-emitted WITH its alias. Verify
+every move by loading each module in the browser — there is no Node
+here, so the browser's parser is the only ground truth.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

@@ -8,6 +8,7 @@ import { parseProvidedScene } from './scene-parse.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
+         goHome, goSection, setSectionHandler, openModal, phonemeSlug,
          pageTopbar, wireBrandHome, EMBLEM, BRAND_BTN, courseProgressHtml,
          runStepSequence, tileHtml, itemTileHtml, reviewStripHtml,
          groupStatus, workspacePage } from './ui.js';
@@ -90,21 +91,16 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
+import { ACCENTLESS_WORKSPACES, COURSES, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
+import { renderAudioAudit, renderContentReview } from './views/admin.js';
+import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
+import { renderDialectAction, renderDialectActionPending } from './views/dialect-action.js';
+import { openWhatIsIpa, renderChart, renderSoundDetail, speakableWord, tryItUrl, whatIsIpaCard, wiiQuestion, wireTryIt, wireWhatIsIpaCard, wireWiiQuestions, wordChip } from './views/reference.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
-// File slug for a phoneme's isolated clip: derived from its display name,
-// same transform the word clips use ("STRUT vowel" → strut_vowel).
-const phonemeSlug = sym =>
-  PHONEMES[sym] ? PHONEMES[sym].name.toLowerCase().replace(/[^a-z0-9]+/g, '_') : null;
 
-// A word control that is only playable when a real recording exists for
-// this course. Missing → visibly unavailable, never a dead button and
-// never device TTS. (Before the index loads, assume available.)
-const speakableWord = (w, acc) => !clipIndexLoaded() || hasWordClip(w, acc);
-const wordChip = (w, acc) => speakableWord(w, acc)
-  ? `<button class="word-chip" data-say="${esc(w)}" type="button" aria-label="Hear the word “${esc(w)}”">🔊 ${esc(w)}</button>`
-  : `<span class="word-chip is-off" role="note" aria-label="“${esc(w)}” — recording coming soon">${esc(w)} <small>· recording soon</small></span>`;
 
 
 
@@ -130,47 +126,8 @@ function teardownAV() {
 
 
 
-const unitById = Object.fromEntries(COURSE.map(u => [u.id, u]));
 
-// Mini-game checkpoints woven between lessons: after every 2 lessons in
-// a unit, a short review game covering everything the unit taught so far.
-function expandUnit(unit) {
-  const out = [];
-  const covered = [];
-  unit.lessons.forEach((l, i) => {
-    out.push(l);
-    covered.push(l);
-    if ((i + 1) % 2 === 0 && unit.lessons.length > 1) {
-      const phonemes = [...new Set(covered.flatMap(x => x.phonemes ?? []))];
-      const types = [...new Set(covered.flatMap(x => x.types ?? []))];
-      const accent = covered.find(x => x.accent)?.accent;
-      const shiftTo = covered.find(x => x.shiftTo)?.shiftTo;
-      // sprinkle in extra game-y types that fit the material
-      const extras = accent || shiftTo ? ['fillBlank'] : ['match', 'fillBlank', 'gapBuild'];
-      // Standard British checkpoints always carry idiom material — meaning
-      // questions early, register questions too (deterministic via rotation).
-      if ((accent ?? shiftTo) === 'ssbe') extras.push('idiom', 'idiomRegister');
-      out.push({
-        id: `chk-${unit.id}-${(i + 1) / 2}`,
-        title: 'Checkpoint game',
-        checkpoint: true,
-        phonemes,
-        types: [...new Set([...types, ...extras])],
-        accent,
-        shiftTo,
-        count: 5,
-      });
-    }
-  });
-  return out;
-}
 
-const UNIT_EXPANDED = Object.fromEntries(COURSE.map(u => [u.id, expandUnit(u)]));
-const TRACK_LESSONS = Object.fromEntries(TRACKS.map(t => [
-  t.id,
-  t.unitIds.flatMap(uid => UNIT_EXPANDED[uid].map(l => ({ ...l, unit: unitById[uid], track: t }))),
-]));
-const ALL_LESSONS = Object.values(TRACK_LESSONS).flat();
 
 function isUnlocked(lesson) {
   if (store.freePlay) return true;
@@ -239,20 +196,6 @@ function practiceLesson(track) {
 // exactly like switching languages. Leaderboards are deliberately absent:
 // there are no accounts, so there is nobody real to rank against.
 
-// Cockney is a strict-audio course (Bob and Lizzie). Launched by owner
-// order 2026-08-29 after the full ear-gated audio pipeline (review batch,
-// bulk, recipe book in tools/respell.json). Exported so the regression
-// suite can assert visibility matches the flag.
-export const COCKNEY_LIVE = true;
-const COURSES = [
-  { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
-  { id: 'rp', icon: '🎩', label: 'Traditional RP' },
-  { id: 'ssbe', icon: '🇬🇧', label: 'Standard British' },
-  { id: 'cockney', icon: '🚕', label: 'Cockney' },
-  { id: 'aus', icon: '🇦🇺', label: 'Australian' },
-  { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
-];
-const visibleCourses = () => COURSES.filter(c => COCKNEY_LIVE || c.id !== 'cockney');
 // The ONE ordered nav config: the desktop sidebar and the mobile bottom
 // nav both render straight from this array, so the two can never drift.
 const SECTIONS = [
@@ -292,75 +235,14 @@ const OFF_NAV_SECTIONS = ['shop', 'profile'];
 // Older saved states point at sections that have since moved.
 const LEGACY_SECTIONS = { textbook: 'library', texts: 'library', quests: 'progress' };
 
-// Every workspace carries the same six sections. Learn is an OPTIONAL
-// guided pathway over the Library's records — never a prerequisite for
-// reading them.
-const activeCourse = () => {
-  const c = localStorage.getItem('speechcraft-course');
-  return visibleCourses().some(x => x.id === c) ? c : 'nam';
-};
 
-// ── Workspaces: Speech · Acting · IPA · Accents & Dialects ──
-// One app, three connected work areas. The sidebar sections keep their
-// names; their CONTENTS follow the active workspace. The selection is
-// remembered locally; nothing about courses, progress or projects is
-// duplicated or erased by switching.
-const WORKSPACES = [
-  { id: 'speech', icon: '🗣', label: 'Speech',
-    context: 'Clarity, confidence, persuasion and vocal freedom' },
-  { id: 'acting', icon: '🎭', label: 'Acting',
-    context: 'Scene study, character, text and rehearsal' },
-  // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
-  // the conservatory class name. The internal id stays 'ipa' (stored
-  // values, lint pins); the IPA Foundations course chip stays inside.
-  { id: 'ipa', icon: 'ʃə', label: 'Voice & Speech',
-    context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
-  { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
-    context: 'Accent and dialect courses' },
-];
-// ── Kill switch (2026-08-19, owner decision) ──────────────────
-// The Speech workspace is withdrawn from the learner-facing app "for
-// now": its content is thin next to Acting, and the full Speech build
-// is deferred. NOTHING is deleted — every renderer, record, review and
-// practice surface stays. The Speechcraft Textbook and Rhetoric &
-// Oratory shelve in the Acting Library meanwhile. Flip to true and the
-// Speech workspace returns whole.
-const SPEECH_LIVE = false;
 // Rhetoric & Oratory is WITHDRAWN from the accent Library (owner hold,
 // 2026-09-17) — a flag, not a deletion: renderReadingPathway and its
 // pinned Jowett copy stay whole, and the Speech Library reference is
 // untouched behind SPEECH_LIVE. Flip to restore the card.
 const RHETORIC_LIVE = false;
-const liveWorkspaces = () => WORKSPACES.filter(w => SPEECH_LIVE || w.id !== 'speech');
 
-// Workspaces that are about the work, not about an accent — they show
-// no accent chip and no accent selector.
-const ACCENTLESS_WORKSPACES = ['speech', 'acting'];
-const WORKSPACE_KEY = 'speechcraft-workspace';
-const activeWorkspace = () => {
-  try {
-    const v = localStorage.getItem(WORKSPACE_KEY);
-    if (v === 'speech' && !SPEECH_LIVE) return 'acting';
-    if (WORKSPACES.some(w => w.id === v)) return v;
-    // Migration from the retired page-level tabs, then inference from
-    // the stored course — existing users land exactly where they were.
-    if (localStorage.getItem('speechcraft-learn-mode') === 'speech'
-      || localStorage.getItem('speechcraft-practice-mode') === 'speech')
-      return SPEECH_LIVE ? 'speech' : 'acting';
-    return activeCourse() === 'core' ? 'ipa' : 'accents';
-  } catch { return 'accents'; }
-};
-const setWorkspace = w => { try { localStorage.setItem(WORKSPACE_KEY, w); } catch {} };
 
-// The course a workspace works in. IPA is always the accent-neutral
-// core course; Accents & Dialects uses the stored dialect course (the
-// stored value is preserved even while other workspaces are active).
-const workspaceCourse = ws => {
-  if (ws === 'ipa') return COURSES.find(c => c.id === 'core');
-  const c = activeCourse();
-  return COURSES.find(x => x.id === (c === 'core' ? 'nam' : c));
-};
-const setCourse = c => { try { localStorage.setItem('speechcraft-course', c); } catch {} };
 const activeSection = () => {
   const raw = localStorage.getItem('speechcraft-section');
   const s = LEGACY_SECTIONS[raw] ?? raw;
@@ -375,9 +257,9 @@ const activeSection = () => {
 };
 const setSection = s => { try { localStorage.setItem('speechcraft-section', s); } catch {} };
 
-const trackFor = d => TRACKS.find(t => t.id === d);
 
 setHomeHandler(() => renderHome());
+setSectionHandler(id => showSection(id));
 setTeardownHooks(() => releaseTryIt(), () => teardownAV());
 
 function renderHome() {
@@ -385,7 +267,9 @@ function renderHome() {
   navTo(() => renderShell(section), 'back');     // the brand button is a way out, not a way in
 }
 
-function goSection(id) {
+// Registered with ui.js as the section handler, so every view can call
+// goSection() without importing the shell that implements it.
+function showSection(id) {
   const target = SECTIONS.some(x => x.id === id) || OFF_NAV_SECTIONS.includes(id)
     ? id : 'learn';
   setSection(target);
@@ -2998,12 +2882,6 @@ function workspaceLibrary(el, { workspace, cards, state }) {
 // Shared records (Speech chapters, Playable Actions, Question
 // Everything) are LINKED from here, never copied.
 
-// Acting content the learner may read: every acting lesson authored in
-// this build is a prepared draft until a qualified acting teacher or
-// coach reviews it (js/data/speech/reviews.js is the shared ledger).
-// Published for preview by owner editorial approval; specialist
-// review remains outstanding and is tracked separately.
-const actingVisible = l => speechPublished(l.id);
 
 function actingCensus() {
   const available = ACTING_LESSONS.filter(actingVisible);
@@ -4886,262 +4764,15 @@ function profileMain(el) {
 // reachable from Library → IPA, the Foundations path, and core lesson
 // guides. Completion is a badge in the store; deliberately no XP or gems.
 
-const WII_QUESTIONS = 5;   // ship-symbol + same-sound pair + 3 classifications
 
-function whatIsIpaCard() {
-  const w = store.whatIsIpa;
-  return `
-    <button class="track-card wii-card" data-open-wii type="button" style="--track-color:#64748b">
-      <div class="track-glyph" aria-hidden="true">💡</div>
-      <div class="track-info">
-        <h2>What Is IPA? ${w.done ? '<span class="tag tag-skill">✓ completed</span>' : ''}</h2>
-        <p>Meet the alphabet of sounds — what it represents, why actors and language learners use it, and how to turn symbols into speech.</p>
-        <p class="mode-meta">3-minute introduction · interactive${w.done ? ` · ${w.correct}/${WII_QUESTIONS} answered right` : ''}</p>
-      </div>
-      <div class="track-arrow">›</div>
-    </button>`;
-}
 
-function wireWhatIsIpaCard(container) {
-  container.querySelectorAll('[data-open-wii]').forEach(b =>
-    b.addEventListener('click', openWhatIsIpa));
-}
 
-function openWhatIsIpa() {
-  record(openWhatIsIpa);
-  drawWhatIsIpa(0, { answered: {}, revealed: false });
-}
 
-// A word row with its transcription and a listen button.
-const wiiWordRow = (word, ipa, note = '') => `
-  <div class="guide-word">
-    ${wordChip(word, 'nam')}
-    <span class="guide-ipa">${esc(ipa)}</span>
-    ${note ? `<span class="guide-note">${esc(note)}</span>` : ''}
-  </div>`;
 
-// A tappable sound chip: symbol + example word. Plays the WORD (labelled as
-// such); flips to the isolated phoneme automatically once one is approved.
-const wiiSoundChip = ph => {
-  const p = PHONEMES[ph];
-  const slug = phonemeSlug(ph);
-  if (hasPhonemeClip(slug, 'nam')) {
-    return `<span class="wii-sound-pair">
-      <button class="word-chip" data-phoneme="${esc(slug)}" type="button"
-        aria-label="Hear the isolated sound ${esc(ph)}">🔊 /${esc(ph)}/</button>
-      <button class="word-chip" data-say="${esc(p.examples[0])}" type="button"
-        aria-label="Hear the word “${esc(p.examples[0])}”">${esc(p.examples[0])}</button>
-    </span>`;
-  }
-  return `<button class="word-chip" data-say="${esc(p.examples[0])}" type="button"
-    aria-label="Hear the word “${esc(p.examples[0])}”, which contains ${esc(ph)}">/${esc(ph)}/ in “${esc(p.examples[0])}”</button>`;
-};
 
-// One-tap mini question. `key` tracks the answer in the module state so a
-// question stays answered (and scored once) across Back/Continue.
-function wiiQuestion(st, key, prompt, options) {
-  const answered = st.answered[key];
-  return `
-    <div class="mini-check" data-q="${key}">
-      <p class="mini-prompt">${prompt}</p>
-      <div class="mini-opts" role="group" aria-label="${esc(prompt.replace(/<[^>]+>/g, ''))}">
-        ${options.map(o => `
-          <button class="btn mini-opt ${answered !== undefined && o.ok ? 'right' : ''}" type="button"
-            data-ok="${o.ok ? 1 : 0}" ${answered !== undefined ? 'disabled' : ''}>${o.label}</button>`).join('')}
-      </div>
-      <p class="mini-result" role="status">${answered === true ? '✓ Correct.' : answered === false ? 'Not quite — the marked answer is right.' : ''}</p>
-    </div>`;
-}
 
-function wireWiiQuestions(container, st, redraw) {
-  container.querySelectorAll('.mini-check').forEach(box => {
-    const key = box.dataset.q;
-    box.querySelectorAll('.mini-opt').forEach(btn =>
-      btn.addEventListener('click', () => {
-        if (st.answered[key] !== undefined) return;
-        const ok = btn.dataset.ok === '1';
-        st.answered[key] = ok;
-        btn.classList.add(ok ? 'right' : 'wrong');
-        box.querySelectorAll('.mini-opt').forEach(b => {
-          b.disabled = true;
-          if (b.dataset.ok === '1') b.classList.add('right');
-        });
-        box.querySelector('.mini-result').textContent =
-          ok ? '✓ Correct.' : 'Not quite — the marked answer is right.';
-      }));
-  });
-}
 
-function wiiStepHtml(step, st) {
-  switch (step) {
-    case 0: return `
-      <h1>What is IPA?</h1>
-      <p class="guide-text">The International Phonetic Alphabet, or IPA, is a system for writing sounds. Unlike ordinary spelling, each symbol tells you what sound to make — not how a word happens to be spelled.</p>
-      ${wiiWordRow('cat', '/kæt/', 'three letters, three sounds')}
-      ${wiiWordRow('enough', '/ɪˈnʌf/', 'six letters, four sounds')}
-      ${wiiWordRow('though', '/ðoʊ/', 'six letters, two sounds')}
-      <p class="pane-note">These transcriptions are accent-aware — this is the Neutral American reading, and other accents can differ.</p>`;
-    case 1: return `
-      <h1>Why is it useful?</h1>
-      <div class="guide-word"><span class="wii-who">🎭 Actors</span><span class="guide-note">learn an accent without depending on imitation alone</span></div>
-      <div class="guide-word"><span class="wii-who">🌍 Language learners</span><span class="guide-note">see how a word is actually pronounced</span></div>
-      <div class="guide-word"><span class="wii-who">🎵 Singers</span><span class="guide-note">identify vowels and consonants precisely</span></div>
-      <div class="guide-word"><span class="wii-who">🎓 Teachers & coaches</span><span class="guide-note">communicate pronunciation consistently</span></div>
-      <div class="guide-word"><span class="wii-who">🔬 Linguists</span><span class="guide-note">record and compare human speech</span></div>
-      <p class="wii-callout">IPA gives you a map. Audio lets you hear the destination; IPA shows you how to find it again.</p>`;
-    case 2: return `
-      <h1>One symbol, one sound</h1>
-      <p class="guide-text">Every symbol always means the same sound. Tap to hear each one inside a word${
-        hasPhonemeClip(phonemeSlug('ʃ'), 'nam') ? ' — or tap the symbol to hear the bare sound by itself' : ''}:</p>
-      <div class="chips">${['iː', 'æ', 'ɑ', 'ʃ', 'θ', 'ð', 'ŋ'].map(wiiSoundChip).join('')}</div>
-      ${hasPhonemeClip(phonemeSlug('ʃ'), 'nam') ? ''
-        : '<p class="pane-note">Isolated recordings of each bare sound are on the way — until then, every button plays the sound inside its word.</p>'}
-      ${wiiQuestion(st, 'ship', 'Which symbol represents the <b>first sound</b> in “ship”?', [
-        { label: '/s/', ok: false }, { label: '/ʃ/', ok: true }, { label: '/ɪ/', ok: false }, { label: '/θ/', ok: false },
-      ])}`;
-    case 3: return `
-      <h1>IPA versus spelling</h1>
-      <p class="guide-text">Spelling is a poor guide to sound:</p>
-      <div class="guide-word"><span class="wii-who">c</span><span class="guide-note">“cat” /k/ and “city” /s/ — one letter, two sounds</span></div>
-      <div class="guide-word"><span class="wii-who">ough</span><span class="guide-note">“though”, “thought”, “enough” — one spelling, three sounds</span></div>
-      <div class="guide-word"><span class="wii-who">/iː/</span><span class="guide-note">“see”, “sea”, “scene” — one sound, three spellings</span></div>
-      <p class="wii-callout">IPA describes pronunciation directly, without asking spelling for permission.</p>
-      ${wiiQuestion(st, 'pair', 'Tap the pair that <b>starts with the same sound</b>:', [
-        { label: 'cat · city', ok: false }, { label: 'city · sea', ok: true }, { label: 'cat · ship', ok: false },
-      ])}`;
-    case 4: return `
-      <h1>How to read a transcription</h1>
-      <div class="guide-word"><span class="wii-who">/ /</span><span class="guide-note">slashes surround a broad pronunciation</span></div>
-      <div class="guide-word"><span class="wii-who">ˈ</span><span class="guide-note">marks the syllable with primary stress — /ɪˈnʌf/</span></div>
-      <div class="guide-word"><span class="wii-who">symbols</span><span class="guide-note">represent sounds, never letters</span></div>
-      <div class="guide-word"><span class="wii-who">accents</span><span class="guide-note">the same word can transcribe differently</span></div>
-      <p class="guide-text">The same word, two accents — listen to both:</p>
-      <div class="guide-word">
-        ${speakableWord('bar', 'nam')
-          ? `<button class="word-chip" data-say="bar" data-lang="en-US" data-acc="nam" type="button">🔊 bar 🇺🇸</button>`
-          : `<span class="word-chip is-off">bar 🇺🇸 <small>· recording soon</small></span>`}
-        <span class="guide-ipa">/bɑr/</span><span class="guide-note">Neutral American — the r is spoken</span>
-      </div>
-      <div class="guide-word">
-        <button class="word-chip" data-say="bar" data-lang="en-GB" data-acc="rp" type="button">🔊 bar 🎩</button>
-        <span class="guide-ipa">/bɑː/</span><span class="guide-note">Traditional RP — the r becomes vowel length</span>
-      </div>
-      <details class="idiom-extra"><summary>Advanced detail — narrow transcription</summary>
-        <p class="pane-note">Square brackets [ ] mark a <i>narrow</i> transcription: exactly what a speaker did, with diacritics for fine detail — [kʰɑːˑ] notes aspiration and length. Speechcraft teaches broad transcription; narrow can wait.</p>
-      </details>`;
-    case 5: return `
-      <h1>How sounds are organized</h1>
-      <div class="guide-word"><span class="wii-who">Vowels</span><span class="guide-note">airflow stays open; tongue and lip position shape the sound</span></div>
-      <div class="guide-word"><span class="wii-who">Consonants</span><span class="guide-note">airflow is narrowed or stopped somewhere in the mouth</span></div>
-      <div class="guide-word"><span class="wii-who">Diphthongs</span><span class="guide-note">the mouth glides from one vowel position toward another</span></div>
-      <p class="guide-text">Sort these three — tap a category for each sound:</p>
-      ${[['æ', 'trap', 'Vowel'], ['ʃ', 'ship', 'Consonant'], ['aɪ', 'price', 'Diphthong']].map(([ph, w, right]) => `
-        <div class="mini-check wii-classify" data-q="cls-${ph}">
-          <p class="mini-prompt"><button class="word-chip" data-say="${esc(PHONEMES[ph].examples[0])}" type="button">🔊 /${esc(ph)}/ ${esc(w)}</button></p>
-          <div class="mini-opts" role="group" aria-label="Classify /${esc(ph)}/">
-            ${['Vowel', 'Consonant', 'Diphthong'].map(c => `
-              <button class="btn mini-opt ${st.answered['cls-' + ph] !== undefined && c === right ? 'right' : ''}" type="button"
-                data-ok="${c === right ? 1 : 0}" ${st.answered['cls-' + ph] !== undefined ? 'disabled' : ''}>${c}</button>`).join('')}
-          </div>
-          <p class="mini-result" role="status">${st.answered['cls-' + ph] === true ? '✓ Correct.' : st.answered['cls-' + ph] === false ? 'Not quite — the marked answer is right.' : ''}</p>
-        </div>`).join('')}
-      <p class="pane-note">The full landscape lives in the Library: the IPA Chart and Your Instrument (the vocal tract) — every sound with tongue placement and audio.</p>`;
-    case 6: return `
-      <h1>How to use IPA</h1>
-      <ol class="wii-steps-list">
-        <li>Find the word’s transcription.</li>
-        <li>Identify each sound.</li>
-        <li>Listen to the symbols and example words.</li>
-        <li>Examine tongue and lip placement.</li>
-        <li>Say the sounds separately.</li>
-        <li>Blend them into the word.</li>
-        <li>Listen closely to the model recordings and shadow them in your head as you read.</li>
-        <li>Compare, adjust, repeat.</li>
-      </ol>
-      <p class="guide-text">Try it on one word:</p>
-      <div class="wii-demo">
-        <div class="wii-demo-word">ship
-          <button class="word-chip" data-say="ship" type="button" aria-label="Hear the word ship">🔊 hear it</button>
-        </div>
-        ${st.revealed ? `
-          <div class="chips" id="wii-demo-syms">
-            ${[['ʃ', 'ship'], ['ɪ', 'kit'], ['p', 'pen']].map(([ph, w]) => {
-              const slug = phonemeSlug(ph);
-              return hasPhonemeClip(slug, 'nam')
-                ? `<button class="word-chip" data-phoneme="${esc(slug)}" type="button"
-                     aria-label="Hear the isolated sound ${esc(ph)}">🔊 /${esc(ph)}/</button>`
-                : `<button class="word-chip" data-say="${esc(w)}" type="button"
-                     aria-label="Hear the word “${esc(w)}”, home of ${esc(ph)}">/${esc(ph)}/ in “${esc(w)}”</button>`;
-            }).join('')}
-          </div>
-          <p class="pane-note">${hasPhonemeClip(phonemeSlug('ʃ'), 'nam')
-            ? 'Tap a symbol to hear the sound by itself; tap 🔊 above to hear the whole word.'
-            : 'Each symbol button plays its home word for now — isolated recordings are coming.'}</p>
-          <button class="btn-lite" data-sound-detail="ʃ" type="button">📐 See /ʃ/ tongue placement ›</button>`
-        : '<button class="btn" id="wii-reveal" type="button">Reveal the transcription</button>'}
-      </div>`;
-  }
-  // completion
-  const correct = Object.values(st.answered).filter(Boolean).length;
-  const course = COURSES.find(c => c.id === activeCourse());
-  return `
-    <h1>That’s the whole idea</h1>
-    <p class="guide-text">You do not need to memorize the entire IPA chart. Start by learning the symbols used in your course, one sound at a time.</p>
-    <div class="end-summary">
-      <div class="end-block"><span class="end-block-l">Questions</span><span class="end-block-v">${correct}/${WII_QUESTIONS} correct</span></div>
-      <div class="end-block"><span class="end-block-l">Covered</span><span class="end-block-v">symbols · stress · accents · vowel/consonant/diphthong · the workflow</span></div>
-      <div class="end-block"><span class="end-block-l">Next</span><span class="end-block-v">${correct >= 4 ? 'jump into a course' : 'the IPA Chart is a good slow tour'}</span></div>
-    </div>
-    <div class="ob-actions ob-actions-col">
-      <button class="btn btn-primary" id="wii-foundations" type="button">Start IPA Foundations</button>
-      <button class="btn" id="wii-chart" type="button">Explore the IPA Chart</button>
-      ${course.id !== 'core' ? `<button class="btn" id="wii-course" type="button">Continue ${esc(course.label)}</button>` : ''}
-    </div>`;
-}
 
-function drawWhatIsIpa(step, st) {
-  stopSpeech();
-  const total = 7;
-  const isEnd = step >= total;
-  app.innerHTML = `
-    <header class="lesson-top">
-      <button class="quit" id="quit" aria-label="Exit What Is IPA">✕</button>
-      <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="${total}"
-           aria-valuenow="${Math.min(step + 1, total)}" aria-label="What Is IPA — step ${Math.min(step + 1, total)} of ${total}">
-        <div class="progress-fill" style="width:${Math.round(Math.min(step + 1, total) / total * 100)}%"></div></div>
-      <span class="step-count">${isEnd ? '✓' : `${step + 1} of ${total}`}</span>
-    </header>
-    <main class="guide guide-stepped">
-      <div class="guide-title-bar" style="--unit-color:#64748b">💡 What Is IPA?</div>
-      <section class="guide-step">${wiiStepHtml(step, st)}</section>
-      ${isEnd ? '' : `
-      <div class="guide-nav">
-        ${step > 0 ? '<button class="btn" id="g-back" type="button">‹ Back</button>' : '<span></span>'}
-        <button class="btn btn-primary" id="g-next" type="button">${step === total - 1 ? 'Finish' : 'Continue'}</button>
-      </div>`}
-    </main>`;
-
-  document.getElementById('quit').addEventListener('click', goBack);
-  document.getElementById('g-back')?.addEventListener('click', () => drawWhatIsIpa(step - 1, st));
-  document.getElementById('g-next')?.addEventListener('click', () => {
-    const to = step + 1;
-    if (to >= total) store.markWhatIsIpa(Object.values(st.answered).filter(Boolean).length);
-    drawWhatIsIpa(to, st);
-  });
-  app.querySelectorAll('[data-say]').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.say, { lang: b.dataset.lang ?? 'en-US', accent: b.dataset.acc ?? 'nam' })));
-  app.querySelectorAll('[data-phoneme]').forEach(b =>
-    b.addEventListener('click', () => playPhoneme(b.dataset.phoneme, 'nam')));
-  app.querySelector('[data-sound-detail]')?.addEventListener('click', e =>
-    renderSoundDetail(e.currentTarget.dataset.soundDetail, 'nam'));
-  document.getElementById('wii-reveal')?.addEventListener('click', () => { st.revealed = true; drawWhatIsIpa(step, st); });
-  document.getElementById('wii-foundations')?.addEventListener('click', () => { setCourse('core'); setWorkspace('ipa'); goSection('learn'); });
-  document.getElementById('wii-chart')?.addEventListener('click', () => renderChart());
-  document.getElementById('wii-course')?.addEventListener('click', () => { setWorkspace('accents'); goSection('learn'); });
-  wireWiiQuestions(app, st);
-  const h = app.querySelector('.guide-step h1');
-  if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
-}
 
 // ── "Why Speech Matters" — the preface ───────────────────────
 // THREE content panels (Why Speech Matters, Speech Is Action, Speech
@@ -5411,335 +5042,8 @@ function renderPreferences() {
 // fresh js/data/audio-flags.js to commit. Plays files DIRECTLY (even
 // quarantined ones) — the whole point is re-listening.
 
-const AUDIT_KEY = 'speechcraft-audio-audit-v1';
-const auditVerdicts = () => { try { return JSON.parse(localStorage.getItem(AUDIT_KEY)) ?? {}; } catch { return {}; } };
-const saveVerdict = (id, v) => {
-  const all = auditVerdicts();
-  if (v) all[id] = v; else delete all[id];
-  try { localStorage.setItem(AUDIT_KEY, JSON.stringify(all)); } catch {}
-};
 
-async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'all', status: 'all' }) {
-  stopSpeech();
-  let index = {};
-  let phonIndex = {};
-  try { index = await (await fetch('audio/index.json')).json(); } catch { /* rows empty */ }
-  try { phonIndex = await (await fetch('audio/phonemes-index.json')).json(); } catch { /* none yet */ }
-  const verdicts = auditVerdicts();
-  KNOWN_BAD_LIST.forEach(id => { if (!verdicts[id]) verdicts[id] = 'bad'; });
 
-  const rows = [];
-  for (const d of Object.keys(index)) {
-    for (const v of Object.keys(index[d])) {
-      for (const clip of index[d][v]) {
-        rows.push({ id: `${d}/${v}/${clip}`, d, v, clip, kind: 'word', path: `audio/${d}/${v}/${clip}.mp3` });
-      }
-    }
-  }
-  for (const d of ['nam', 'rp', 'aus', 'ssbe']) {
-    // Voice keys come from the candidate index itself (so a human
-    // 'reference' voice shows up the moment its files are imported); with
-    // no candidates on disk yet, fall back to the expected keys so the
-    // grid still works as a to-record checklist.
-    const named = voicesForCourse(d).map(v => v.id);
-    const onDisk = Object.keys(phonIndex[d] ?? {});
-    const voiceKeys = onDisk.length ? onDisk : (named.length ? named : ['f', 'm']);
-    for (const sym of phonemesForAccent(d)) {
-      const slug = phonemeSlug(sym);
-      for (const v of voiceKeys) {
-        const candidates = phonIndex[d]?.[v] ?? [];
-        for (const s2 of [slug, slug + '_syllable']) {
-          if (s2.endsWith('_syllable') && !candidates.includes(s2)) continue;
-          rows.push({ id: `${d}/${v}/${s2}`, d, v, slug: s2,
-            clip: `/${sym}/${s2.endsWith('_syllable') ? ' — syllable demo' : ' — isolated'}`, kind: 'phoneme',
-            path: `audio/phonemes/${d}/${v}/${s2}.mp3`,
-            missing: !candidates.includes(s2) });
-        }
-      }
-    }
-  }
-
-  const f = filters;
-  const shown = rows.filter(r =>
-    (f.d === 'all' || r.d === f.d) &&
-    (f.v === 'all' || r.v === f.v) &&
-    (f.kind === 'all' || r.kind === f.kind) &&
-    (f.status === 'all'
-      || (f.status === 'missing' && r.missing)
-      || (f.status === 'bad' && verdicts[r.id] === 'bad')
-      || (f.status === 'good' && verdicts[r.id] === 'good')
-      || (f.status === 'unreviewed' && !r.missing && !verdicts[r.id])));
-  const CAP = 300;
-
-  const sel = (id, opts, cur) => `
-    <select id="${id}" class="input-text audit-sel">
-      ${opts.map(o => `<option value="${o}" ${o === cur ? 'selected' : ''}>${o}</option>`).join('')}
-    </select>`;
-
-  app.innerHTML = `
-    <header class="topbar">
-      <button class="backbtn" id="audit-exit" aria-label="Back to the app" title="Back to the app">‹</button>
-      <div class="track-title" style="color:#64748b">🎧 Audio audit</div>
-      <div class="stats"><span class="stat">${shown.length} clips</span></div>
-    </header>
-    <main class="guide audit-page">
-      <p class="pane-note">Owner tool. Play each clip, mark it — <b>Good</b> means a learner may hear it, <b>Bad</b> quarantines it. Export writes a new <code>js/data/audio-flags.js</code> to commit.</p>
-      <div class="audit-filters">
-        ${sel('af-d', ['all', 'nam', 'rp', 'aus', 'ssbe', 'cockney'], f.d)}
-        ${sel('af-v', ['all', ...new Set(rows.map(r => r.v))], f.v)}
-        ${sel('af-kind', ['all', 'word', 'phoneme'], f.kind)}
-        ${sel('af-status', ['all', 'unreviewed', 'good', 'bad', 'missing'], f.status)}
-        <button class="btn" id="audit-export" type="button">Export flags</button>
-      </div>
-      <textarea id="audit-out" class="input-text audit-out" hidden rows="10" aria-label="Exported audio-flags.js"></textarea>
-      <div class="audit-rows">
-        ${shown.slice(0, CAP).map(r => `
-          <div class="audit-row ${verdicts[r.id] ?? ''}" data-id="${esc(r.id)}">
-            ${r.missing ? '<span class="audit-play is-off" title="No clip yet">∅</span>'
-              : `<button class="audit-play" data-path="${esc(r.path)}" type="button" aria-label="Play ${esc(r.id)}">▶</button>`}
-            <span class="audit-name">${esc(r.clip)}</span>
-            <span class="audit-meta">${r.d}/${r.v} · ${r.kind}${r.slug ? ` · ${esc(r.slug)}` : ''}${r.missing ? ' · missing' : ''}</span>
-            ${r.missing ? '' : `
-              <span class="audit-verdict">
-                <button class="btn-lite av-good" type="button" aria-pressed="${verdicts[r.id] === 'good'}">Good</button>
-                <button class="btn-lite av-bad" type="button" aria-pressed="${verdicts[r.id] === 'bad'}">Bad</button>
-              </span>`}
-          </div>`).join('')}
-        ${shown.length > CAP ? `<p class="pane-note">Showing ${CAP} of ${shown.length} — narrow the filters.</p>` : ''}
-      </div>
-    </main>`;
-
-  document.getElementById('audit-exit').addEventListener('click', () => {
-    history.replaceState(null, '', location.pathname);
-    renderHome();
-  });
-  [['af-d', 'd'], ['af-v', 'v'], ['af-kind', 'kind'], ['af-status', 'status']].forEach(([id, key]) =>
-    document.getElementById(id).addEventListener('change', e =>
-      renderAudioAudit({ ...f, [key]: e.target.value })));
-
-  let playing = null;
-  app.querySelectorAll('.audit-play[data-path]').forEach(b =>
-    b.addEventListener('click', () => {
-      if (playing) playing.pause();
-      playing = new Audio(b.dataset.path);
-      playing.play().catch(() => { b.textContent = '✗'; b.title = 'File failed to load'; });
-    }));
-
-  app.querySelectorAll('.audit-row').forEach(row => {
-    const id = row.dataset.id;
-    row.querySelector('.av-good')?.addEventListener('click', () => {
-      const cur = auditVerdicts()[id];
-      saveVerdict(id, cur === 'good' ? null : 'good');
-      renderAudioAudit(f);
-    });
-    row.querySelector('.av-bad')?.addEventListener('click', () => {
-      const cur = auditVerdicts()[id];
-      const marking = cur !== 'bad';
-      saveVerdict(id, marking ? 'bad' : null);
-      if (marking) {
-        const note = window.prompt('Optional note — what is wrong with this clip?', '');
-        try {
-          const notes = JSON.parse(localStorage.getItem(AUDIT_KEY + '-notes')) ?? {};
-          if (note) notes[id] = note.slice(0, 140); else delete notes[id];
-          localStorage.setItem(AUDIT_KEY + '-notes', JSON.stringify(notes));
-        } catch { /* note is a nicety */ }
-      }
-      renderAudioAudit(f);
-    });
-  });
-
-  document.getElementById('audit-export').addEventListener('click', () => {
-    const all = auditVerdicts();
-    KNOWN_BAD_LIST.forEach(id => { if (!all[id]) all[id] = 'bad'; });
-    const bad = Object.keys(all).filter(k => all[k] === 'bad').sort();
-    const phonemeIds = new Set(rows.filter(r => r.kind === 'phoneme').map(r => r.id));
-    const approved = Object.keys(all).filter(k => all[k] === 'good' && phonemeIds.has(k)).sort();
-    let notes = {};
-    try { notes = JSON.parse(localStorage.getItem(AUDIT_KEY + '-notes')) ?? {}; } catch {}
-    const goodSsbe = Object.keys(all).filter(k => all[k] === 'good' && k.startsWith('ssbe/')).length;
-    const out = document.getElementById('audit-out');
-    out.hidden = false;
-    out.value = [
-      '// Generated by the #audit page on ' + new Date().toISOString().slice(0, 10) + ' — review, then replace js/data/audio-flags.js.',
-      goodSsbe ? `// ssbe review: ${goodSsbe} clip(s) marked good this session.` : '',
-      'export const KNOWN_BAD = [',
-      ...bad.map(x => `  '${x}',${notes[x] ? `   // ${notes[x].replace(/\n/g, ' ')}` : ''}`),
-      '];', '',
-      'export const APPROVED_PHONEMES = [', ...approved.map(x => `  '${x}',`), '];', '',
-    ].filter(l => l !== '').join('\n');
-    out.focus();
-    out.select();
-  });
-}
-
-// ── Content review (#review) — owner gate for written drafts ──
-// The writing counterpart to #audit: every Dialect in Action piece and
-// sonnet transposition still awaiting review, rendered exactly as a
-// learner would see it. Approval is a deliberate file edit (reviewStatus
-// in js/data/action.js, TRANSPOSITION_REVIEW in js/data/recasts.js) —
-// nothing on this page can publish anything by accident.
-function renderContentReview() {
-  stopSpeech();
-  const drafts = actionDrafts();
-  const transDrafts = [];
-  for (const n of Object.keys(RECASTS)) {
-    for (const d of Object.keys(RECASTS[n].recasts ?? {})) {
-      if (!approvedTranspositions(+n).includes(d)) {
-        transDrafts.push({ n: +n, d, text: RECASTS[n].recasts[d] });
-      }
-    }
-  }
-  const brDrafts = bridgeDrafts();
-  const brComps = brDrafts.reduce((n, r) => n + r.comparisons.length, 0);
-  const revLine = (label, r) => `${label}: <b>${esc(r?.status ?? 'pending')}</b>${r?.reviewer ? ` — ${esc(r.reviewer)}${r.date ? `, ${esc(r.date)}` : ''}` : ''}`;
-  app.innerHTML = `
-    <header class="topbar">
-      <button class="backbtn" id="review-exit" aria-label="Back to the app" title="Back to the app">‹</button>
-      <div class="track-title" style="color:#64748b">📝 Content review</div>
-      <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
-    </header>
-    <main class="guide audit-page">
-      <p class="pane-note">Owner tool, reached by typing <code>#review</code> — it is NOT authenticated, so treat everything here as public. Nothing below is on a learner surface. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
-
-      <h1>The original 23-item queue</h1>
-      <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>
-
-      <h2 class="guide-heading">Dialect in Action — ${drafts.length} draft piece(s)</h2>
-      <p class="pane-note">Required reviewers, per piece: a <b>literary</b> read (rhythm, register, no parody) and a <b>dialect</b> read by a native or expert speaker of the course accent.</p>
-      ${drafts.map(p => `
-        <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(p.id)}</code> · ${esc(p.courseId)} · status <b>${esc(p.reviewStatus)}</b> ·
-            ${revLine('literary', p.review?.literary)} · ${revLine('dialect', p.review?.dialect)}</p>
-          ${actionPieceHtml(p)}
-          <p class="pane-note">Reviewer notes: ${esc(p.reviewNotes)}</p>
-        </section>`).join('')}
-
-      <h2 class="guide-heading">Sonnet transpositions — ${transDrafts.length} draft version(s)</h2>
-      <p class="pane-note">Checklist: docs/RECAST_REVIEW.md — faithfulness to argument, imagery and emotional progression; dialect register; no parody.</p>
-      ${transDrafts.map(t => `
-        <section class="review-piece">
-          <p class="sonnet-hint">Sonnet ${t.n} · ${esc(TRANSPOSITION_LABELS[t.d] ?? t.d)} · status <b>draft</b></p>
-          <div class="sonnet-lines">${t.text.split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
-        </section>`).join('')}
-
-      <h1 id="bridge-drafts">Accent Bridge routes — ${brDrafts.length} new draft route(s)</h1>
-      <p class="pane-note">Build D drafts, listed separately — <b>not</b> part of the original 23. ${brComps} comparison(s) across ${brDrafts.length} route(s). Required reviewer: a <b>dialect/accent</b> reviewer qualified in both ends of each route. Every phonetic claim restates the Dialect Accuracy Standard; the reviewer confirms the restatement, the example words and the articulation guidance.</p>
-      ${brDrafts.map(r => `
-        <section class="review-piece">
-          <p class="sonnet-hint">route <code>${esc(r.id)}</code> · ${esc(r.title)} · ${r.comparisons.length} draft comparison(s)</p>
-          <p class="guide-text">${esc(r.intro)}</p>
-          ${r.comparisons.map(c => `
-            <div class="bridge-card">
-              <div class="idiom-head"><span class="idiom-term">${esc(c.feature)}</span><span class="tag">${esc(c.lexicalSet)}</span></div>
-              <p class="bridge-pair"><span class="ipa-chip">/${esc(c.startIPA)}/</span> <span aria-hidden="true">→</span>
-                <span class="ipa-chip is-target">/${esc(c.targetIPA)}/</span> <span class="bridge-word">“${esc(c.word)}”</span></p>
-              <p class="guide-note"><b>Stays:</b> ${esc(c.stays)}</p>
-              <p class="guide-note"><b>Changes:</b> ${esc(c.changes)}</p>
-              <p class="guide-note"><b>Lips:</b> ${esc(c.guidance.lips)} <b>Tongue:</b> ${esc(c.guidance.tongue)} <b>Jaw:</b> ${esc(c.guidance.jaw)} <b>Voice:</b> ${esc(c.guidance.voice)}</p>
-            </div>`).join('')}
-          ${r.sourceNote ? `<p class="pane-note">${esc(r.sourceNote)}</p>` : ''}
-        </section>`).join('')}
-
-      <h1 id="edition-drafts">Sonnet editions — the Build F written catalog</h1>
-      <p class="pane-note">New drafts, tracked in <code>js/data/edition-reviews.js</code> —
-        listed separately from the original 23. Coverage so far:
-        ${EDITION_CHUNKS.length ? EDITION_CHUNKS.map(c => `${c.from}–${c.to}`).join(', ') : 'none yet'}
-        (${EDITION_CHUNKS.reduce((s, c) => s + c.expect, 0)} new sonnets ×
-        Plain Meaning + 3 voices)${EDITION_CATALOG_COMPLETE ? ' — CATALOG COMPLETE (149 new + 5 pilots = 154)' : ' — catalog in progress'}.
-        The five pilots (${LEGACY_SONNETS.join(', ')}) stay in the original queue above.
-        Plain Meaning needs a literary review; each voice needs literary AND
-        dialect/register review. Enter a sonnet number to inspect its drafts.</p>
-      <div class="proj-toolbar">
-        <label class="field-label" for="ed-n">Sonnet</label>
-        <input class="input-sel" id="ed-n" type="number" min="1" max="154" value="1" style="width:6em">
-        <button class="btn-lite" id="ed-show" type="button">Show drafts</button>
-      </div>
-      <div id="ed-view"></div>
-
-      <h1 id="speech-drafts">Speech system — draft content</h1>
-      <p class="pane-note">The written Speech course and practice system (2026-08-13 build), tracked in
-        <code>js/data/speech/reviews.js</code> — absence from that ledger means draft. Reviewer guide:
-        <code>docs/SPEECH_REVIEW.md</code>. Professional-tier bodies (anatomy/health, acting methods)
-        are never learner-facing while draft; editorial-tier drafts may show while pending. Claude may
-        never approve his own writing.</p>
-
-      <h2 class="guide-heading">Stage 1 anatomy &amp; vocal health — ${SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional' && !speechApproved(l.id)).length} lesson(s) awaiting voice-professional review</h2>
-      <p class="pane-note">Required reviewer: an appropriately qualified <b>voice professional or speech-language pathologist</b>. Sources are paraphrased from NIDCD, ASHA and NIDCR public guidance — the reviewer confirms accuracy, non-diagnostic framing and the absence of prescriptive treatment.</p>
-      ${SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional' && !speechApproved(l.id)).map(l => `
-        <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(l.id)}</code> · ${esc(l.title)} · status <b>${speechPublished(l.id) ? 'published (owner approval)' : 'draft'}</b> · awaiting voice-professional review</p>
-          ${l.body.map(b => b.p ? `<p class="guide-text">${esc(b.p)}</p>`
-            : b.h ? `<p class="guide-text"><b>${esc(b.h)}</b></p>`
-            : b.list ? `<ul class="th-list">${b.list.map(li => `<li>${esc(li)}</li>`).join('')}</ul>`
-            : b.safety ? `<p class="pane-note pane-warn">${esc(SPEECH_SAFETY_LINE)}</p>`
-            : b.comfort ? `<p class="pane-note">${esc(SPEECH_COMFORT_LINE)}</p>` : '').join('')}
-          ${(l.sources ?? []).map(s => `<p class="pane-note">Source: ${esc(s)}</p>`).join('')}
-        </section>`).join('')}
-
-      <h2 class="guide-heading">Approaches to Acting — ${ACTING_APPROACHES.filter(a => !speechApproved(a.id)).length} introduction(s) awaiting acting-professional review</h2>
-      <p class="pane-note">Required reviewer: a qualified <b>acting teacher or coach</b> — accuracy of history, principles and terminology; no flattened slogans; no implied affiliation.</p>
-      ${ACTING_APPROACHES.filter(a => !speechApproved(a.id)).map(a => `
-        <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(a.id)}</code> · ${esc(a.name)} · ${esc(a.era)} · status <b>${speechPublished(a.id) ? 'published (owner approval)' : 'draft'}</b> · awaiting acting-professional review</p>
-          ${['background', 'principles', 'terminology', 'considers', 'misunderstandings', 'sources']
-            .map(k => `<p class="guide-text"><b>${esc(k)}:</b> ${esc(a.sections[k])}</p>`).join('')}
-          <ul class="th-list">${a.sections.questions.map(q => `<li>${esc(q)}</li>`).join('')}</ul>
-        </section>`).join('')}
-
-      <h2 class="guide-heading">Guided Practice routines — ${draftRoutines().length} draft(s) + ${learnerRoutines().length} in the reviewed batch</h2>
-      <p class="pane-note">The eight batch-1 Train routines are learner-facing pending <b>editorial</b> review; the sixteen Prepare/Apply drafts below are review-area-only until reviewed and batched by the owner.</p>
-      ${draftRoutines().map(r => `
-        <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(r.id)}</code> · ${esc(r.title)} (${esc(r.mode)}, ${esc(PRACTICE_SUBJECTS.find(s => s.id === r.subject)?.title ?? r.subject)}) · status <b>draft</b></p>
-          <ul class="th-list">${r.steps.map(s => `<li>${esc(s)}</li>`).join('')}</ul>
-        </section>`).join('')}
-
-      <h2 class="guide-heading">Practice texts — ${SPEECH_TEXTS.filter(t => !speechApproved(t.id)).length} awaiting editorial review</h2>
-      <p class="pane-note">Original Speechcraft writing (provenance recorded per record). Learner-facing pending <b>editorial</b> review, per the accepted editorial-tier policy.</p>
-      ${SPEECH_TEXTS.filter(t => !speechApproved(t.id)).map(t => `
-        <section class="review-piece">
-          <p class="sonnet-hint">id <code>${esc(t.id)}</code> · ${esc(t.title)} (${esc(t.kind)}) · ${esc(t.provenance)} · status <b>draft</b></p>
-          <div class="sonnet-lines">${esc(speechTextBody(t)).split('\n').map(l => `<p class="guide-text">${l}</p>`).join('')}</div>
-        </section>`).join('')}
-    </main>`;
-  document.getElementById('review-exit').addEventListener('click', () => {
-    history.replaceState(null, '', location.pathname);
-    renderHome();
-  });
-  wireActionPiece(app);
-
-  // Edition-draft inspector: loads ONE sonnet's chunk on demand — the
-  // review page never parses the whole catalog either.
-  const edView = document.getElementById('ed-view');
-  document.getElementById('ed-show').addEventListener('click', async () => {
-    const n = +document.getElementById('ed-n').value;
-    edView.innerHTML = '<p class="pane-note">Loading…</p>';
-    const orig = SONNETS.find(x => x.n === n);
-    const ed = await editionFor(n).catch(() => null);
-    if (!orig) { edView.innerHTML = '<p class="pane-note">No such sonnet.</p>'; return; }
-    if (!ed) { edView.innerHTML = `<p class="pane-note">Sonnet ${n}: edition batch not written yet.</p>`; return; }
-    if (ed.legacy) {
-      edView.innerHTML = `<p class="pane-note">Sonnet ${n} is one of the five pilots — its transpositions live in the original 23-item queue above (js/data/recasts.js).</p>`;
-      return;
-    }
-    const block = (label, kind, text) => `
-      <section class="review-piece">
-        <p class="sonnet-hint">Sonnet ${n} · ${esc(label)} · status <b>${esc(editionStatus(n, kind))}</b>
-          ${kind === 'plain' ? '· requires literary review' : '· requires literary + dialect/register review'}</p>
-        <div class="sonnet-lines">${String(text).split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
-      </section>`;
-    edView.innerHTML = `
-      <section class="review-piece">
-        <p class="sonnet-hint">Sonnet ${n} · Original (byte-locked, not under review)</p>
-        <div class="sonnet-lines">${orig.lines.map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>
-      </section>
-      ${block('Plain Meaning', 'plain', ed.plain)}
-      ${block('In Today’s Voice — Neutral American', 'nam', ed.voices.nam)}
-      ${block('In Today’s Voice — Standard British', 'ssbe', ed.voices.ssbe)}
-      ${block('In Today’s Voice — Australian', 'aus', ed.voices.aus)}
-      <p class="pane-note">Traditional RP deliberately has no vocabulary adaptation — RP is a pronunciation target, not a modern slang register. Its course shows Original + Plain Meaning (once approved).</p>`;
-  });
-}
 
 // ── More: the reference shelf ─────────────────────────────────
 
@@ -6070,18 +5374,7 @@ function renderInstrument() {
 
 // ── Text & Delivery: speak real text aloud ────────────────────
 
-// Dialects you can read/scan/transcribe any text in.
-const TEXT_DIALECTS = [
-  { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
-  { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🎩' },
-  { id: 'ssbe', label: 'Standard British', lang: 'en-GB', flag: '🇬🇧' },
-  // Cockney joins the Studio dialect pickers only when its course is live —
-  // a hidden course must never leak through a project screen.
-  ...(COCKNEY_LIVE ? [{ id: 'cockney', label: 'Cockney', lang: 'en-GB', flag: '🚕' }] : []),
-  { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
-];
 const dialectLang = id => (TEXT_DIALECTS.find(d => d.id === id) || TEXT_DIALECTS[1]).lang;
-const dialectName = id => (TEXT_DIALECTS.find(d => d.id === id) || {}).label || '';
 
 function renderSonnetList() {
   record(renderSonnetList);
@@ -6670,9 +5963,6 @@ const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '
 // the rest simply read in the device voice — but we only look for clip files
 // where they exist, and we say so rather than leaving the change unexplained.
 
-// Bracketed stage directions removed for anything SPOKEN — narration
-// like "[He exits]" is never read aloud or transcribed.
-const stripStage = s => s.replace(/\[[^\]]*\]/g, ' ').replace(/\s+/g, ' ').trim();
 
 // ── Scenes ────────────────────────────────────────────────────
 // A shelf of our own two-hander scenes. Empty until scenes are written
@@ -8560,123 +7850,11 @@ function todayPane(pane, today) {
 // Believable speech built from the course's Words & Expressions. Only
 // approved pieces reach the Library; drafts render solely on #review.
 
-// [[term|ID]] markers become highlighted, tappable expression chips that
-// open the matching Words & Expressions entry.
-function actionLineHtml(text) {
-  return esc(text).replace(/\[\[([^\]|]+)\|([A-Z]+-\d+)\]\]/g,
-    (_, term, id) => `<button class="xp-term" data-xp="${id}" type="button"
-      aria-label="Expression: ${esc(term)} — open its definition">${esc(term)}</button>`);
-}
 
-function actionPieceHtml(piece) {
-  return `
-    <div class="piece-meta">
-      <h1 class="piece-title">${esc(piece.title)}</h1>
-      <p class="piece-source">${esc(piece.setting)}</p>
-      <p class="piece-scene">${esc(piece.speakerDescription)}</p>
-      <div class="piece-tags">
-        <span class="tag">${piece.type === 'dialogue' ? 'Dialogue' : 'Monologue'}</span>
-        <span class="tag tag-dialect">🗣 ${esc(dialectName(piece.courseId))}</span>
-        <span class="tag">${esc(piece.register)}</span>
-      </div>
-      ${piece.situation ? `<p class="guide-text piece-situation"><b>The situation:</b> ${esc(piece.situation)}</p>` : ''}
-      <p class="pane-note">${esc(piece.region)}. Highlighted words are this course’s Words &amp; Expressions — tap one for its meaning.</p>
-      ${piece.audio ? '' : '<p class="pane-note">🎙 No recording exists for this piece yet — audio arrives only when an approved recording in this exact dialect does.</p>'}
-    </div>
-    <div class="sonnet-lines action-lines">
-      ${piece.lines.map(l => `
-        <p class="guide-text action-line">${l.speaker ? `<b class="action-speaker">${esc(l.speaker)}:</b> ` : ''}${actionLineHtml(l.text)}</p>`).join('')}
-    </div>`;
-}
 
-function wireActionPiece(root) {
-  root.querySelectorAll('.xp-term').forEach(b =>
-    b.addEventListener('click', () => {
-      const entry = IDIOM.find(e => e.id === b.dataset.xp);
-      if (!entry) return;
-      openModal({
-        title: `“${entry.term}”`,
-        body: `
-          <p class="idiom-meaning">${esc(entry.meaning)}</p>
-          ${entry.example ? `<p class="idiom-example">“${esc(entry.example)}”</p>` : ''}
-          ${entry.note ? `<p class="idiom-note">${esc(entry.note)}</p>` : ''}
-          <p class="pane-note">From ${esc(dialectName(entry.dialect))} Words &amp; Expressions.</p>`,
-        actions: '<button class="btn btn-primary" id="xp-close" type="button">Done</button>',
-        onMount: (rootEl, close) => rootEl.querySelector('#xp-close').addEventListener('click', close),
-      });
-    }));
-}
 
-function renderDialectAction(d) {
-  const pieces = actionFor(d);
-  // Never render a shelf with nothing on it: any caller that reaches here
-  // with no approved pieces gets the honest pending page instead. The
-  // delegation precedes record() so the back stack holds the page shown.
-  if (!pieces.length) return renderDialectActionPending(d);
-  record(() => renderDialectAction(d));
-  app.innerHTML = `
-    ${pageTopbar('🎭 Dialect in Action', trackFor(d).color)}
-    <main class="track-list">
-      <p class="track-blurb">${esc(dialectName(d))}’s words, expressions and rhythm inside believable speech — a scene and a story, not a vocabulary list.</p>
-      ${pieces.map((p, i) => `
-        <button class="track-card" data-i="${i}" type="button" style="--track-color:${trackFor(d).color}">
-          <div class="track-glyph">${p.type === 'dialogue' ? '💬' : '🎤'}</div>
-          <div class="track-info"><h2>${esc(p.title)}</h2><p>${esc(p.setting)} · ${esc(p.register)}</p></div>
-          <div class="track-arrow">›</div>
-        </button>`).join('')}
-    </main>`;
-  wireBrandHome();
-  app.querySelectorAll('.track-card').forEach(b =>
-    b.addEventListener('click', () => renderActionPiece(d, pieces[+b.dataset.i].id)));
-}
 
-// Honest state for an accent whose Dialect in Action pieces are written
-// but not yet through dialect review — the card is never silently
-// missing, and no other accent's material is shown in its place.
-function renderDialectActionPending(d) {
-  record(() => renderDialectActionPending(d));
-  stopSpeech();
-  const drafts = actionDrafts().filter(p => p.courseId === d).length;
-  workspacePage(
-    pageTopbar('🎭 Dialect in Action', trackFor(d).color),
-    `<div class="ws-head">
-       <h1 class="page-h">Dialect in Action</h1>
-       <p class="ws-sub">${esc(dialectName(d))}</p>
-     </div>`,
-    `<p class="pane-note">${drafts} piece(s) for this accent are written and awaiting review by a qualified dialect reviewer. They appear here the moment a named reviewer approves them — and only this accent's material will ever appear on this page.</p>`);
-}
 
-function renderActionPiece(d, id) {
-  record(() => renderActionPiece(d, id));
-  const piece = actionFor(d).find(p => p.id === id);
-  if (!piece) return renderDialectAction(d);
-  app.innerHTML = `
-    ${pageTopbar('🎭 ' + esc(piece.title), trackFor(d).color)}
-    <main class="guide sonnet-view">
-      ${actionPieceHtml(piece)}
-      <p><button class="btn-lite" id="action-ipa" type="button" aria-expanded="false">≈ Show approximate IPA</button></p>
-      <div id="action-ipa-pane" hidden></div>
-    </main>`;
-  wireBrandHome();
-  wireActionPiece(app);
-  // Line-by-line IPA through the EXISTING derivation system (the same one
-  // the Studio uses) — dictionary-backed for Neutral American, rule-derived
-  // and marked ≈ elsewhere. Honest or absent; never hand-invented here.
-  const ipaBtn = document.getElementById('action-ipa');
-  const ipaPane = document.getElementById('action-ipa-pane');
-  ipaBtn.addEventListener('click', () => {
-    const open = !ipaPane.hidden;
-    ipaPane.hidden = open;
-    ipaBtn.setAttribute('aria-expanded', String(!open));
-    ipaBtn.textContent = open ? '≈ Show approximate IPA' : 'Hide IPA';
-    if (!open && !ipaPane.dataset.filled) {
-      ipaPane.dataset.filled = '1';
-      const plain = piece.lines.map(l =>
-        (l.speaker ? l.speaker + ': ' : '') + l.text.replace(/\[\[([^\]|]+)\|[A-Z]+-\d+\]\]/g, '$1'));
-      fillSound(plain, d, ipaPane);
-    }
-  });
-}
 
 // ── Accent Bridge: the Listening practice exercise ────────────
 // Rebuilt 2026-08-12 by owner order: a structured listening session,
@@ -8878,191 +8056,14 @@ function scanPane(lines, verse = true) {
     <div class="scan">${linesHtml}</div>`;
 }
 
-async function fillSound(lines, accent, pane, opts = {}) {
-  try { await loadPron(); }
-  catch {
-    pane.innerHTML = `<p class="pane-note">Couldn’t load the pronunciation dictionary — check your connection and reopen this tab.</p>`;
-    return;
-  }
-  const projectId = opts.projectId ?? null;
-  let project = projectId ? await getProject(projectId) : null;
-
-  const draw = () => {
-    let approxSeen = false, miss = 0, edited = 0;
-    const linesHtml = lines.map((ln, i) => {
-      const toks = stripStage(ln).split(/(\s+)/);
-      let wordIdx = -1;
-      const html = toks.map(tok => {
-        if (/^\s*$/.test(tok)) return tok === '' ? '' : '<span class="scan-sp"> </span>';
-        wordIdx++;
-        const base = ipaFor(tok, accent);
-        const res = resolvePronunciation({
-          word: tok, accent, project, lineIdx: i, wordIdx, base,
-        });
-        const editable = `data-word="${esc(tok)}" data-line="${i}" data-widx="${wordIdx}"`;
-        if (!res) {
-          miss++;
-          return `<span class="tw"><button class="tw-word" type="button" ${editable}>${esc(tok)}</button><span class="tw-ipa tw-miss">—</span></span>`;
-        }
-        if (res.source === 'dictionary' && res.approx) approxSeen = true;
-        const custom = res.source !== 'dictionary';
-        if (custom) edited++;
-        return `<span class="tw"><button class="tw-word ${custom ? 'is-custom' : ''}" type="button" ${editable}>${esc(tok)}</button>` +
-               `<span class="tw-ipa ${custom ? 'is-custom' : ''}" title="${custom ? esc(res.source) + ' override' : ''}">/${esc(res.ipa)}/</span></span>`;
-      }).join('');
-      return `<div class="tw-line"><span class="ln-num">${i + 1}</span><span class="tw-words">${html}</span></div>`;
-    }).join('');
-
-    pane.innerHTML = `
-      <p class="pane-note">Transcribed to IPA in <b>${esc(dialectName(accent))}</b>${approxSeen ? ' <span class="approx">≈ non-American dialects are rule-derived, not dictionary-exact</span>' : ''}.${miss ? ` <span class="approx">${miss} word${miss === 1 ? ' is' : 's are'} not in the dictionary (marked —) — names and invented words need your ear: tap one to supply its pronunciation.</span>` : ''}
-        Tap any word to correct it.${edited ? ` <span class="approx">${edited} customised.</span>` : ''}</p>
-      <div class="son-transcribe">${linesHtml}</div>`;
-
-    pane.querySelectorAll('.tw-word').forEach(b =>
-      b.addEventListener('click', () => openWordEditor({
-        word: b.dataset.word, accent, project, projectId,
-        lineIdx: +b.dataset.line, wordIdx: +b.dataset.widx,
-        onSaved: async () => { if (projectId) project = await getProject(projectId); draw(); },
-      })));
-  };
-  draw();
-}
 
 // ── Word pronunciation editor (modal) ─────────────────────────
 
-function openWordEditor({ word, accent, project, projectId, lineIdx, wordIdx, onSaved }) {
-  const base = ipaFor(word, accent);
-  const current = resolvePronunciation({ word, accent, project, lineIdx, wordIdx, base });
-  const generated = base?.ipa ?? '';
-  // Alternates the built-in data can offer: the same word read in the other dialects.
-  const alts = TEXT_DIALECTS.map(d => d.id)
-    .filter(a => a !== accent)
-    .map(a => ({ accent: a, ipa: ipaFor(word, a)?.ipa }))
-    .filter(a => a.ipa && a.ipa !== generated);
-
-  const scopeOpts = [
-    ['occurrence', 'This occurrence only', !projectId],
-    ['project', 'All matching words in this project', !projectId],
-    ['personal', 'Save to my personal dictionary', false],
-  ];
-
-  openModal({
-    title: `Pronunciation of “${word}”`,
-    body: `
-      <dl class="we-facts">
-        <div><dt>Word</dt><dd>${esc(word)}</dd></div>
-        <div><dt>Dialect</dt><dd>${esc(dialectName(accent) || accent)}</dd></div>
-        <div><dt>Generated</dt><dd>${generated ? `/${esc(generated)}/` : '<i>not in the dictionary</i>'}</dd></div>
-        ${current && current.source !== 'dictionary' ? `<div><dt>Now using</dt><dd class="is-custom">/${esc(current.ipa)}/ <span class="src-tag">${esc(current.source)}</span></dd></div>` : ''}
-      </dl>
-      ${alts.length ? `<div class="we-alts"><span class="field-label">Alternates</span>${alts.map(a =>
-        `<button class="chip-pick ipa" type="button" data-alt="${esc(a.ipa)}">/${esc(a.ipa)}/ <span class="alt-src">${esc(dialectName(a.accent) || a.accent)}</span></button>`).join('')}</div>` : ''}
-      <label class="field"><span class="field-label" id="we-ipa-label">IPA</span>
-        <input class="input-text ipa-input" id="we-ipa" aria-labelledby="we-ipa-label" value="${esc(current?.ipa ?? generated)}" placeholder="e.g. ˈaɪðər" autocomplete="off"></label>
-      <p class="we-warn" id="we-warn" role="alert" hidden></p>
-      <label class="field"><span class="field-label">Note (optional)</span>
-        <input class="input-text" id="we-note" maxlength="140" value="${esc(current?.note ?? '')}" placeholder="e.g. director wants the British form"></label>
-      <fieldset class="field"><legend class="field-label">Apply to</legend>
-        ${scopeOpts.map(([v, l, dis], i) => `
-          <label class="we-scope ${dis ? 'is-off' : ''}">
-            <input type="radio" name="we-scope" value="${v}" ${i === (projectId ? 0 : 2) ? 'checked' : ''} ${dis ? 'disabled' : ''}>
-            <span>${l}${dis ? ' <i>(open from a project)</i>' : ''}</span>
-          </label>`).join('')}
-      </fieldset>`,
-    actions: `
-      <button class="btn btn-lite" id="we-reset" type="button">Reset to generated</button>
-      <button class="btn btn-primary" id="we-save" type="button">Save</button>`,
-    onMount: (root, close) => {
-      const ipaInput = root.querySelector('#we-ipa');
-      const warn = root.querySelector('#we-warn');
-      root.querySelectorAll('[data-alt]').forEach(b =>
-        b.addEventListener('click', () => { ipaInput.value = b.dataset.alt; ipaInput.focus(); }));
-
-      root.querySelector('#we-save').addEventListener('click', async () => {
-        const check = validateIpa(ipaInput.value);
-        if (!check.ok) { warn.hidden = false; warn.textContent = check.error; return; }
-        if (check.warning) { warn.hidden = false; warn.textContent = check.warning; }
-        const scope = root.querySelector('input[name="we-scope"]:checked')?.value ?? 'personal';
-        const note = root.querySelector('#we-note').value.trim();
-        try {
-          if (scope === 'personal') {
-            setPersonal({ word, accent, ipa: check.ipa, note });
-          } else if (projectId) {
-            let p = await getProject(projectId);
-            p = scope === 'occurrence'
-              ? setOccurrenceOverride(p, { lineIdx, wordIdx, ipa: check.ipa, note })
-              : setProjectWordOverride(p, { word, accent, ipa: check.ipa, note });
-            await saveProject(p);
-          }
-          close();
-          onSaved?.();
-        } catch (err) {
-          warn.hidden = false; warn.textContent = 'Could not save that override.';
-          console.warn(err);
-        }
-      });
-
-      root.querySelector('#we-reset').addEventListener('click', async () => {
-        if (!confirm('Reset this word to the generated pronunciation?')) return;
-        deletePersonal(word, accent);
-        if (projectId) {
-          let p = await getProject(projectId);
-          p = clearOverridesFor(p, { word, accent, lineIdx, wordIdx });
-          await saveProject(p);
-        }
-        close();
-        onSaved?.();
-      });
-    },
-  });
-}
 
 // ── Accessible modal ──────────────────────────────────────────
 // Focus is trapped inside while open, Escape closes, and focus returns to
 // whatever opened it.
 
-function openModal({ title, body, actions = '', onMount }) {
-  const prev = document.activeElement;
-  const wrap = document.createElement('div');
-  wrap.className = 'modal-wrap';
-  wrap.innerHTML = `
-    <div class="modal-backdrop" data-close></div>
-    <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
-      <div class="modal-head">
-        <h2>${esc(title)}</h2>
-        <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
-      </div>
-      <div class="modal-body">${body}</div>
-      <div class="modal-actions">${actions}</div>
-    </div>`;
-  document.body.appendChild(wrap);
-  document.body.classList.add('modal-open');
-
-  const close = () => {
-    wrap.remove();
-    document.body.classList.remove('modal-open');
-    document.removeEventListener('keydown', onKey, true);
-    prev?.focus?.();
-  };
-  const focusables = () => [...wrap.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')].filter(el => !el.disabled);
-
-  function onKey(e) {
-    if (e.key === 'Escape') { e.preventDefault(); close(); return; }
-    if (e.key !== 'Tab') return;
-    const f = focusables();
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
-  document.addEventListener('keydown', onKey, true);
-  wrap.querySelectorAll('[data-close]').forEach(b => b.addEventListener('click', close));
-
-  onMount?.(wrap, close);
-  (wrap.querySelector('input, button:not([data-close])') ?? wrap.querySelector('button'))?.focus();
-  return close;
-}
 
 // ── Personal Pronunciation Dictionary ─────────────────────────
 
@@ -9169,67 +8170,7 @@ function renderDictionary() {
 
 // ── The IPA chart: a reference to browse ──────────────────────
 
-function renderChart() {
-  record(renderChart);
-  const syms = Object.entries(PHONEMES);
-  const groups = [
-    { key: 'vowels', title: 'Vowels', note: 'Single vowel sounds — short, long (ː), and the accent-specific variants.',
-      items: syms.filter(([, p]) => p.type === 'vowel' && !p.weak && !p.allophone) },
-    { key: 'diphthongs', title: 'Diphthongs', note: 'Vowels that glide from one position to another.',
-      items: syms.filter(([, p]) => p.type === 'diphthong' && !p.weak && !p.allophone) },
-    { key: 'consonants', title: 'Consonants', note: 'The consonant phonemes of English.',
-      items: syms.filter(([, p]) => p.type === 'consonant' && !p.allophone) },
-    { title: 'Weak vowels', note: 'The vowels of unstressed syllables, counted apart from the full vowel system.',
-      items: syms.filter(([, p]) => p.weak && !p.allophone) },
-    { title: 'Realizations', note: 'Ways a phoneme is actually spoken, written in [brackets] — never extra phonemes.',
-      items: syms.filter(([, p]) => p.allophone) },
-  ];
 
-  const section = g => `
-    <section class="chart-section">
-      <h2 class="chart-h">${esc(g.title)} <span>${g.items.length}</span></h2>
-      <p class="chart-note">${esc(g.note)}</p>
-      ${(() => {
-        // The section's overview chart, where the artwork pack has one.
-        // Sections it does not cover (weak vowels, realizations) simply
-        // go without rather than borrowing a chart that omits them.
-        const c = chartFor(g.key);
-        return c ? `<figure class="chart-overview">
-          <img src="${esc(c.src)}" alt="${esc(c.title)} overview chart" decoding="async">
-        </figure>` : '';
-      })()}
-      <div class="chart-grid">
-        ${g.items.map(([sym, p]) => `
-          <button class="chart-chip" data-sym="${esc(sym)}" title="How “${esc(sym)}” is made">
-            <span class="chart-sym">${p.allophone ? `[${esc(sym)}]` : esc(sym)}</span>
-            <span class="chart-meta">
-              <span class="chart-name">${esc(p.name)}</span>
-              <span class="chart-eg">${p.examples.slice(0, 2).map(w => `<b>${esc(w)}</b>`).join(', ')}</span>
-            </span>
-            <span class="chart-play">›</span>
-          </button>`).join('')}
-      </div>
-    </section>`;
-
-  app.innerHTML = `
-    ${pageTopbar('📖 The IPA Chart', '#64748b')}
-    <main class="tree chart-page">
-      <p class="track-blurb">The full alphabet of sounds. Tap any symbol to see how it’s made and hear it.</p>
-      ${whatIsIpaCard()}
-      ${groups.map(section).join('')}
-    </main>`;
-
-  wireBrandHome();
-  wireWhatIsIpaCard(app);
-  app.querySelectorAll('.chart-chip').forEach(btn =>
-    btn.addEventListener('click', () => renderSoundDetail(btn.dataset.sym))
-  );
-}
-
-// ── Try it yourself: record, play back, compare with the model ─
-// Ephemeral by design — nothing is saved; the Studio remains the place for
-// keeping takes. One object URL lives at a time.
-let tryItUrl = null;
 
 function releaseTryIt() {
   if (tryItUrl) { URL.revokeObjectURL(tryItUrl); tryItUrl = null; }
@@ -9239,238 +8180,10 @@ function releaseTryIt() {
 // it renders nothing while learner speaking is disabled. wireTryIt below
 // is a no-op when no widget rendered.
 
-function wireTryIt(container, playModel) {
-  const box = container.querySelector('.tryit');
-  if (!box) return;
-  const rec = box.querySelector('[data-tryit="rec"]');
-  const player = box.querySelector('[data-tryit="play"]');
-  const status = box.querySelector('[data-tryit="status"]');
-  let recording = false;
-  box.querySelector('[data-tryit="model"]').addEventListener('click', () => playModel());
-  rec.addEventListener('click', async () => {
-    if (!recording) {
-      try {
-        stopSpeech();
-        await startRecording({ onAutoStop: () => rec.click() });
-        recording = true;
-        rec.textContent = '⏹ Stop';
-        rec.classList.add('is-recording');
-        status.textContent = 'Recording… speak, then press stop.';
-      } catch (err) {
-        status.textContent = err?.name === 'NotAllowedError'
-          ? 'Microphone permission was declined — allow it in the browser to record.'
-          : 'Recording isn’t available right now.';
-      }
-      return;
-    }
-    recording = false;
-    rec.textContent = '⏺ Record';
-    rec.classList.remove('is-recording');
-    const take = await stopRecording();
-    if (!take?.blob) { status.textContent = 'Nothing captured — try again.'; return; }
-    if (tryItUrl) URL.revokeObjectURL(tryItUrl);
-    tryItUrl = URL.createObjectURL(take.blob);
-    player.src = tryItUrl;
-    player.hidden = false;
-    player.play().catch(() => {});
-    status.textContent = 'That’s you. Play the model, then match it.';
-  });
-}
 
-// The visible inventory order for a context: exactly the sequence the
-// course's IPA page (or the full Foundations chart) displays its chips in.
-// Prev/Next on the sound pages follows THIS order and nothing else, so a
-// symbol excluded from a course can never be reached from inside it.
-function inventoryOrder(accent) {
-  const syms = accent ? phonemesForAccent(accent) : Object.keys(PHONEMES);
-  const info = s => PHONEMES[s] ?? {};
-  return [
-    ...syms.filter(s => info(s).type === 'vowel' && !info(s).weak && !info(s).allophone),
-    ...syms.filter(s => info(s).type === 'diphthong' && !info(s).weak && !info(s).allophone),
-    ...syms.filter(s => info(s).type === 'consonant' && !info(s).allophone),
-    ...syms.filter(s => info(s).weak && !info(s).allophone),
-    ...syms.filter(s => info(s).allophone),
-  ];
-}
 
-// Articulation video: renders ONLY for an approved manifest entry — with
-// none approved (the current state) the sound page shows nothing extra, an
-// honest absence rather than a "coming soon" tease. Native controls plus
-// loop and half-speed toggles; captions track required; inline playback.
-function articulationVideoHtml(v, kindLabel) {
-  if (!v) return '';
-  const g = v.articulation ?? {};
-  return `
-    <figure class="artic-video" data-video-id="${esc(v.id)}">
-      <figcaption class="field-label">${esc(kindLabel)}${v.word ? ` — “${esc(v.word)}”` : ''} · /${esc(v.symbol)}/</figcaption>
-      <video controls playsinline preload="metadata" poster="${esc(v.poster)}" aria-label="${esc(kindLabel)} articulation video for ${esc(v.symbol)}">
-        <source src="${esc(v.video)}">
-        ${v.captions ? `<track kind="captions" src="${esc(v.captions)}" srclang="en" label="Captions" default>` : ''}
-      </video>
-      <div class="artic-video-tools">
-        <button class="btn-lite" data-vid-loop type="button" aria-pressed="false">🔁 Loop</button>
-        <button class="btn-lite" data-vid-slow type="button" aria-pressed="false">🐢 Half speed</button>
-      </div>
-      ${(g.lips || g.tongue || g.jaw || g.voice) ? `
-      <dl class="anat-list artic-video-guide">
-        ${g.lips ? `<div><dt>Lips</dt><dd>${esc(g.lips)}</dd></div>` : ''}
-        ${g.tongue ? `<div><dt>Tongue</dt><dd>${esc(g.tongue)}</dd></div>` : ''}
-        ${g.jaw ? `<div><dt>Jaw</dt><dd>${esc(g.jaw)}</dd></div>` : ''}
-        ${g.voice ? `<div><dt>Voice</dt><dd>${esc(g.voice)}</dd></div>` : ''}
-      </dl>` : ''}
-    </figure>`;
-}
 
-function wireArticulationVideos(root) {
-  root.querySelectorAll('.artic-video').forEach(fig => {
-    const vid = fig.querySelector('video');
-    fig.querySelector('[data-vid-loop]')?.addEventListener('click', e => {
-      vid.loop = !vid.loop;
-      e.currentTarget.setAttribute('aria-pressed', String(vid.loop));
-    });
-    fig.querySelector('[data-vid-slow]')?.addEventListener('click', e => {
-      vid.playbackRate = vid.playbackRate === 0.5 ? 1 : 0.5;
-      e.currentTarget.setAttribute('aria-pressed', String(vid.playbackRate === 0.5));
-    });
-  });
-}
 
-// Detail for one sound: articulation diagram, description, example words.
-// `accent` is the dialect context the page was opened from — inside a course
-// everything speaks that course's voices. Without one (the full Foundations
-// chart) fall back to guessing from dialect-exclusive symbols.
-// `focusHeading` is set by Prev/Next so keyboard and screen-reader users
-// land on the new sound's name.
-function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
-  const p = PHONEMES[sym];
-  if (!p) return renderChart();
-  record(() => renderSoundDetail(sym, accent));
-  // Realizations (like [ʔ] for /t/) wear square brackets everywhere.
-  const wrapSym = s => (p.allophone ? `[${s}]` : `/${s}/`);
-  const diagram = articulationSVG(sym);
-  const lang = ACCENT_LANG[accent]
-    ?? ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
-    ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ɔ', 'oː', 'eː', 'oɪ'].includes(sym) ? 'en-AU' : 'en-GB');
-  const acc = accent ?? ({ 'en-US': 'nam', 'en-GB': 'rp', 'en-AU': 'aus' })[lang];
-  const isVowel = p.type !== 'consonant';
-  // The big symbol plays the ISOLATED sound only when an ear-approved clip
-  // exists. Until then it is an explicit word control — labelled as such,
-  // never pretending a word is the phoneme.
-  const slug = phonemeSlug(sym);
-  const hasIso = hasPhonemeClip(slug, acc);
-  const hasSyl = hasPhonemeClip(slug + '_syllable', acc);
-  const chips = p.examples.map(w => wordChip(w, acc)).join('');
-
-  // Prev/Next through the visible inventory for this context. No looping:
-  // the controls simply disable at either end.
-  const order = inventoryOrder(accent);
-  const idx = order.indexOf(sym);
-  const prevSym = idx > 0 ? order[idx - 1] : null;
-  const nextSym = idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null;
-  const navLabel = s => `${PHONEMES[s].allophone ? `[${s}]` : `/${s}/`} ${PHONEMES[s].name}`;
-  const arrow = (s, dir) => `
-    <button class="sound-step" data-step="${esc(s ?? '')}" data-dir="${dir === 'prev' ? 'back' : 'forward'}" type="button" ${s ? '' : 'disabled'}
-      aria-label="${s ? `${dir === 'prev' ? 'Previous' : 'Next'} sound: ${esc(navLabel(s))}` : `No ${dir === 'prev' ? 'previous' : 'next'} sound`}"
-      title="${s ? esc(navLabel(s)) : ''}">${dir === 'prev' ? '‹' : '›'}</button>`;
-
-  app.innerHTML = `
-    ${pageTopbar(wrapSym(esc(sym)), '#64748b')}
-    <main class="guide sound-detail">
-      <div class="sound-hero">
-        <div class="sound-big-wrap">
-          ${hasIso ? `
-          <button class="sound-big" id="say-sym"
-            aria-label="Hear the isolated sound ${esc(sym)}" title="Hear the sound">${wrapSym(esc(sym))}</button>
-          <span class="sound-big-cap">🔊 Hear the sound</span>`
-          : hasSyl ? `
-          <button class="sound-big" id="say-syl-hero"
-            aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, since this sound cannot be spoken alone" title="Hear it in a syllable">${wrapSym(esc(sym))}</button>
-          <span class="sound-big-cap">🔊 In a syllable</span>`
-          : `
-          <div class="sound-big is-plain" aria-hidden="true">${wrapSym(esc(sym))}</div>`}
-          ${hasIso && hasSyl ? `<button class="word-chip" id="say-syl" type="button"
-            aria-label="Hear ${esc(sym)} inside a syllable — a syllable demonstration, not a fully isolated sound">🔊 Hear it in a syllable</button>` : ''}
-        </div>
-        <div class="sound-head">
-          <h1 id="sound-title" tabindex="-1">${esc(p.name)}</h1>
-          <p class="guide-text">${esc(p.hint)}.</p>
-          <div class="sound-steps" aria-label="Neighbouring sounds">
-            ${arrow(prevSym, 'prev')}${arrow(nextSym, 'next')}
-          </div>
-        </div>
-      </div>
-      ${(() => {
-        // The picture of how this sound is made.
-        //
-        // A hand-drawn illustration REPLACES the generated diagram
-        // outright wherever one exists. The generated one was only ever
-        // a stand-in for artwork that had not been drawn yet, and
-        // showing both would just be two answers to the same question.
-        const art = artFor(sym);
-        const g = articulationFor(sym);
-        const picture = art
-          ? `<figure class="artic-wrap artic-figure">
-               <img class="artic-art" src="${esc(art)}"
-                    alt="How the mouth makes ${esc(sym)}" decoding="async">
-             </figure>`
-          // No artwork yet: fall back to the generated diagram, with the
-          // cues on leader lines when there is written guidance to hang.
-          : (g ? `<div class="artic-wrap">${guideSVG(sym, g.cues)}</div>`
-               : (diagram ? `<div class="artic-wrap">${diagram}
-                   <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''));
-        if (!g) return picture;
-        return `
-        <section class="sp-step guide-block" aria-label="How to make this sound">
-          <h2 class="guide-heading">How to make it</h2>
-          <p class="guide-text">${esc(g.summary)}</p>
-          ${picture}
-          <ol class="guide-steps">${g.steps.map(t => `<li>${esc(t)}</li>`).join('')}</ol>
-          ${g.contrast ? `<p class="pane-note"><b>Against /${esc(g.contrast.sym)}/:</b> ${esc(g.contrast.note)}</p>` : ''}
-          ${g.watch ? `<p class="pane-note">${esc(g.watch)}</p>` : ''}
-        </section>`;
-      })()}
-      ${articulationVideoHtml(videoFor(acc, sym, 'isolated'), 'Isolated Sound')}
-      ${articulationVideoHtml(videoFor(acc, sym, 'word'), 'Example Word')}
-      <h2 class="guide-heading">Hear it in words</h2>
-      <div class="chips">${chips}</div>
-      ${tryItHtml(`Record yourself saying ${hasIso ? `the sound /${sym}/` : `“${p.examples.find(x => speakableWord(x, acc)) ?? p.examples[0]}”`}, then compare.`)}
-      <nav class="sound-footnav" aria-label="Neighbouring sounds">
-        ${prevSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(prevSym)}" data-dir="back" type="button"
-          aria-label="Previous sound: ${esc(navLabel(prevSym))}">‹ Previous: ${esc(navLabel(prevSym))}</button>` : '<span></span>'}
-        ${nextSym ? `<button class="btn-lite sound-step-wide" data-step="${esc(nextSym)}" data-dir="forward" type="button"
-          aria-label="Next sound: ${esc(navLabel(nextSym))}">Next: ${esc(navLabel(nextSym))} ›</button>` : '<span></span>'}
-      </nav>
-    </main>`;
-
-  wireBrandHome();
-  wireArticulationVideos(app);
-  // A phoneme request plays the phoneme or nothing — no word stand-in.
-  document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, acc));
-  document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
-  document.getElementById('say-syl-hero')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
-  wireTryIt(app, () => {
-    if (hasIso) { playPhoneme(slug, acc); return; }
-    const w = p.examples.find(x => speakableWord(x, acc));
-    if (w) speak(w, { lang, accent: acc });
-  });
-  app.querySelectorAll('[data-say]').forEach(b =>
-    b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: acc })));
-
-  // Prev/Next REPLACE this page in the back history: after /ɪ/ → /e/ → /æ/
-  // the main Back button returns straight to the inventory. record() inside
-  // the next render handles the audio/mic/try-it cleanup.
-  app.querySelectorAll('[data-step]').forEach(b =>
-    b.addEventListener('click', () => {
-      if (!b.dataset.step) return;
-      navTo(() => {
-        navStack.pop();
-        renderSoundDetail(b.dataset.step, accent, { focusHeading: true });
-      }, b.dataset.dir ?? 'forward');
-    }));
-
-  window.scrollTo(0, 0);
-  if (focusHeading) document.getElementById('sound-title')?.focus();
-}
 
 // ── Track page: that dialect's units & lessons ────────────────
 

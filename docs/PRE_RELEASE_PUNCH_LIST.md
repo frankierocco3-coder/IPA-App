@@ -172,6 +172,25 @@ release, and it is not an engineering task.**
 
 ### B-R1 · Split `js/main.js` — **L**, do it before release, not after
 
+**STATUS 2026-09-18 — under way, not finished.** The scaffolding is in and
+proven end to end: `js/views/` exists, the acyclic rule is enforced by a
+refusing extraction script rather than by care, and both graders now read
+main.js plus `js/views/*.js` as one layer, so moving code no longer breaks
+a copy pin. Extracted so far: `context.js` (the shared core 69
+declarations depended on), `reference.js`, `ipa-tools.js`,
+`dialect-action.js`, `action-piece.js`, `admin.js`. **main.js 10,262 →
+8,974 lines**, and ui.js grew the two navigation callbacks (`goHome`,
+`goSection`) that let a view reach the shell without importing it.
+
+The remaining seams, in the order their dependencies allow: dissect
+(textbook + worksheet), studio + project tabs, acting, speech, then the
+lesson/exercise runners. Expect each to need one or two more shared
+helpers lifted into ui.js or context.js first — that is the normal shape
+of this work, not a surprise. Three declarations defeat the boundary
+scanner and must be moved by hand if wanted: `renderSpeakDrills`,
+`renderProvidedScene`, `renderPerformPane`.
+
+
 **Problem.** 8,913 lines; **71% of all app JS** (8,913 of 12,472); 84 `render*` functions;
 79 top-level constants. Every change to any screen touches one file, so the review surface
 for a one-line fix is the entire app. `CLAUDE.md` still says "~2.5k lines" — off by 3.5×.

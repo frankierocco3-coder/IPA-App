@@ -22,11 +22,21 @@
  * Nothing cross-origin is fetched or cached — the app makes no
  * external requests, and this worker preserves that.
  *
- * Bump VERSION when the caching LOGIC changes (old caches are then
- * dropped on activate). Content updates need no bump: URLs are stable
- * and stale-while-revalidate refreshes entries by itself.
+ * Bump VERSION when the caching LOGIC changes, or when the MODULE GRAPH
+ * gains files (old caches are then dropped on activate). Ordinary content
+ * updates need no bump: URLs are stable and stale-while-revalidate
+ * refreshes entries by itself.
+ *
+ * The module-graph case is not obvious and it bites offline. An installed
+ * app holding the old js/main.js serves it from cache and revalidates in
+ * the background, so the NEW main.js lands in the cache while the OLD one
+ * is still the code running — and the old code never imports the new
+ * js/views/* modules, so they are never fetched. Go offline, open the app,
+ * and the cached new main.js asks for modules that were never cached.
+ * Bumping VERSION drops the old cache wholesale, so the next load fetches
+ * one consistent graph.
  */
-const VERSION = 'sc-v1';
+const VERSION = 'sc-v2';                      // 2026-09: js/views/* joined the graph
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

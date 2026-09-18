@@ -31,7 +31,13 @@ def fail(msg):
 
 
 def main():
-    main_js = (ROOT / "js" / "main.js").read_text(encoding="utf-8")
+    # The view layer is no longer one file: js/main.js was split into
+    # js/views/* (2026-09). Every pin below is about the shipped view
+    # CODE, never about which file holds it, so the layer is read as one
+    # text. Present-pins keep their exact meaning; banned-copy pins get
+    # stronger, because the ban now covers every view module.
+    view_files = [ROOT / "js" / "main.js"] + sorted((ROOT / "js" / "views").glob("*.js"))
+    views_js = "\n".join(p.read_text(encoding="utf-8") for p in view_files)
     course_js = (ROOT / "js" / "data" / "course.js").read_text(encoding="utf-8")
     shipped = ""
     for p in list((ROOT / "js").rglob("*.js")) + [ROOT / "index.html"]:
@@ -56,9 +62,9 @@ def main():
         fail("'SSBE' appears as display text")
 
     # 3: icons
-    if not re.search(r"id: 'rp', icon: '🎩'", main_js):
+    if not re.search(r"id: 'rp', icon: '🎩'", views_js):
         fail("Traditional RP course icon is not 🎩 in COURSES")
-    if not re.search(r"id: 'ssbe', icon: '🇬🇧'", main_js):
+    if not re.search(r"id: 'ssbe', icon: '🇬🇧'", views_js):
         fail("Standard British course icon is not 🇬🇧 in COURSES")
     if "title: 'Traditional RP',\n    icon: '🎩'" not in course_js:
         fail("Traditional RP track icon is not 🎩")
@@ -77,13 +83,13 @@ def main():
         fail("lesson-id audit parsed suspiciously few lessons (%d)" % len(ids))
 
     # 4: deterministic Words & Expressions in ssbe checkpoints
-    if "extras.push('idiom', 'idiomRegister')" not in main_js:
+    if "extras.push('idiom', 'idiomRegister')" not in views_js:
         fail("ssbe checkpoints lost their deterministic idiom extras")
 
     # 5: reader voices must come from the generated coverage manifest
-    if "LONGFORM_COVERAGE.sonnets" not in main_js:
+    if "LONGFORM_COVERAGE.sonnets" not in views_js:
         fail("sonnet reader no longer derives voices from LONGFORM_COVERAGE")
-    if re.search(r"SONNET_NARRATED\s*=", main_js):
+    if re.search(r"SONNET_NARRATED\s*=", views_js):
         fail("hardcoded SONNET_NARRATED narration claim has returned")
 
     # 6d: the speaking pause — targeted surface pins, NOT global word bans
@@ -99,7 +105,7 @@ def main():
     for pin in ["New recording is temporarily unavailable",
                 "saved recordings remain on this device",
                 "play, download and delete"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("Privacy recording-pause disclosure missing: %r" % pin)
     record_ui = (ROOT / "js" / "record-ui.js").read_text(encoding="utf-8")
     for guard in ["if (!caps.learnerSpeaking) return ''"]:
@@ -124,14 +130,14 @@ def main():
                 "taking responsibility for its effect",
                 "Speech reveals thought. It reveals what we understand",
                 "relationship between thought and expression"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("preface copy drifted from docs/WHY_SPEECH_MATTERS_COPY.md: missing %r" % pin[:60])
     # The removed panels stay removed — under any name. The preface now
     # ENDS on "Speech Reveals Thought" (owner order 2026-08-20): no course
     # picker, no "choose your way in", nothing asked of the reader.
     for gone in ["Why Actors Train This Way", "The Journey",
                  "Choose your way in", "Both take you into the same app"]:
-        if gone in main_js:
+        if gone in views_js:
             fail("a removed preface panel resurfaced: %r" % gone)
 
     # 6d: the reading pathway stays a credited public-domain pathway, not
@@ -144,7 +150,7 @@ def main():
                 "persuades the judges in the courts",
                 "create forgetfulness in the learners",
                 "the beginning is the most important part of any work"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("reading-pathway credit/PD/excerpt missing: %r" % pin)
 
     # 6e: Speech Dissection stays a thinking tool — the one-tap honest
@@ -154,18 +160,18 @@ def main():
     for pin in ["I don’t know yet",
                 "Not relevant",
                 "diss-clear"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("Speech Dissection lost a first-class control: %r" % pin)
-    if "Delete this dissection" in main_js:
+    if "Delete this dissection" in views_js:
         fail("the whole-dissection delete returned — Clear is per-question now")
     # …and stays OFF the Studio tab strip (approved spec: an action and a
     # focused screen, never another tab)
-    if "'dissect', '🔍 Dissect This'" in main_js or '"dissect", "🔍' in main_js:
+    if "'dissect', '🔍 Dissect This'" in views_js or '"dissect", "🔍' in views_js:
         fail("Dissect This crept back into the Studio tab strip")
     # Privacy must disclose dissection storage and include it in the wipe
     for pin in ["Text dissections",
                 "Delete projects, dissections, recordings"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("Privacy lost its dissection disclosure: %r" % pin)
 
     # 6e2: a present-but-unusable dissection in an import is REPORTED,
@@ -229,7 +235,7 @@ def main():
     # never offers the target — so the old same-accent message is gone.)
     for pin in ["review by a qualified dialect reviewer",
                 "part of the original 23"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("bridge/review honesty copy missing: %r" % pin)
 
     # 6h2: the removed period-American expressions stay removed from the
@@ -255,12 +261,12 @@ def main():
     # label is retired from every learner surface (internal store, field
     # and question-ID names keep their historical "dissect…" spelling and
     # are NEVER renamed). Featured Texts stays removed as a shelf.
-    if "Question Everything" not in main_js:
+    if "Question Everything" not in views_js:
         fail("the Question Everything textbook title is missing from main.js")
-    if "Speech Dissection" in _strip_comments(main_js):
+    if "Speech Dissection" in _strip_comments(views_js):
         fail("a learner surface still says 'Speech Dissection' — the learner-facing "
              "title was renamed Question Everything (comments are fine)")
-    if "Featured Texts" in _strip_comments(main_js):
+    if "Featured Texts" in _strip_comments(views_js):
         fail("the Featured Texts shelf returned — every text lives unpromoted "
              "in its collection")
 
@@ -268,11 +274,11 @@ def main():
     # "Quick Practice"; the "Recommended for you" framing is retired from
     # every learner surface, and the bridge exercise never synthesizes:
     # its rounds come only from playableComparisons (both-clips rule).
-    if "Quick Practice" not in main_js:
+    if "Quick Practice" not in views_js:
         fail("the Quick Practice heading is missing from Practice")
-    if "Recommended for you" in _strip_comments(main_js):
+    if "Recommended for you" in _strip_comments(views_js):
         fail("'Recommended for you' returned to a learner surface")
-    if "playableComparisons" not in main_js:
+    if "playableComparisons" not in views_js:
         fail("the bridge exercise no longer routes through the both-clips gate")
 
     # 6l: the Speech system (2026-08-13) — binding invariants
@@ -296,7 +302,7 @@ def main():
     # Memory is automatic/second nature — NEVER "autonomic" (comments
     # documenting this rule are fine).
     if _re.search(r"\bautonomic\b", _strip_comments(sp_all), _re.I) \
-       or _re.search(r"\bautonomic\b", _strip_comments(main_js), _re.I):
+       or _re.search(r"\bautonomic\b", _strip_comments(views_js), _re.I):
         fail("'autonomic' used for memory — the binding term is automatic/automaticity")
     # The alphabet experiment: present, and carrying NO personal attribution.
     for pin in ["name the 3rd letter", "13th", "14th", "16th", "23rd"]:
@@ -319,7 +325,7 @@ def main():
              % sp_routines_code.count("reviewBatch: 1"))
     # The three Speech Practice navigation choices.
     for pin in ["Guided Practice", "Speechcraft Arcade", "Practice My Text"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("Speech Practice lost a primary choice: %r" % pin)
     # Arcade grouping, and Context Shift hidden (no learner-facing trace).
     for grp in ["Build Fluency", "Shape the Thought", "Change the Circumstances",
@@ -328,7 +334,7 @@ def main():
             fail("Arcade lost a group: %r" % grp)
     if "id: 'context-shift'" not in sp_arcade or "hidden: true" not in sp_arcade:
         fail("Context Shift must exist in data as hidden (roadmap-approved, not shipped)")
-    if "Context Shift" in _strip_comments(main_js):
+    if "Context Shift" in _strip_comments(views_js):
         fail("Context Shift leaked onto a learner surface")
     # No deferred-feature placeholders. Feature names are banned from all
     # learner surfaces; 'coming soon' is banned inside the Speech system
@@ -336,7 +342,7 @@ def main():
     # guidebook predates this build and is governed by the audio contract).
     for banned in ["Body Language pathway", "Build a Character",
                    "Musical Theatre", "Vocal Performance"]:
-        if banned.lower() in _strip_comments(main_js).lower():
+        if banned.lower() in _strip_comments(views_js).lower():
             fail("a deferred feature grew a placeholder: %r" % banned)
     if "coming soon" in _strip_comments(sp_all).lower():
         fail("a 'coming soon' placeholder appeared inside the Speech system")
@@ -353,37 +359,37 @@ def main():
 
     # 6m: the three-workspace IA (2026-08-13)
     for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("a workspace is missing from the selector: %r" % pin)
-    if "IPA Foundations" not in main_js:
+    if "IPA Foundations" not in views_js:
         fail("the IPA workspace lost its accent-neutral context label")
     # The Speech Library presents COLLECTIONS, never stage labels.
     for banned in ["Stage 1 · Foundation", "Stage 2 · Shaping Meaning",
                    "Stage 3 · The Whole Speaker"]:
-        if banned in _strip_comments(sp_course) or banned in _strip_comments(main_js):
+        if banned in _strip_comments(sp_course) or banned in _strip_comments(views_js):
             fail("a retired Stage label survives in the Speech material: %r" % banned)
     for pin in ["Speechcraft Principles", "Your Speaking Instrument",
                 "Meaning, Intention & Urgency", "Presence & Integration"]:
         if "title: '%s'" % pin not in sp_course:
             fail("the Speech Library lost a collection: %r" % pin)
     # Review transparency: computed counts, never a hardcoded claim.
-    if "function speechCensus" not in main_js:
+    if "function speechCensus" not in views_js:
         fail("the review census helper is gone — counts must derive from records")
-    if _re.search(r"7 prepared and awaiting", main_js):
+    if _re.search(r"7 prepared and awaiting", views_js):
         fail("a review count is hardcoded in the UI — it must come from speechCensus()")
     for pin in ["Prepared draft — awaiting professional review",
                 "awaiting professional review"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("review-status wording missing: %r" % pin)
     # My Working Text: requested only when needed, never invented.
-    if "My Working Text" not in main_js:
+    if "My Working Text" not in views_js:
         fail("the working-text system lost its name")
     for pin in ["function needWorkingText", "function resolveWorkingText"]:
-        if pin not in main_js:
+        if pin not in views_js:
             fail("the working-text system lost a required part: %r" % pin)
     # Deferred combined experience stays documented-only.
     for banned in ["Performance Lab", "Put It Together"]:
-        if banned in _strip_comments(main_js):
+        if banned in _strip_comments(views_js):
             fail("the deferred combined experience grew a UI surface: %r" % banned)
 
     # 6n: The Line You Know vs. The Line You Can Find — owner-supplied
@@ -406,7 +412,7 @@ def main():
     ]:
         if pin not in lines_js:
             fail("verbatim memory lesson lost a pinned line: %r" % pin)
-    if "renderLineLesson" not in main_js or "col:lines" not in main_js:
+    if "renderLineLesson" not in views_js or "col:lines" not in views_js:
         fail("the memory lesson lost its Library tile or renderer")
 
     # 6i: the Build F sonnet-edition catalog
@@ -441,7 +447,7 @@ def main():
     if declared_new > 149:
         fail("edition chunks declare %d new sonnets — more than the 149 that exist "
              "outside the five pilots" % declared_new)
-    if "No Fear" in main_js:
+    if "No Fear" in views_js:
         fail("'No Fear' label must never appear on a learner surface")
 
     # 6f: a blocked storage upgrade must carry the visible instruction,
@@ -457,7 +463,7 @@ def main():
 
     # 6b: syllable demonstrations stay labelled as demonstrations, never
     # passed off as pure isolated sounds
-    if "🔊 In a syllable" not in main_js or "syllable demonstration" not in main_js:
+    if "🔊 In a syllable" not in views_js or "syllable demonstration" not in views_js:
         fail("syllable-demo labelling weakened on the sound pages")
 
     # 6: no silent device fallback in course audio
