@@ -81,7 +81,7 @@ excludes it).
 ```
 index.html          CSP lives here (meta tag, must stay first in <head>)
 js/main.js          the shell, routing, boot, and the views not yet
-                    extracted (~9.7k lines). Views are render*() fns.
+                    extracted (~9.0k lines). Views are render*() fns.
                     The B-R1 split is UNDER WAY — see below.
 js/ui.js            shared UI vocabulary: app, navStack, record, goBack,
                     navTo, goHome, esc, openModal, phonemeSlug, topbars,

@@ -14,9 +14,48 @@ Priorities: **P0** blocks release · **P1** is what makes four workspaces feel l
 
 ---
 
+# AUDIT 2026-09-21 — where release actually stands
+
+Every item below was checked against the code at `859b189` and, for the
+on-screen ones, the live site in all three live workspaces (Speech is
+withdrawn). Each item now carries a dated STATUS line with its evidence.
+
+**Done: 16 of 23.** P0-1, P0-2, P0-3, P0-4 (resolved), all eight P1s
+at least in presentation, B-R2, B-R3, B-R4, B-R6. The consistency pass
+that the August list called "the single biggest perceived gain" has
+already happened.
+
+**What actually stands between here and release:**
+
+1. **Content review (P2)** — the real critical path, and not
+   engineering: 73 Accent Bridge comparisons, 8 Dialect in Action pieces,
+   15 transpositions, 616 edition texts, and a professional read of the
+   Acting chapters, all awaiting named human reviewers.
+2. **Real-device testing (P0-5)** — never done. Offline audio only
+   started working today, and Safari is where it is most likely to break.
+3. **Ear-check (P0-6)** — partly done; gates production, not beta.
+
+**Small, fixable, needs an owner call first:**
+
+* Recording rule: one take per file, or three? Decide before recording
+  (B-D1).
+* "Your Speaking Instrument" beside "Your Instrument": rename one (P1-7).
+* Acting pays warmup XP it never shows (P1-3).
+* Shared chapters: render in place or move you (P1-5). Render-in-place
+  is fine while Speech is withdrawn.
+
+**Open, optional:** finish the main.js split (B-R1: 9,017 lines, needs
+the sibling-cycles vs navigation-registry decision), split style.css
+(B-R5), write the missing specs (B-D2), refresh ROADMAP.md (B-D1).
+
+---
+
 # P0 — Release blockers
 
 ### P0-1 · The app's name says it's an IPA trainer
+
+**STATUS 2026-09-21 — DONE.** `index.html` title and `manifest.json` name both read `Speechcraft — Find your voice`.
+
 
 `index.html:32` — `<title>Speechcraft — learn the IPA</title>`
 `manifest.json:2` — `"name": "Speechcraft — learn the IPA"`
@@ -29,6 +68,9 @@ workspaces genuinely add up to). `short_name` "Speechcraft" is already correct.
 
 ### P0-2 · "Ready" is a progress state wearing a content label
 
+**STATUS 2026-09-21 — DONE.** `js/ui.js` `groupStatus` returns `label: 'Not started'` (class name kept).
+
+
 `main.js:2858` — `if (done === 0) return { cls: 'is-ready', label: 'Ready' };`
 
 Every Acting module shows **Ready** because none has been started. To a new user that reads
@@ -39,11 +81,17 @@ Fix: `Not started`. Keep the class name if the styling is doing work.
 
 ### P0-3 · The Acting hero shows an empty progress bar with no numbers
 
+**STATUS 2026-09-21 — DONE.** Every hero uses the one `courseProgressHtml` renderer; the live Acting hero reads "Course progress · 0 of 55".
+
+
 `main.js:1091` renders `Course progress · ${doneCount} of ${seq.length}`, but the Acting
 hero renders a bare bar with the label and no count. An empty bar with no numbers reads as
 broken rather than as zero. Use the same renderer both places.
 
 ### P0-4 · Verify the epigraph attribution and the lint pins agree
+
+**STATUS 2026-09-21 — RESOLVED.** The preface epigraph is pinned as `— Plato, Republic 377a–b, translated by Benjamin Jowett` and the lint passes. The `— Socrates, Book II (377a–b)` line survives only on the Rhetoric & Oratory page, which is withdrawn (`RHETORIC_LIVE = false`). Both are true (Plato wrote it; Socrates speaks it); align them if Rhetoric ever returns.
+
 
 `main.js:3816` now reads `— Socrates, Book II (377a–b)`; `THRESHOLD_COPY.md` says
 `— Plato, Republic 377a–b`, and `launch_lint.py` pins six threshold lines verbatim.
@@ -53,11 +101,17 @@ nobody remembers editing.
 
 ### P0-5 · Cross-browser, still outstanding
 
+**STATUS 2026-09-21 — OPEN, and sharper.** Still untested in Firefox, Safari and iOS. Recording is switched off now, so MediaRecorder is no longer the worry; offline AUDIO is. It only started working on 2026-09-21 (`8292ea8`), and Safari is the browser most likely to reject a range response. The owner's phone test (play online, then airplane mode) is the first real iOS check.
+
+
 Firefox, Safari desktop, iOS Safari, iPadOS — all **NOT TESTED**. Safari `MediaRecorder`
 especially. Unchanged from the planning report and still the largest untested risk in a
 product whose core loop is recording.
 
 ### P0-6 · No voice has been ear-checked
+
+**STATUS 2026-09-21 — PARTLY.** The owner ear-approved the Standard British review batch and pilot (2026-07-30), vetoed and rebuilt Cockney drill lines by ear, and quarantines bad clips through `#audit` (7 in `KNOWN_BAD` today). No full pass across all ~4,000 word clips. Still gates production, not beta.
+
 
 Unchanged, and undelegatable. This gates *production*, not beta.
 
@@ -68,6 +122,9 @@ Unchanged, and undelegatable. This gates *production*, not beta.
 This is the substance of the polish pass. Each item is a divergence I can see on screen.
 
 ### P1-1 · Library screens are three different designs
+
+**STATUS 2026-09-21 — DONE, with one owner override.** Checked live in all three live workspaces: one shared tile component, a `<Name> Library` heading everywhere (Acting Library / Neutral American Library / IPA Foundations Library), search on all three. The "count on every card" recommendation was OVERRIDDEN by owner order (2026-09-17): counts appear only on material shelves ("178 monologues", "27 scenes", "53 expressions", "12 drills").
+
 
 | Workspace | Heading | Search | Layout | Counts | Section label |
 |---|---|---|---|---|---|
@@ -84,6 +141,9 @@ every card.
 
 ### P1-2 · The right-hand rail is a different feature per workspace
 
+**STATUS 2026-09-21 — DONE.** Every workspace's rail is "Next step"; Daily Quests now render INSIDE it (IPA and Accents, once something is earned) — this item's own recommendation.
+
+
 - Speech / Acting: **"Next step"** with a working-text panel (`main.js:583`)
 - Accents & Dialects: **"Daily Quests"** with XP/gem/heart progress
 
@@ -91,6 +151,9 @@ Two unrelated widgets in the same slot. Decide what the rail *is*. If it's "what
 next," quests are one kind of next step and should render inside it, not replace it.
 
 ### P1-3 · The game economy exists in one workspace only
+
+**STATUS 2026-09-21 — DECIDED (scoped), one loose end.** `drawStatsbar` scopes the economy on purpose: "Speech and Acting are not governed by the pronunciation-game economy". Loose end: the Acting Warmup still pays +5 XP that is never shown in Acting, so it surfaces as a changed number in another workspace. Either stop paying XP in Acting or show it there. Owner's call.
+
 
 Accents & Dialects shows streak 🔥1, gems 💎10, hearts ❤️5, plus a lock chip and Daily
 Quests. Speech and Acting show none of it.
@@ -102,11 +165,17 @@ economy across all four or scope it explicitly to dialect drills and say so.
 
 ### P1-4 · The working-text panel follows you into the Library
 
+**STATUS 2026-09-21 — DONE.** The Acting Library's rail is now the course "Next step", not the working-text panel.
+
+
 "Next step / The envelope / Practice this text" renders on the Acting Library screen, where
 it points away from the content. It looks like a Learn-side widget mounted globally. Scope
 it to Learn, or make it collapse outside Learn.
 
 ### P1-5 · Two conventions for cross-workspace content
+
+**STATUS 2026-09-21 — LABEL DONE; behaviour still an owner decision.** One convention now: a `Shared` badge (e.g. Speechcraft Textbook in Acting, Your Speaking Instrument in Voice & Speech). Rhetoric & Oratory is withdrawn. Whether a shared chapter renders in place or visibly moves you into its owning workspace is still open. With Speech withdrawn, render-in-place is the only sensible behaviour today.
+
 
 - Acting Library: "Speech for Actors — **7 shared Speech chapters**"
 - Accents Library: "Rhetoric & Oratory **(shared Speech resource)**"
@@ -117,11 +186,17 @@ in the Acting Library reading a Speech chapter with no signal about where they a
 
 ### P1-6 · Two dropdowns in one workspace, one in the others
 
+**STATUS 2026-09-21 — DONE.** The course chip now carries a "Course" label ("Course 🇺🇸 Neutral American ▾"), so it no longer reads as a peer of the workspace chip.
+
+
 Accents & Dialects has a workspace selector **and** a course selector (Standard British).
 Correct — it's the only workspace with courses — but the two chips are visually identical
 and read as peers. Differentiate them, or nest the course inside the workspace chip.
 
 ### P1-7 · Thin top-level cards
+
+**STATUS 2026-09-21 — DONE, but a new naming clash.** "Acting Glossary — 6 terms" and "Dialects in Speech — 1 topic" are gone. NEW: the Voice & Speech library shows **"Your Speaking Instrument"** (the seven anatomy chapters, Shared) right beside **"Your Instrument"** (the vocal-tract figure tour): two different things with nearly the same name on a four-card shelf. Rename one. Owner's call on wording.
+
 
 - **Acting Glossary — 6 terms.** Too thin for a top-level card.
 - **Dialects in Speech — 1 topic.** Same.
@@ -132,6 +207,9 @@ top-level placement isn't.
 
 ### P1-8 · Count-label grammar
 
+**STATUS 2026-09-21 — DONE.** Owner rule: counts only on material shelves, all in one form, `N noun`.
+
+
 "10 chapters" · "9 chapters" · "4 introductions" · "6 terms" · "3 dialogues · Jowett
 translation" · "7 shared Speech chapters" · "4 shared references" · "1 topic" · "21 chapters
 in four parts" · and one card with prose instead of a count. Pick one pattern.
@@ -139,6 +217,9 @@ in four parts" · and one card with prose instead of a count. Pick one pattern.
 ---
 
 # P2 — Content review triage
+
+**STATUS 2026-09-21 — OPEN, unchanged, human-bound.** Accent Bridge 73 draft / 8 approved (unchanged since August); Dialect in Action 8 of 8 draft; sonnet transpositions 15 draft (the August table said recasts 6, but the right count is the 15 transposition drafts); sonnet editions 616 draft texts; `APPROVED_PHONEMES = []` and `ARTICULATION_VIDEOS = []` still empty. Acting chapters are learner-visible under owner approval but all still await an acting professional's review. Nothing here moves without a named human reviewer.
+
 
 **87 items are currently invisible to learners because they are `draft`:**
 
@@ -243,11 +324,17 @@ In a stack trace or a grep, these are currently indistinguishable.
 
 ### B-R3 · Fix the shadowed constant — **S**
 
+**STATUS 2026-09-21 — DONE.** One `const SECTIONS` in main.js; the dissection headings are `DISSECT_SECTIONS` in `js/dissect.js`.
+
+
 `main.js:284` `const SECTIONS` is the nav config. `main.js:6133` `const SECTIONS` is a local
 array of dissection question headings. Same name, same file, 5,800 lines apart. Rename the
 local one (`DISSECT_SECTIONS`). This will bite during B-R1.
 
 ### B-R4 · Delete vestigial abstractions — **S**
+
+**STATUS 2026-09-21 — DONE.** `NO_LEARN_WORKSPACES`, `sectionsFor` and `defaultSectionFor` no longer exist anywhere in `js/`.
+
 
 - `main.js:300` `const NO_LEARN_WORKSPACES = [];` — an empty config array
 - `main.js:301` `const sectionsFor = () => SECTIONS;` — a function that ignores its purpose
@@ -258,10 +345,16 @@ right now they imply per-workspace nav behavior that doesn't exist.
 
 ### B-R5 · Split `css/style.css` — **M**, optional before release
 
+**STATUS 2026-09-21 — OPEN, optional.** Now 2,022 lines, still one file. The advice to defer stands.
+
+
 1,626 lines, single file. Lower priority than the JS split because CSS conflicts are visible
 immediately rather than silently. Defer unless it's actively slowing you down.
 
 ### B-R6 · Stale code comment — **S**
+
+**STATUS 2026-09-21 — DONE.** The three-workspace comment is gone.
+
 
 `main.js:311` — `// ── Workspaces (2026-08-13 IA): Speech · IPA · Accents & Dialects ──`
 lists **three**; `WORKSPACES` has **four**. The comment is already a day stale.
@@ -271,6 +364,9 @@ lists **three**; `WORKSPACES` has **four**. The comment is already a day stale.
 # P4 — Documentation
 
 ### B-D1 · One true document — **S**, highest leverage per hour
+
+**STATUS 2026-09-21 — MOSTLY DONE, one live hazard.** CLAUDE.md is current (its main.js size corrected to ~9.0k today). The phoneme voice-key tables are FIXED: every file lands under the single `reference` key. The three once-untracked docs are tracked. Still stale: `docs/ROADMAP.md` (build orders marked "in flight" from August, a TEXT BOOK nav that no longer exists). **LIVE HAZARD before recording:** `docs/PHONEME_RECORDING_LIST.md` (2026-08-30) says to put THREE repetitions in each file and have the pipeline pick the best take; `tools/prep_phonemes.py` (2026-09-20) treats each file as ONE sound and only trims the ends, so a three-take file would import as all three takes with the gaps. The NAM pilot script only says "record several takes". Decide the rule before the session: one take per file, or teach the tool to split takes.
+
 
 The 15 conflicts from the planning report are all still open, and two got worse today:
 
@@ -285,6 +381,9 @@ Also now untracked and unreconciled: `docs/CHATGPT_REVIEW_PROMPT.md`,
 `docs/REVIEW_PENDING_CONTENT.md`, `docs/SPEECH_REVIEW.md`.
 
 ### B-D2 · Write the four missing specs — **S**
+
+**STATUS 2026-09-21 — OPEN, low priority.** No `docs/` spec yet for Accent Bridge, Dialect in Action, the Shakespeare editions, or the Acting workspace (Playable Actions and Speech Dissection have theirs). CLAUDE.md carries most of it in the meantime.
+
 
 Accent Bridge, Dialect in Action, the Shakespeare editions, and now the Speech and Acting
 workspaces have their only specification inside source-file header comments. Those headers
