@@ -22,6 +22,12 @@ Example Word), each roughly 5–15 s of front-facing mouth footage:
 | One full course (~45 sounds) | ~150–350 MB |
 | All four courses | 0.6–1.4 GB — **exceeds the repo** |
 
+**STATUS 2026-09-21 — the sibling-repository route is LIVE for audio.**
+`frankierocco3-coder/IPA-Audio` serves every clip at `/IPA-Audio/`, same
+origin as the app. Video, when it comes, follows the same route (a
+sibling `IPA-Media`, or a `video/` folder inside IPA-Audio). Mechanics in
+CLAUDE.md under AUDIO REPOSITORY.
+
 ## Recommendation (preserves the privacy & network model)
 1. **Pilot in-repo.** Up to ~10 sounds (≤ 80 MB) can live in this repo at
    `media/video/<dialect>/…` with no architectural change.

@@ -36,7 +36,7 @@
  * Bumping VERSION drops the old cache wholesale, so the next load fetches
  * one consistent graph.
  */
-const VERSION = 'sc-v3';                      // 2026-09-21: js/data/acting/art.js joined the graph
+const VERSION = 'sc-v4';                      // 2026-09-21: audio moved to /IPA-Audio/; drop the orphaned old media cache
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

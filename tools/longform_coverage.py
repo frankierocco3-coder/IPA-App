@@ -15,7 +15,7 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-AUDIO = ROOT / "audio"
+from audio_root import AUDIO   # the IPA-Audio checkout beside this repo
 DATA = ROOT / "js" / "data"
 
 DIALECTS = ["nam", "rp", "aus", "ssbe"]

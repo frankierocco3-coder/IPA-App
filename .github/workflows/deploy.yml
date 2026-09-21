@@ -22,7 +22,8 @@ jobs:
   # reference, or an unsafe JS construct is about to be published.
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Includes a shallow clone of IPA-Audio (~305 MB) for the audio gate.
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -34,9 +35,6 @@ jobs:
       - name: Security audit
         run: python3 tools/security_audit.py
 
-      - name: Audio integrity (index ↔ files ↔ quality flags)
-        run: python3 tools/audit_audio.py
-
       - name: Launch lint (language, icons, structural guarantees)
         run: python3 tools/launch_lint.py
 
@@ -45,6 +43,23 @@ jobs:
 
       - name: Credential scan (working tree + full git history)
         run: python3 tools/scan_secrets.py --worktree --history
+
+      # Audio lives in its own repository (IPA-Audio) since 2026-09-21, but
+      # the app still must not deploy against an index that disagrees with
+      # the files or the quality flags. Checked out LAST, after every scanner
+      # above has run, so none of them walks 9,000 audio files by accident.
+      - name: Checkout audio (IPA-Audio)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          repository: frankierocco3-coder/IPA-Audio
+          path: IPA-Audio
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Audio integrity (index ↔ files ↔ quality flags)
+        env:
+          SPEECHCRAFT_AUDIO_DIR: ${{ github.workspace }}/IPA-Audio
+        run: python3 tools/audit_audio.py
 
   deploy:
     needs: audit

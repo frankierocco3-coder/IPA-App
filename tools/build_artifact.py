@@ -28,7 +28,8 @@ FILES = ['index.html', 'manifest.json', 'icon-180.png', 'icon-512.png', 'favicon
 DIRS = {
     'css':   {'.css'},
     'js':    {'.js', '.mjs', '.json'},
-    'audio': {'.mp3', '.json'},
+    # 'audio' no longer ships from here: it is its own Pages site, IPA-Audio,
+    # published by that repository (same origin as the app).
     # Articulation artwork. .json ships so the symbol-to-drawing manifest
     # stays checkable on the live site, the same way it is in the repo.
     'img':   {'.jpg', '.png', '.svg', '.json'},

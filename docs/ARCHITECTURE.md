@@ -100,9 +100,14 @@ Small, synchronously-read state.
 same-origin:
 
 ```
-js/audio.js:47   fetch('audio/index.json')
+js/audio.js      fetch(audioUrl('index.json'))   → /IPA-Audio/index.json
 js/pron.js:14    fetch('./data/pron.json')
 ```
+
+Audio (the index and every clip) comes from `/IPA-Audio/`, the audio
+repository's own Pages site. That is still the app's own origin — every
+Pages site under one account shares `frankierocco3-coder.github.io` — so
+`'self'` covers it and nothing here is an external request.
 
 No CDN, no fonts, no analytics, no telemetry, no crash reporting, no
 third-party scripts. CSP `connect-src 'self'` enforces this at the browser

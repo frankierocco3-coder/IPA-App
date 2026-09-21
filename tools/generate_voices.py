@@ -35,7 +35,7 @@ import urllib.request
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 TOOLS = ROOT / "tools"
-AUDIO = ROOT / "audio"
+from audio_root import AUDIO   # the IPA-Audio checkout beside this repo
 PHONEMES_JS = ROOT / "js" / "data" / "phonemes.js"
 VOICES_JSON = TOOLS / "voices.json"
 KEY_FILE = TOOLS / ".elevenlabs_key"

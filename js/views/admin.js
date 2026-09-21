@@ -3,7 +3,7 @@
 // Moved out of js/main.js by the 2026-09 split. No behaviour
 // change: every declaration keeps its name and its body.
 
-import { stopSpeech } from '../audio.js';
+import { stopSpeech, audioUrl } from '../audio.js';
 import { ACTING_APPROACHES } from '../data/acting/approaches.js';
 import { actionDrafts } from '../data/action.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from '../data/audio-flags.js';
@@ -31,8 +31,8 @@ export async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'al
   stopSpeech();
   let index = {};
   let phonIndex = {};
-  try { index = await (await fetch('audio/index.json')).json(); } catch { /* rows empty */ }
-  try { phonIndex = await (await fetch('audio/phonemes-index.json')).json(); } catch { /* none yet */ }
+  try { index = await (await fetch(audioUrl('index.json'))).json(); } catch { /* rows empty */ }
+  try { phonIndex = await (await fetch(audioUrl('phonemes-index.json'))).json(); } catch { /* none yet */ }
   const verdicts = auditVerdicts();
   KNOWN_BAD_LIST.forEach(id => { if (!verdicts[id]) verdicts[id] = 'bad'; });
 
@@ -40,7 +40,7 @@ export async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'al
   for (const d of Object.keys(index)) {
     for (const v of Object.keys(index[d])) {
       for (const clip of index[d][v]) {
-        rows.push({ id: `${d}/${v}/${clip}`, d, v, clip, kind: 'word', path: `audio/${d}/${v}/${clip}.mp3` });
+        rows.push({ id: `${d}/${v}/${clip}`, d, v, clip, kind: 'word', path: audioUrl(`${d}/${v}/${clip}.mp3`) });
       }
     }
   }
@@ -60,7 +60,7 @@ export async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'al
           if (s2.endsWith('_syllable') && !candidates.includes(s2)) continue;
           rows.push({ id: `${d}/${v}/${s2}`, d, v, slug: s2,
             clip: `/${sym}/${s2.endsWith('_syllable') ? ' — syllable demo' : ' — isolated'}`, kind: 'phoneme',
-            path: `audio/phonemes/${d}/${v}/${s2}.mp3`,
+            path: audioUrl(`phonemes/${d}/${v}/${s2}.mp3`),
             missing: !candidates.includes(s2) });
         }
       }

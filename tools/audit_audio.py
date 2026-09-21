@@ -21,7 +21,7 @@ import re
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-AUDIO = ROOT / "audio"
+from audio_root import AUDIO   # the IPA-Audio checkout beside this repo
 FLAGS = ROOT / "js" / "data" / "audio-flags.js"
 WORD_DIALECTS = ["rp", "nam", "aus", "ssbe", "cockney"]
 

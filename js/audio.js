@@ -62,9 +62,16 @@ let clipIndex = null;
 let indexResolve;
 export const indexReady = new Promise(r => { indexResolve = r; });
 export const clipIndexLoaded = () => clipIndex != null;
-// Module-relative URL so the index loads no matter which page imported us
-// (the app at /, or the local test runner under /tests/).
-fetch(new URL('../audio/index.json', import.meta.url))
+// Audio lives in its own repository, IPA-Audio, published beside the app.
+// Every Pages site under one account is the SAME origin, so this is not an
+// external request and the same-origin rule holds with no exception. The
+// base resolves against this module, so it is right from the app at
+// /IPA-App/, from the local dev server at /, and from the test runner;
+// serve.py maps /IPA-Audio/ to the sibling checkout for local work.
+export const AUDIO_BASE = new URL('../../IPA-Audio/', import.meta.url).href;
+export const audioUrl = rel => AUDIO_BASE + rel;
+
+fetch(audioUrl('index.json'))
   .then(r => (r.ok ? r.json() : null))
   .then(idx => { if (idx) clipIndex = idx; indexResolve(); })
   .catch(() => { indexResolve(); });
@@ -124,7 +131,7 @@ export function playPhoneme(slug, accent) {
   if (current) { current.pause(); current = null; }
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
   const voice = options[Math.floor(Math.random() * options.length)];
-  const el = new Audio(`audio/phonemes/${accent}/${voice}/${slug}.mp3`);
+  const el = new Audio(audioUrl(`phonemes/${accent}/${voice}/${slug}.mp3`));
   current = el;
   el.play().catch(() => {});   // a missing approved file stays silent — never a word, never TTS
   return true;
@@ -133,7 +140,7 @@ export function playPhoneme(slug, accent) {
 let current = null;
 
 function playClip(dir, voice, word, fallback) {
-  const el = new Audio(`audio/${dir}/${voice}/${clipName(word)}.mp3`);
+  const el = new Audio(audioUrl(`${dir}/${voice}/${clipName(word)}.mp3`));
   current = el;
   // A 404 fires both 'error' and a play() rejection — guard so the fallback
   // runs only once. Strict courses never fall to TTS, even on a 404.
@@ -209,7 +216,7 @@ export function resolveAudio({ kind = 'word', accent = null, lang = 'en-GB', tex
     if (!options.length) return { status: 'unavailable', kind, dir: accent, voice: null, path: null, text: null };
     const voice = options[Math.floor(Math.random() * options.length)];
     return { status: 'ok', kind, dir: accent, voice,
-             path: `audio/phonemes/${accent}/${voice}/${theSlug}.mp3`, text: null };
+             path: audioUrl(`phonemes/${accent}/${voice}/${theSlug}.mp3`), text: null };
   }
   // word | expression | sentence — all resolve by EXACT displayed text;
   // the filename derives from that text, so cross-content substitution is
@@ -219,7 +226,7 @@ export function resolveAudio({ kind = 'word', accent = null, lang = 'en-GB', tex
   const options = voicesWith(dir, text);
   if (!options.length) return { status: 'unavailable', kind, dir, voice: null, path: null, text };
   const voice = options[Math.floor(Math.random() * options.length)];
-  return { status: 'ok', kind, dir, voice, path: `audio/${dir}/${voice}/${clipName(text)}.mp3`, text };
+  return { status: 'ok', kind, dir, voice, path: audioUrl(`${dir}/${voice}/${clipName(text)}.mp3`), text };
 }
 
 // True when a real, playable recording exists for this text in this course.

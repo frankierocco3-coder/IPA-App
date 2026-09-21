@@ -116,7 +116,8 @@ img/articulation/   65 hand-drawn diagrams + 3 overview charts (baseline
                     symbol -> file, sourced from the pack manifest)
 js/pron.js          lazy-loads the 2.8MB pronunciation dictionary
 js/data/            course, phonemes, 6 text libraries, pron.json
-audio/              8,419 pre-generated MP3s (~288MB)
+../IPA-Audio/       the audio — its OWN repository since 2026-09-21 (~9.2k
+                    MP3s, ~305MB), checked out BESIDE this one; see below
 tools/              offline scripts — NEVER deployed
 docs/               product, architecture, security, deployment, threat model
 tests/              security.test.js (browser-run)
@@ -1035,6 +1036,34 @@ reduced-motion lock, and `view-transition-name` on .side-nav /
 .bottom-nav / .topbar so the furniture holds still while the page moves
 through it. Two elements sharing one name would kill every transition at
 once, so the suite pins name-uniqueness in the live app (section 28).
+
+AUDIO REPOSITORY (2026-09-21): the audio moved out of this repository
+into `frankierocco3-coder/IPA-Audio`, published as its own Pages site at
+`/IPA-Audio/`. Every Pages site under one account is the SAME origin, so
+the strict CSP and the no-external-request rule hold with no exception —
+this was the plan recorded in docs/MEDIA_HOSTING.md since August. Why:
+every app push re-published ~305MB of unchanged audio (deploys climbed
+from ~2 to ~8 minutes and one was cancelled at the 10-minute limit). The
+app artifact is now ~24MB. Mechanics:
+  * `js/audio.js` exports `AUDIO_BASE` (resolved against the module:
+    `../../IPA-Audio/`) and `audioUrl(rel)`. EVERY clip, index and
+    narration path goes through it — never write `audio/...` again.
+  * Local layout is two sibling checkouts: `Agent-Workspace/ipa-trainer`
+    and `Agent-Workspace/IPA-Audio`. `serve.py` maps `/IPA-Audio/` to the
+    sibling (realpath-guarded against `../`), so local and live use the
+    same URLs. `SPEECHCRAFT_AUDIO_DIR` overrides the location.
+  * Every offline tool imports `AUDIO` from `tools/audio_root.py` — one
+    answer to "where is the audio". Generators now write into IPA-Audio,
+    so a new batch means a commit + push in THAT repo (its own allow-listed
+    Pages workflow publishes only .mp3 and .json).
+  * CI: the app's audit job clones IPA-Audio LAST, after every scanner has
+    run, and runs `audit_audio.py` against it. The app deploy never ships
+    audio (`build_artifact.py` dropped it). `/audio/` is gitignored here.
+  * Service worker sc-v4: the audio URLs changed, so the old media cache
+    was orphaned; the bump drops it. Requests to /IPA-Audio/ from the app
+    are still caught by the app's worker (same origin, cache-first).
+  * History: the old audio stays in this repo's git history (~349MB);
+    nothing was rewritten. Growth stops here.
 
 LESSON FIGURES (2026-09-21): acting chapters can carry pictures. A body
 block `{ fig: '<key>' }` names an entry in js/data/acting/art.js

@@ -33,7 +33,7 @@ import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
-import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady } from '../js/audio.js';
+import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady, audioUrl, AUDIO_BASE } from '../js/audio.js';
 import { store } from '../js/state.js';
 import { CAPABILITIES } from '../js/capabilities.js';
 import { tryItHtml, performCaptureHtml } from '../js/record-ui.js';
@@ -3511,7 +3511,7 @@ export async function run({ navDoc = document } = {}) {
       && ipaFor('butter', 'cockney')?.ipa.includes('ʔ')
       && ipaFor('house', 'cockney')?.ipa[0] !== 'h'
       && ipaFor('the', 'cockney')?.ipa.includes('ð'));
-    const idx = await fetch('../audio/index.json').then(r => r.json());
+    const idx = await fetch(audioUrl('index.json')).then(r => r.json());
     const bob = idx.cockney?.bob ?? [], lizzie = idx.cockney?.lizzie ?? [];
     check('cockney: strict audio parity — Bob and Lizzie carry identical clip sets, 300+ each',
       bob.length >= 300 && JSON.stringify([...bob].sort()) === JSON.stringify([...lizzie].sort()),
@@ -3549,6 +3549,21 @@ export async function run({ navDoc = document } = {}) {
       !wuText.includes('\u2014') && !/["']/.test(wuText));
     check('warmup: behavioural only, no anatomical claims',
       !/diaphragm|vocal folds|vocal cords|larynx|ribs|intercostal/i.test(wuText));
+  }
+
+  // ── 21f. Audio lives beside the app, on the same origin ─────
+  // The IPA-Audio repository is published as its own Pages site. Same
+  // account, so same origin: the strict CSP and the no-external-request
+  // rule both hold. What would break silently: a base that leaves the
+  // origin, or one that points back inside the app.
+  {
+    const base = new URL(AUDIO_BASE);
+    check('audio: clips load from the sibling IPA-Audio site on the same origin',
+      base.origin === location.origin && base.pathname === '/IPA-Audio/'
+      && audioUrl('nam/f/see.mp3') === AUDIO_BASE + 'nam/f/see.mp3');
+    const idxOk = await fetch(audioUrl('index.json')).then(r => r.ok).catch(() => false);
+    const clipOk = await fetch(audioUrl('nam/f/see.mp3'), { method: 'HEAD' }).then(r => r.ok).catch(() => false);
+    check('audio: the index and a known clip are served from the audio site', idxOk && clipOk);
   }
 
   // ── 21e. Acting figures: every { fig } resolves, ships, is described ─

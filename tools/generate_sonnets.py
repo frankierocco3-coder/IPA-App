@@ -30,6 +30,8 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from audio_root import AUDIO   # the IPA-Audio checkout beside this repo
+
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL = "eleven_multilingual_v2"
 
@@ -209,7 +211,7 @@ def main():
 
     key = read_key()
     vid, settings = voice_for(load_voices(), args.dialect)
-    out_dir = os.path.join(ROOT, "audio", args.source, args.dialect)
+    out_dir = os.path.join(str(AUDIO), args.source, args.dialect)
     os.makedirs(out_dir, exist_ok=True)
 
     # How many calls will this ACTUALLY make? Existing files are skipped, so

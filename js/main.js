@@ -14,7 +14,7 @@ import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record,
          groupStatus, workspacePage } from './ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
-import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady, audioUrl } from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
@@ -7335,7 +7335,7 @@ function renderPiece(key, id) {
     meta: s,
     // Same narrator voices as the sonnets; missing clips fall back to device TTS.
     clip: (n, acc) => (LONGFORM_COVERAGE.libs[key]?.[acc] ?? []).includes(s.id)
-      ? `audio/${key}/${acc}/${s.id}-${n}.mp3` : null,
+      ? audioUrl(`${key}/${acc}/${s.id}-${n}.mp3`) : null,
     narrated: Object.keys(LONGFORM_COVERAGE.libs[key] ?? {})
       .filter(d => (LONGFORM_COVERAGE.libs[key][d] ?? []).includes(s.id)),
     scopeId: `${key}:${s.id}`,
@@ -7373,7 +7373,7 @@ async function renderSonnet(n) {
     : [];
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: narrated[0] ?? 'rp',
-    clip: (i, acc) => narrated.includes(acc) ? `audio/sonnets/${acc}/${n}-${i}.mp3` : null,
+    clip: (i, acc) => narrated.includes(acc) ? audioUrl(`sonnets/${acc}/${n}-${i}.mp3`) : null,
     narrated,
     recast: ed && ed.plain && ed.plainStatus === 'approved' ? { plain: ed.plain } : null,
     today,
