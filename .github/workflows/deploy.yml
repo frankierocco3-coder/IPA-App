@@ -49,7 +49,10 @@ jobs:
   deploy:
     needs: audit
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Pages re-publishes the WHOLE site each time (hundreds of MB of audio),
+    # and its publish step alone ran past 10 minutes on 2026-09-21, which
+    # cancelled a deploy that had passed every check. 20 leaves headroom.
+    timeout-minutes: 20
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
