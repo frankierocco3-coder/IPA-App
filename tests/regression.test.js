@@ -29,6 +29,7 @@ import { PROVIDED_SCENES } from '../js/data/scenes.js';
 import { parseProvidedScene } from '../js/scene-parse.js';
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
+import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
@@ -2896,6 +2897,22 @@ export async function run({ navDoc = document } = {}) {
         doc.querySelectorAll('.item-tile').length === ACTING_COLLECTIONS[0].lessons.length
         && doc.body.textContent.includes('Behavior Comes From the Situation'));
       clickIn(doc.getElementById('nav-back')); await sleep(350);
+      // A chapter with figures: both render with their alt text and
+      // captions, from same-origin files, lazily.
+      clickIn(doc.querySelector('[data-tile="col:rehearsal"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-item="ac-fourthwall"]')); await sleep(450);
+      const figs = [...doc.querySelectorAll('main figure.sp-fig')];
+      check('acting: the fourth wall chapter shows both figures, described and captioned',
+        figs.length === 2
+        && figs.every(f => {
+          const img = f.querySelector('img');
+          return !!img && img.getAttribute('alt').length > 40
+            && img.getAttribute('src').startsWith('img/lessons/')
+            && img.getAttribute('loading') === 'lazy'
+            && !!f.querySelector('figcaption')?.textContent.trim();
+        }), `found ${figs.length} figure(s)`);
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
       check('acting: the Library contains no scored exercise or game',
         !doc.querySelector('main .mode-card, main [data-check], main .sp-check')
         && !/\bXP\b/.test(doc.querySelector('main')?.textContent ?? ''));
@@ -3532,6 +3549,24 @@ export async function run({ navDoc = document } = {}) {
       !wuText.includes('\u2014') && !/["']/.test(wuText));
     check('warmup: behavioural only, no anatomical claims',
       !/diaphragm|vocal folds|vocal cords|larynx|ribs|intercostal/i.test(wuText));
+  }
+
+  // ── 21e. Acting figures: every { fig } resolves, ships, is described ─
+  {
+    const figKeys = ACTING_LESSONS.flatMap(l => (l.body ?? []).filter(b => b.fig).map(b => b.fig));
+    check('figures: every acting { fig } names a registered figure with alt text and a caption',
+      figKeys.length >= 2
+      && figKeys.every(k => { const f = actingFigure(k); return !!f && f.alt.length > 40 && !!f.caption; }));
+    const shipped = await Promise.all(figKeys.map(k =>
+      fetch('../' + actingFigure(k).src, { method: 'HEAD' }).then(r => r.ok).catch(() => false)));
+    check('figures: every acting figure file ships', shipped.length > 0 && shipped.every(Boolean));
+    const capText = Object.values(ACTING_FIGURES).map(f => f.caption).join(' ');
+    check('figures: captions keep house copy (no em dashes, no straight quotes)',
+      !capText.includes('\u2014') && !/["']/.test(capText));
+    const fw = ACTING_LESSONS.find(l => l.id === 'ac-fourthwall');
+    check('figures: the fourth wall chapter shows the theatre, then the room, after its opening',
+      String((fw?.body ?? []).filter(b => b.fig).map(b => b.fig)) === 'fourth-wall-theatre,fourth-wall-house'
+      && fw.body.findIndex(b => b.fig) === 1);
   }
 
   // ── 21c. Speak-aloud drills: a full bank per accent course ───

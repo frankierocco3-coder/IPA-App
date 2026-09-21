@@ -510,6 +510,8 @@ export const ACTING_LESSONS = [
     reflection: 'Take a scene you know that happens indoors. What is on the fourth wall, exactly where, and how far away?',
     body: [
       { p: 'A realistic set has three walls. The fourth one, the one that would complete the room, is missing, and the audience sits where it belongs. The convention says: for the character, the wall is still there. The room is whole. The character can lean near it, glance at it, stare out of a window in it, and never once notice the several hundred people breathing where the wallpaper should be.' },
+      { fig: 'fourth-wall-theatre' },
+      { fig: 'fourth-wall-house' },
       { p: 'This chapter is not about breaking that wall. Direct address, the aside, the confidant speech to the house: those are real tools, and some plays are built on them, but they are a different subject. This is the ordinary night in a realistic play, where the wall stays up and the actor has to live behind it. Used well, the fourth wall is not a limitation to be coped with. It is a quarter of the character’s world that happens to be invisible, and it is yours to furnish.' },
       { h: 'Build the wall before you need it' },
       { p: 'A wall you have not built is a wall you cannot use, and the failure is visible. Eyes with nowhere to land drift across the house, focus on nothing, or lock politely into the middle distance, and every one of those reads from the back row. So build it in rehearsal, as deliberately as the designer built the other three. Decide what is on it and where. Then keep it there, every run, every night.' },

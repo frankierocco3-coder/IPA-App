@@ -1036,6 +1036,21 @@ reduced-motion lock, and `view-transition-name` on .side-nav /
 through it. Two elements sharing one name would kill every transition at
 once, so the suite pins name-uniqueness in the live app (section 28).
 
+LESSON FIGURES (2026-09-21): acting chapters can carry pictures. A body
+block `{ fig: '<key>' }` names an entry in js/data/acting/art.js
+(ACTING_FIGURES: title, file, alt, caption; `actingFigure(key)` resolves
+the src under img/lessons/). This mirrors the Speech chapters'
+voice-art.js exactly, rather than inventing a second pattern.
+actingChapterBlocks renders a <figure class="sp-fig"> with the alt text,
+a caption (.sp-figcap), fixed 1536x1024 dimensions and loading="lazy";
+an unknown key renders nothing, never a broken image. Owner-supplied art
+ships as baseline JPEG q90 at 1536x1024, like every other drawing here.
+First use: Using the Fourth Wall (ac-fourthwall), the theatre then the
+room, straight after the opening paragraph. Alt text describes the
+picture, not the lesson's conclusion; captions are learner copy in house
+style. The suite checks every key resolves, every file ships, captions
+keep house style, and the chapter renders both figures.
+
 THE main.js SPLIT (B-R1, begun 2026-09-18, staged): main.js is being
 taken apart along the seams the IA already defines. Three rules hold it
 together. (1) NO CYCLES: a view may import ui.js, views/context.js and

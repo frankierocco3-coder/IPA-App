@@ -1899,6 +1899,7 @@ body.nb-full #app { display: none; }
 /* Voice-science figures inside chapters and references. */
 .sp-fig { margin: 18px 0; }
 .sp-fig img { width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(0,0,0,.08); }
+.sp-figcap { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--muted); }
 
 /* ── Motion opt-out, app-wide (2026-09-15) ───────────────────────
    The targeted reduced-motion rules above stay; this is the net under

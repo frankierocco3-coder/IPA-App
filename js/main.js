@@ -36,6 +36,7 @@ import { glossaryTerm } from './data/speech/glossary.js';
 import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from './data/acting/approaches.js';
 import { LINE_LESSON } from './data/acting/lines.js';
 import { voiceFigure, VOICE_ATLAS } from './data/voice-art.js';
+import { actingFigure } from './data/acting/art.js';
 import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
@@ -3014,11 +3015,21 @@ function renderActingModule(n) {
 }
 
 // Acting chapter body — the one authoritative copy of an acting lesson.
+// A { fig } block names a figure in js/data/acting/art.js; an unknown key
+// renders nothing rather than a broken image.
+function actingFigureHtml(key) {
+  const f = actingFigure(key);
+  return f ? `<figure class="sp-fig">
+      <img src="${f.src}" alt="${esc(f.alt)}" width="1536" height="1024" loading="lazy">
+      ${f.caption ? `<figcaption class="sp-figcap">${esc(f.caption)}</figcaption>` : ''}
+    </figure>` : '';
+}
 function actingChapterBlocks(l) {
   return (l.body ?? []).map(b =>
     b.h ? `<h2 class="guide-heading">${esc(b.h)}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
-    : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '').join('');
+    : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
+    : b.fig ? actingFigureHtml(b.fig) : '').join('');
 }
 
 function actingDraftGate(l, where) {
