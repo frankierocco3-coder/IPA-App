@@ -97,7 +97,7 @@ import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
 import { renderDialectAction, renderDialectActionPending } from './views/dialect-action.js';
-import { openWhatIsIpa, renderChart, renderSoundDetail, speakableWord, tryItUrl, whatIsIpaCard, wiiQuestion, wireTryIt, wireWhatIsIpaCard, wireWiiQuestions, wordChip } from './views/reference.js';
+import { openWhatIsIpa, renderChart, renderSoundDetail, speakableWord, releaseTryIt, whatIsIpaCard, wiiQuestion, wireTryIt, wireWhatIsIpaCard, wireWiiQuestions, wordChip } from './views/reference.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
 
@@ -8218,9 +8218,6 @@ function renderDictionary() {
 
 
 
-function releaseTryIt() {
-  if (tryItUrl) { URL.revokeObjectURL(tryItUrl); tryItUrl = null; }
-}
 
 // tryItHtml now lives in js/record-ui.js behind the capability boundary —
 // it renders nothing while learner speaking is disabled. wireTryIt below

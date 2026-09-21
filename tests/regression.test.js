@@ -3551,6 +3551,32 @@ export async function run({ navDoc = document } = {}) {
       !/diaphragm|vocal folds|vocal cords|larynx|ribs|intercostal/i.test(wuText));
   }
 
+  // ── 21g. No module writes to a binding it imports ───────────
+  // An imported binding is read-only: assigning to it THROWS. The 2026-09
+  // split moved `let tryItUrl` into views/reference.js while main.js kept
+  // assigning it — invisible to every driven check, because that line only
+  // runs once learner speaking is switched back on. Checked statically,
+  // across main.js, ui.js and every view module main.js imports.
+  {
+    const main = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+    const rels = ['main.js', 'ui.js',
+      ...[...main.matchAll(/from '\.\/(views\/[\w-]+\.js)'/g)].map(m => m[1])];
+    const writes = [];
+    for (const rel of rels) {
+      const src = rel === 'main.js' ? main
+        : await fetch('../js/' + rel).then(r => r.text()).catch(() => '');
+      const code = src.replace(/^\s*\/\/.*$/gm, '');
+      const names = [...code.matchAll(/import\s*\{([^}]*)\}\s*from/g)]
+        .flatMap(m => m[1].split(',').map(b => b.trim().split(/\s+as\s+/).pop()).filter(Boolean));
+      for (const n of names) {
+        const re = new RegExp(`(?<![\\w.$])${n.replace(/\$/g, '\\$')}\\s*(=(?![=>])|\\+=|-=|\\+\\+|--)`);
+        if (re.test(code)) writes.push(`${rel}: ${n}`);
+      }
+    }
+    check('split: no view-layer module assigns to a binding it imports',
+      rels.length >= 8 && writes.length === 0, writes.join(', '));
+  }
+
   // ── 21f. Audio lives beside the app, on the same origin ─────
   // The IPA-Audio repository is published as its own Pages site. Same
   // account, so same origin: the strict CSP and the no-external-request
@@ -3617,6 +3643,15 @@ export async function run({ navDoc = document } = {}) {
       !!sw && sw.includes("const VERSION = '")
       && sw.includes('if (!sameOrigin(url)) return')
       && sw.includes('caches.delete'));
+    // <audio> asks for every clip with a Range header, so offline audio
+    // lives or dies in the range branch: it must STORE a full copy online
+    // and SLICE it into a real 206 offline (Safari rejects a 200 there).
+    // Until 2026-09-21 it stored nothing, so offline audio never worked.
+    check('pwa: range requests store a full copy and answer offline with a real 206',
+      !!sw && sw.includes('rangeRequest(e, req, url)')
+      && sw.includes('e.waitUntil(storeFull(key))')
+      && sw.includes('status: 206') && sw.includes("'Content-Range'")
+      && sw.includes('status: 416'));
     const mainSrc = await viewSource();
     check('pwa: registration is production-only, top window only',
       mainSrc.includes("navigator.serviceWorker.register('./sw.js')")

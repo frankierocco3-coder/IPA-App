@@ -70,7 +70,6 @@ def measure(path, extra=()):
     txt = r.stderr
     mean = re.search(r'mean_volume:\s*(-?\d+(?:\.\d+)?) dB', txt)
     peak = re.search(r'max_volume:\s*(-?\d+(?:\.\d+)?) dB', txt)
-    dur = re.search(r'time=(\d+):(\d+):(\d+(?:\.\d+)?)', txt[::-1])
     seconds = 0.0
     m = re.findall(r'time=(\d+):(\d+):(\d+\.\d+)', txt)
     if m:

@@ -16,9 +16,11 @@
  *     the next visit without ever blocking on the network
  *   • audio / images / fonts   cache first (these files never change
  *     in place; new recordings get new paths)
- *   • Range requests (audio seeking) go to the network; if the network
- *     is gone, the cached full response is served instead, which
- *     Chromium accepts for playback
+ *   • Range requests — which is how <audio> asks for EVERY clip, not just
+ *     when seeking — go to the network for a real 206, and a full copy of
+ *     the file is stored once in the background. Offline, that copy is
+ *     sliced into the 206 the player asked for. (Until 2026-09-21 nothing
+ *     ever stored that copy, so offline audio never worked.)
  * Nothing cross-origin is fetched or cached — the app makes no
  * external requests, and this worker preserves that.
  *
@@ -36,7 +38,7 @@
  * Bumping VERSION drops the old cache wholesale, so the next load fetches
  * one consistent graph.
  */
-const VERSION = 'sc-v4';                      // 2026-09-21: audio moved to /IPA-Audio/; drop the orphaned old media cache
+const VERSION = 'sc-v5';                      // 2026-09-21: range requests now store a full copy for offline
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
@@ -90,20 +92,54 @@ async function cacheFirst(req) {
   return res;
 }
 
+// <audio> requests media in ranges, so every play arrives HERE, never in
+// cacheFirst — this branch is where offline audio is won or lost. Online,
+// the network answers with its own 206 and a full copy is stored once in
+// the background. Offline, the stored copy is sliced into the 206 the
+// player asked for: Safari will not play a 200 handed back to a range.
+function rangeRequest(e, req, url) {
+  const key = url.origin + url.pathname;
+  e.respondWith(fetch(req).catch(async () => {
+    const cached = await (await caches.open(MEDIA)).match(key, { ignoreVary: true });
+    return cached ? sliceRange(cached, req.headers.get('range')) : Response.error();
+  }));
+  if (isMedia(url.pathname)) e.waitUntil(storeFull(key));
+}
+
+async function storeFull(key) {
+  const cache = await caches.open(MEDIA);
+  if (await cache.match(key, { ignoreVary: true })) return;
+  try {
+    const res = await fetch(key);
+    if (res.ok && res.status === 200) await cache.put(key, res);
+  } catch { /* offline right now; the next online play tries again */ }
+}
+
+async function sliceRange(res, header) {
+  const buf = await res.arrayBuffer();
+  const size = buf.byteLength;
+  const m = /bytes=(\d*)-(\d*)/.exec(header || '');
+  let start = 0, end = size - 1;
+  if (m && m[1] === '' && m[2] !== '') start = Math.max(0, size - Number(m[2]));   // bytes=-N
+  else if (m) { start = m[1] === '' ? 0 : Number(m[1]); if (m[2] !== '') end = Math.min(Number(m[2]), size - 1); }
+  if (start >= size || start > end) {
+    return new Response(null, { status: 416, headers: { 'Content-Range': `bytes */${size}` } });
+  }
+  return new Response(buf.slice(start, end + 1), { status: 206, headers: {
+    'Content-Type': res.headers.get('Content-Type') || 'audio/mpeg',
+    'Content-Range': `bytes ${start}-${end}/${size}`,
+    'Content-Length': String(end - start + 1),
+    'Accept-Ranges': 'bytes',
+  } });
+}
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   if (!sameOrigin(url)) return;                    // the app never asks; never answer
   if (req.mode === 'navigate') { e.respondWith(networkFirstNav(req)); return; }
-  if (req.headers.has('range')) {
-    // Seeking inside audio: let the network answer with a real 206;
-    // offline, fall back to the cached full file.
-    e.respondWith(fetch(req).catch(async () =>
-      (await caches.open(MEDIA)).match(url.pathname, { ignoreSearch: true, ignoreVary: true })
-        .then(r => r ?? Response.error())));
-    return;
-  }
+  if (req.headers.has('range')) { rangeRequest(e, req, url); return; }
   if (isMedia(url.pathname)) { e.respondWith(cacheFirst(req)); return; }
   if (/\.(js|css|json|webmanifest)$/i.test(url.pathname)) {
     e.respondWith(staleWhileRevalidate(req));

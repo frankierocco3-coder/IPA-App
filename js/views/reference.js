@@ -329,7 +329,13 @@ export function renderChart() {
 // ── Try it yourself: record, play back, compare with the model ─
 // Ephemeral by design — nothing is saved; the Studio remains the place for
 // keeping takes. One object URL lives at a time.
-export let tryItUrl = null;
+// Module-private: only this module writes it. An exported `let` cannot be
+// assigned by an importer (the binding is read-only there and assignment
+// throws), which is how the 2026-09 split briefly broke releaseTryIt.
+let tryItUrl = null;
+export function releaseTryIt() {
+  if (tryItUrl) { URL.revokeObjectURL(tryItUrl); tryItUrl = null; }
+}
 export function wireTryIt(container, playModel) {
   const box = container.querySelector('.tryit');
   if (!box) return;
