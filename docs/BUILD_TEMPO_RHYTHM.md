@@ -158,7 +158,7 @@ Practice beside the existing decks.
 ## What this deliberately does not do
 
 - **No new workspace, no kill switch, no `js/data/character/`.** It is a module
-  in `js/data/acting/course.js` like every other lesson.
+  in `js/data/acting/acting-course.js` like every other lesson.
 - **No audio.** No metronome tick, no click track. The text-first rule defers all
   new audio, and a browser-generated tick is new audio.
 - **No recording or scoring of the learner.** `CAPABILITIES.learnerSpeaking` is

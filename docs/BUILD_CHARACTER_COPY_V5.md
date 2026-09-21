@@ -1,6 +1,6 @@
 # Module 4 · Building a Character — fifth pass: two roads
 
-> **Installed 2026-08-27.** Live in `js/data/acting/course.js`, Module 4,
+> **Installed 2026-08-27.** Live in `js/data/acting/acting-course.js`, Module 4,
 > lessons 4.1 to 4.10. This file is the source draft.
 
 

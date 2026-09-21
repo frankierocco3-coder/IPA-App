@@ -38,7 +38,7 @@ def main():
     # stronger, because the ban now covers every view module.
     view_files = [ROOT / "js" / "main.js"] + sorted((ROOT / "js" / "views").glob("*.js"))
     views_js = "\n".join(p.read_text(encoding="utf-8") for p in view_files)
-    course_js = (ROOT / "js" / "data" / "course.js").read_text(encoding="utf-8")
+    course_js = (ROOT / "js" / "data" / "dialect-course.js").read_text(encoding="utf-8")
     shipped = ""
     for p in list((ROOT / "js").rglob("*.js")) + [ROOT / "index.html"]:
         shipped += p.read_text(encoding="utf-8") + "\n"
@@ -78,7 +78,7 @@ def main():
         ids += re.findall(r"\bid: '([^']+)'", block)
     dupes = sorted({i for i in ids if ids.count(i) > 1})
     for d_ in dupes:
-        fail("duplicate lesson id in course.js: %s" % d_)
+        fail("duplicate lesson id in dialect-course.js: %s" % d_)
     if len(ids) < 40:
         fail("lesson-id audit parsed suspiciously few lessons (%d)" % len(ids))
 
@@ -184,7 +184,7 @@ def main():
 
     # 6g: Playable Actions stays exactly the approved twelve — verbs, pair
     # relationships and shared practice lines pinned to ACTION_LIBRARY_v1
-    playable_js = (ROOT / "js" / "data" / "playable.js").read_text(encoding="utf-8")
+    playable_js = (ROOT / "js" / "data" / "playable-actions.js").read_text(encoding="utf-8")
     for verb in ["To Reassure", "To Dismiss", "To Confess", "To Justify",
                  "To Confront", "To Draw Out", "To Command", "To Appeal To",
                  "To Warn", "To Intimidate", "To Forgive", "To Punish"]:
@@ -245,14 +245,14 @@ def main():
         src = _re.sub(r"/\*.*?\*/", "", src, flags=_re.S)
         return _re.sub(r"^\s*//.*$", "", src, flags=_re.M)
     idiom_code = _strip_comments((ROOT / "js" / "data" / "idiom.js").read_text(encoding="utf-8"))
-    action_code = _strip_comments((ROOT / "js" / "data" / "action.js").read_text(encoding="utf-8"))
+    action_code = _strip_comments((ROOT / "js" / "data" / "dialect-in-action.js").read_text(encoding="utf-8"))
     removed = ["jake", "copacetic", "the berries", "horsefeathers", "hooey",
                "bunk", "palooka", "take a powder", "sawbuck", "simoleons",
                "kale", "hooch", "giggle water", "flapper", "dead soldiers",
                "on the level", "the brush off", "the brush-off",
                "shoot the breeze"]
     for term in removed:
-        for src, name in ((idiom_code, "idiom.js"), (action_code, "action.js")):
+        for src, name in ((idiom_code, "idiom.js"), (action_code, "dialect-in-action.js")):
             if _re.search(r"\b" + _re.escape(term) + r"\b", src, _re.I):
                 fail("removed NAM expression resurfaced in %s: %r" % (name, term))
 
@@ -283,16 +283,16 @@ def main():
 
     # 6l: the Speech system (2026-08-13) — binding invariants
     speech_dir = ROOT / "js" / "data" / "speech"
-    sp_course = (speech_dir / "course.js").read_text(encoding="utf-8")
+    sp_course = (speech_dir / "speech-course.js").read_text(encoding="utf-8")
     sp_routines = (speech_dir / "routines.js").read_text(encoding="utf-8")
     sp_arcade = (speech_dir / "arcade.js").read_text(encoding="utf-8")
     acting_dir = ROOT / "js" / "data" / "acting"
     sp_all = "".join((speech_dir / f).read_text(encoding="utf-8")
-                     for f in ["course.js", "glossary.js",
+                     for f in ["speech-course.js", "glossary.js",
                                "routines.js", "arcade.js", "texts.js",
-                               "reviews.js", "store.js", "dialects.js"]) \
+                               "reviews.js", "store.js", "dialect-facets.js"]) \
         + "".join((acting_dir / f).read_text(encoding="utf-8")
-                  for f in ["course.js", "approaches.js", "practice.js", "store.js"])
+                  for f in ["acting-course.js", "approaches.js", "practice.js", "store.js"])
     # The two central practice statements, verbatim.
     for pin in ["Practice one element at a time so you can recognize and control it. "
                 "Then carry that skill into thought, listening, movement and response.",

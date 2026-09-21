@@ -2,7 +2,7 @@
 // distractors are provably wrong (checked against real transcriptions).
 
 import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
-import { EXERCISES_PER_LESSON } from './data/course.js';
+import { EXERCISES_PER_LESSON } from './data/dialect-course.js';
 import { IDIOM, IDIOM_DIALOGUES, IDIOM_SITUATIONS, IDIOM_LITERAL } from './data/idiom.js';
 import { voicesWith, clipIndexLoaded } from './audio.js';
 

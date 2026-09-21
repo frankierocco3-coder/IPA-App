@@ -1,4 +1,4 @@
-import { COURSE, TRACKS, MODES } from './data/course.js';
+import { COURSE, TRACKS, MODES } from './data/dialect-course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { DIALECT_INFO } from './data/dialects.js';
 import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
@@ -21,7 +21,7 @@ import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
 import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from './data/recasts.js';
 import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from './data/editions/index.js';
-import { actionFor, actionDrafts, DIALECT_ACTION_LIVE } from './data/action.js';
+import { actionFor, actionDrafts, DIALECT_ACTION_LIVE } from './data/dialect-in-action.js';
 import { videoFor } from './data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
@@ -31,7 +31,7 @@ import { SPEECH_STAGES, SPEECH_MODULES, speechModuleGroups, speechReading,
          chapterTitle, CHAPTER_TITLES, SPEECH_COLLECTIONS, SPEECH_LESSONS, speechLessonsFor,
          speechLessonById, collectionForLesson, moduleForLesson, lessonNumber, lessonKeywords,
          SPEECH_REVIEW_WHY, SPEECH_LESSON_EXTRAS,
-         PRACTICE_PRINCIPLE_SHORT, SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE } from './data/speech/course.js';
+         PRACTICE_PRINCIPLE_SHORT, SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE } from './data/speech/speech-course.js';
 import { glossaryTerm } from './data/speech/glossary.js';
 import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from './data/acting/approaches.js';
 import { LINE_LESSON } from './data/acting/lines.js';
@@ -48,10 +48,10 @@ import { speechApproved, speechPublished, speechBodyVisible, speechReviewFor } f
 import { SPEECH_GOALS, speechGoal, setSpeechGoal, speechLessonDone,
          markSpeechLessonDone, speechDoneCount, speechHistory, recordSpeechPractice,
          attachSpeechReflection, REFLECTION_CHOICES, wipeSpeechData } from './data/speech/store.js';
-import { DIALECT_FACETS, DIALECT_VARIATION_LINE } from './data/speech/dialects.js';
+import { DIALECT_FACETS, DIALECT_VARIATION_LINE } from './data/speech/dialect-facets.js';
 import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
          ACTING_GLOSSARY, actingLessonsFor, actingLessonById, actingModuleFor,
-         actingLessonNumber } from './data/acting/course.js';
+         actingLessonNumber } from './data/acting/acting-course.js';
 import { ACTING_GAMES, ACTING_DECKS, actingGameById,
          SCENE_STUDY_AREAS } from './data/acting/practice.js';
 import { sceneStudyNotes, saveSceneStudyNote } from './data/acting/store.js';
@@ -83,7 +83,7 @@ import { questRows, claimQuest, onLessonFinished } from './quests.js';
 import { PLAYABLE_ACTIONS, ACTION_VERBS, ACTION_VERB_FRAME, taughtActionFor,
          ACTION_PAIRS, ACTION_CATEGORIES, GOVERNING_QUESTION,
          ACTION_DISTINCTION, PAIR_LESSON, actionById, pairById, pairIndexOf,
-         searchActions } from './data/playable.js';
+         searchActions } from './data/playable-actions.js';
 import { readJsonFile, validateProjectBundle, validateDictionaryBundle,
          ValidationError, LIMITS, importResultMessage } from './validate.js';
 import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePersonal,
@@ -858,7 +858,7 @@ function speechReviewCategories() {
         why: SPEECH_REVIEW_WHY[l.id] ?? 'Health or anatomy content requires professional confirmation before it is taught.',
         concerns: 'Health and anatomy accuracy; non-diagnostic, non-prescriptive framing; no universal posture, support or tongue-position claim; sources paraphrased, never copied.',
         sources: l.sources ?? [],
-        file: 'js/data/speech/course.js',
+        file: 'js/data/speech/speech-course.js',
         record: l,
       })) },
   ].filter(g => g.count > 0);
@@ -2905,7 +2905,7 @@ function actingReviewCategories() {
         why: 'Newly written acting instruction. A qualified teacher must confirm the account is accurate, useful and consistent with responsible practice before it is taught as approved material.',
         concerns: 'No single artistic interpretation implied; emotional states never taught as objectives; no method-specific claim presented as universal; no protected exercise sequences reproduced.',
         sources: l.sharedFrom ? [`Builds on the shared record: ${l.sharedFrom.label}`] : [],
-        file: 'js/data/acting/course.js', record: l,
+        file: 'js/data/acting/acting-course.js', record: l,
       })) },
     { id: 'approaches', label: 'Acting approach introductions', shortLabel: 'approach introductions',
       reviewer: 'Qualified acting teacher or coach', count: approaches.length,
@@ -4402,7 +4402,7 @@ function renderReadingPathway() {
 
 // ── Playable Actions (Build C) ───────────────────────────────
 // Twelve verbatim entries and six contrast pairs from
-// docs/ACTION_LIBRARY_v1.md, rendered from js/data/playable.js.
+// docs/ACTION_LIBRARY_v1.md, rendered from js/data/playable-actions.js.
 // Entirely written: the shared practice line is text for private
 // exploration — no audio, no recording, no scoring, no empty controls.
 // The search query survives in module state so Back from a detail page

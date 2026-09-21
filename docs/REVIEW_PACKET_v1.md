@@ -16,7 +16,7 @@ commit. Approved content reaches learner surfaces automatically.
 Canonical text locations (texts are reproduced in full below; the data
 file is authoritative if they ever drift):
 
-- Dialect in Action — `js/data/action.js`
+- Dialect in Action — `js/data/dialect-in-action.js`
 - Sonnet transpositions — `js/data/recasts.js`
 - Accent Bridge routes — `js/data/bridge.js`
 

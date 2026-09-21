@@ -93,7 +93,7 @@ euphemism and cliché analysis). Neither is named in the bodies.
 
 ## Install checklist (on approval)
 
-1. `js/data/acting/course.js` — insert both records; `ac-actions` moves
+1. `js/data/acting/acting-course.js` — insert both records; `ac-actions` moves
    to `order: 11`; add `'ac-wordschoice'` to the `scene` collection
    after `'ac-subtext'` and `'ac-appeals'` to the `rehearsal`
    collection after `'ac-playing'`.

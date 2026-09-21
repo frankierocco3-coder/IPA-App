@@ -95,9 +95,9 @@ Open the app, then:
   owner review area.
 
 Source files, if you would rather copy from the repo directly:
-`js/data/speech/course.js`, `js/data/acting/course.js`,
+`js/data/speech/speech-course.js`, `js/data/acting/acting-course.js`,
 `js/data/acting/approaches.js`, `js/data/speech/routines.js`,
-`js/data/speech/texts.js`, `js/data/action.js`, `js/data/bridge.js`,
+`js/data/speech/texts.js`, `js/data/dialect-in-action.js`, `js/data/bridge.js`,
 `js/data/editions/`.
 
 ## Recording an approval

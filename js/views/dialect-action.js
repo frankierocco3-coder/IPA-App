@@ -4,7 +4,7 @@
 // change: every declaration keeps its name and its body.
 
 import { stopSpeech } from '../audio.js';
-import { actionDrafts, actionFor } from '../data/action.js';
+import { actionDrafts, actionFor } from '../data/dialect-in-action.js';
 import { app, esc, pageTopbar, record, wireBrandHome, workspacePage } from '../ui.js';
 import { actionPieceHtml, wireActionPiece } from './action-piece.js';
 import { dialectName, trackFor } from './context.js';

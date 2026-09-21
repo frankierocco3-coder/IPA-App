@@ -221,7 +221,7 @@ before any approval is requested. Generation happens in ear-gated batches
       sources; dialect_lint fails without it)
 - [ ] `js/data/phonemes.js` — phonemesForAccent('cockney') = ssbe set;
       narrow entries for realization drills
-- [ ] `js/data/course.js` — track, stages, lessons, TRACK_ACCENT, COURSES
+- [ ] `js/data/dialect-course.js` — track, stages, lessons, TRACK_ACCENT, COURSES
       entry (name Cockney, icon 🚕)
 - [ ] `js/data/idiom.js` — cockney dialect set incl. rhyming slang
 - [ ] `js/audio.js` — STRICT_ACCENTS + ACCENT_LANG ('en-GB')

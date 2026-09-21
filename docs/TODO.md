@@ -10,7 +10,7 @@ rather than quietly dropped.
 ## Next up — the programme's next part
 
 **BUILDING A CHARACTER (owner order, 2026-08-20) — built 2026-08-26.** Two new
-Acting modules in `js/data/acting/course.js`: Module 4 Building a Character
+Acting modules in `js/data/acting/acting-course.js`: Module 4 Building a Character
 (rebuilt 2026-08-27 as ten lessons in the workshop voice: the two-roads
 structure, What You Are Hired For, archetypes, and the improvisation road)
 and Module 5 Tempo-Rhythm (6 lessons, workshop voice). Plus The Professional
@@ -73,7 +73,7 @@ flag away from returning. Verified in the running app, not just in source.
 | Surface | Flag | File | Content behind it |
 |---|---|---|---|
 | Accent Bridge | `BRIDGE_LIVE = false` | `js/data/bridge.js` | 12 routes, 81 comparisons, 73 unapproved |
-| Dialect in Action | `DIALECT_ACTION_LIVE = false` | `js/data/action.js` | 8 pieces, 8 draft |
+| Dialect in Action | `DIALECT_ACTION_LIVE = false` | `js/data/dialect-in-action.js` | 8 pieces, 8 draft |
 | Speech workspace | `SPEECH_LIVE = false` | `js/main.js` | textbook now shared into Acting |
 | Scene Study | `SCENE_STUDY_LIVE = false` | `js/main.js` | — |
 
@@ -96,7 +96,7 @@ what each one covers, is in `docs/WHAT_NEEDS_REVIEW.md`.
 | Accent Bridge comparisons (`js/data/bridge.js`) | 73 | dialect, per accent | No |
 | Articulation guides (`js/data/articulation.js`) | 62 | voice professional or SLP | **Yes**, badged draft |
 | Speech chapters (`js/data/speech/reviews.js`) | 39 | voice professional or SLP; acting teacher | **Yes**, owner-approved |
-| Dialect in Action pieces (`js/data/action.js`) | 8 | literary AND dialect | No |
+| Dialect in Action pieces (`js/data/dialect-in-action.js`) | 8 | literary AND dialect | No |
 
 An earlier version of this file gave the queue as 89 items and then 148. Both
 were wrong: they missed the sonnet editions entirely, and counted the recast

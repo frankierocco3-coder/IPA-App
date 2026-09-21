@@ -16,7 +16,7 @@
 // every step skippable, no forced breath holds, no assumption of nasal
 // breathing), and interpretive: completion only, never a quality score.
 
-import { SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE } from './course.js';
+import { SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE } from './speech-course.js';
 
 export { SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE };
 

@@ -83,7 +83,7 @@ one in source, matching the rest of the glossary.)
 
 ## Install checklist (on approval)
 
-1. `js/data/acting/course.js` — insert the record; bump `ac-performance`
+1. `js/data/acting/acting-course.js` — insert the record; bump `ac-performance`
    to `order: 7`; add `'fourth-wall'` to `ACTING_GLOSSARY`; add
    `'ac-fourthwall'` to the `rehearsal` collection before
    `'ac-performance'`.

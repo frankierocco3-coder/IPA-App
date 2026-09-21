@@ -5,13 +5,13 @@
 
 import { stopSpeech, audioUrl } from '../audio.js';
 import { ACTING_APPROACHES } from '../data/acting/approaches.js';
-import { actionDrafts } from '../data/action.js';
+import { actionDrafts } from '../data/dialect-in-action.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from '../data/audio-flags.js';
 import { bridgeDrafts } from '../data/bridge.js';
 import { EDITION_CATALOG_COMPLETE, EDITION_CHUNKS, LEGACY_SONNETS, editionFor, editionStatus } from '../data/editions/index.js';
 import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from '../data/recasts.js';
 import { SONNETS } from '../data/sonnets.js';
-import { SPEECH_COMFORT_LINE, SPEECH_LESSONS, SPEECH_SAFETY_LINE } from '../data/speech/course.js';
+import { SPEECH_COMFORT_LINE, SPEECH_LESSONS, SPEECH_SAFETY_LINE } from '../data/speech/speech-course.js';
 import { speechApproved, speechPublished } from '../data/speech/reviews.js';
 import { PRACTICE_SUBJECTS, draftRoutines, learnerRoutines } from '../data/speech/routines.js';
 import { SPEECH_TEXTS, speechTextBody } from '../data/speech/texts.js';
@@ -183,7 +183,7 @@ export async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'al
 // The writing counterpart to #audit: every Dialect in Action piece and
 // sonnet transposition still awaiting review, rendered exactly as a
 // learner would see it. Approval is a deliberate file edit (reviewStatus
-// in js/data/action.js, TRANSPOSITION_REVIEW in js/data/recasts.js) —
+// in js/data/dialect-in-action.js, TRANSPOSITION_REVIEW in js/data/recasts.js) —
 // nothing on this page can publish anything by accident.
 export function renderContentReview() {
   stopSpeech();
@@ -206,7 +206,7 @@ export function renderContentReview() {
       <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
-      <p class="pane-note">Owner tool, reached by typing <code>#review</code> — it is NOT authenticated, so treat everything here as public. Nothing below is on a learner surface. To approve: set the status fields in <code>js/data/action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
+      <p class="pane-note">Owner tool, reached by typing <code>#review</code> — it is NOT authenticated, so treat everything here as public. Nothing below is on a learner surface. To approve: set the status fields in <code>js/data/dialect-in-action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
 
       <h1>The original 23-item queue</h1>
       <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>

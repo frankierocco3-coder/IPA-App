@@ -222,6 +222,16 @@ commit.
 
 ### B-R2 · Disambiguate colliding module names — **S**
 
+**STATUS 2026-09-21 — DONE.** `data/course.js` → `data/dialect-course.js`,
+`data/speech/course.js` → `data/speech/speech-course.js`,
+`data/acting/course.js` → `data/acting/acting-course.js`,
+`data/action.js` → `data/dialect-in-action.js`,
+`data/playable.js` → `data/playable-actions.js`,
+`data/speech/dialects.js` → `data/speech/dialect-facets.js`. Each file
+kept its folder; `data/dialects.js` (the Accuracy Standard) kept its name,
+since nothing collides with it now. Moved with `git mv`, so history
+follows each file. The text below is the original problem statement.
+
 - Three files named `course.js`: `data/course.js`, `data/speech/course.js`,
   `data/acting/course.js` → `dialect-course.js`, `speech-course.js`, `acting-course.js`
 - Two unrelated "action" modules: `data/action.js` (Dialect in Action) and `data/playable.js`

@@ -1,7 +1,7 @@
 # Modules 4 and 5 — fourth pass: the workshop voice
 
 > **Module 5 installed 2026-08-27** from this file (workshop voice). Module 4
-> here was superseded by V5. Live text: `js/data/acting/course.js`.
+> here was superseded by V5. Live text: `js/data/acting/acting-course.js`.
 
 
 The order: make it read like a working performer telling you how he actually

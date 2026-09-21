@@ -38,7 +38,7 @@
  * Bumping VERSION drops the old cache wholesale, so the next load fetches
  * one consistent graph.
  */
-const VERSION = 'sc-v5';                      // 2026-09-21: range requests now store a full copy for offline
+const VERSION = 'sc-v6';                      // 2026-09-21: six data modules renamed (B-R2) — new URLs in the graph
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

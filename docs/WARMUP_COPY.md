@@ -18,7 +18,7 @@ thing".
   proves anything. Every step can be skipped.
 * **House voice.** No contractions, no em dashes, curly quotes. Short
   sentences. A dry closing note where it earns one.
-* The shared comfort and safety lines from `js/data/speech/course.js`
+* The shared comfort and safety lines from `js/data/speech/speech-course.js`
   render with the sequence, as they do now.
 
 About twelve minutes end to end. The four movements can be run alone: body

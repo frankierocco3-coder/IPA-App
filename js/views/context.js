@@ -3,7 +3,7 @@
 // Moved out of js/main.js by the 2026-09 split. No behaviour
 // change: every declaration keeps its name and its body.
 
-import { COURSE, TRACKS } from '../data/course.js';
+import { COURSE, TRACKS } from '../data/dialect-course.js';
 import { speechPublished } from '../data/speech/reviews.js';
 import { app, record } from '../ui.js';
 

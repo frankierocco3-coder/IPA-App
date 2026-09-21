@@ -60,7 +60,7 @@ No AI pass may set it.
 
 # Part 1 — Acting lessons (28)
 
-Source file: `js/data/acting/course.js` · Required reviewer: qualified
+Source file: `js/data/acting/acting-course.js` · Required reviewer: qualified
 acting teacher or coach · Status: prepared draft, no reviewer recorded.
 
 

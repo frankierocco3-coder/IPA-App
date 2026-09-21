@@ -1,7 +1,7 @@
 # Module 4 · Building a Character — draft copy
 
 > **Superseded 2026-08-26 (same day):** the owner ordered all copy simplified.
-> The live text is in `js/data/acting/course.js`, Module 5, lessons 5.1 to 5.6.
+> The live text is in `js/data/acting/acting-course.js`, Module 5, lessons 5.1 to 5.6.
 > This file preserves the longer first draft.
 
 
@@ -10,7 +10,7 @@ the module opens with the Four Lists, so it is not written yet.
 
 Written to the existing Acting lesson shape: `objective`, `orientation`,
 `reflection`, and a `body` of three paragraphs. House style matched, which in
-`js/data/acting/course.js` means no em dashes, no contractions, and typographic
+`js/data/acting/acting-course.js` means no em dashes, no contractions, and typographic
 quotes.
 
 All original prose. Stanislavski credited in-text where the idea is his.

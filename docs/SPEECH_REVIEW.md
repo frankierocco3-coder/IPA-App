@@ -15,10 +15,10 @@ type and date.
 
 | Reviewer type | Records awaiting | Where |
 |---|---|---|
-| Voice professional / SLP | 7 Stage-1 Foundation lessons (`sp-f-*`) — anatomy, breath, effort, jaw/tongue/neck (incl. TMD/bruxism info), voice/resonance, articulation, vocal health | `js/data/speech/course.js` |
+| Voice professional / SLP | 7 Stage-1 Foundation lessons (`sp-f-*`) — anatomy, breath, effort, jaw/tongue/neck (incl. TMD/bruxism info), voice/resonance, articulation, vocal health | `js/data/speech/speech-course.js` |
 | Acting teacher/coach | 4 Approaches to Acting sections (Stanislavski, Adler, Meisner, Chekhov) | `js/data/speech/approaches.js` |
 | Editorial | Start Here (5), Stage 2 (5), Stage 3 (4) lessons; 24 practice routines; 20 practice texts; glossary (15 terms); arcade copy | `course.js`, `routines.js`, `texts.js`, `glossary.js`, `arcade.js` |
-| Dialect | none new — Dialects in Speech reuses existing review-governed dialect records without duplication | `js/data/speech/dialects.js` (structure only) |
+| Dialect | none new — Dialects in Speech reuses existing review-governed dialect records without duplication | `js/data/speech/dialect-facets.js` (structure only) |
 | Rhetoric | none new — Rhetoric & Oratory pathway unchanged in the Library | — |
 
 ## Learner-facing policy (matches accepted precedent)

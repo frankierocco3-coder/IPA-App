@@ -31,7 +31,7 @@ import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
-         searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
+         searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable-actions.js';
 import { emptyProject, saveProject } from '../js/projects.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady, audioUrl, AUDIO_BASE } from '../js/audio.js';
 import { store } from '../js/state.js';
@@ -39,7 +39,7 @@ import { CAPABILITIES } from '../js/capabilities.js';
 import { tryItHtml, performCaptureHtml } from '../js/record-ui.js';
 import { startRecording, isRecording, micErrorMessage, recordingSupported } from '../js/perform.js';
 import { openDB, idbGet, idbAll, STORES } from '../js/db.js';
-import { DIALECT_ACTION, actionFor } from '../js/data/action.js';
+import { DIALECT_ACTION, actionFor } from '../js/data/dialect-in-action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
 import { SONNETS } from '../js/data/sonnets.js';
 import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
@@ -53,7 +53,7 @@ import { SPEECH_LESSONS, SPEECH_COLLECTIONS, SPEECH_MODULES, speechModuleGroups,
          TEXTBOOK_PARTS, TEXTBOOK_END_MATTER, textbookOrder, textbookPartChapters, chapterTitle,
          speechLessonsFor, speechLessonById,
          collectionForLesson, moduleForLesson, lessonNumber, lessonKeywords,
-         SPEECH_REVIEW_WHY, SPEECH_LESSON_EXTRAS } from '../js/data/speech/course.js';
+         SPEECH_REVIEW_WHY, SPEECH_LESSON_EXTRAS } from '../js/data/speech/speech-course.js';
 import { glossaryTerm } from '../js/data/speech/glossary.js';
 import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from '../js/data/acting/approaches.js';
 import { SPEECH_ROUTINES, PRACTICE_SUBJECTS, routinesFor,
@@ -63,7 +63,7 @@ import { SPEECH_TEXTS } from '../js/data/speech/texts.js';
 import { speechApproved, speechBodyVisible, speechReviewFor } from '../js/data/speech/reviews.js';
 import { speechGoal, setSpeechGoal, speechHistory, speechLessonDone } from '../js/data/speech/store.js';
 import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
-         actingLessonById, actingLessonNumber } from '../js/data/acting/course.js';
+         actingLessonById, actingLessonNumber } from '../js/data/acting/acting-course.js';
 import { ACTING_GAMES, SCENE_STUDY_AREAS } from '../js/data/acting/practice.js';
 
 // The view layer spans js/main.js and the js/views/* modules it imports
@@ -3440,7 +3440,7 @@ export async function run({ navDoc = document } = {}) {
     // About-the-Accent removal: no page, no routes, no dead facet buttons,
     // and no copy anywhere still sending a learner to one.
     const dialectSrc = await fetch('../js/data/dialects.js').then(r => r.text());
-    const facetSrc = await fetch('../js/data/speech/dialects.js').then(r => r.text());
+    const facetSrc = await fetch('../js/data/speech/dialect-facets.js').then(r => r.text());
     const bridgeSrc = await fetch('../js/data/bridge.js').then(r => r.text());
     check('about removal: renderAboutCourse and its about-* routes are gone',
       !/renderAboutCourse/.test(src) && !/'about-(target|features|voice|context)'/.test(src));
@@ -3487,7 +3487,7 @@ export async function run({ navDoc = document } = {}) {
     check('cockney: visibility gates exist — course picker and Studio dialects both honor COCKNEY_LIVE',
       /COCKNEY_LIVE \|\| c\.id !== 'cockney'/.test(mainSrc)
       && /COCKNEY_LIVE \? \[\{ id: 'cockney'/.test(mainSrc));
-    const { TRACKS, COURSE } = await import('../js/data/course.js');
+    const { TRACKS, COURSE } = await import('../js/data/dialect-course.js');
     const { DIALECT_INFO } = await import('../js/data/dialects.js');
     const track = TRACKS.find(t => t.id === 'cockney');
     check('cockney: track registered — 🚕, accent course, four stages',

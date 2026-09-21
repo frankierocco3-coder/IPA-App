@@ -420,7 +420,7 @@ withdrawn and were NOT approved; no audio generated.
 
 VERTICAL SLICE (2026-08-05, committed locally — NOT pushed): four new
 review-gated systems, all data-driven, nothing fake. (1) DIALECT IN
-ACTION (js/data/action.js): 8 original draft pieces (dialogue+monologue
+ACTION (js/data/dialect-in-action.js): 8 original draft pieces (dialogue+monologue
 × 4 courses) with [[term|ID]] expression markers that open the real W&E
 entry; actionFor() returns ONLY approved pieces — Library card absent
 until something is approved; dialect_lint validates every ref exists +
@@ -625,7 +625,7 @@ was PRESENT but unusable (absent files stay quiet — backward
 compatible); importProjectFile returns {count, droppedDissections};
 the studio import alert uses validate.importResultMessage(), whose
 warning line is lint-pinned; regression covers absent/valid/invalid ×
-message shapes. (3) BUILD C — Playable Actions: js/data/playable.js
+message shapes. (3) BUILD C — Playable Actions: js/data/playable-actions.js
 holds the twelve entries + six pairs VERBATIM from
 docs/ACTION_LIBRARY_v1.md (house typographic quotes are the only
 normalization; wording/punctuation otherwise untouched — do not

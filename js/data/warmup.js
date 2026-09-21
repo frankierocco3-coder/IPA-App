@@ -4,7 +4,7 @@
 // audio, no recording, no evaluation, nothing scored. The copy is
 // deliberately behavioural — what to do, gently — and makes no anatomical
 // or therapeutic claims; the shared comfort and safety lines
-// (js/data/speech/course.js) render on the page with it.
+// (js/data/speech/speech-course.js) render on the page with it.
 //
 // Each movement runs on its own, or all four run in order as "the whole
 // thing", about twelve minutes end to end.

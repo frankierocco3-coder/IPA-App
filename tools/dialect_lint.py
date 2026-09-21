@@ -79,7 +79,7 @@ def parse_foreign(src):
 
 def main():
     phonemes_src = (DATA / "phonemes.js").read_text(encoding="utf-8")
-    course_src = (DATA / "course.js").read_text(encoding="utf-8")
+    course_src = (DATA / "dialect-course.js").read_text(encoding="utf-8")
     engine_src = (ROOT / "js" / "engine.js").read_text(encoding="utf-8")
     dialects_src = (DATA / "dialects.js").read_text(encoding="utf-8")
 
@@ -112,7 +112,7 @@ def main():
                 fail("course %s / lesson %s: symbol %r belongs to another "
                      "accent's transcription system" % (target, lid, sym))
     if lessons_seen < 40:
-        fail("course.js: parsed suspiciously few lessons (%d)" % lessons_seen)
+        fail("dialect-course.js: parsed suspiciously few lessons (%d)" % lessons_seen)
 
     # 3 + 4 + 5: WORDS transcription-system and notation checks
     for w in words:
@@ -139,15 +139,15 @@ def main():
     unit_ids = re.findall(r"^    id: '([^']+)',$", course_block.group(1), re.M) \
         if course_block else []
     if len(unit_ids) < 10:
-        fail("course.js: parsed suspiciously few unit ids (%d)" % len(unit_ids))
+        fail("dialect-course.js: parsed suspiciously few unit ids (%d)" % len(unit_ids))
     for u in sorted({u for u in unit_ids if unit_ids.count(u) > 1}):
-        fail("course.js COURSE: duplicate unit id %r" % u)
+        fail("dialect-course.js COURSE: duplicate unit id %r" % u)
     tracks = re.search(r"export const TRACKS = \[(.*?)\n\];", course_src, re.S)
     track_ids = re.findall(r"id: '([^']+)'", tracks.group(1)) if tracks else []
     if len(track_ids) < 4:
-        fail("course.js: parsed suspiciously few track ids (%d)" % len(track_ids))
+        fail("dialect-course.js: parsed suspiciously few track ids (%d)" % len(track_ids))
     for t in sorted({t for t in track_ids if track_ids.count(t) > 1}):
-        fail("course.js TRACKS: duplicate track id %r" % t)
+        fail("dialect-course.js TRACKS: duplicate track id %r" % t)
 
     # 7: every dialect course has About data
     for d in ("nam", "rp", "ssbe", "aus", "cockney"):
@@ -199,14 +199,14 @@ def main():
                 fail("%s: symbol %r not in PHONEMES" % (scope, e.get("symbol")))
 
     # 10: Dialect in Action pieces reference real, same-course expressions
-    action_src = (DATA / "action.js").read_text(encoding="utf-8")
+    action_src = (DATA / "dialect-in-action.js").read_text(encoding="utf-8")
     idiom_src = (DATA / "idiom.js").read_text(encoding="utf-8")
     idiom_ids = set(re.findall(r"id: '([A-Z]+-\d+)'", idiom_src))
     prefix = {"nam": "NAM", "rp": "RP", "ssbe": "SSBE", "aus": "AUS"}
     for pm in re.finditer(r"\{\s*id: '([a-z-]+)',\s*courseId: '(\w+)',(.*?)reviewStatus: '(\w+)'",
                           action_src, re.S):
         pid, course, body, status = pm.groups()
-        scope = "action.js piece %r" % pid
+        scope = "dialect-in-action.js piece %r" % pid
         if status not in ("draft", "approved"):
             fail("%s: reviewStatus %r not draft|approved" % (scope, status))
         markers = set(re.findall(r"\[\[[^\]|]+\|([A-Z]+-\d+)\]\]", body))
