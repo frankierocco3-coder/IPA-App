@@ -52,7 +52,18 @@ python3 tools/build_artifact.py _site              # exactly what Pages publishe
 # audio generation (offline, spends money — ALWAYS --dry-run first)
 python3 tools/generate_sonnets.py --source ibsen --dialect rp --all --dry-run
 python3 tools/generate_voices.py --idioms --dry-run  # idiom clips, ~15k credits pending
+
+# owner phoneme recordings (offline, free) — prep then import
+python3 tools/prep_phonemes.py takes/ --out prepped/ --dry-run   # trim, level, → mp3
+python3 tools/import_phonemes.py prepped/ --dialect nam --voice reference --dry-run
 ```
+
+**ffmpeg** is NOT a system install here: there is no Homebrew on this Mac,
+and installing it needs a password Claude cannot type. It comes from pip
+instead — `python3 -m pip install --user imageio-ffmpeg` — and
+`tools/prep_phonemes.py` finds it on PATH first, then falls back to that
+package. macOS `afconvert` can DECODE mp3 but cannot encode it, which is
+why the pip binary is needed at all.
 
 In the browser console, with the app running:
 ```js
@@ -979,9 +990,14 @@ Two-Hander (6.3); 47 path lessons / 55 records / 59 published;
 Listening & Responding collection (every collection maps one module);
 Beat Builder rename; renames Let the Information Affect You /
 Repetition / Play the Objective, Not the Emotion / Putting It
-Together; partner-work chapters carry Scenes-shelf doorways; Warmup
-flow leads Acting Practice (9 steps, +5 XP, safety line, history
-kind 'warmup' skill 'Acting'). ARCADE — passage step on long texts,
+Together; partner-work chapters carry Scenes-shelf doorways; the
+Warmup leads Acting Practice — since 2026-09-20 a body-and-voice warmup
+in FOUR MOVEMENTS (body 7, breath 3, voice 5, words 5 steps; copy
+source docs/WARMUP_COPY.md, owner-approved) on a chooser: any movement
+alone, or "the whole thing" (all twenty, ~12 min). A finished movement
+offers "Next:" the following one. +5 XP per run, safety line, history
+kind 'warmup' ref 'warmup-v2:<id>' skill 'Acting'. The original
+nine-step warmup is retired. ARCADE — passage step on long texts,
 exercise-first layout. PICKERS — Speeches/Scenes doors everywhere.
 TWISTERS & SENTENCES — js/data/twisters.js, 60 original feature-
 targeted drills (6+6 per accent course) on each accent Library with

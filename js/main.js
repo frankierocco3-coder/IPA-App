@@ -2,7 +2,7 @@ import { COURSE, TRACKS, MODES } from './data/course.js';
 import { PHONEMES, WORDS } from './data/phonemes.js';
 import { DIALECT_INFO } from './data/dialects.js';
 import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
-import { WARMUP_STEPS } from './data/warmup.js';
+import { WARMUP_MOVEMENTS, WARMUP_ALL, warmupById, warmupSteps } from './data/warmup.js';
 import { drillsFor } from './data/twisters.js';
 import { parseProvidedScene } from './scene-parse.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -3468,18 +3468,46 @@ function renderSpeakDrills(d) {
   });
 }
 
-// ── The Warmup: a short guided sequence before practice ───────
-// Written guidance on the shared step runner. Completion pays the
-// practice convention (+5 XP, no hearts); nothing here is scored and
-// nothing listens. The comfort and safety lines render verbatim.
+// ── The Warmup: body and voice, in four movements ────────────
+// A chooser, then written guidance on the shared step runner. Any one
+// movement runs alone; "the whole thing" runs all four in order.
+// Completion pays the practice convention (+5 XP, no hearts); nothing
+// here is scored and nothing listens. The comfort and safety lines
+// render verbatim on every run.
 function renderWarmup() {
   record(renderWarmup);
   stopSpeech();
+  const card = m => `
+      <button class="track-card hub-card" data-wu="${m.id}" type="button">
+        <div class="track-glyph">${m.emoji}</div>
+        <div class="track-info"><h2>${esc(m.title)}</h2><p>About ${m.minutes} minutes</p></div>
+        <div class="track-arrow">›</div>
+      </button>`;
+  app.innerHTML = `
+    ${pageTopbar('🔥 Warmup', '#6f8657')}
+    <main class="guide">
+      <h1>Warmup</h1>
+      <p class="pane-note">Four short warmups, or all of them in a row. Body before a rehearsal, voice before a read, words before a take.</p>
+      ${WARMUP_MOVEMENTS.map(card).join('')}
+      ${card(WARMUP_ALL)}
+      <p class="pane-note">Quiet and gentle throughout: a warmup that feels like effort is being done wrong.</p>
+    </main>`;
+  wireBrandHome();
+  app.querySelectorAll('[data-wu]').forEach(b =>
+    b.addEventListener('click', () => navTo(() => renderWarmupRun(b.dataset.wu))));
+}
+
+function renderWarmupRun(id) {
+  const w = warmupById(id);
+  if (!w) { renderWarmup(); return; }
+  record(() => renderWarmupRun(id));
+  stopSpeech();
+  const whole = id === 'all';
   app.innerHTML = `
     ${pageTopbar('🔥 Warmup', '#6f8657')}
     <main class="guide sp-game">
-      <h1>Warmup</h1>
-      <p class="pane-note">About five minutes, before you work. Quiet and gentle throughout: a warmup that feels like effort is being done wrong.</p>
+      <h1>${esc(w.title)}</h1>
+      <p class="pane-note">About ${w.minutes} minutes. Quiet and gentle throughout: a warmup that feels like effort is being done wrong.</p>
       <p class="pane-note">${esc(SPEECH_COMFORT_LINE)}</p>
       <p class="pane-note pane-warn">${esc(SPEECH_SAFETY_LINE)}</p>
       <div id="wu-seq"></div>
@@ -3488,23 +3516,30 @@ function renderWarmup() {
   wireBrandHome();
   runStepSequence({
     mount: document.getElementById('wu-seq'),
-    steps: WARMUP_STEPS.map((s, i) => ({ label: `${i + 1} · ${s.title}`, text: s.text })),
+    steps: warmupSteps(id).map(s => ({
+      label: whole ? `${s.movement} · ${s.title}` : s.title, text: s.text })),
     onFinish: () => {
-      recordSpeechPractice({ kind: 'warmup', ref: 'warmup-v1', title: 'Warmup', skill: 'Acting' });
+      recordSpeechPractice({ kind: 'warmup', ref: `warmup-v2:${id}`,
+        title: `Warmup · ${w.title}`, skill: 'Acting' });
       store.addXp(5);
+      const at = WARMUP_MOVEMENTS.findIndex(m => m.id === id);
+      const next = at >= 0 ? WARMUP_MOVEMENTS[at + 1] : null;
       app.innerHTML = `
         ${pageTopbar('🔥 Warmup', '#6f8657')}
         <main class="guide">
           <h1>Warm · +5 XP</h1>
           <p class="guide-text">Completion, not a grade — nothing here measures how you sounded.</p>
           <div class="practice-row">
-            <button class="btn btn-primary" id="wu-done" type="button">To Practice</button>
+            ${next ? `<button class="btn btn-primary" id="wu-next" type="button">Next: ${esc(next.title)}</button>` : ''}
+            <button class="${next ? 'btn-lite' : 'btn btn-primary'}" id="wu-done" type="button">To Practice</button>
             <button class="btn-lite" id="wu-again" type="button">Run it again</button>
           </div>
         </main>`;
       wireBrandHome();
+      document.getElementById('wu-next')?.addEventListener('click', () =>
+        navTo(() => { navStack.pop(); renderWarmupRun(next.id); }));
       document.getElementById('wu-done').addEventListener('click', () => { navStack.pop(); goSection('practice'); });
-      document.getElementById('wu-again').addEventListener('click', () => { navStack.pop(); renderWarmup(); });
+      document.getElementById('wu-again').addEventListener('click', () => { navStack.pop(); renderWarmupRun(id); });
     },
   });
 }

@@ -28,6 +28,7 @@ import { validateDissection, validateProjectBundle, importResultMessage } from '
 import { PROVIDED_SCENES } from '../js/data/scenes.js';
 import { parseProvidedScene } from '../js/scene-parse.js';
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
+import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable.js';
 import { emptyProject, saveProject } from '../js/projects.js';
@@ -2903,14 +2904,22 @@ export async function run({ navDoc = document } = {}) {
       check('acting: Practice holds the five categories, Scene Study withdrawn',
         String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
           === 'Warmup,Acting Arcade,Flash Cards,Rhythm Cards,Practice My Text');
-      // The Warmup: written steps on the shared runner, safety line
-      // verbatim, no audio and no scoring apparatus.
+      // The Warmup: a chooser of four movements plus the whole thing,
+      // then written steps on the shared runner, safety line verbatim,
+      // no audio and no scoring apparatus.
       clickIn(doc.getElementById('acp-warmup')); await sleep(350);
-      check('acting: the Warmup runs written steps with the safety line, unscored',
+      check('acting: the Warmup opens on four movements and the whole thing',
+        String([...doc.querySelectorAll('[data-wu]')].map(b => b.dataset.wu))
+          === 'body,breath,voice,words,all'
+        && !doc.getElementById('step-next'));
+      clickIn(doc.querySelector('[data-wu="all"]')); await sleep(400);
+      check('acting: the whole warmup runs all twenty steps with the safety line, unscored',
         !!doc.getElementById('step-next')
+        && (doc.getElementById('step-count')?.textContent ?? '').includes('of 20')
         && doc.body.textContent.includes('Stop if you experience pain')
         && doc.body.textContent.includes('skipping a step costs nothing')
         && !doc.querySelector('audio, [data-check], .sp-check'));
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('acp-arcade')); await sleep(400);
       // The Arcade is text-first: a three-level picker (Speeches and
@@ -3509,6 +3518,20 @@ export async function run({ navDoc = document } = {}) {
           && by('trifles-discovery')?.characters.join(',') === 'MRS. HALE,MRS. PETERS'
           && by('tartuffe-dorine')?.characters.join(',') === 'Dorine,Mariane';
       })());
+  }
+
+  // ── 21d. The Warmup: four movements, house copy ─────────────
+  {
+    check('warmup: four movements of 7, 3, 5 and 5 steps make the whole twenty',
+      String(WARMUP_MOVEMENTS.map(m => `${m.id}:${m.steps.length}`))
+        === 'body:7,breath:3,voice:5,words:5'
+      && warmupSteps('all').length === 20
+      && warmupSteps('voice').every(s => s.movement === 'The voice'));
+    const wuText = WARMUP_MOVEMENTS.flatMap(m => m.steps.map(s => s.title + ' ' + s.text)).join(' ');
+    check('warmup: house copy holds (no em dashes, no straight quotes or apostrophes)',
+      !wuText.includes('\u2014') && !/["']/.test(wuText));
+    check('warmup: behavioural only, no anatomical claims',
+      !/diaphragm|vocal folds|vocal cords|larynx|ribs|intercostal/i.test(wuText));
   }
 
   // ── 21c. Speak-aloud drills: a full bank per accent course ───
