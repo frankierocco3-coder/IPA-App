@@ -3,9 +3,12 @@
 Generated 2026-08-30 from the app's own inventories (all five courses,
 Cockney included). **62 recordings total**: 51 isolated sounds + 11
 syllable demos. Slugs are the filenames — record one file per sound,
-named `<slug>` (any format: .m4a, .wav, .mp3), containing **three clean
-repetitions** with a second of silence between; the import pipeline
-trims, level-matches and picks the best take with you.
+named `<slug>` (any format: .m4a, .wav, .aiff, .mp3), containing **ONE
+take** — the best one. Try it as often as you like while recording; keep
+only the take you are happy with in the file. (Owner decision 2026-09-21:
+one take per file. The prep tool trims the silence at each end and levels
+the batch; a file with more than one sound in it is refused, not
+imported, so an extra take can never slip through as part of the clip.)
 
 Setup: closet or under a duvet, phone 10–15 cm away and slightly
 off-axis, same distance every clip, quiet appliance-free room.
@@ -97,7 +100,7 @@ Same in every course. No vowel before or after — just the sound.
 | 50 | /æɔ/ | Australian MOUTH | `australian_mouth` | mouth — front start |
 | 51 | /əʉ/ | Australian GOAT | `australian_goat` | goat — fronted finish |
 
-## Session 7 — Syllable demos (11) · say the FRAME naturally, once per repetition
+## Session 7 — Syllable demos (11) · say the FRAME naturally, once
 
 Stops and glides cannot exist alone — the app labels these as syllable
 demos, never as pure sounds. Say the frame word exactly as written.

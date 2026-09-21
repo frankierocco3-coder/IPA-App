@@ -37,8 +37,9 @@ already happened.
 
 **Small, fixable, needs an owner call first:**
 
-* Recording rule: one take per file, or three? Decide before recording
-  (B-D1).
+* ~~Recording rule~~ — DECIDED 2026-09-21: one take per file. Both
+  recording docs say so, and the prep tool refuses a file holding more
+  than one sound (B-D1).
 * "Your Speaking Instrument" beside "Your Instrument": rename one (P1-7).
 * Acting pays warmup XP it never shows (P1-3).
 * Shared chapters: render in place or move you (P1-5). Render-in-place
@@ -365,7 +366,7 @@ lists **three**; `WORKSPACES` has **four**. The comment is already a day stale.
 
 ### B-D1 · One true document — **S**, highest leverage per hour
 
-**STATUS 2026-09-21 — MOSTLY DONE, one live hazard.** CLAUDE.md is current (its main.js size corrected to ~9.0k today). The phoneme voice-key tables are FIXED: every file lands under the single `reference` key. The three once-untracked docs are tracked. Still stale: `docs/ROADMAP.md` (build orders marked "in flight" from August, a TEXT BOOK nav that no longer exists). **LIVE HAZARD before recording:** `docs/PHONEME_RECORDING_LIST.md` (2026-08-30) says to put THREE repetitions in each file and have the pipeline pick the best take; `tools/prep_phonemes.py` (2026-09-20) treats each file as ONE sound and only trims the ends, so a three-take file would import as all three takes with the gaps. The NAM pilot script only says "record several takes". Decide the rule before the session: one take per file, or teach the tool to split takes.
+**STATUS 2026-09-21 — MOSTLY DONE, one live hazard.** CLAUDE.md is current (its main.js size corrected to ~9.0k today). The phoneme voice-key tables are FIXED: every file lands under the single `reference` key. The three once-untracked docs are tracked. Still stale: `docs/ROADMAP.md` (build orders marked "in flight" from August, a TEXT BOOK nav that no longer exists). ~~LIVE HAZARD before recording~~ — **RESOLVED 2026-09-21 by owner decision: ONE take per file.** Both `docs/PHONEME_RECORDING_LIST.md` and `docs/PHONEME_RECORDING_SCRIPT_NAM.md` now say so (the stale "must be MP3 / no encoder" note is gone too), and `tools/prep_phonemes.py` refuses any file with a pause longer than 0.35 s inside it — long enough to be a second take, far longer than the ~0.1 s stop closure in a syllable demo. Tested: a single take and an /ɑpɑ/-style demo pass; a three-take file is refused, with the pauses named.
 
 
 The 15 conflicts from the planning report are all still open, and two got worse today:

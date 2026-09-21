@@ -55,6 +55,7 @@ python3 tools/generate_voices.py --idioms --dry-run  # idiom clips, ~15k credits
 
 # owner phoneme recordings (offline, free) — prep then import
 python3 tools/prep_phonemes.py takes/ --out prepped/ --dry-run   # trim, level, → mp3
+#   ONE take per file (owner rule 2026-09-21): a file with a second sound is refused
 python3 tools/import_phonemes.py prepped/ --dialect nam --voice reference --dry-run
 ```
 

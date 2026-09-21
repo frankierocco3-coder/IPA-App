@@ -134,8 +134,28 @@ def encode(trimmed_wav, dest, gain_db):
     return r.returncode == 0, r.stderr
 
 
-def prepare(src, dest_mp3, tmp_dir, seek=None, dur=None):
-    """Trim, then measure the SOUND, then level and encode. Returns a note."""
+GAP_S = 0.35   # a pause this long inside one file means a second take.
+               # Stop closures in the syllable demos (/ɑpɑ/) are ~0.1 s,
+               # so they never trip it.
+
+
+def internal_gaps(wav, peak_db):
+    """Silences INSIDE the trimmed sound, as [(start, end)] seconds."""
+    thresh = max(peak_db - 30.0, -60.0)
+    r = run(['-i', str(wav), '-af', 'silencedetect=noise=%.1fdB:d=%.2f' % (thresh, GAP_S),
+             '-f', 'null', '-'])
+    starts = [float(x) for x in re.findall(r'silence_start:\s*(-?\d+\.?\d*)', r.stderr)]
+    ends = [float(x) for x in re.findall(r'silence_end:\s*(\d+\.?\d*)', r.stderr)]
+    return [(a, b) for a, b in zip(starts, ends)]
+
+
+def prepare(src, dest_mp3, tmp_dir, seek=None, dur=None, one_take=True):
+    """Trim, then measure the SOUND, then level and encode. Returns a note.
+
+    one_take: the owner's rule (2026-09-21) is ONE take per file. A file
+    that still holds two or more sounds separated by a real pause is
+    refused, never imported: otherwise every take would ship as one clip.
+    """
     tmp = pathlib.Path(tmp_dir) / '_trim.wav'
     ok, err = trim(src, tmp, seek, dur)
     if not ok:
@@ -146,6 +166,12 @@ def prepare(src, dest_mp3, tmp_dir, seek=None, dur=None):
     mean, peak, length = m
     if length < MIN_LEN_S:
         return None, 'only %.2fs of sound — too short, or the take is silent' % length
+    if one_take:
+        gaps = internal_gaps(tmp, peak)
+        if gaps:
+            return None, ('REFUSED — %d sounds in one file (a pause at %s). '
+                          'Keep only your best take in the file.'
+                          % (len(gaps) + 1, ', '.join('%.1fs' % a for a, _ in gaps)))
     gain = min(TARGET_RMS_DB - mean, PEAK_CEIL_DB - peak)
     if dest_mp3 is not None:
         ok, err = encode(tmp, dest_mp3, gain)
@@ -167,23 +193,26 @@ def mode_files(args, out):
         sys.exit('No audio files in %s' % args.source)
     known = set(slugs_from(args.manifest)) if args.manifest else None
     print('%d recording(s)' % len(srcs))
-    bad = 0
+    bad_name = refused = 0
     with tempfile.TemporaryDirectory() as td:
         for p in srcs:
             slug = p.stem
             if known and slug not in known:
                 print('  %-24s  ← NOT a slug in the manifest, skipped' % p.name)
-                bad += 1
+                bad_name += 1
                 continue
             got, err = prepare(p, None if args.dry_run else out / (slug + '.mp3'), td)
             if err:
                 print('  %-24s  %s' % (p.name, err))
-                bad += 1
+                refused += 1
                 continue
             length, gain = got
             print('  %-24s sound %5.2fs  gain %+5.1f dB' % (p.name, length, gain))
-    if bad:
-        print('\n%d file(s) skipped: the name must be exactly <slug>.mp3-style.' % bad)
+    if bad_name:
+        print('\n%d file(s) skipped: the name must be a slug from the manifest.' % bad_name)
+    if refused:
+        print('\n%d file(s) NOT prepared — see the reason beside each. Fix and re-run;'
+              ' nothing else was affected.' % refused)
     if not args.dry_run:
         print('\nWrote to %s — next:\n  python3 tools/import_phonemes.py %s '
               '--dialect <d> --voice reference --dry-run' % (out, out))

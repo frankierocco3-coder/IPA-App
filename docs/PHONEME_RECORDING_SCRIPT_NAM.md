@@ -16,9 +16,11 @@ ever disagree, the manifest wins.
 * **Nothing before or after.** No little vowel after a consonant, no breath
   at the end, no lip smack at the start. Leave a second of silence around
   each take so it can be trimmed cleanly.
-* **Record several takes of each.** Keep going; pick later.
-* **File names are the slug, exactly as written below**, and the format
-  must be **MP3** (`kit_vowel.mp3`). See "Handing them over" at the end.
+* **One take per file.** Try a sound as often as you like, but keep only
+  the take you are happy with. A file holding two or more sounds is
+  refused by the prep tool rather than imported.
+* **File names are the slug, exactly as written below** (`kit_vowel`). Any
+  format your recorder makes is fine: m4a, wav, aiff or mp3.
 
 ## The ten vowels
 
@@ -100,7 +102,7 @@ Syllable demo: /ɑkɑ/ — clean velar closure and release, no 'kuh'.
 
 ## Handing them over
 
-1. Put every file in one folder, named `<slug>.mp3`.
+1. Put every file in one folder, each named by its slug (`kit_vowel.m4a`).
 2. Tell me the folder. I trim the silence, level them against each other,
    check each one is a real recording and not a stray file, and import
    them with `tools/import_phonemes.py`, which never overwrites and never
@@ -112,12 +114,9 @@ Syllable demo: /ɑkɑ/ — clean velar closure and release, no 'kuh'.
    too. Approving Neutral American does not affect RP, Standard British or
    Australian.
 
-**One snag worth knowing:** this Mac has no MP3 encoder, so I cannot
-convert your recordings for you. Two ways round it:
-
-* **Export MP3 yourself.** Audacity does it free, and so do most recorders.
-  Sixteen files, named by slug. Nothing else needed.
-* **Let me install ffmpeg** (one Homebrew command, your say-so). Then
-  record however you like — even one long continuous take with pauses
-  between sounds — and I will slice, trim, level, convert and import the
-  lot. Worth it if you plan to record the other three courses.
+Conversion is handled: ffmpeg is installed (from pip, 2026-09-20), so
+`tools/prep_phonemes.py` turns whatever the recorder made into levelled,
+trimmed MP3 before import. It can also split ONE continuous take of all
+sixteen sounds (in this order, a clear pause between each) if that is
+easier on the day, and it refuses to write anything if the count of
+sounds it hears does not match the list.
