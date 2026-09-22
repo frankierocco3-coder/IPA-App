@@ -221,9 +221,12 @@ export async function run({ navDoc = document } = {}) {
   check('approval is slug-exact (syllable ≠ isolated)',
     phonemeVariantsFrom(A(['nam/reference/p_syllable']), A([]), 'p', 'nam').length === 0);
   await indexReady;
+  // Needs a course whose word clip exists but whose phoneme is NOT approved.
+  // nam's phonemes are all approved since 2026-09-22 (Frankie's recordings),
+  // so this probes rp; move it to another unrecorded course when rp lands.
   check('a word clip cannot satisfy a phoneme request',
-    hasWordClip('kit', 'nam') === true && hasPhonemeClip('kit_vowel', 'nam') === false,
-    `word=${hasWordClip('kit', 'nam')} phoneme=${hasPhonemeClip('kit_vowel', 'nam')}`);
+    hasWordClip('kit', 'rp') === true && hasPhonemeClip('kit_vowel', 'rp') === false,
+    `word=${hasWordClip('kit', 'rp')} phoneme=${hasPhonemeClip('kit_vowel', 'rp')}`);
 
   // ── 4b. Review gates: drafts never reach learners ────────────
   const draftCount = DIALECT_ACTION.filter(p => p.reviewStatus !== 'approved').length;

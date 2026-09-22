@@ -97,7 +97,7 @@ def validate_batch(files, dialect, voice, valid_slugs, dest_dir, replace):
         dest = dest_dir / (slug + ".mp3")
         if dest.exists() and not replace:
             try:
-                shown = dest.relative_to(ROOT)
+                shown = dest.relative_to(AUDIO.parent)
             except ValueError:
                 shown = dest
             errors.append("%s: %s already exists — pass --replace to overwrite it"
@@ -213,7 +213,7 @@ def main():
 
     print("%d recording(s) validated for %s/%s:" % (len(plan), args.dialect, args.voice))
     for f, dest, slug in plan:
-        print("  %s → %s" % (f.name, dest.relative_to(ROOT)))
+        print("  %s → %s" % (f.name, dest.relative_to(AUDIO.parent)))
     if args.dry_run:
         print("Dry run — nothing written. Re-run without --dry-run to import.")
         return

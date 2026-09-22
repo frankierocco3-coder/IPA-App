@@ -272,9 +272,14 @@ PHONEMES (playPhoneme(), audio/phonemes/, NO fallback of any kind) are
 separate and never cross-substituted; speak() refuses bare-IPA text.
 js/data/audio-flags.js is the quality gate: KNOWN_BAD clips are skipped by
 playback (nam/f/strut and nam/f/car quarantined by Frankie's ear,
-2026-07); phoneme clips play ONLY when in APPROVED_PHONEMES (none exist
-yet — production is the next milestone, spec in
-docs/AUDIO_RECORDING_SPEC.md). Until then, symbol controls are explicit,
+2026-07); phoneme clips play ONLY when in APPROVED_PHONEMES. Since
+2026-09-22 that holds Frankie's OWN recordings (voice key `reference`):
+ALL 42 General American sounds (16-sound pilot + batch 2 of 26, both
+scripted in docs/PHONEME_RECORDING_SCRIPT_NAM.md), every one
+ear-approved; the other courses have none yet. Pipeline: takes → tools/prep_phonemes.py
+(noise-floor-relative trim; sub-0.25s clicks dropped and reported; two
+real sounds refused) → import_phonemes.py into IPA-Audio → #audit →
+APPROVED_PHONEMES. Unrecorded sounds keep explicit,
 labelled word controls ("Hear it in 'strut'"), never dead buttons. The
 owner ear-checks clips at #audit (hash-gated grid, exports a fresh flags
 file); tools/audit_audio.py enforces index↔files↔flags integrity in the

@@ -28,4 +28,51 @@ export const KNOWN_BAD = [
 // The candidates were removed from the repo (recoverable from git
 // history). Until human recordings land and are approved here, sound
 // pages show a decorative symbol and words carry the audio.
-export const APPROVED_PHONEMES = [];
+//
+// 2026-09-22: the first HUMAN recordings — Frankie's own voice. The whole
+// General American course (42: the 16-sound pilot, then the other 26),
+// every one marked Good by ear at #audit.
+export const APPROVED_PHONEMES = [
+  'nam/reference/american_goat',
+  'nam/reference/american_letter',
+  'nam/reference/american_lot_palm',
+  'nam/reference/american_nurse',
+  'nam/reference/b_syllable',
+  'nam/reference/ch_syllable',
+  'nam/reference/choice_diphthong',
+  'nam/reference/d_syllable',
+  'nam/reference/dress_vowel',
+  'nam/reference/eng',
+  'nam/reference/esh',
+  'nam/reference/eth',
+  'nam/reference/ezh',
+  'nam/reference/f',
+  'nam/reference/face_diphthong',
+  'nam/reference/fleece_vowel',
+  'nam/reference/foot_vowel',
+  'nam/reference/g_syllable',
+  'nam/reference/goose_vowel',
+  'nam/reference/h',
+  'nam/reference/happy_vowel',
+  'nam/reference/j_syllable',
+  'nam/reference/k_syllable',
+  'nam/reference/kit_vowel',
+  'nam/reference/l',
+  'nam/reference/m',
+  'nam/reference/mouth_diphthong',
+  'nam/reference/n',
+  'nam/reference/p_syllable',
+  'nam/reference/price_diphthong',
+  'nam/reference/r',
+  'nam/reference/s',
+  'nam/reference/schwa',
+  'nam/reference/strut_vowel',
+  'nam/reference/t_syllable',
+  'nam/reference/theta',
+  'nam/reference/thought_vowel',
+  'nam/reference/trap_vowel',
+  'nam/reference/v',
+  'nam/reference/w_syllable',
+  'nam/reference/yod_syllable',
+  'nam/reference/z',
+];

@@ -24,7 +24,9 @@ Always run --dry-run first: it reports what it found and changes nothing.
 """
 
 import argparse
+import array
 import json
+import math
 import pathlib
 import re
 import shutil
@@ -89,26 +91,89 @@ def silences(path):
     return list(zip(starts, ends + [None] * (len(starts) - len(ends))))
 
 
-def trim(src, dest_wav, seek=None, dur=None):
-    """Cut the silence off both ends into a temp WAV.
+ENV_SR = 16000       # envelope analysis rate
+FRAME_S = 0.02       # 20 ms loudness frames
+MIN_SNR_DB = 15.0    # sound must clear the room noise by at least this
+LEAD_S, TAIL_S = 0.03, 0.05   # kept around the detected sound so onsets
+                              # and natural decays are never clipped
 
-    The threshold follows the recording's own peak instead of being fixed:
-    a quietly recorded take is not silence, and a fixed -45 dB floor
-    deletes one outright. Levelling happens AFTER this, measured on the
+
+def envelope(src, seek=None, dur=None):
+    """Per-frame RMS loudness (dBFS) of the recording, mono."""
+    r = subprocess.run([FF, '-hide_banner', '-nostdin', *cut_args(seek, dur), '-i', str(src),
+                        '-ac', '1', '-ar', str(ENV_SR), '-f', 's16le', '-'],
+                       capture_output=True)
+    a = array.array('h', r.stdout)
+    if sys.byteorder == 'big':
+        a.byteswap()
+    n = int(ENV_SR * FRAME_S)
+    out = []
+    for i in range(0, len(a) - n + 1, n):
+        rms = math.sqrt(sum(x * x for x in a[i:i + n]) / n)
+        out.append(20 * math.log10(max(rms, 1.0) / 32768.0))
+    return out
+
+
+def find_sound(env):
+    """Locate the sound against the file's OWN noise floor.
+
+    The silence line sits between the room noise and the sound, not at a
+    fixed distance below the peak: a phone take recorded quietly has its
+    hiss only ~30 dB down, and a peak-relative line inside that hiss read
+    noise flicker as extra sounds and pauses (2026-09-22, the first owner
+    batch — three single-take files wrongly refused).
+
+    Loud stretches closer together than GAP_S are one sound (the closure
+    in /ɑpɑ/ is ~0.1 s). A stretch shorter than MIN_LEN_S is not a sound
+    at all but handling noise — the record-button tap, a click, a breath
+    after the vowel — and is dropped and reported, never kept in the clip
+    and never mistaken for a second take. Two REAL sounds still refuse.
+
+    Returns (start_s, end_s, gaps, blips, snr_db) or an error string.
+    """
+    if len(env) < 3:
+        return 'no audio'
+    floor = sorted(env)[len(env) // 5]
+    top = max(env)
+    snr = top - floor
+    if snr < MIN_SNR_DB:
+        return 'too noisy — the sound is only %.0f dB above the room noise' % snr
+    thresh = floor + max(8.0, 0.35 * snr)
+    segs = []                      # [first_frame, last_frame] of loud stretches
+    for i, v in enumerate(env):
+        if v < thresh:
+            continue
+        if segs and (i - segs[-1][1] - 1) * FRAME_S < GAP_S:
+            segs[-1][1] = i
+        else:
+            segs.append([i, i])
+    real = [s for s in segs if (s[1] + 1 - s[0]) * FRAME_S >= MIN_LEN_S]
+    blips = [s[0] * FRAME_S for s in segs if s not in real]
+    if not real:
+        return 'no sound long enough to be a take (only short noises)'
+    gaps = [s[0] * FRAME_S for s in real[1:]]
+    return real[0][0] * FRAME_S, (real[-1][1] + 1) * FRAME_S, gaps, blips, snr
+
+
+def trim(src, dest_wav, seek=None, dur=None):
+    """Cut the sound out into a temp WAV (with a gentle 70 Hz high-pass).
+
+    Returns (info, error). Levelling happens AFTER this, measured on the
     sound alone, so how much silence was around it cannot skew the gain.
     """
-    m = measure(src, cut_args(seek, dur))
-    peak = m[1] if m else -6.0
-    thresh = max(peak - 30.0, -60.0)
-    chain = (
-        f'silenceremove=start_periods=1:start_silence=0.03:start_threshold={thresh:.1f}dB:detection=rms,'
-        'areverse,'
-        f'silenceremove=start_periods=1:start_silence=0.03:start_threshold={thresh:.1f}dB:detection=rms,'
-        'areverse'
-    )
-    r = run(['-y', *cut_args(seek, dur), '-i', str(src), '-af', chain,
-             '-ac', '1', '-ar', '44100', str(dest_wav)])
-    return r.returncode == 0, r.stderr
+    found = find_sound(envelope(src, seek, dur))
+    if isinstance(found, str):
+        return None, found
+    start, end, gaps, blips, snr = found
+    a = max(0.0, start - LEAD_S) + (seek or 0.0)
+    length = (end - start) + LEAD_S + TAIL_S
+    if gaps:                       # refused anyway; nothing to cut
+        return (gaps, blips, snr), None
+    r = run(['-y', '-ss', '%.3f' % a, '-t', '%.3f' % length, '-i', str(src),
+             '-af', 'highpass=f=70', '-ac', '1', '-ar', '44100', str(dest_wav)])
+    if r.returncode != 0:
+        return None, 'trim failed'
+    return (gaps, blips, snr), None
 
 
 def cut_args(seek, dur):
@@ -139,16 +204,6 @@ GAP_S = 0.35   # a pause this long inside one file means a second take.
                # so they never trip it.
 
 
-def internal_gaps(wav, peak_db):
-    """Silences INSIDE the trimmed sound, as [(start, end)] seconds."""
-    thresh = max(peak_db - 30.0, -60.0)
-    r = run(['-i', str(wav), '-af', 'silencedetect=noise=%.1fdB:d=%.2f' % (thresh, GAP_S),
-             '-f', 'null', '-'])
-    starts = [float(x) for x in re.findall(r'silence_start:\s*(-?\d+\.?\d*)', r.stderr)]
-    ends = [float(x) for x in re.findall(r'silence_end:\s*(\d+\.?\d*)', r.stderr)]
-    return [(a, b) for a, b in zip(starts, ends)]
-
-
 def prepare(src, dest_mp3, tmp_dir, seek=None, dur=None, one_take=True):
     """Trim, then measure the SOUND, then level and encode. Returns a note.
 
@@ -157,28 +212,27 @@ def prepare(src, dest_mp3, tmp_dir, seek=None, dur=None, one_take=True):
     refused, never imported: otherwise every take would ship as one clip.
     """
     tmp = pathlib.Path(tmp_dir) / '_trim.wav'
-    ok, err = trim(src, tmp, seek, dur)
-    if not ok:
-        return None, 'trim failed'
+    info, err = trim(src, tmp, seek, dur)
+    if err:
+        return None, err
+    gaps, blips, snr = info
+    if one_take and gaps:
+        return None, ('REFUSED — %d sounds in one file (the next one starts at %s). '
+                      'Keep only your best take in the file.'
+                      % (len(gaps) + 1, ', '.join('%.1fs' % g for g in gaps)))
     m = measure(tmp)
     if not m:
         return None, 'could not measure'
     mean, peak, length = m
     if length < MIN_LEN_S:
         return None, 'only %.2fs of sound — too short, or the take is silent' % length
-    if one_take:
-        gaps = internal_gaps(tmp, peak)
-        if gaps:
-            return None, ('REFUSED — %d sounds in one file (a pause at %s). '
-                          'Keep only your best take in the file.'
-                          % (len(gaps) + 1, ', '.join('%.1fs' % a for a, _ in gaps)))
     gain = min(TARGET_RMS_DB - mean, PEAK_CEIL_DB - peak)
     if dest_mp3 is not None:
         ok, err = encode(tmp, dest_mp3, gain)
         if not ok:
             return None, 'encode failed'
     tmp.unlink(missing_ok=True)
-    return (length, gain), None
+    return (length, gain, snr, blips), None
 
 
 def slugs_from(manifest):
@@ -206,8 +260,11 @@ def mode_files(args, out):
                 print('  %-24s  %s' % (p.name, err))
                 refused += 1
                 continue
-            length, gain = got
-            print('  %-24s sound %5.2fs  gain %+5.1f dB' % (p.name, length, gain))
+            length, gain, snr, blips = got
+            print('  %-24s sound %5.2fs  gain %+5.1f dB  clear of noise by %2.0f dB%s'
+                  % (p.name, length, gain, snr,
+                     ('  (dropped a click at %s)' % ', '.join('%.1fs' % b for b in blips))
+                     if blips else ''))
     if bad_name:
         print('\n%d file(s) skipped: the name must be a slug from the manifest.' % bad_name)
     if refused:
@@ -246,7 +303,7 @@ def mode_split(args, out):
             if err:
                 print('  %-24s %6.2f → %6.2f  %s' % (slug, a, b, err))
                 continue
-            length, gain = got
+            length, gain, _snr, _blips = got
             print('  %-24s %6.2f → %6.2f  sound %.2fs  gain %+5.1f dB'
                   % (slug, a, b, length, gain))
     if not args.dry_run:

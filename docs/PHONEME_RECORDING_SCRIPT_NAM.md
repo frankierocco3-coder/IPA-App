@@ -120,3 +120,67 @@ trimmed MP3 before import. It can also split ONE continuous take of all
 sixteen sounds (in this order, a clear pause between each) if that is
 easier on the day, and it refuses to write anything if the count of
 sounds it hears does not match the list.
+
+---
+
+## Batch 2 — the rest of Neutral American (26)
+
+The pilot's sixteen were recorded, all marked Good and approved on
+2026-09-22. These twenty-six complete the course. Same room, same phone,
+same distance as the pilot, so the batch matches it. The pilot's quiet
+sounds came in quiet (`s` needed +8 dB), so for the soft ones below —
+marked **(soft)** — lean in a little closer and give them a touch more
+air. The tool refuses a take the room noise nearly covers.
+
+Stops, affricates and glides cannot be held alone, so they are recorded
+as syllable demos, exactly like `p`, `t` and `k` in the pilot. Their
+"isolated" rows at #audit stay empty forever; that is correct.
+
+### Held consonants (11) · hold each 1–2 seconds, nothing before or after
+
+| Slug | Sound | Find it in |
+|---|---|---|
+| `f` | /f/ **(soft)** | fun |
+| `v` | /v/ | van, with the buzz |
+| `theta` | /θ/ **(soft)** | think, tongue between the teeth, no voice |
+| `eth` | /ð/ | this, same place, voiced |
+| `esh` | /ʃ/ | she |
+| `ezh` | /ʒ/ | the middle of measure |
+| `h` | /h/ **(soft)** | a clean breathy exhale, no vowel after it |
+| `n` | /n/ | no, tongue tip up, hum |
+| `eng` | /ŋ/ | the end of sing, held, no g released |
+| `l` | /l/ | love, tongue tip up, voiced |
+| `r` | /r/ | red, the American r, held, no vowel |
+
+### Vowels (4) · steady, about a second
+
+| Slug | Sound | Find it in |
+|---|---|---|
+| `foot_vowel` | /ʊ/ | foot, short and lax, not goose |
+| `thought_vowel` | /ɔː/ | law, rounded; do not slide into father |
+| `happy_vowel` | /i/ | the end of happy, bright but short |
+| `american_letter` | /ɚ/ | the end of letter, r-coloured, brief and unstressed |
+
+### Diphthongs (4) · the whole glide, start to finish
+
+| Slug | Sound | Find it in |
+|---|---|---|
+| `face_diphthong` | /eɪ/ | face |
+| `choice_diphthong` | /ɔɪ/ | choice |
+| `mouth_diphthong` | /aʊ/ | mouth |
+| `american_goat` | /oʊ/ | go, the American glide |
+
+### Syllable demos (7) · say the frame once, naturally
+
+| Slug | Say |
+|---|---|
+| `b_syllable` | "aba" |
+| `d_syllable` | "ada" (a true d, not the tap in ladder) |
+| `g_syllable` | "aga" |
+| `ch_syllable` | "acha" |
+| `j_syllable` | "aja" |
+| `w_syllable` | "awa" |
+| `yod_syllable` | "aya" |
+
+Hand-over is the same as the pilot: one file per sound, named by its slug,
+your best take only, all in one folder (the Desktop is fine).
