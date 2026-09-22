@@ -37,15 +37,25 @@
  * and the cached new main.js asks for modules that were never cached.
  * Bumping VERSION drops the old cache wholesale, so the next load fetches
  * one consistent graph.
+ *
+ * Every fetch here goes past the browser's own HTTP cache ('no-cache' /
+ * 'reload'). GitHub Pages marks files max-age=600, so for ten minutes after
+ * a visit a plain fetch() can be handed the OLD file without asking the
+ * server. That once filled a freshly bumped cache (sc-v7) with the previous
+ * deploy's main.js, which quietly undoes the bump and re-opens the offline
+ * blank-screen trap above. 'no-cache' is a conditional request: an
+ * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v7';                      // 2026-09-22: js/data/pron-licence.js joins the graph
+const VERSION = 'sc-v8';                      // 2026-09-22: fetches bypass the browser's HTTP cache (see above)
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
                   'favicon.svg', 'icon-180.png', 'icon-512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(SHELL).then(c => c.addAll(PRECACHE)).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(SHELL)
+    .then(c => c.addAll(PRECACHE.map(u => new Request(u, { cache: 'reload' }))))
+    .then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -64,7 +74,7 @@ async function networkFirstNav(req) {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 3000);
-    const res = await fetch(req, { signal: ctrl.signal });
+    const res = await fetch(req, { signal: ctrl.signal, cache: 'no-cache' });
     clearTimeout(t);
     if (res.ok) (await caches.open(SHELL)).put('index.html', res.clone());
     return res;
@@ -76,7 +86,7 @@ async function networkFirstNav(req) {
 async function staleWhileRevalidate(req) {
   const cache = await caches.open(SHELL);
   const cached = await cache.match(req);
-  const fresh = fetch(req).then(res => {
+  const fresh = fetch(req, { cache: 'no-cache' }).then(res => {
     if (res.ok) cache.put(req, res.clone());
     return res;
   }).catch(() => null);

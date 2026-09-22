@@ -3646,6 +3646,13 @@ export async function run({ navDoc = document } = {}) {
       !!sw && sw.includes("const VERSION = '")
       && sw.includes('if (!sameOrigin(url)) return')
       && sw.includes('caches.delete'));
+    // Pages serves max-age=600, so a plain fetch() in the worker can be
+    // handed a stale file from the HTTP cache and file it under a NEW
+    // cache version, undoing the bump (it happened on the sc-v7 deploy).
+    check('pwa: the worker revalidates past the HTTP cache',
+      !!sw && sw.includes("fetch(req, { cache: 'no-cache' })")
+      && sw.includes("signal: ctrl.signal, cache: 'no-cache'")
+      && sw.includes("new Request(u, { cache: 'reload' })"));
     // <audio> asks for every clip with a Range header, so offline audio
     // lives or dies in the range branch: it must STORE a full copy online
     // and SLICE it into a real 206 offline (Safari rejects a 200 there).
