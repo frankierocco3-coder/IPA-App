@@ -1347,7 +1347,7 @@ export async function run({ navDoc = document } = {}) {
     searchActions('').length === 12
     && searchActions('reassure').some(a => a.id === 'reassure')
     && searchActions('To Control').length === 2
-    && searchActions(' weird￿').length === 0);
+    && searchActions('\x00weird￿').length === 0);
 
   if (navDoc !== document) {
     const frame = document.querySelector('iframe');

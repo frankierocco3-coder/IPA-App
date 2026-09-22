@@ -1,5 +1,5 @@
 // Pronunciation lookup for arbitrary text. The dictionary is General
-// American IPA (converted from CMUdict, public domain, ~126k words) and is
+// American IPA (converted from CMUdict, ~126k words; BSD-style licence, js/data/pron-licence.js) and is
 // lazy-loaded — a big file we only fetch the first time Sound mode opens.
 // Other dialects are derived by rule from the American form and are marked
 // approximate (≈): word-level IPA can't fully know lexical sets, so the

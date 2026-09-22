@@ -38,7 +38,7 @@
  * Bumping VERSION drops the old cache wholesale, so the next load fetches
  * one consistent graph.
  */
-const VERSION = 'sc-v6';                      // 2026-09-21: six data modules renamed (B-R2) — new URLs in the graph
+const VERSION = 'sc-v7';                      // 2026-09-22: js/data/pron-licence.js joins the graph
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

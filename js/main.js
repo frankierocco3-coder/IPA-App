@@ -97,6 +97,7 @@ import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
 import { renderDialectAction, renderDialectActionPending } from './views/dialect-action.js';
+import { CMUDICT_LICENCE } from './data/pron-licence.js';
 import { openWhatIsIpa, renderChart, renderSoundDetail, speakableWord, releaseTryIt, whatIsIpaCard, wiiQuestion, wireTryIt, wireWhatIsIpaCard, wireWiiQuestions, wordChip } from './views/reference.js';
 
 const langFor = lesson => ACCENT_LANG[lesson?.accent] ?? 'en-GB';
@@ -5128,6 +5129,51 @@ function renderFeedback() {
   wireBrandHome();
 }
 
+// Terms of Use (2026-09-22). Plain-language terms for a free, account-free
+// app: not professional advice, no purchases, the learner's work stays
+// theirs, no warranty, limited liability, New York law (owner's state).
+// Contact goes through the Feedback page, so no new external link is
+// added here.
+function renderTerms() {
+  record(renderTerms);
+  const sec = (h, ...ps) => `<h2 class="guide-heading">${h}</h2>${ps.map(p => `<p class="guide-text">${p}</p>`).join('')}`;
+  app.innerHTML = `
+    ${pageTopbar('📜 Terms of Use', '#64748b')}
+    <main class="guide">
+      <h1>Terms of Use</h1>
+      <p class="pane-note">Effective 22 September 2026.</p>
+      ${sec('Using Speechcraft',
+        'Speechcraft is a free educational tool for studying speech, acting, the IPA and accents. By using it you agree to these terms. If you do not agree, please do not use it. Speechcraft is in beta, so its features and content change as it grows.')}
+      ${sec('Not professional advice',
+        'Speechcraft teaches and helps you practise. It does not replace a qualified voice teacher, dialect coach, acting teacher, speech-language pathologist or doctor, and nothing in it is medical, therapeutic or professional advice.',
+        'The voice, breath and body exercises are gentle, but you know your own body. Stop anything that causes pain, strain or discomfort, and if you have a voice or health condition, check with a qualified professional first.')}
+      ${sec('Free, with nothing to buy',
+        'Speechcraft costs nothing and sells nothing. XP, gems, hearts, streaks and the items in the Shop are practice points earned inside the app. They have no cash value and cannot be bought, sold or exchanged for money.')}
+      ${sec('Your work stays yours',
+        'What you write, paste or record in Speechcraft stays on your device. We never see it, store it or claim any rights to it. If you work with a text you did not write, you are responsible for having the right to use it.')}
+      ${sec('Our content',
+        'Speechcraft’s lessons, exercises, explanations, design and code are original work protected by copyright. You are welcome to use them for your own learning and in your own teaching, but please do not copy, republish or sell them.',
+        'The classic plays, poems and translations in the app are public-domain works, and some materials are used under their own licences. Sources &amp; Credits lists them.')}
+      ${sec('How the audio and some writing are made',
+        'The word, expression and narration audio is generated with licensed AI voices from ElevenLabs. The isolated General American sounds are recordings of a human voice. Some written material was drafted with the help of AI tools and reviewed before it was published.',
+        'Pronunciation targets are models of an accent, not the only correct way to speak, and a recording or transcription can contain mistakes. If you find one, please report it through Feedback.')}
+      ${sec('No warranty',
+        'Speechcraft is provided “as is” and “as available”, without warranties of any kind, express or implied, including warranties of accuracy or fitness for a particular purpose. We do not promise that it will always be available or free of errors, or that any particular result will follow from using it.')}
+      ${sec('Limitation of liability',
+        'To the fullest extent the law allows, Speechcraft and the people who make it are not liable for any indirect, incidental, special or consequential damages, or for any loss of data, arising from your use of the app. Some places do not allow these limits, so they may not all apply to you.',
+        'Your progress and projects live only in this browser. Clearing your browser data, changing devices or a browser failure can erase them, so export anything you want to keep.')}
+      ${sec('Governing law',
+        'These terms are governed by the laws of the State of New York, United States, without regard to its conflict-of-law rules.')}
+      ${sec('Changes to these terms',
+        'We may update these terms as Speechcraft changes. The date at the top shows the current version, and using the app after a change means you accept the updated terms.')}
+      ${sec('Questions',
+        'Questions about these terms go through the Feedback page.')}
+      <p><button class="btn" id="terms-feedback" type="button">Go to Feedback</button></p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('terms-feedback').addEventListener('click', renderFeedback);
+}
+
 function renderCredits() {
   record(renderCredits);
   app.innerHTML = `
@@ -5144,7 +5190,11 @@ function renderCredits() {
       <p class="guide-text">Each course’s pronunciation target follows published descriptions, cited in full here:</p>
       ${[...new Set(Object.values(DIALECT_INFO).flatMap(i => i.sources))].map(s => `<p class="pane-note">${esc(s)}</p>`).join('')}
       <h2 class="guide-heading">Everything else</h2>
-      <p class="guide-text">Design, course content, exercises, transcriptions and code are original to Speechcraft. Pronunciation data derives from CMUdict (public domain) for General American, with rule-derived adaptations marked ≈ elsewhere.</p>
+      <p class="guide-text">Design, course content, exercises, transcriptions and code are original to Speechcraft. General American pronunciation data derives from the Carnegie Mellon University Pronouncing Dictionary (CMUdict), used under its licence, which is reproduced below; the adaptations for the other accents are rule-derived and marked ≈.</p>
+      <details class="guide-details">
+        <summary>CMUdict licence</summary>
+        <pre class="licence-text">${esc(CMUDICT_LICENCE)}</pre>
+      </details>
     </main>`;
   wireBrandHome();
 }
@@ -5157,6 +5207,7 @@ function moreMain(el) {
     { icon: '👤', img: 'img/ui/profile.png', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
     { icon: '⚙️', img: 'img/ui/preferences.png', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
     { icon: '🔒', img: 'img/ui/privacy.png', title: 'Privacy & Data', blurb: 'What’s stored on this device, and how to delete it.', go: renderPrivacy, color: '#8a6d3b' },
+    { icon: '📜', title: 'Terms of Use', blurb: 'The ground rules for using Speechcraft, in plain language.', go: renderTerms, color: '#64748b' },
     { icon: '✉️', img: 'img/ui/feedback.png', title: 'Feedback', blurb: 'Report a wrong pronunciation or a mistake.', go: renderFeedback, color: '#8a6d3b' },
     // Permanent doorway to the preface — never retired by onboarding state.
     // Replaying only touches the replay timestamps (state.js guarantees it).
@@ -5272,7 +5323,7 @@ function hubIdiom(hub, d, track) {
       ? `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. Contemporary usage is the default view; use the Era filter for older material.`
       : `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.`}</p>
     <div class="practice-row"><button class="btn btn-practice" id="idiom-drill" type="button">🗣 Drill these — no hearts lost</button></div>
-    <input class="sonnet-search" id="idiom-q" type="search" placeholder="Search term, meaning or example…" autocomplete="off">
+    <input class="sonnet-search" id="idiom-q" type="search" aria-label="Search words and expressions" placeholder="Search term, meaning or example…" autocomplete="off">
     <div class="dialect-picker"><span class="dialect-label">Era</span><div class="dialect-chips" id="idiom-era">
       ${chip('era', 'all', 'All', idiomFilters.era === 'all')}
       ${chip('era', 'period', 'Period', idiomFilters.era === 'period')}
@@ -5567,6 +5618,18 @@ function renderPrivacy() {
         <div class="stat-row"><span class="stat-name">Offline copy of app content (for use without a connection)</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
+      </section>
+
+      <section class="stat-block" id="privacy-policy">
+        <h2 class="chart-h">Privacy policy</h2>
+        <p class="pane-note">Effective 22 September 2026.</p>
+        <p class="pane-note"><b>What we collect:</b> nothing. Speechcraft has no accounts, no servers of its own, and no analytics or advertising. The app never sends what you do in it anywhere.</p>
+        <p class="pane-note"><b>Hosting:</b> the app’s files are served by GitHub Pages. Like any web host, GitHub receives standard request details, such as your IP address, when your browser downloads them. GitHub’s own privacy statement covers that; Speechcraft adds nothing to it.</p>
+        <p class="pane-note"><b>Cookies and storage:</b> Speechcraft sets no cookies. It uses your browser’s own storage (local storage, IndexedDB and an offline cache) only to run the app: your progress, your projects and offline use. None of it is used for tracking or advertising, which is why the app never asks for cookie consent.</p>
+        <p class="pane-note"><b>Feedback:</b> reporting a problem takes you to GitHub Issues, a separate site with its own terms and privacy statement. Anything you post there is public.</p>
+        <p class="pane-note"><b>Children:</b> Speechcraft collects no personal information from anyone, including children.</p>
+        <p class="pane-note"><b>Your rights:</b> because your data never reaches us, there is nothing on our side to access, correct or delete. You control all of it on this device, including deleting it below.</p>
+        <p class="pane-note"><b>Changes:</b> if this policy changes, the date above changes with it. Questions go through the Feedback page.</p>
       </section>
 
       <section class="stat-block" id="rec-manager">
@@ -8168,7 +8231,7 @@ function renderDictionary() {
     ${pageTopbar('📕 Personal Dictionary', '#8a6d3b')}
     <main class="track-list">
       <p class="track-blurb">Pronunciations you've corrected. These apply everywhere in the app, for the dialect you saved them in.</p>
-      <input class="sonnet-search" id="dict-search" type="search" placeholder="Search word, IPA or note…" value="${esc(dictQuery)}" autocomplete="off">
+      <input class="sonnet-search" id="dict-search" type="search" aria-label="Search your personal dictionary" placeholder="Search word, IPA or note…" value="${esc(dictQuery)}" autocomplete="off">
       <div class="proj-tools">
         <label class="field-label" for="dict-filter">Dialect</label>
         <select class="input-sel" id="dict-filter" aria-label="Filter by dialect">

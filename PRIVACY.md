@@ -34,6 +34,9 @@ third-party scripts of any kind.
 
 ## Microphone
 
+New recording is currently turned off in the app (existing recordings can
+still be played, downloaded and deleted). When it returns, these rules apply:
+
 * Permission is requested **only** when you press **Record** — never on load.
 * Recording never starts on its own.
 * Only one recording can run at a time, and it stops automatically after
@@ -60,7 +63,7 @@ Once you save or send an export, its contents are your responsibility.
 
 ## Deleting your data
 
-In the app: **The IPA Handbook → Privacy & Data**, which offers
+In the app: **More → Privacy & Data**, which offers
 
 * delete projects, recordings, analytics and dictionary — *keeping* XP,
   streak and lesson progress, or
