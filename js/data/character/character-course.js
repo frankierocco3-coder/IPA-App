@@ -285,7 +285,7 @@ export const COMMEDIA_MASKS = [
     wants: 'Admiration, fear, status and conquest.',
     fears: 'Danger, and above all being found out.',
     contradiction: 'His reputation is made entirely of language and supported by nothing he has done.',
-    centre: 'The inflated chest, the sword and the display.',
+    centre: 'The inflated chest, the sword and the display, all of it carried above knees that are the first thing to go.',
     leads: 'The chest, and the sword just ahead of it.',
     stance: ['Feet wide, weight planted.', 'Knees locked.', 'Pelvis forward.', 'Chest thrust up and out.', 'Chin high.', 'One hand on the sword, the other on the hip or raised in the air.', 'Attention on whoever might be watching him.'],
     walk: 'A long, swaggering stride that stops for poses. Under threat the stride shrinks to a tiptoe or a scurry toward the exit.',
@@ -491,13 +491,15 @@ export const CHARACTER_LESSONS = [
       { p: 'The loop runs like this. You make an offer: a look, a line, a piece of business. The room answers, with laughter, or silence, or the particular quiet of people who have stopped following. You listen to that answer. You adjust the size, the speed or the aim. Then you make the next offer. None of that changes the story you are telling. All of it changes how you tell it tonight.' },
       { p: 'The principle underneath is larger than commedia. Saying a thing is not the same as being understood. A speech is not finished because you reached the end of it, and a scene is not working because you played it correctly. It is finished when it has landed on the person in front of you, and the only way to know whether it has is to keep looking at them while you speak.' },
       { h: 'What is history, and what is craft' },
-      { p: 'Commedia never had one fixed cast or one fixed way of moving. Companies, cities and generations renamed, combined and reinvented the characters, and very little about how they moved was written down. So this module keeps four kinds of knowledge apart:' },
+      { p: 'Commedia never had one fixed cast or one fixed way of moving. Companies, cities and generations renamed, combined and reinvented the characters, and very little about how they moved was written down. So this module keeps five kinds of knowledge apart:' },
       { list: [
         'Documented history: what contracts, printed scenarios, letters and pictures from the period actually show.',
         'Longstanding convention: what performers have handed down and is traditionally associated with a character, such as Pantalone’s red costume or Arlecchino’s bat.',
         'Modern training: movement vocabulary that twentieth-century teachers reconstructed and organised, commonly used in commedia training today.',
         'Speechcraft’s interpretation: playable ways into a character offered by this course, one choice among many.',
+        'Received wisdom: what popular accounts repeat about commedia. Often right, occasionally badly wrong, and never a source. This course treats it as something to check rather than something to cite.',
       ] },
+      { p: 'Here is that last distinction doing real work. A widely watched introduction to commedia will tell you that Arlecchino wears a green mask. Ask what kind of claim it is. The surviving pictures and the handed-down convention agree that his mask is black, and that green belongs to Brighella, whose olive leather is one of the things you identify him by. So the green Arlecchino is not documented history and not longstanding convention. It is received wisdom, repeated with enough confidence to sound settled. You will meet a great deal of it, and the question is always the same: which of these five is this, and who would actually know?' },
       { p: 'Every character chapter ends with a note saying which is which. Treat each walk and sequence as a way in, not a rule: performance conventions vary by company, teacher, period and region.' },
       { h: 'Questions to ask of every mask' },
       { list: [
@@ -538,6 +540,7 @@ export const CHARACTER_LESSONS = [
       { p: 'Most of commedia’s comic characters wore a half mask covering the forehead, eyes and nose, leaving the mouth free to speak. The lovers played unmasked, and so did a few others. A mask is not a disguise. It fixes one expression in place, permanently, and that changes everything below it. With the face frozen, the character has to speak through the head, the spine, the hips, the hands, the rhythm of moving and stopping, the distance kept from other people, and the voice.' },
       { p: 'That is why masked actors learn to lead with the head. A small turn of the head reads as a look; a sharp one reads as a thought arriving. The mask always faces something, and whatever it faces, the audience looks at too. Stillness becomes loud. A mask that stops dead in the middle of a scramble can get a bigger laugh than any line.' },
       { p: 'A mask also exposes a gap you can use in any role: the body often says what the words are trying to hide. A masked braggart can boast in the bravest voice he owns while his knees are already turning toward the exit. The audience believes the knees.' },
+      { p: 'One part of this only appears when there are other people on stage. The unmasked characters never treat a mask as a mask. To the lovers, Pantalone is not a performer in moulded leather. He is an old man who will not let them marry. Everyone plays the masked characters as ordinary people, and that is what lets the audience hold both facts at once: that it is obviously a piece of leather, and that it is a person. A mask becomes real because the company behaves as though it already is.' },
       { h: 'From shape to speech' },
       { p: 'There is an order to this work, and it runs upward from the body. A shape comes first. The shape changes the breath, because a braced chest and a lifted one cannot take the same one. The breath, once you let it be heard, is already most of a voice. The voice finds words, and the words go to somebody who would rather not hear them. Work in that order and the voice arrives attached to a body that earned it.' },
       { p: 'Work in the other order and it shows. An actor who settles on a funny voice first and then hunts for a walk to go with it is wearing two things that never quite belong to the same person. The breath is the hinge between them, the one thing that is part of the body and part of the speech at once, which is why every breakdown in this module treats voice and breath as a single entry rather than two.' },
@@ -558,6 +561,7 @@ export const CHARACTER_LESSONS = [
     reflection: 'Which of the nine do you already recognise from something you have watched this year?',
     body: [
       { p: 'Here is the whole company on one page. Four families, nine characters, and a set of relationships that has driven comedies for four hundred years. Every chapter after this one takes a single character apart. This is the map you will be filling in.' },
+      { fig: 'cm-cast-tree' },
       { h: 'The old masters, the vecchi' },
       { p: 'They own the money, the houses and the rules, and in most plots they are the obstacle.' },
       { roster: ['pantalone', 'dottore'] },
@@ -605,7 +609,7 @@ export const CHARACTER_LESSONS = [
     orientation: 'Pantalone has the money. That is his answer to every question.',
     reflection: 'Pantalone keeps insisting on an authority nobody obeys any more. Where have you seen that happen?',
     body: [
-      { p: 'Pantalone is the old Venetian merchant, head of the household and the richest man in most plots, and early companies also called him Il Magnifico. His close-fitting trousers gave English the word pantaloons. He is usually the father of one of the lovers, usually arranging a marriage the lovers do not want, and often chasing a young woman himself. His whole life fits in three words: acquire without risking.' },
+      { p: 'Pantalone is the old Venetian merchant, head of the household and the richest man in most plots, and early companies also called him Il Magnifico. You will meet that older name in period scenarios, where it means this character. Some modern training traditions use it differently, for a separate figure of pure authority standing above Pantalone, so it is worth knowing which sense you are being handed. His close-fitting trousers gave English the word pantaloons. He is usually the father of one of the lovers, usually arranging a marriage the lovers do not want, and often chasing a young woman himself. His whole life fits in three words: acquire without risking.' },
       { fig: 'cm-pantalone-mask' },
       { h: 'At a glance' },
       { mask: 'pantalone' },
@@ -678,6 +682,7 @@ export const CHARACTER_LESSONS = [
     reflection: 'Say the lovers’ line twice: once as a joke, once completely sincere. Which one was funnier?',
     body: [
       { p: 'The innamorati are the young lovers, and every commedia plot is, on the surface, about getting them together. They speak the most polished Italian on the stage, full of poetry and elaborate declarations. Their names changed from company to company: Flavio, Lelio, Leandro and Orazio; Isabella, Flaminia, Silvia and Lavinia.' },
+      { p: 'There is more than one generation of them. The young pair are the ones most companies played and the ones this chapter breaks down: educated on their fathers’ money, fluent in the language of adulthood well before they understand what it costs. Some traditions also carry an older pair, grown aristocrats with real power and the capacity to use it badly. The difference is the one between Romeo and Juliet and the Macbeths. Same unmasked face, same beautiful speech, entirely different stakes.' },
       { fig: 'cm-innamorata-mask' },
       { fig: 'cm-innamorato-mask' },
       { h: 'At a glance' },
@@ -754,6 +759,7 @@ export const CHARACTER_LESSONS = [
     reflection: 'Brighella rarely lies. He chooses which part of the truth to tell. When have you watched someone do that well?',
     body: [
       { p: 'Brighella is the first zanni: Arlecchino’s countryman from Bergamo and his opposite. Where Arlecchino blunders, Brighella calculates. He is often an innkeeper, a go-between or the senior servant in Pantalone’s house, and in almost every plot he is the one who invents the scheme: the forged letter, the disguise, the plan to marry the lovers under the old men’s noses.' },
+      { p: 'The phrase that unlocks him is master of the servants and servant of the masters. Picture the head waiter in an expensive restaurant: proud of the uniform, aware he worked his way into it, smooth with the important guests, hard on the staff beneath him, and entirely informed about what is happening in the kitchen. He does not own the place. He knows how it actually runs, which is worth more, and every favour he grants has a price he worked out before you asked.' },
       { fig: 'cm-brighella-mask' },
       { h: 'At a glance' },
       { mask: 'brighella' },
@@ -795,6 +801,7 @@ export const CHARACTER_LESSONS = [
     reflection: 'Arlecchino wins more often than anyone above him. Why do you think nobody sees him coming?',
     body: [
       { p: 'Arlecchino is the most famous second zanni, the servant who carries out the plans and gets them wrong. He comes from the hills around Bergamo, and he carries the wooden bat that gave slapstick its name. In one plot he serves Pantalone, in the next one of the lovers or the Captain. Whoever employs him, he is thinking about lunch.' },
+      { p: 'He is not stupid, and playing him stupid kills him. He simply does not run on the kind of logic that plans three moves ahead. He runs on appetite, instinct and whatever is physically in front of him, which is why he sometimes arrives at a solution a careful schemer would never have found. Brighella thinks and then moves. Arlecchino moves, and the thinking catches up afterwards.' },
       { fig: 'cm-arlecchino-mask' },
       { h: 'At a glance' },
       { mask: 'arlecchino' },

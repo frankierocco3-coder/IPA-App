@@ -67,6 +67,16 @@ Character ids: `arlecchino`, `brighella`, `colombina`, `pulcinella`,
 * **No stereotypes:** a character is never reduced to body type,
   disability, age, ethnicity or accent. Pantalone's age is theatrical, not
   medical.
+* **A walk sheet must show a change, not a sample.** This is the rule the
+  delivered set most often misses. Four drawings of the same walk at
+  slightly different angles teach nothing; the series has to read left to
+  right as one event, with a beginning and a different end. The reliable
+  shape is: the character sees something, the body receives it, they
+  decide, they act, something gets in the way, and they recover or
+  collapse. Il Capitano's sheet earns this (swagger, lunge, flinch,
+  cringe) and so does Pedrolino's daisy. Arlecchino's seven frames and Il
+  Dottore's three are variations in energy rather than a story, and are
+  the ones to redo first if the set is ever regenerated.
 * **Movement in mechanics, not labels:** describe what the body does
   ("knees bent, nose reaching forward, hands over the purse"), not just
   what the character is like. The movement principle can steer the image,

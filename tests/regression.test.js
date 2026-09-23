@@ -3819,9 +3819,11 @@ export async function run({ navDoc = document } = {}) {
     // The commedia collection landed whole (2026-09-22), so every slot the
     // chapters reserve now resolves. A new slot without art would fail
     // here rather than render an invisible gap nobody notices.
+    // 30 character slots (three for each of nine masks, six for the two
+    // Lovers) plus the company family tree on The Cast.
     const figKeys = CHARACTER_LESSONS.flatMap(l => (l.body ?? []).filter(b => b.fig).map(b => b.fig));
     check('character: every { fig } slot names a registered picture with real alt text',
-      figKeys.length === 30
+      figKeys.length === 31
       && figKeys.every(k => { const f = characterFigure(k); return !!f && f.alt.length > 40 && !!f.caption; }),
       `${figKeys.length} slot(s)`);
     check('character: the Lovers chapter carries both performers, face then stance then walk',

@@ -26,6 +26,22 @@ const fig = (title, file, alt, caption) =>
   ({ title, file, alt, caption: `${caption} ${CLOSE}`, w: 1536, h: 864 });
 
 export const CHARACTER_FIGURES = {
+  // ── The company as a whole ─────────────────────────────────
+  // The one portrait figure here, and the one that is a diagram rather
+  // than a character study, so it carries its own dimensions and its own
+  // illustrated style. It maps POSITIONS, not this course's cast: it
+  // names Magnifico and a root Zanni, which have no chapters, and folds
+  // Pulcinella and Pedrolino into that Zanni node. The caption does that
+  // reconciling, because the picture and the roster below it would
+  // otherwise appear to disagree.
+  'cm-cast-tree': {
+    title: 'The company as a family tree',
+    file: 'cast-tree.jpg',
+    w: 1199, h: 1312,
+    alt: 'A family tree of commedia characters drawn as portrait medallions on aged paper, with Venice along the bottom. Magnifico, crowned and robed, sits at the top. Below him are the unmasked lovers, Innamorata and Innamorato, then the masked old men Pantalone and Il Dottore. Colombina, unmasked in a white cap, sits at the centre with lines reaching every other figure. Brighella in a green mask and Arlecchino in a patched cap flank her, Il Capitano in a plumed hat sits below them, and a masked Zanni in a white cap is at the root.',
+    caption: 'One arrangement of the company, and not the only one. Magnifico at the top is the older figure of pure authority that Pantalone descends from. Zanni at the root is the servant every other servant is a version of, including three this course names separately: Colombina, Pulcinella and Pedrolino all branch from that one node. A teaching interpretation, not a historical record.',
+  },
+
   // ── Pantalone ──────────────────────────────────────────────
   'cm-pantalone-mask': fig(
     'Pantalone: the mask',
