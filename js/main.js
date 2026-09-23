@@ -37,6 +37,7 @@ import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from './data/acting/approaches
 import { LINE_LESSON } from './data/acting/lines.js';
 import { voiceFigure, VOICE_ATLAS } from './data/voice-art.js';
 import { actingFigure } from './data/acting/art.js';
+import { characterFigure } from './data/character/art.js';
 import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
@@ -44,6 +45,8 @@ import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
 import { SPEECH_TEXTS, speechTextById, speechTextBody } from './data/speech/texts.js';
 import { parseScript, speechUnits, unitText, cuedSpeeches } from './script.js';
 import { mountNotebook } from './notebook.js';
+import { CHARACTER_KINDS, MAX_FIELD_LEN, MAX_NAME_LEN, kindLabel, fieldsFor, listCharacters, getCharacter,
+         createCharacter, saveFields, renameCharacter, deleteCharacter } from './characters.js';
 import { speechApproved, speechPublished, speechBodyVisible, speechReviewFor } from './data/speech/reviews.js';
 import { SPEECH_GOALS, speechGoal, setSpeechGoal, speechLessonDone,
          markSpeechLessonDone, speechDoneCount, speechHistory, recordSpeechPractice,
@@ -52,6 +55,9 @@ import { DIALECT_FACETS, DIALECT_VARIATION_LINE } from './data/speech/dialect-fa
 import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
          ACTING_GLOSSARY, actingLessonsFor, actingLessonById, actingModuleFor,
          actingLessonNumber } from './data/acting/acting-course.js';
+import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
+         COMMEDIA_MASKS, commediaMask, MASK_SITUATIONS, MASK_PROBLEMS,
+         ONE_LINES } from './data/character/character-course.js';
 import { ACTING_GAMES, ACTING_DECKS, actingGameById,
          SCENE_STUDY_AREAS } from './data/acting/practice.js';
 import { sceneStudyNotes, saveSceneStudyNote } from './data/acting/store.js';
@@ -92,7 +98,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, COURSES, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -465,12 +471,16 @@ function drawRail(section) {
   // 1 · Next step — every workspace. The working-text card belongs to
   //     Learn and Practice only: in the Library it points away from the
   //     content the learner came to read.
-  if (ws === 'speech' || ws === 'acting') {
+  if (ws === 'speech' || ws === 'acting' || ws === 'character') {
     const next = ws === 'acting'
       ? ACTING_LESSONS.filter(actingVisible).find(l => !speechLessonDone(l.id)) ?? null
+      : ws === 'character'
+      ? CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l)).find(l => !speechLessonDone(l.id)) ?? null
       : nextSpeechLesson();
-    const wt = inLearnOrPractice ? workingText() : null;
-    if (inLearnOrPractice && !wt) {
+    // Character work needs no working text, so it never asks for one.
+    const wantsText = inLearnOrPractice && ws !== 'character';
+    const wt = wantsText ? workingText() : null;
+    if (wantsText && !wt) {
       cards.push({ h: 'Next step', title: 'Choose a working text',
         note: 'Exercises that need text will use it — you can change it any time.',
         actions: [['Choose a text', () => renderWorkingTextPicker(), true]] });
@@ -485,8 +495,9 @@ function drawRail(section) {
         ] });
     } else if (next) {
       cards.push({ h: 'Next step', title: next.title,
-        note: ws === 'acting' ? 'Continue the acting course.' : 'Continue the Speech course.',
-        actions: [['Continue', () => ws === 'acting' ? renderActingLesson(next.id) : renderSpeechLesson(next.id), true]] });
+        note: ws === 'acting' ? 'Continue the acting course.'
+          : ws === 'character' ? 'Continue Building a Character.' : 'Continue the Speech course.',
+        actions: [['Continue', () => ws === 'speech' ? renderSpeechLesson(next.id) : renderActingLesson(next.id), true]] });
     } else {
       cards.push({ h: 'Next step', title: 'Browse the Library',
         note: 'Every chapter is free to read in any order.',
@@ -549,7 +560,7 @@ function drawRail(section) {
   });
   q.querySelector('#rail-quests-all')?.addEventListener('click', () => goSection('progress'));
   const t = document.getElementById('rail-today');
-  t.innerHTML = section === 'practice' || ws === 'speech' || ws === 'acting' ? '' : dailyRehearsalCard();
+  t.innerHTML = section === 'practice' || ACCENTLESS_WORKSPACES.includes(ws) ? '' : dailyRehearsalCard();
   t.querySelector('#today-start')?.addEventListener('click', startDailyRehearsal);
 }
 
@@ -660,6 +671,7 @@ function showSsbeIntro(course) {
 // is the authoritative reading surface.
 function learnMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLearnPane(el);
+  if (ws === 'character') return bookLearnPane(el, BOOKS.character);
   if (ws === 'speech') return speechLearnPane(el);
   ipaLearnPane(el, course);
 }
@@ -749,6 +761,7 @@ const AUDIO_MODES = new Set(['listen', 'pairs', 'earacc']);
 // ── Practice: contents follow the active workspace ────────────
 function practiceMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingPracticePane(el);
+  if (ws === 'character') return characterPracticePane(el);
   if (ws === 'speech') return speechPracticePane(el);
   ipaPracticePane(el, course);
 }
@@ -2929,20 +2942,68 @@ const approachPublished = a => speechPublished(a.id);
 // ── Acting → Learn: the optional guided pathway ───────────────
 const ACTING_MODULE_TONE = { 1: 'is-sage', 2: 'is-blue', 3: 'is-lavender', 4: 'is-terracotta' };
 
-function actingLearnPane(el) {
-  const cats = actingReviewCategories();
-  const avail = ACTING_LESSONS.filter(actingVisible);
+// ── One set of course screens, two courses (2026-09-22) ─────────
+// Acting and Building a Character share the Learn cards, module page,
+// lesson page, chapter page and collection page. Every lesson id belongs
+// to exactly one book, so a screen works out its course from the id it
+// is showing, and Acting's screens render exactly as they did before.
+const BOOKS = {
+  acting: { ws: 'acting', icon: '🎭', title: 'Acting & Scene Work', libraryName: 'Acting Library',
+    principle: ACTING_PRINCIPLE, modules: ACTING_MODULES, lessons: ACTING_LESSONS,
+    collections: ACTING_COLLECTIONS, visible: actingVisible,
+    moduleTone: n => ACTING_MODULE_TONE[n], reviewCats: () => actingReviewCategories() },
+  character: { ws: 'character', icon: '🧍', title: 'Building a Character', libraryName: 'Character Library',
+    principle: CHARACTER_PRINCIPLE, modules: CHARACTER_MODULES, lessons: CHARACTER_LESSONS,
+    collections: CHARACTER_COLLECTIONS, visible: characterVisible,
+    moduleTone: () => 'is-terracotta', reviewCats: () => ({ total: 0 }) },
+};
+const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
+// Whose thinking a lesson comes from, shown ONLY in the owner preview of
+// the hidden course (owner request 2026-09-22, to sort the course out).
+// Practitioner names stay out of learner-facing copy: when the course
+// launches these tags disappear and the credits go to Sources & Credits.
+const showAttribution = B => B.ws === 'character' && !CHARACTER_LIVE && characterPreview();
+// The name goes in the TITLE, never in the description (owner order).
+// The name goes on the MODULE, nothing else (owner order 2026-09-22): a
+// module whose lessons all come from one place is titled with that name
+// in the preview, so the course sorts itself at a glance.
+const moduleAttribution = (B, m) => {
+  const names = new Set(bookLessonsFor(B, m.id).map(l => l.attribution));
+  return names.size === 1 ? [...names][0] : null;
+};
+const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m)) || m.title;
+const bookOf = id => CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
+const bookOfCollection = id => CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
+const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
+// A `reference: true` record is a page you are sent to, never a step on
+// the path: it is not listed in its module, shelved, counted or given a
+// place in the Next sequence (owner order 2026-09-22).
+const pathLessons = B => B.lessons.filter(l => !l.reference);
+const bookLessonsFor = (B, moduleId) =>
+  pathLessons(B).filter(l => l.module === moduleId).sort((a, b) => a.order - b.order);
+const bookModuleFor = (B, l) => B.modules.find(m => m.id === l.module) ?? null;
+function bookLessonNumber(B, l) {
+  const m = bookModuleFor(B, l);
+  if (!m) return '';
+  return `${m.n}.${bookLessonsFor(B, l.module).findIndex(x => x.id === l.id) + 1}`;
+}
+
+function actingLearnPane(el) { return bookLearnPane(el, BOOKS.acting); }
+
+function bookLearnPane(el, B) {
+  const cats = B.reviewCats();
+  const avail = pathLessons(B).filter(B.visible);
   const done = avail.filter(l => speechLessonDone(l.id)).length;
   const next = avail.find(l => !speechLessonDone(l.id)) ?? null;
   const pct = avail.length ? Math.round(done / avail.length * 100) : 0;
 
-  const cards = ACTING_MODULES.map(m => {
-    const lessons = actingLessonsFor(m.id);
-    const ready = lessons.filter(actingVisible);
+  const cards = B.modules.map(m => {
+    const lessons = bookLessonsFor(B, m.id);
+    const ready = lessons.filter(B.visible);
     const mDone = ready.filter(l => speechLessonDone(l.id)).length;
     const st = groupStatus({ available: ready.length, done: mDone, prepared: lessons.length - ready.length });
     return tileHtml({
-      key: `mod:${m.n}`, tone: ACTING_MODULE_TONE[m.n], title: m.title, badge: st,
+      key: `mod:${m.n}`, tone: B.moduleTone(m.n), title: moduleTitle(B, m), badge: st,
       meta: ready.length ? m.blurb : 'Prepared lessons awaiting acting-professional review',
       progress: ready.length && mDone ? { done: mDone, total: ready.length } : null,
     });
@@ -2950,13 +3011,15 @@ function actingLearnPane(el) {
 
   el.innerHTML = `
     <div class="ws-head">
-      <h1 class="page-h">Acting &amp; Scene Work</h1>
-      <p class="ws-sub">${esc(ACTING_PRINCIPLE)}</p>
+      <h1 class="page-h">${esc(B.title)}</h1>
+      <p class="ws-sub">${esc(B.principle)}</p>
     </div>
+    ${B.ws === 'character' && !CHARACTER_LIVE ? `
+    <p class="pane-note pane-warn">Owner preview. This course is hidden from learners until it launches. Written so far: Commedia dell’Arte, and the lessons first written for Acting’s Building a Character module. The rest follow docs/CHARACTER_COURSE_OUTLINE.md.</p>` : ''}
     ${next ? `
     <section class="continue-card" aria-label="Continue learning">
       <div class="cc-info">
-        <span class="cc-stage">${esc((actingModuleFor(next)?.title ?? '').toUpperCase())}</span>
+        <span class="cc-stage">${esc((bookModuleFor(B, next)?.title ?? '').toUpperCase())}</span>
         <h2>${esc(next.title)}</h2>
         <p class="cc-meta">${esc(next.objective)}</p>
         ${courseProgressHtml(done, avail.length)}
@@ -2969,15 +3032,15 @@ function actingLearnPane(el) {
         <h2>${avail.length ? 'Every available lesson complete' : 'The course is written and in review'}</h2>
         <p class="cc-meta">${avail.length
           ? 'More lessons are prepared and waiting on acting-professional review.'
-          : `All ${ACTING_LESSONS.length} lessons are written and waiting on a qualified acting teacher or coach. The Library, Actor’s Studio and Acting Practice are open meanwhile.`}</p>
+          : `All ${pathLessons(B).length} lessons are written and waiting on a qualified acting teacher or coach. The Library, Actor’s Studio and Acting Practice are open meanwhile.`}</p>
       </div>
-      <button class="btn btn-primary cc-go" id="ac-to-library" type="button">Browse the Acting Library</button>
+      <button class="btn btn-primary cc-go" id="ac-to-library" type="button">Browse the ${esc(B.libraryName)}</button>
     </section>`}
     <h2 class="sec-h">Course modules</h2>
     <div class="tile-grid">${cards}</div>
     ${cats.total ? reviewStripHtml('ac-review-link', cats.total, 'Acting drafts awaiting acting-professional review') : ''}
     <p class="pane-note sp-explore-more">
-      <button class="linkish" id="ac-to-library-2" type="button">Browse everything in the Acting Library</button>
+      <button class="linkish" id="ac-to-library-2" type="button">Browse everything in the ${esc(B.libraryName)}</button>
     </p>`;
 
   el.querySelector('#ac-review-link')?.addEventListener('click', renderActingReviewStatus);
@@ -2985,30 +3048,31 @@ function actingLearnPane(el) {
   el.querySelector('#ac-to-library')?.addEventListener('click', () => goSection('library'));
   el.querySelector('#ac-to-library-2').addEventListener('click', () => goSection('library'));
   el.querySelectorAll('[data-tile]').forEach(b =>
-    b.addEventListener('click', () => navTo(() => renderActingModule(+b.dataset.tile.slice(4)))));
+    b.addEventListener('click', () => navTo(() => renderActingModule(+b.dataset.tile.slice(4), B.ws))));
 }
 
-function renderActingModule(n) {
-  record(() => renderActingModule(n));
+function renderActingModule(n, ws = 'acting') {
+  record(() => renderActingModule(n, ws));
   stopSpeech();
-  const m = ACTING_MODULES.find(x => x.n === n);
+  const B = BOOKS[ws] ?? BOOKS.acting;
+  const m = B.modules.find(x => x.n === n);
   if (!m) return goSection('learn');
-  const lessons = actingLessonsFor(m.id);
-  const ready = lessons.filter(actingVisible);
+  const lessons = bookLessonsFor(B, m.id);
+  const ready = lessons.filter(B.visible);
   const done = ready.filter(l => speechLessonDone(l.id)).length;
   const st = groupStatus({ available: ready.length, done, prepared: lessons.length - ready.length });
   workspacePage(
-    pageTopbar('🎭 Acting & Scene Work', '#8a6d3b'),
+    pageTopbar(`${B.icon} ${B.title}`, '#8a6d3b'),
     `<div class="ws-head">
-       <h1 class="page-h">${esc(m.title)}</h1>
+       <h1 class="page-h">${esc(moduleTitle(B, m))}</h1>
        <p class="ws-sub"><span class="badge ${st.cls}">${esc(st.label)}</span>
          ${ready.length ? ` · ${done} of ${ready.length} lessons completed` : ` · ${lessons.length} lessons prepared`}</p>
      </div>`,
     `<div class="item-grid">
        ${lessons.map(l => itemTileHtml({
-         key: l.id, seq: actingLessonNumber(l), title: l.title,
-         note: actingVisible(l) ? (speechLessonDone(l.id) ? 'Completed' : l.objective) : ACTING_DRAFT_BADGE,
-         state: actingVisible(l) ? '' : 'is-pending',
+         key: l.id, seq: bookLessonNumber(B, l), title: l.title,
+         note: B.visible(l) ? (speechLessonDone(l.id) ? 'Completed' : l.objective) : ACTING_DRAFT_BADGE,
+         state: B.visible(l) ? '' : 'is-pending',
        })).join('')}
      </div>`);
   app.querySelectorAll('[data-item]').forEach(b =>
@@ -3019,9 +3083,13 @@ function renderActingModule(n) {
 // A { fig } block names a figure in js/data/acting/art.js; an unknown key
 // renders nothing rather than a broken image.
 function actingFigureHtml(key) {
-  const f = actingFigure(key);
+  const f = actingFigure(key) ?? characterFigure(key);
+  // Width and height reserve the space before the file lands. Most
+  // drawings here are 1536x1024; a registry entry carrying its own w/h
+  // (the commedia collection is 1536x864) is believed over the default,
+  // so nothing jumps when the picture loads.
   return f ? `<figure class="sp-fig">
-      <img src="${f.src}" alt="${esc(f.alt)}" width="1536" height="1024" loading="lazy">
+      <img src="${f.src}" alt="${esc(f.alt)}" width="${f.w ?? 1536}" height="${f.h ?? 1024}" loading="lazy">
       ${f.caption ? `<figcaption class="sp-figcap">${esc(f.caption)}</figcaption>` : ''}
     </figure>` : '';
 }
@@ -3030,7 +3098,74 @@ function actingChapterBlocks(l) {
     b.h ? `<h2 class="guide-heading">${esc(b.h)}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
-    : b.fig ? actingFigureHtml(b.fig) : '').join('');
+    : b.steps ? `<ol class="th-list">${b.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`
+    : b.fig ? actingFigureHtml(b.fig)
+    : b.mask ? maskSheetHtml(b.mask)
+    : b.profile ? maskProfileHtml(b.profile)
+    : b.roster ? maskRosterHtml(b.roster) : '').join('');
+}
+
+// A commedia mask, from its ONE record in character-course.js: the
+// sheet (at a glance) and the full physical breakdown. A field may be a
+// string or a list; sequences render numbered, sets as bullets.
+const MASK_SEQUENCES = new Set(['thinking', 'fearResponse', 'signature', 'recovery']);
+function maskValueHtml(field, v) {
+  if (!Array.isArray(v)) return esc(v);
+  const tag = MASK_SEQUENCES.has(field) ? 'ol' : 'ul';
+  return `<${tag} class="th-list">${v.map(x => `<li>${esc(x)}</li>`).join('')}</${tag}>`;
+}
+function maskSheetHtml(id) {
+  const k = commediaMask(id);
+  if (!k) return '';
+  const row = (t, v) => `<div><dt>${t}</dt><dd>${esc(v)}</dd></div>`;
+  return `<dl class="anat-list sp-terms mask-sheet">
+      ${row('Wants', k.wants)}${row('Fears', k.fears)}${row('Contradiction', k.contradiction)}
+      ${row('Movement principle', k.principle)}${row('Try the line', `“${k.line}”`)}
+    </dl>`;
+}
+const MASK_PROFILE = [
+  ['family', 'Family'], ['status', 'Status and space'], ['fn', 'In the plot'],
+  ['maskLook', 'Mask'], ['costume', 'Costume'],
+  ['centre', 'Centre of gravity'], ['leads', 'What leads'], ['stance', 'Base stance'], ['walk', 'The walk'],
+  ['thinking', 'How a thought travels'], ['fearResponse', 'When afraid'], ['desireResponse', 'When wanting'],
+  ['gestures', 'Gestures'], ['audience', 'With the audience'], ['signature', 'Signature action'],
+  ['recovery', 'Recovery'], ['voice', 'Voice and breath'], ['rhetoric', 'What the words are doing'],
+  ['note', 'History and variation'],
+];
+// A family of masks at a glance, for the lesson that meets the whole
+// company: name, place, want and contradiction, from the ONE record.
+// Each name in a roster opens that character's own chapter, where the
+// full breakdown lives.
+const maskChapterId = id => CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === id))?.id ?? null;
+function wireMaskLinks() {
+  app.querySelectorAll('[data-mask]').forEach(b => b.addEventListener('click', () => {
+    const to = maskChapterId(b.dataset.mask);
+    if (to) navTo(() => renderActingChapter(to));
+  }));
+}
+
+function maskRosterHtml(ids) {
+  const rows = ids.map(commediaMask).filter(Boolean);
+  if (!rows.length) return '';
+  const card = k => {
+    const to = maskChapterId(k.id);
+    const body = `<span class="mask-card-name">${esc(k.name)}</span>
+      <span class="mask-card-note"><b>${esc(k.family)}</b>, from ${esc(k.from)}. Wants ${esc(k.wants.charAt(0).toLowerCase() + k.wants.slice(1))}
+        <b>Contradiction:</b> ${esc(k.contradiction.charAt(0).toLowerCase() + k.contradiction.slice(1))}</span>`;
+    return to
+      ? `<button class="mask-card" data-mask="${esc(k.id)}" type="button"><span class="mask-card-body">${body}</span><span class="tile-chev" aria-hidden="true">›</span></button>`
+      : `<div class="mask-card is-plain"><span class="mask-card-body">${body}</span></div>`;
+  };
+  return `<div class="mask-cards">${rows.map(card).join('')}</div>`;
+}
+
+function maskProfileHtml(id) {
+  const k = commediaMask(id);
+  if (!k) return '';
+  return `<dl class="anat-list sp-terms mask-sheet mask-profile">
+      ${MASK_PROFILE.filter(([f]) => k[f]).map(([f, t]) =>
+        `<div><dt>${t}</dt><dd>${maskValueHtml(f, k[f])}</dd></div>`).join('')}
+    </dl>`;
 }
 
 function actingDraftGate(l, where) {
@@ -3052,11 +3187,12 @@ function actingDraftGate(l, where) {
 function renderActingChapter(id) {
   record(() => renderActingChapter(id));
   stopSpeech();
-  const l = actingLessonById(id);
+  const B = bookOf(id);
+  const l = bookLessonById(B, id);
   if (!l) return goSection('library');
-  if (!actingVisible(l)) return actingDraftGate(l, 'the Library');
-  const col = ACTING_COLLECTIONS.find(c => c.lessons.includes(l.id));
-  const sibs = (col?.lessons ?? []).map(actingLessonById).filter(x => x && actingVisible(x));
+  if (!B.visible(l)) return actingDraftGate(l, 'the Library');
+  const col = B.collections.find(c => c.lessons.includes(l.id));
+  const sibs = (col?.lessons ?? []).map(x => bookLessonById(B, x)).filter(x => x && B.visible(x));
   const at = sibs.findIndex(x => x.id === l.id);
   const prev = at > 0 ? sibs[at - 1] : null;
   const nxt = at >= 0 && at < sibs.length - 1 ? sibs[at + 1] : null;
@@ -3064,7 +3200,7 @@ function renderActingChapter(id) {
   app.innerHTML = `
     ${pageTopbar('📖 ' + esc(l.title), '#8a6d3b')}
     <main class="guide sp-chapter">
-      <p class="pane-note">${esc(col?.title ?? 'Acting Library')}</p>
+      <p class="pane-note">${esc(col?.title ?? (bookModuleFor(B, l) ? moduleTitle(B, bookModuleFor(B, l)) : B.libraryName))}</p>
       ${chapterListHtml(sibs, at)}
       <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
       ${actingChapterBlocks(l)}
@@ -3078,7 +3214,7 @@ function renderActingChapter(id) {
       <p class="guide-text">${esc(l.reflection)}</p>
       <p class="pane-note">A question to sit with — there is no answer to submit and nothing here is scored.</p>` : ''}
       ${glossaryChips(l.glossary)}
-      ${actingModuleFor(l) ? `<p class="pane-note"><button class="linkish" id="ac-study" type="button">Study this in Learn</button></p>`
+      ${bookModuleFor(B, l) && !l.reference ? `<p class="pane-note"><button class="linkish" id="ac-study" type="button">Study this in Learn</button></p>`
         : ''}
       <nav class="sp-chapter-nav" aria-label="Chapter navigation">
         ${prev ? `<button class="btn btn-lite" id="ac-prev" type="button">‹ ${esc(prev.title)}</button>` : '<span></span>'}
@@ -3087,6 +3223,7 @@ function renderActingChapter(id) {
     </main>`;
   wireBrandHome();
   wireGlossary(app);
+  wireMaskLinks();
   app.querySelector('#ac-h').focus();
   app.querySelectorAll('[data-shared]').forEach(b =>
     b.addEventListener('click', () => openSharedRecord(b.dataset.sharedWs, b.dataset.shared)));
@@ -3135,21 +3272,22 @@ function openSharedRecord(ws, id) {
 function renderActingLesson(id) {
   record(() => renderActingLesson(id));
   stopSpeech();
-  const l = actingLessonById(id);
+  const B = bookOf(id);
+  const l = bookLessonById(B, id);
   if (!l) return goSection('library');
-  if (!actingVisible(l)) return actingDraftGate(l, 'the Library');
-  const m = actingModuleFor(l);
-  const seq = ACTING_LESSONS.filter(actingVisible);
+  if (!B.visible(l)) return actingDraftGate(l, 'the Library');
+  const m = bookModuleFor(B, l);
+  const seq = pathLessons(B).filter(B.visible);
   const at = seq.findIndex(x => x.id === id);
   const nxt = at >= 0 && at < seq.length - 1 ? seq[at + 1] : null;
   const isDone = speechLessonDone(id);
 
   app.innerHTML = `
-    ${pageTopbar('🎭 ' + esc(l.title), '#8a6d3b')}
+    ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
     <main class="guide sp-lesson">
-      <p class="pane-note">Module ${m?.n} · ${esc(m?.title ?? '')} · Lesson ${esc(actingLessonNumber(l))}</p>
+      <p class="pane-note">Module ${m?.n} · ${esc(m ? moduleTitle(B, m) : '')}${l.reference ? '' : ` · Lesson ${esc(bookLessonNumber(B, l))}`}</p>
       ${m ? (() => {
-        const mods = actingLessonsFor(m.id).filter(actingVisible);
+        const mods = bookLessonsFor(B, m.id).filter(B.visible);
         return chapterListHtml(mods, mods.findIndex(x => x.id === l.id), 'Lesson');
       })() : ''}
       <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
@@ -3183,6 +3321,7 @@ function renderActingLesson(id) {
       </section>
     </main>`;
   wireBrandHome();
+  wireMaskLinks();
   app.querySelector('#ac-h').focus();
   app.querySelectorAll('[data-shared]').forEach(b =>
     b.addEventListener('click', () => openSharedRecord(b.dataset.sharedWs, b.dataset.shared)));
@@ -3349,23 +3488,27 @@ function renderActorIpaTools() {
 function renderActingCollection(collectionId) {
   record(() => renderActingCollection(collectionId));
   stopSpeech();
-  const c = ACTING_COLLECTIONS.find(x => x.id === collectionId);
+  const B = bookOfCollection(collectionId);
+  const c = B.collections.find(x => x.id === collectionId);
   if (!c) return goSection('library');
-  const lessons = c.lessons.map(actingLessonById).filter(Boolean);
+  const lessons = c.lessons.map(x => bookLessonById(B, x)).filter(Boolean);
   workspacePage(
-    pageTopbar('📚 Acting Library', '#8a6d3b'),
+    pageTopbar(`📚 ${B.libraryName}`, '#8a6d3b'),
     `<div class="ws-head">
-       <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id]}</span>${esc(c.title)}</h1>
-       <p class="ws-sub">${lessons.length} chapters · Acting Library</p>
+       <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id] ?? c.icon}</span>${esc(moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }))}</h1>
+       <p class="ws-sub">${lessons.length} chapters · ${esc(B.libraryName)}</p>
      </div>`,
     `<p class="pane-note">Read in any order. This sequence is a suggested starting point.</p>
      <div class="item-grid">
        ${lessons.map((l, i) => itemTileHtml({
          key: l.id, seq: String(i + 1).padStart(2, '0'), title: l.title,
-         note: actingVisible(l) ? '' : ACTING_DRAFT_BADGE,
-         state: actingVisible(l) ? '' : 'is-pending',
+         note: B.visible(l) ? '' : ACTING_DRAFT_BADGE,
+         state: B.visible(l) ? '' : 'is-pending',
        })).join('')}
      </div>
+     ${B.ws === 'character' && c.id === 'commedia' ? `
+       <div class="item-grid">${itemTileHtml({ key: 'masks', title: 'The Masks at a Glance',
+         note: 'Every principal character on one page: what they want, fear and do.' })}</div>` : ''}
      ${collectionId === 'scene' ? `
        <h2 class="sec-h">Acting Glossary</h2>
        <p class="pane-note">${Object.keys(ACTING_GLOSSARY).length} terms used across the acting chapters.</p>
@@ -3379,8 +3522,8 @@ function renderActingCollection(collectionId) {
       row.append(dt, dd); gl.appendChild(row);
     }
   }
-  app.querySelectorAll('[data-item]').forEach(b =>
-    b.addEventListener('click', () => renderActingChapter(b.dataset.item)));
+  app.querySelectorAll('[data-item]').forEach(b => b.addEventListener('click', () =>
+    b.dataset.item === 'masks' ? navTo(renderMasksAtGlance) : renderActingChapter(b.dataset.item)));
 }
 
 function renderActingGlossary() {
@@ -4174,6 +4317,331 @@ function actingProgressPane(el) {
   })();
 }
 
+// ── Building a Character: Library, Practice, Progress ──────────
+// The course's lesson, chapter, module and collection pages are the
+// shared book screens above. These are the pages only it has.
+const CHARACTER_PREVIEW_HASHES = ['#character-preview', '#character-preview-off'];
+function setCharacterPreview(on) {
+  try {
+    if (on) localStorage.setItem(CHARACTER_PREVIEW_KEY, 'on');
+    else localStorage.removeItem(CHARACTER_PREVIEW_KEY);
+  } catch {}
+  setWorkspace(on ? 'character' : 'acting');
+}
+
+function characterLibraryPane(el) {
+  const B = BOOKS.character;
+  el.innerHTML = `
+    <div class="ws-head">
+      <h1 class="page-h">${esc(B.libraryName)}</h1>
+      <p class="ws-sub">Every chapter is free to read in any order.</p>
+    </div>
+    <div class="tile-grid">
+      ${B.collections.map(c => tileHtml({ key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon,
+        title: moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }) })).join('')}
+    </div>`;
+  el.querySelectorAll('[data-tile]').forEach(b =>
+    b.addEventListener('click', () => navTo(() => renderActingCollection(b.dataset.tile.slice(4)))));
+}
+
+function renderMasksAtGlance() {
+  record(renderMasksAtGlance);
+  stopSpeech();
+  workspacePage(
+    pageTopbar('📚 Character Library', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">The Masks at a Glance</h1>
+       <p class="ws-sub">The principal commedia characters: what each one wants, fears and does.</p>
+     </div>`,
+    COMMEDIA_MASKS.map(k => `
+      <section class="stat-block">
+        <h2 class="chart-h">${esc(k.name)}</h2>
+        <p class="pane-note">${esc(k.family)} · from ${esc(k.from)}</p>
+        ${maskSheetHtml(k.id)}
+      </section>`).join(''));
+}
+
+function characterPracticePane(el) {
+  el.innerHTML = `
+    <h1 class="page-h">Character Practice</h1>
+    <p class="pane-note">Prompts to get on your feet with. Nothing here is scored.</p>
+    <button class="track-card hub-card" id="chp-masks" type="button">
+      <div class="track-glyph">🃏</div>
+      <div class="track-info"><h2>Mask Cards</h2></div>
+      <div class="track-arrow">›</div>
+    </button>
+    <button class="track-card hub-card" id="chp-oneline" type="button">
+      <div class="track-glyph">🎭</div>
+      <div class="track-info"><h2>One Line, Many Masks</h2></div>
+      <div class="track-arrow">›</div>
+    </button>
+    <button class="track-card hub-card" id="chp-warmup" type="button">
+      <div class="track-glyph">🔥</div>
+      <div class="track-info"><h2>Warmup</h2></div>
+      <div class="track-arrow">›</div>
+    </button>`;
+  el.querySelector('#chp-masks').addEventListener('click', () => renderMaskCards());
+  el.querySelector('#chp-oneline').addEventListener('click', () => renderOneLine());
+  el.querySelector('#chp-warmup').addEventListener('click', renderWarmup);
+}
+
+const pickOne = a => a[Math.floor(Math.random() * a.length)];
+
+// Mask Cards: a mask, a situation and a problem to build a lazzo around.
+// Deal again REPLACES the page in navStack, so one Back returns to
+// Practice however many deals came before.
+function renderMaskCards(deal = null) {
+  const d = deal ?? { mask: pickOne(COMMEDIA_MASKS).id, situation: pickOne(MASK_SITUATIONS), problem: pickOne(MASK_PROBLEMS) };
+  record(() => renderMaskCards(d));
+  stopSpeech();
+  const k = commediaMask(d.mask);
+  workspacePage(
+    pageTopbar('🃏 Mask Cards', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h" tabindex="-1" id="mc-h">${esc(k.name)}</h1>
+       <p class="ws-sub">${esc(k.family)} · from ${esc(k.from)}</p>
+     </div>`,
+    `<section class="stat-block">
+       <h2 class="chart-h">The situation</h2>
+       <p class="guide-text">${esc(d.situation)}</p>
+       <h2 class="chart-h">The problem in your way</h2>
+       <p class="guide-text">Build a short lazzo around ${esc(d.problem)}.</p>
+     </section>
+     ${maskSheetHtml(k.id)}
+     <p class="pane-note">Find the body first, then let the situation happen to it. Play what they want, and stay inside what your body allows today.</p>
+     <div class="practice-row"><button class="btn btn-primary" id="mc-deal" type="button">Deal again</button></div>`);
+  document.getElementById('mc-deal').addEventListener('click', () => { navStack.pop(); renderMaskCards(); });
+}
+
+// One Line, Many Masks: the same words, played through every mask.
+function renderOneLine(line = null) {
+  const t = line ?? pickOne(ONE_LINES);
+  record(() => renderOneLine(t));
+  stopSpeech();
+  workspacePage(
+    pageTopbar('🎭 One Line, Many Masks', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">“${esc(t)}”</h1>
+       <p class="ws-sub">Say it as each mask. Keep every word the same and change only what you want it to do.</p>
+     </div>`,
+    `<ol class="th-list">${COMMEDIA_MASKS.map(k => `<li><b>${esc(k.name)}:</b> ${esc(k.play)}</li>`).join('')}</ol>
+     <p class="pane-note">The words never change. The want underneath them does, and the body, the rhythm and the voice follow it.</p>
+     <div class="practice-row"><button class="btn btn-primary" id="ol-new" type="button">Another line</button></div>`);
+  document.getElementById('ol-new').addEventListener('click', () => {
+    navStack.pop();
+    renderOneLine(pickOne(ONE_LINES.filter(x => x !== t)));
+  });
+}
+
+function characterProgressPane(el) {
+  const B = BOOKS.character;
+  const avail = pathLessons(B).filter(B.visible);
+  const done = avail.filter(l => speechLessonDone(l.id)).length;
+  el.innerHTML = `
+    <h1 class="page-h">Character Progress</h1>
+    <p class="track-blurb">What you have studied. Character work is never scored: there is no correct version to measure against.</p>
+    <div class="summary-grid">
+      <div class="summary-card"><span class="summary-n">${done}/${avail.length}</span><span class="summary-l">chapters explored</span></div>
+    </div>
+    ${B.modules.map(m => {
+      const ls = bookLessonsFor(B, m.id).filter(B.visible);
+      const d = ls.filter(l => speechLessonDone(l.id)).length;
+      return `<h2 class="chart-h">${esc(m.title)}</h2>${courseProgressHtml(d, ls.length)}`;
+    }).join('')}`;
+}
+
+// ── My Characters: the Building a Character Studio ───────────
+// Storage and the worksheet live in js/characters.js. Every value a
+// learner typed enters the DOM through textarea.value or esc(), never raw.
+function characterNote(c) {
+  const bits = [kindLabel(c.kind)];
+  if (c.kind === 'commedia') bits.push(commediaMask(c.maskId)?.name ?? '');
+  if (c.kind === 'given' && c.source?.title) bits.push(c.source.title);
+  if (c.updatedAt) bits.push('edited ' + new Date(c.updatedAt).toLocaleDateString());
+  return bits.filter(Boolean).join(' · ');
+}
+
+async function characterStudioPane(el) {
+  el.innerHTML = `
+    <div class="ws-head">
+      <h1 class="page-h">My Characters</h1>
+      <p class="ws-sub">The people you are building, broken down the way the course teaches. Private to this device, and never scored.</p>
+    </div>
+    <div class="practice-row"><button class="btn btn-primary" id="mc-new" type="button">＋ New character</button></div>
+    <div id="mc-list" class="mc-list"><p class="pane-note">Loading…</p></div>`;
+  el.querySelector('#mc-new').addEventListener('click', () => navTo(() => renderNewCharacter()));
+  const list = el.querySelector('#mc-list');
+  if (!dbSupported()) {
+    list.innerHTML = '<p class="pane-note pane-warn">This browser is not letting Speechcraft save anything on this device, so characters cannot be kept here.</p>';
+    return;
+  }
+  let chars;
+  try { chars = await listCharacters(); }
+  catch (err) { list.innerHTML = `<p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>`; return; }
+  if (!list.isConnected) return;
+  list.innerHTML = chars.length
+    ? `<div class="item-grid">${chars.map(c => itemTileHtml({ key: c.id, title: c.name, note: characterNote(c) })).join('')}</div>`
+    : '<p class="pane-note">No characters yet. Start one from scratch, from a role you have been cast in, or from a commedia mask.</p>';
+  list.querySelectorAll('[data-item]').forEach(b =>
+    b.addEventListener('click', () => navTo(() => renderCharacterSheet(b.dataset.item))));
+}
+
+async function renderNewCharacter() {
+  record(renderNewCharacter);
+  stopSpeech();
+  let projects = [];
+  try { projects = await listProjects(); } catch { /* scenes still offered */ }
+  workspacePage(
+    pageTopbar('🧍 New character', '#8a6d3b'),
+    `<div class="ws-head"><h1 class="page-h" tabindex="-1" id="nc-h">New character</h1>
+       <p class="ws-sub">Nothing is saved until you press Create.</p></div>`,
+    `<div class="proj-form">
+       <label class="field"><span class="field-label">Name</span>
+         <input class="input-text" id="nc-name" maxlength="${MAX_NAME_LEN}" autocomplete="off" placeholder="Name your character"></label>
+       <fieldset class="nc-kinds">
+         <legend class="field-label">What kind of character?</legend>
+         ${CHARACTER_KINDS.map((k, i) => `
+           <label class="nc-kind">
+             <input type="radio" name="nc-kind" value="${k.id}" ${i === 0 ? 'checked' : ''}>
+             <span><b>${esc(k.label)}</b><span class="nc-kind-blurb">${esc(k.blurb)}</span></span>
+           </label>`).join('')}
+       </fieldset>
+       <label class="field" id="nc-given" hidden><span class="field-label">The script</span>
+         <select class="input-sel" id="nc-source">
+           <option value="">Not linked yet</option>
+           ${projects.length ? `<optgroup label="Your Studio projects">${projects.map(pr =>
+             `<option value="project:${esc(pr.id)}">${esc(pr.title || 'Untitled project')}</option>`).join('')}</optgroup>` : ''}
+           <optgroup label="The Scenes shelf">${PROVIDED_SCENES.map(sc =>
+             `<option value="scene:${esc(sc.id)}">${esc(sc.play)}: ${esc(sc.title)}</option>`).join('')}</optgroup>
+         </select></label>
+       <label class="field" id="nc-commedia" hidden><span class="field-label">The mask</span>
+         <select class="input-sel" id="nc-mask">${COMMEDIA_MASKS.map(k =>
+           `<option value="${k.id}">${esc(k.name)}</option>`).join('')}</select></label>
+       <p class="pane-note pane-warn" id="nc-warn" role="alert" hidden></p>
+       <div class="form-actions">
+         <button class="btn btn-primary" id="nc-create" type="button">Create character</button>
+         <button class="btn btn-lite" id="nc-cancel" type="button">Cancel</button>
+       </div>
+     </div>`);
+  const $ = sel => app.querySelector(sel);
+  const kind = () => app.querySelector('input[name="nc-kind"]:checked').value;
+  // The learner names every character themselves; nothing is pre-filled
+  // (owner order 2026-09-22).
+  const syncKind = () => {
+    $('#nc-given').hidden = kind() !== 'given';
+    $('#nc-commedia').hidden = kind() !== 'commedia';
+  };
+  app.querySelectorAll('input[name="nc-kind"]').forEach(r => r.addEventListener('change', syncKind));
+  $('#nc-cancel').addEventListener('click', goBack);
+  $('#nc-create').addEventListener('click', async () => {
+    const warn = $('#nc-warn');
+    const name = $('#nc-name').value.trim();
+    if (!name) { warn.hidden = false; warn.textContent = 'Give your character a name.'; $('#nc-name').focus(); return; }
+    let source = null;
+    const pick = kind() === 'given' ? $('#nc-source').value : '';
+    if (pick.startsWith('project:')) {
+      const pr = projects.find(x => x.id === pick.slice(8));
+      if (pr) source = { type: 'project', id: pr.id, title: pr.title || 'Untitled project' };
+    } else if (pick.startsWith('scene:')) {
+      const sc = providedSceneById(pick.slice(6));
+      if (sc) source = { type: 'scene', id: sc.id, title: `${sc.play}: ${sc.title}` };
+    }
+    try {
+      const id = await createCharacter({ name, kind: kind(), maskId: $('#nc-mask').value, source });
+      navTo(() => { navStack.pop(); renderCharacterSheet(id); });
+    } catch (err) {
+      warn.hidden = false;
+      warn.textContent = err?.message && !/idb|indexeddb|transaction/i.test(err.message) ? err.message : dbErrorMessage(err);
+    }
+  });
+  $('#nc-h').focus();
+}
+
+async function renderCharacterSheet(id) {
+  record(() => renderCharacterSheet(id));
+  stopSpeech();
+  let c = null;
+  try { c = await getCharacter(id); } catch { /* shown as missing below */ }
+  if (!c) return goSection('studio');
+  const mask = c.kind === 'commedia' ? commediaMask(c.maskId) : null;
+  const chapter = mask ? CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === mask.id)) : null;
+  const trad = f => {
+    const v = mask && f.mask ? mask[f.mask] : null;
+    return v ? `<p class="pane-note cs-trad"><b>The tradition:</b> ${esc(Array.isArray(v) ? v.join(' ') : v)}</p>` : '';
+  };
+  workspacePage(
+    pageTopbar('🧍 My Characters', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h" tabindex="-1" id="cs-h">${esc(c.name)}</h1>
+       <p class="ws-sub">${esc(kindLabel(c.kind))}${mask ? ` · ${esc(mask.name)}` : ''}</p>
+     </div>`,
+    `${c.kind === 'given' ? `<p class="pane-note">${c.source
+        ? `From <b>${esc(c.source.title)}</b>. <button class="linkish" id="cs-open-src" type="button">Open the script</button>`
+        : 'Not linked to a script. Start a new character from the role to link one.'}</p>` : ''}
+     ${chapter ? `<p class="pane-note">The tradition’s answers sit beside each field: learn the form, then write your own version. <button class="linkish" id="cs-chapter" type="button">Read the ${esc(mask.name)} chapter</button></p>` : ''}
+     ${fieldsFor(c.kind).map(sec => `
+       <h2 class="guide-heading">${esc(sec.title)}</h2>
+       ${sec.fields.map(f => `
+         <div class="cs-field">
+           <label class="field-label" for="cs-${f.id}">${esc(f.label)}</label>
+           <p class="pane-note" id="cs-${f.id}-hint">${esc(f.hint)}</p>
+           ${trad(f)}
+           <textarea class="ct-area cs-area" id="cs-${f.id}" data-field="${f.id}" rows="3"
+             maxlength="${MAX_FIELD_LEN}" aria-describedby="cs-${f.id}-hint"></textarea>
+         </div>`).join('')}`).join('')}
+     <p class="save-state" id="cs-state" role="status" aria-live="polite"></p>
+     <div class="form-actions">
+       <button class="btn btn-lite" id="cs-rename" type="button">Rename</button>
+       <button class="btn btn-lite btn-danger" id="cs-delete" type="button">Delete character</button>
+     </div>`);
+  const state = app.querySelector('#cs-state');
+  app.querySelectorAll('.cs-area').forEach(t => { t.value = c.fields?.[t.dataset.field] ?? ''; });
+
+  // Autosave: gather edits, write them together after a pause. A pending
+  // write still lands if the learner navigates away mid-pause.
+  let pending = {}, timer = null;
+  const flush = async () => {
+    timer = null;
+    const patch = pending; pending = {};
+    if (!Object.keys(patch).length) return;
+    try {
+      await saveFields(id, patch);
+      if (state.isConnected) state.textContent = 'Saved ✓';
+    } catch {
+      if (state.isConnected) state.textContent = 'Not saved: this device refused the write. Copy your text to be safe.';
+    }
+  };
+  app.querySelectorAll('.cs-area').forEach(t => t.addEventListener('input', () => {
+    pending[t.dataset.field] = t.value;
+    state.textContent = 'Saving…';
+    clearTimeout(timer);
+    timer = setTimeout(flush, 700);
+  }));
+
+  document.getElementById('cs-open-src')?.addEventListener('click', async () => {
+    if (c.source.type === 'scene') return renderProvidedScene(c.source.id);
+    const pr = await getProject(c.source.id).catch(() => null);
+    if (pr) renderProject(pr.id);
+    else alert(`“${c.source.title}” is no longer in your Studio.`);
+  });
+  document.getElementById('cs-chapter')?.addEventListener('click', () => renderActingChapter(chapter.id));
+  document.getElementById('cs-rename').addEventListener('click', async () => {
+    const name = (prompt('Rename this character', c.name) ?? '').trim();
+    if (!name || name === c.name) return;
+    if (await renameCharacter(id, name).catch(() => false)) {
+      c.name = name.slice(0, MAX_NAME_LEN);
+      app.querySelector('#cs-h').textContent = c.name;
+    }
+  });
+  document.getElementById('cs-delete').addEventListener('click', async () => {
+    if (!confirm(`Delete “${c.name}” and everything written about them?\n\nThis cannot be undone.`)) return;
+    clearTimeout(timer); pending = {};
+    try { await deleteCharacter(id); } catch { alert('Could not delete just now.'); return; }
+    goBack();
+  });
+  app.querySelector('#cs-h').focus();
+}
+
 // ── Acting review status ──────────────────────────────────────
 let actingReviewFilter = 'all';
 
@@ -4293,6 +4761,7 @@ function renderActingDraft(itemId) {
 // badge and opens the pending page, so the count always matches the page.
 function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLibraryPane(el);
+  if (ws === 'character') return characterLibraryPane(el);
   if (ws === 'speech') return speechLibraryPane(el);
   const d = course.id === 'core' ? null : course.id;
   const cards = (d ? [
@@ -4646,6 +5115,7 @@ function speechProgressPane(el) {
 
 function progressMain(el) {
   if (activeWorkspace() === 'acting') return actingProgressPane(el);
+  if (activeWorkspace() === 'character') return characterProgressPane(el);
   if (activeWorkspace() === 'speech') return speechProgressPane(el);
   // Before anything is earned there is nothing to chart — say so on purpose
   // instead of showing a dashboard of zeroes.
@@ -5615,6 +6085,8 @@ function renderPrivacy() {
         <div class="stat-row"><span class="stat-name">Audio recordings</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Practice analytics</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Personal dictionary</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Notebooks</span><span class="stat-val">this device</span></div>
+        ${characterOpen() ? '<div class="stat-row"><span class="stat-name">Characters you are building</span><span class="stat-val">this device</span></div>' : ''}
         <div class="stat-row"><span class="stat-name">Offline copy of app content (for use without a connection)</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
@@ -5645,7 +6117,7 @@ function renderPrivacy() {
       <div class="danger-zone">
         <h2 class="chart-h">Delete local data</h2>
         <p class="pane-note">This cannot be undone. Export anything you want to keep first.</p>
-        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, dissections, recordings, analytics &amp; dictionary</button>
+        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics &amp; dictionary</button>
         <button class="btn btn-lite btn-danger" id="wipe-all" type="button">Delete everything, including course progress</button>
         <p class="save-state" id="wipe-state" role="status" aria-live="polite"></p>
       </div>
@@ -5660,7 +6132,7 @@ function renderPrivacy() {
     document.getElementById('wipe-state').textContent = `Deleted: ${done.join(', ')}.`;
   };
   document.getElementById('wipe-content').addEventListener('click', () =>
-    run(false, 'Delete all projects, dissections, recordings, analytics and personal dictionary entries?\n\nYour XP, streak and completed lessons are KEPT.'));
+    run(false, `Delete all projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics and personal dictionary entries?\n\nYour XP, streak and completed lessons are KEPT.`));
   document.getElementById('wipe-all').addEventListener('click', () =>
     run(true, 'Delete EVERYTHING, including your XP, streak and completed lessons?'));
 }
@@ -5794,6 +6266,7 @@ let projectQuery = '';
 // TITLE-ONLY — descriptions live on the destination pages.
 function studioMain(el) {
   if (activeWorkspace() === 'acting') return actorStudioPane(el);
+  if (activeWorkspace() === 'character') return characterStudioPane(el);
   const inSpeech = activeWorkspace() === 'speech';
   // Playable Actions is acting work — it shelves in the Acting Library
   // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
@@ -9054,6 +9527,9 @@ if (!framedHostile) {
   // The notebook mounts OUTSIDE #app, once, so it survives every render.
   mountNotebook().catch(err => console.warn('notebook unavailable:', err));
 
+  // #character-preview opens the hidden Building a Character course for
+  // the owner (and #character-preview-off closes it again).
+  if (CHARACTER_PREVIEW_HASHES.includes(location.hash)) setCharacterPreview(location.hash === '#character-preview');
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool
   else gateThreshold();   // threshold for fresh users; grandfathers everyone else
@@ -9064,6 +9540,10 @@ if (!framedHostile) {
   window.addEventListener('hashchange', () => {
     if (location.hash === '#audit') renderAudioAudit();
     else if (location.hash === '#review') renderContentReview();
+    else if (CHARACTER_PREVIEW_HASHES.includes(location.hash)) {
+      setCharacterPreview(location.hash === '#character-preview');
+      renderShell('learn');
+    }
   });
 
   // Offline capability (sw.js): production only, top window only. The

@@ -84,6 +84,8 @@ export const WORKSPACES = [
     context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
   { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
     context: 'Accent and dialect courses' },
+  { id: 'character', icon: '🧍', label: 'Building a Character',
+    context: 'Inventing a person, building a cast role, and commedia dell’arte' },
 ];
 // ── Kill switch (2026-08-19, owner decision) ──────────────────
 // The Speech workspace is withdrawn from the learner-facing app "for
@@ -93,15 +95,28 @@ export const WORKSPACES = [
 // Oratory shelve in the Acting Library meanwhile. Flip to true and the
 // Speech workspace returns whole.
 export const SPEECH_LIVE = false;
-export const liveWorkspaces = () => WORKSPACES.filter(w => SPEECH_LIVE || w.id !== 'speech');
+// Building a Character (owner decision 2026-09-22) is being written and
+// stays hidden until enough of it exists to stand alone, the lesson the
+// Speech withdrawal taught. The owner reads it meanwhile through a
+// preview flag set by the #character-preview link (like #audit and
+// #review, not authenticated: treat what it shows as public).
+export const CHARACTER_LIVE = false;
+export const CHARACTER_PREVIEW_KEY = 'speechcraft-character-preview';
+export const characterPreview = () => {
+  try { return localStorage.getItem(CHARACTER_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const characterOpen = () => CHARACTER_LIVE || characterPreview();
+export const liveWorkspaces = () => WORKSPACES.filter(w =>
+  (SPEECH_LIVE || w.id !== 'speech') && (w.id !== 'character' || characterOpen()));
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
-export const ACCENTLESS_WORKSPACES = ['speech', 'acting'];
+export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character'];
 export const WORKSPACE_KEY = 'speechcraft-workspace';
 export const activeWorkspace = () => {
   try {
     const v = localStorage.getItem(WORKSPACE_KEY);
     if (v === 'speech' && !SPEECH_LIVE) return 'acting';
+    if (v === 'character' && !characterOpen()) return 'acting';
     if (WORKSPACES.some(w => w.id === v)) return v;
     // Migration from the retired page-level tabs, then inference from
     // the stored course — existing users land exactly where they were.
@@ -128,6 +143,10 @@ export const trackFor = d => TRACKS.find(t => t.id === d);
 // Published for preview by owner editorial approval; specialist
 // review remains outstanding and is tracked separately.
 export const actingVisible = l => speechPublished(l.id);
+// Building a Character follows the same ledger once it launches. In the
+// owner preview every written lesson shows, because the whole workspace
+// is invisible to learners until then.
+export const characterVisible = l => characterPreview() || speechPublished(l.id);
 // Dialects you can read/scan/transcribe any text in.
 export const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },

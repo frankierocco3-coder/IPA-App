@@ -1236,6 +1236,44 @@ body.modal-open { overflow: hidden; }
 .sp-inventory thead th { font-size: 13px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
 .sp-review-details { margin-top: 20px; border-top: 1px solid var(--line); padding-top: 10px; }
 .sp-review-details summary { cursor: pointer; font-weight: 700; }
+/* Commedia character breakdown: lists inside a definition match its text. */
+.sp-lesson .mask-profile .th-list, .sp-chapter .mask-profile .th-list, .mask-profile .th-list {
+  margin: 2px 0 0; padding-left: 20px; gap: 3px;
+}
+.sp-lesson .mask-profile .th-list li, .sp-chapter .mask-profile .th-list li, .mask-profile .th-list li {
+  font-size: 14px; line-height: 1.4;
+}
+/* The Cast: one card per commedia character, opening its chapter. */
+.mask-cards { display: grid; gap: 10px; margin: 6px 0 18px; }
+.mask-card {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
+  border: 1px solid var(--line); background: var(--panel); border-radius: 12px;
+  padding: 12px 14px; font: inherit; color: inherit; cursor: pointer;
+}
+.mask-card.is-plain { cursor: default; }
+button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--green); background: var(--accent-tint); }
+.mask-card-body { flex: 1 1 auto; }
+.mask-card-name { font-family: var(--serif); font-size: 18px; font-weight: 700; display: block; margin-bottom: 2px; }
+.mask-card-note { display: block; font-size: 14px; line-height: 1.45; color: var(--muted); }
+.mask-card .tile-chev { flex: 0 0 auto; color: var(--muted); }
+
+/* My Characters (the Building a Character Studio). */
+.field[hidden] { display: none; }
+.mc-list { margin-top: 24px; }   /* .field sets display, which would override the hidden attribute */
+.nc-kinds { border: 0; padding: 0; margin: 12px 0; display: grid; gap: 8px; }
+.nc-kind {
+  display: flex; gap: 10px; align-items: flex-start; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; background: var(--panel);
+}
+.nc-kind:has(input:checked) { border-color: var(--green); background: var(--accent-tint); }
+.nc-kind input { margin-top: 4px; accent-color: var(--green-dark); }
+.nc-kind-blurb { display: block; font-size: 14px; color: var(--muted); margin-top: 2px; }
+.cs-field { margin: 0 0 16px; }
+.cs-field .field-label { display: block; font-weight: 700; margin-bottom: 2px; }
+.cs-field .pane-note { margin: 0 0 6px; }
+.cs-trad { border-left: 3px solid var(--gold); padding-left: 10px; }
+.cs-area { width: 100%; min-height: 76px; }
+
 /* Sources & Credits: third-party licence notices, reproduced in full. */
 .guide-details { margin: 8px 0 16px; }
 .guide-details summary { cursor: pointer; font-weight: 700; padding: 4px 0; }
@@ -1834,15 +1872,32 @@ body.nb-full #app { display: none; }
   border: 1px solid var(--line, #d9d2c2); background: transparent;
   font: inherit; font-size: .88rem; color: inherit; white-space: nowrap;
 }
-.nb-tab.on { background: var(--accent, #6f8657); border-color: var(--accent, #6f8657); color: #fff; font-weight: 600; }
+.nb-tab.on { background: var(--green-dark); border-color: var(--green-dark); color: #fff; font-weight: 600; }   /* 5.6:1; the lighter sage held white at only 4.0:1 */
 .nb-add { font-weight: 700; }
+/* IPA is one tab that opens a second row of notebooks (owner order 2026-09-22). */
+.nb-tab[data-nb-tab="ipa-group"]::after { content: " ▾" / ""; }
+.nb-sub {
+  display: flex; gap: .3rem; overflow-x: auto; scrollbar-width: thin;
+  padding: .35rem .75rem; border-bottom: 1px solid var(--line, #ddd6c4);
+  background: var(--panel-2, #ece5d6);
+}
+.nb-sub[hidden] { display: none; }
+.nb-sub .nb-tab { font-size: .85rem; }
+/* On a phone the tabs get their own full-width line under the controls,
+   and both rows wrap, so no notebook hides behind a sideways scroll. */
+@media (max-width: 560px) {
+  .nb-head { flex-wrap: wrap; }
+  .nb-controls { order: 1; margin-left: auto; }
+  .nb-tabs { order: 2; flex: 1 1 100%; flex-wrap: wrap; overflow-x: visible; }
+  .nb-sub { flex-wrap: wrap; overflow-x: visible; }
+}
 .nb-controls { display: flex; gap: .25rem; flex: 0 0 auto; }
 .nb-btn {
   border: 1px solid var(--line, #d9d2c2); background: transparent; cursor: pointer;
   border-radius: .45rem; padding: .3rem .5rem; font: inherit; font-size: .88rem; color: inherit;
 }
 .nb-btn:hover, .nb-btn:focus-visible { background: var(--accent-soft, #e6ecdd); }
-.nb-btn.on { background: var(--accent, #6f8657); border-color: var(--accent, #6f8657); color: #fff; font-weight: 600; }
+.nb-btn.on { background: var(--green-dark); border-color: var(--green-dark); color: #fff; font-weight: 600; }
 .nb-min { font-weight: 600; }
 /* The controls must never be squeezed off the edge by a long tab row. */
 .nb-controls { min-width: max-content; }

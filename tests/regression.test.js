@@ -65,6 +65,13 @@ import { speechGoal, setSpeechGoal, speechHistory, speechLessonDone } from '../j
 import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
          actingLessonById, actingLessonNumber } from '../js/data/acting/acting-course.js';
 import { ACTING_GAMES, SCENE_STUDY_AREAS } from '../js/data/acting/practice.js';
+import { CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS, CHARACTER_PRINCIPLE,
+         COMMEDIA_MASKS, commediaMask, ONE_LINES, MASK_SITUATIONS, MASK_PROBLEMS } from '../js/data/character/character-course.js';
+import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible } from '../js/views/context.js';
+import { CHARACTER_FIGURES, characterFigure } from '../js/data/character/art.js';
+import { IPA_BOOKS, notebookForContext } from '../js/notebook.js';
+import { CHARACTER_SECTIONS, CHARACTER_KINDS, fieldsFor, createCharacter, getCharacter, saveFields,
+         renameCharacter, deleteCharacter, listCharacters, MAX_FIELD_LEN } from '../js/characters.js';
 
 // The view layer spans js/main.js and the js/views/* modules it imports
 // (the 2026-09 split). Checks that pin shipped copy, a withdrawal flag or
@@ -3671,6 +3678,229 @@ export async function run({ navDoc = document } = {}) {
       !navigator.serviceWorker?.controller);
     check('pwa: the full wipe covers the offline cache',
       mainSrc.includes("report.push('offline cache')"));
+  }
+
+  // ── 29. Building a Character: hidden, complete, in house style ──
+  // A fourth workspace being written behind CHARACTER_LIVE (owner decision
+  // 2026-09-22). Commedia dell’Arte is its first module. Its lessons are
+  // shown by Acting's own screens, so what is pinned here is the data:
+  // hidden by default, every record whole, no id clash with Acting, and
+  // the house copy rules on every learner-facing line.
+  {
+    let savedPreview = null;
+    try { savedPreview = localStorage.getItem(CHARACTER_PREVIEW_KEY); localStorage.removeItem(CHARACTER_PREVIEW_KEY); } catch {}
+    try {
+      check('character: hidden from learners until it launches',
+        CHARACTER_LIVE === false && !liveWorkspaces().some(w => w.id === 'character'));
+      check('character: no lesson is visible without the preview or a publication entry',
+        CHARACTER_LESSONS.every(l => !characterVisible(l) && speechReviewFor(l.id) === null));
+    } finally {
+      try { if (savedPreview !== null) localStorage.setItem(CHARACTER_PREVIEW_KEY, savedPreview); } catch {}
+    }
+    const modIds = new Set(CHARACTER_MODULES.map(m => m.id));
+    check('character: every lesson is a whole record in a written module',
+      CHARACTER_LESSONS.length >= 16 && CHARACTER_LESSONS.every(l => modIds.has(l.module)
+        && l.title && l.objective && l.orientation && l.reflection && l.requiredReviewer
+        && Array.isArray(l.body) && l.body.length >= 3));
+    const actingIds = new Set(ACTING_LESSONS.map(l => l.id));
+    const chIds = CHARACTER_LESSONS.map(l => l.id);
+    check('character: lesson ids are unique and never collide with Acting',
+      new Set(chIds).size === chIds.length && chIds.every(id => id.startsWith('ch-') && !actingIds.has(id)));
+    const shelved = CHARACTER_COLLECTIONS.flatMap(c => c.lessons);
+    const pathIds = CHARACTER_LESSONS.filter(l => !l.reference).map(l => l.id);
+    check('character: the Library shelves every PATH lesson exactly once, and no reference page',
+      shelved.length === pathIds.length && new Set(shelved).size === shelved.length
+      && pathIds.every(id => shelved.includes(id)));
+    const maskBlocks = CHARACTER_LESSONS.flatMap(l => l.body.filter(b => b.mask).map(b => b.mask));
+    const rostered = CHARACTER_LESSONS.flatMap(l => l.body.flatMap(b => b.roster ?? []));
+    check('character: the cast lesson rosters every mask, from the same records',
+      COMMEDIA_MASKS.every(k => rostered.includes(k.id)) && rostered.every(id => commediaMask(id)));
+    // The owner's physical-performance framework (2026-09-22): every
+    // principal character is a repeatable system, recorded field by field.
+    const MASK_FIELDS = ['name', 'family', 'from', 'fn', 'status', 'maskLook', 'costume', 'wants', 'fears',
+      'contradiction', 'centre', 'leads', 'stance', 'walk', 'principle', 'thinking', 'fearResponse',
+      'desireResponse', 'gestures', 'audience', 'signature', 'recovery', 'voice', 'rhetoric', 'line', 'play', 'note'];
+    const filled = v => (Array.isArray(v) ? v.length > 0 && v.every(x => typeof x === 'string' && x) : typeof v === 'string' && v.length > 0);
+    check('character: every mask block names a whole mask record',
+      maskBlocks.length >= 9 && maskBlocks.every(id => commediaMask(id))
+      && COMMEDIA_MASKS.every(k => MASK_FIELDS.every(f => filled(k[f]))),
+      COMMEDIA_MASKS.flatMap(k => MASK_FIELDS.filter(f => !filled(k[f])).map(f => k.id + '.' + f)).slice(0, 4).join(', '));
+    const commediaOrder = CHARACTER_LESSONS.filter(l => l.module === 'commedia' && !l.reference)
+      .sort((a, b) => a.order - b.order).map(l => l.id);
+    check('character: commedia runs in the owner’s order (why, history, slapstick, scenario; Pantalone opens the characters; Lazzi last)',
+      commediaOrder[0] === 'ch-cm-why' && commediaOrder[1] === 'ch-cm-history' && commediaOrder[2] === 'ch-cm-slapstick'
+      && commediaOrder[3] === 'ch-cm-scenario' && commediaOrder[4] === 'ch-cm-form'
+      && commediaOrder[5] === 'ch-archetypes' && commediaOrder[6] === 'ch-cm-mask'
+      && commediaOrder[7] === 'ch-cm-cast' && commediaOrder.at(-1) === 'ch-cm-lazzi'
+      && commediaOrder.length === 9,
+      commediaOrder.join(' › '));
+    // Commedia opens the course (owner decision 2026-09-22): the modules,
+    // the Library shelves and the lesson sequence all start there.
+    check('character: Commedia dell’Arte opens the course',
+      CHARACTER_MODULES[0].id === 'commedia' && CHARACTER_MODULES[0].n === 1
+      && CHARACTER_COLLECTIONS[0].id === 'commedia' && CHARACTER_LESSONS[0].id === 'ch-cm-why'
+      && CHARACTER_MODULES.every((m, i, all) => i === 0 || m.n > all[i - 1].n));
+    // Lessons first written for Acting's Building a Character module
+    // (owner order 2026-09-22). Each names the Acting id it takes over at
+    // launch; the unedited ones match Acting word for word, and nothing in
+    // this course keeps the retired "two roads" framing.
+    const moved = CHARACTER_LESSONS.filter(l => l.movesFrom);
+    const actingById = id => ACTING_LESSONS.find(l => l.id === id);
+    check('character: lessons taken over from Acting each name a real Acting lesson',
+      moved.length === 7 && moved.every(l => actingById(l.movesFrom)?.module === 'character'));
+    // Through Analysis went back to Acting, which owns text analysis
+    // (owner order 2026-09-22), so only two takeovers needed edits.
+    const EDITED = new Set(['ch-inside', 'ch-essence']);
+    // Renamed for this course, text untouched: The Universal Cast
+    // (Archetypes) reads as What Is an Archetype here (owner order).
+    const RETITLED = new Set(['ch-archetypes']);
+    check('character: the unedited taken-over lessons match Acting word for word',
+      moved.filter(l => !EDITED.has(l.id)).every(l => JSON.stringify(l.body) === JSON.stringify(actingById(l.movesFrom).body)
+        && (l.title === actingById(l.movesFrom).title || RETITLED.has(l.id))));
+    check('character: a retitled takeover still carries Acting’s text',
+      [...RETITLED].every(id => {
+        const l = CHARACTER_LESSONS.find(x => x.id === id);
+        return l && JSON.stringify(l.body) === JSON.stringify(actingById(l.movesFrom).body);
+      }));
+    // The framing's own phrases, not the word: "The Road Runner" is fine.
+    const roads = CHARACTER_LESSONS.filter(l =>
+      /\b(two roads|the roads|other road|this road|feeling road|analysis road|either road|cross over)\b/i.test(JSON.stringify(l)));
+    check('character: no lesson keeps the retired two-roads framing', roads.length === 0,
+      roads.map(l => l.id).join(', '));
+    // Influence tags are an OWNER PREVIEW tool (2026-09-22): practitioner
+    // names must never reach a learner-facing surface.
+    const src31 = await viewSource();
+    check('character: every lesson names the thinking it comes from',
+      CHARACTER_LESSONS.every(l => typeof l.attribution === 'string' && l.attribution.length));
+    check('character: influence tags show only in the owner preview of the hidden course',
+      src31.includes("B.ws === 'character' && !CHARACTER_LIVE && characterPreview()")
+      && src31.includes('const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m))')
+      && !/attribution/.test(JSON.stringify(ACTING_LESSONS)));
+    const pant = commediaMask('pantalone');
+    check('character: Pantalone carries the full framework (acquire without risking)',
+      /acquire without risking/.test(pant.contradiction) && pant.stance.length >= 7 && pant.gestures.length >= 10
+      && pant.signature.length === 8 && pant.fearResponse.length === 5 && pant.recovery.length === 5
+      && /theatrical construction, not a medical portrait/.test(pant.note));
+    check('character: no movement field duplicates the retired body/speech lines',
+      COMMEDIA_MASKS.every(k => !('body' in k) && !('speech' in k)));
+    const chapterOf = id => CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === id));
+    // The character chapters are REFERENCE pages now: reached from The
+    // Cast, never listed as steps on the path or shelved beside them.
+    check('character: each character chapter is a reference page, off the path and off the shelves',
+      COMMEDIA_MASKS.every(k => chapterOf(k.id)?.reference === true)
+      && CHARACTER_COLLECTIONS.every(c => !c.lessons.some(id => CHARACTER_LESSONS.find(l => l.id === id)?.reference)));
+    // Every mask's chapter carries a mask, a stance and a walk. The Lovers
+    // are two performers, so that one chapter carries both sets (the
+    // 2026-09-22 picture intake); cm-innamorati-* is retired.
+    const performers = id => id === 'innamorati' ? ['innamorata', 'innamorato'] : [id];
+    check('character: every mask has its own chapter with the breakdown and its picture slots',
+      COMMEDIA_MASKS.every(k => { const c = chapterOf(k.id); return c && performers(k.id)
+        .every(who => ['mask', 'stance', 'walk']
+          .every(slot => c.body.some(b => b.fig === `cm-${who}-${slot}`))); }));
+    // The two servant jobs live in their own characters' chapters, and the
+    // frightened run with the second zanni (owner order 2026-09-22).
+    const chapter = id => CHARACTER_LESSONS.find(l => l.id === id);
+    const text = l => l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? '']).join(' ');
+    const brig = chapter('ch-cm-brighella'), arle = chapter('ch-cm-arlecchino');
+    check('character: the first and second zanni jobs are taught in Brighella and Arlecchino, as functions',
+      !!brig && !!arle && /first zanni/i.test(text(brig)) && /second zanni/i.test(text(arle))
+      && /not measurements of intelligence/.test(text(brig))
+      && /a job in the plot rather than a measure of intelligence/.test(text(arle))
+      && !CHARACTER_LESSONS.some(l => l.id === 'ch-cm-zanni-roles'));
+    check('character: the frightened run sits with the second zanni, labelled a modern training convention',
+      /convention of modern training/.test(text(arle)) && /does not prove/.test(text(arle))
+      && arle.body.some(b => b.steps?.length === 8));
+    const figs = Object.entries(CHARACTER_FIGURES);
+    const figFiles = await Promise.all(figs.map(([, f]) =>
+      fetch('../img/lessons/commedia/' + f.file, { method: 'HEAD' }).then(r => r.ok).catch(() => false)));
+    check('character: every picture that ships has its file, alt text and an interpretation caption',
+      figs.every(([, f], i) => figFiles[i] && f.alt && /interpretation/i.test(f.caption ?? '')),
+      `${figs.length} picture(s) registered`);
+    // The commedia collection landed whole (2026-09-22), so every slot the
+    // chapters reserve now resolves. A new slot without art would fail
+    // here rather than render an invisible gap nobody notices.
+    const figKeys = CHARACTER_LESSONS.flatMap(l => (l.body ?? []).filter(b => b.fig).map(b => b.fig));
+    check('character: every { fig } slot names a registered picture with real alt text',
+      figKeys.length === 30
+      && figKeys.every(k => { const f = characterFigure(k); return !!f && f.alt.length > 40 && !!f.caption; }),
+      `${figKeys.length} slot(s)`);
+    check('character: the Lovers chapter carries both performers, face then stance then walk',
+      String(figKeys.filter(k => k.startsWith('cm-innamorat')))
+        === 'cm-innamorata-mask,cm-innamorato-mask,cm-innamorata-stance,cm-innamorata-walk,'
+          + 'cm-innamorato-stance,cm-innamorato-walk');
+    const capText = figs.map(([, f]) => f.caption).join(' ');
+    check('character: picture captions keep house copy (no em dashes, no straight quotes)',
+      !capText.includes('—') && !/["']/.test(capText));
+    const copy = [CHARACTER_PRINCIPLE, ...ONE_LINES, ...MASK_SITUATIONS, ...MASK_PROBLEMS,
+      ...CHARACTER_MODULES.flatMap(m => [m.title, m.blurb]),
+      ...CHARACTER_COLLECTIONS.map(c => c.title),
+      ...COMMEDIA_MASKS.flatMap(k => Object.values(k).flat().filter(v => typeof v === 'string')),
+      ...CHARACTER_LESSONS.flatMap(l => [l.title, l.objective, l.orientation, l.reflection,
+        ...l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? ''])])];
+    const styleBad = copy.filter(t => /[—–"]/.test(t) || /n’t\b|’(re|ll|ve|m|d)\b/.test(t)
+      || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(t));
+    check('character: copy keeps house style (no dashes, no contractions, curly quotes)',
+      styleBad.length === 0, styleBad.slice(0, 3).join(' | '));
+    const named = copy.filter(t => /\b(Stanislavski|Chekhov|Lecoq|Johnstone|Laban|Meisner|Adler|Bogosian|Andreini|Scala|Rudlin)\b/.test(t));
+    check('character: no practitioner names in the copy (sources belong on Sources & Credits)',
+      named.length === 0, named.slice(0, 2).join(' | '));
+  }
+
+  // ── 30. The notebook: grouped tabs, same stored notes ────────
+  // Two levels since 2026-09-22 (owner order): Acting, IPA (a second row
+  // of the general IPA notebook and one per dialect), Building a
+  // Character, and your own. The IPA ids ARE the storage keys of the old
+  // flat row, so changing them would orphan every note already written.
+  {
+    check('notebook: the IPA notebooks keep the storage ids the flat row used',
+      IPA_BOOKS.map(b => b.id).join() === 'ipa,nam,rp,ssbe,aus');
+    let savedPreview = null;
+    try { savedPreview = localStorage.getItem(CHARACTER_PREVIEW_KEY); localStorage.removeItem(CHARACTER_PREVIEW_KEY); } catch {}
+    try {
+      check('notebook: opens on the notebook for wherever the learner is',
+        notebookForContext('acting', 'nam') === 'acting' && notebookForContext('ipa', 'core') === 'ipa'
+        && notebookForContext('accents', 'rp') === 'rp' && notebookForContext('accents', 'cockney') === 'ipa');
+      check('notebook: the Building a Character notebook stays hidden with its course',
+        notebookForContext('character', 'nam') === 'acting');
+    } finally {
+      try { if (savedPreview !== null) localStorage.setItem(CHARACTER_PREVIEW_KEY, savedPreview); } catch {}
+    }
+  }
+
+  // ── 31. My Characters: the Building a Character Studio ────────
+  // Worksheets on this device (meta store). The drive only touches the
+  // character IT creates and deletes it again, whatever happens.
+  {
+    const maskFieldsOk = CHARACTER_SECTIONS.flatMap(sec => sec.fields).filter(f => f.mask)
+      .every(f => COMMEDIA_MASKS.every(k => k[f.mask] !== undefined));
+    check('characters: every worksheet field that shows the tradition names a real mask field', maskFieldsOk);
+    const ids = kind => fieldsFor(kind).flatMap(sec => sec.fields.map(f => f.id));
+    check('characters: each kind gets its own opening fields, and all share the breakdown',
+      CHARACTER_KINDS.length === 3 && ids('scratch').includes('observed') && !ids('scratch').includes('circumstances')
+      && ids('given').includes('circumstances') && ids('given').includes('othersSay') && !ids('given').includes('observed')
+      && ['wants', 'centre', 'walk', 'recovery', 'voice'].every(f => ['scratch', 'given', 'commedia'].every(k => ids(k).includes(f))));
+    let made = null;
+    try {
+      made = await createCharacter({ name: '  __regression character  ', kind: 'commedia', maskId: 'pantalone' });
+      // Two saves fired together: the queue must keep both.
+      await Promise.all([saveFields(made, { wants: 'one' }), saveFields(made, { fears: 'two' })]);
+      await saveFields(made, { walk: 'x'.repeat(MAX_FIELD_LEN + 50) });
+      const rec = await getCharacter(made);
+      check('characters: a worksheet round-trips, and concurrent saves both land',
+        rec?.name === '__regression character' && rec.fields.wants === 'one' && rec.fields.fears === 'two'
+        && rec.fields.walk.length === MAX_FIELD_LEN && rec.maskId === 'pantalone');
+      await renameCharacter(made, 'Renamed');
+      check('characters: rename reaches the shelf',
+        (await listCharacters()).some(c => c.id === made && c.name === 'Renamed'));
+      await deleteCharacter(made);
+      check('characters: delete removes the worksheet and its shelf entry',
+        (await getCharacter(made)) === null && !(await listCharacters()).some(c => c.id === made));
+      made = null;
+    } catch (err) {
+      bad('characters: storage round trip', String(err));
+    } finally {
+      if (made) { try { await deleteCharacter(made); } catch { /* best effort */ } }
+    }
   }
 
   // ── 28. Page transitions: the browser's own, used sparingly ──

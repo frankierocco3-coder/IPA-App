@@ -108,12 +108,17 @@ export function goBack() {
 // reference surfaces where progress numbers are noise; XP lives on the
 // shell stats bar and the lesson screens. The empty stats div stays as
 // the flex spacer that keeps the title centered.
+// Page-title shades, darkened so a 16px bold title clears WCAG AA 4.5:1 on
+// the page ground (2026-09-22: the originals read 3.3 to 4.0:1). Callers
+// keep passing the palette colour; any other colour passes through.
+const TITLE_SHADE = { '#8a6d3b': '#725a30', '#6f8657': '#596f44', '#64748b': '#566377' };
+
 export function pageTopbar(title, color) {
   return `
     <header class="topbar">
       <button class="backbtn" id="nav-back" aria-label="Back" title="Back">‹</button>
       ${BRAND_BTN}
-      <div class="track-title" style="color:${color}">${title}</div>
+      <div class="track-title" style="color:${TITLE_SHADE[color] ?? color}">${title}</div>
       <div class="stats"></div>
     </header>`;
 }

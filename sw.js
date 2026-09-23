@@ -46,7 +46,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v8';                      // 2026-09-22: fetches bypass the browser's HTTP cache (see above)
+const VERSION = 'sc-v9';                      // 2026-09-22: js/data/character/character-course.js joins the graph
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

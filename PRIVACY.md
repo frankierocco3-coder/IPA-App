@@ -15,6 +15,8 @@ All of it is in your browser, on the device you are using:
 | Recording metadata (ratings, notes, durations) | IndexedDB | |
 | Practice analytics | localStorage | counters per sound/exercise |
 | Personal pronunciation dictionary | localStorage | |
+| Notebooks | IndexedDB | the notebook dock's notes |
+| Characters you are building | IndexedDB | My Characters, in the Building a Character course |
 | XP, streak, completed lessons, settings | localStorage | |
 
 Nothing is uploaded. There is no "sync", no cloud copy, and no backup — which

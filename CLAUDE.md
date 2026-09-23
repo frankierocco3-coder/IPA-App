@@ -1088,6 +1088,66 @@ picture, not the lesson's conclusion; captions are learner copy in house
 style. The suite checks every key resolves, every file ships, captions
 keep house style, and the chapter renders both figures.
 
+BUILDING A CHARACTER (2026-09-22): a fourth workspace, HIDDEN behind
+CHARACTER_LIVE=false (js/views/context.js); the owner reads it through
+the `#character-preview` link (sets localStorage
+speechcraft-character-preview; `#character-preview-off` clears it).
+Three kinds of character work: from scratch, a given role, and Commedia
+dell’Arte. Commedia comes FIRST (owner decision): its ready-made characters
+teach what any character is made of before the learner builds their own;
+the course opens with "Why We Start With Commedia". Plan and launch checklist: docs/CHARACTER_COURSE_OUTLINE.md.
+Data: js/data/character/character-course.js, same record shape as Acting;
+lesson ids `ch-…`. Acting's lesson, chapter, module and collection
+screens serve BOTH courses through the `BOOKS` layer in main.js (a
+lesson id resolves its own course; Acting renders exactly as before).
+Every commedia mask's facts, including the owner's physical-performance
+framework, are ONE record (COMMEDIA_MASKS), shown by `{ mask }` (the
+sheet) and `{ profile }` (the full breakdown) body blocks, Mask Cards and
+The Masks at a Glance; `{ steps }` renders a numbered sequence. Character
+pictures are three `{ fig }` slots per mask (cm-<id>-mask/-stance/-walk,
+registry js/data/character/art.js, spec docs/COMMEDIA_IMAGE_SPEC.md); an
+empty slot renders nothing. The collection ARRIVED WHOLE 2026-09-22: 30
+owner-supplied pictures in img/lessons/commedia/, baseline JPEG q90 at
+1536x864 — NOT the usual 1536x1024, so a registry entry may carry its own
+w/h and actingFigureHtml believes it, keeping the reserved space equal to
+the file. The Lovers are two performers, so that chapter carries six
+(cm-innamorata-*, cm-innamorato-*) and cm-innamorati-* is retired. Walk
+sheets hold 3, 5 or 7 keyframes depending on the character, and alt text
+states the count actually drawn. Intake notes head the spec.
+Commedia (18 lessons) is written; the other
+modules follow the outline. Seven lessons of Acting's Module 4
+(the improvise-alone loop, where characters come from, and archetypes) are
+in the course as `ch-` copies carrying `movesFrom`; Through Analysis went
+back to Acting, which owns text analysis; Acting keeps its copies
+until the course is built, then its Module 4 moves over (plan in the
+outline).
+Suite section 29 pins hidden-by-default, whole records, no id clash, and
+house style on every line.
+
+MY CHARACTERS (2026-09-22, owner order): the Building a Character
+workspace's Studio. js/characters.js holds storage (meta store, keys
+`characters:index` + `character:<id>`, no schema change; every write
+goes through one queue so concurrent saves never drop a field) and the
+worksheet (CHARACTER_SECTIONS: the same breakdown as the commedia
+records). Three kinds: from scratch (+ people observed), a role you have
+been cast in (+ given circumstances, what others say; linked by title to
+a Studio project or a Scenes-shelf scene), a commedia mask (the
+tradition's answer shown beside each field, read from COMMEDIA_MASKS,
+never copied). UI in main.js: characterStudioPane, renderNewCharacter,
+renderCharacterSheet. Autosaves, private, never scored. Privacy lists
+Notebooks always and Characters while the course is open; both wipes
+clear them (meta is in CONTENT_STORES). Suite section 31.
+
+THE NOTEBOOK (js/notebook.js; regrouped 2026-09-22 by owner order): a
+dock outside #app. Top row: Acting, IPA, Building a Character (only while
+that course is open), the learner's own notebooks, +. IPA is ONE tab that
+opens a second row: General IPA, Neutral American, Traditional RP,
+Standard British, Australian (IPA_BOOKS). Those ids ARE the storage keys
+of the old flat row (meta store, `notebook:<id>`), so never rename them;
+suite section 30 pins it. It opens on the notebook for the current
+workspace (notebookForContext). On phones the tabs wrap under the
+controls instead of scrolling sideways.
+
 THE main.js SPLIT (B-R1, begun 2026-09-18, staged): main.js is being
 taken apart along the seams the IA already defines. Three rules hold it
 together. (1) NO CYCLES: a view may import ui.js, views/context.js and

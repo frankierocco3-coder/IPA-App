@@ -87,7 +87,7 @@ export async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'al
   app.innerHTML = `
     <header class="topbar">
       <button class="backbtn" id="audit-exit" aria-label="Back to the app" title="Back to the app">‹</button>
-      <div class="track-title" style="color:#64748b">🎧 Audio audit</div>
+      <div class="track-title" style="color:#566377">🎧 Audio audit</div>
       <div class="stats"><span class="stat">${shown.length} clips</span></div>
     </header>
     <main class="guide audit-page">
@@ -202,7 +202,7 @@ export function renderContentReview() {
   app.innerHTML = `
     <header class="topbar">
       <button class="backbtn" id="review-exit" aria-label="Back to the app" title="Back to the app">‹</button>
-      <div class="track-title" style="color:#64748b">📝 Content review</div>
+      <div class="track-title" style="color:#566377">📝 Content review</div>
       <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
