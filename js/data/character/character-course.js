@@ -45,6 +45,8 @@ export const CHARACTER_PRINCIPLE =
 export const CHARACTER_MODULES = [
   { n: 1, id: 'commedia', title: 'Commedia dell’Arte',
     blurb: 'The course starts here: complete, ready-made characters that show you what every character is made of. Learn each form, then find your own life inside it.' },
+  { n: 3, id: 'physical', title: 'The Physical Character',
+    blurb: 'The tools the masks are built from, taught on their own: your own habits first, then centre, imagined body, weight, tempo, space, walk, animal and the one gesture that holds a want.' },
   { n: 6, id: 'piece', title: 'Making the Piece',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
 ];
@@ -978,6 +980,184 @@ export const CHARACTER_LESSONS = [
       { p: 'Work at a scale your body is comfortable with. The classic lazzi included falls and acrobatics that took years of training. Yours need none of that to be good.' },
     ] },
 
+  // ── Module 3: The Physical Character (written 2026-09-23) ──────
+  // The vocabulary the commedia chapters already use, taught as
+  // transferable craft: centre, what leads, weight, tempo, space, walk,
+  // animal and signature gesture. Every lesson carries a safety line,
+  // because this is the first module that asks a learner to move.
+  { id: 'ch-ph-own', module: 'physical', order: 1,
+    title: 'Your Own Body First',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Notice your own physical habits, so that you know what you are taking off before you put anyone else on.',
+    orientation: 'You already have a walk, a centre and a set of gestures. You simply stopped noticing them years ago.',
+    reflection: 'Which of your own habits would be hardest to leave behind for a role, and why that one?',
+    body: [
+      { p: 'You arrive with a body that already has opinions. It has a preferred way of standing, a speed it walks at when nothing is urgent, a hand it gestures with, a place it holds tension, and a distance it likes to keep from other people. None of that is neutral. It is a character, and it is the one you have been playing your whole life.' },
+      { p: 'This matters for a practical reason. Unexamined habits leak. If your weight always sits back on your heels, every person you play will stand back on their heels, and you will call that your instrument when it is really one option out of many that you never noticed you were choosing.' },
+      { h: 'Try it: the inventory' },
+      { steps: [
+        'Stand and do nothing for thirty seconds. Do not correct anything. Just find out what your body does when nobody has asked it to do something.',
+        'Where is your weight: forward over the toes, back on the heels, even, or more on one side?',
+        'What are your hands doing? Where do they go when you stop thinking about them?',
+        'Walk the length of the room at your ordinary speed. What part of you arrives first?',
+        'Now stop, and notice where you hold tension. Jaw, shoulders, lower back, hands. Everyone has somewhere.',
+        'Write down four things. Those are your defaults, and from now on they are choices.',
+      ] },
+      { p: 'Do this again in a week and some of it will have changed, because a body on a bad night is a different instrument from a body on a good one. That is worth knowing too. Actors who cannot tell the difference between their own tiredness and a character choice end up playing tiredness in everything.' },
+      { p: 'Neutral does not mean blank, and nobody is asking you to erase yourself. Neutral means knowing your own settings well enough to leave them deliberately. Everything in this module is a way of changing one of them on purpose.' },
+      { p: 'Work gently and inside what your body allows today. Nothing in this module needs strain, pain, deep crouches or falls to be useful, and if something hurts, it is the wrong version of the exercise.' },
+    ] },
+
+  { id: 'ch-ph-leads', module: 'physical', order: 2,
+    title: 'Where the Body Leads',
+    attribution: 'Michael Chekhov',
+    requiredReviewer: 'acting-professional',
+    objective: 'Find the centre a person moves from, and the part of them that enters a room first.',
+    orientation: 'Watch anybody cross a room and something goes first. It is almost never the feet.',
+    reflection: 'Pick somebody you know well. What part of them arrives before the rest, and what does that tell you about what they want?',
+    body: [
+      { p: 'Imagine the energy a person moves with comes from one place in their body, and that everything else follows it. That place is their centre. A person centred in the chest looks open, or proud, or exposed. A person centred low in the belly looks settled, appetitive, hard to move. A person centred in the head looks like they are thinking their way across the room and have left their body to manage on its own.' },
+      { p: 'Close to that idea, and easier to play, is what leads. The centre is where the movement comes from. What leads is the part that gets there first. They are often the same and they do not have to be. Somebody can be centred in the belly and still lead with the nose, which is exactly what makes them look greedy rather than grounded.' },
+      { h: 'You have already met this' },
+      { p: 'Every commedia breakdown in this course lists a centre and a what-leads, because those two answers are most of what makes each mask look different from the others. Pantalone is divided between a guarded pelvis and a searching nose, and that contradiction is the whole man. Il Dottore is belly and chest, leading with the belly, so his opinions arrive before he does. Arlecchino sits low in the belly where the hunger lives, with the feet beneath it. Pedrolino is the heart and the open chest, which is why nothing he feels can be hidden.' },
+      { h: 'Try it: five centres' },
+      { steps: [
+        'Walk the room normally, and notice your own centre from the last lesson.',
+        'Now imagine a small warm weight behind the breastbone, and let it pull you across the room. Walk. Then speak one sentence from there.',
+        'Move the weight down into the belly. Walk again. Speak the same sentence.',
+        'Move it up into the forehead. Walk. Speak.',
+        'Put it in the pelvis. Walk. Speak.',
+        'Finally, keep the weight in the belly but let your nose lead. Walk. Speak. Notice that you now look like you want something.',
+      ] },
+      { p: 'The sentence should change every time without you deciding to change it. That is the point of the exercise, and it is the same principle the mask work rests on: alter the shape and the voice follows, because a body arranged differently cannot breathe the same way.' },
+      { p: 'Work at a scale that is comfortable, and keep the weight imaginary. None of this asks you to hold a posture that strains.' },
+    ] },
+
+  { id: 'ch-ph-imaginary', module: 'physical', order: 3,
+    title: 'The Imaginary Body',
+    attribution: 'Michael Chekhov',
+    requiredReviewer: 'acting-professional',
+    objective: 'Wear a body that is not yours, from the inside, without changing your actual one.',
+    orientation: 'You cannot lengthen your arms or widen your back. You can change the body you imagine yourself standing inside.',
+    reflection: 'Which imaginary body felt least like acting and most like simply being somebody else?',
+    body: [
+      { p: 'Here is a tool that does more work than it has any right to. Picture a body that is not yours occupying the same space you occupy. Taller, or wider, or heavier through the shoulders, or thin and high and brittle. Do not act it. Step into it, as though putting on a coat, and let your real body do whatever it does in response.' },
+      { p: 'What makes this useful is that it changes many things at once. A person who decides to play somebody heavy has to remember to move slowly, take up room, breathe low and speak deliberately, and they will drop two of those the moment they have a line to think about. A person standing inside an imagined heavy body gets all four for free, and keeps them while they think about something else.' },
+      { h: 'Try it: three bodies' },
+      { steps: [
+        'Stand in neutral. Imagine a body around you that is a head taller than you and broader through the back. Take one breath inside it. Walk four steps. Say your own name.',
+        'Shake it off. Now imagine a body that is small, light and quick, with the weight high in the chest. Breathe. Walk. Say your name.',
+        'Shake it off. Now one that is heavy and low, wide through the hips, slow to start and slow to stop. Breathe. Walk. Say your name.',
+        'Come back to neutral and notice how strongly your own body wants to return to it.',
+      ] },
+      { p: 'Three things will have changed without you managing any of them: how much room you took, how long your sentences wanted to be, and where your voice sat. That is the tool working. It gives you a whole physical logic from one image, which is far more reliable than a list of adjustments you have to hold in mind.' },
+      { p: 'The trap is going too far and losing yourself in the image. The imagined body is a way in, not a performance. Once it has changed how you move, stop thinking about it and get on with what the character wants. If an audience can see you concentrating on your own physicality, the tool has stopped helping.' },
+      { p: 'Keep every imagined body inside what your real one can comfortably do. You are not required to strain, crouch, hunch or hold anything that hurts, and nothing here needs a shape your body objects to.' },
+    ] },
+
+  { id: 'ch-ph-weight', module: 'physical', order: 4,
+    title: 'Weight, Tempo and Space',
+    attribution: 'Rudolf Laban',
+    requiredReviewer: 'acting-professional',
+    objective: 'Use three dials that change a person: how heavy they are, how fast, and how much room they take.',
+    orientation: 'Almost every physical difference between two people can be described with three settings.',
+    reflection: 'Which of the three dials do you habitually leave in one position, whatever you are playing?',
+    body: [
+      { p: 'Three qualities do most of the work, and the useful thing about them is that they are dials rather than switches. You can turn each one a little rather than all the way, which is how you get a person instead of a caricature.' },
+      { list: [
+        'Weight: light or strong. Does this person move as if gravity barely applies to them, or as if every gesture has force behind it? Light is not weak, and strong is not loud. A quiet threat is played strong.',
+        'Tempo: quick or sustained. Does movement arrive in sudden bursts, or unfold and keep going? Tempo is separate from speed of speech, and the mismatch between them is often the most interesting thing about somebody.',
+        'Space: direct or indirect. Does this person go straight at what they want, or approach it around the side? Direct is a straight line through a room. Indirect wanders, circles and arrives eventually.',
+      ] },
+      { p: 'A fourth question sits alongside them and belongs to status rather than movement: how much room does this person believe they are entitled to? Somebody who takes up space they have not earned is comic. Somebody who takes up less than they are owed is somebody you worry about.' },
+      { h: 'Try it: one line, eight ways' },
+      { p: 'Take any ordinary sentence. “I did not think you would come.” Play it light and quick and direct. Then light, quick and indirect. Work through every combination of the three dials, eight in total, and keep the words identical. Somewhere in those eight is a person you have not played before.' },
+      { h: 'Reading the masks with it' },
+      { p: 'The dials describe the commedia characters efficiently, which is a good test of any vocabulary. Arlecchino is light, quick and indirect: he goes at everything sideways and at speed. Il Dottore is strong, sustained and indirect, which is why an explanation from him never arrives anywhere. Colombina is light, quick and direct, the only one in the company who goes straight at the problem. Il Capitano is strong, sustained and direct, right up to the moment he is frightened, when all three settings flip at once.' },
+      { p: 'Work within your own comfortable range. Strong does not mean forcing, and quick does not mean rushing at something and hurting yourself.' },
+    ] },
+
+  { id: 'ch-ph-walk', module: 'physical', order: 5,
+    title: 'The Walk',
+    attribution: 'Movement training tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Build a walk by changing one thing at a time, and find the rhythm underneath it.',
+    orientation: 'A walk is not a pose that travels. It is a rhythm, and rhythm is the part an audience reads from the back of the room.',
+    reflection: 'When you built your walk, which single change did the most work?',
+    body: [
+      { p: 'A walk is the most public thing a character has. It arrives before the face is readable and before a word is spoken, and an audience has usually decided a great deal about somebody by the time they have crossed a stage. That is why it is worth building deliberately rather than hoping one turns up.' },
+      { p: 'Build it by changing one thing at a time. Change everything at once and you get a costume that falls off the moment you have to think about a line. Change one variable, walk with it until it stops feeling like a decision, then add the next.' },
+      { h: 'The variables' },
+      { list: [
+        'Step size. Long strides, or small quick steps that cover no ground.',
+        'Speed, and whether it is constant or arrives in bursts.',
+        'What leads, from the last lessons. The walk follows whatever goes first.',
+        'Where the weight falls: heels, toes, or rolling through the whole foot.',
+        'What the arms do, which is usually whatever you forgot to decide.',
+        'The pathway. Straight across the room, or around the edge of it.',
+        'And the one most actors miss: what happens when the walk stops. Starting and stopping tell an audience more than the travelling does.',
+      ] },
+      { h: 'Try it: build one' },
+      { steps: [
+        'Walk normally. Now change one thing only: take smaller steps. Keep going until it is no longer an effort to remember.',
+        'Add a second change: let the chest lead. Walk again.',
+        'Add a third: put the weight back on the heels.',
+        'Now stop suddenly, as though somebody said your name. Notice what the rest of your body does when the feet stop.',
+        'Walk again and let a thought arrive while you are moving. Does this person stop to think, or think while walking? That single answer is most of a character.',
+      ] },
+      { p: 'The commedia walks in this course are all built this way, which is why each one can be described in a sentence. Pantalone travels in darts, still then suddenly quick, and the nose finds the target before the feet move. Brighella is slow and even until a single fast step, then slow again as though nothing happened. Arlecchino goes feet first and lets the thinking catch up. Each is one rhythm, chosen and repeatable.' },
+      { p: 'Keep the steps small and light, work on a floor that will not slip, and leave out anything that strains a knee, hip or back. A walk does not need to be extreme to read.' },
+    ] },
+
+  { id: 'ch-ph-animal', module: 'physical', order: 6,
+    title: 'Animal Work',
+    attribution: 'Movement training tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Watch an animal closely, then let a little of it into a person.',
+    orientation: 'The oldest trick in physical character work, and the easiest one to overdo.',
+    reflection: 'How little of the animal could you keep and still feel it changing you?',
+    body: [
+      { p: 'Choose an animal and watch it properly, for longer than is comfortable. Not a cartoon of it and not your memory of it: the real thing, in a video if you have no other way. Watch how it holds its weight when nothing is happening. Watch what it does with its head. Watch how it starts moving, and how it stops, and what it does when it is startled and when it wants something.' },
+      { p: 'Then take almost none of it. The finished result should be a person, with perhaps one percent of the animal left in the rhythm, the stillness or the way the head turns. An audience should never think “that is a bird.” They should think there is something about that man that makes them uneasy, without being able to say why.' },
+      { h: 'Why it works' },
+      { p: 'It works because animals do not hide anything. A cat wanting something is entirely a cat wanting something, with no social layer over it, and watching that reminds an actor what pure want looks like in a body. It is also a shortcut past your own defaults, which is why it survives in training everywhere: it hands you rhythms and stillnesses you would never have chosen from your own habits.' },
+      { h: 'Try it' },
+      { steps: [
+        'Choose your animal and watch it for five minutes without doing anything else.',
+        'On your feet, go too far first. Let yourself be entirely the animal, at whatever scale your body is comfortable with, standing upright. This is private work and it is meant to be ridiculous.',
+        'Now take it down by half. Then half again. Then half again.',
+        'Stop when a person walks into the room who is not you, and who carries something of the animal in how they wait, how they turn and how they start moving.',
+        'Say a line as that person. Then take the animal out entirely and say it again, and notice what you lost.',
+      ] },
+      { p: 'This is the commit-and-sculpt shape from the commedia module applied to one tool: go too far on purpose, then remove until only the mechanism is left. Several masks in this course carry an animal in their sensory image for exactly this reason, and Arlecchino is the clearest, described as somewhere between a cat and a monkey.' },
+      { p: 'Two cautions. Keep all of it upright and inside your comfortable range: nothing here requires crawling, jumping or weight on the hands. And never use this to build a person out of a disability, an illness or an ethnicity. The animal is a source of rhythm and attention, and it stops there.' },
+    ] },
+
+  { id: 'ch-ph-gesture', module: 'physical', order: 7,
+    title: 'The Signature Gesture',
+    attribution: 'Michael Chekhov',
+    requiredReviewer: 'acting-professional',
+    objective: 'Find one gesture that holds what a character wants, and learn how rarely to use it.',
+    orientation: 'One movement, made with the whole body, can carry an entire want. Used twice in a scene it becomes a tic.',
+    reflection: 'What is the gesture for somebody who wants to be forgiven but will not ask?',
+    body: [
+      { p: 'Take what a character wants and turn it into a single physical action made with the whole body rather than the hands. Somebody who wants to hold on to everything might close and pull inward. Somebody who wants to be seen might open and lift. Somebody who wants to push the world away might press outward and down. The gesture is not mime and it is not illustration. It is the want, made physical, at full size.' },
+      { p: 'You rehearse it large and privately, several times, until the shape is in the body and carries a feeling with it. Then you put it away. It almost never appears on stage at full size. What appears is the residue: the pull inward reduced to a hand closing on a sleeve, the lift reduced to a chin. The audience never sees the gesture. They see everything it left behind.' },
+      { h: 'Try it' },
+      { steps: [
+        'Pick a character, your own or one of the masks, and say in one sentence what they want.',
+        'Find a whole-body movement that is that want. Make it big and repeat it six times, letting the breath go with it.',
+        'Notice the feeling it produces. Do not manufacture the feeling. Let the shape do it.',
+        'Now shrink the gesture until it is barely visible, and keep the same breath.',
+        'Say a line while the small version is happening somewhere in your body.',
+      ] },
+      { h: 'Where you have already seen it' },
+      { p: 'Every commedia breakdown carries a signature action, and they are all built this way. Pantalone hears money, locates it with his nose, checks his own purse, advances in tiny steps, reaches, is threatened, contracts around both, and retreats still watching. That is a want turned into a sequence you can repeat exactly. Il Capitano grows while safe and collapses the instant he is not, which is one gesture and its opposite.' },
+      { p: 'The discipline is in how rarely you spend it. A signature gesture that shows up in every scene stops meaning anything and becomes a mannerism the audience waits for. Once in a performance, at the moment it costs the character most, is usually right.' },
+      { p: 'Keep the movement inside a comfortable range and let the size come from commitment rather than strain.' },
+    ] },
+
   // ── Lessons first written for Acting's Building a Character module ──
   // (owner order 2026-09-22: the course takes them over). Acting keeps its
   // own copies until this course is built; then Acting's module comes
@@ -1114,7 +1294,7 @@ export const CHARACTER_LESSONS = [
 ];
 
 // One Library shelf per module, in path order.
-const SHELF_ICON = { piece: '📝', commedia: '🃏' };
+const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶' };
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], title: m.title,
   lessons: CHARACTER_LESSONS.filter(l => l.module === m.id && !l.reference)
