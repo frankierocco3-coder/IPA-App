@@ -47,6 +47,8 @@ export const CHARACTER_MODULES = [
     blurb: 'The course starts here: complete, ready-made characters that show you what every character is made of. Learn each form, then find your own life inside it.' },
   { n: 3, id: 'physical', title: 'The Physical Character',
     blurb: 'The tools the masks are built from, taught on their own: your own habits first, then centre, imagined body, weight, tempo, space, walk, animal and the one gesture that holds a want.' },
+  { n: 4, id: 'vocal', title: 'The Vocal Character',
+    blurb: 'The voice as a consequence of the body rather than a decision taken separately: how somebody thinks shows in how they phrase, what an accent can and cannot carry, and the words a person reaches for or refuses.' },
   { n: 6, id: 'piece', title: 'Making the Piece',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
 ];
@@ -1158,6 +1160,136 @@ export const CHARACTER_LESSONS = [
       { p: 'Keep the movement inside a comfortable range and let the size come from commitment rather than strain.' },
     ] },
 
+  // ── Module 4: The Vocal Character (written 2026-09-23) ─────────
+  // Deliberately on the CHARACTER side of the line. These lessons choose
+  // among voices a learner already has; they never instruct on vocal
+  // production, which is voice-professional territory and belongs with a
+  // teacher in the room. Every lesson says so, and every exercise is
+  // built to be impossible to strain on.
+  { id: 'ch-vo-follows', module: 'vocal', order: 1,
+    title: 'The Voice Follows the Body',
+    attribution: 'Voice and movement training',
+    requiredReviewer: 'acting-professional',
+    objective: 'Get a character voice from the body you have already built, rather than inventing one and hoping it fits.',
+    orientation: 'A voice is made by a breathing body arranged in a particular way. Change the arrangement and the voice has already changed.',
+    reflection: 'When the shape gave you a voice, what surprised you about it?',
+    body: [
+      { p: 'Most character voices that do not work were chosen first. An actor decides the man sounds nasal and reedy, produces that sound, and then spends the rest of rehearsal carrying it around on a body it has nothing to do with. The audience hears the effort, even when they cannot name it. What they are hearing is two decisions that were never introduced to each other.' },
+      { p: 'The reliable order runs the other way, and you have met it already in the mask work. A shape changes the breath, because a chest that is braced and a chest that is lifted cannot take the same one. The breath, once it is audible, is most of a voice. The voice finds words. The words go to somebody. Work in that order and the voice arrives attached to a body that earned it, and it stays without being maintained.' },
+      { h: 'Try it: take the voice from the shape' },
+      { steps: [
+        'Choose one physical setting from the last module. A centre, an imagined body, or one of the three dials.',
+        'Stand in it and do nothing else for two breaths. Do not decide anything about the voice.',
+        'Let the breath be audible. Not loud, just heard.',
+        'Let the sound of it become a hum, then a word, then a sentence about your day.',
+        'Change one physical thing only, and say the same sentence again.',
+      ] },
+      { p: 'The sentence changes both times, and you did not choose how. That is the tool. Notice also how little effort it took, because nothing was being produced: the voice was a consequence rather than a performance.' },
+      { h: 'What this module will not teach you' },
+      { p: 'Nothing here instructs you on how to make a sound. There are no exercises for building a voice, extending a range or changing how you produce tone, because that is voice training, it needs a qualified teacher who can hear you in the room, and it is the one part of this craft where getting it wrong can do real harm. Everything in this module chooses among voices your body already offers. If a character seems to need a voice you do not have, that is a conversation with a voice teacher, not a thing to force alone.' },
+      { p: 'The rule for every exercise here: it should feel like less work than your ordinary speaking voice, not more. If your throat feels tight, if you are pushing, or if anything aches or rasps, stop. A character voice that hurts is the wrong answer even when it sounds right.' },
+    ] },
+
+  { id: 'ch-vo-qualities', module: 'vocal', order: 2,
+    title: 'Pitch, Pace and Placement',
+    attribution: 'Voice training tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Describe a voice precisely enough to play it, using the range you already have.',
+    orientation: 'Three words let you describe almost any voice, and describing it is most of playing it.',
+    reflection: 'Which of the three do you change most easily, and which one stays where it always is?',
+    body: [
+      { p: 'Actors talk about voices vaguely, which is why voice notes are so hard to act on. Gravelly, posh, whiny: none of those tell you what to do on Tuesday. Three plainer words do.' },
+      { list: [
+        'Pitch: where the voice sits, and how far it travels. Not high or low as a fixed setting, but whether this person moves around or stays on one note. A narrow pitch range reads as controlled, or exhausted, or dangerous. A wide one reads as open, or young, or unguarded.',
+        'Pace: how fast, and more importantly how even. Somebody who speaks quickly in bursts with long gaps is a different person from somebody at the same average speed who never varies. The gaps carry more than the speed does.',
+        'Placement: where the voice seems to come from, which is a question about where you feel it rather than an instruction about how to make it. Forward and bright in the face, or further back and warmer, or down in the chest. Notice where yours sits now, then notice it move when your body does.',
+      ] },
+      { p: 'Underneath all three sits the one that does the most work and gets the least attention: the breath. Where somebody breathes, how deeply, and whether they run out tells an audience about their state before a single word is interpreted. A person who takes a breath before a sentence is deciding. A person who takes one in the middle has been caught out.' },
+      { h: 'Try it: one sentence, changed once' },
+      { steps: [
+        'Say a line in your ordinary voice. Note where it sits.',
+        'Say it again, keeping everything the same except the pitch range: let it move more than usual, then less than usual. Stay comfortable.',
+        'Again, changing only the pace, and then only where the pauses fall.',
+        'Again, noticing where you feel it, and letting a change of posture move that rather than pushing it anywhere.',
+        'Now combine the two settings that felt least like you, and say the line once more.',
+      ] },
+      { p: 'The whole exercise stays inside your comfortable range on purpose. You are not stretching anything. You are finding out how many different people live inside the voice you already own, which is far more than most actors assume.' },
+      { p: 'Stop at once if anything feels tight, forced or scratchy. Never push pitch to an edge, never hold a placement that strains, and do not work on a tired or unwell voice. None of these choices needs volume, and none of them should hurt.' },
+    ] },
+
+  { id: 'ch-vo-rhythm', module: 'vocal', order: 3,
+    title: 'The Rhythm of Thought',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Play how a person thinks, by playing how their sentences arrive.',
+    orientation: 'You can hear somebody thinking. The shape of the thought arrives before its content does.',
+    reflection: 'Does your character know the end of the sentence when they begin it?',
+    body: [
+      { p: 'One question separates two completely different people who might say identical words: does this person know how the sentence ends when they start it? Somebody who does speaks in finished shapes, arrives where they intended and stops. Somebody who does not builds as they go, changes direction, doubles back, and lands somewhere they did not plan. An audience reads that difference instantly and never names it.' },
+      { p: 'That is why rhythm is character work rather than voice work. A person who thinks in complete sentences and a person who thinks out loud can share a pitch, a pace and an accent and still be unmistakably different. The thinking shows in where the thought breaks.' },
+      { h: 'Things to decide' },
+      { list: [
+        'Does the thought arrive complete, or get assembled in public?',
+        'Where does this person pause: before the important word, after it, or never?',
+        'Do they finish other people’s sentences, or wait, or talk over the top?',
+        'When they are interrupted, do they stop, or keep going until they are done?',
+        'What happens to the rhythm under pressure? Most people speed up. Some go very slow, which is far more frightening.',
+      ] },
+      { h: 'Try it' },
+      { steps: [
+        'Take five or six lines of any text and speak them as somebody who knows exactly where each sentence is going. Land every ending.',
+        'Now the same lines as somebody assembling the thought while speaking. Let yourself change direction mid-sentence and repair it.',
+        'Now as somebody who thinks in silence and speaks only finished conclusions, with real pauses where the thinking happens.',
+        'Notice that you have played three people without altering your voice at all.',
+      ] },
+      { p: 'The commedia masks are built on this. Il Dottore starts explaining before he has understood anything and mistakes the length of the explanation for proof. Arlecchino talks while moving and stops talking altogether when he has to think, which is why his silences are funny. Colombina says one short thing and lets the silence finish the job. Three rhythms, three ways of thinking, three entirely different comic engines.' },
+    ] },
+
+  { id: 'ch-vo-accent', module: 'vocal', order: 4,
+    title: 'Accent as Character, Not Costume',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Know when an accent is doing character work and when it is doing damage.',
+    orientation: 'An accent tells an audience where somebody is from. It tells them nothing at all about who the person is.',
+    reflection: 'If the accent were removed from your character, what would be lost, and what would survive?',
+    body: [
+      { p: 'An accent is information about history: where a person grew up, who raised them, where they have lived since, and sometimes what they have tried to leave behind. It is not a personality, it is not a status, and it is not a joke. The moment an accent is carrying the characterisation on its own, there is no character underneath it.' },
+      { p: 'The test is simple and worth applying honestly. Take the accent away and play the same person in your own voice. If almost everything survives, the accent is doing its job, sitting on top of a real person. If the character collapses into nothing, you were not playing a person. You were doing an impression, and an audience will feel the difference even in the scenes where it seems to be working.' },
+      { h: 'Where it goes wrong' },
+      { list: [
+        'Using an accent to signal that somebody is stupid, brutish, untrustworthy or comic. That is not characterisation. It is a stereotype with a voice on it, and it lands on real people who speak that way.',
+        'Playing a region rather than a person, so that every character from one place shares one personality.',
+        'Letting the accent eat the intention, so that the effort of producing it is the only thing an audience can hear.',
+        'Keeping an accent that the text does not need, because it is impressive, and paying for it in clarity.',
+        'Treating an accent you cannot yet do as a detail to sort out later. Audiences forgive many things and are unforgiving about this one, particularly people who own that accent.',
+      ] },
+      { h: 'Doing it properly' },
+      { p: 'An accent is learned the way any other part of the instrument is learned: slowly, from real speakers, with the sounds broken down and drilled until they stop taking attention. That is what the accent courses in this app are for, and they are a different kind of work from this module. Neutral American, Traditional RP, Standard British, Cockney and Australian each have their own course, with the inventory, the connected speech and the recordings. Learn the accent there, then come back here and ask what this particular person does with it.' },
+      { p: 'One question belongs to the character rather than the accent, and it is usually the interesting one: how much of it does this person choose? Almost everybody adjusts how they speak depending on who is listening. A character who softens their accent in one room and lets it return in another has just told you something about power, and about what they want from whoever is in front of them. That is character work, and it only becomes available once the accent itself is secure.' },
+    ] },
+
+  { id: 'ch-vo-habit', module: 'vocal', order: 5,
+    title: 'The Verbal Habit',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Find the words a person reaches for, and the ones they never use.',
+    orientation: 'Everybody has a handful of words they overuse, and a set of things they will not say. Both are character.',
+    reflection: 'What is your character unable to say out loud, and what do they say instead?',
+    body: [
+      { p: 'Listen to anybody for ten minutes and a pattern appears. There is a phrase they lean on, a way they begin sentences, a filler they use while thinking, and a register they retreat to when uncomfortable. None of it is chosen. All of it is legible, and a small amount of it, placed well, does more character work than a whole accent.' },
+      { p: 'The more useful half is the negative one. What does this person never say? Somebody who cannot say the word love, or sorry, or money, or the name of the person who died, is telling you exactly where the pressure is. An avoidance is more revealing than a habit, because the habit is unconscious and the avoidance is defended.' },
+      { h: 'Where to look in a script' },
+      { list: [
+        'Words this character uses that nobody else in the play uses.',
+        'How they begin: a question, an apology, an order, a joke, or straight into the middle of it.',
+        'What they call other people, and whether it changes by scene. A name, a title, a nickname, or nothing at all.',
+        'Their register under pressure. Some people get more formal when frightened, which is its own kind of armour.',
+        'The thing they talk around. Find the subject the character keeps approaching and leaving.',
+      ] },
+      { p: 'If you are inventing somebody rather than working from a script, decide three things and let the rest follow: one phrase they overuse, one word they avoid, and what they do with their sentences when they are lying. Write them into your character sheet. They will be the details you reach for in performance when everything else has gone out of your head.' },
+      { p: 'The commedia masks are written this way too. Pantalone turns every relationship into a debt, and the line for him is about what he has given rather than what he feels. Il Capitano talks about what he did while carefully never describing what happened. The words are chosen to expose the want, which is the whole trick and it works in any script you will ever be handed.' },
+    ] },
+
   // ── Lessons first written for Acting's Building a Character module ──
   // (owner order 2026-09-22: the course takes them over). Acting keeps its
   // own copies until this course is built; then Acting's module comes
@@ -1294,7 +1426,7 @@ export const CHARACTER_LESSONS = [
 ];
 
 // One Library shelf per module, in path order.
-const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶' };
+const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️' };
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], title: m.title,
   lessons: CHARACTER_LESSONS.filter(l => l.module === m.id && !l.reference)
