@@ -1102,8 +1102,11 @@ screens serve BOTH courses through the `BOOKS` layer in main.js (a
 lesson id resolves its own course; Acting renders exactly as before).
 Every commedia mask's facts, including the owner's physical-performance
 framework, are ONE record (COMMEDIA_MASKS), shown by `{ mask }` (the
-sheet) and `{ profile }` (the full breakdown) body blocks, Mask Cards and
-The Masks at a Glance; `{ steps }` renders a numbered sequence. Character
+sheet) and `{ profile }` (the full breakdown) body blocks and Mask Cards;
+`{ steps }` renders a numbered sequence. The Masks at a Glance page is
+GONE (owner order 2026-09-23: the same breakdown is on every character's
+own chapter, reached from The Cast, so the page was a second copy).
+Character
 pictures are three `{ fig }` slots per mask (cm-<id>-mask/-stance/-walk,
 registry js/data/character/art.js, spec docs/COMMEDIA_IMAGE_SPEC.md); an
 empty slot renders nothing. The collection ARRIVED WHOLE 2026-09-22: 30

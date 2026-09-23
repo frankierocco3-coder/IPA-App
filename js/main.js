@@ -3125,15 +3125,15 @@ function maskSheetHtml(id) {
 }
 const MASK_PROFILE = [
   ['family', 'Family'], ['status', 'Status and space'], ['fn', 'In the plot'],
-  ['maskLook', 'Mask'], ['costume', 'Costume'],
+  ['maskLook', 'Mask'], ['costume', 'Costume'], ['sense', 'Sensory image'],
   ['centre', 'Centre of gravity'], ['leads', 'What leads'], ['stance', 'Base stance'], ['walk', 'The walk'],
   ['thinking', 'How a thought travels'], ['fearResponse', 'When afraid'], ['desireResponse', 'When wanting'],
   ['gestures', 'Gestures'], ['audience', 'With the audience'], ['signature', 'Signature action'],
   ['recovery', 'Recovery'], ['voice', 'Voice and breath'], ['rhetoric', 'What the words are doing'],
   ['note', 'History and variation'],
 ];
-// A family of masks at a glance, for the lesson that meets the whole
-// company: name, place, want and contradiction, from the ONE record.
+// One family of masks as a row of cards, for the lesson that meets the
+// whole company: name, place, want and contradiction, from the ONE record.
 // Each name in a roster opens that character's own chapter, where the
 // full breakdown lives.
 const maskChapterId = id => CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === id))?.id ?? null;
@@ -3506,9 +3506,6 @@ function renderActingCollection(collectionId) {
          state: B.visible(l) ? '' : 'is-pending',
        })).join('')}
      </div>
-     ${B.ws === 'character' && c.id === 'commedia' ? `
-       <div class="item-grid">${itemTileHtml({ key: 'masks', title: 'The Masks at a Glance',
-         note: 'Every principal character on one page: what they want, fear and do.' })}</div>` : ''}
      ${collectionId === 'scene' ? `
        <h2 class="sec-h">Acting Glossary</h2>
        <p class="pane-note">${Object.keys(ACTING_GLOSSARY).length} terms used across the acting chapters.</p>
@@ -3523,7 +3520,7 @@ function renderActingCollection(collectionId) {
     }
   }
   app.querySelectorAll('[data-item]').forEach(b => b.addEventListener('click', () =>
-    b.dataset.item === 'masks' ? navTo(renderMasksAtGlance) : renderActingChapter(b.dataset.item)));
+    renderActingChapter(b.dataset.item)));
 }
 
 function renderActingGlossary() {
@@ -4342,23 +4339,6 @@ function characterLibraryPane(el) {
     </div>`;
   el.querySelectorAll('[data-tile]').forEach(b =>
     b.addEventListener('click', () => navTo(() => renderActingCollection(b.dataset.tile.slice(4)))));
-}
-
-function renderMasksAtGlance() {
-  record(renderMasksAtGlance);
-  stopSpeech();
-  workspacePage(
-    pageTopbar('📚 Character Library', '#8a6d3b'),
-    `<div class="ws-head">
-       <h1 class="page-h">The Masks at a Glance</h1>
-       <p class="ws-sub">The principal commedia characters: what each one wants, fears and does.</p>
-     </div>`,
-    COMMEDIA_MASKS.map(k => `
-      <section class="stat-block">
-        <h2 class="chart-h">${esc(k.name)}</h2>
-        <p class="pane-note">${esc(k.family)} · from ${esc(k.from)}</p>
-        ${maskSheetHtml(k.id)}
-      </section>`).join(''));
 }
 
 function characterPracticePane(el) {

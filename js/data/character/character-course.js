@@ -51,8 +51,7 @@ export const CHARACTER_MODULES = [
 
 // ── The masks: ONE record per character ─────────────────────
 // Read by the chapters ({ mask } shows the sheet, { profile } the full
-// physical breakdown), Mask Cards and the Masks at a Glance page, so none
-// of them can disagree. The physical fields follow the owner's
+// physical breakdown) and Mask Cards, so none of them can disagree. The physical fields follow the owner's
 // performance framework (2026-09-22): a commedia character is a
 // repeatable system connecting desire, status, speech and action.
 //
@@ -66,6 +65,7 @@ export const COMMEDIA_MASKS = [
     status: 'The very bottom of the household. He owns nothing, answers to everyone and gets beaten by most of them, and he claims space only by never staying in one place. His one moment of high status is appetite: in front of a plate of food, Arlecchino is a king.',
     maskLook: 'Traditionally a black leather half mask with a small snub nose, round eye openings and often a bump on the forehead: a face somewhere between a cat and a monkey.',
     costume: 'Patches of coloured cloth that settled over time into the famous diamond pattern, a soft cap, a belt, and the wooden bat, the batacchio.',
+    sense: 'Salt, and whatever was nearest to hand. Hot, quick, never still. The animal is a monkey carrying the appetite of a pig.',
     wants: 'Food first, then comfort, affection, and to get through the day without a beating.',
     fears: 'Hunger, punishment, and any task that needs thinking for long.',
     contradiction: 'Wildly inventive, and he understands almost nothing.',
@@ -92,6 +92,7 @@ export const COMMEDIA_MASKS = [
     status: 'Low by rank, high in fact. He is a servant who understands money, people and the city better than the masters who employ him, and he knows it. He plays high among the servants and low to his masters’ faces, and his power lives in the gap. He occupies exactly as much space as keeps him useful and unnoticed.',
     maskLook: 'Traditionally an olive or dark half mask with a hooked nose and a knowing, heavy-lidded look, often with a moustache: a face that always seems about to smile.',
     costume: 'A white suit or livery trimmed with green braid, a soft cap, and a knife or a purse at the belt.',
+    sense: 'Olive oil and cold smoke, always exactly room temperature. The animal is a cat that has already decided and is waiting for you to catch up.',
     wants: 'Money, influence, pleasure, and control of whatever is happening.',
     fears: 'Being caught, and being left out of the game.',
     contradiction: 'A servant who understands the world better than the masters who own it.',
@@ -118,6 +119,7 @@ export const COMMEDIA_MASKS = [
     status: 'Low by rank, high in every scene she is in. She has no money, no authority and no protection, and still nobody can put anything past her, because she has watched these people so closely that she knows what they will do before they do. She claims little space and holds it completely.',
     maskLook: 'Usually unmasked, or in a small half mask around the eyes.',
     costume: 'A neat servant’s dress and apron; in later versions, a patched dress that matches Arlecchino’s.',
+    sense: 'Lemon and clean cold water. The animal is a magpie: nothing shiny gets past her, and neither does anything stupid.',
     wants: 'Independence, affection, fun, and to get things done properly.',
     fears: 'Being dismissed or controlled.',
     contradiction: 'She has no official power at all, and she understands everyone.',
@@ -144,6 +146,7 @@ export const COMMEDIA_MASKS = [
     status: 'Always changing, and that is the point. He can be bullied one moment and a bully the next, bowing to a master and then kicking whoever is below him. He lives near the bottom, refuses to stay there, and occupies as much space as he can get away with.',
     maskLook: 'Traditionally a black half mask with a long hooked nose like a beak and a furrowed brow.',
     costume: 'A loose white smock and trousers and a tall, soft, conical hat, often with a hunched back or a pot belly beneath.',
+    sense: 'Old bread and sour wine, thick and hard to shift. The animal is a chicken that has survived several attempts on its life and expects another.',
     wants: 'Food, comfort, and a way out of whatever trouble he is in.',
     fears: 'Work, danger and consequences.',
     contradiction: 'Clever and stupid, cruel and pitiful, bully and victim, all at once.',
@@ -170,6 +173,7 @@ export const COMMEDIA_MASKS = [
     status: 'Low, and he plays it low without resisting. He does not fight for status, fake it or trade it; he simply has none and does not hide it. He takes up little space and gives away what he has, and audiences who laugh at everyone else end up on his side.',
     maskLook: 'Unmasked, his face traditionally whitened.',
     costume: 'Loose white clothes; in France, the wide white blouse with large buttons and the baggy trousers of Pierrot.',
+    sense: 'Milk and cold air, soft the whole way through. The animal is a dog that keeps going back to the person who kicked it.',
     wants: 'Affection, recognition, and to belong.',
     fears: 'Rejection.',
     contradiction: 'His honesty is both his strength and the thing that gets him hurt.',
@@ -196,6 +200,7 @@ export const COMMEDIA_MASKS = [
     status: 'At the top by rank. He possesses money, household authority and social control, and he assumes that owning things entitles him to control people. He takes all the space he believes he has paid for. His comedy is watching that authority leak away while he keeps insisting on it.',
     maskLook: 'Traditionally a dark brown, reddish-brown or black leather half mask with a long hooked nose, deep wrinkles at the forehead and eyes, heavy raised brows and narrow, suspicious eye openings. A small moustache or a pointed grey beard belongs to the costume.',
     costume: 'Traditionally red: close-fitting red breeches or tights and a red jacket under a long black overgown, soft slippers, a skullcap, and a purse at the belt.',
+    sense: 'Vinegar and dry paper, cold to the touch. The animal is a spider: still at the centre of something it owns, and across it the instant a thread moves.',
     wants: 'Money, control, respect, and often a much younger woman.',
     fears: 'Poverty, humiliation, old age, and losing command of his household.',
     contradiction: 'He wants to acquire something new without risking anything he already owns. In three words: acquire without risking.',
@@ -222,6 +227,7 @@ export const COMMEDIA_MASKS = [
     status: 'High by title, and he never stops asserting it. His status rests entirely on being thought learned, which makes it fragile: one plain question could knock it over, so he never stops talking long enough for anyone to ask one. He takes up all the space available, and more while he is speaking.',
     maskLook: 'Traditionally a small black mask covering only the forehead and nose, sometimes with cheeks reddened by wine.',
     costume: 'A scholar’s black gown and cap, often with a wide white collar.',
+    sense: 'Olive oil and warm soup, heavy and slow to pour. The animal is a very well fed owl that has never once caught anything.',
     wants: 'To be recognised as the most learned person in any room.',
     fears: 'Being exposed as ignorant.',
     contradiction: 'All the appearance of knowledge, none of the understanding.',
@@ -248,6 +254,7 @@ export const COMMEDIA_MASKS = [
     status: 'High by birth, powerless in practice. They are the children of the rich households, and they cannot get a single thing they want without help. Their status rises and falls with their feelings, and they occupy space elegantly and expect it to be admired.',
     maskLook: 'Unmasked. The face itself is their instrument.',
     costume: 'The height of contemporary fashion: the most elegant clothes on the stage.',
+    sense: 'Perfume and sugar, warm and weightless. The animal is a songbird on an open branch, entirely unaware of the cat.',
     wants: 'Perfect union with the beloved.',
     fears: 'Separation, rejection, or a marriage arranged by the old men.',
     contradiction: 'They can describe love magnificently and cannot solve a single practical problem.',
@@ -274,6 +281,7 @@ export const COMMEDIA_MASKS = [
     status: 'He claims the highest status on the stage and has none at all. He insists on rank, titles and respect, gets them for as long as nobody tests him, and takes all the space there is. The moment anything real happens, his status drops to the floor in a single beat.',
     maskLook: 'Traditionally a half mask with a long, prominent nose and a fierce moustache.',
     costume: 'A soldier’s finery, often in the Spanish style: a feathered hat, a cape, and a huge sword he never draws.',
+    sense: 'Brass and hot metal, loud even to the touch. The animal is a peacock, and something is moving in the grass behind it.',
     wants: 'Admiration, fear, status and conquest.',
     fears: 'Danger, and above all being found out.',
     contradiction: 'His reputation is made entirely of language and supported by nothing he has done.',
@@ -451,6 +459,7 @@ export const CHARACTER_LESSONS = [
       { list: [
         'Their family and status: how much physical and social space they believe they are entitled to.',
         'What they want, what they fear, and the contradiction at their core.',
+        'A sensory image to experiment with: a taste, a texture, an animal. These are provocations to try in the body, not facts about the character, and you are free to replace any of them with one that works better for you.',
         'Their centre of gravity, and the part of them that enters a room first.',
         'Their base stance: the physical home they return to after every interruption.',
         'Their walk, as a rhythm rather than a pose.',
@@ -477,6 +486,10 @@ export const CHARACTER_LESSONS = [
         'Colombina: I saw what you needed, so I came.',
       ] },
       { p: 'The words never change. The want underneath them does, and it changes the body, the rhythm and the voice along with it. That is the whole of commedia in a single sentence.' },
+      { h: 'Playing with them, not at them' },
+      { p: 'Commedia is played with an audience rather than in front of one. That began as a necessity. In a square where nothing dims and nobody has paid to stay, a performer who ignores the room loses it. What the necessity produced is a habit worth keeping: the performer watches the audience as closely as the audience watches the performer.' },
+      { p: 'The loop runs like this. You make an offer: a look, a line, a piece of business. The room answers, with laughter, or silence, or the particular quiet of people who have stopped following. You listen to that answer. You adjust the size, the speed or the aim. Then you make the next offer. None of that changes the story you are telling. All of it changes how you tell it tonight.' },
+      { p: 'The principle underneath is larger than commedia. Saying a thing is not the same as being understood. A speech is not finished because you reached the end of it, and a scene is not working because you played it correctly. It is finished when it has landed on the person in front of you, and the only way to know whether it has is to keep looking at them while you speak.' },
       { h: 'What is history, and what is craft' },
       { p: 'Commedia never had one fixed cast or one fixed way of moving. Companies, cities and generations renamed, combined and reinvented the characters, and very little about how they moved was written down. So this module keeps four kinds of knowledge apart:' },
       { list: [
@@ -525,8 +538,14 @@ export const CHARACTER_LESSONS = [
       { p: 'Most of commedia’s comic characters wore a half mask covering the forehead, eyes and nose, leaving the mouth free to speak. The lovers played unmasked, and so did a few others. A mask is not a disguise. It fixes one expression in place, permanently, and that changes everything below it. With the face frozen, the character has to speak through the head, the spine, the hips, the hands, the rhythm of moving and stopping, the distance kept from other people, and the voice.' },
       { p: 'That is why masked actors learn to lead with the head. A small turn of the head reads as a look; a sharp one reads as a thought arriving. The mask always faces something, and whatever it faces, the audience looks at too. Stillness becomes loud. A mask that stops dead in the middle of a scramble can get a bigger laugh than any line.' },
       { p: 'A mask also exposes a gap you can use in any role: the body often says what the words are trying to hide. A masked braggart can boast in the bravest voice he owns while his knees are already turning toward the exit. The audience believes the knees.' },
+      { h: 'From shape to speech' },
+      { p: 'There is an order to this work, and it runs upward from the body. A shape comes first. The shape changes the breath, because a braced chest and a lifted one cannot take the same one. The breath, once you let it be heard, is already most of a voice. The voice finds words, and the words go to somebody who would rather not hear them. Work in that order and the voice arrives attached to a body that earned it.' },
+      { p: 'Work in the other order and it shows. An actor who settles on a funny voice first and then hunts for a walk to go with it is wearing two things that never quite belong to the same person. The breath is the hinge between them, the one thing that is part of the body and part of the speech at once, which is why every breakdown in this module treats voice and breath as a single entry rather than two.' },
+      { h: 'Too much, then less' },
+      { p: 'Start bigger than feels reasonable. Make the shape unmistakable, take the breath further than you would, let the rhythm go to an extreme, and commit to all of it completely. Nothing can be discovered from a version so careful that nothing happened. Then find out whether it reads: ask somebody what they saw, or watch yourself back. Only once it is legible do you begin taking away, removing whatever is decorating rather than doing, and keeping whatever the character stops working without.' },
+      { p: 'Both halves are the work, and most actors only do one. Commit without ever cutting and you have an impression, loud and approximate. Cut without ever committing and there was nothing there to refine in the first place. The order matters too: you cannot sculpt what you have not made yet.' },
       { h: 'Try it: the imagined mask' },
-      { p: 'You do not need a real mask for this. Start in neutral: feet under your hips, weight even, face relaxed, looking straight ahead. Now imagine a mask settling onto your face with one fixed expression, suspicious, say, or starving, or delighted with itself. Keep your own face still and let the expression travel down. How does a suspicious head sit on the neck? What do suspicious shoulders do? Walk. Stop. Turn your head toward something and let the whole body follow a moment later. Then take the mask off, come back to neutral, and try another.' },
+      { p: 'You do not need a real mask for this. Start in neutral: feet under your hips, weight even, face relaxed, looking straight ahead. Now imagine a mask settling onto your face with one fixed expression, suspicious, say, or starving, or delighted with itself. Keep your own face still and let the expression travel down. How does a suspicious head sit on the neck? What do suspicious shoulders do? Walk. Stop. Turn your head toward something and let the whole body follow a moment later. Now stand still and listen to your breathing. The shape has already changed it. Let it be audible, let the sound of it become a hum and then a word, and say that word to somebody across the room. Notice that you did not choose the voice. Then take the mask off, come back to neutral, and try another.' },
       { p: 'Work gently and inside what your body allows today. None of this needs falls, jumps or deep crouches to be useful, and nothing here should hurt.' },
     ] },
 
@@ -604,6 +623,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-pantalone-walk' },
       { h: 'Find it' },
       { p: 'Hinge forward a little from the hips and let your nose lead. Take small quick steps across the room, your hands guarding an imaginary purse. Hear a coin drop somewhere: freeze, locate it with your nose, check your own purse, and dart toward it. Then imagine a stranger appearing, and contract around both the coin and your purse as you retreat, still watching.' },
+      { p: 'Now hold the crouch and listen to your breath. It is small and guarded, because a body curled around a purse cannot take a generous one. Let it be heard. Let it sharpen into a voice, and say this to somebody who owes you money: “After everything I have given you, I should not have to ask twice.” Then think of the coin again and notice how much faster the breath goes.' },
       { h: 'Where you can see him' },
       { list: [
         'Harpagon in Molière’s The Miser, who loves his money more than his children.',
@@ -639,6 +659,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-dottore-walk' },
       { h: 'Find it' },
       { p: 'Let your weight settle back on your heels and your belly lead. Walk slowly, as if every step were worth recording. Then stop, lift one finger, and explain something you do not understand, how clouds stay up, say, at great length and with complete confidence.' },
+      { p: 'Keep the weight back and the belly leading, and take a breath the size of the sentence you are about to deliver. Spend it slowly, as though the air itself were expensive. Let it carry you into “What you have failed to account for is the underlying multifactorial nature of the paradigm,” and do not stop where a full stop would go.' },
       { h: 'Where you can see him' },
       { list: [
         'Polonius in Hamlet, who gives endless advice and never quite reaches the point.',
@@ -676,6 +697,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-innamorato-walk' },
       { h: 'Find it' },
       { p: 'Stand tall with your chest lifted and one foot slightly forward, as if about to dance. Say the lovers’ line to an empty chair as though it held the most beautiful person alive. Then hear an imaginary father’s footsteps and let the whole pose collapse into despair, and rebuild it the moment he has gone.' },
+      { p: 'Stay in the pose and let the breath climb into the top of your chest, where feeling lives and good sense does not. Let it come out as one long phrase rather than several short ones. Say “You are the only person who has ever truly seen me,” and mean every syllable of it. The comedy is not in mocking the feeling. It is in how completely you mean it.' },
       { p: 'The trap is to play the lovers as a joke. They are funny because they are completely sincere. Their feelings are real, even when their idea of love has been assembled from poems, songs and daydreams, and even when they seem half in love with the sound of their own declarations. The comedy is that the audience can see how little they have actually seen of each other.' },
       { h: 'Where you can see them' },
       { list: [
@@ -711,6 +733,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-capitano-walk' },
       { h: 'Find it' },
       { p: 'Cross the room as the Captain describing a battle, chest high, arms wide, voice ringing. Then imagine a small dog barking at your heels, and let the whole body shrink in an instant, keeping your feet under you. When the danger has passed, puff back up and carry on the story as if nothing happened. The faster and more complete the collapse, the funnier it is. The question that punctures him is always the same: what did you actually do?' },
+      { p: 'Take the wide stance and pump the breath up high into the top of your chest until you are almost too big to move. Speak from up there: “Everyone else panicked. I was the only one prepared to do what had to be done.” Then let something behind you make a sudden noise, and say the same sentence again with the breath fallen out of it. That drop is the whole character.' },
       { p: 'The Captain has cousins. Scaramuccia, the swordsman and adventurer who became the French Scaramouche, mixes the Captain’s swagger with real charm and a gift for escaping.' },
       { h: 'Where you can see him' },
       { list: [
@@ -752,6 +775,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-brighella-walk' },
       { h: 'Find it' },
       { p: 'Walk the room slowly with your weight low and your eyes moving, as if every person you pass might be worth something. Spot an imaginary coin on the floor and go from slow to instant and back to slow again, as if nothing happened.' },
+      { p: 'Stay low and let the breath settle deep and slow, the breath of somebody who is never hurried because he already knows how this ends. Keep it even while you say “I am not asking you to lie. I am asking you to tell the part of the truth that helps us,” and say it warmly enough that it sounds like a favour. Nothing in the voice should rise. That is what makes it frightening.' },
       { h: 'Where you can see him' },
       { list: [
         'Scapin in Molière’s Scapin the Schemer, a servant who runs rings around everyone.',
@@ -807,6 +831,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-arlecchino-walk' },
       { h: 'Find it' },
       { p: 'Bend your knees a little, lift your heels, and cross the room in quick short steps. Stop dead. Look at something with just your head. Now let your stomach remind you it is empty, and see how far across the room it pulls you. Keep it light and inside what your body allows; the acrobatics came later, with training.' },
+      { p: 'Now let the breath ride high and quick, catching on every new thing in the room. Let it break into sound before it turns into any words at all. Then explain yourself: “I did exactly what you told me. You said watch the door, so I watched the door.” Stop moving the instant you have to think, and start again the instant you do not. The mouth and the feet run on the same engine.' },
       { h: 'Where you can see him' },
       { list: [
         'Harlequin, his direct descendant, in the English pantomime.',
@@ -843,6 +868,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-colombina-walk' },
       { h: 'Find it' },
       { p: 'Stand with your weight even and your hands on your hips. Listen to an imaginary master explain a terrible plan. Do not roll your eyes or comment. Just hold a level look, a beat too long, and then say one word: “No.”' },
+      { p: 'Keep the breath low and unhurried, the breath of the only person present who is not panicking. Say “You can keep explaining why your plan will work, or you can listen while I tell you why it will not,” at a completely ordinary volume. Then stop, and let the silence finish the job. She is the one character who can turn and say it straight to the audience, so try it that way too.' },
       { h: 'Where you can see her' },
       { list: [
         'Dorine in Molière’s Tartuffe, on the Scenes shelf, who tells her master’s household the truth nobody else will.',
@@ -876,6 +902,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-pulcinella-walk' },
       { h: 'Find it' },
       { p: 'Let your spine round and your belly soften forward, keeping it comfortable. Shuffle a few steps. Then let your head peck toward something interesting, two or three quick jerks, and scurry after it before settling back into the slump.' },
+      { p: 'Let the breath push up high and thin, in front of the beak rather than down in the chest. Complain about something very small, at length, and let the pitch climb every time you are contradicted. Then defend yourself: “Of course I am innocent. And if I did do it, you should be thanking me.” The voice should sound like it is already arguing before anyone has disagreed.' },
       { h: 'Where you can see him' },
       { list: [
         'Mr Punch in Punch and Judy, his English descendant, who kept the stick, the squawk and the talent for escaping consequences.',
@@ -910,6 +937,7 @@ export const CHARACTER_LESSONS = [
       { fig: 'cm-pedrolino-walk' },
       { h: 'Find it' },
       { p: 'Stand with your arms loose and your chest open. Imagine someone you care about has just told you they are leaving with someone else. Do not act sad. Let it land, completely, and let the audience watch it land.' },
+      { p: 'Stay open and let the breath be visible, the way it is in somebody who is not managing their face. Take far longer than is comfortable. Then say “I know you might not feel the same. I just did not want to pretend I do not care,” simply, with no colour added, and let the pause afterwards do the rest. He is the one who never protects himself, and the breath is where you can see it first.' },
       { h: 'Where you can see him' },
       { list: [
         'Pierrot, his French descendant, the white-faced clown of pantomime.',
