@@ -3395,7 +3395,8 @@ function actingLibraryPane(el) {
       go: renderDissectTextbook },
     { ...colTile('principles'), group: G2 },
     { ...colTile('listening'), group: G2 },
-    { ...colTile('character'), group: G2 },
+    // The Building a Character shelf left Acting on 2026-09-23 with its
+    // module; the course of that name owns the material now.
     { ...colTile('rehearsal'), group: G2 },
     { ...colTile('rhythm'), group: G2 },
     // Playable Actions follows Tempo-Rhythm (owner order, 2026-09-16).

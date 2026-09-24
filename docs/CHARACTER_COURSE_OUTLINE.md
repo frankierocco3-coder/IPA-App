@@ -380,6 +380,7 @@ at least one full track.
 
 ## After the course is built
 
-Take Acting's Module 4 out, as described at the top: move the eight
-lessons here with their ids, retire Acting 4.1, renumber Acting, and
-repoint any links into the old module.
+**DONE 2026-09-23.** Acting's Module 4 is out: seven lessons moved here
+with their ids (so completed progress survived), Acting 4.1 retired,
+Through Analysis kept by Acting in Investigating the Text, Acting
+renumbered to five modules, and its Building a Character shelf removed.

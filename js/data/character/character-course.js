@@ -524,7 +524,7 @@ export const CHARACTER_LESSONS = [
       ] },
     ] },
 
-  { id: 'ch-archetypes', module: 'commedia', order: 6, movesFrom: 'ac-archetypes',
+  { id: 'ac-archetypes', module: 'commedia', order: 6,
     title: 'What Is an Archetype',
     attribution: 'Archetype tradition',
     requiredReviewer: 'acting-professional',
@@ -1544,12 +1544,12 @@ export const CHARACTER_LESSONS = [
     ] },
 
   // ── Lessons first written for Acting's Building a Character module ──
-  // (owner order 2026-09-22: the course takes them over). Acting keeps its
-  // own copies until this course is built; then Acting's module comes
-  // out, and each record here takes over the Acting id named in
-  // `movesFrom`, so learners keep their progress. Copied word for word
+  // (owner order 2026-09-22; HANDOVER DONE 2026-09-23). Acting's Module 4
+  // is gone and these records now carry the Acting ids themselves, so
+  // anyone who completed them in Acting keeps that progress and nothing
+  // stored needed migrating. Copied word for word
   // except the sentences built on the retired "two roads" framing.
-  { id: 'ch-inside', module: 'piece', order: 1, movesFrom: 'ac-inside',
+  { id: 'ac-inside', module: 'piece', order: 1,
     title: 'Through Feeling',
     attribution: 'Eric Bogosian',
     requiredReviewer: 'acting-professional',
@@ -1563,7 +1563,7 @@ export const CHARACTER_LESSONS = [
       { p: 'So forget building a character the way you would build a shelf. There is no finishing it. You are pulling somebody out of a collection you spent your whole life making, and you will know it is working when they start saying things you did not plan.' },
     ] },
 
-  { id: 'ch-room', module: 'piece', order: 2, movesFrom: 'ac-room',
+  { id: 'ac-room', module: 'piece', order: 2,
     title: 'The Empty Room',
     attribution: 'Eric Bogosian',
     requiredReviewer: 'acting-professional',
@@ -1577,7 +1577,7 @@ export const CHARACTER_LESSONS = [
       { p: 'One honest note: Speechcraft cannot do this part with you. The app does not record and does not listen. This is you, a phone, a shut door, and half an hour nobody needs you for. Bring back whatever turns out to be worth keeping.' },
     ] },
 
-  { id: 'ch-waysin', module: 'piece', order: 3, movesFrom: 'ac-waysin',
+  { id: 'ac-waysin', module: 'piece', order: 3,
     title: 'Three Ways In',
     attribution: 'Eric Bogosian',
     requiredReviewer: 'acting-professional',
@@ -1613,7 +1613,7 @@ export const CHARACTER_LESSONS = [
       { p: 'The manner gets you in the door. What is underneath it is the difference between an impression and a character.' },
     ] },
 
-  { id: 'ch-noaim', module: 'piece', order: 5, movesFrom: 'ac-noaim',
+  { id: 'ac-noaim', module: 'piece', order: 5,
     title: 'Do Not Aim',
     attribution: 'Eric Bogosian',
     requiredReviewer: 'acting-professional',
@@ -1626,7 +1626,7 @@ export const CHARACTER_LESSONS = [
       { p: 'And expect waste. Plan on it. Throw everything at the wall, because you cannot know in advance what sticks. Three good minutes come out of hours of tape. Hours. That is not you failing, that is the arithmetic of the method, and knowing the arithmetic going in is what gets you through the long stretch where all of it sounds like nothing.' },
     ] },
 
-  { id: 'ch-transcribe', module: 'piece', order: 6, movesFrom: 'ac-transcribe',
+  { id: 'ac-transcribe', module: 'piece', order: 6,
     title: 'Listen, Transcribe, Go Again',
     attribution: 'Eric Bogosian',
     requiredReviewer: 'acting-professional',
@@ -1640,7 +1640,7 @@ export const CHARACTER_LESSONS = [
       { p: 'Once something is on paper, interrogate it with boring questions. What was this person doing ten minutes ago? What is in their pockets? How old are they, and what has that age done to the voice and the posture? The answers are not the point. The point is what the questions shake loose.' },
     ] },
 
-  { id: 'ch-essence', module: 'piece', order: 7, movesFrom: 'ac-essence',
+  { id: 'ac-essence', module: 'piece', order: 7,
     title: 'The Person, Not the Props',
     attribution: 'Eric Bogosian',
     requiredReviewer: 'acting-professional',

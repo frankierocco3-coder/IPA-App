@@ -2780,12 +2780,18 @@ export async function run({ navDoc = document } = {}) {
 
   // ── 20. The Acting workspace ─────────────────────────────────
   {
-    check('acting: six modules hold the 47 path lessons; 8 Professional chapters shelve outside the path',
-      ACTING_MODULES.length === 6
+    // Building a Character left Acting on 2026-09-23 for the course of
+    // that name: eight lessons out (seven moved keeping their ids, the
+    // two-roads opener retired), Through Analysis kept and moved into
+    // Investigating the Text, which owns text analysis.
+    check('acting: five modules hold the 39 path lessons; 8 Professional chapters shelve outside the path',
+      ACTING_MODULES.length === 5
       && String(ACTING_MODULES.map(m => m.title))
-        === 'The Actor’s Work,Investigating the Text,Listening and Responding,Building a Character,Tempo-Rhythm,Preparing the Performance'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 47
-      && ACTING_LESSONS.length === 55
+        === 'The Actor’s Work,Investigating the Text,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 39
+      && ACTING_LESSONS.length === 47
+      && !actingLessonById('ac-character')
+      && actingLessonById('ac-analysis')?.module === 'text'
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
         .every(l => l.module === 'professional')
       && ACTING_MODULES.every(m => actingLessonsFor(m.id)
@@ -2815,7 +2821,8 @@ export async function run({ navDoc = document } = {}) {
            .reduce((n, a) => n + DISSECT_SECTIONS[a.qeSection].asks.length, 0)
          === DISSECT_SECTIONS.reduce((n, sec) => n + sec.asks.length, 0));
     check('acting: the Library collections cover the lessons without duplication',
-      ACTING_COLLECTIONS.length === 7
+      ACTING_COLLECTIONS.length === 6
+      && !ACTING_COLLECTIONS.some(c => c.id === 'character')
       && (() => {
         const listed = ACTING_COLLECTIONS.flatMap(c => c.lessons);
         return new Set(listed).size === listed.length
@@ -2863,19 +2870,16 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !doc.getElementById('freeplay'));
-      check('acting: all 57 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 51 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
-          // item (28 original + 16 Building a Character/Tempo-Rhythm + 8 Professional Actor Character /
-          // Tempo-Rhythm lessons owner-approved 2026-08-26 + Using the
-          // Fourth Wall owner-approved 2026-09-14 + Finding the
-          // Objective owner-approved 2026-09-16 + Working the
-          // Two-Hander owner-approved 2026-09-17 + 4 approaches)
-          // carries the owner's editorial verdict, none claims a
-          // specialist, and no reviewer name is invented — so the draft
-          // strip has nothing to count and must be gone.
+          // item carries the owner's editorial verdict, none claims a
+          // specialist, and no reviewer name is invented, so the draft
+          // strip has nothing to count and must be gone. 59 -> 51 on
+          // 2026-09-23: Building a Character's eight lessons left Acting
+          // for the course of that name.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 59
+          return items.length === 51
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -2895,10 +2899,10 @@ export async function run({ navDoc = document } = {}) {
       // The shared right rail legitimately names the next acting chapter
       // in its "Next step" card on every section, so chapter titles are
       // asserted absent from the Library pane itself, never the whole body.
-      check('acting: the Library landing shows collections only, never all 55 items at once',
+      check('acting: the Library landing shows collections only, never all 47 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:listening,col:character,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -3712,8 +3716,14 @@ export async function run({ navDoc = document } = {}) {
         && Array.isArray(l.body) && l.body.length >= 3));
     const actingIds = new Set(ACTING_LESSONS.map(l => l.id));
     const chIds = CHARACTER_LESSONS.map(l => l.id);
-    check('character: lesson ids are unique and never collide with Acting',
-      new Set(chIds).size === chIds.length && chIds.every(id => id.startsWith('ch-') && !actingIds.has(id)));
+    // Ids are unique, and no id lives in both courses. Seven carry the
+    // `ac-` prefix on purpose: they ARE Acting's old lessons, moved here
+    // with their ids on 2026-09-23 so completed progress survived.
+    check('character: lesson ids are unique, and no id exists in both courses',
+      new Set(chIds).size === chIds.length
+      && chIds.every(id => !actingIds.has(id))
+      && chIds.filter(id => id.startsWith('ac-')).length === 7
+      && chIds.every(id => id.startsWith('ch-') || id.startsWith('ac-')));
     const shelved = CHARACTER_COLLECTIONS.flatMap(c => c.lessons);
     const pathIds = CHARACTER_LESSONS.filter(l => !l.reference).map(l => l.id);
     check('character: the Library shelves every PATH lesson exactly once, and no reference page',
@@ -3738,7 +3748,7 @@ export async function run({ navDoc = document } = {}) {
     check('character: commedia runs in the owner’s order (why, history, slapstick, scenario; Pantalone opens the characters; Lazzi last)',
       commediaOrder[0] === 'ch-cm-why' && commediaOrder[1] === 'ch-cm-history' && commediaOrder[2] === 'ch-cm-slapstick'
       && commediaOrder[3] === 'ch-cm-scenario' && commediaOrder[4] === 'ch-cm-form'
-      && commediaOrder[5] === 'ch-archetypes' && commediaOrder[6] === 'ch-cm-mask'
+      && commediaOrder[5] === 'ac-archetypes' && commediaOrder[6] === 'ch-cm-mask'
       && commediaOrder[7] === 'ch-cm-cast' && commediaOrder.at(-1) === 'ch-cm-lazzi'
       && commediaOrder.length === 9,
       commediaOrder.join(' › '));
@@ -3748,28 +3758,21 @@ export async function run({ navDoc = document } = {}) {
       CHARACTER_MODULES[0].id === 'commedia' && CHARACTER_MODULES[0].n === 1
       && CHARACTER_COLLECTIONS[0].id === 'commedia' && CHARACTER_LESSONS[0].id === 'ch-cm-why'
       && CHARACTER_MODULES.every((m, i, all) => i === 0 || m.n > all[i - 1].n));
-    // Lessons first written for Acting's Building a Character module
-    // (owner order 2026-09-22). Each names the Acting id it takes over at
-    // launch; the unedited ones match Acting word for word, and nothing in
-    // this course keeps the retired "two roads" framing.
-    const moved = CHARACTER_LESSONS.filter(l => l.movesFrom);
+    // HANDOVER DONE 2026-09-23. Acting's Building a Character module is
+    // gone and these seven records carry its lesson ids themselves, which
+    // is what preserves progress: a learner who completed ac-inside in
+    // Acting finds it complete here, and nothing stored was migrated.
+    const TAKEN_OVER = ['ac-archetypes', 'ac-inside', 'ac-room', 'ac-waysin',
+                        'ac-noaim', 'ac-transcribe', 'ac-essence'];
     const actingById = id => ACTING_LESSONS.find(l => l.id === id);
-    check('character: lessons taken over from Acting each name a real Acting lesson',
-      moved.length === 7 && moved.every(l => actingById(l.movesFrom)?.module === 'character'));
-    // Through Analysis went back to Acting, which owns text analysis
-    // (owner order 2026-09-22), so only two takeovers needed edits.
-    const EDITED = new Set(['ch-inside', 'ch-essence']);
-    // Renamed for this course, text untouched: The Universal Cast
-    // (Archetypes) reads as What Is an Archetype here (owner order).
-    const RETITLED = new Set(['ch-archetypes']);
-    check('character: the unedited taken-over lessons match Acting word for word',
-      moved.filter(l => !EDITED.has(l.id)).every(l => JSON.stringify(l.body) === JSON.stringify(actingById(l.movesFrom).body)
-        && (l.title === actingById(l.movesFrom).title || RETITLED.has(l.id))));
-    check('character: a retitled takeover still carries Acting’s text',
-      [...RETITLED].every(id => {
-        const l = CHARACTER_LESSONS.find(x => x.id === id);
-        return l && JSON.stringify(l.body) === JSON.stringify(actingById(l.movesFrom).body);
-      }));
+    check('character: the seven Acting ids moved here and exist in exactly one course',
+      TAKEN_OVER.every(id => !!CHARACTER_LESSONS.find(l => l.id === id) && !actingById(id)));
+    check('character: nothing still points at an Acting module that no longer exists',
+      CHARACTER_LESSONS.every(l => !l.movesFrom)
+      && !ACTING_MODULES.some(m => m.id === 'character'));
+    // The retired opener is gone from both courses, not merely hidden.
+    check('character: the retired two-roads opener exists nowhere',
+      !actingById('ac-character') && !CHARACTER_LESSONS.some(l => l.id === 'ac-character'));
     // The framing's own phrases, not the word: "The Road Runner" is fine.
     const roads = CHARACTER_LESSONS.filter(l =>
       /\b(two roads|the roads|other road|this road|feeling road|analysis road|either road|cross over)\b/i.test(JSON.stringify(l)));

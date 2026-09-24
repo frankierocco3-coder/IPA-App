@@ -1130,12 +1130,18 @@ the file. The Lovers are two performers, so that chapter carries six
 sheets hold 3, 5 or 7 keyframes depending on the character, and alt text
 states the count actually drawn. Intake notes head the spec.
 Commedia (18 lessons) is written; the other
-modules follow the outline. Seven lessons of Acting's Module 4
-(the improvise-alone loop, where characters come from, and archetypes) are
-in the course as `ch-` copies carrying `movesFrom`; Through Analysis went
-back to Acting, which owns text analysis; Acting keeps its copies
-until the course is built, then its Module 4 moves over (plan in the
-outline).
+modules follow the outline. ACTING'S MODULE 4 HANDOVER IS DONE (2026-09-23).
+Acting no longer has a Building a Character module: it is FIVE modules
+and 39 path lessons (47 records), the Library has six collections, and
+Tempo-Rhythm/Preparing the Performance renumbered to 4 and 5. Seven
+lessons moved here CARRYING THEIR ACTING IDS (ac-archetypes, ac-inside,
+ac-room, ac-waysin, ac-noaim, ac-transcribe, ac-essence), which is what
+preserved progress: a learner who completed ac-inside in Acting finds it
+complete here and nothing stored was migrated. Those seven publish
+through the ledger entries Acting already had; their `ch-` entries were
+removed as orphans. `ac-character` (the two-roads opener) is RETIRED from
+both courses. Through Analysis stayed in Acting and moved into
+Investigating the Text, which owns text analysis.
 Suite section 29 pins hidden-by-default, whole records, no id clash, and
 house style on every line.
 
