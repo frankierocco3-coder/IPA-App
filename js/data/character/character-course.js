@@ -49,6 +49,8 @@ export const CHARACTER_MODULES = [
     blurb: 'The tools the masks are built from, taught on their own: your own habits first, then centre, imagined body, weight, tempo, space, walk, animal and the one gesture that holds a want.' },
   { n: 4, id: 'vocal', title: 'The Vocal Character',
     blurb: 'The voice as a consequence of the body rather than a decision taken separately: how somebody thinks shows in how they phrase, what an accent can and cannot carry, and the words a person reaches for or refuses.' },
+  { n: 5, id: 'status', title: 'Status',
+    blurb: 'Status as behaviour rather than rank: what raises or lowers a person second by second, in the body, the voice and the room, and where in a scene it changes hands.' },
   { n: 6, id: 'piece', title: 'Making the Piece',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
 ];
@@ -1290,6 +1292,154 @@ export const CHARACTER_LESSONS = [
       { p: 'The commedia masks are written this way too. Pantalone turns every relationship into a debt, and the line for him is about what he has given rather than what he feels. Il Capitano talks about what he did while carefully never describing what happened. The words are chosen to expose the want, which is the whole trick and it works in any script you will ever be handed.' },
     ] },
 
+  // ── Module 5: Status (written 2026-09-23) ─────────────────────
+  // The last piece of vocabulary the commedia breakdowns already use and
+  // nothing taught: every mask record carries a status line, and the
+  // whole form runs on authority leaking away. Useful in Acting too,
+  // which is why it is deliberately written for any scene, not just for
+  // masks.
+  { id: 'ch-st-play', module: 'status', order: 1,
+    title: 'Status Is Something You Play',
+    attribution: 'Keith Johnstone',
+    requiredReviewer: 'acting-professional',
+    objective: 'Separate the status a character has from the status they play, and work in the gap between them.',
+    orientation: 'Status is not who somebody is. It is what they do, second by second, and anybody can play any of it.',
+    reflection: 'Think of somebody with real authority who plays low. What does it get them?',
+    body: [
+      { p: 'Rank is what a character owns: a title, money, a job, a place in a family. Status is what they do about it. Those are different things, and confusing them is why so much acting about power looks like an impression of power. A duke who has to keep announcing he is a duke is playing low while holding high rank, and an audience reads that instantly.' },
+      { p: 'The useful move is to treat status as behaviour you choose, moment by moment. A servant can play high. A king can play low, and often does, because somebody secure has nothing to prove. What produces the drama is the distance between the rank a character holds and the status they are managing to play.' },
+      { h: 'The gap is where the scene is' },
+      { list: [
+        'High rank and high status: settled, unhurried, no need to check whether anyone agrees. Rarely interesting for long.',
+        'High rank and low status: somebody losing their grip, insisting on an authority that is draining away while they talk.',
+        'Low rank and high status: the most watchable of the four. Somebody with nothing behaving as though the room belongs to them.',
+        'Low rank and low status: only interesting when they decide to stop, which is the turn most plays are built on.',
+      ] },
+      { h: 'The whole company, read this way' },
+      { p: 'Commedia is a machine for this. Pantalone has the rank and spends every scene watching his authority leak away while he insists on it. Il Capitano has no rank at all and plays high continuously, which is the joke, and the question that punctures him is always what he actually did. Colombina has the lowest rank in the household and the highest working authority in it, because she is the only one who understands the whole situation. Three characters, three different gaps, and the gap is the comedy in each case.' },
+      { h: 'Try it' },
+      { steps: [
+        'Take one plain line. “I did not know you were coming.”',
+        'Play it as somebody who owns the room. Do not add attitude. Simply stop needing anything from the other person.',
+        'Play it as somebody who is apologising for existing, without changing a word.',
+        'Now play it as somebody with no power at all who has decided to behave as though they have all of it.',
+        'The third one is the one worth keeping. Notice it is not louder than the first.',
+      ] },
+    ] },
+
+  { id: 'ch-st-body', module: 'status', order: 2,
+    title: 'High and Low in the Body',
+    attribution: 'Keith Johnstone',
+    requiredReviewer: 'acting-professional',
+    objective: 'Play status physically, using stillness, the head and the eyes rather than attitude.',
+    orientation: 'Status is visible from the back of the room long before anybody has spoken.',
+    reflection: 'Which of the high-status habits is hardest for you, and what does that say about your own defaults?',
+    body: [
+      { p: 'The single most reliable signal is stillness. High status keeps the head still, moves when it has decided to, and does not fill silences with small adjustments. Low status fidgets, touches its own face and hair, shifts weight, and produces little sounds while thinking. None of that is about confidence as a feeling. It is a set of behaviours, and you can play them on a day when you feel nothing of the kind.' },
+      { list: [
+        'The head. Still is high. Bobbing, tilting and nodding along while somebody else speaks is low.',
+        'The eyes. Low status checks constantly to see how it is going. High status looks when it chooses to and is comfortable looking away, because it does not need the information.',
+        'The hands. Away from the face is high. Covering the mouth, touching the neck or the hair is low.',
+        'Weight. Settled and even is high. Shifting from foot to foot is low.',
+        'Speed of response. Answering instantly is low. A beat before answering is high, and a beat too long is a threat.',
+      ] },
+      { p: 'The trap is playing these as a personality. Somebody is not a high-status person; they are somebody playing high right now, in this room, with this person, and it can change in a line. The moment you fix it as a character trait it stops moving, and status that does not move is not doing any work.' },
+      { h: 'Try it: one change at a time' },
+      { steps: [
+        'Have a short ordinary conversation, real or imagined, and keep your head completely still throughout. Notice what it does to you.',
+        'Do it again and let your head move freely, nodding along, tilting toward the other person.',
+        'Again, keeping the hands away from the face entirely.',
+        'Again, taking a full beat before every answer.',
+        'Now combine the two that changed the most, and say a line you already know from a script.',
+      ] },
+      { p: 'Work comfortably and do not hold any position that strains. Stillness here means unhurried, not rigid, and a body braced into stillness reads as tension rather than authority.' },
+    ] },
+
+  { id: 'ch-st-voice', module: 'status', order: 3,
+    title: 'Status in the Voice',
+    attribution: 'Keith Johnstone',
+    requiredReviewer: 'acting-professional',
+    objective: 'Hear status in pace, pauses and endings, and play it without raising your volume.',
+    orientation: 'The quietest person in a scene is very often the highest. Volume is not status.',
+    reflection: 'Whose sentences does your character finish, and who finishes theirs?',
+    body: [
+      { p: 'Loudness is the first thing actors reach for and it is close to useless. Shouting is usually somebody who has run out of authority. What actually carries status is control of time: who can pause, who can take as long as they like, and who has to hurry in case they lose the floor.' },
+      { list: [
+        'Pauses. High status can stop in the middle of a sentence and nobody fills the gap. Low status keeps talking to hold the space.',
+        'Endings. Sentences that fall at the end are high. Sentences that lift, as though checking the answer is acceptable, are low.',
+        'Interruption. Who talks over whom, who stops when interrupted, and who carries on until they are finished.',
+        'Repair. Low status apologises for its own sentences: starting again, adding explanations nobody asked for, softening the request until it disappears.',
+        'The filler. Small sounds while thinking are low, and removing them is the fastest single change you can make.',
+      ] },
+      { p: 'This pairs with the rhythm work in the last module. Somebody who knows how their sentence ends before they begin it is usually playing high, and somebody assembling the thought in public is usually playing low. That is a rhythm, not a voice, which is why status can flip inside one speech without the voice changing at all.' },
+      { h: 'Try it' },
+      { steps: [
+        'Take a short request. Ask for something you actually want.',
+        'Ask it low: hurry it, lift the ending, add a reason, then add another reason.',
+        'Ask it high: say it once, let the ending fall, and then stop talking. Do not repeat it and do not explain.',
+        'Notice how uncomfortable the silence after the high version is, and that the discomfort is the whole point.',
+        'Now play somebody who asks high and then, when the answer is slow, drops to low mid-scene.',
+      ] },
+      { p: 'None of this asks for volume or force. If you find yourself pushing to sound authoritative, you are playing the opposite of what you intend, and your voice will pay for it before the scene does.' },
+    ] },
+
+  { id: 'ch-st-seesaw', module: 'status', order: 4,
+    title: 'The Seesaw',
+    attribution: 'Keith Johnstone',
+    requiredReviewer: 'acting-professional',
+    objective: 'Move status line by line, by raising or lowering yourself or the other person.',
+    orientation: 'Status is not a setting for a character. It is a thing two people do to each other, continuously.',
+    reflection: 'In your scene, where does the status change hands, and does the audience see it happen?',
+    body: [
+      { p: 'Status only exists between people. Nobody is high in an empty room. That makes it a seesaw: every line either raises or lowers somebody, and the interesting question in any scene is not who is on top but where it changes hands.' },
+      { h: 'The four moves' },
+      { list: [
+        'Raise yourself. Claim knowledge, space, time or the right to decide.',
+        'Lower yourself. Apologise, defer, make yourself smaller, invite correction.',
+        'Raise them. Flatter, ask their opinion, treat their judgement as final.',
+        'Lower them. Correct, interrupt, ignore, explain something they already know.',
+      ] },
+      { p: 'The two that look alike are worth separating, because actors confuse them constantly. Raising yourself and lowering them are not the same move. Somebody who builds themselves up is usually insecure. Somebody who quietly lowers everybody else, while claiming nothing at all, is far more dangerous, and an audience reads the difference without being able to name it.' },
+      { p: 'A scene worth watching almost always contains a transfer. Somebody comes in high and leaves low, or the servant who began by apologising ends up running the room. The moment of handover is the event, and if you play one status setting all the way through, you have played a situation rather than a scene.' },
+      { h: 'Try it: with a partner or alone' },
+      { steps: [
+        'Take any short two-hander, from the Scenes shelf or anywhere else.',
+        'Mark every line with one of the four moves. Do not worry about being right; worry about deciding.',
+        'Read it through playing only those choices.',
+        'Find the line where status changes hands. If there is not one, invent one and see what the scene becomes.',
+        'Alone, do the same by reading both parts and switching seats, physically, on every line.',
+      ] },
+      { p: 'Commedia runs almost entirely on this. The masters give orders and the servants appear to obey while quietly arranging the outcome, so the rank never moves and the status moves constantly. That is the engine, and it is the same engine in any office, family or waiting room you have ever sat in.' },
+    ] },
+
+  { id: 'ch-st-space', module: 'status', order: 5,
+    title: 'Status and Space',
+    attribution: 'Keith Johnstone',
+    requiredReviewer: 'acting-professional',
+    objective: 'Play status through territory: who takes the room, who moves for whom, and who waits at the edge.',
+    orientation: 'Watch who moves out of the way. That is the whole hierarchy, settled before anybody speaks.',
+    reflection: 'In the room you know best, who owns it, and how would somebody watching be able to tell?',
+    body: [
+      { p: 'Space is the most honest status signal because it is the hardest to fake. Somebody who owns a room walks through the middle of it. Somebody who does not skirts the edge, keeps near the door, and takes the seat nobody wanted. Watch two people meet in a corridor and notice which one adjusts. That adjustment happens below thinking and it settles the question.' },
+      { list: [
+        'The path. Straight through the middle, or around the outside.',
+        'The furniture. Who sits without being asked, who stays standing, and who is left standing while somebody else sits.',
+        'Distance. Who closes it, who keeps it, and what happens when somebody comes closer than expected.',
+        'Belongings. Whose coat is on the chair, whose things are spread out, and who keeps everything on their lap.',
+        'The exit. Who stands between the other person and the door. It is an old trick and it still works.',
+      ] },
+      { h: 'How much room do you believe you are owed' },
+      { p: 'That one question carries most of it, and the commedia breakdowns answer it for every character. Pantalone takes all the space he believes he has paid for, which is a claim about ownership rather than confidence. Il Capitano takes space he has not earned, planting his feet wide and pushing his chest into the room, and the comedy is how quickly it collapses. Arlecchino claims space by never staying anywhere long enough to be removed from it. Pedrolino stands entirely open and defends nothing, which is why what happens to him lands so hard.' },
+      { h: 'Try it' },
+      { steps: [
+        'In a real room, cross it as somebody who is allowed to be there. Then cross it as somebody who is not sure.',
+        'Sit down as the person who owns the room, then as the person waiting to be seen.',
+        'Imagine somebody entering. Decide whether you adjust for them or let them adjust for you, and play it without a word.',
+        'Now play a character who takes more space than their rank allows, and find the moment they realise it.',
+      ] },
+      { p: 'Keep all of it inside what your body finds comfortable. Nothing here needs to be held, forced or sustained, and taking space is a decision rather than an effort.' },
+    ] },
+
   // ── Lessons first written for Acting's Building a Character module ──
   // (owner order 2026-09-22: the course takes them over). Acting keeps its
   // own copies until this course is built; then Acting's module comes
@@ -1426,7 +1576,7 @@ export const CHARACTER_LESSONS = [
 ];
 
 // One Library shelf per module, in path order.
-const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️' };
+const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️', status: '⚖️' };
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], title: m.title,
   lessons: CHARACTER_LESSONS.filter(l => l.module === m.id && !l.reference)
