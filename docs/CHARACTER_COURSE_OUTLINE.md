@@ -239,7 +239,15 @@ written-only).
 the address (`#character-preview-off` closes it). Like #audit and #review
 it is not authenticated, so treat what it shows as public.
 
-**Launch checklist** (when the threshold below is met):
+**LAUNCHED 2026-09-23.** All four checklist items below are done: 38
+owner-approved entries in the ledger, commedia sources on Sources &
+Credits, the suite's hidden-course pins rewritten to assert the launched
+state, and `CHARACTER_LIVE` flipped. Published on the owner's editorial
+approval alone. Specialist review by a named acting teacher or coach is
+outstanding for every record and is tracked in #review. Status and
+Playing the Role remain unwritten; the course launched at four modules.
+
+**Launch checklist** (kept for the record; all complete):
 1. A publication entry in js/data/speech/reviews.js for every lesson to
    publish (the ledger Acting uses), and update regression section 29's
    "nothing is published" pin.

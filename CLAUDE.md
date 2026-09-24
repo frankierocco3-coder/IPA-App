@@ -1088,10 +1088,18 @@ picture, not the lesson's conclusion; captions are learner copy in house
 style. The suite checks every key resolves, every file ships, captions
 keep house style, and the chapter renders both figures.
 
-BUILDING A CHARACTER (2026-09-22): a fourth workspace, HIDDEN behind
-CHARACTER_LIVE=false (js/views/context.js); the owner reads it through
-the `#character-preview` link (sets localStorage
-speechcraft-character-preview; `#character-preview-off` clears it).
+BUILDING A CHARACTER (2026-09-22; **LAUNCHED 2026-09-23**): the fourth
+workspace, now LIVE (CHARACTER_LIVE=true in js/views/context.js). All 38
+records carry an `owner-approved` entry in js/data/speech/reviews.js
+(reviewerType product-owner-editorial), exactly as Acting launched:
+specialist review by a NAMED acting teacher or coach is still
+OUTSTANDING for every record and stays tracked — awaitingSpecialist() is
+true throughout, and the suite pins that. Four modules are written
+(Commedia 18 records, The Physical Character 7, The Vocal Character 5,
+Making the Piece 8); Status and Playing the Role are NOT written. The
+`#character-preview` link survives and now only turns ON the influence
+tags that replace module titles in the owner's view (Making the Piece
+shows as its real title to learners).
 Three kinds of character work: from scratch, a given role, and Commedia
 dell’Arte. Commedia comes FIRST (owner decision): its ready-made characters
 teach what any character is made of before the learner builds their own;

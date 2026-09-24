@@ -60,7 +60,7 @@ import { SPEECH_ROUTINES, PRACTICE_SUBJECTS, routinesFor,
          learnerRoutines, draftRoutines } from '../js/data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById } from '../js/data/speech/arcade.js';
 import { SPEECH_TEXTS } from '../js/data/speech/texts.js';
-import { speechApproved, speechBodyVisible, speechReviewFor } from '../js/data/speech/reviews.js';
+import { awaitingSpecialist, speechApproved, speechBodyVisible, speechReviewFor } from '../js/data/speech/reviews.js';
 import { speechGoal, setSpeechGoal, speechHistory, speechLessonDone } from '../js/data/speech/store.js';
 import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
          actingLessonById, actingLessonNumber } from '../js/data/acting/acting-course.js';
@@ -2767,8 +2767,8 @@ export async function run({ navDoc = document } = {}) {
       new (document.querySelector('iframe').contentWindow.MouseEvent)('click', { bubbles: true }));
     await scSleep(200);
     const wsRows = [...fdoc.querySelectorAll('[data-ws]')].map(b => b.dataset.ws);
-    check('speech: the workspace is withdrawn — three live workspaces, no Speech row',
-      String(wsRows) === 'acting,ipa,accents');
+    check('speech: the workspace is withdrawn — no Speech row among the live workspaces',
+      String(wsRows) === 'acting,ipa,accents,character');
     check('speech: withdrawal is a flag, not a deletion — every record survives it',
       SPEECH_LESSONS.length === 25 && textbookOrder().length === 25
       && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional')
@@ -2851,9 +2851,9 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(200);
-      check('acting: the selector offers the three live workspaces, Speech withdrawn',
+      check('acting: the selector offers every live workspace, Speech withdrawn',
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join()
-          === 'Acting,Voice & Speech,Accents & Dialects');
+          === 'Acting,Voice & Speech,Accents & Dialects,Building a Character');
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
       check('acting: the workspace keeps its guided course and its Library',
@@ -3690,10 +3690,18 @@ export async function run({ navDoc = document } = {}) {
     let savedPreview = null;
     try { savedPreview = localStorage.getItem(CHARACTER_PREVIEW_KEY); localStorage.removeItem(CHARACTER_PREVIEW_KEY); } catch {}
     try {
-      check('character: hidden from learners until it launches',
-        CHARACTER_LIVE === false && !liveWorkspaces().some(w => w.id === 'character'));
-      check('character: no lesson is visible without the preview or a publication entry',
-        CHARACTER_LESSONS.every(l => !characterVisible(l) && speechReviewFor(l.id) === null));
+      // Launched 2026-09-23. The workspace is a live one now, and every
+      // record carries a publication entry, so visibility no longer
+      // depends on the preview flag being set.
+      check('character: the workspace is live and offered in the selector',
+        CHARACTER_LIVE === true && liveWorkspaces().some(w => w.id === 'character'));
+      check('character: every lesson is published, and none rests on the preview flag',
+        CHARACTER_LESSONS.every(l => characterVisible(l) && speechReviewFor(l.id) !== null));
+      // Published on owner editorial approval only. If this ever passes
+      // with a specialist verdict it means someone recorded a sign-off,
+      // which is a real event and should be a deliberate edit here.
+      check('character: publication is owner editorial, specialist review still outstanding',
+        CHARACTER_LESSONS.every(l => awaitingSpecialist(l.id)));
     } finally {
       try { if (savedPreview !== null) localStorage.setItem(CHARACTER_PREVIEW_KEY, savedPreview); } catch {}
     }
@@ -3862,8 +3870,8 @@ export async function run({ navDoc = document } = {}) {
       check('notebook: opens on the notebook for wherever the learner is',
         notebookForContext('acting', 'nam') === 'acting' && notebookForContext('ipa', 'core') === 'ipa'
         && notebookForContext('accents', 'rp') === 'rp' && notebookForContext('accents', 'cockney') === 'ipa');
-      check('notebook: the Building a Character notebook stays hidden with its course',
-        notebookForContext('character', 'nam') === 'acting');
+      check('notebook: the Building a Character notebook opens with its launched course',
+        notebookForContext('character', 'nam') === 'character');
     } finally {
       try { if (savedPreview !== null) localStorage.setItem(CHARACTER_PREVIEW_KEY, savedPreview); } catch {}
     }

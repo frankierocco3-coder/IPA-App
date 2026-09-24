@@ -95,12 +95,14 @@ export const WORKSPACES = [
 // Oratory shelve in the Acting Library meanwhile. Flip to true and the
 // Speech workspace returns whole.
 export const SPEECH_LIVE = false;
-// Building a Character (owner decision 2026-09-22) is being written and
-// stays hidden until enough of it exists to stand alone, the lesson the
-// Speech withdrawal taught. The owner reads it meanwhile through a
-// preview flag set by the #character-preview link (like #audit and
-// #review, not authenticated: treat what it shows as public).
-export const CHARACTER_LIVE = false;
+// Building a Character LAUNCHED 2026-09-23 on the owner's editorial
+// approval, once four modules existed and the course could stand alone
+// (the lesson the Speech withdrawal taught). Every record carries an
+// owner-approved entry in js/data/speech/reviews.js; specialist review
+// by a named acting teacher or coach is still outstanding and tracked.
+// The #character-preview link remains, and now only suppresses the
+// influence tags on module titles.
+export const CHARACTER_LIVE = true;
 export const CHARACTER_PREVIEW_KEY = 'speechcraft-character-preview';
 export const characterPreview = () => {
   try { return localStorage.getItem(CHARACTER_PREVIEW_KEY) === 'on'; } catch { return false; }
