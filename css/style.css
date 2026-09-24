@@ -618,6 +618,29 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .ln-num { flex: none; width: 20px; text-align: right; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .ln-text { font-family: var(--serif); font-size: 18px; line-height: 1.35; }
 
+/* Side by Side: the verse beside what it says. Two columns on a desk,
+   stacked on a phone. The meaning column can be covered so a learner can
+   work from the verse alone once they have read it. */
+.sbs-controls { margin: 0 0 12px; }
+.sbs { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+.sbs-h {
+  font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 8px; font-weight: 600;
+}
+.sbs-line {
+  display: flex; align-items: baseline; gap: 12px; margin: 0 0 2px;
+  font-family: var(--serif); font-size: 18px; line-height: 1.5;
+}
+.sbs-n { flex: none; width: 20px; text-align: right; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sbs-meaning { border-left: 1px solid var(--line); padding-left: 22px; }
+.sbs.is-covered .sbs-meaning .guide-text {
+  filter: blur(5px); opacity: .45; user-select: none;
+}
+@media (max-width: 720px) {
+  .sbs { grid-template-columns: 1fr; gap: 18px; }
+  .sbs-meaning { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 16px; }
+}
+
 .scan { display: flex; flex-direction: column; gap: 12px; }
 .scan-line { display: flex; align-items: flex-end; gap: 10px; }
 .scan-syls { flex: 1; line-height: 2.4; }

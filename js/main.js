@@ -7944,6 +7944,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
         ${CAPABILITIES.learnerSpeaking ? '<button class="son-tab" data-mode="perform">🎙 Perform</button>' : ''}
         ${recast?.plain ? '<button class="son-tab" data-mode="plain">📖 Plain Meaning</button>' : ''}
+        ${recast?.plain ? '<button class="son-tab" data-mode="both">🔀 Side by Side</button>' : ''}
         ${today.length ? '<button class="son-tab" data-mode="today">🗣 In Today’s Voice</button>' : ''}
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
@@ -7973,6 +7974,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
     else if (m === 'plain') { pane.innerHTML = plainPane(recast); }
+    else if (m === 'both') { pane.innerHTML = sideBySidePane(lines, recast); wireSideBySide(pane); }
     else if (m === 'today') { todayPane(pane, today); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
@@ -8395,6 +8397,47 @@ function plainPane(recast) {
   return `
     <p class="pane-note">📖 <b>Plain Meaning</b> — what the original says, in plain prose. The full text is in the Listen tab.</p>
     <p class="guide-text">${esc(recast.plain)}</p>`;
+}
+
+// Side by Side — the reading view of "Shakespeare Basically": the verse
+// and what it means, without flipping tabs to hold both in mind.
+//
+// The Plain Meaning is ONE PROSE PARAGRAPH, not a line-by-line gloss, so
+// this aligns the two texts as columns and makes no claim to align them
+// line for line. The spec's colour-coded phrase links would need
+// per-line alignment data that does not exist, and inventing the
+// appearance of it would be worse than not having it.
+//
+// The cover button is the study exercise: read the meaning once, hide
+// it, and work from the verse alone. That is the direction the whole
+// feature is meant to travel in, so the control says so.
+function sideBySidePane(lines, recast) {
+  return `
+    <p class="pane-note">📖 <b>Side by Side</b> — the verse, and what it says. The meaning is a bridge to the original, not a substitute for speaking it.</p>
+    <div class="sbs-controls">
+      <button class="btn btn-lite" id="sbs-cover" type="button" aria-pressed="false">Hide the meaning</button>
+    </div>
+    <div class="sbs" id="sbs">
+      <div class="sbs-col sbs-verse">
+        <h3 class="sbs-h">Original</h3>
+        ${lines.map((l, i) => `<p class="sbs-line"><span class="sbs-n">${i + 1}</span>${esc(l)}</p>`).join('')}
+      </div>
+      <div class="sbs-col sbs-meaning" id="sbs-meaning">
+        <h3 class="sbs-h">What it says</h3>
+        <p class="guide-text">${esc(recast.plain)}</p>
+      </div>
+    </div>`;
+}
+
+function wireSideBySide(pane) {
+  const btn = pane.querySelector('#sbs-cover');
+  const box = pane.querySelector('#sbs');
+  if (!btn || !box) return;
+  btn.addEventListener('click', () => {
+    const hidden = box.classList.toggle('is-covered');
+    btn.setAttribute('aria-pressed', String(hidden));
+    btn.textContent = hidden ? 'Show the meaning' : 'Hide the meaning';
+  });
 }
 
 // In Today's Voice: the sonnet's ideas re-voiced in a contemporary
