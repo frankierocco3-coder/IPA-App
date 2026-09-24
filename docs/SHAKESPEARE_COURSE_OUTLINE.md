@@ -206,6 +206,42 @@ B03, which switched `learnerSpeaking` off across the whole app.
 
 ---
 
+## Rejected: an external 154-sonnet IPA and modern-English file
+
+Audited 2026-09-24 (a generated file supplied by the owner) and **not
+imported**. Recorded here so it is not reconsidered.
+
+**Its original text was byte-identical to `sonnets.js` across all 154**,
+which is the one thing it got right.
+
+**Its IPA was a different system from ours on four axes**: `ɹ` for the
+rhotic 8,576 times where the app writes `/r/` by documented decision,
+`ʧ`/`ʤ` ligatures for `tʃ`/`dʒ`, no length marks, and `əɹ` for NURSE
+where the app has `ɝ` and `ɚ`. Most telling, **`ʌ` appeared zero times in
+4,310 lines of English** — STRUT collapsed into schwa, erasing a contrast
+the course drills. `dialect_lint` would reject it.
+
+**It also contained real errors**, not just convention: 172 instances of
+epenthesis inside consonant clusters (*spring* as `/spəɹɪŋ/`, 14 times),
+*beauty's* as one syllable 36 times, *as* as `/ɛz/` 76 times. Both
+syllable errors matter doubly in a course about metre.
+
+**Its "Contemporary English" was 63% character-identical to the
+original** and left *ere*, *thou*, *nor*, *thence*, *o'er*, *decease*,
+*self-substantial* and *niggarding* untranslated — the exact words a
+modern rendering exists for.
+
+**The file was also redundant.** The reader already transcribes any
+sonnet to Neutral American word by word from the dictionary, and marks
+the words it does not know rather than guessing. Those unknown words are
+precisely where the generated file invented pronunciations and stated
+them with the same confidence as the rest.
+
+**Standing rule this sets:** Shakespeare IPA comes from the app's own
+pipeline. An external transcription is not imported without an audit
+against `sonnets.js` and the nam inventory, and honest gaps beat
+confident guesses.
+
 ## The open scoping question
 
 **"All the Shakespeare text gets the full treatment."** In the app today
