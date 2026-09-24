@@ -23,4 +23,23 @@
 // js/data/recasts.js (TRANSPOSITION_REVIEW), and their Plain Meanings
 // are live by prior owner decision.
 
-export const EDITION_REVIEWS = {};
+// ── Working set, batch 1 (owner read and approved 2026-09-24) ──
+// Plain Meanings only: the Shakespeare course is Neutral American, so no
+// dialect voice is written or reviewed here (owner decision, same day).
+//
+// These are OWNER EDITORIAL approvals. Frankie read each Plain Meaning
+// against its original at #review and spoke for it individually; nothing
+// was batch-approved, and no credentialed Shakespeare scholar has
+// reviewed any of them. The revisionNotes on every entry say so, because
+// the reviewer field alone would imply more than happened.
+const OWNER_LIT = { status: 'approved', reviewer: 'Product owner', date: '2026-09-24' };
+const OWNER_NOTE = 'Owner editorial approval, read against the original at #review. '
+  + 'NOT a scholarly sign-off: no Shakespeare specialist has reviewed this text.';
+
+export const EDITION_REVIEWS = {
+  '12.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '15.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '30.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '55.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '60.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+};
