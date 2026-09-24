@@ -42,4 +42,16 @@ export const EDITION_REVIEWS = {
   '30.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
   '55.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
   '60.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+
+  // ── Batch 2, love and loss (owner read and approved 2026-09-24) ──
+  '27.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '40.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Reads "this more" as the mistress and the sonnet as '
+      + 'betrayal, which is the majority reading but not the only one; approved with that '
+      + 'single reading by owner decision after the alternative was raised.' },
+  '64.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '65.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '71.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Closing sentence rewritten before approval: it had '
+      + 'addressed reviewers rather than the learner.' },
 };
