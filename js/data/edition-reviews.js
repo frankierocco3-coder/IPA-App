@@ -64,4 +64,22 @@ export const EDITION_REVIEWS = {
       + 'four centuries of critics have not.' },
   '104.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
   '106.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+
+  // ── Batch 4, the Dark Lady group (owner approved 2026-09-24) ──
+  '127.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Revised before approval: added a note that "black" in '
+      + 'this group carries associations a modern reader cannot hear neutrally, and that '
+      + 'the performance choice should be made deliberately.' },
+  '129.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Revised before approval: the opening phrase is now '
+      + 'glossed as physical (spirit as semen, expense as spending, a pun on waist), which '
+      + 'the feature spec requires for sexual language and the draft had passed over.' },
+  '138.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '141.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Revised before approval: two clauses reversed the '
+      + 'original sense, on "tender feeling, to base touches prone" and on "who leaves '
+      + 'unswayed the likeness of a man".' },
+  '147.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Revised before approval: added a note on the closing '
+      + 'line, where blackness is doing moral work rather than description.' },
 };
