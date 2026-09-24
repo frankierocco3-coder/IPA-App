@@ -44,6 +44,7 @@ import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/dat
 import { SONNETS } from '../js/data/sonnets.js';
 import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
+import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
@@ -1719,9 +1720,20 @@ export async function run({ navDoc = document } = {}) {
         && e.aus?.length > 100 && !('rp' in e)));
     check('editions: the four texts are mutually distinct per sonnet',
       Object.values(newEds).every(e => new Set([e.plain, e.nam, e.ssbe, e.aus]).size === 4));
-    check('editions: every new text is a DRAFT — nothing learner-visible',
-      edKeys.every(n => editionStatus(n, 'plain') === 'draft'
-        && ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft')));
+    // The owner began approving Plain Meanings on 2026-09-24, one batch at
+    // a time, reading each against its original. So "nothing is visible" is
+    // no longer the invariant; what still holds is that a text is visible
+    // ONLY with an entry naming a human, and that no dialect voice has been
+    // approved at all, since the Shakespeare course is Neutral American.
+    const approvedPlain = edKeys.filter(n => editionStatus(n, 'plain') === 'approved');
+    check('editions: a Plain Meaning is visible only with a named reviewer on record',
+      approvedPlain.every(n => {
+        const r = EDITION_REVIEWS[`${n}.plain`];
+        return r?.verdict === 'approved' && r?.literary?.status === 'approved'
+          && !!r?.literary?.reviewer && !!r?.literary?.date;
+      }));
+    check('editions: no dialect voice is approved — the course is Neutral American',
+      edKeys.every(n => ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft')));
     check('editions: the five pilots stay in the original queue, unduplicated',
       (await editionFor(18))?.legacy === true
       && (await editionFor(18)).voices.nam === RECASTS[18].recasts.nam

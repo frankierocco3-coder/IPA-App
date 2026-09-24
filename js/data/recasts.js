@@ -33,12 +33,18 @@ export const TRANSPOSITION_LABELS = {
 
 // Sonnet 18 is the structural pilot: every view wired end to end, all
 // transpositions still awaiting review.
+// `plain` is a RECORD, not a gate. Nothing reads it: voiceStatus and
+// approvedTranspositions only ever look up dialect keys, and Plain
+// Meaning has been live since the pilots shipped. It is here so all 25
+// sonnets of the reviewed working set carry a review trail — the other
+// 20 are in js/data/edition-reviews.js — instead of five of the
+// most-read texts in the app having none (owner read 2026-09-24).
 export const TRANSPOSITION_REVIEW = {
-  18: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
-  29: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
-  73: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
-  116: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
-  130: { nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  18: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  29: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  73: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  116: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
+  130: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
 };
 
 // The dialects of sonnet `n` a learner may see under In Today's Voice:
@@ -81,7 +87,7 @@ export const RECASTS = {
     },
   },
   130: {
-    plain: 'The speaker catalogues everything a conventional love poem would claim and refuses each one: the mistress’s eyes aren’t like the sun, her lips aren’t coral-red, her skin isn’t snow-white, her hair is ordinary, her cheeks aren’t roses, her breath isn’t perfume, her voice isn’t music, and she walks on the ground like anyone. The turn: and yet — the speaker’s love is as rare as any woman ever lied about with false comparisons. It’s a love poem against exaggeration: she’s real, and that’s the point.',
+    plain: 'The speaker catalogues everything a conventional love poem would claim and refuses each one: the mistress’s eyes aren’t like the sun, her lips aren’t coral-red, her breasts are dun beside snow, black wires grow on her head, her cheeks aren’t roses, her breath isn’t perfume, her voice isn’t music, and she walks on the ground like anyone. The turn: and yet — the speaker’s love is as rare as any woman ever lied about with false comparisons. It’s a love poem against exaggeration: she’s real, and that’s the point. Two of those details are specific rather than generic, and worth keeping specific: dun is a dull greyish brown, and the hair is black. This is a Dark Lady sonnet, and the same note applies here as across that group — the language of colour is doing more than one job, a modern reader cannot hear it neutrally, and the performance choice is worth making deliberately.',
     recasts: {
       nam: `My girlfriend's eyes are nothing like the sun.\nCoral's way redder than her lips.\nSnow's white — her skin's just skin.\nHer hair? It's hair. Regular hair.\nI've seen roses, pink and deep red —\nher cheeks aren't roses, sorry.\nAnd some perfumes honestly smell better\nthan her breath does some mornings.\nI love hearing her talk — but let's be real,\nmusic sounds better.\nNever seen a goddess walk, myself;\nshe walks on the ground like the rest of us.\nAnd still — I swear she's as rare\nas any woman anyone ever lied a poem about.`,
       ssbe: `My girlfriend's eyes are nothing like the sun.\nCoral's miles redder than her mouth.\nIf snow's white, well — her skin's more of a normal colour.\nHer hair's just hair, isn't it.\nI've seen proper roses, pink and red —\nnothing like that going on in her cheeks.\nAnd some perfumes, honestly, are nicer\nthan her breath first thing.\nI love listening to her — still,\nmusic's got the edge, hasn't it.\nCan't say I've ever seen a goddess about;\nshe walks on the pavement like everyone else.\nAnd yet — I swear she's as rare\nas any woman ever flattered with rubbish comparisons.`,
