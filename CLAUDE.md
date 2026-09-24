@@ -1094,9 +1094,13 @@ records carry an `owner-approved` entry in js/data/speech/reviews.js
 (reviewerType product-owner-editorial), exactly as Acting launched:
 specialist review by a NAMED acting teacher or coach is still
 OUTSTANDING for every record and stays tracked — awaitingSpecialist() is
-true throughout, and the suite pins that. Four modules are written
-(Commedia 18 records, The Physical Character 7, The Vocal Character 5,
-Making the Piece 8); Status and Playing the Role are NOT written. The
+true throughout, and the suite pins that. ALL SIX MODULES ARE WRITTEN as
+of 2026-09-23, 47 records: Commedia dell'Arte 18 (9 path + 9 reference),
+The Physical Character 7, The Vocal Character 5, Status 5, Making the
+Piece 8, Playing the Role 4. Modules added to the LIVE course must ship
+their ledger entries in the SAME commit or learners get a shelf of
+draft-gated lessons; the suite's every-lesson-is-published check catches
+it. The
 `#character-preview` link survives and now only turns ON the influence
 tags that replace module titles in the owner's view (Making the Piece
 shows as its real title to learners).

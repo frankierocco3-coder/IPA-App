@@ -53,6 +53,8 @@ export const CHARACTER_MODULES = [
     blurb: 'Status as behaviour rather than rank: what raises or lowers a person second by second, in the body, the voice and the room, and where in a scene it changes hands.' },
   { n: 6, id: 'piece', title: 'Making the Piece',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
+  { n: 9, id: 'role', title: 'Playing the Role',
+    blurb: 'Where the whole course points: turning what the text found into choices a body can play, deciding how far to transform, holding it while you genuinely listen, and keeping one record of the person you can return to.' },
 ];
 
 // ── The masks: ONE record per character ─────────────────────
@@ -1440,6 +1442,107 @@ export const CHARACTER_LESSONS = [
       { p: 'Keep all of it inside what your body finds comfortable. Nothing here needs to be held, forced or sustained, and taking space is a decision rather than an effort.' },
     ] },
 
+  // ── Module 9: Playing the Role (written 2026-09-23) ───────────
+  // The closer. Everything before this builds a person; this points the
+  // whole course at a script and at the My Characters worksheet, which
+  // is the character bible the last lesson teaches.
+  { id: 'ch-ro-page', module: 'role', order: 1,
+    title: 'From the Page to the Body',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Turn what reading the text found into physical and vocal choices you can actually play.',
+    orientation: 'Analysis gives you answers. Performance needs choices, and they are not the same thing.',
+    reflection: 'Which of your findings has no physical form yet, and what would it look like if it had one?',
+    body: [
+      { p: 'By the time you reach this point you have two sets of material that have never met. Reading the text told you what this person wants, what stands in the way, what happened before the scene, what it costs them and what everyone else says about them. This course gave you a body, a voice, a walk, a centre and a status. The work now is translation, and most unconvincing performances are unfinished translations: a great deal of understanding, still sitting in the head.' },
+      { p: 'The move is mechanical and it is worth doing on paper. Take one finding at a time and give it exactly one physical or vocal consequence. Not a feeling, not an adjective. A thing the body does.' },
+      { h: 'A worked example' },
+      { list: [
+        'Finding: she is the only person in the scene who knows the money is gone. Choice: she is the stillest person on stage, and the stillness is the secret.',
+        'Finding: he has not slept and will not say so. Choice: the breath is shallow and the sentences are shorter than his usual ones.',
+        'Finding: she is in somebody else’s house and hates it. Choice: she never sits, and she keeps to the edge of the room.',
+        'Finding: he was in charge until three months ago. Choice: he still takes the space, and the voice has stopped matching it.',
+      ] },
+      { p: 'Notice that each one is checkable. You can tell from the back of the room whether an actor is sitting, where they are standing, how long their sentences are. That is the standard: if a choice cannot be seen or heard, it is still analysis.' },
+      { h: 'Then stop playing the analysis' },
+      { p: 'Once the choices are in the body, put the findings away. An actor who is still thinking about their objective while speaking is running two processes and the audience can hear the second one. The preparation is what makes the person available. The scene is what happens to them.' },
+      { p: 'Do not try to install twelve choices at once. Three or four that genuinely change what your body does will carry more than a full page of notes you cannot feel.' },
+    ] },
+
+  { id: 'ch-ro-howfar', module: 'role', order: 2,
+    title: 'How Far to Go',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Decide how much transformation a role needs, and know what never changes.',
+    orientation: 'Transformation is a tool, not a virtue. Some roles need a great deal of it and some need almost none.',
+    reflection: 'For your current role, what is the smallest change that would still make them somebody other than you?',
+    body: [
+      { p: 'There is a persistent idea that the more an actor changes, the better the acting. It is not true, and it produces a particular kind of bad performance: enormously worked, entirely visible, and strangely empty. The amount of transformation a role needs is a question about the role, not about how hard you are prepared to work.' },
+      { p: 'Some parts need a different body, a different voice and a different rhythm, because the distance between you and them is the point. Some need you, almost unaltered, standing very still and telling the truth. A film close-up and a masked character in a square are asking for opposite amounts, and an actor who only has one setting is only useful half the time.' },
+      { h: 'What never changes, however far you go' },
+      { list: [
+        'Your actual attention. If you are watching yourself perform, the transformation has become the subject.',
+        'Your real listening. A character who can only survive while you are not listening is not built, it is held.',
+        'Your breath, which has to stay free. Any transformation you can only maintain by tightening is the wrong one.',
+        'Your judgement in the moment. The character is a set of tendencies, not a script for how to respond to something nobody planned.',
+      ] },
+      { h: 'The test worth applying' },
+      { p: 'Can you still be surprised? Play the scene and have somebody do something slightly different from the rehearsal. If the character absorbs it and responds in their own way, the transformation is working. If it falls off, or you hear yourself reaching to put it back on, you are wearing it rather than being it, and the answer is usually less rather than more.' },
+      { p: 'Two limits that are not negotiable. Never build a person out of a disability, an illness, an ethnicity or an accent used as a signal, which was true in the animal work and is true here. And never transform in a way that hurts: a voice you have to force, a posture that strains or a weight you cannot carry through a run is a choice that will end the job early.' },
+    ] },
+
+  { id: 'ch-ro-holding', module: 'role', order: 3,
+    title: 'Holding It Through a Scene',
+    attribution: 'Sanford Meisner',
+    requiredReviewer: 'acting-professional',
+    objective: 'Keep the character while genuinely listening and responding to somebody else.',
+    orientation: 'Everything you built, you built alone. Now there is another person, and they are not doing what you imagined.',
+    reflection: 'When the character slipped, what were you doing at that exact moment?',
+    body: [
+      { p: 'This is where character work usually falls apart, and it falls apart in a predictable order. The walk goes first, because you stop moving and start standing. Then the centre, as your own default quietly returns. Then the status, the moment somebody says something that lands on you personally rather than on the character. The voice often survives longest, which is why so many performances end up as an accent standing in your own posture.' },
+      { p: 'The cause is almost never carelessness. It is load. You built twelve things and a human being can hold about two while actually listening to another human being. So the answer is not more concentration. It is fewer things, held deeper.' },
+      { h: 'Keep two' },
+      { steps: [
+        'Choose the one physical mechanism the character stops working without. Usually the centre or the status, rarely the walk.',
+        'Choose the one vocal mechanism. Usually the breath or the rhythm, rarely the accent.',
+        'Rehearse those two until they cost nothing. They should survive a conversation about something else entirely.',
+        'Let everything else be a consequence. The gestures, the walk and the pace will arrive on their own if the two are genuinely in.',
+        'Then give all your attention to the other actor, and let the character deal with what they do.',
+      ] },
+      { p: 'The priority order matters and it is uncomfortable. Real listening comes first. A scene in which you listened properly and lost some of the physicality is better than one in which the physicality was perfect and nothing landed on you. Audiences forgive an inconsistent walk. They do not forgive watching two people wait for each other to finish.' },
+      { p: 'If the character keeps dropping in the same place, that place is usually telling you something. It is often a moment the character finds genuinely difficult, and your body is solving it by leaving. That is worth rehearsing as a moment rather than as a fault.' },
+    ] },
+
+  { id: 'ch-ro-bible', module: 'role', order: 4,
+    title: 'Your Character Bible',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'acting-professional',
+    objective: 'Keep one written record of the person, and use it when the work gets hard.',
+    orientation: 'Everything you have decided about this person, in one place you can return to on a bad night.',
+    reflection: 'What is in your record that you would have forgotten by opening night?',
+    body: [
+      { p: 'Actors carry most of this in their heads and lose most of it. Six weeks into a run, the specific decision that made the first week work has quietly been replaced by a general impression of the character, and nobody notices until a review says the performance has gone vague. A written record is the cure, and it takes twenty minutes.' },
+      { h: 'Use the Studio' },
+      { p: 'My Characters, in the Studio of this workspace, is built for exactly this. It offers the three kinds of character work this course covers: a person you invent, a role you have been cast in, and your own version of a commedia mask. Choose the kind and you get a worksheet with the same breakdown the mask chapters use, which is not a coincidence. It is the same set of questions, asked of your character instead of Arlecchino.' },
+      { list: [
+        'Where they come from: the people you observed, or the given circumstances and what the other characters say about them.',
+        'The person: wants, fears, the contradiction, and status.',
+        'The body: centre, what leads, the base stance, the walk, the gestures.',
+        'Under pressure: how a thought travels, what fear does, what wanting does, and how they recover.',
+        'With others: how they treat whoever is watching, and their signature action.',
+        'Voice and words: the breath and voice, what their words are for, and one line only they could say.',
+      ] },
+      { p: 'If you are building your own version of a mask, the tradition’s answer sits beside each field for comparison. It is there to argue with, not to copy. The whole point of the exercise is to find out where your Arlecchino differs from the one the tradition handed you.' },
+      { h: 'Keeping it useful' },
+      { list: [
+        'Write choices, not descriptions. “Takes the space, voice no longer matches it” beats “used to be powerful”.',
+        'Update it in rehearsal. A record that stopped on day one is a record of what you guessed.',
+        'Mark the two you decided to hold in the last lesson, so you know what to return to first.',
+        'Keep the line. The one sentence only this person could say is the fastest way back into them.',
+      ] },
+      { p: 'It stays on your device, it is never scored, and nobody sees it. It is a working document for the one person who needs it, which is you at the half-hour call on a night when nothing is landing.' },
+    ] },
+
   // ── Lessons first written for Acting's Building a Character module ──
   // (owner order 2026-09-22: the course takes them over). Acting keeps its
   // own copies until this course is built; then Acting's module comes
@@ -1576,7 +1679,7 @@ export const CHARACTER_LESSONS = [
 ];
 
 // One Library shelf per module, in path order.
-const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️', status: '⚖️' };
+const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️', status: '⚖️', role: '🎬' };
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], title: m.title,
   lessons: CHARACTER_LESSONS.filter(l => l.module === m.id && !l.reference)

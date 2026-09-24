@@ -245,7 +245,10 @@ Credits, the suite's hidden-course pins rewritten to assert the launched
 state, and `CHARACTER_LIVE` flipped. Published on the owner's editorial
 approval alone. Specialist review by a named acting teacher or coach is
 outstanding for every record and is tracked in #review. Status and
-Playing the Role remain unwritten; the course launched at four modules.
+Playing the Role were written and published the same day, so the course
+is COMPLETE at six modules and 47 records. Modules 2, 6 and 8 of the
+original plan were merged or dropped by earlier owner decisions, which is
+why the numbering runs 1, 3, 4, 5, 6, 9.
 
 **Launch checklist** (kept for the record; all complete):
 1. A publication entry in js/data/speech/reviews.js for every lesson to

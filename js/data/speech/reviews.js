@@ -413,6 +413,18 @@ export const SPEECH_REVIEWS = {
   'ch-st-space': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-09-23', version: 1,
     notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  'ch-ro-page': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-23', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  'ch-ro-howfar': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-23', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  'ch-ro-holding': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-23', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  'ch-ro-bible': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-23', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
 };
 
 export const speechReviewFor = id => SPEECH_REVIEWS[id] ?? null;
