@@ -120,7 +120,12 @@ export function syllabify(word) {
 }
 
 // Scan a whole line: syllables per word + the iambic pulse across the line.
-export function scanLine(line) {
+//
+// `expected` is the line's syllable target, which is a property of the
+// METRE and not a constant: ten for pentameter, eight for the one sonnet
+// in tetrameter. Callers that know the text pass it; callers that do not
+// get pentameter, which is the overwhelming default here.
+export function scanLine(line, expected = 10) {
   const tokens = line.split(/(\s+)/);                 // keep spaces as tokens
   const words = [];
   let count = 0;
@@ -136,5 +141,5 @@ export function scanLine(line) {
     if (!w.syllables) continue;
     for (const s of w.syllables) { p++; s.stress = p % 2 === 0 ? STRONG : WEAK; }
   }
-  return { words, count, expected: 10, regular: count === 10 };
+  return { words, count, expected, regular: count === expected };
 }

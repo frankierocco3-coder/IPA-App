@@ -75,6 +75,7 @@ import { PIRANDELLO } from './data/pirandello.js';
 import { IBSEN } from './data/ibsen.js';
 import { IDIOM, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS, MLE } from './data/idiom.js';
 import { scanLine } from './scan.js';
+import { PENTAMETER, metreOfSonnet } from './data/sonnet-metre.js';
 import { loadPron, ipaFor } from './pron.js';
 import { migrateLegacyCustomText, listProjects, getProject, saveProject, createProject,
          duplicateProject, deleteProject, emptyProject, touchRehearsed, sortProjects,
@@ -7942,6 +7943,7 @@ async function renderSonnet(n) {
     : [];
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: narrated[0] ?? 'rp',
+    metre: metreOfSonnet(n),
     clip: (i, acc) => narrated.includes(acc) ? audioUrl(`sonnets/${acc}/${n}-${i}.mp3`) : null,
     narrated,
     recast: ed && ed.plain && ed.plainStatus === 'approved' ? { plain: ed.plain } : null,
@@ -7955,7 +7957,7 @@ async function renderSonnet(n) {
 
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, clip, verse = true, meta = null, narrated = [], recast = null, today = [], scopeId = null, projectId = null }) {
+function renderReader({ label, lines, accent, prev, next, clip, verse = true, metre = PENTAMETER, meta = null, narrated = [], recast = null, today = [], scopeId = null, projectId = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -8012,7 +8014,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     mode = m;
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
     if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
-    else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse); }
+    else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse, metre); }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
     else if (m === 'plain') { pane.innerHTML = plainPane(recast); }
     else if (m === 'both') { pane.innerHTML = sideBySidePane(lines, recast); wireSideBySide(pane); }
@@ -8694,8 +8696,8 @@ function wireSpeak(lines, accent, pane, clip) {
 
 // One scanned line. `verse` decides only whether a count that is not ten
 // is FLAGGED: in prose there is no expected count, so nothing is off.
-function scanLineHtml(ln, verse) {
-  const { words, count, regular } = scanLine(stripStage(ln));
+function scanLineHtml(ln, verse, expected = 10) {
+  const { words, count, regular } = scanLine(stripStage(ln), expected);
   const syls = words.map(w => {
     if (w.space) return '<span class="scan-sp"> </span>';
     return `<span class="scan-word">${w.syllables.map(sy =>
@@ -8707,10 +8709,14 @@ function scanLineHtml(ln, verse) {
   </div>`;
 }
 
-function scanPane(lines, verse = true) {
-  const linesHtml = lines.map(ln => scanLineHtml(ln, verse)).join('');
+// `metre` carries the line's syllable target and the words to describe it.
+// It is a parameter and not a constant because Sonnet 145 is in eights:
+// see js/data/sonnet-metre.js. Everything else here is pentameter.
+function scanPane(lines, verse = true, metre = PENTAMETER) {
+  const linesHtml = lines.map(ln => scanLineHtml(ln, verse, metre.expected)).join('');
   const intro = verse
-    ? `<p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>`
+    ? `<p class="pane-note"><b>${esc(metre.name)}</b> is ${esc(metre.feetWord)} beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×${metre.feet}) — ${esc(metre.syllables)} syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t ${metre.expected} (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>
+       ${metre.note ? `<p class="pane-note pane-caveat">${esc(metre.note)}</p>` : ''}`
     : `<p class="pane-note">This is <b>prose</b>, so there’s no fixed metre to hit — nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
   return `
     ${intro}

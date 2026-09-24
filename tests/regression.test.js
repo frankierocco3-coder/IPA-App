@@ -44,6 +44,8 @@ import { openDB, idbGet, idbAll, STORES } from '../js/db.js';
 import { DIALECT_ACTION, actionFor } from '../js/data/dialect-in-action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
 import { SONNETS } from '../js/data/sonnets.js';
+import { PENTAMETER, metreOfSonnet } from '../js/data/sonnet-metre.js';
+import { scanLine } from '../js/scan.js';
 import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
@@ -3646,6 +3648,46 @@ export async function run({ navDoc = document } = {}) {
       && scanSrc.includes('scanSentences(sp.lines.join'));
     check('scan: the view is offered only where the metre is Shakespeare’s own',
       scanSrc.includes("const scannable = sc.authorGroup === 'Shakespeare';"));
+  }
+
+  // ── 21j. Sonnet 145 is in eights, and the scanner knows ──────
+  // The scanner assumed ten syllables for every verse line, which is
+  // right 153 times and wrong once: Sonnet 145 is the sequence's only
+  // iambic TETRAMETER poem, and all fourteen of its lines were flagged
+  // as bent metre. What is pinned here is that the expectation follows
+  // the TEXT, that the one exception is the only one, and that no
+  // pentameter sonnet moved.
+  {
+    check('metre: 145 is the only exception, and it is tetrameter',
+      metreOfSonnet(145).expected === 8 && metreOfSonnet(145).feet === 4
+      && metreOfSonnet(145).name === 'Iambic tetrameter'
+      && typeof metreOfSonnet(145).note === 'string' && metreOfSonnet(145).note.length > 80
+      && SONNETS.filter(s => metreOfSonnet(s.n).expected !== 10).length === 1,
+      `exceptions: ${SONNETS.filter(s => metreOfSonnet(s.n).expected !== 10).map(s => s.n).join(',')}`);
+    check('metre: everything else is pentameter, and that is the default',
+      PENTAMETER.expected === 10 && PENTAMETER.feet === 5
+      && !PENTAMETER.note
+      && metreOfSonnet(18).expected === 10 && metreOfSonnet(1).expected === 10
+      && scanLine('Shall I compare thee to a summer’s day?').expected === 10);
+
+    // The fix itself: 145 stops crying wolf, and the residual misses are
+    // ordinary heuristic noise, not the old fourteen-for-fourteen.
+    const bent = (n, exp) => SONNETS.find(s => s.n === n).lines
+      .filter(l => !scanLine(l, exp).regular).length;
+    check('metre: Sonnet 145 no longer reports fourteen bent lines',
+      bent(145, 10) === 14 && bent(145, 8) <= 3,
+      `at 10: ${bent(145, 10)} / at 8: ${bent(145, 8)}`);
+    check('metre: the pentameter sonnets are untouched by the change',
+      bent(18, 10) === 1 && bent(30, 10) === 3 && bent(116, 10) === bent(116, 10));
+
+    const metreSrc = await viewSource();
+    check('metre: the reader passes the TEXT’s metre, not a constant',
+      metreSrc.includes('metre: metreOfSonnet(n)')
+      && metreSrc.includes('scanPane(lines, verse, metre)')
+      && metreSrc.includes('scanLineHtml(ln, verse, metre.expected)'));
+    check('metre: the pane names the metre it is actually counting',
+      metreSrc.includes('${esc(metre.name)}</b> is ${esc(metre.feetWord)} beats')
+      && metreSrc.includes('A count that isn’t ${metre.expected}'));
   }
 
   // ── 21i. Scene Work: the per-text analysis, and its gate ─────
