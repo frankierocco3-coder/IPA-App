@@ -169,6 +169,20 @@ section, subtext prompts, operative words, images and rhetorical
 patterns, verse or prose, scansion and its irregularities, audio of the
 original, optional IPA.
 
+### Neutral American only (owner decision 2026-09-24)
+
+Everything this course shows in IPA, audio or dialect is **Neutral
+American**. No Traditional RP, Standard British, Cockney or Australian
+transposition is written, reviewed or displayed inside Shakespeare, and
+the sonnet editions need only their Plain Meaning approved rather than
+four kinds each.
+
+**This does not touch the existing reader.** The sonnets also sit in
+Scripts & Speeches, where accent-course learners read them in the accent
+they are studying and Traditional RP has recorded audio for 153 of the
+154. That stays exactly as it is. The restriction is a scope decision
+about this course, not a removal of anything already shipped.
+
 **Learner exercises:** write your own paraphrase before seeing the
 app's, compare the two, hide the translation once studied, rehearsal mode
 showing only the original, partner mode with one part hidden.
