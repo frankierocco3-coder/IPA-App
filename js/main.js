@@ -2978,7 +2978,14 @@ const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // A `reference: true` record is a page you are sent to, never a step on
 // the path: it is not listed in its module, shelved, counted or given a
 // place in the Next sequence (owner order 2026-09-22).
-const pathLessons = B => B.lessons.filter(l => !l.reference);
+// A path lesson is one the Learn path actually walks: not a reference
+// page, and in one of the book's modules. The module test matters for
+// Acting, whose 8 Professional Actor chapters shelve in the Library
+// outside every module — without it they inflated the hero's progress
+// denominator (39 lessons shown as "of 47") and could be offered as the
+// next lesson after the last real one.
+const pathLessons = B => B.lessons.filter(l =>
+  !l.reference && B.modules.some(m => m.id === l.module));
 const bookLessonsFor = (B, moduleId) =>
   pathLessons(B).filter(l => l.module === moduleId).sort((a, b) => a.order - b.order);
 const bookModuleFor = (B, l) => B.modules.find(m => m.id === l.module) ?? null;
