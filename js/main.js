@@ -4,7 +4,7 @@ import { DIALECT_INFO } from './data/dialects.js';
 import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
 import { WARMUP_MOVEMENTS, WARMUP_ALL, warmupById, warmupSteps } from './data/warmup.js';
 import { drillsFor } from './data/twisters.js';
-import { parseProvidedScene } from './scene-parse.js';
+import { parseProvidedScene, sceneSpeeches, formTracker } from './scene-parse.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
@@ -6604,8 +6604,12 @@ function renderProvidedScene(id) {
   const emify = s => esc(s).replace(/_([^_]+)_/g, '<em>$1</em>');
   const blocks = sc.text.split(/\n\s*\n/).map(b => b.split('\n'));
   // Prose sources are hard-wrapped, so lines JOIN into paragraphs.
-  // Verse (sc.verse) keeps every line break: the lines ARE the metre.
-  const body = ls => sc.verse
+  // Verse keeps every line break: the lines ARE the metre. A scene that
+  // crosses between the two (the Nunnery Scene) answers per speech —
+  // formTracker walks the record's authored map, and body() is called
+  // once per block in reading order, which is what it needs.
+  const formOf = formTracker(sc);
+  const body = ls => formOf(ls[0]?.trim() ?? '') === 'verse'
     ? ls.map(l => emify(l.trim())).join('<br>')
     : emify(ls.join(' ').replace(/\s+/g, ' ').trim());
   // Verse with inline speakers and no blank lines between turns (the
@@ -6677,18 +6681,44 @@ function renderProvidedScene(id) {
     }
     return `<p class="sc-text">${body(ls)}</p>`;
   };
+  // Built ONCE: blockHtml walks the form tracker, which is positional,
+  // so re-running it on a tab switch would read the map from the wrong
+  // place. The Read pane is a string from here on.
+  const readHtml = `<section class="sc-scene" aria-label="Scene text">
+       ${blocks.map(blockHtml).join('')}
+     </section>`;
+  // Scansion is offered where the metre is Shakespeare's own. The verse
+  // translations on this shelf are their translators' metre, not the
+  // playwright's, and a scan view over them would make a claim about
+  // the original that the English on the page cannot support.
+  const scannable = sc.authorGroup === 'Shakespeare';
+  const notes = `<p class="pane-note">Characters: ${sc.characters.map(esc).join(', ')}. ${esc(sc.cutNote)}</p>
+     ${sc.context ? `<p class="pane-note">${esc(sc.context)}</p>` : ''}
+     ${sc.contentNote ? `<p class="pane-note">Content note: ${esc(sc.contentNote)}</p>` : ''}`;
+
   workspacePage(
     pageTopbar('🎭 ' + esc(sc.title), '#8a6d3b'),
     `<div class="ws-head">
        <h1 class="page-h">${esc(sc.title)}</h1>
        <p class="ws-sub">${esc(sc.play)} · ${esc(sc.author)} · ${esc(sc.location)}</p>
      </div>`,
-    `<p class="pane-note">Characters: ${sc.characters.map(esc).join(', ')}. ${esc(sc.cutNote)}</p>
-     ${sc.context ? `<p class="pane-note">${esc(sc.context)}</p>` : ''}
-     ${sc.contentNote ? `<p class="pane-note">Content note: ${esc(sc.contentNote)}</p>` : ''}
-     <section class="sc-scene" aria-label="Scene text">
-       ${blocks.map(blockHtml).join('')}
-     </section>`);
+    scannable
+      ? `${notes}
+         <div class="sonnet-tabs">
+           <button class="son-tab on" data-mode="read">📖 Read</button>
+           <button class="son-tab" data-mode="scan">📐 Scan</button>
+         </div>
+         <div class="scene-pane" id="sc-pane"></div>`
+      : `${notes}${readHtml}`);
+
+  if (!scannable) return;
+  const pane = document.getElementById('sc-pane');
+  const show = m => {
+    app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
+    pane.innerHTML = m === 'scan' ? sceneScanPane(sc) : readHtml;
+  };
+  app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
+  show('read');
 }
 
 // ── The Four Lists ────────────────────────────────────────────
@@ -8651,19 +8681,23 @@ function wireSpeak(lines, accent, pane, clip) {
     b.addEventListener('click', () => speakLine(b.dataset.say, { lang, clipUrl: clipFor(+b.dataset.idx) })));
 }
 
-function scanPane(lines, verse = true) {
-  const linesHtml = lines.map((ln) => {
-    const { words, count, regular } = scanLine(stripStage(ln));
-    const syls = words.map(w => {
-      if (w.space) return '<span class="scan-sp"> </span>';
-      return `<span class="scan-word">${w.syllables.map(sy =>
-        `<span class="syl ${sy.stress}"><span class="syl-mark">${sy.stress === 'strong' ? '´' : '˘'}</span><span class="syl-txt">${esc(sy.text)}</span></span>`).join('')}</span>`;
-    }).join('');
-    return `<div class="scan-line">
-      <div class="scan-syls">${syls}</div>
-      <span class="scan-count ${verse && !regular ? 'off' : ''}">${count}${verse && !regular ? ' ⚠' : ''}</span>
-    </div>`;
+// One scanned line. `verse` decides only whether a count that is not ten
+// is FLAGGED: in prose there is no expected count, so nothing is off.
+function scanLineHtml(ln, verse) {
+  const { words, count, regular } = scanLine(stripStage(ln));
+  const syls = words.map(w => {
+    if (w.space) return '<span class="scan-sp"> </span>';
+    return `<span class="scan-word">${w.syllables.map(sy =>
+      `<span class="syl ${sy.stress}"><span class="syl-mark">${sy.stress === 'strong' ? '´' : '˘'}</span><span class="syl-txt">${esc(sy.text)}</span></span>`).join('')}</span>`;
   }).join('');
+  return `<div class="scan-line">
+    <div class="scan-syls">${syls}</div>
+    <span class="scan-count ${verse && !regular ? 'off' : ''}">${count}${verse && !regular ? ' ⚠' : ''}</span>
+  </div>`;
+}
+
+function scanPane(lines, verse = true) {
+  const linesHtml = lines.map(ln => scanLineHtml(ln, verse)).join('');
   const intro = verse
     ? `<p class="pane-note"><b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5) — ten syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t 10 (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>`
     : `<p class="pane-note">This is <b>prose</b>, so there’s no fixed metre to hit — nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
@@ -8671,6 +8705,63 @@ function scanPane(lines, verse = true) {
     ${intro}
     <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree.</p>
     <div class="scan">${linesHtml}</div>`;
+}
+
+// ── Scanning a whole scene ────────────────────────────────────
+// A scene is not a poem. It is speeches, and a speech can be verse or
+// prose whatever the one before it was, so the form comes per speech
+// from the record's authored map and the pentameter framing appears
+// only over verse. Where a scene crosses between the two the crossing
+// is marked, because in Shakespeare the crossing is usually the point.
+//
+// Verse keeps its lines: the lines are the metre. Prose has none, so
+// its hard wraps are joined and the unit becomes the SENTENCE, which is
+// the shape a prose thought actually has.
+const SCAN_CLEAN = s => stripStage(s).replace(/_/g, '').trim();
+const scanSentences = text => (text.match(/[^.!?]+[.!?]+[”’"']*|[^.!?]+$/g) ?? [text])
+  .map(s => s.trim()).filter(Boolean);
+
+function sceneScanPane(sc) {
+  const speeches = sceneSpeeches(sc);
+  const spoken = speeches.filter(s => s.kind === 'speech');
+  if (!spoken.length) return `<p class="pane-note">There is nothing to scan in this scene.</p>`;
+  const forms = new Set(spoken.map(s => s.form));
+  const mixed = forms.size > 1;
+  const switchAt = first => (sc.form ?? []).find(s => first.startsWith(s.from));
+
+  let last = null;
+  const body = speeches.map(sp => {
+    if (sp.kind !== 'speech') return `<p class="sc-direction scan-aside">${esc(sp.text.replace(/_/g, ''))}</p>`;
+    const crossed = last !== null && sp.form !== last;
+    last = sp.form;
+    const sw = crossed ? switchAt(sp.lines[0]) : null;
+    const mark = crossed
+      ? `<p class="scan-switch"><b>${sp.form === 'prose' ? 'Prose' : 'Verse'} from here.</b>${
+          sw?.note ? ` ${esc(sw.note)}` : ''}</p>`
+      : '';
+    const units = sp.form === 'verse'
+      ? sp.lines
+      : scanSentences(sp.lines.join(' ').replace(/\s+/g, ' '));
+    const rows = units.map(u => SCAN_CLEAN(u)).filter(Boolean)
+      .map(u => scanLineHtml(u, sp.form === 'verse')).join('');
+    return `${mark}
+      <div class="scan-speech">
+        <h3 class="scan-who">${esc(sp.who)}<span class="scan-form">${sp.form}</span>${
+          sp.attributed ? '<span class="scan-attr" title="The source leaves this speech unlabelled: the cut opens mid-speech. The attribution is ours.">our attribution</span>' : ''}</h3>
+        <div class="scan">${rows}</div>
+      </div>`;
+  }).join('');
+
+  const intro = mixed
+    ? `<p class="pane-note">📐 <b>Scan</b>. This scene moves between <b>verse</b> and <b>prose</b>, and each speech is marked with the form it is in. Over verse, <span class="mk-strong">´</span> and <span class="mk-weak">˘</span> lay the iambic pulse across the line and the number is the syllable count, so a count that is not ten (⚠) is where the metre bends. Over prose there is no count to hit and nothing is flagged: the marks show where natural word stress falls, and the unit is the sentence rather than the line.</p>
+       <p class="pane-note">Where the form changes, the change is called out. That is worth more than any single line here: a character crossing from verse into prose, or back, has changed how they are thinking.</p>`
+    : forms.has('verse')
+      ? `<p class="pane-note">📐 <b>Scan</b>. <b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5), ten syllables to the line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that is not ten (⚠) is where the metre bends: a feminine ending, an extra foot, a headless line, or a line shared between two speakers. Those are moments to notice, not to fix.</p>`
+      : `<p class="pane-note">📐 <b>Scan</b>. This scene is <b>prose</b> from end to end, so there is no metre to hit and nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count of the sentence. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
+
+  return `${intro}
+    <p class="pane-note pane-caveat">The splits are computed, not perfect: the map, not the territory. Trust your ear where they disagree. Which speeches are verse and which are prose comes from the edition and from us, and it is a reading, not a rule.</p>
+    <div class="scene-scan">${body}</div>`;
 }
 
 

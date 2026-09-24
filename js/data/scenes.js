@@ -18,6 +18,16 @@
 //     reading pages no longer display them (owner order 2026-09-17) —
 //     learner-facing credit lives on Sources & Credits.
 //   • `contentNote` is shown, never used to rewrite the work.
+//   • `verse` is the scene's predominant form. A scene that CROSSES
+//     between verse and prose carries a `form` map: each entry names
+//     the first words of the speech where the new form begins. The map
+//     is authored and reviewable — never derived from line length,
+//     because hard-wrapped prose and lineated verse are the same shape
+//     in a fixed-width file and this app teaches the difference.
+//   • `unlabelled` attributes a block the source leaves unlabelled,
+//     which happens where a cut opens mid-speech. It is Speechcraft's
+//     attribution, not the edition's, and the tools that use it flag it
+//     as ours. Nothing is added to `text`.
 // Rendering may reflow hard-wrapped lines and show the source's
 // _underscore_ emphasis as italics; it must never alter, omit or
 // reorder the words (renderProvidedScene in main.js).
@@ -31,6 +41,10 @@ export const PROVIDED_SCENES = [
     author: 'William Shakespeare',
     location: 'Act II: the end of Scene 1 and the whole of Scene 2',
     verse: true,
+    // Scene 2 opens on Romeo already speaking, so the source carries no
+    // speaker label there. The attribution is ours, and the tools that
+    // group a scene by speaker say so rather than silently claiming it.
+    unlabelled: [{ from: 'But soft, what light', who: 'ROMEO' }],
     characters: ['Romeo', 'Juliet'],
     source: 'Project Gutenberg eBook #100 (The Complete Works of William Shakespeare)',
     verified: '2026-09-16',
@@ -469,6 +483,20 @@ More light and light, more dark and dark our woes.`,
     author: 'William Shakespeare',
     location: 'Act III, Scene 1: from Hamlet’s entrance to just before the King and Polonius re-enter',
     verse: true,
+    // This scene crosses from verse into prose and back, and the crossing
+    // is the scene. Added 2026-09-24; until then the prose rendered with
+    // the source's hard wraps standing in for line breaks it never had.
+    form: [
+      { from: 'To be, or not to be', form: 'verse' },
+      { from: 'Ha, ha! Are you honest?', form: 'prose', contested: true,
+        note: 'Editors put the crossing in slightly different places. From '
+          + '“That if you be honest and fair” the prose is beyond argument, since '
+          + 'those speeches are too long and too unlineated to be anything else. '
+          + 'The four short exchanges before it could be read either way, and this '
+          + 'edition sets them as prose.' },
+      { from: 'O, what a noble mind is here o’erthrown!', form: 'verse',
+        note: 'Ophelia is alone, and the verse comes back with her.' },
+    ],
     characters: ['Hamlet', 'Ophelia'],
     source: 'Project Gutenberg eBook #1524',
     verified: '2026-09-16',
@@ -636,6 +664,8 @@ T’have seen what I have seen, see what I see.`,
     author: 'William Shakespeare',
     location: 'Act I, Scene 7, complete',
     verse: true,
+    // Macbeth resumes after his wife's entrance, mid-speech and unlabelled.
+    unlabelled: [{ from: 'How now! what news?', who: 'MACBETH' }],
     characters: ['Macbeth', 'Lady Macbeth'],
     source: 'Project Gutenberg eBook #1533',
     verified: '2026-09-16',
@@ -947,7 +977,11 @@ Wake Duncan with thy knocking! I would thou couldst!
     play: 'Much Ado About Nothing',
     author: 'William Shakespeare',
     location: 'Act IV, Scene 1: the closing exchange',
-    verse: true,
+    // PROSE, corrected 2026-09-24. This record said verse, so the reader
+    // kept the source's hard wraps as line breaks and Beatrice's speeches
+    // arrived broken at the column the typesetter happened to stop at.
+    // Benedick and Beatrice speak prose from end to end of this exchange.
+    verse: false,
     characters: ['Beatrice', 'Benedick'],
     source: 'Project Gutenberg eBook #1519',
     verified: '2026-09-16',
@@ -1118,6 +1152,9 @@ must say she is dead; and so, farewell.
     author: 'William Shakespeare',
     location: 'Act II, Scene 1: Katherina’s entrance to just before the others return',
     verse: true,
+    // “Good morrow, Kate” continues a speech begun before she enters, which
+    // is why it carries no label — see cutNote.
+    unlabelled: [{ from: 'Good morrow, Kate', who: 'PETRUCHIO' }],
     characters: ['Katherina', 'Petruchio'],
     source: 'Project Gutenberg eBook #1508',
     verified: '2026-09-16',

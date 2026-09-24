@@ -26,7 +26,7 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
          attachImportedDissection, dissectQuestions, DISSECT_SECTIONS } from '../js/dissect.js';
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
 import { PROVIDED_SCENES } from '../js/data/scenes.js';
-import { parseProvidedScene } from '../js/scene-parse.js';
+import { parseProvidedScene, sceneSpeeches, formTracker } from '../js/scene-parse.js';
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
@@ -3561,6 +3561,89 @@ export async function run({ navDoc = document } = {}) {
           && by('trifles-discovery')?.characters.join(',') === 'MRS. HALE,MRS. PETERS'
           && by('tartuffe-dorine')?.characters.join(',') === 'Dorine,Mariane';
       })());
+  }
+
+  // ── 21h. Verse, prose, and the Scan view over a scene ────────
+  // The form of a speech comes from the record, never from the shape of
+  // the text, so what is pinned here is that the authored map is
+  // COMPLETE and that nothing silently falls out of the parse. The
+  // per-scene counts are the guard: a cue that stops matching, a block
+  // that stops being recognised as speech, or a new scene added without
+  // its `unlabelled` claim all move a number here rather than passing
+  // quietly and dropping lines out of the view.
+  {
+    const shake = PROVIDED_SCENES.filter(sc => sc.authorGroup === 'Shakespeare');
+    check('scenes: the Shakespeare shelf is the eight two-handers',
+      shake.length === 8, `saw ${shake.length}`);
+
+    const PINS = {
+      'romeo-juliet-balcony': [59, 11], 'rj-nightingale-lark': [6, 2],
+      'hamlet-nunnery': [24, 2], 'macbeth-decision': [14, 4],
+      'macbeth-aftermath': [28, 7], 'muchado-killclaudio': [45, 1],
+      'shrew-first-encounter': [55, 2], 'jc-quarrel': [48, 2],
+    };
+    const shapes = shake.map(sc => {
+      const sp = sceneSpeeches(sc);
+      const said = sp.filter(x => x.kind === 'speech');
+      return [sc.id, said.length, sp.length - said.length];
+    });
+    check('scenes: every Shakespeare scene parses to its pinned speeches and directions',
+      shapes.every(([id, s, d]) => PINS[id] && PINS[id][0] === s && PINS[id][1] === d),
+      shapes.filter(([id, s, d]) => !PINS[id] || PINS[id][0] !== s || PINS[id][1] !== d)
+        .map(r => r.join(':')).join(' | '));
+    check('scenes: no speech loses its lines, and no direction is scanned as speech',
+      shake.every(sc => sceneSpeeches(sc).every(x =>
+        x.kind === 'speech' ? (x.who && x.lines.length && x.form) : !!x.text)));
+
+    // Three cuts open mid-speech, so the source labels no speaker there.
+    // The attribution is ours and has to SAY so wherever it appears.
+    const claimed = shake.flatMap(sc => sceneSpeeches(sc).filter(x => x.attributed));
+    check('scenes: the three mid-speech openings are attributed, and flagged as ours',
+      claimed.length === 3
+      && claimed.every(x => x.who && x.lines.length)
+      && shake.filter(sc => sc.unlabelled).length === 3,
+      `attributed=${claimed.length}`);
+    check('scenes: every unlabelled claim and every form cue matches real text',
+      shake.every(sc => (sc.unlabelled ?? []).every(u =>
+        sc.text.split(/\n\s*\n/).some(b => b.trim().startsWith(u.from))))
+      && shake.every(sc => (sc.form ?? []).every(f => sc.text.includes(f.from))));
+
+    // The two corrections of 2026-09-24, pinned so neither can drift
+    // back: Much Ado is prose end to end, and the Nunnery Scene crosses.
+    const nunnery = PROVIDED_SCENES.find(s => s.id === 'hamlet-nunnery');
+    const nunForms = sceneSpeeches(nunnery).filter(x => x.kind === 'speech').map(x => x.form);
+    check('scenes: Kill Claudio is prose, not verse with the typesetter’s wraps',
+      PROVIDED_SCENES.find(s => s.id === 'muchado-killclaudio').verse === false
+      && sceneSpeeches(PROVIDED_SCENES.find(s => s.id === 'muchado-killclaudio'))
+        .filter(x => x.kind === 'speech').every(x => x.form === 'prose'));
+    check('scenes: the Nunnery Scene goes verse, prose, then verse again',
+      nunForms[0] === 'verse'
+      && nunForms.includes('prose')
+      && nunForms[nunForms.length - 1] === 'verse'
+      && [...new Set(nunForms)].length === 2
+      && nunForms.join(',').split('verse,prose').length === 2,
+      nunForms.join(','));
+    check('scenes: the contested crossing says it is contested',
+      (nunnery.form ?? []).some(f => f.contested && (f.note ?? '').length > 60));
+    check('scenes: the other seven are uniform, so no map invents a crossing',
+      shake.filter(sc => sc.form).length === 1);
+
+    // formTracker is positional. Fed the same speeches in order it must
+    // report the same forms, and fed nothing it must not switch.
+    const t1 = formTracker(nunnery), t2 = formTracker(nunnery);
+    const firsts = sceneSpeeches(nunnery).filter(x => x.kind === 'speech').map(x => x.lines[0]);
+    check('scenes: the form tracker is deterministic over the same reading order',
+      String(firsts.map(f => t1(f))) === String(firsts.map(f => t2(f))));
+
+    const scanSrc = await viewSource();
+    check('scan: prose is never flagged against a count it was never keeping',
+      scanSrc.includes("scanLineHtml(u, sp.form === 'verse')")
+      && scanSrc.includes("verse && !regular ? 'off' : ''"));
+    check('scan: verse keeps its lines, prose is scanned by the sentence',
+      scanSrc.includes("sp.form === 'verse'\n      ? sp.lines")
+      && scanSrc.includes('scanSentences(sp.lines.join'));
+    check('scan: the view is offered only where the metre is Shakespeare’s own',
+      scanSrc.includes("const scannable = sc.authorGroup === 'Shakespeare';"));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────
