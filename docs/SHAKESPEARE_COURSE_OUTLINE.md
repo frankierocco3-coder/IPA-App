@@ -221,6 +221,18 @@ where the app has `ɝ` and `ɚ`. Most telling, **`ʌ` appeared zero times in
 4,310 lines of English** — STRUT collapsed into schwa, erasing a contrast
 the course drills. `dialect_lint` would reject it.
 
+> **CORRECTION, 2026-09-24 (second audit).** Two of those four axes do not
+> survive checking against the app's own output. `pron.ipaFor(w, 'nam')`
+> returns `spɹɪŋ`, `ɹʌf`, `kɹitʃɚz` — **we write the rhotic as `ɹ` too**,
+> and `si`, `swit`, `tɹuθ`, `mjuzɪk` — **we do not write length marks
+> either**. The `/r/` and `iː uː ɔː` in `phonemesForAccent('nam')` are the
+> INVENTORY AND LESSON layer, which is broad and phonemic; the
+> transcription layer that a reader actually sees is narrower and agrees
+> with the external file on both counts. The axes that DO hold are the
+> `ʧ`/`ʤ` ligatures, `əɹ` where we write `ɝ`/`ɚ`, and the missing `ʌ`.
+> The first two are mechanical to convert. The third is not a convention
+> at all: it is a lost contrast.
+
 **It also contained real errors**, not just convention: 172 instances of
 epenthesis inside consonant clusters (*spring* as `/spəɹɪŋ/`, 14 times),
 *beauty's* as one syllable 36 times, *as* as `/ɛz/` 76 times. Both
@@ -241,6 +253,78 @@ them with the same confidence as the rest.
 pipeline. An external transcription is not imported without an audit
 against `sonnets.js` and the nam inventory, and honest gaps beat
 confident guesses.
+
+## Second external file, audited 2026-09-24: split verdict
+
+A SECOND generated 154-sonnet file (Original, Contemporary English, and
+General American IPA for both). It is not the same artifact as the first
+one and does not deserve the same flat answer.
+
+**Original text: identical to `sonnets.js` again**, down to the curly
+apostrophes and the odd comma in Sonnet 7 ("Unlook'd, on diest"), and it
+gets Sonnet 126's twelve lines right. Same source, correctly handled.
+
+**IPA: reject, and not on a technicality.** It carries the same lost
+contrast as the first file (no `ʌ` anywhere, STRUT written as schwa
+throughout) and the same `ɛz` for *as* where the dictionary gives `æz`.
+Beyond that it garbles ordinary words, in both the Original and the
+Contemporary transcriptions, which means one broken lexicon drives both:
+
+* **`us` becomes the initialism `ˈjuˈɛs`** — the letters U and S read
+  aloud. At least ten times, across Sonnets 39, 44, 59, 72, 87, 123, 138
+  and others.
+* **`th'` becomes `ˈtiˈeɪʧ'`** — the letters T and H. Sonnets 4 and 124.
+* *vouchsafe* → `ˈvaʊskə` (32, 135). *forget'st* → `fəɹˈʒɛt` (100).
+  *thrivers* → `ˈvaɪɹəvəɹz` (125). *simplemindedness* →
+  `ˈsɪmpəldmənəsts` (66). *forgetfulness* → `ˈfɔɹgətˌfənsəlz` (122).
+  *insufficiency* → `ɪnsəˈfɪnɪksi` and *unworthiness* → `ənˈwɔɹθɪnɪnz`
+  (150). *sleeplessness* → `sˈlipslənz` (148). *gazeth* → `ˈgeɪzˌtɛ` and
+  *amazeth* → `ˈæməsˌθɛ` (20). Roughly two dozen found by reading.
+* **Epenthesis is still there and is self-contradicting**: *spring* is
+  `spəɹɪŋ`, two syllables, in Sonnets 1, 53, 63, 75, 97, 98, 102, 104,
+  153 and 154 — while *springtime* in Sonnet 3 is `ˈspɹɪŋˌtaɪm`, correct.
+  The same file transcribes the same cluster both ways.
+
+In a course about metre, a transcription that invents syllables is worse
+than no transcription. The app's own pipeline handles any sonnet from the
+dictionary and marks what it does not know.
+
+**Contemporary English: genuinely good, and a DIFFERENT ARTIFACT from
+ours.** This is the real finding and it reverses the first file's verdict
+on this layer. The earlier file was 63% character-identical to the
+original; this one actually translates ("We want the most beautiful
+people to have children"), handles the hard cruxes (129's *expense of
+spirit* is glossed as spending seed; 151 keeps the erection frank), and
+renders Sonnet 145's tetrameter and Sonnet 126's twelve lines without
+stumbling.
+
+Most importantly it is **line-aligned: fourteen lines to fourteen**. Our
+Plain Meanings are ONE PROSE PARAGRAPH by design — a guide to the poem
+that opens on a framing image ("Memory as a courtroom", "The fever
+chart"), walks the argument, names what the couplet does, and carries the
+editorial apparatus (129's sexual gloss, 147's note on blackness, 130's
+Dark Lady caveat). Theirs is a modern version OF the poem, with no
+commentary and no apparatus. Neither replaces the other.
+
+Line alignment is the thing I said did not exist when Side by Side
+shipped, and it is the only cheap route to the spec's colour-coded phrase
+links. If any part of this file is taken, it is this part, it sits BESIDE
+the Plain Meanings rather than over them, and it goes through the same
+per-sonnet owner review the 25 approved texts got. It is a draft, not an
+import.
+
+**Known softening to check in review:** Sonnets 135 and 136 turn the
+*Will* pun into "desire" and never reach the sexual sense, which is the
+same class of omission we corrected in 129 before approving it.
+
+## A bug in OUR app, found by this audit
+
+**Sonnet 145 is the only sonnet in the sequence in iambic TETRAMETER.**
+`scanLine()` pins `expected: 10` and flags anything else, so the Scan tab
+currently marks **all fourteen lines** of 145 as "where the metre bends".
+They do not bend. They are eight syllables because the poem is in eights,
+correctly. The app is telling a learner that Shakespeare broke his metre
+fourteen times in a row. Needs a per-text expected count, not a constant.
 
 ## The scoping question, ANSWERED 2026-09-24: the scenes
 
