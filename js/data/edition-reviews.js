@@ -54,4 +54,14 @@ export const EDITION_REVIEWS = {
   '71.plain': { literary: OWNER_LIT, verdict: 'approved',
     revisionNotes: OWNER_NOTE + ' Closing sentence rewritten before approval: it had '
       + 'addressed reviewers rather than the learner.' },
+
+  // ── Batch 3, worth and its withdrawal (owner approved 2026-09-24) ──
+  '87.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '91.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '94.plain': { literary: OWNER_LIT, verdict: 'approved',
+    revisionNotes: OWNER_NOTE + ' Checked specifically for a hidden verdict: the text '
+      + 'keeps the poem ambiguous between praise and warning rather than resolving what '
+      + 'four centuries of critics have not.' },
+  '104.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
+  '106.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
 };
