@@ -46,7 +46,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v9';                      // 2026-09-22: js/data/character/character-course.js joins the graph
+const VERSION = 'sc-v10';                     // 2026-09-24: scene-work.js, scene-work-reviews.js, views/scene-work.js and sonnet-metre.js join the graph
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
