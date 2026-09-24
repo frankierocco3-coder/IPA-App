@@ -5,6 +5,9 @@ import { PROVIDED_SCENES, providedSceneById } from './data/scenes.js';
 import { WARMUP_MOVEMENTS, WARMUP_ALL, warmupById, warmupSteps } from './data/warmup.js';
 import { drillsFor } from './data/twisters.js';
 import { parseProvidedScene, sceneSpeeches, formTracker } from './scene-parse.js';
+import { sceneWorkById } from './data/scene-work.js';
+import { sceneWorkApproved } from './data/scene-work-reviews.js';
+import { sceneWorkHtml } from './views/scene-work.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
@@ -6692,9 +6695,14 @@ function renderProvidedScene(id) {
   // playwright's, and a scan view over them would make a claim about
   // the original that the English on the page cannot support.
   const scannable = sc.authorGroup === 'Shakespeare';
+  // Scene Work is a HUMAN-APPROVED reading, so the tab exists only where
+  // somebody has signed for it. Absence of a ledger entry is draft, and
+  // a draft never reaches this page: the owner reads it at #review.
+  const work = sceneWorkApproved(sc.id) ? sceneWorkById(sc.id) : null;
   const notes = `<p class="pane-note">Characters: ${sc.characters.map(esc).join(', ')}. ${esc(sc.cutNote)}</p>
      ${sc.context ? `<p class="pane-note">${esc(sc.context)}</p>` : ''}
      ${sc.contentNote ? `<p class="pane-note">Content note: ${esc(sc.contentNote)}</p>` : ''}`;
+  const tabbed = scannable || work;
 
   workspacePage(
     pageTopbar('🎭 ' + esc(sc.title), '#8a6d3b'),
@@ -6702,20 +6710,23 @@ function renderProvidedScene(id) {
        <h1 class="page-h">${esc(sc.title)}</h1>
        <p class="ws-sub">${esc(sc.play)} · ${esc(sc.author)} · ${esc(sc.location)}</p>
      </div>`,
-    scannable
+    tabbed
       ? `${notes}
          <div class="sonnet-tabs">
            <button class="son-tab on" data-mode="read">📖 Read</button>
-           <button class="son-tab" data-mode="scan">📐 Scan</button>
+           ${scannable ? '<button class="son-tab" data-mode="scan">📐 Scan</button>' : ''}
+           ${work ? '<button class="son-tab" data-mode="work">🎬 Scene Work</button>' : ''}
          </div>
          <div class="scene-pane" id="sc-pane"></div>`
       : `${notes}${readHtml}`);
 
-  if (!scannable) return;
+  if (!tabbed) return;
   const pane = document.getElementById('sc-pane');
   const show = m => {
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
-    pane.innerHTML = m === 'scan' ? sceneScanPane(sc) : readHtml;
+    if (m === 'scan') pane.innerHTML = sceneScanPane(sc);
+    else if (m === 'work') pane.innerHTML = sceneWorkHtml(work);
+    else pane.innerHTML = readHtml;
   };
   app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
   show('read');

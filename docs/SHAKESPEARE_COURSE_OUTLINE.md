@@ -242,30 +242,63 @@ pipeline. An external transcription is not imported without an audit
 against `sonnets.js` and the nam inventory, and honest gaps beat
 confident guesses.
 
-## The open scoping question
+## The scoping question, ANSWERED 2026-09-24: the scenes
 
-**"All the Shakespeare text gets the full treatment."** In the app today
-that is **154 sonnets and 8 scenes**. Every item in the Shakespeare
-Basically list above is hand-written per text: a paraphrase, an actor's
-paraphrase, given circumstances, objectives, beats, operative words,
-subtext prompts and alignment data.
+**"All the Shakespeare text gets the full treatment."** In the app that
+is 154 sonnets and 8 scenes, and the per-text analysis fields (given
+circumstances, objectives, obstacles, stakes, beats, actions, operative
+words, subtext prompts, patterns, scansion) are **aimed at the eight
+scenes**. A sonnet is a thought; a scene is a transaction, and that
+apparatus was built for the second one. The sonnets keep Plain Meaning
+and Side by Side, which is what they need.
 
-Plain Meaning for the 154 sonnets was already one of the largest writing
-jobs in this repo, and it is ONE of the twelve fields above.
+### What this produced, and one thing it found
 
-So the question is not whether to do it but in what order:
+Built 2026-09-24, both commits gated and suite-green:
 
-* **Sonnets only** at first, since they already have Plain Meaning and
-  audio, and the machinery can be proved on them.
-* **The eight scenes**, which need scansion built first and are what an
-  actor actually works on.
-* **Everything added later**, as new plays and speeches come in.
+1. **Scan reaches scenes.** `sceneSpeeches()` and `formTracker()` in
+   js/scene-parse.js; `sceneScanPane()` in main.js. Verse is scanned by
+   the line with the pentameter framing; prose by the SENTENCE, with no
+   count to miss and nothing flagged; every crossing between the two is
+   called out between the speeches. Offered where `authorGroup` is
+   Shakespeare, because the verse translations on that shelf are their
+   translators' metre, not the playwright's.
+2. **The scenes were wrong about their own form.** `muchado-killclaudio`
+   is prose end to end and the record said verse, so the reader kept the
+   Gutenberg hard wraps as line breaks. `hamlet-nunnery` CROSSES, verse
+   to prose at "Ha, ha! Are you honest?" and back to verse for Ophelia
+   alone, and all of it rendered as verse: seven false line endings in
+   one speech, in the app whose third module is Verse and Prose. Both
+   fixed. scenes.js gained an authored `form` map (switch points quoted
+   by their first words, never derived from line length) and
+   `unlabelled`, which attributes the three cuts that open mid-speech
+   and is flagged in the UI as our attribution, not the edition's.
+3. **Scene Work**, js/data/scene-work.js: all eight scenes, 53 beats,
+   31 patterns, 37 metre notes, 223 operative words. Ledger-gated in
+   js/data/scene-work-reviews.js (empty = every record is draft, nothing
+   learner-facing), rendered by js/views/scene-work.js for both the
+   scene tab and #review. Required reviewer: an acting teacher, coach or
+   director.
+
+**The line the records hold, and the suite enforces:** `metre` and
+`patterns` are CHECKABLE and every one of the 347 quotations is verified
+against the scene text by the suite. `circumstances`, `people` and
+`beats` are READINGS. `contested` names the reading a scene usually gets
+and says what the text supports if you decline it — the field that stops
+the app teaching received opinion as fact, and the one a reviewer should
+be hardest on. Five scenes carry one.
+
+Phrase-alignment data for colour-coded connections is still unbuilt and
+still the first thing to cut.
 
 ## Build order, when approved
 
-1. Extend the Scan view beyond the sonnets. Code, not content, and it
-   unblocks the scenes.
+1. ~~Extend the Scan view beyond the sonnets.~~ **Done 2026-09-24.**
 2. Modules 2, 3 and 4 — the language and the verse, which is the spine.
+   Module 3.4, "Finding the Switch", now has its worked example built:
+   the Nunnery Scene's crossing is visible on the Scan tab.
 3. The rhetoric shelf, then Module 6.
 4. Module 7, then Modules 1 and 5.
-5. Shakespeare Basically, starting with the sonnets.
+5. ~~Shakespeare Basically~~ — Side by Side shipped for the 25 approved
+   sonnet Plain Meanings; Scene Work written for all eight scenes and
+   awaiting review.

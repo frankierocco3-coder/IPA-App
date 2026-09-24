@@ -1198,6 +1198,39 @@ truncated a function and left a stray brace behind), and an alias like
 every move by loading each module in the browser — there is no Node
 here, so the browser's parser is the only ground truth.
 
+SHAKESPEARE (2026-09-24, pushed): the course is outlined
+(docs/SHAKESPEARE_COURSE_OUTLINE.md) and three pieces of it are built.
+**Shakespeare Basically** is the Side by Side tab in renderReader: verse
+in a numbered column, Plain Meaning beside it, and a cover button that
+blurs the meaning without reflowing. It appears wherever a recast has an
+approved `plain`, which today is the 25 owner-approved sonnets plus the
+5 pilots. It makes NO claim to align line for line, because the Plain
+Meaning is one prose paragraph and the alignment data does not exist.
+**The 160-entry lexicon** is js/data/shakespeare-lexicon.js.
+**Scene Work** is the per-text analysis, aimed at the EIGHT SCENES by
+owner decision (a sonnet is a thought, a scene is a transaction):
+js/data/scene-work.js, 53 beats across the eight, ledger-gated in
+js/data/scene-work-reviews.js — the ledger is EMPTY, so every record is
+draft and the tab does not exist for a learner; the owner reads them at
+#review. Rendered by js/views/scene-work.js, shared with admin.js. The
+records separate CHECKABLE claims (metre, patterns — the suite verifies
+all 347 quotations against the scene text) from READINGS (circumstances,
+people, beats), and `contested` names the reading a scene usually gets.
+The course references **Neutral American only** (owner decision); the
+existing reader is untouched and keeps all four dialects.
+VERSE AND PROSE: a scene's form comes from its RECORD, never from the
+shape of the text, because hard-wrapped prose and lineated verse are
+identical in a fixed-width file. scenes.js carries an authored `form`
+map (switch points quoted by first words) and `unlabelled` (attributing
+the three cuts that open mid-speech; the UI flags it as ours). Two live
+defects fixed on the way: Kill Claudio is prose and was marked verse,
+and the Nunnery Scene crosses verse→prose→verse and was rendered all
+verse. Scan now reaches scenes (`sceneSpeeches`/`formTracker` in
+scene-parse.js, `sceneScanPane` in main.js): verse by the line with the
+pentameter framing, prose by the SENTENCE with nothing flagged, every
+crossing called out. Offered only where `authorGroup === 'Shakespeare'`
+— the verse translations on that shelf are the translators' metre.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

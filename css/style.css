@@ -681,6 +681,38 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 }
 .scan-aside { margin: 0; font-size: 14px; }
 
+/* Scene Work: the per-text analysis over one scene. */
+.sw-people { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 8px; }
+.sw-person { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: #fdfcf7; }
+.sw-who { margin: 0 0 10px; font-family: var(--serif); font-size: 19px; color: #8a6d3b; }
+.sw-row, .sw-ops, .sw-ask { margin: 0 0 10px; font-size: 15px; line-height: 1.6; }
+.sw-label {
+  display: block; font-family: var(--sans); font-size: 10.5px; font-weight: 800;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
+}
+.sw-beat { margin: 0 0 24px; padding-left: 16px; border-left: 2px solid var(--line); }
+.sw-beat-h { display: flex; align-items: baseline; gap: 10px; margin: 0 0 4px; font-family: var(--serif); font-size: 19px; }
+.sw-beat-n {
+  flex: none; width: 24px; height: 24px; border-radius: 50%; background: #8a6d3b; color: #fdfcf7;
+  font-family: var(--sans); font-size: 12px; font-weight: 800; display: inline-flex;
+  align-items: center; justify-content: center;
+}
+.sw-cue { margin: 0 0 10px; font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--muted); }
+.sw-actions { margin: 10px 0; padding-left: 20px; font-size: 15px; line-height: 1.7; }
+.sw-linked {
+  font-family: var(--sans); font-size: 10px; font-weight: 700; letter-spacing: .05em;
+  color: #8a6d3b; border: 1px solid #d9cdb4; border-radius: 999px; padding: 1px 7px; margin-left: 4px;
+}
+.sw-word {
+  display: inline-block; font-family: var(--serif); font-size: 15px; color: var(--ink);
+  background: #f3ece0; border-radius: 5px; padding: 1px 8px; margin: 2px 6px 2px 0;
+}
+.sw-metre { margin: 0 0 16px; }
+.sw-quote { margin: 0 0 4px; font-family: var(--serif); font-size: 16px; color: var(--ink); }
+@media (max-width: 720px) {
+  .sw-people { grid-template-columns: 1fr; gap: 14px; }
+}
+
 /* Sound / transcription: word stacked over its IPA */
 .son-transcribe { display: flex; flex-direction: column; gap: 10px; }
 .tw-line { display: flex; align-items: flex-start; gap: 10px; }

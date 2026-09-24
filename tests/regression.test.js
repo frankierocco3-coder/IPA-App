@@ -27,6 +27,8 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
 import { PROVIDED_SCENES } from '../js/data/scenes.js';
 import { parseProvidedScene, sceneSpeeches, formTracker } from '../js/scene-parse.js';
+import { SCENE_WORK } from '../js/data/scene-work.js';
+import { SCENE_WORK_REVIEWS, sceneWorkApproved } from '../js/data/scene-work-reviews.js';
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
@@ -3644,6 +3646,99 @@ export async function run({ navDoc = document } = {}) {
       && scanSrc.includes('scanSentences(sp.lines.join'));
     check('scan: the view is offered only where the metre is Shakespeare’s own',
       scanSrc.includes("const scannable = sc.authorGroup === 'Shakespeare';"));
+  }
+
+  // ── 21i. Scene Work: the per-text analysis, and its gate ─────
+  // Two things matter here and they are different. The QUOTATIONS are
+  // either in the text or they are not, and every one is checked below
+  // against the scene it claims to come from. The READINGS are opinions
+  // and cannot be tested, so what is tested instead is that no learner
+  // ever sees one without a named human having signed for it.
+  {
+    const shakeIds = PROVIDED_SCENES.filter(sc => sc.authorGroup === 'Shakespeare').map(sc => sc.id);
+    check('scene work: one record per Shakespeare scene, and no orphans',
+      SCENE_WORK.length === 8
+      && SCENE_WORK.every(w => shakeIds.includes(w.id))
+      && shakeIds.every(id => SCENE_WORK.some(w => w.id === id)),
+      SCENE_WORK.map(w => w.id).join(','));
+    check('scene work: every record is complete, with nothing left as a stub',
+      SCENE_WORK.every(w =>
+        w.circumstances.length > 200 && w.form.length > 40
+        && w.people.length === 2
+        && w.people.every(p => p.who && ['between', 'want', 'obstacle', 'stake']
+          .every(k => typeof p[k] === 'string' && p[k].length > 25))
+        && w.beats.length >= 4
+        && w.beats.every(b => b.title && b.cue && b.what.length > 80 && b.ask.length > 25
+          && b.actions.length >= 1 && b.actions.every(a => a.who && a.verb)
+          && b.operative.length >= 3)
+        && w.patterns.length >= 3 && w.patterns.every(p => p.name && p.what.length > 60)
+        && w.metre.length >= 3 && w.metre.every(m => m.line && m.what.length > 60)));
+
+    // 347 quotations, checked one at a time against the scene's own
+    // text. A cue or a metre note may quote across a line break, which
+    // is written " / " here and has to be split before matching.
+    {
+      const body = id => PROVIDED_SCENES.find(s => s.id === id).text.replace(/\s+/g, ' ');
+      const segs = s => s.split(' / ').map(x => x.trim().replace(/\s+/g, ' ')).filter(Boolean);
+      const bad = [];
+      let n = 0;
+      for (const w of SCENE_WORK) {
+        const t = body(w.id);
+        for (const b of w.beats) {
+          for (const s of segs(b.cue)) { n++; if (!t.includes(s)) bad.push(`cue ${w.id}: ${s}`); }
+          for (const o of b.operative) { n++; if (!t.includes(o)) bad.push(`operative ${w.id}: ${o}`); }
+        }
+        for (const m of w.metre) {
+          for (const q of m.line.match(/“([^”]+)”/g) ?? []) {
+            for (const s of segs(q.slice(1, -1))) { n++; if (!t.includes(s)) bad.push(`metre ${w.id}: ${s}`); }
+          }
+        }
+      }
+      check('scene work: every cue, operative word and quoted line is really in the text',
+        bad.length === 0 && n > 300, bad.slice(0, 4).join(' | ') || `checked ${n}`);
+    }
+
+    check('scene work: a named Playable Action is always one of the twelve',
+      SCENE_WORK.flatMap(w => w.beats.flatMap(b => b.actions.map(a => a.action)))
+        .filter(Boolean).every(id => PLAYABLE_ACTIONS.some(a => a.id === id)));
+
+    // The gate. An approval needs a verdict AND a named reviewer, and
+    // the checks below are run against INJECTED ledgers so the live one
+    // is never touched.
+    const inj = l => sceneWorkApproved('macbeth-decision', l);
+    const full = { literary: { status: 'approved', reviewer: 'A. Name' }, verdict: 'approved' };
+    check('scene work: approval needs a verdict and a named reviewer, both',
+      inj({ 'macbeth-decision': full }) === true
+      && inj({}) === false
+      && inj({ 'macbeth-decision': { ...full, verdict: 'pending' } }) === false
+      && inj({ 'macbeth-decision': { ...full, literary: { status: 'approved', reviewer: '' } } }) === false
+      && inj({ 'macbeth-decision': { ...full, literary: { status: 'approved' } } }) === false
+      && inj({ 'macbeth-decision': { verdict: 'approved' } }) === false);
+    check('scene work: nothing is approved yet, so no learner sees a reading',
+      Object.keys(SCENE_WORK_REVIEWS).length === 0
+      && SCENE_WORK.every(w => !sceneWorkApproved(w.id)));
+
+    const swSrc = await viewSource();
+    check('scene work: the tab exists only behind the ledger',
+      swSrc.includes('sceneWorkApproved(sc.id) ? sceneWorkById(sc.id) : null')
+      && swSrc.includes("work ? '<button class=\"son-tab\" data-mode=\"work\">"));
+
+    // House style holds on the PROSE. The quotation fields keep the
+    // edition's own spelling and punctuation, so honour'd, I'll and a
+    // dash inside a quoted line are the playwright's, not ours.
+    const prose = SCENE_WORK.flatMap(w => [
+      w.circumstances, w.form, w.contested ?? '',
+      ...w.people.flatMap(p => [p.between, p.want, p.obstacle, p.stake]),
+      ...w.beats.flatMap(b => [b.title, b.what, b.ask, ...b.actions.map(a => a.verb)]),
+      ...w.patterns.flatMap(p => [p.name, p.what]),
+      ...w.metre.map(m => m.what),
+    ]).join(' ');
+    check('scene work: house style holds on our own prose',
+      !prose.includes('—') && !/["']/.test(prose)
+      && !/\w+n’t\b|\b\w+’(re|ll|ve|m|d)\b/.test(prose),
+      (prose.match(/\w+n’t\b|\b\w+’(re|ll|ve|m|d)\b|—|["']/g) ?? []).slice(0, 5).join(' '));
+    check('scene work: Claude is never named as a reviewer',
+      !/claude|anthropic/i.test(JSON.stringify(SCENE_WORK_REVIEWS)));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────
