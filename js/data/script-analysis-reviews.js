@@ -32,7 +32,45 @@
 // The metre and pattern claims can be checked by anyone willing to
 // count, and should be, separately.
 
-export const SCRIPT_ANALYSIS_REVIEWS = {};
+export const SCRIPT_ANALYSIS_REVIEWS = {
+  // ── All eight, owner-approved 2026-09-25 ──
+  // This turns the Script Analysis tab ON for every Shakespeare scene.
+  // It is an OWNER EDITORIAL approval, the same standing Acting and
+  // Building a Character launched under: a named acting teacher, coach
+  // or director has still not read these, and every entry says so.
+  'macbeth-decision': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations. This record carries a `contested` field, naming the reading the scene usually gets. That is the field a specialist should be hardest on, and it has not had one yet.' },
+  'macbeth-aftermath': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations. This record carries a `contested` field, naming the reading the scene usually gets. That is the field a specialist should be hardest on, and it has not had one yet.' },
+  'hamlet-nunnery': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations. This record carries a `contested` field, naming the reading the scene usually gets. That is the field a specialist should be hardest on, and it has not had one yet.' },
+  'muchado-killclaudio': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations.' },
+  'jc-quarrel': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations.' },
+  'romeo-juliet-balcony': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations. This record carries a `contested` field, naming the reading the scene usually gets. That is the field a specialist should be hardest on, and it has not had one yet.' },
+  'rj-nightingale-lark': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations.' },
+  'shrew-first-encounter': {
+    literary: { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' },
+    verdict: 'approved',
+    revisionNotes: 'Owner editorial approval, read 2026-09-25. NOT the specialist review this record asks for: the ledger header names an acting teacher or director as the right reader for the readings, and none has seen these. The owner is the product owner. The metre and pattern claims are separately verified against the scene text by the suite, which checks all 347 quotations. This record carries a `contested` field, naming the reading the scene usually gets. That is the field a specialist should be hardest on, and it has not had one yet.' },
+};
 
 // A scene's notes are visible only with a NAMED reviewer and a verdict
 // of approved. Both, every time: a verdict with nobody's name on it is

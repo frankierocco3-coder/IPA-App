@@ -4033,9 +4033,20 @@ export async function run({ navDoc = document } = {}) {
       && inj({ 'macbeth-decision': { ...full, literary: { status: 'approved', reviewer: '' } } }) === false
       && inj({ 'macbeth-decision': { ...full, literary: { status: 'approved' } } }) === false
       && inj({ 'macbeth-decision': { verdict: 'approved' } }) === false);
-    check('script analysis: nothing is approved yet, so no learner sees a reading',
-      Object.keys(SCRIPT_ANALYSIS_REVIEWS).length === 0
-      && SCRIPT_ANALYSIS.every(w => !scriptAnalysisApproved(w.id)));
+    // All eight were owner-approved on 2026-09-25, so the tab is LIVE.
+    // "Nothing is approved" was the right check while nothing was; the
+    // invariant that outlasts it is that every approval names somebody
+    // and says what kind of review it was not.
+    check('script analysis: every approved record names a reviewer',
+      SCRIPT_ANALYSIS.filter(w => scriptAnalysisApproved(w.id)).length === SCRIPT_ANALYSIS.length
+      && SCRIPT_ANALYSIS.every(w => {
+        const r = SCRIPT_ANALYSIS_REVIEWS[w.id];
+        return r?.verdict === 'approved' && r?.literary?.reviewer?.trim().length > 1;
+      }),
+      SCRIPT_ANALYSIS.filter(w => !scriptAnalysisApproved(w.id)).map(w => w.id).join(','));
+    check('script analysis: every approval admits it is not the specialist read',
+      SCRIPT_ANALYSIS.every(w =>
+        /NOT the specialist review/.test(SCRIPT_ANALYSIS_REVIEWS[w.id]?.revisionNotes ?? '')));
 
     const saSrc = await viewSource();
     check('script analysis: the tab exists only behind the ledger',
@@ -4183,9 +4194,22 @@ export async function run({ navDoc = document } = {}) {
         c.lessons.length === SHAKESPEARE_LESSONS.filter(l => l.module === c.id).length));
     // NOTHING is approved. The course has no ledger entries, so with the
     // preview off not one lesson would be visible even if the flag flipped.
-    check('shakespeare: no lesson is published, so nothing is approved by accident',
-      SHAKESPEARE_LESSONS.every(l => !speechPublished(l.id)),
-      SHAKESPEARE_LESSONS.filter(l => speechPublished(l.id)).map(l => l.id).join(','));
+    // All 40 were owner-approved on 2026-09-25. Publication and specialist
+    // sign-off stay separate facts: every lesson carries the owner's
+    // editorial verdict, NONE claims a specialist, and the workspace is
+    // still behind its flag, so approving it published nothing yet.
+    check('shakespeare: every lesson is published by owner approval, with a name on it',
+      SHAKESPEARE_LESSONS.every(l => speechPublished(l.id)
+        && speechReviewFor(l.id)?.reviewerType === 'product-owner-editorial'
+        && speechReviewFor(l.id)?.reviewer === 'Product owner'),
+      SHAKESPEARE_LESSONS.filter(l => !speechPublished(l.id)).map(l => l.id).join(','));
+    check('shakespeare: not one lesson claims a specialist has read it',
+      SHAKESPEARE_LESSONS.every(l => !speechApproved(l.id)
+        && /NOT specialist sign-off/.test(speechReviewFor(l.id)?.notes ?? '')));
+    // 5.3 takes a contested position on purpose. Its ledger entry has to
+    // say that a scholar has not checked the bibliography behind it.
+    check('shakespeare: lesson 5.3 records that its contested claims are unchecked',
+      /A Shakespeare scholar has NOT checked/.test(speechReviewFor('sh-capitals')?.notes ?? ''));
 
     const shCopy = [SHAKESPEARE_PRINCIPLE,
       ...SHAKESPEARE_MODULES.flatMap(m => [m.title, m.blurb]),

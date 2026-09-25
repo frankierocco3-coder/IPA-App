@@ -1323,6 +1323,29 @@ three books, nothing published, house style on every line, that module 5
 still calls the typography contested, and that every rhetoric example is
 a real line from a text the app carries.
 
+OWNER REVIEW PASS (2026-09-25). The owner read and approved the two
+outstanding blocks, 48 items, and both ledgers now carry his name:
+* THE 40 SHAKESPEARE LESSONS are published in js/data/speech/reviews.js,
+  reviewerType product-owner-editorial. SHAKESPEARE_LIVE IS STILL FALSE,
+  so approving them published nothing: launching is a separate decision.
+  Five entries carry extra notes because they make claims outside his
+  expertise (the two Folio lessons, the biography, company practice), and
+  5.3 is called out on its own because it takes a CONTESTED position on
+  purpose and no Shakespeare scholar has checked the bibliography.
+* THE EIGHT SCRIPT ANALYSIS RECORDS are approved in
+  js/data/script-analysis-reviews.js, which turns the Script Analysis tab
+  ON for every Shakespeare scene. This is the first learner-facing
+  Shakespeare analysis in the app. Every entry states it is NOT the
+  specialist read the ledger header asks for; the five records carrying a
+  `contested` field say so explicitly, because that is the field a
+  specialist should be hardest on.
+* The lexicon and rhetoric shelves KEEP their awaiting-review badges. The
+  owner is not a Shakespeare scholar or verse teacher, and those badges
+  name that requirement rather than any review he can give.
+* Two suite checks asserted "nothing is approved" and were true only
+  while that held. Both are rewritten to pin the invariant that outlasts
+  it: every approval names somebody, and not one claims a specialist.
+
 WORKSPACE ORDER (owner order 2026-09-25): Acting, Building a Character,
 Shakespeare, Voice & Speech, Accents & Dialects. The WORKSPACES array in
 js/views/context.js IS the display order — the switcher renders
