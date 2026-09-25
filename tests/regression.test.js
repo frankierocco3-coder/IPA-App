@@ -3797,12 +3797,20 @@ export async function run({ navDoc = document } = {}) {
         else if (d === 'nam') off.push(s.n);
       }
     }
-    check('sbs: the Neutral American transpositions really are line-aligned',
-      counts.nam >= 150 && counts.nam <= 154 && SONNETS.length === 154,
-      `nam aligned ${counts.nam}/154, off: ${off.join(',')}`);
-    check('sbs: the misaligned few are known, and fall back rather than stretch',
-      off.every(n => [26, 29, 73, 112].includes(n)),
-      `unexpected misalignment: ${off.filter(n => ![26, 29, 73, 112].includes(n)).join(',')}`);
+    // 150 of 154 until 2026-09-25, when 26, 29, 73 and 112 were re-lineated
+    // to 14. ALL 154 now pair, so the paragraph fallback is no longer
+    // reachable for this dialect and the old "the misaligned few are known"
+    // check would pass on an empty list. Assert the whole set instead: a
+    // vacuous check is worse than no check.
+    check('sbs: every one of the 154 Neutral American texts is line-aligned',
+      counts.nam === 154 && off.length === 0 && SONNETS.length === 154,
+      `nam aligned ${counts.nam}/154, off: ${off.join(',') || 'none'}`);
+    // The fallback still has to WORK — it is what protects ssbe and aus,
+    // where nothing is line-aligned yet.
+    check('sbs: the unaligned dialects still fall back rather than stretch',
+      counts.ssbe < 154 && counts.aus < 154
+      && alignedLines('one\ntwo', 14) === null && alignedLines(null, 14) === null,
+      `ssbe ${counts.ssbe}, aus ${counts.aus}`);
 
     // Alignment is not permission — both gates have to pass. Batch 1
     // (sonnets 1 to 5, Neutral American) is approved AND aligned, so

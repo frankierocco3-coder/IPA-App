@@ -78,14 +78,16 @@ export const EDITION_CATALOG_COMPLETE = true;
 
 // ── Line-for-line alignment ───────────────────────────────────
 // The In Today's Voice transpositions are written one line per line of
-// the original, so 150 of the 154 Neutral American texts already pair up
-// with the verse exactly. That is worth using and worth checking: this
+// the original, so all 154 Neutral American texts pair up with the verse
+// exactly. That is worth using and worth checking: this
 // returns the split lines ONLY when the count matches, and null when it
 // does not, so a pane can never draw an alignment that is not there.
 //
-// Four do not match today (26, 29, 73 and 112 in nam). They are drafts
-// like the rest; they simply fall back to the unaligned view until
-// somebody evens them up, which is the correct failure.
+// ALL 154 match as of 2026-09-25. Four did not (26, 29, 73 and 112): two
+// had compressed four lines of the original into three, two had spread
+// them over more, and all four were re-lineated to fourteen. The fallback
+// stays because it still protects ssbe and aus, where nothing is aligned
+// yet, and because falling back is the correct failure.
 //
 // Alignment is not permission. A caller still has to check the review
 // gate — this answers a question about SHAPE, not about approval.
