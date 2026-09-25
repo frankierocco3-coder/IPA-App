@@ -633,9 +633,16 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 }
 .sbs-n { flex: none; width: 20px; text-align: right; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .sbs-meaning { border-left: 1px solid var(--line); padding-left: 22px; }
-.sbs.is-covered .sbs-meaning .guide-text {
+/* The cover blurs whichever shape the right column is in — one paragraph,
+   or the paired lines — so hiding the meaning works in both. */
+.sbs.is-covered .sbs-meaning .guide-text,
+.sbs.is-covered .sbs-meaning .sbs-line {
   filter: blur(5px); opacity: .45; user-select: none;
 }
+/* Paired lines sit level with the verse they answer, so the eye can cross
+   at any line without counting. */
+.sbs.is-paired .sbs-line { margin: 0 0 2px; min-height: 27px; }
+.sbs.is-paired .sbs-meaning .sbs-line { font-style: italic; color: var(--ink); }
 @media (max-width: 720px) {
   .sbs { grid-template-columns: 1fr; gap: 18px; }
   .sbs-meaning { border-left: 0; border-top: 1px solid var(--line); padding-left: 0; padding-top: 16px; }

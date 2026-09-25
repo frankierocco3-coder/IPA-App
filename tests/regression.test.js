@@ -46,7 +46,7 @@ import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/dat
 import { SONNETS } from '../js/data/sonnets.js';
 import { PENTAMETER, metreOfSonnet } from '../js/data/sonnet-metre.js';
 import { scanLine } from '../js/scan.js';
-import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
+import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
 import { videoLookup } from '../js/data/media-videos.js';
@@ -3648,6 +3648,57 @@ export async function run({ navDoc = document } = {}) {
       && scanSrc.includes('scanSentences(sp.lines.join'));
     check('scan: the view is offered only where the metre is Shakespeare’s own',
       scanSrc.includes("const scannable = sc.authorGroup === 'Shakespeare';"));
+  }
+
+  // ── 21k. Side by Side pairs line for line where that is TRUE ─
+  // The transpositions are written one line per line of the original, so
+  // most of them pair up with the verse exactly. "Most" is the whole
+  // point: alignment is checked per sonnet and never assumed, because a
+  // drawn alignment that is not real is worse than no alignment.
+  {
+    check('sbs: alignedLines matches on count and refuses otherwise',
+      String(alignedLines('one\ntwo\nthree', 3)) === 'one,two,three'
+      && alignedLines('one\ntwo', 3) === null
+      && alignedLines('a\nb\nc\nd', 3) === null
+      && String(alignedLines('one\n\ntwo\n  \nthree\n', 3)) === 'one,two,three'
+      && alignedLines(null, 3) === null && alignedLines('a\nb', 0) === null);
+
+    // The data fact this feature rests on, counted rather than believed.
+    const counts = { nam: 0, ssbe: 0, aus: 0 }, off = [];
+    for (const s of SONNETS) {
+      const ed = await editionFor(s.n).catch(() => null);
+      if (!ed) continue;
+      for (const d of ['nam', 'ssbe', 'aus']) {
+        if (alignedLines(ed.voices?.[d], s.lines.length)) counts[d]++;
+        else if (d === 'nam') off.push(s.n);
+      }
+    }
+    check('sbs: the Neutral American transpositions really are line-aligned',
+      counts.nam >= 150 && counts.nam <= 154 && SONNETS.length === 154,
+      `nam aligned ${counts.nam}/154, off: ${off.join(',')}`);
+    check('sbs: the misaligned few are known, and fall back rather than stretch',
+      off.every(n => [26, 29, 73, 112].includes(n)),
+      `unexpected misalignment: ${off.filter(n => ![26, 29, 73, 112].includes(n)).join(',')}`);
+
+    // Alignment is not permission. Nothing is approved, so no learner
+    // sees a paired column today and the paragraph is what renders.
+    const anyVoiceApproved = SONNETS.some(s =>
+      ['nam', 'ssbe', 'aus'].some(d => editionStatus(s.n, d) === 'approved'));
+    check('sbs: approval is a separate gate, and no voice has passed it yet',
+      anyVoiceApproved === false);
+
+    const sbsSrc = await viewSource();
+    check('sbs: the pane pairs only when given a verified partner',
+      sbsSrc.includes('function pairedVoice(lines, today, prefer)')
+      && sbsSrc.includes('const ls = alignedLines(v.text, lines.length);')
+      && sbsSrc.includes('sideBySidePane(lines, recast, pairedVoice(lines, today, cur))'));
+    check('sbs: a transposition is labelled a transposition, never a translation',
+      sbsSrc.includes('creative transposition, not a translation'));
+
+    const sbsCss = await fetch('../css/style.css').then(r => r.text()).catch(() => '');
+    check('sbs: the cover hides both shapes of the right-hand column',
+      sbsCss.includes('.sbs.is-covered .sbs-meaning .guide-text,')
+      && sbsCss.includes('.sbs.is-covered .sbs-meaning .sbs-line'));
   }
 
   // ── 21j. Sonnet 145 is in eights, and the scanner knows ──────

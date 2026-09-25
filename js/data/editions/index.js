@@ -61,6 +61,25 @@ export const EDITION_CHUNKS = [
 // 149 new sonnets in 11 chunks + the 5 pilots in recasts.js = 154.
 export const EDITION_CATALOG_COMPLETE = true;
 
+// ── Line-for-line alignment ───────────────────────────────────
+// The In Today's Voice transpositions are written one line per line of
+// the original, so 150 of the 154 Neutral American texts already pair up
+// with the verse exactly. That is worth using and worth checking: this
+// returns the split lines ONLY when the count matches, and null when it
+// does not, so a pane can never draw an alignment that is not there.
+//
+// Four do not match today (26, 29, 73 and 112 in nam). They are drafts
+// like the rest; they simply fall back to the unaligned view until
+// somebody evens them up, which is the correct failure.
+//
+// Alignment is not permission. A caller still has to check the review
+// gate — this answers a question about SHAPE, not about approval.
+export function alignedLines(text, originalLineCount) {
+  if (typeof text !== 'string' || !originalLineCount) return null;
+  const ls = text.split('\n').map(l => l.trim()).filter(Boolean);
+  return ls.length === originalLineCount ? ls : null;
+}
+
 const chunkCache = new Map();
 
 async function loadChunk(chunk) {

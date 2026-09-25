@@ -22,7 +22,7 @@ import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
 import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from './data/recasts.js';
-import { editionFor, allEditions, editionStatus, EDITION_CHUNKS,
+import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from './data/editions/index.js';
 import { actionFor, actionDrafts, DIALECT_ACTION_LIVE } from './data/dialect-in-action.js';
 import { videoFor } from './data/media-videos.js';
@@ -7987,7 +7987,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
         <button class="son-tab" data-mode="transcribe">🔤 IPA</button>
         ${CAPABILITIES.learnerSpeaking ? '<button class="son-tab" data-mode="perform">🎙 Perform</button>' : ''}
         ${recast?.plain ? '<button class="son-tab" data-mode="plain">📖 Plain Meaning</button>' : ''}
-        ${recast?.plain ? '<button class="son-tab" data-mode="both">🔀 Side by Side</button>' : ''}
+        ${recast?.plain || pairedVoice(lines, today, accent) ? '<button class="son-tab" data-mode="both">🔀 Side by Side</button>' : ''}
         ${today.length ? '<button class="son-tab" data-mode="today">🗣 In Today’s Voice</button>' : ''}
       </div>
       <div class="sonnet-pane" id="sonnet-pane"></div>
@@ -8017,7 +8017,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse, metre); }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
     else if (m === 'plain') { pane.innerHTML = plainPane(recast); }
-    else if (m === 'both') { pane.innerHTML = sideBySidePane(lines, recast); wireSideBySide(pane); }
+    else if (m === 'both') { pane.innerHTML = sideBySidePane(lines, recast, pairedVoice(lines, today, cur)); wireSideBySide(pane); }
     else if (m === 'today') { todayPane(pane, today); }
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
@@ -8445,31 +8445,61 @@ function plainPane(recast) {
 // Side by Side — the reading view of "Shakespeare Basically": the verse
 // and what it means, without flipping tabs to hold both in mind.
 //
-// The Plain Meaning is ONE PROSE PARAGRAPH, not a line-by-line gloss, so
-// this aligns the two texts as columns and makes no claim to align them
-// line for line. The spec's colour-coded phrase links would need
-// per-line alignment data that does not exist, and inventing the
-// appearance of it would be worse than not having it.
+// It draws line for line WHERE THAT IS TRUE, and only there.
+//
+// CORRECTION, 2026-09-24: when this shipped its comment said per-line
+// alignment data did not exist. It does, and it was already in the repo.
+// The In Today's Voice transpositions are written one line per line of
+// the original, and 150 of the 154 Neutral American texts pair up with
+// the verse exactly. `alignedLines()` checks the count and returns null
+// when it does not match, so the claim is verified per sonnet rather
+// than assumed.
+//
+// A transposition is NOT a translation and the heading has to say so, or
+// a learner reads a contemporary re-voicing as a gloss on the words. The
+// Plain Meaning paragraph remains the fallback, and it is the honest
+// shape for a text that has no line-for-line partner.
 //
 // The cover button is the study exercise: read the meaning once, hide
 // it, and work from the verse alone. That is the direction the whole
 // feature is meant to travel in, so the control says so.
-function sideBySidePane(lines, recast) {
+function sideBySidePane(lines, recast, paired = null) {
+  const right = paired
+    ? `<h3 class="sbs-h">${esc(paired.label)}</h3>
+       ${paired.lines.map((l, i) => `<p class="sbs-line"><span class="sbs-n">${i + 1}</span>${esc(l)}</p>`).join('')}`
+    : `<h3 class="sbs-h">What it says</h3>
+       <p class="guide-text">${esc(recast.plain)}</p>`;
+  const note = paired
+    ? `<p class="pane-note">🔀 <b>Side by Side</b> — the verse, and the same fourteen lines re-voiced for today. This is a <b>creative transposition, not a translation</b>: it follows the thought line by line, not the words. Read it to find your footing, then work from the verse.</p>`
+    : `<p class="pane-note">📖 <b>Side by Side</b> — the verse, and what it says. The meaning is a bridge to the original, not a substitute for speaking it.</p>`;
   return `
-    <p class="pane-note">📖 <b>Side by Side</b> — the verse, and what it says. The meaning is a bridge to the original, not a substitute for speaking it.</p>
+    ${note}
     <div class="sbs-controls">
       <button class="btn btn-lite" id="sbs-cover" type="button" aria-pressed="false">Hide the meaning</button>
     </div>
-    <div class="sbs" id="sbs">
+    <div class="sbs ${paired ? 'is-paired' : ''}" id="sbs">
       <div class="sbs-col sbs-verse">
         <h3 class="sbs-h">Original</h3>
         ${lines.map((l, i) => `<p class="sbs-line"><span class="sbs-n">${i + 1}</span>${esc(l)}</p>`).join('')}
       </div>
       <div class="sbs-col sbs-meaning" id="sbs-meaning">
-        <h3 class="sbs-h">What it says</h3>
-        <p class="guide-text">${esc(recast.plain)}</p>
+        ${right}
       </div>
     </div>`;
+}
+
+// The partner for the right-hand column: an APPROVED voice whose line
+// count matches the verse. Approval and alignment are separate gates and
+// both have to pass — an approved text that does not line up falls back
+// to the paragraph rather than being stretched to fit.
+function pairedVoice(lines, today, prefer) {
+  const order = [...today].sort((a, b) =>
+    (b.id === prefer) - (a.id === prefer));
+  for (const v of order) {
+    const ls = alignedLines(v.text, lines.length);
+    if (ls) return { label: v.label, lines: ls };
+  }
+  return null;
 }
 
 function wireSideBySide(pane) {
