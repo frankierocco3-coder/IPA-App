@@ -1323,6 +1323,15 @@ three books, nothing published, house style on every line, that module 5
 still calls the typography contested, and that every rhetoric example is
 a real line from a text the app carries.
 
+WORKSPACE ORDER (owner order 2026-09-25): Acting, Building a Character,
+Shakespeare, Voice & Speech, Accents & Dialects. The WORKSPACES array in
+js/views/context.js IS the display order — the switcher renders
+liveWorkspaces() straight through — so reordering that array is the whole
+change. Speech sits last, withdrawn behind SPEECH_LIVE and never
+rendered, kept rather than deleted because the kill switch is a flag. The
+live selector therefore shows four of six today; with the Shakespeare
+preview on it shows all five of the owner's list.
+
 OWNER TRIM (2026-09-25). Five changes to live content:
 * SCRIPT ANALYSIS IS SIX THINGS: Lines & Memory, The Four Lists, Through
   Analysis, Marking Up the Script, Finding Your Own Marks, Question

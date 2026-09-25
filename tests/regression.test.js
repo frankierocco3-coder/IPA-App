@@ -2925,8 +2925,12 @@ export async function run({ navDoc = document } = {}) {
       new (document.querySelector('iframe').contentWindow.MouseEvent)('click', { bubbles: true }));
     await scSleep(200);
     const wsRows = [...fdoc.querySelectorAll('[data-ws]')].map(b => b.dataset.ws);
+    // Reordered 2026-09-25 by owner order. What this check is FOR is the
+    // absence of Speech, so assert that first and the order second.
     check('speech: the workspace is withdrawn — no Speech row among the live workspaces',
-      String(wsRows) === 'acting,ipa,accents,character');
+      !wsRows.includes('speech')
+      && String(wsRows) === 'acting,character,ipa,accents',
+      String(wsRows));
     check('speech: withdrawal is a flag, not a deletion — every record survives it',
       SPEECH_LESSONS.length === 25 && textbookOrder().length === 25
       && SPEECH_LESSONS.filter(l => l.requiredReviewer === 'voice-professional')
@@ -3042,9 +3046,14 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(200);
-      check('acting: the selector offers every live workspace, Speech withdrawn',
+      // The array order IS the screen order (owner order 2026-09-25):
+      // Acting, Building a Character, Shakespeare, Voice & Speech,
+      // Accents & Dialects. Speech is withdrawn and Shakespeare is hidden,
+      // so the live selector shows four of the six.
+      check('acting: the selector offers every live workspace in order, Speech withdrawn',
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join()
-          === 'Acting,Voice & Speech,Accents & Dialects,Building a Character');
+          === 'Acting,Building a Character,Voice & Speech,Accents & Dialects',
+        [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join());
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
       check('acting: the workspace keeps its guided course and its Library',

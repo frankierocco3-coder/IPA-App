@@ -67,16 +67,24 @@ export const activeCourse = () => {
   const c = localStorage.getItem('speechcraft-course');
   return visibleCourses().some(x => x.id === c) ? c : 'nam';
 };
-// ── Workspaces: Speech · Acting · IPA · Accents & Dialects ──
-// One app, three connected work areas. The sidebar sections keep their
+// ── Workspaces ────────────────────────────────────────────────
+// One app, several connected work areas. The sidebar sections keep their
 // names; their CONTENTS follow the active workspace. The selection is
 // remembered locally; nothing about courses, progress or projects is
 // duplicated or erased by switching.
+//
+// THIS ARRAY IS THE DISPLAY ORDER. The workspace switcher renders
+// liveWorkspaces() straight through, so the order here is the order on
+// screen. Owner order 2026-09-25: Acting, Building a Character,
+// Shakespeare, Voice & Speech, Accents & Dialects — the work first, the
+// instrument and the accents after it.
 export const WORKSPACES = [
-  { id: 'speech', icon: '🗣', label: 'Speech',
-    context: 'Clarity, confidence, persuasion and vocal freedom' },
   { id: 'acting', icon: '🎭', label: 'Acting',
     context: 'Scene study, character, text and rehearsal' },
+  { id: 'character', icon: '🧍', label: 'Building a Character',
+    context: 'Inventing a person, building a cast role, and commedia dell’arte' },
+  { id: 'shakespeare', icon: '🪶', label: 'Shakespeare',
+    context: 'The language, the verse, and text that is harder to read than it is to play' },
   // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
   // the conservatory class name. The internal id stays 'ipa' (stored
   // values, lint pins); the IPA Foundations course chip stays inside.
@@ -84,10 +92,11 @@ export const WORKSPACES = [
     context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
   { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
     context: 'Accent and dialect courses' },
-  { id: 'character', icon: '🧍', label: 'Building a Character',
-    context: 'Inventing a person, building a cast role, and commedia dell’arte' },
-  { id: 'shakespeare', icon: '🪶', label: 'Shakespeare',
-    context: 'The language, the verse, and text that is harder to read than it is to play' },
+  // Withdrawn behind SPEECH_LIVE and therefore never rendered, so its
+  // position is moot until that flag flips. Kept last rather than
+  // deleted: the kill switch is a flag, not a removal.
+  { id: 'speech', icon: '🗣', label: 'Speech',
+    context: 'Clarity, confidence, persuasion and vocal freedom' },
 ];
 // ── Kill switch (2026-08-19, owner decision) ──────────────────
 // The Speech workspace is withdrawn from the learner-facing app "for
