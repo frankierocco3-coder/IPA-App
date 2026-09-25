@@ -46,7 +46,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v12';                     // 2026-09-24: batch-2 approvals — chunk text and edition-reviews.js changed together again; same coupling, same reason
+const VERSION = 'sc-v13';                     // 2026-09-25: Scene Work renamed Script Analysis — three modules changed FILENAME, so the old cached URLs are orphans and the new ones must be fetched
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

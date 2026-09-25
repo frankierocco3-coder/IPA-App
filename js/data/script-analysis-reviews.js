@@ -1,4 +1,4 @@
-// Review ledger for Scene Work (js/data/scene-work.js).
+// Review ledger for Script Analysis (js/data/script-analysis.js).
 //
 // EVERY record starts as a draft by construction: absence from this map
 // IS draft status. A scene's working notes reach learners only when a
@@ -32,12 +32,12 @@
 // The metre and pattern claims can be checked by anyone willing to
 // count, and should be, separately.
 
-export const SCENE_WORK_REVIEWS = {};
+export const SCRIPT_ANALYSIS_REVIEWS = {};
 
 // A scene's notes are visible only with a NAMED reviewer and a verdict
 // of approved. Both, every time: a verdict with nobody's name on it is
 // how a review ledger turns into a formality.
-export function sceneWorkApproved(id, ledger = SCENE_WORK_REVIEWS) {
+export function scriptAnalysisApproved(id, ledger = SCRIPT_ANALYSIS_REVIEWS) {
   const r = ledger[id];
   return !!r && r.verdict === 'approved'
     && !!r.literary && r.literary.status === 'approved'

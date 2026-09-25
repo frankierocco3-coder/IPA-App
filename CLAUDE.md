@@ -1207,12 +1207,18 @@ approved `plain`, which today is the 25 owner-approved sonnets plus the
 5 pilots. It makes NO claim to align line for line, because the Plain
 Meaning is one prose paragraph and the alignment data does not exist.
 **The 160-entry lexicon** is js/data/shakespeare-lexicon.js.
-**Scene Work** is the per-text analysis, aimed at the EIGHT SCENES by
+**Script Analysis** is the per-text analysis, aimed at the EIGHT SCENES by
 owner decision (a sonnet is a thought, a scene is a transaction):
-js/data/scene-work.js, 53 beats across the eight, ledger-gated in
-js/data/scene-work-reviews.js — the ledger is EMPTY, so every record is
+js/data/script-analysis.js, 53 beats across the eight, ledger-gated in
+js/data/script-analysis-reviews.js — the ledger is EMPTY, so every record is
 draft and the tab does not exist for a learner; the owner reads them at
-#review. Rendered by js/views/scene-work.js, shared with admin.js. The
+#review. Rendered by js/views/script-analysis.js, shared with admin.js.
+It carries the SAME NAME as Acting's module 2 on purpose: that module
+teaches the skill, this tab shows it done on a real scene. It was called
+Scene Work until 2026-09-25, which collided with two established Acting
+names — the workspace title "Acting & Scene Work" and the live lesson
+`ac-scene`, "Scene Work" — so the name was wrong, not just duplicated.
+Nothing stored moved: the ledger is keyed by SCENE id. The
 records separate CHECKABLE claims (metre, patterns — the suite verifies
 all 347 quotations against the scene text) from READINGS (circumstances,
 people, beats), and `contested` names the reading a scene usually gets.

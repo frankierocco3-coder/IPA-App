@@ -27,8 +27,8 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
 import { PROVIDED_SCENES } from '../js/data/scenes.js';
 import { parseProvidedScene, sceneSpeeches, formTracker } from '../js/scene-parse.js';
-import { SCENE_WORK } from '../js/data/scene-work.js';
-import { SCENE_WORK_REVIEWS, sceneWorkApproved } from '../js/data/scene-work-reviews.js';
+import { SCRIPT_ANALYSIS } from '../js/data/script-analysis.js';
+import { SCRIPT_ANALYSIS_REVIEWS, scriptAnalysisApproved } from '../js/data/script-analysis-reviews.js';
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
@@ -3833,7 +3833,7 @@ export async function run({ navDoc = document } = {}) {
       && metreSrc.includes('A count that isn’t ${metre.expected}'));
   }
 
-  // ── 21i. Scene Work: the per-text analysis, and its gate ─────
+  // ── 21i. Script Analysis: the per-text analysis, and its gate ─────
   // Two things matter here and they are different. The QUOTATIONS are
   // either in the text or they are not, and every one is checked below
   // against the scene it claims to come from. The READINGS are opinions
@@ -3841,13 +3841,13 @@ export async function run({ navDoc = document } = {}) {
   // ever sees one without a named human having signed for it.
   {
     const shakeIds = PROVIDED_SCENES.filter(sc => sc.authorGroup === 'Shakespeare').map(sc => sc.id);
-    check('scene work: one record per Shakespeare scene, and no orphans',
-      SCENE_WORK.length === 8
-      && SCENE_WORK.every(w => shakeIds.includes(w.id))
-      && shakeIds.every(id => SCENE_WORK.some(w => w.id === id)),
-      SCENE_WORK.map(w => w.id).join(','));
-    check('scene work: every record is complete, with nothing left as a stub',
-      SCENE_WORK.every(w =>
+    check('script analysis: one record per Shakespeare scene, and no orphans',
+      SCRIPT_ANALYSIS.length === 8
+      && SCRIPT_ANALYSIS.every(w => shakeIds.includes(w.id))
+      && shakeIds.every(id => SCRIPT_ANALYSIS.some(w => w.id === id)),
+      SCRIPT_ANALYSIS.map(w => w.id).join(','));
+    check('script analysis: every record is complete, with nothing left as a stub',
+      SCRIPT_ANALYSIS.every(w =>
         w.circumstances.length > 200 && w.form.length > 40
         && w.people.length === 2
         && w.people.every(p => p.who && ['between', 'want', 'obstacle', 'stake']
@@ -3867,7 +3867,7 @@ export async function run({ navDoc = document } = {}) {
       const segs = s => s.split(' / ').map(x => x.trim().replace(/\s+/g, ' ')).filter(Boolean);
       const bad = [];
       let n = 0;
-      for (const w of SCENE_WORK) {
+      for (const w of SCRIPT_ANALYSIS) {
         const t = body(w.id);
         for (const b of w.beats) {
           for (const s of segs(b.cue)) { n++; if (!t.includes(s)) bad.push(`cue ${w.id}: ${s}`); }
@@ -3879,51 +3879,51 @@ export async function run({ navDoc = document } = {}) {
           }
         }
       }
-      check('scene work: every cue, operative word and quoted line is really in the text',
+      check('script analysis: every cue, operative word and quoted line is really in the text',
         bad.length === 0 && n > 300, bad.slice(0, 4).join(' | ') || `checked ${n}`);
     }
 
-    check('scene work: a named Playable Action is always one of the twelve',
-      SCENE_WORK.flatMap(w => w.beats.flatMap(b => b.actions.map(a => a.action)))
+    check('script analysis: a named Playable Action is always one of the twelve',
+      SCRIPT_ANALYSIS.flatMap(w => w.beats.flatMap(b => b.actions.map(a => a.action)))
         .filter(Boolean).every(id => PLAYABLE_ACTIONS.some(a => a.id === id)));
 
     // The gate. An approval needs a verdict AND a named reviewer, and
     // the checks below are run against INJECTED ledgers so the live one
     // is never touched.
-    const inj = l => sceneWorkApproved('macbeth-decision', l);
+    const inj = l => scriptAnalysisApproved('macbeth-decision', l);
     const full = { literary: { status: 'approved', reviewer: 'A. Name' }, verdict: 'approved' };
-    check('scene work: approval needs a verdict and a named reviewer, both',
+    check('script analysis: approval needs a verdict and a named reviewer, both',
       inj({ 'macbeth-decision': full }) === true
       && inj({}) === false
       && inj({ 'macbeth-decision': { ...full, verdict: 'pending' } }) === false
       && inj({ 'macbeth-decision': { ...full, literary: { status: 'approved', reviewer: '' } } }) === false
       && inj({ 'macbeth-decision': { ...full, literary: { status: 'approved' } } }) === false
       && inj({ 'macbeth-decision': { verdict: 'approved' } }) === false);
-    check('scene work: nothing is approved yet, so no learner sees a reading',
-      Object.keys(SCENE_WORK_REVIEWS).length === 0
-      && SCENE_WORK.every(w => !sceneWorkApproved(w.id)));
+    check('script analysis: nothing is approved yet, so no learner sees a reading',
+      Object.keys(SCRIPT_ANALYSIS_REVIEWS).length === 0
+      && SCRIPT_ANALYSIS.every(w => !scriptAnalysisApproved(w.id)));
 
-    const swSrc = await viewSource();
-    check('scene work: the tab exists only behind the ledger',
-      swSrc.includes('sceneWorkApproved(sc.id) ? sceneWorkById(sc.id) : null')
-      && swSrc.includes("work ? '<button class=\"son-tab\" data-mode=\"work\">"));
+    const saSrc = await viewSource();
+    check('script analysis: the tab exists only behind the ledger',
+      saSrc.includes('scriptAnalysisApproved(sc.id) ? scriptAnalysisById(sc.id) : null')
+      && saSrc.includes("analysis ? '<button class=\"son-tab\" data-mode=\"analysis\">"));
 
     // House style holds on the PROSE. The quotation fields keep the
     // edition's own spelling and punctuation, so honour'd, I'll and a
     // dash inside a quoted line are the playwright's, not ours.
-    const prose = SCENE_WORK.flatMap(w => [
+    const prose = SCRIPT_ANALYSIS.flatMap(w => [
       w.circumstances, w.form, w.contested ?? '',
       ...w.people.flatMap(p => [p.between, p.want, p.obstacle, p.stake]),
       ...w.beats.flatMap(b => [b.title, b.what, b.ask, ...b.actions.map(a => a.verb)]),
       ...w.patterns.flatMap(p => [p.name, p.what]),
       ...w.metre.map(m => m.what),
     ]).join(' ');
-    check('scene work: house style holds on our own prose',
+    check('script analysis: house style holds on our own prose',
       !prose.includes('—') && !/["']/.test(prose)
       && !/\w+n’t\b|\b\w+’(re|ll|ve|m|d)\b/.test(prose),
       (prose.match(/\w+n’t\b|\b\w+’(re|ll|ve|m|d)\b|—|["']/g) ?? []).slice(0, 5).join(' '));
-    check('scene work: Claude is never named as a reviewer',
-      !/claude|anthropic/i.test(JSON.stringify(SCENE_WORK_REVIEWS)));
+    check('script analysis: Claude is never named as a reviewer',
+      !/claude|anthropic/i.test(JSON.stringify(SCRIPT_ANALYSIS_REVIEWS)));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────

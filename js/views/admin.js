@@ -19,9 +19,9 @@ import { voicesForCourse } from '../data/voices.js';
 import { phonemesForAccent } from '../engine.js';
 import { app, esc, goHome, phonemeSlug, record } from '../ui.js';
 import { actionPieceHtml, wireActionPiece } from './action-piece.js';
-import { SCENE_WORK } from '../data/scene-work.js';
-import { sceneWorkApproved } from '../data/scene-work-reviews.js';
-import { sceneWorkHtml } from './scene-work.js';
+import { SCRIPT_ANALYSIS } from '../data/script-analysis.js';
+import { scriptAnalysisApproved } from '../data/script-analysis-reviews.js';
+import { scriptAnalysisHtml } from './script-analysis.js';
 
 const AUDIT_KEY = 'speechcraft-audio-audit-v1';
 const auditVerdicts = () => { try { return JSON.parse(localStorage.getItem(AUDIT_KEY)) ?? {}; } catch { return {}; } };
@@ -201,7 +201,7 @@ export function renderContentReview() {
   }
   const brDrafts = bridgeDrafts();
   const brComps = brDrafts.reduce((n, r) => n + r.comparisons.length, 0);
-  const swDrafts = SCENE_WORK.filter(w => !sceneWorkApproved(w.id));
+  const saDrafts = SCRIPT_ANALYSIS.filter(w => !scriptAnalysisApproved(w.id));
   const revLine = (label, r) => `${label}: <b>${esc(r?.status ?? 'pending')}</b>${r?.reviewer ? ` — ${esc(r.reviewer)}${r.date ? `, ${esc(r.date)}` : ''}` : ''}`;
   app.innerHTML = `
     <header class="topbar">
@@ -267,12 +267,12 @@ export function renderContentReview() {
       </div>
       <div id="ed-view"></div>
 
-      <h1 id="scene-work-drafts">Scene Work — ${swDrafts.length} draft(s) of ${SCENE_WORK.length}</h1>
-      <p class="pane-note">The per-text analysis for the Shakespeare course, aimed at the eight scenes (owner decision 2026-09-24) and tracked in <code>js/data/scene-work-reviews.js</code> — absence from that ledger means draft, and a draft never reaches the scene page. Required reviewer: an <b>acting teacher, coach or director</b>. Two kinds of claim, weighed differently: <b>metre</b> and <b>patterns</b> are checkable against the text and should be counted, not judged; <b>circumstances</b>, <b>people</b> and <b>beats</b> are readings, and approving them says defensible and honestly framed, not true. Be hardest on <b>the reading this scene usually gets</b>, which is the field that stops received opinion being taught as fact. Claude may never approve his own writing and nothing here may be batch-approved.</p>
-      ${swDrafts.map(w => `
+      <h1 id="script-analysis-drafts">Script Analysis — ${saDrafts.length} draft(s) of ${SCRIPT_ANALYSIS.length}</h1>
+      <p class="pane-note">The per-text analysis for the Shakespeare course, aimed at the eight scenes (owner decision 2026-09-24) and tracked in <code>js/data/script-analysis-reviews.js</code> — absence from that ledger means draft, and a draft never reaches the scene page. Required reviewer: an <b>acting teacher, coach or director</b>. Two kinds of claim, weighed differently: <b>metre</b> and <b>patterns</b> are checkable against the text and should be counted, not judged; <b>circumstances</b>, <b>people</b> and <b>beats</b> are readings, and approving them says defensible and honestly framed, not true. Be hardest on <b>the reading this scene usually gets</b>, which is the field that stops received opinion being taught as fact. Claude may never approve his own writing and nothing here may be batch-approved.</p>
+      ${saDrafts.map(w => `
         <section class="review-piece">
           <p class="sonnet-hint">scene <code>${esc(w.id)}</code> · ${w.beats.length} beat(s) · ${w.metre.length} metre note(s) · status <b>draft</b> · awaiting acting-professional review</p>
-          ${sceneWorkHtml(w, { heading: false })}
+          ${scriptAnalysisHtml(w, { heading: false })}
         </section>`).join('')}
 
       <h1 id="speech-drafts">Speech system — draft content</h1>

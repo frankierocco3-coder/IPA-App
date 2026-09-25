@@ -357,12 +357,16 @@ Built 2026-09-24, both commits gated and suite-green:
    by their first words, never derived from line length) and
    `unlabelled`, which attributes the three cuts that open mid-speech
    and is flagged in the UI as our attribution, not the edition's.
-3. **Scene Work**, js/data/scene-work.js: all eight scenes, 53 beats,
+3. **Script Analysis**, js/data/script-analysis.js: all eight scenes, 53 beats,
    31 patterns, 37 metre notes, 223 operative words. Ledger-gated in
-   js/data/scene-work-reviews.js (empty = every record is draft, nothing
-   learner-facing), rendered by js/views/scene-work.js for both the
+   js/data/script-analysis-reviews.js (empty = every record is draft, nothing
+   learner-facing), rendered by js/views/script-analysis.js for both the
    scene tab and #review. Required reviewer: an acting teacher, coach or
-   director.
+   director. Named **Script Analysis** to match Acting's module 2, which
+   teaches this exact skill: the module teaches it, this tab shows it done
+   on a real scene. It was called Scene Work until 2026-09-25, which
+   collided with the Acting workspace title and with the live Acting
+   lesson `ac-scene`, itself titled Scene Work.
 
 **The line the records hold, and the suite enforces:** `metre` and
 `patterns` are CHECKABLE and every one of the 347 quotations is verified
@@ -384,5 +388,5 @@ still the first thing to cut.
 3. The rhetoric shelf, then Module 6.
 4. Module 7, then Modules 1 and 5.
 5. ~~Shakespeare Basically~~ — Side by Side shipped for the 25 approved
-   sonnet Plain Meanings; Scene Work written for all eight scenes and
+   sonnet Plain Meanings; Script Analysis written for all eight scenes and
    awaiting review.

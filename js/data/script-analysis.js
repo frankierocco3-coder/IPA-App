@@ -1,4 +1,4 @@
-// Scene Work — the per-text analysis, aimed at the scenes.
+// Script Analysis — the per-text analysis, aimed at the scenes.
 //
 // Owner decision 2026-09-24: of the two places the Shakespeare course
 // could hang its analysis, the sonnets or the eight scenes, it hangs on
@@ -40,11 +40,11 @@
 //                what the text says if you decline it
 //
 // REVIEW. Nothing here reaches a learner until a human approves it in
-// js/data/scene-work-reviews.js. Claude may author and revise these
+// js/data/script-analysis-reviews.js. Claude may author and revise these
 // drafts and can never approve its own literary or dialect writing, and
 // nothing may be batch-approved. Absence from that ledger IS draft.
 
-export const SCENE_WORK = [
+export const SCRIPT_ANALYSIS = [
 
   // ── Macbeth, Act I Scene 7 ──────────────────────────────────
   {
@@ -1045,4 +1045,4 @@ export const SCENE_WORK = [
   },
 ];
 
-export const sceneWorkById = id => SCENE_WORK.find(w => w.id === id) ?? null;
+export const scriptAnalysisById = id => SCRIPT_ANALYSIS.find(w => w.id === id) ?? null;
