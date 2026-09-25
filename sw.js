@@ -46,7 +46,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v14';                     // 2026-09-25: one approval gate (editionStatus MOVED file, recasts.js and the ledger changed with it, sonnet 16 rewritten) AND main.js's graph gained shakespeare-lexicon.js — a half-updated cache could pair the new resolver with the old gate, or hold a main.js that never fetches the lexicon
+const VERSION = 'sc-v15';                     // 2026-09-25: the Shakespeare course — main.js's module graph GAINED js/data/shakespeare/shakespeare-course.js, and an installed app holding the old main.js would never fetch it
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

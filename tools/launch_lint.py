@@ -378,6 +378,33 @@ def main():
         if banned in lex_fn:
             fail("the lexicon reference page gained lesson machinery: %r" % banned)
 
+    # 6o: the Shakespeare course (2026-09-25). Modules 2, 3 and 4 of a
+    # planned seven. It is HIDDEN, and the flag being false is the pin
+    # that matters: a course 18 lessons into 42 must not reach learners,
+    # and nothing here is approved by any reviewer.
+    ctx_src = (ROOT / "js" / "views" / "context.js").read_text(encoding="utf-8")
+    if "export const SHAKESPEARE_LIVE = false;" not in ctx_src:
+        fail("SHAKESPEARE_LIVE must stay false until the course can stand alone")
+    sh_path = ROOT / "js" / "data" / "shakespeare" / "shakespeare-course.js"
+    if not sh_path.exists():
+        fail("the Shakespeare course data is missing")
+    else:
+        sh_src = sh_path.read_text(encoding="utf-8")
+        # Ids are never renamed here: that is what preserves stored progress.
+        for pin in ["id: 'sh-hard'", "id: 'sh-syntax'", "id: 'sh-findswitch'",
+                    "id: 'sh-bends'", "id: 'sh-sharedlines'"]:
+            if pin not in sh_src:
+                fail("a Shakespeare lesson id changed or vanished: %r" % pin)
+        # The course exists to APPLY the craft, not to re-teach what is
+        # already built. If these pointers go, the lessons have started
+        # duplicating the lexicon, the scanner and Acting.
+        for pointer in ["Scan tab", "lexicon", "Side by Side", "Script Analysis"]:
+            if pointer not in sh_src:
+                fail("the Shakespeare course stopped pointing at %r" % pointer)
+        # The organising claim of the whole course.
+        if "It is information about the acting" not in sh_src:
+            fail("the Shakespeare course lost its governing principle")
+
     # 6m: the three-workspace IA (2026-08-13)
     for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:
         if pin not in views_js:

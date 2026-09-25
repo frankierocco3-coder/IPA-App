@@ -1275,6 +1275,39 @@ pentameter framing, prose by the SENTENCE with nothing flagged, every
 crossing called out. Offered only where `authorGroup === 'Shakespeare'`
 — the verse translations on that shelf are the translators' metre.
 
+THE SHAKESPEARE COURSE (2026-09-25): the FIFTH workspace, hidden behind
+SHAKESPEARE_LIVE=false in js/views/context.js, the mechanism
+CHARACTER_LIVE used. MODULES 2, 3 AND 4 ARE WRITTEN: The Language (6),
+Verse and Prose (4), Iambic Pentameter (8) — 18 lessons of a planned 42
+across 7 modules. Module numbers follow the outline so each keeps its
+number as the rest arrive; modules 1, 5, 6 and 7 are absent rather than
+listed empty. Data: js/data/shakespeare/shakespeare-course.js, the same
+record shape as Acting and Character, ids `sh-…`. Served through the
+BOOKS layer in main.js, which now resolves THREE books by id with Acting
+as the fallback. Owner reads it at #shakespeare-preview (and
+#shakespeare-preview-off), exactly as Character was read.
+It will NOT launch until it can stand alone — the lesson the Speech
+withdrawal taught — and every lesson still needs a publication entry in
+js/data/speech/reviews.js. NOTHING IS APPROVED: the suite pins that not
+one lesson is published, so flipping the flag alone would show an empty
+course rather than unreviewed content.
+The course deliberately does NOT re-teach three things, and launch_lint
+6o fails if it stops pointing at them: vocabulary and elisions (the
+lexicon shelf), syllable counting (the Scan tab), and objectives, beats
+and actions (Acting, Script Analysis, Playable Actions). Its governing
+claim is that the verse is not a constraint on the acting but
+information about it.
+Learn, Library, Practice, Progress and Studio all fork for it.
+characterLibraryPane and characterProgressPane were PARAMETERISED into
+bookLibraryPane/bookProgressPane rather than copied, so Character's
+behaviour is provably unchanged. Shakespeare Practice has NO exercise
+built and says so, pointing at the sonnets, the scenes and the lexicon
+instead of inventing a drill to fill the page. Its Studio drops the
+Personal Dictionary, which is accent work.
+Suite section 21k (13 checks) pins the hidden flag, the stored-workspace
+fallback, the 6+4+8 shape, whole records, no id clash across the three
+books, nothing published, and house style on every line.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

@@ -86,6 +86,8 @@ export const WORKSPACES = [
     context: 'Accent and dialect courses' },
   { id: 'character', icon: '🧍', label: 'Building a Character',
     context: 'Inventing a person, building a cast role, and commedia dell’arte' },
+  { id: 'shakespeare', icon: '🪶', label: 'Shakespeare',
+    context: 'The language, the verse, and text that is harder to read than it is to play' },
 ];
 // ── Kill switch (2026-08-19, owner decision) ──────────────────
 // The Speech workspace is withdrawn from the learner-facing app "for
@@ -108,17 +110,32 @@ export const characterPreview = () => {
   try { return localStorage.getItem(CHARACTER_PREVIEW_KEY) === 'on'; } catch { return false; }
 };
 export const characterOpen = () => CHARACTER_LIVE || characterPreview();
+// Shakespeare is the fifth workspace (owner decision 2026-09-24: its own
+// course, not a module inside Acting). It is WRITTEN IN PART — modules 2,
+// 3 and 4, 18 of a planned 42 lessons — and hidden behind this flag until
+// it can stand alone, which is the lesson the Speech withdrawal taught
+// and the route Building a Character took. The owner reads it through the
+// preview key meanwhile, exactly as Character was read.
+export const SHAKESPEARE_LIVE = false;
+export const SHAKESPEARE_PREVIEW_KEY = 'speechcraft-shakespeare-preview';
+export const shakespearePreview = () => {
+  try { return localStorage.getItem(SHAKESPEARE_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const shakespeareOpen = () => SHAKESPEARE_LIVE || shakespearePreview();
 export const liveWorkspaces = () => WORKSPACES.filter(w =>
-  (SPEECH_LIVE || w.id !== 'speech') && (w.id !== 'character' || characterOpen()));
+  (SPEECH_LIVE || w.id !== 'speech')
+  && (w.id !== 'character' || characterOpen())
+  && (w.id !== 'shakespeare' || shakespeareOpen()));
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
-export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character'];
+export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'shakespeare'];
 export const WORKSPACE_KEY = 'speechcraft-workspace';
 export const activeWorkspace = () => {
   try {
     const v = localStorage.getItem(WORKSPACE_KEY);
     if (v === 'speech' && !SPEECH_LIVE) return 'acting';
     if (v === 'character' && !characterOpen()) return 'acting';
+    if (v === 'shakespeare' && !shakespeareOpen()) return 'acting';
     if (WORKSPACES.some(w => w.id === v)) return v;
     // Migration from the retired page-level tabs, then inference from
     // the stored course — existing users land exactly where they were.
@@ -149,6 +166,10 @@ export const actingVisible = l => speechPublished(l.id);
 // owner preview every written lesson shows, because the whole workspace
 // is invisible to learners until then.
 export const characterVisible = l => characterPreview() || speechPublished(l.id);
+// Shakespeare uses the same ledger and the same preview rule. While the
+// workspace is hidden the owner sees every written lesson; when it goes
+// live, each lesson needs its own publication entry like every other.
+export const shakespeareVisible = l => shakespearePreview() || speechPublished(l.id);
 // Dialects you can read/scan/transcribe any text in.
 export const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },

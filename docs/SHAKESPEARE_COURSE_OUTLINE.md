@@ -4,7 +4,8 @@ Drafted 2026-09-24 from the owner's contents list. Supersedes
 SHAKESPEARE_MODULE_OUTLINE.md, which sized this as a module inside
 Acting. **Owner decision 2026-09-24: Shakespeare is its own course.**
 
-Nothing here is built.
+Modules 2, 3 and 4 are BUILT as of 2026-09-25 (18 lessons), hidden
+behind SHAKESPEARE_LIVE. Modules 1, 5, 6 and 7 are not built.
 
 ## What it is
 
@@ -388,9 +389,13 @@ still the first thing to cut.
 ## Build order, when approved
 
 1. ~~Extend the Scan view beyond the sonnets.~~ **Done 2026-09-24.**
-2. Modules 2, 3 and 4 — the language and the verse, which is the spine.
-   Module 3.4, "Finding the Switch", now has its worked example built:
-   the Nunnery Scene's crossing is visible on the Scan tab.
+2. ~~Modules 2, 3 and 4 — the language and the verse, which is the
+   spine.~~ **Done 2026-09-25.** 18 lessons in
+   js/data/shakespeare/shakespeare-course.js, hidden behind
+   SHAKESPEARE_LIVE, nothing approved. 3.4 uses the Nunnery Scene
+   crossing on the Scan tab; 4.8 uses the broken lines after the murder
+   in Macbeth; 3.1 names this app's own verse-for-prose error as the
+   reason not to trust the shape of a page.
 3. The rhetoric shelf, then Module 6.
 4. Module 7, then Modules 1 and 5.
 5. ~~Shakespeare Basically~~ — Side by Side shipped for the 25 approved

@@ -50,6 +50,7 @@ import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from '../js/data/shakespeare-lexicon.js';
+import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
@@ -66,7 +67,7 @@ import { SPEECH_ROUTINES, PRACTICE_SUBJECTS, routinesFor,
          learnerRoutines, draftRoutines } from '../js/data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById } from '../js/data/speech/arcade.js';
 import { SPEECH_TEXTS } from '../js/data/speech/texts.js';
-import { awaitingSpecialist, speechApproved, speechBodyVisible, speechReviewFor } from '../js/data/speech/reviews.js';
+import { awaitingSpecialist, speechApproved, speechBodyVisible, speechPublished, speechReviewFor } from '../js/data/speech/reviews.js';
 import { speechGoal, setSpeechGoal, speechHistory, speechLessonDone } from '../js/data/speech/store.js';
 import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
          actingLessonById, actingLessonNumber } from '../js/data/acting/acting-course.js';
@@ -4059,6 +4060,94 @@ export async function run({ navDoc = document } = {}) {
       (lexFn.match(/addXp|awardXp|markDone|completeLesson|localStorage|speak\(|playPhoneme/g) ?? []).join(' '));
     check('lexicon: every displayed field is escaped',
       !/\$\{(?!esc\()(e|now)\.(term|modern|note|example|source|metre)/.test(lexFn));
+  }
+
+  // ── 21k. The Shakespeare course: written in part, hidden by default ──
+  // Modules 2, 3 and 4 of a planned 7 (owner order 2026-09-25). What is
+  // pinned here is the DATA and the gate, because the lessons are shown
+  // by Acting's own screens: hidden from learners, every record whole, no
+  // id clash with the two existing books, and house copy on every line.
+  {
+    const ctx = await import('../js/views/context.js');
+    check('shakespeare: the workspace is hidden from learners until it can stand alone',
+      ctx.SHAKESPEARE_LIVE === false
+      && !ctx.liveWorkspaces().some(w => w.id === 'shakespeare'),
+      `LIVE=${ctx.SHAKESPEARE_LIVE}`);
+    check('shakespeare: it is in the workspace list, ready to be switched on',
+      ctx.WORKSPACES.some(w => w.id === 'shakespeare')
+      && ctx.ACCENTLESS_WORKSPACES.includes('shakespeare'));
+    // A stored workspace of 'shakespeare' must not strand a learner on a
+    // hidden course, the same fallback Speech and Character have.
+    let saved = null;
+    try { saved = localStorage.getItem('speechcraft-workspace'); } catch {}
+    try {
+      localStorage.setItem('speechcraft-workspace', 'shakespeare');
+      check('shakespeare: a stored hidden workspace falls back to Acting',
+        ctx.activeWorkspace() === 'acting', ctx.activeWorkspace());
+    } finally {
+      try { saved === null ? localStorage.removeItem('speechcraft-workspace')
+        : localStorage.setItem('speechcraft-workspace', saved); } catch {}
+    }
+
+    check('shakespeare: modules 2, 3 and 4 are written, keeping their outline numbers',
+      String(SHAKESPEARE_MODULES.map(m => m.n)) === '2,3,4'
+      && String(SHAKESPEARE_MODULES.map(m => m.title))
+        === 'The Language,Verse and Prose,Iambic Pentameter',
+      SHAKESPEARE_MODULES.map(m => m.n + ':' + m.title).join(' | '));
+    check('shakespeare: 18 lessons, 6 + 4 + 8, matching the outline exactly',
+      SHAKESPEARE_LESSONS.length === 18
+      && String(SHAKESPEARE_MODULES.map(m =>
+        SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length)) === '6,4,8',
+      SHAKESPEARE_MODULES.map(m =>
+        m.id + ':' + SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length).join(' '));
+    check('shakespeare: every record is whole, and every id is an sh- id',
+      SHAKESPEARE_LESSONS.every(l => /^sh-[a-z]+$/.test(l.id)
+        && l.title && l.objective && l.orientation && l.reflection
+        && Array.isArray(l.body) && l.body.length >= 3
+        && l.requiredReviewer && l.attribution),
+      SHAKESPEARE_LESSONS.filter(l => !l.reflection || !l.body?.length).map(l => l.id).join(','));
+    // Three books share one lesson-id namespace, so a clash would send a
+    // reader to the wrong course's screen.
+    const shIds = SHAKESPEARE_LESSONS.map(l => l.id);
+    check('shakespeare: no id clash with Acting or Building a Character',
+      new Set(shIds).size === shIds.length
+      && !shIds.some(id => ACTING_LESSONS.some(l => l.id === id))
+      && !shIds.some(id => CHARACTER_LESSONS.some(l => l.id === id)));
+    check('shakespeare: order is unique inside each module, so the path cannot fork',
+      SHAKESPEARE_MODULES.every(m => {
+        const o = SHAKESPEARE_LESSONS.filter(l => l.module === m.id).map(l => l.order);
+        return new Set(o).size === o.length
+          && String([...o].sort((a, b) => a - b)) === String(o.map((_, i) => i + 1));
+      }));
+    check('shakespeare: one Library shelf per module, in path order',
+      SHAKESPEARE_COLLECTIONS.length === 3
+      && SHAKESPEARE_COLLECTIONS.every(c =>
+        c.lessons.length === SHAKESPEARE_LESSONS.filter(l => l.module === c.id).length));
+    // NOTHING is approved. The course has no ledger entries, so with the
+    // preview off not one lesson would be visible even if the flag flipped.
+    check('shakespeare: no lesson is published, so nothing is approved by accident',
+      SHAKESPEARE_LESSONS.every(l => !speechPublished(l.id)),
+      SHAKESPEARE_LESSONS.filter(l => speechPublished(l.id)).map(l => l.id).join(','));
+
+    const shCopy = [SHAKESPEARE_PRINCIPLE,
+      ...SHAKESPEARE_MODULES.flatMap(m => [m.title, m.blurb]),
+      ...SHAKESPEARE_COLLECTIONS.map(c => c.title),
+      ...SHAKESPEARE_LESSONS.flatMap(l => [l.title, l.objective, l.orientation, l.reflection,
+        ...l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? ''])])];
+    const shBad = shCopy.filter(t2 => /[—–"]/.test(t2)
+      || /n’t\b|’(re|ll|ve|m|d)\b/.test(t2)
+      || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(t2));
+    check('shakespeare: copy keeps house style (no dashes, no contractions, curly quotes)',
+      shBad.length === 0, shBad.slice(0, 3).join(' | '));
+    check('shakespeare: no practitioner names in the copy',
+      !shCopy.some(t2 => /\b(Stanislavski|Chekhov|Lecoq|Johnstone|Laban|Meisner|Adler|Berry|Rodenburg|Linklater|Barton|Hall)\b/.test(t2)));
+    // The course must not re-teach what the app already has. If a lesson
+    // starts drilling vocabulary or syllable counting, these shelves and
+    // tools have been duplicated instead of pointed at.
+    const joined = shCopy.join(' ');
+    check('shakespeare: it points at the existing tools rather than repeating them',
+      /Scan tab/.test(joined) && /lexicon/.test(joined)
+      && /Side by Side/.test(joined) && /Script Analysis/.test(joined));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────

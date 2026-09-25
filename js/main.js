@@ -9,6 +9,7 @@ import { scriptAnalysisById } from './data/script-analysis.js';
 import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
+import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
@@ -103,7 +104,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -677,6 +678,7 @@ function showSsbeIntro(course) {
 function learnMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLearnPane(el);
   if (ws === 'character') return bookLearnPane(el, BOOKS.character);
+  if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
   if (ws === 'speech') return speechLearnPane(el);
   ipaLearnPane(el, course);
 }
@@ -767,6 +769,7 @@ const AUDIO_MODES = new Set(['listen', 'pairs', 'earacc']);
 function practiceMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingPracticePane(el);
   if (ws === 'character') return characterPracticePane(el);
+  if (ws === 'shakespeare') return shakespearePracticePane(el);
   if (ws === 'speech') return speechPracticePane(el);
   ipaPracticePane(el, course);
 }
@@ -2961,8 +2964,13 @@ const BOOKS = {
     principle: CHARACTER_PRINCIPLE, modules: CHARACTER_MODULES, lessons: CHARACTER_LESSONS,
     collections: CHARACTER_COLLECTIONS, visible: characterVisible,
     moduleTone: () => 'is-terracotta', reviewCats: () => ({ total: 0 }) },
+  shakespeare: { ws: 'shakespeare', icon: '🪶', title: 'Shakespeare', libraryName: 'Shakespeare Library',
+    principle: SHAKESPEARE_PRINCIPLE, modules: SHAKESPEARE_MODULES, lessons: SHAKESPEARE_LESSONS,
+    collections: SHAKESPEARE_COLLECTIONS, visible: shakespeareVisible,
+    moduleTone: () => 'is-terracotta', reviewCats: () => ({ total: 0 }) },
 };
 const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
+const SHAKESPEARE_IDS = new Set(SHAKESPEARE_LESSONS.map(l => l.id));
 // Whose thinking a lesson comes from, shown ONLY in the owner preview of
 // the hidden course (owner request 2026-09-22, to sort the course out).
 // Practitioner names stay out of learner-facing copy: when the course
@@ -2977,8 +2985,13 @@ const moduleAttribution = (B, m) => {
   return names.size === 1 ? [...names][0] : null;
 };
 const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m)) || m.title;
-const bookOf = id => CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
-const bookOfCollection = id => CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
+// Three books now, so these resolve by id rather than by one ternary.
+// Acting stays the fallback, which is what keeps every existing 'ac-' id
+// and every unknown id behaving exactly as it did.
+const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
+  : CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
+const bookOfCollection = id => SHAKESPEARE_COLLECTIONS.some(c => c.id === id) ? BOOKS.shakespeare
+  : CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
 const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // A `reference: true` record is a page you are sent to, never a step on
 // the path: it is not listed in its module, shelved, counted or given a
@@ -4373,8 +4386,23 @@ function setCharacterPreview(on) {
   setWorkspace(on ? 'character' : 'acting');
 }
 
-function characterLibraryPane(el) {
-  const B = BOOKS.character;
+// The same door for the hidden Shakespeare course, built the same way
+// Character's was (owner order 2026-09-24). #shakespeare-preview opens
+// it, #shakespeare-preview-off closes it and returns to Acting.
+const SHAKESPEARE_PREVIEW_HASHES = ['#shakespeare-preview', '#shakespeare-preview-off'];
+function setShakespearePreview(on) {
+  try {
+    if (on) localStorage.setItem(SHAKESPEARE_PREVIEW_KEY, 'on');
+    else localStorage.removeItem(SHAKESPEARE_PREVIEW_KEY);
+  } catch {}
+  setWorkspace(on ? 'shakespeare' : 'acting');
+}
+
+function characterLibraryPane(el) { return bookLibraryPane(el, BOOKS.character); }
+function shakespeareLibraryPane(el) { return bookLibraryPane(el, BOOKS.shakespeare); }
+// Parameterised 2026-09-25 when Shakespeare became the third book. The
+// body is Character's, unchanged except for the book it is handed.
+function bookLibraryPane(el, B) {
   el.innerHTML = `
     <div class="ws-head">
       <h1 class="page-h">${esc(B.libraryName)}</h1>
@@ -4410,6 +4438,56 @@ function characterPracticePane(el) {
   el.querySelector('#chp-masks').addEventListener('click', () => renderMaskCards());
   el.querySelector('#chp-oneline').addEventListener('click', () => renderOneLine());
   el.querySelector('#chp-warmup').addEventListener('click', renderWarmup);
+}
+
+// Shakespeare Practice. No drill has been built for this course yet, and
+// inventing one to fill the page would be worse than saying so: this is
+// the same honesty the app uses for unapproved content everywhere else.
+// What it does instead is send the reader at the real text the app
+// already carries, because the practice for this module IS reading verse
+// with the tools open beside it.
+function shakespearePracticePane(el) {
+  el.innerHTML = `
+    <h1 class="page-h">Shakespeare Practice</h1>
+    <p class="pane-note">No exercise has been built for this course yet. What is here is the text itself, with the tools the lessons point at. Nothing below is scored.</p>
+    <button class="track-card hub-card" id="shp-sonnets" type="button">
+      <div class="track-glyph">📜</div>
+      <div class="track-info"><h2>The Sonnets</h2><p>Scan the metre, and read Side by Side where a voice is approved.</p></div>
+      <div class="track-arrow">›</div>
+    </button>
+    <button class="track-card hub-card" id="shp-scenes" type="button">
+      <div class="track-glyph">🎭</div>
+      <div class="track-info"><h2>Scenes</h2><p>Eight two-handers. The Scan tab marks verse, prose and every crossing between them.</p></div>
+      <div class="track-arrow">›</div>
+    </button>
+    <button class="track-card hub-card" id="shp-lexicon" type="button">
+      <div class="track-glyph">📖</div>
+      <div class="track-info"><h2>Shakespeare’s Language</h2><p>The words that stop an actor, and what changes when you play them right.</p></div>
+      <div class="track-arrow">›</div>
+    </button>`;
+  el.querySelector('#shp-sonnets').addEventListener('click', () => navTo(renderSonnetList));
+  el.querySelector('#shp-scenes').addEventListener('click', () => navTo(renderScenesShelf));
+  el.querySelector('#shp-lexicon').addEventListener('click', () => navTo(renderShakespeareLexicon));
+}
+
+// The Shakespeare Studio: the three text surfaces the course works from.
+// Title-only, like every other Studio hub.
+function shakespeareStudioPane(el) {
+  const cards = [
+    { icon: '📜', title: 'Scripts & Speeches', go: renderTextsPage },
+    { icon: '🎭', title: 'Scenes', go: renderScenesShelf },
+    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
+  ];
+  el.innerHTML = `
+    <div class="ws-head"><h1 class="page-h">Studio</h1></div>
+    ${cards.map((c, i) => `
+      <button class="track-card hub-card" data-i="${i}" type="button">
+        <div class="track-glyph">${c.icon}</div>
+        <div class="track-info"><h2>${esc(c.title)}</h2></div>
+        <div class="track-arrow">›</div>
+      </button>`).join('')}`;
+  el.querySelectorAll('[data-i]').forEach(b =>
+    b.addEventListener('click', () => navTo(cards[+b.dataset.i].go)));
 }
 
 const pickOne = a => a[Math.floor(Math.random() * a.length)];
@@ -4461,12 +4539,20 @@ function renderOneLine(line = null) {
 }
 
 function characterProgressPane(el) {
-  const B = BOOKS.character;
+  return bookProgressPane(el, BOOKS.character, 'Character Progress',
+    'What you have studied. Character work is never scored: there is no correct version to measure against.');
+}
+function shakespeareProgressPane(el) {
+  return bookProgressPane(el, BOOKS.shakespeare, 'Shakespeare Progress',
+    'What you have studied. Nothing here is scored: reading a text well is not a thing with a mark out of ten.');
+}
+// Parameterised 2026-09-25 alongside the Library pane, same reason.
+function bookProgressPane(el, B, heading, blurb) {
   const avail = pathLessons(B).filter(B.visible);
   const done = avail.filter(l => speechLessonDone(l.id)).length;
   el.innerHTML = `
-    <h1 class="page-h">Character Progress</h1>
-    <p class="track-blurb">What you have studied. Character work is never scored: there is no correct version to measure against.</p>
+    <h1 class="page-h">${esc(heading)}</h1>
+    <p class="track-blurb">${esc(blurb)}</p>
     <div class="summary-grid">
       <div class="summary-card"><span class="summary-n">${done}/${avail.length}</span><span class="summary-l">chapters explored</span></div>
     </div>
@@ -4789,6 +4875,7 @@ function renderActingDraft(itemId) {
 function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLibraryPane(el);
   if (ws === 'character') return characterLibraryPane(el);
+  if (ws === 'shakespeare') return shakespeareLibraryPane(el);
   if (ws === 'speech') return speechLibraryPane(el);
   const d = course.id === 'core' ? null : course.id;
   const cards = (d ? [
@@ -5143,6 +5230,7 @@ function speechProgressPane(el) {
 function progressMain(el) {
   if (activeWorkspace() === 'acting') return actingProgressPane(el);
   if (activeWorkspace() === 'character') return characterProgressPane(el);
+  if (activeWorkspace() === 'shakespeare') return shakespeareProgressPane(el);
   if (activeWorkspace() === 'speech') return speechProgressPane(el);
   // Before anything is earned there is nothing to chart — say so on purpose
   // instead of showing a dashboard of zeroes.
@@ -6438,6 +6526,9 @@ let projectQuery = '';
 function studioMain(el) {
   if (activeWorkspace() === 'acting') return actorStudioPane(el);
   if (activeWorkspace() === 'character') return characterStudioPane(el);
+  // Shakespeare gets the text surfaces and NOT the Personal Dictionary,
+  // which is accent work and has no place in a course about reading verse.
+  if (activeWorkspace() === 'shakespeare') return shakespeareStudioPane(el);
   const inSpeech = activeWorkspace() === 'speech';
   // Playable Actions is acting work — it shelves in the Acting Library
   // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
@@ -9963,6 +10054,7 @@ if (!framedHostile) {
   // #character-preview opens the hidden Building a Character course for
   // the owner (and #character-preview-off closes it again).
   if (CHARACTER_PREVIEW_HASHES.includes(location.hash)) setCharacterPreview(location.hash === '#character-preview');
+  if (SHAKESPEARE_PREVIEW_HASHES.includes(location.hash)) setShakespearePreview(location.hash === '#shakespeare-preview');
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool
   else gateThreshold();   // threshold for fresh users; grandfathers everyone else
@@ -9975,6 +10067,9 @@ if (!framedHostile) {
     else if (location.hash === '#review') renderContentReview();
     else if (CHARACTER_PREVIEW_HASHES.includes(location.hash)) {
       setCharacterPreview(location.hash === '#character-preview');
+      renderShell('learn');
+    } else if (SHAKESPEARE_PREVIEW_HASHES.includes(location.hash)) {
+      setShakespearePreview(location.hash === '#shakespeare-preview');
       renderShell('learn');
     }
   });
