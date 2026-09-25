@@ -162,4 +162,25 @@ export const EDITION_REVIEWS = {
       + 'no counterpart in the sonnet (“That’s not neutrality. That’s hate with a plan.”) '
       + 'and is gone; line 13’s “for love of me” is his love for the speaker, and the '
       + 'draft had turned it around.' },
+
+  // ── Batch 3, sonnets 11 to 15 (owner approved 2026-09-24) ──
+  // The cleanest batch so far: no drift anywhere, and nothing rewritten.
+  // Three word choices in 11 were raised, weighed and deliberately left,
+  // which is recorded here so nobody "fixes" them later.
+  '11.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, with three readings considered and '
+      + 'KEPT: line 14 renders Shakespeare\u2019s \u201ccopy\u201d as \u201coriginal\u201d, which is right for '
+      + 'a modern ear \u2014 in Elizabethan printing the copy is the master a printer works '
+      + 'from, and \u201ccopy\u201d now means the opposite. Line 7\u2019s consequence sits in line 8, '
+      + 'and \u201cfor store\u201d is softened to \u201cbuilt without care\u201d; both are half a line and '
+      + 'self-correcting.' },
+  '12.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '13.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged. \u201cDetermination\u201d is read in its legal '
+      + 'sense, as the lease running out, which is correct.' },
+  '14.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '15.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
 };
