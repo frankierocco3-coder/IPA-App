@@ -1277,17 +1277,30 @@ crossing called out. Offered only where `authorGroup === 'Shakespeare'`
 
 THE SHAKESPEARE COURSE (2026-09-25): the FIFTH workspace, hidden behind
 SHAKESPEARE_LIVE=false in js/views/context.js, the mechanism
-CHARACTER_LIVE used. MODULES 2, 3 AND 4 ARE WRITTEN: The Language (6),
-Verse and Prose (4), Iambic Pentameter (8) — 18 lessons of a planned 42
-across 7 modules. Module numbers follow the outline so each keeps its
-number as the rest arrive; modules 1, 5, 6 and 7 are absent rather than
-listed empty. Data: js/data/shakespeare/shakespeare-course.js, the same
+CHARACTER_LIVE used. ALL SEVEN MODULES ARE WRITTEN, 40 lessons:
+Shakespeare 101 (7), The Language (6), Verse and Prose (4), Iambic
+Pentameter (8), The First Folio and Textual Clues (6), Rhetoric (3),
+Soliloquies and Monologues (6). 40 and not the outline's estimate of 42
+because module 6 keeps its seventeen figures as a SHELF rather than
+expanding them into seventeen lessons, which is what the outline asked
+for. TWO LIBRARY SHELVES: the 160-entry lexicon (live since 2026-09-25 on
+Scripts & Speeches) and js/data/shakespeare/rhetoric.js, 17 figures whose
+EVERY EXAMPLE is a verbatim line from the sonnets or the eight scenes and
+is verified against that corpus by the suite, the discipline the Script
+Analysis quotations use. Module 1 is deliberately the shortest and least
+actor-facing; every lesson in it ends at a consequence for performance.
+MODULE 5 IS THE ACCURACY HAZARD: Folio capitalisation and punctuation as
+acting instruction is contested, and 5.3 says outright that the
+typography is very largely the printing house rather than the author.
+launch_lint 6o fails if that sentence is ever softened away.
+Data: js/data/shakespeare/shakespeare-course.js, the same
 record shape as Acting and Character, ids `sh-…`. Served through the
 BOOKS layer in main.js, which now resolves THREE books by id with Acting
 as the fallback. Owner reads it at #shakespeare-preview (and
 #shakespeare-preview-off), exactly as Character was read.
-It will NOT launch until it can stand alone — the lesson the Speech
-withdrawal taught — and every lesson still needs a publication entry in
+The course is now complete enough to stand alone, which was the launch
+condition, but LAUNCHING IS AN OWNER DECISION and the content is
+unreviewed. Every lesson still needs a publication entry in
 js/data/speech/reviews.js. NOTHING IS APPROVED: the suite pins that not
 one lesson is published, so flipping the flag alone would show an empty
 course rather than unreviewed content.
@@ -1304,9 +1317,11 @@ behaviour is provably unchanged. Shakespeare Practice has NO exercise
 built and says so, pointing at the sonnets, the scenes and the lexicon
 instead of inventing a drill to fill the page. Its Studio drops the
 Personal Dictionary, which is accent work.
-Suite section 21k (13 checks) pins the hidden flag, the stored-workspace
-fallback, the 6+4+8 shape, whole records, no id clash across the three
-books, nothing published, and house style on every line.
+Suite section 21k (19 checks) pins the hidden flag, the stored-workspace
+fallback, the 7+6+4+8+6+3+6 shape, whole records, no id clash across the
+three books, nothing published, house style on every line, that module 5
+still calls the typography contested, and that every rhetoric example is
+a real line from a text the app carries.
 
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**

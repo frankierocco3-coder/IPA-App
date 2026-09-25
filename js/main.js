@@ -10,6 +10,7 @@ import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
+import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
@@ -6007,6 +6008,7 @@ function textSpeechPane(pane) {
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
     { icon: '📖', title: 'Shakespeare’s Language', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
+    { icon: '⚖️', title: 'Shakespeare’s Rhetoric', blurb: `${RHETORIC.length} shapes a speech is built from — what each one does to the person being spoken to.`, go: renderRhetoricShelf },
     ...libs,
     { icon: '🎭', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
     { icon: '🎬', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
@@ -6161,6 +6163,76 @@ function renderShakespeareLexicon() {
   draw();
 }
 
+
+// ── Shakespeare's Rhetoric: the figures, on a shelf ──────────────
+//
+// Seventeen figures, built exactly like the lexicon and for the same
+// reason: module 6 teaches what rhetoric is FOR in three lessons, and
+// seventeen lessons on figures of speech would be the dullest part of
+// the app. This is the glossary those lessons send you to.
+//
+// Every example is a VERBATIM line from a text this app already carries,
+// and the suite checks each one against that corpus. A glossary that
+// quotes texts the reader cannot open would be worse than no glossary.
+//
+// Reference, not lesson: no XP, no completion, nothing stored.
+const RHETORIC_REVIEW_NOTE = 'Awaiting review by a Shakespeare scholar or verse teacher. '
+  + 'The names of these figures are not stable across sources, and several carry two or '
+  + 'three names depending on who is writing. Where that is true the entry says so.';
+
+let rhetQuery = '';
+
+function rhetoricRowHtml(r) {
+  return `
+    <article class="lex-row">
+      <h3 class="lex-term">${esc(r.term)}</h3>
+      <p class="lex-modern">${esc(r.what)}</p>
+      <p class="lex-note">${esc(r.note)}</p>
+      <p class="lex-eg">“${esc(r.example)}”<span class="lex-src">${esc(r.source)}</span></p>
+    </article>`;
+}
+
+function renderRhetoricShelf() {
+  record(renderRhetoricShelf);
+  stopSpeech();
+  rhetQuery = '';
+  app.innerHTML = `
+    ${pageTopbar('⚖️ Shakespeare’s Rhetoric', '#8a6d3b')}
+    <main class="guide">
+      <h1>Shakespeare’s Rhetoric</h1>
+      <p class="guide-text">A speech is a structure built to do something to another person.
+        These are the shapes it is built from. The line under each one is what matters:
+        not what the figure is called, but what it does to whoever is listening.</p>
+      <p class="pane-note pane-caveat">${esc(RHETORIC_REVIEW_NOTE)}</p>
+      <input class="sonnet-search" id="rh-search" type="search"
+        placeholder="Search figures, effects, lines…" aria-label="Search Shakespeare’s Rhetoric"
+        autocomplete="off">
+      <div id="rh-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('rh-list');
+  const searchEl = document.getElementById('rh-search');
+  const draw = () => {
+    const q = rhetQuery.trim().toLowerCase();
+    const hits = q
+      ? RHETORIC.filter(r => [r.term, r.what, r.note, r.example, r.source]
+          .some(f => String(f ?? '').toLowerCase().includes(q)))
+      : RHETORIC;
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(rhetQuery)}”.</p>
+        <p><button class="btn-lite" id="rh-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#rh-clear').addEventListener('click', () => {
+        rhetQuery = ''; searchEl.value = ''; draw();
+      });
+      return;
+    }
+    listEl.innerHTML = `<h2 class="guide-heading">${hits.length} of ${RHETORIC.length}</h2>`
+      + hits.map(rhetoricRowHtml).join('');
+  };
+  searchEl.addEventListener('input', () => { rhetQuery = searchEl.value; draw(); });
+  draw();
+}
 
 // "Your Instrument": labelled vocal-tract anatomy.
 function renderInstrument() {

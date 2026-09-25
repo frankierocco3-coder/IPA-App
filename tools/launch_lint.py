@@ -392,7 +392,8 @@ def main():
         sh_src = sh_path.read_text(encoding="utf-8")
         # Ids are never renamed here: that is what preserves stored progress.
         for pin in ["id: 'sh-hard'", "id: 'sh-syntax'", "id: 'sh-findswitch'",
-                    "id: 'sh-bends'", "id: 'sh-sharedlines'"]:
+                    "id: 'sh-bends'", "id: 'sh-sharedlines'", "id: 'sh-whymatters'",
+                    "id: 'sh-capitals'", "id: 'sh-playfigure'", "id: 'sh-famous'"]:
             if pin not in sh_src:
                 fail("a Shakespeare lesson id changed or vanished: %r" % pin)
         # The course exists to APPLY the craft, not to re-teach what is
@@ -404,6 +405,22 @@ def main():
         # The organising claim of the whole course.
         if "It is information about the acting" not in sh_src:
             fail("the Shakespeare course lost its governing principle")
+        # Module 5 is the accuracy hazard of the course. Its whole subject
+        # is that Folio typography as acting instruction is CONTESTED. If
+        # this sentence is ever softened away, the module has quietly
+        # started teaching one school as fact.
+        if "very largely not the author" not in sh_src:
+            fail("lesson 5.3 stopped saying the Folio typography is not the author's")
+    # The rhetoric shelf: a glossary, deliberately not seventeen lessons.
+    rh_path = ROOT / "js" / "data" / "shakespeare" / "rhetoric.js"
+    if not rh_path.exists():
+        fail("the rhetoric shelf is missing")
+    else:
+        rh_src = rh_path.read_text(encoding="utf-8")
+        if rh_src.count("{ id: 'RH-") != 17:
+            fail("the rhetoric shelf should carry exactly 17 figures")
+        if "function renderRhetoricShelf()" not in views_js:
+            fail("the rhetoric shelf has no page")
 
     # 6m: the three-workspace IA (2026-08-13)
     for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:

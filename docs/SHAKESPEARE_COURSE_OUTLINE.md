@@ -4,8 +4,10 @@ Drafted 2026-09-24 from the owner's contents list. Supersedes
 SHAKESPEARE_MODULE_OUTLINE.md, which sized this as a module inside
 Acting. **Owner decision 2026-09-24: Shakespeare is its own course.**
 
-Modules 2, 3 and 4 are BUILT as of 2026-09-25 (18 lessons), hidden
-behind SHAKESPEARE_LIVE. Modules 1, 5, 6 and 7 are not built.
+ALL SEVEN MODULES ARE BUILT as of 2026-09-25: 40 lessons plus the
+rhetoric shelf, hidden behind SHAKESPEARE_LIVE. Nothing is approved.
+40 rather than the estimated 42 because the seventeen figures stayed a
+shelf, exactly as this outline asked.
 
 ## What it is
 

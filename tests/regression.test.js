@@ -51,6 +51,7 @@ import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from '../js/data/shakespeare-lexicon.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
+import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
@@ -4069,6 +4070,15 @@ export async function run({ navDoc = document } = {}) {
   // id clash with the two existing books, and house copy on every line.
   {
     const ctx = await import('../js/views/context.js');
+    // The owner may be READING the course through the preview key while
+    // this runs, and that must not turn a real check into a false alarm.
+    // Snapshot it, test the LEARNER default, and put it back — the same
+    // thing the Building a Character section does for its own key.
+    let savedShPreview = null;
+    try {
+      savedShPreview = localStorage.getItem(ctx.SHAKESPEARE_PREVIEW_KEY);
+      localStorage.removeItem(ctx.SHAKESPEARE_PREVIEW_KEY);
+    } catch {}
     check('shakespeare: the workspace is hidden from learners until it can stand alone',
       ctx.SHAKESPEARE_LIVE === false
       && !ctx.liveWorkspaces().some(w => w.id === 'shakespeare'),
@@ -4087,17 +4097,23 @@ export async function run({ navDoc = document } = {}) {
     } finally {
       try { saved === null ? localStorage.removeItem('speechcraft-workspace')
         : localStorage.setItem('speechcraft-workspace', saved); } catch {}
+      try {
+        if (savedShPreview !== null) localStorage.setItem(ctx.SHAKESPEARE_PREVIEW_KEY, savedShPreview);
+      } catch {}
     }
 
-    check('shakespeare: modules 2, 3 and 4 are written, keeping their outline numbers',
-      String(SHAKESPEARE_MODULES.map(m => m.n)) === '2,3,4'
+    check('shakespeare: all seven modules, in outline order, keeping their numbers',
+      String(SHAKESPEARE_MODULES.map(m => m.n)) === '1,2,3,4,5,6,7'
       && String(SHAKESPEARE_MODULES.map(m => m.title))
-        === 'The Language,Verse and Prose,Iambic Pentameter',
+        === 'Shakespeare 101,The Language,Verse and Prose,Iambic Pentameter,'
+          + 'The First Folio and Textual Clues,Rhetoric,Soliloquies and Monologues',
       SHAKESPEARE_MODULES.map(m => m.n + ':' + m.title).join(' | '));
-    check('shakespeare: 18 lessons, 6 + 4 + 8, matching the outline exactly',
-      SHAKESPEARE_LESSONS.length === 18
+    // 40, not the outline's estimate of 42, because module 6 keeps its
+    // figures as a SHELF instead of expanding them into seventeen lessons.
+    check('shakespeare: 40 lessons, 7 + 6 + 4 + 8 + 6 + 3 + 6, matching the outline',
+      SHAKESPEARE_LESSONS.length === 40
       && String(SHAKESPEARE_MODULES.map(m =>
-        SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length)) === '6,4,8',
+        SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length)) === '7,6,4,8,6,3,6',
       SHAKESPEARE_MODULES.map(m =>
         m.id + ':' + SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length).join(' '));
     check('shakespeare: every record is whole, and every id is an sh- id',
@@ -4120,7 +4136,7 @@ export async function run({ navDoc = document } = {}) {
           && String([...o].sort((a, b) => a - b)) === String(o.map((_, i) => i + 1));
       }));
     check('shakespeare: one Library shelf per module, in path order',
-      SHAKESPEARE_COLLECTIONS.length === 3
+      SHAKESPEARE_COLLECTIONS.length === 7
       && SHAKESPEARE_COLLECTIONS.every(c =>
         c.lessons.length === SHAKESPEARE_LESSONS.filter(l => l.module === c.id).length));
     // NOTHING is approved. The course has no ledger entries, so with the
@@ -4148,6 +4164,45 @@ export async function run({ navDoc = document } = {}) {
     check('shakespeare: it points at the existing tools rather than repeating them',
       /Scan tab/.test(joined) && /lexicon/.test(joined)
       && /Side by Side/.test(joined) && /Script Analysis/.test(joined));
+    // Module 5 exists to say that Folio typography is contested. If that
+    // claim is ever softened out, the module is teaching one school as
+    // fact, which is the thing the outline flagged as the accuracy hazard.
+    check('shakespeare: module 5 keeps saying the typography is contested',
+      /very largely not the author/.test(joined)
+      && /printing house/.test(joined)
+      && /contested/.test(joined));
+
+    // ── The rhetoric shelf ──
+    // Seventeen figures, and EVERY example is checked against the app's
+    // own corpus, the discipline the Script Analysis quotations use.
+    const rhIds = RHETORIC.map(r => r.id);
+    check('rhetoric: 17 figures, ids unique and in the stable RH-### form',
+      RHETORIC.length === 17 && new Set(rhIds).size === 17
+      && rhIds.every(id => /^RH-\d{3}$/.test(id)));
+    check('rhetoric: every figure carries a definition, an effect and a source',
+      RHETORIC.every(r => r.term && r.what?.trim() && r.note?.trim()
+        && r.example?.trim() && r.source?.trim()));
+    // Build the corpus the same way the reader can: sonnets plus scenes.
+    const flat = s2 => String(s2).replace(/\s+/g, ' ').trim();
+    const corpus = flat(SONNETS.flatMap(s2 => s2.lines).join(' ') + ' '
+      + PROVIDED_SCENES.map(s2 => s2.text ?? '').join(' '));
+    const unverified = RHETORIC.filter(r => !corpus.includes(flat(r.example)));
+    check('rhetoric: every example is a real line from a text this app carries',
+      unverified.length === 0,
+      unverified.map(r => r.id + ' ' + r.example.slice(0, 40)).join(' | '));
+    // House style applies to OUR prose, never to the quotations, which
+    // keep the edition's own punctuation including its em dashes.
+    const rhProse = RHETORIC.flatMap(r => [r.what, r.note]);
+    check('rhetoric: house style holds on our prose, and quotations are exempt',
+      rhProse.every(t2 => !/[\u2014\u2013"]/.test(t2)
+        && !/n\u2019t\b|\u2019(re|ll|ve|m|d)\b/.test(t2)
+        && !/\b(it|that|there|here|what|he|she|let|who)\u2019s\b/i.test(t2)),
+      rhProse.filter(t2 => /[\u2014\u2013"]/.test(t2)).slice(0, 2).join(' | '));
+    // The note is the reason the shelf exists: it must be about EFFECT.
+    const shSrc = await viewSource();
+    check('rhetoric: the shelf is reachable, and it is a reference not a lesson',
+      shSrc.includes('function renderRhetoricShelf()')
+      && shSrc.includes("title: 'Shakespeare\u2019s Rhetoric'"));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────
