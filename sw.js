@@ -46,7 +46,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v11';                     // 2026-09-24: sonnet chunk text and edition-reviews.js changed TOGETHER (batch-1 approvals); a mixed cache would pair a new approval with an old line
+const VERSION = 'sc-v12';                     // 2026-09-24: batch-2 approvals — chunk text and edition-reviews.js changed together again; same coupling, same reason
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

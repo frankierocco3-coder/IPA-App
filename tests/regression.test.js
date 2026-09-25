@@ -1808,15 +1808,21 @@ export async function run({ navDoc = document } = {}) {
       check('editions UI: no Featured Texts shelf — collections only',
         !card('Featured Texts'));
       clickIn(card('Shakespeare’s Sonnets')); await sleep(500);
-      // Sonnet 7: nothing about it is approved — no Plain Meaning and no
-      // voice. (This used to be Sonnet 2, which stopped being a fully
-      // draft example once its Neutral American voice was approved.)
-      clickIn(doc.querySelector('.sonnet-row[data-n="7"]'));
-      await until(() => doc.body.textContent.includes('Sonnet 7') && !!doc.querySelector('.sonnet-tabs'));
+      // FIND a fully draft sonnet rather than naming one. This was
+      // Sonnet 2, then Sonnet 7, and each time a review batch reached it
+      // the check broke for the right reason but the wrong file. Staying
+      // under 40 keeps it near the top of the list, which renders.
+      const draftN = SONNETS.map(s => s.n).find(n => n <= 40
+        && editionStatus(n, 'plain') === 'draft'
+        && ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft'));
+      check('editions: a fully draft sonnet still exists to test the gate with',
+        !!draftN, `frontier reached ${draftN ?? 'everything under 40'}`);
+      clickIn(doc.querySelector(`.sonnet-row[data-n="${draftN}"]`));
+      await until(() => doc.body.textContent.includes(`Sonnet ${draftN}`) && !!doc.querySelector('.sonnet-tabs'));
       check('editions UI: a draft edition shows NO Plain/Today tabs to learners',
-        doc.body.textContent.includes('Sonnet 7')
+        doc.body.textContent.includes(`Sonnet ${draftN}`)
         && !tabs().some(t => t.includes('Plain')) && !tabs().some(t => t.includes('Voice')),
-        tabs().join(','));
+        `sonnet ${draftN}: ${tabs().join(',')}`);
       clickIn(doc.getElementById('nav-back'));
       await until(() => !!doc.getElementById('sonnet-search'));
       clickIn(doc.querySelector('.sonnet-row[data-n="18"]'));
@@ -3733,14 +3739,22 @@ export async function run({ navDoc = document } = {}) {
     // Alignment is not permission — both gates have to pass. Batch 1
     // (sonnets 1 to 5, Neutral American) is approved AND aligned, so
     // those pair; everything else still falls back to the paragraph.
+    // Review marches forward five at a time, so this describes the SHAPE
+    // of the frontier rather than pinning a number that needs editing
+    // every batch: an unbroken run from sonnet 1, nothing approved out
+    // of order, and one ledger entry per approved voice.
     const paired = SONNETS.filter(s => editionStatus(s.n, 'nam') === 'approved');
-    check('sbs: only reviewed voices pair, and the reviewed batch is 1 to 5',
-      String(paired.map(s => s.n)) === '1,2,3,4,5');
+    const namKeys = Object.keys(EDITION_REVIEWS).filter(k => k.endsWith('.nam'));
+    check('sbs: approved voices are an unbroken run from sonnet 1, with a ledger entry each',
+      paired.length > 0
+      && String(paired.map(s => s.n)) === String([...Array(paired.length)].map((_, i) => i + 1))
+      && namKeys.length === paired.length,
+      `approved: ${paired.map(s => s.n).join(',')} | ledger nam entries: ${namKeys.length}`);
     check('sbs: every approved voice is also genuinely aligned',
       (await Promise.all(paired.map(async s =>
         !!alignedLines((await editionFor(s.n)).voices.nam, s.lines.length)))).every(Boolean));
-    check('sbs: an unreviewed sonnet still shows the paragraph, not a pairing',
-      editionStatus(7, 'nam') === 'draft' && editionStatus(26, 'nam') === 'draft');
+    check('sbs: sonnets past the frontier still show the paragraph, not a pairing',
+      editionStatus(paired.length + 1, 'nam') === 'draft' && editionStatus(26, 'nam') === 'draft');
 
     const sbsSrc = await viewSource();
     check('sbs: the pane pairs only when given a verified partner',

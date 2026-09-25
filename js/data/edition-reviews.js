@@ -133,4 +133,33 @@ export const EDITION_REVIEWS = {
       + 'spendthrift, and the draft’s “cheap” pulled toward the miser, who is line 5.' },
   '5.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
     revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+
+  // ── Batch 2, sonnets 6 to 10 (owner approved 2026-09-24) ──
+  // Heavier than batch 1: three of the five had drifted, plus an
+  // invented line. The failure is always the same shape — one line
+  // swallows a line and a half of the original and pushes everything
+  // after it a step out — and the line COUNTS stay perfect throughout,
+  // so alignedLines() cannot see any of it. Only reading the pairs can.
+  '6.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Lines 9 and 10 un-swapped before approval: the '
+      + 'original puts the claim on 9 and the condition on 10, and the draft had them '
+      + 'the other way round.' },
+  '7.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged. Its opening quatrain '
+      + 'redistributes Shakespeare’s enjambment and still pairs.' },
+  '8.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Lines 5 to 7 rewritten before approval: the draft '
+      + 'dropped the conditional. Shakespeare allows that the harmony MIGHT offend him '
+      + 'and says it would only be a gentle reproof; the draft asserted both and rewired '
+      + 'the rhetoric with an added “Here’s why:”.' },
+  '9.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Lines 4 to 8 redistributed before approval: line 4 had '
+      + 'swallowed the original’s 4 AND 5, so the contrast between the world’s grief and '
+      + 'the ordinary widow’s consolation fell on the wrong lines.' },
+  '10.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Three fixes before approval: lines 5 to 8 had drifted '
+      + 'by one and lost “murderous hate” entirely; line 8 was INVENTED commentary with '
+      + 'no counterpart in the sonnet (“That’s not neutrality. That’s hate with a plan.”) '
+      + 'and is gone; line 13’s “for love of me” is his love for the speaker, and the '
+      + 'draft had turned it around.' },
 };
