@@ -37,8 +37,13 @@ export const ACTING_MODULES = [
   // an actor is still holding the script.
   { n: 1, id: 'work', title: 'The Actor’s Work',
     blurb: 'Securing the text first, then where behavior comes from: circumstances, objective, obstacle, stakes.' },
-  { n: 2, id: 'text', title: 'Investigating the Text',
-    blurb: 'The script-analysis course: what a scene actually gives you. Facts, relationship, turns, subtext, action.' },
+  // Renamed from Investigating the Text (owner order, 2026-09-24): the
+  // blurb had called it "the script-analysis course" since it was
+  // written, and the module now also teaches how to RECORD the analysis
+  // on the page, not only how to do it. The id stays 'text' — ids are
+  // never renamed here, which is what keeps stored progress intact.
+  { n: 2, id: 'text', title: 'Script Analysis',
+    blurb: 'What a scene actually gives you — facts, relationship, turns, subtext, action — and how to get it onto the page.' },
   { n: 3, id: 'listening', title: 'Listening and Responding',
     blurb: 'The scene-partner work: the live half of acting, receiving the other person before you answer them.' },
   // Tempo-Rhythm was inserted here (owner order, 2026-08-26); Building a
@@ -208,7 +213,7 @@ export const ACTING_LESSONS = [
     ],
     doorway: { id: 'lines-memory', label: 'Lines & Memory' } },
 
-  // ── Module 2 · Investigating the Text ─────────────────────────
+  // ── Module 2 · Script Analysis ────────────────────────────────
   { id: 'ac-fourlists', module: 'text', order: 0,
     title: 'The Four Lists',
     requiredReviewer: 'acting-professional',
@@ -217,7 +222,7 @@ export const ACTING_LESSONS = [
     body: [
       { p: 'Before you interpret a word, collect what the play already states. Five read-throughs and four inventories: the facts the text gives outright, what your character says about themselves, what they say about everyone else, and what everyone else says about them. The first reading has no pen in it at all.' },
       { p: 'The lists are evidence rather than biography, and the useful part is where they disagree. A character whose account of themselves contradicts the stated facts, or whose reputation contradicts their own account, has handed you the argument the play is having about them.' },
-      { p: 'Everything else in Text Investigation digs into what you collect here, and Question Everything, next, is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Library shelf: they save with that project.' },
+      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything, next, is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Library shelf: they save with that project.' },
     ],
     reflection: 'Which of your four lists came out shortest? What does that absence tell you?' },
   { id: 'ac-question', module: 'text', order: 1,
@@ -450,7 +455,7 @@ export const ACTING_LESSONS = [
       { p: 'What it ruins, when it goes wrong, is listening. Run a scene by yourself often enough and you will set melodies: a fixed reading for every line, timed against cues you deliver to yourself in your head. A partner then becomes an interruption to a performance you have already given. Actors call this being married to a reading, and it is built, line by line, in solitary rehearsal.' },
       { h: 'What alone-time is for' },
       { list: [
-        'The whole of Text Investigation: facts, relationships, the objective, the beats. Evidence work needs no partner.',
+        'The whole of Script Analysis: facts, relationships, the objective, the beats. Evidence work needs no partner.',
         'Getting off book, including the other role: know their lines nearly as well as yours, because their thought, not their last three words, is your cue.',
         'Choosing what you are DOING in each beat, in playable verbs. What you do can be decided alone; how it will sound cannot.',
         'Reading the other part aloud once, plainly, to learn what it is doing to you. Their speeches are the circumstances of yours.',
@@ -556,9 +561,122 @@ export const ACTING_LESSONS = [
     reflection: 'Take a character you know. What is the single fact of their world that shaped them most before the play began?',
     body: [
       { p: 'The analysis road works like detective work. You read the whole play, more than once, and you collect what it actually states: the world this person lives in, what they do for a living, who they answer to, what they want out loud and what they seem to want underneath. You gather what they say about themselves, what they say about everyone else, and what everyone else says about them. Then you look for the places where those accounts disagree, because the disagreements are where the person is hiding.' },
-      { p: 'You already own the tools for this road. Investigating the Text is eight lessons of exactly this work: facts, relationships, beats, subtext, playable actions. The Four Lists in the Library turns the reading into four concrete inventories on your own script. This lesson is not here to repeat them. It is here to point them at a new target.' },
+      { p: 'You already own the tools for this road. Script Analysis is the module that does exactly this work: facts, relationships, beats, subtext, playable actions. The Four Lists in the Library turns the reading into four concrete inventories on your own script. This lesson is not here to repeat them. It is here to point them at a new target.' },
       { p: 'Because here is the shift: those tools are usually aimed at understanding a scene. Aim them at building a person instead. The world of the play tells you what shaped this character before page one. The facts tell you what they cannot escape. The gap between what they claim and what others report tells you what they are hiding, and a person is mostly made of what they are hiding. Analysis done this way does not end in notes. It ends in somebody.' },
       { p: 'And when it does, do not stop there. Take that somebody to the other road. Carry everything the desk gave you into an empty room and let the person improvise, and watch the research turn into behavior. Or if you came here from the feeling road, run your discovered character through these tools and find out whether they can survive the facts of the play. Either order works. No right answers. The character is finished where the two roads meet.' },
+    ] },
+
+  { id: 'ac-markup', module: 'text', order: 12,
+    title: 'Marking Up the Script',
+    requiredReviewer: 'acting-professional',
+    objective: 'Get the analysis onto the page in marks you can read at speed.',
+    orientation: 'Analysis you cannot find again during a run-through is analysis you did not do.',
+    reflection: 'Open a script you know. Mark one page for beats only, nothing else. What did you have to decide that you had been avoiding?',
+    body: [
+      { p: 'Everything in this module happens at a desk, and almost none of it survives the walk into the rehearsal room unless you write it down. A decision you made on Tuesday about where a beat turns is worth nothing on Thursday if you cannot see it on the page in front of you. Marking up is not tidiness. It is the difference between having analysed the scene and being able to use the analysis while somebody is talking to you.' },
+      { p: 'There is no standard notation. No two actors mark alike, no school agrees, and nobody is coming to check. What follows is not a system to adopt. It is the small set of marks that keep turning up, and what each one is for.' },
+
+      { h: 'Beats, and what you are doing in them' },
+      { p: 'The most common mark in the world is a line across the page where a beat turns, with the action written beside it. That is two decisions recorded in about four seconds: here is where the scene changes, and here is what I am doing until it changes again.' },
+      { markup: {
+          caption: 'Beats and actions — Macbeth, Act I, Scene 7',
+          rows: [
+            { beat: 'Beat 1 · The refusal', action: 'to close the subject' },
+            { who: 'MACBETH.', text: 'We will proceed |no further| in this business:' },
+            { text: 'He hath |honour’d| me of late; and I have bought' },
+            { text: '|Golden opinions| from all sorts of people,', side: 'the reason he gives is not the reason he has' },
+            { text: 'Which would be worn now in their newest gloss,' },
+            { text: 'Not cast aside so soon. //' },
+            { beat: 'Beat 2 · The interrogation', action: 'to shame him into it' },
+            { who: 'LADY M.', text: 'Was the hope |drunk|' },
+            { text: 'Wherein you dress’d yourself? Hath it slept since?', side: '5 questions, no statements' },
+            { text: 'And wakes it now, to look so green and pale' },
+            { text: 'At what it did so freely? From this time' },
+            { text: 'Such I account thy love. Art thou |afeard|' },
+          ],
+          key: [
+            '|word| — the word the line turns on',
+            '// — a breath, or a pause you are choosing to take',
+            'the line across — a beat change',
+            'the margin — the action, and anything you noticed once and will forget',
+          ],
+          note: 'Two marks and a margin. That is the whole page. A page carrying five kinds of mark is a page you will stop reading.',
+      } },
+      { p: 'Notice where the beat line falls. It lands mid-speech, because a beat is not a paragraph and it does not wait for somebody to stop talking. Where you draw it is a choice, and two actors will draw it in different places on the same scene. The value is not in getting it right. It is in having had to decide.' },
+
+      { h: 'Operative words' },
+      { p: 'Underlining the word a line turns on is the oldest mark there is, and the most abused. Underline one word in a line and you have made a decision. Underline four and you have made none, because a line where everything is stressed sounds exactly like a line where nothing is.' },
+      { p: 'The test is subtraction. Say the line, leave the marked word out, and see whether the sense survives. If it does, you have marked the wrong word.' },
+
+      { h: 'Cuts, and marks you can undo' },
+      { p: 'Mark a cut so that you can still read what is under it. A line through the words keeps the option open; scribbling them out closes it, and cuts get restored more often than anyone expects.' },
+      { markup: {
+          caption: 'A cut and a pickup',
+          rows: [
+            { who: 'BENVOLIO.', text: 'Go then; for ’tis in vain' },
+            { text: '~To seek him here that means not to be found.~', side: 'cut 12 Oct — restored 19 Oct' },
+            { who: 'ROMEO.', text: 'He jests at scars that never felt a wound. //' },
+          ],
+          key: ['~word~ — cut, still readable'],
+      } },
+
+      { h: 'The margin' },
+      { p: 'The margin is where everything goes that is not a mark: a fact you had to look up, a question you cannot answer yet, the thing you noticed on the fourth read and will certainly have lost by the sixth. Date the notes that are decisions. In a long rehearsal you will want to know whether a note is from before or after the director changed something.' },
+      { p: 'One rule holds across every system anyone uses: a mark you cannot read at speed is worse than no mark, because it stops you. If you have to work out what your own page means, the page has become another thing to act around.' },
+    ] },
+
+  { id: 'ac-ownmarks', module: 'text', order: 13,
+    title: 'Finding Your Own Marks',
+    requiredReviewer: 'acting-professional',
+    objective: 'Build a marking system you will actually keep using, from what you keep needing.',
+    orientation: 'The right system is the one that survives a week of rehearsal without being abandoned.',
+    reflection: 'Think back to the last thing you performed. What did you keep forgetting? That is the thing your system has to hold.',
+    body: [
+      { p: 'Actors who have been doing this a long time mark very differently from one another, and the differences are not arbitrary. They come from what each person keeps losing. Somebody who forgets why they are in the room writes objectives at the top of every page. Somebody who rushes marks breath and nothing else. Somebody who goes up on lines marks only the cue words. The system is a record of a weakness, which is why copying someone else’s rarely holds.' },
+
+      { h: 'Four shapes that recur' },
+      { p: 'None of these is better than the others. They suit different weaknesses, and most working actors end up with a mix.' },
+      { list: [
+        'Objective-first. The action for each beat goes at the top of the page in capitals, and the page carries almost nothing else. Suits an actor who plays intention well but drifts from it.',
+        'Breath-first. Only breath and pause are marked. Suits long speeches, verse, and anyone whose problem is pace rather than meaning.',
+        'Partner-first. The marks are all on the OTHER character’s lines: what they do to you, where they change. Suits an actor who prepares their own half thoroughly and then does not listen.',
+        'Bare. A clean script and a separate notebook. Suits an actor who needs the page uncluttered to stay free, and who will genuinely open the notebook.',
+      ] },
+
+      { h: 'Two pages, two actors, one scene' },
+      { p: 'The same eight lines, marked by somebody working from objectives and by somebody working from breath. Neither page is wrong. They are solving different problems.' },
+      { markup: {
+          caption: 'Objective-first',
+          rows: [
+            { beat: 'TO MAKE HER SAY IT', action: '' },
+            { who: 'BENEDICK.', text: 'I do love nothing in the world so well as you: is not that |strange|?', side: 'the question is the retreat' },
+            { who: 'BEATRICE.', text: 'As strange as the thing I know not.' },
+            { beat: 'TO GET OUT OF IT WITHOUT LYING', action: '' },
+            { text: 'It were as possible for me to say I loved nothing so well as you;' },
+            { text: 'but believe me not, and yet I lie not;' },
+            { text: 'I confess nothing, nor I |deny| nothing. I am sorry for my cousin.', side: 'she never actually says it' },
+          ],
+      } },
+      { markup: {
+          caption: 'Breath-first — the same lines',
+          rows: [
+            { who: 'BENEDICK.', text: 'I do love nothing in the world so well as you: // is not that strange?' },
+            { who: 'BEATRICE.', text: 'As strange as the thing I know not. //' },
+            { text: 'It were as possible for me to say I loved nothing so well as you; //' },
+            { text: 'but believe me not, // and yet I lie not; //' },
+            { text: 'I confess nothing, // nor I deny nothing. // I am sorry for my cousin.' },
+          ],
+          note: 'The second page says nothing about meaning and everything about where this woman runs out of air. Read it aloud and the evasion is audible without a single note explaining it.',
+      } },
+
+      { h: 'Building yours' },
+      { steps: [
+        'Perform something, and afterwards write down what you kept losing. Not what went badly — what you kept having to rebuild.',
+        'Choose one mark for it. One. A system that starts with six marks does not survive the first week.',
+        'Use it on a whole script and see whether you still read it on day five.',
+        'Add a second mark only when a second thing keeps going missing.',
+      ] },
+      { p: 'Use pencil for anything a director might change, and keep the marks that are yours separate from the marks that came from the room. When a production ends, the page you kept is a record of how you solved that part, and it is worth reading again before you solve the next one.' },
     ] },
   { id: 'ac-dials', module: 'rhythm', order: 1,
     title: 'Two Dials, Not One',
@@ -752,9 +870,10 @@ export const ACTING_COLLECTIONS = [
   { id: 'listening', icon: '👂', title: 'Listening & Responding',
     lessons: ['ac-attention', 'ac-receiving', 'ac-moment', 'ac-newinfo',
               'ac-repetition', 'ac-playing'] },
-  { id: 'scene', icon: '🔍', title: 'Text Investigation',
+  { id: 'scene', icon: '🔍', title: 'Script Analysis',
     lessons: ['ac-fourlists', 'ac-question', 'ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
-              'ac-objective-text', 'ac-beats', 'ac-subtext', 'ac-analysis'] },
+              'ac-objective-text', 'ac-beats', 'ac-subtext', 'ac-analysis',
+              'ac-markup', 'ac-ownmarks'] },
   // Monologue Work and Scene Work shelve here, matching their Learn
   // module (Preparing the Performance) — the shelf and the path must
   // not disagree about what these chapters are (owner fix, 2026-09-16).

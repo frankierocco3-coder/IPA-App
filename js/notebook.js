@@ -45,6 +45,13 @@ const CHARACTER_BOOK = { id: 'character', label: 'Building a Character' };
 const builtIns = () => [ACTING_BOOK, ...IPA_BOOKS, ...(characterOpen() ? [CHARACTER_BOOK] : [])];
 const isIpa = id => IPA_BOOKS.some(b => b.id === id);
 
+// The IPA row is a DISCLOSURE, not a permanent second row (owner order,
+// 2026-09-24). It used to stay open for as long as an IPA notebook was
+// active, so choosing one left five options on screen when the choice
+// was already made — and the chip itself says which one is open.
+// Collapsed by default, including when the dock opens on an IPA book.
+let ipaExpanded = false;
+
 let tabs = builtIns();
 let active = 'acting';
 let lastIpa = 'ipa';          // the IPA tab reopens the last IPA notebook used
@@ -79,19 +86,32 @@ function drawTabs() {
   const ipaLabel = ipaOn && active !== 'ipa'
     ? `IPA · ${IPA_BOOKS.find(b => b.id === active).label}` : 'IPA';
   const custom = tabs.filter(t => t.custom);
+  const showSub = ipaOn && ipaExpanded;
   els.tabs.innerHTML =
     tab(ACTING_BOOK.id, ACTING_BOOK.label, active === 'acting')
-    + tab('ipa-group', ipaLabel, ipaOn, `aria-controls="nb-sub" aria-expanded="${ipaOn}"`)
+    + tab('ipa-group', ipaLabel, ipaOn, `aria-controls="nb-sub" aria-expanded="${showSub}"`)
     + (characterOpen() ? tab(CHARACTER_BOOK.id, CHARACTER_BOOK.label, active === CHARACTER_BOOK.id) : '')
     + custom.map(t => tab(t.id, t.label, t.id === active)).join('')
     + '<button class="nb-tab nb-add" id="nb-add" type="button" aria-label="New notebook">+</button>';
 
-  // The second row: only while an IPA notebook is open.
-  els.sub.hidden = !ipaOn;
-  els.sub.innerHTML = ipaOn ? IPA_BOOKS.map(b => tab(b.id, b.label, b.id === active)).join('') : '';
+  // The second row: only while the IPA chip is expanded.
+  els.sub.hidden = !showSub;
+  els.sub.innerHTML = showSub ? IPA_BOOKS.map(b => tab(b.id, b.label, b.id === active)).join('') : '';
 
   els.dock.querySelectorAll('[data-nb-tab]').forEach(b =>
-    b.addEventListener('click', () => openTab(b.dataset.nbTab === 'ipa-group' ? lastIpa : b.dataset.nbTab)));
+    b.addEventListener('click', () => {
+      const id = b.dataset.nbTab;
+      if (id === 'ipa-group') {
+        // On an IPA notebook already: the chip just opens and shuts the
+        // row. Coming from elsewhere: open the row AND the last IPA book
+        // used, so the chip still behaves like a tab.
+        if (isIpa(active)) { ipaExpanded = !ipaExpanded; drawTabs(); }
+        else { ipaExpanded = true; openTab(lastIpa); }
+        return;
+      }
+      ipaExpanded = false;          // a choice was made; put the row away
+      openTab(id);
+    }));
   els.tabs.querySelector('#nb-add').addEventListener('click', addNotebook);
 }
 

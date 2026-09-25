@@ -3113,7 +3113,41 @@ function actingChapterBlocks(l) {
     : b.fig ? actingFigureHtml(b.fig)
     : b.mask ? maskSheetHtml(b.mask)
     : b.profile ? maskProfileHtml(b.profile)
-    : b.roster ? maskRosterHtml(b.roster) : '').join('');
+    : b.roster ? maskRosterHtml(b.roster)
+    : b.markup ? scriptMarkupHtml(b.markup) : '').join('');
+}
+
+// ── A marked-up page ──────────────────────────────────────────
+// Script markup is TEXT PLUS MARKS, so it renders as text plus marks
+// rather than as a photograph of somebody's script. That keeps it
+// readable aloud by a screen reader, searchable, and legible at any
+// size — and it means the example can use a scene the app already
+// carries verbatim instead of a picture of one.
+//
+// Three inline marks, chosen because none of them occurs in the plays:
+//   |word|   the word the line turns on   → underlined
+//   //       a breath or a held pause     → a visible slash
+//   ~word~   a cut                        → struck through
+// esc() runs FIRST, so only our own tags reach the DOM.
+const markupLine = s => esc(s)
+  .replace(/\|([^|]+)\|/g, '<u class="mk-op">$1</u>')
+  .replace(/~([^~]+)~/g, '<s class="mk-cut">$1</s>')
+  .replace(/\/\//g, '<span class="mk-breath" aria-label="breath">/</span>');
+
+function scriptMarkupHtml(m) {
+  const rows = (m.rows ?? []).map(r => r.beat
+    ? `<div class="mu-beat"><span class="mu-beat-n">${esc(r.beat)}</span>${
+        r.action ? `<span class="mu-action">${esc(r.action)}</span>` : ''}</div>`
+    : `<div class="mu-row">
+         <p class="mu-line">${r.who ? `<span class="mu-who">${esc(r.who)}</span> ` : ''}${markupLine(r.text ?? '')}</p>
+         ${r.side ? `<p class="mu-side">${esc(r.side)}</p>` : ''}
+       </div>`).join('');
+  return `<figure class="mu">
+      ${m.caption ? `<figcaption class="mu-cap">${esc(m.caption)}</figcaption>` : ''}
+      <div class="mu-page">${rows}</div>
+      ${m.note ? `<p class="mu-note">${esc(m.note)}</p>` : ''}
+      ${m.key?.length ? `<ul class="mu-key">${m.key.map(k => `<li>${markupLine(k)}</li>`).join('')}</ul>` : ''}
+    </figure>`;
 }
 
 // A commedia mask, from its ONE record in character-course.js: the

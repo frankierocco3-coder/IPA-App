@@ -445,13 +445,28 @@ export function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
     ?? ACCENT_LANG[({ 'ɝ': 'nam', 'ɚ': 'nam', 'ɑ': 'nam', 'oʊ': 'nam' }[sym])]
     ?? (['ɐ', 'ɐː', 'ʉː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ɔ', 'oː', 'eː', 'oɪ'].includes(sym) ? 'en-AU' : 'en-GB');
   const acc = accent ?? ({ 'en-US': 'nam', 'en-GB': 'rp', 'en-AU': 'aus' })[lang];
+  // ISOLATED PHONEMES EXIST IN ONE ACCENT. All 42 approved clips are
+  // nam/reference (the owner's own recordings), and General American is
+  // the only course getting them for now — owner decision 2026-09-22.
+  //
+  // So an accent-NEUTRAL surface (Voice & Speech, IPA Foundations, or a
+  // page reached with no accent at all) resolved to a guessed 'rp' and
+  // fell silent, holding forty-two recordings it would not play. Owner
+  // order 2026-09-24: use the Neutral American ones we have.
+  //
+  // The four accent courses are deliberately NOT included. Handing an
+  // RP learner a General American vowel would teach the wrong sound,
+  // which is why their sound pages still say the isolated clip is not
+  // recorded yet and keep their word audio.
+  const ACCENT_COURSES = ['rp', 'ssbe', 'aus', 'cockney'];
+  const phonAcc = ACCENT_COURSES.includes(acc) ? acc : 'nam';
   const isVowel = p.type !== 'consonant';
   // The big symbol plays the ISOLATED sound only when an ear-approved clip
   // exists. Until then it is an explicit word control — labelled as such,
   // never pretending a word is the phoneme.
   const slug = phonemeSlug(sym);
-  const hasIso = hasPhonemeClip(slug, acc);
-  const hasSyl = hasPhonemeClip(slug + '_syllable', acc);
+  const hasIso = hasPhonemeClip(slug, phonAcc);
+  const hasSyl = hasPhonemeClip(slug + '_syllable', phonAcc);
   const chips = p.examples.map(w => wordChip(w, acc)).join('');
 
   // Prev/Next through the visible inventory for this context. No looping:
@@ -538,11 +553,11 @@ export function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
   wireBrandHome();
   wireArticulationVideos(app);
   // A phoneme request plays the phoneme or nothing — no word stand-in.
-  document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, acc));
-  document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
-  document.getElementById('say-syl-hero')?.addEventListener('click', () => playPhoneme(slug + '_syllable', acc));
+  document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, phonAcc));
+  document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', phonAcc));
+  document.getElementById('say-syl-hero')?.addEventListener('click', () => playPhoneme(slug + '_syllable', phonAcc));
   wireTryIt(app, () => {
-    if (hasIso) { playPhoneme(slug, acc); return; }
+    if (hasIso) { playPhoneme(slug, phonAcc); return; }
     const w = p.examples.find(x => speakableWord(x, acc));
     if (w) speak(w, { lang, accent: acc });
   });

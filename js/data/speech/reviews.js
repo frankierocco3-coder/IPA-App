@@ -239,6 +239,16 @@ export const SPEECH_REVIEWS = {
   'ac-analysis': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-27', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-27. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  // Script Analysis gained two lessons on RECORDING the analysis (owner
+  // order 2026-09-24). Acting is live, so their ledger entries ship in
+  // the same commit as the lessons — a module added to a live course
+  // without them gives learners a shelf of draft-gated chapters.
+  'ac-markup': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-24', version: 1,
+    notes: 'Editorially approved by the product owner for publication on 2026-09-24. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. The marked-up examples use scene text the app already carries verbatim; the marks and the beat divisions in them are Speechcraft\u2019s own reading and are offered as one way of doing it, not a standard.' },
+  'ac-ownmarks': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-09-24', version: 1,
+    notes: 'Editorially approved by the product owner for publication on 2026-09-24. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. The four marking styles describe practice that recurs among working actors; no practitioner is named in the lesson body, and none of the four is presented as authoritative.' },
   'ac-archetypes': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-27', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-27. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },

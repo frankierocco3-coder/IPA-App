@@ -2855,13 +2855,18 @@ export async function run({ navDoc = document } = {}) {
     // Building a Character left Acting on 2026-09-23 for the course of
     // that name: eight lessons out (seven moved keeping their ids, the
     // two-roads opener retired), Through Analysis kept and moved into
-    // Investigating the Text, which owns text analysis.
-    check('acting: five modules hold the 39 path lessons; 8 Professional chapters shelve outside the path',
+    // what is now Script Analysis, which owns text analysis.
+    //
+    // Module 2 was renamed Investigating the Text -> Script Analysis on
+    // 2026-09-24 and gained two lessons on recording the analysis. The
+    // id stayed 'text', which is why nothing stored on a device moved.
+    check('acting: five modules hold the 41 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 5
       && String(ACTING_MODULES.map(m => m.title))
-        === 'The Actor’s Work,Investigating the Text,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 39
-      && ACTING_LESSONS.length === 47
+        === 'The Actor’s Work,Script Analysis,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
+      && ACTING_MODULES.find(m => m.n === 2).id === 'text'
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 41
+      && ACTING_LESSONS.length === 49
       && !actingLessonById('ac-character')
       && actingLessonById('ac-analysis')?.module === 'text'
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
@@ -2942,16 +2947,18 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !doc.getElementById('freeplay'));
-      check('acting: all 51 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 53 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
           // item carries the owner's editorial verdict, none claims a
           // specialist, and no reviewer name is invented, so the draft
           // strip has nothing to count and must be gone. 59 -> 51 on
-          // 2026-09-23: Building a Character's eight lessons left Acting
-          // for the course of that name.
+          // 2026-09-23 when Building a Character's eight lessons left
+          // Acting; 51 -> 53 on 2026-09-24 when Script Analysis gained
+          // Marking Up the Script and Finding Your Own Marks. A lesson
+          // added to a LIVE course without its ledger entry lands here.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 51
+          return items.length === 53
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
