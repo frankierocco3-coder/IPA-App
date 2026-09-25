@@ -708,6 +708,22 @@ recasts.js — never duplicated; the 15 pilot transpositions remain
 the original 23 queue) + js/data/edition-reviews.js approval ledger
 (absence = draft; plain needs literary review, voices need literary
 AND dialect; Claude never a reviewer; no batch approval).
+ONE GATE for all 154 (2026-09-25): where a sonnet's TEXT lives no longer
+decides how its approval is recorded. The pilots used to answer to a
+second map, TRANSPOSITION_REVIEW — a flat 'approved' string with no
+reviewer and no literary/dialect split — which would have given five of
+the most-read texts a thinner audit trail than sonnet 12. Surfaced when
+the review frontier reached sonnet 18. editionStatus MOVED to
+edition-reviews.js (same name, same body) so recasts.js can resolve
+approval without importing editions/index.js, which already imports
+recasts.js and would have been a cycle; index.js re-exports it, so all
+callers are unchanged. editionFor's legacy branch and
+approvedTranspositions both go through it now. The five pilot Plain
+Meanings were MIGRATED into the ledger in the same commit — without
+them five live texts would have silently reverted to draft, a content
+regression dressed as a refactor. TRANSPOSITION_REVIEW is kept as the
+historical record and is INERT: the suite flips an entry and asserts the
+real gate still says draft, so the second gate cannot come back to life.
 renderSonnet shows Plain/Today tabs ONLY for approved texts — today
 that means the reader looks unchanged except pilot Plain Meanings;
 #review has a lazy per-sonnet edition inspector. launch_lint 6i:
@@ -1206,7 +1222,21 @@ blurs the meaning without reflowing. It appears wherever a recast has an
 approved `plain`, which today is the 25 owner-approved sonnets plus the
 5 pilots. It makes NO claim to align line for line, because the Plain
 Meaning is one prose paragraph and the alignment data does not exist.
-**The 160-entry lexicon** is js/data/shakespeare-lexicon.js.
+**Shakespeare's Language** is the 160-entry lexicon
+(js/data/shakespeare-lexicon.js) on a reference page of its own:
+Studio > Scripts & Speeches > Shakespeare's Language. 70 false
+friends first (a word you THINK you know sends you on stage playing
+the wrong thing), then 60 obsolete words, 17 elisions carrying their
+scansion effect, 13 points of grammar. Filtered by the shared
+single-select, searchable, reference only: no XP, no completion,
+nothing stored. It is badged AWAITING REVIEW by a Shakespeare
+scholar or verse teacher, because original definitions of
+Shakespeare's usage are a scholarly claim and nobody qualified has
+checked them. Written 2026-09-24 and imported by NOTHING until
+2026-09-25 — it was recorded here as "built" while being
+unreachable, which was wrong; launch_lint 6n and suite 21j now pin
+the shelf card, the page and the disclosure so it cannot silently
+unwire again.
 **Script Analysis** is the per-text analysis, aimed at the EIGHT SCENES by
 owner decision (a sonnet is a thought, a scene is a transaction):
 js/data/script-analysis.js, 53 beats across the eight, ledger-gated in

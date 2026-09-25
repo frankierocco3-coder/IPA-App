@@ -49,6 +49,7 @@ import { scanLine } from '../js/scan.js';
 import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
+import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from '../js/data/shakespeare-lexicon.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
@@ -255,14 +256,45 @@ export async function run({ navDoc = document } = {}) {
   check('every action expression ref exists in Words & Expressions',
     badRefs.length === 0, badRefs.join(', '));
 
-  // Sonnet views: In Today's Voice appears ONLY for approved transpositions
+  // Sonnet views: In Today's Voice appears ONLY for approved transpositions,
+  // and since 2026-09-25 the pilots answer to the SAME ledger as every other
+  // sonnet — a verdict plus a named reviewer for both halves.
   for (const n of Object.keys(RECASTS)) {
     const approved = approvedTranspositions(+n);
-    const wrongly = approved.filter(d => TRANSPOSITION_REVIEW[+n]?.[d] !== 'approved');
-    check(`sonnet ${n}: approved transposition list honours the review map`, wrongly.length === 0);
+    const wrongly = approved.filter(d => editionStatus(+n, d) !== 'approved');
+    check(`sonnet ${n}: approved transposition list honours the one ledger`, wrongly.length === 0);
   }
   check('sonnet 18 structural pilot: drafts exist, none learner-visible yet',
     Object.keys(RECASTS[18].recasts).length >= 3 && approvedTranspositions(18).length === 0);
+
+  // The pilots' Plain Meanings were live before the gate was unified. If the
+  // migration into edition-reviews.js had been forgotten, five shipped texts
+  // would have reverted to draft — so prove each one is still approved AND
+  // that the approval now carries a name, which is what it lacked before.
+  check('pilots: every Plain Meaning survived the gate unification, with a reviewer',
+    LEGACY_SONNETS.every(n => editionStatus(n, 'plain') === 'approved'
+      && EDITION_REVIEWS[`${n}.plain`]?.literary?.reviewer)
+    && LEGACY_SONNETS.every(n => /MIGRATES the owner/.test(
+      EDITION_REVIEWS[`${n}.plain`]?.revisionNotes ?? '')),
+    LEGACY_SONNETS.map(n => `${n}:${editionStatus(n, 'plain')}`).join(' '));
+
+  // TRANSPOSITION_REVIEW is history now. Flipping it must change nothing:
+  // if this ever fails, the second gate has come back to life and a pilot
+  // can reach learners without a named reviewer. Restored in finally so the
+  // rest of the suite sees the real data.
+  {
+    const before = TRANSPOSITION_REVIEW[18].nam;
+    let leaked = null;
+    try {
+      TRANSPOSITION_REVIEW[18].nam = 'approved';
+      leaked = editionStatus(18, 'nam') === 'approved'
+        || approvedTranspositions(18).includes('nam');
+    } finally {
+      TRANSPOSITION_REVIEW[18].nam = before;
+    }
+    check('pilots: the retired transposition map is inert — editing it gates nothing',
+      leaked === false && TRANSPOSITION_REVIEW[18].nam === before);
+  }
 
   // Articulation-video manifest: approval + exact course/kind matching
   const vids = [
@@ -3776,16 +3808,20 @@ export async function run({ navDoc = document } = {}) {
       sbsCss.includes('.sbs.is-covered .sbs-meaning .guide-text,')
       && sbsCss.includes('.sbs.is-covered .sbs-meaning .sbs-line'));
 
-    // Owner order 2026-09-24 applies to EVERY dialect choice, not just
-    // the reader, so all three go through the one shared control.
-    // One definition plus three call sites each — the regex sees the
-    // `function` line too, which is why both counts are four.
-    check('dialect: every dialect choice uses the one shared select',
-      (sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length === 4
-      && (sbsSrc.match(/wireDialectSelect\(/g) ?? []).length === 4
+    // Owner order 2026-09-24: one option on screen at a time, never a row
+    // of chips wrapping on a phone. It was given about dialect and the
+    // REASON generalises, so every such choice goes through the one shared
+    // control — including Shakespeare's Language, whose five kind filters
+    // would otherwise wrap exactly the way the original screenshot did.
+    // One definition plus four call sites each, and the regex sees the
+    // `function` line too, which is why both counts are five.
+    check('single-select: every one-of-many choice uses the one shared select',
+      (sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length === 5
+      && (sbsSrc.match(/wireDialectSelect\(/g) ?? []).length === 5
       && sbsSrc.includes("id: 'rd', label: 'Dialect'")
       && sbsSrc.includes("id: 'np', label: 'Dialect'")
-      && sbsSrc.includes("id: 'today', label: 'Version'"),
+      && sbsSrc.includes("id: 'today', label: 'Version'")
+      && sbsSrc.includes("id: 'lex', label: 'Show'"),
       `html:${(sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length} wire:${(sbsSrc.match(/wireDialectSelect\(/g) ?? []).length}`);
     check('dialect: the control is reachable by keyboard and says what it is',
       sbsSrc.includes('aria-haspopup="menu" aria-expanded="false"')
@@ -3924,6 +3960,51 @@ export async function run({ navDoc = document } = {}) {
       (prose.match(/\w+n’t\b|\b\w+’(re|ll|ve|m|d)\b|—|["']/g) ?? []).slice(0, 5).join(' '));
     check('script analysis: Claude is never named as a reviewer',
       !/claude|anthropic/i.test(JSON.stringify(SCRIPT_ANALYSIS_REVIEWS)));
+  }
+
+  // ── 21j. Shakespeare's Language: the lexicon, and its shelf ────
+  // It was written on 2026-09-24 and imported by NOTHING until 2026-09-25,
+  // so the first thing to pin is that it is reachable at all. Written
+  // content nothing can open is the worst state for anything to be in.
+  {
+    const ids = SHAKESPEARE_LEXICON.map(e => e.id);
+    check('lexicon: 160 entries, ids unique and in the stable SH-### form',
+      SHAKESPEARE_LEXICON.length === 160
+      && new Set(ids).size === 160
+      && ids.every(id => /^SH-\d{3}$/.test(id)),
+      `${SHAKESPEARE_LEXICON.length} entries, ${new Set(ids).size} unique`);
+    const byKind = k => SHAKESPEARE_LEXICON.filter(e => e.kind === k).length;
+    check('lexicon: the four kinds are 70 / 60 / 17 / 13, as the header claims',
+      byKind('false-friend') === 70 && byKind('obsolete') === 60
+      && byKind('elision') === 17 && byKind('grammar') === 13
+      && SHAKESPEARE_LEXICON.every(e => LEXICON_KINDS.includes(e.kind)),
+      LEXICON_KINDS.map(k => `${k}:${byKind(k)}`).join(' '));
+    check('lexicon: every entry carries a meaning and an actor-facing note',
+      SHAKESPEARE_LEXICON.every(e => e.modern?.trim() && e.note?.trim()));
+    // metre is a scansion fact, so it belongs to elisions and nowhere else.
+    check('lexicon: metre is recorded for elisions and null for every other kind',
+      SHAKESPEARE_LEXICON.every(e =>
+        e.kind === 'elision' ? !!e.metre : e.metre === null));
+    // A source without an example, or an example presented as a quotation
+    // with nothing behind it, is how invented attributions creep in.
+    check('lexicon: no source is recorded without the example it belongs to',
+      SHAKESPEARE_LEXICON.every(e => !e.source || e.example));
+
+    const lexSrc = await viewSource();
+    check('lexicon: it is on a shelf and the shelf opens it',
+      lexSrc.includes("title: 'Shakespeare’s Language'")
+      && lexSrc.includes('go: renderShakespeareLexicon')
+      && lexSrc.includes('function renderShakespeareLexicon()'));
+    check('lexicon: the page says plainly that nobody qualified has checked it',
+      lexSrc.includes('Awaiting review by a Shakespeare scholar or verse teacher'));
+    // A reference, not a lesson: nothing scored, nothing stored, nothing locked.
+    const lexFn = lexSrc.slice(lexSrc.indexOf('function renderShakespeareLexicon()'),
+      lexSrc.indexOf('// "Your Instrument"'));
+    check('lexicon: reference only — no XP, no completion, no storage, no audio',
+      !/addXp|awardXp|markDone|completeLesson|localStorage|speak\(|playPhoneme/.test(lexFn),
+      (lexFn.match(/addXp|awardXp|markDone|completeLesson|localStorage|speak\(|playPhoneme/g) ?? []).join(' '));
+    check('lexicon: every displayed field is escaped',
+      !/\$\{(?!esc\()(e|now)\.(term|modern|note|example|source|metre)/.test(lexFn));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────

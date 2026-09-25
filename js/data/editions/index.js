@@ -30,12 +30,27 @@
 // THE FIVE PILOT SONNETS (18, 29, 73, 116, 130) stay in
 // js/data/recasts.js — the loader below serves them from there so the
 // original 23-item review queue remains the single home of those drafts
-// and nothing is duplicated. Their Plain Meanings are live by prior
-// owner decision; their transpositions still answer to
-// TRANSPOSITION_REVIEW.
+// and nothing is duplicated. That is a decision about where the TEXT
+// lives.
+//
+// ONE GATE (2026-09-25). Approval is NOT split by where the text lives:
+// every one of the 154 sonnets answers to edition-reviews.js through
+// editionStatus, which demands a verdict AND a named reviewer for each
+// required review. The pilots used to answer to a second, weaker map
+// (TRANSPOSITION_REVIEW: a flat 'approved' string, no reviewer, no
+// literary/dialect split), which would have given five of the most-read
+// texts in the app a thinner audit trail than sonnet 12 has. That map is
+// now history, not a gate — see recasts.js.
+//
+// editionStatus itself moved to edition-reviews.js, beside the ledger it
+// reads, so recasts.js can resolve approval without importing this
+// module and forming a cycle. Re-exported here: every existing caller is
+// unchanged.
 
-import { RECASTS, TRANSPOSITION_REVIEW } from '../recasts.js';
-import { EDITION_REVIEWS } from '../edition-reviews.js';
+import { RECASTS } from '../recasts.js';
+import { editionStatus } from '../edition-reviews.js';
+
+export { editionStatus };
 
 export const LEGACY_SONNETS = [18, 29, 73, 116, 130];
 
@@ -89,22 +104,15 @@ async function loadChunk(chunk) {
   return chunkCache.get(chunk.file);
 }
 
-// Approval resolution — draft by construction unless a human recorded
-// the required review(s) in edition-reviews.js. Plain needs the literary
-// review; a voice needs BOTH literary and dialect/register review.
-export function editionStatus(n, kind) {
-  const r = EDITION_REVIEWS[`${n}.${kind}`];
-  if (!r || r.verdict !== 'approved') return 'draft';
-  const lit = r.literary?.status === 'approved' && r.literary?.reviewer;
-  if (kind === 'plain') return lit ? 'approved' : 'draft';
-  const dia = r.dialect?.status === 'approved' && r.dialect?.reviewer;
-  return lit && dia ? 'approved' : 'draft';
-}
-
 /**
  * The full edition record for one sonnet, or null when its batch is not
  * written yet. Uniform shape for legacy and new sonnets:
  *   { n, legacy, plain, plainStatus, voices: {nam,ssbe,aus}, voiceStatus(d) }
+ *
+ * `legacy` says where the TEXT lives, and nothing more. Since the gate was
+ * unified (2026-09-25) both branches resolve approval the same way, through
+ * editionStatus, so a pilot is held to the same named-reviewer standard as
+ * any other sonnet.
  */
 export async function editionFor(n) {
   if (LEGACY_SONNETS.includes(n)) {
@@ -113,9 +121,9 @@ export async function editionFor(n) {
     return {
       n, legacy: true,
       plain: r.plain,
-      plainStatus: 'approved',                 // live by prior owner decision
+      plainStatus: editionStatus(n, 'plain'),
       voices: { nam: r.recasts.nam ?? null, ssbe: r.recasts.ssbe ?? null, aus: r.recasts.aus ?? null },
-      voiceStatus: d => TRANSPOSITION_REVIEW[n]?.[d] ?? 'draft',
+      voiceStatus: d => editionStatus(n, d),
     };
   }
   const chunk = EDITION_CHUNKS.find(c => n >= c.from && n <= c.to);

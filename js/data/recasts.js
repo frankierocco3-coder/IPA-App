@@ -17,12 +17,14 @@
 // deliberately offers Original + Plain Meaning only — a slang RP
 // "translation" would be a costume, not a register.
 //
-// REVIEW GATE: a transposition reaches learners only when its dialect
-// entry below is 'approved' in TRANSPOSITION_REVIEW. Everything starts
-// 'draft' and renders only on the owner #review page until Frankie has
-// checked it for literary faithfulness and dialect accuracy
-// (checklist: docs/RECAST_REVIEW.md). Plain Meaning is already live and
-// is NOT gated by this map.
+// REVIEW GATE: js/data/edition-reviews.js, the same one every other
+// sonnet answers to, resolved through editionStatus. A transposition
+// reaches learners only when that ledger carries a verdict AND a named
+// reviewer for both the literary and the dialect read. Everything starts
+// draft and renders only on the owner #review page until Frankie has
+// checked it (checklist: docs/RECAST_REVIEW.md).
+
+import { editionStatus } from './edition-reviews.js';
 
 export const TRANSPOSITION_LABELS = {
   nam: 'Neutral American Transposition',
@@ -31,14 +33,17 @@ export const TRANSPOSITION_LABELS = {
   rp: 'Traditional RP Transposition',
 };
 
-// Sonnet 18 is the structural pilot: every view wired end to end, all
-// transpositions still awaiting review.
-// `plain` is a RECORD, not a gate. Nothing reads it: voiceStatus and
-// approvedTranspositions only ever look up dialect keys, and Plain
-// Meaning has been live since the pilots shipped. It is here so all 25
-// sonnets of the reviewed working set carry a review trail — the other
-// 20 are in js/data/edition-reviews.js — instead of five of the
-// most-read texts in the app having none (owner read 2026-09-24).
+// HISTORY, NOT A GATE (frozen 2026-09-25). This map WAS the pilots'
+// approval record. Nothing reads it any more: the gate was unified so the
+// pilots answer to edition-reviews.js like the other 149 sonnets, and the
+// five Plain Meaning approvals recorded here were migrated there with the
+// reviewer named. It is kept because it is the only record of what was
+// approved when, and because deleting an audit trail to tidy a refactor
+// is exactly the wrong instinct.
+//
+// Editing it changes NOTHING a learner sees. The suite proves that by
+// flipping an entry to 'approved' and asserting the real gate still says
+// draft, so this cannot quietly come back to life.
 export const TRANSPOSITION_REVIEW = {
   18: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
   29: { plain: 'approved', nam: 'draft', ssbe: 'draft', aus: 'draft' },
@@ -49,9 +54,11 @@ export const TRANSPOSITION_REVIEW = {
 
 // The dialects of sonnet `n` a learner may see under In Today's Voice:
 // approved AND actually written. No approval, no tab — never a dead tab.
+// Approval comes from the one ledger, so a pilot needs a named reviewer
+// for both halves exactly as sonnet 12 did.
 export const approvedTranspositions = n =>
   Object.keys(RECASTS[n]?.recasts ?? {})
-    .filter(d => TRANSPOSITION_REVIEW[n]?.[d] === 'approved');
+    .filter(d => editionStatus(n, d) === 'approved');
 
 export const RECASTS = {
   18: {

@@ -5,9 +5,14 @@
 // is deliberately not that. 70 false friends, 60 obsolete words, 17
 // elisions, 13 points of grammar.
 //
-// NOT WIRED to any screen yet. The catalogue belongs to the Shakespeare
-// course (owner decision 2026-09-24: Shakespeare is its OWN course, not
-// a module inside Acting), and the shelf it lives on is built with it.
+// WIRED 2026-09-25 to Shakespeare's Language, a reference page on the
+// Scripts & Speeches shelf (renderShakespeareLexicon in js/main.js),
+// filtered by kind through the shared single-select and searchable across
+// every field. It had no screen for a day after it was written, which is
+// the worst state for written content to be in. When the Shakespeare
+// course is built (owner decision 2026-09-24: Shakespeare is its OWN
+// course, not a module inside Acting) the page moves onto its shelf; the
+// data does not change when it does.
 //
 // SOURCES AND COPYRIGHT. Every definition here is written for this app.
 // The good modern Shakespeare glossaries are all in copyright (Onions as

@@ -18,10 +18,14 @@
 // literary and dialect/register review before the loader treats it as
 // approved (editions/index.js enforces this).
 //
-// The five pilot sonnets (18, 29, 73, 116, 130) are NOT tracked here —
-// their 15 transpositions remain the original review queue in
-// js/data/recasts.js (TRANSPOSITION_REVIEW), and their Plain Meanings
-// are live by prior owner decision.
+// THE FIVE PILOT SONNETS ARE TRACKED HERE TOO, since 2026-09-25. Their
+// TEXTS still live in js/data/recasts.js — that is unchanged — but their
+// APPROVAL is resolved here like every other sonnet's. Before that they
+// answered to a second map, TRANSPOSITION_REVIEW, which recorded a flat
+// 'approved' string with no reviewer and no literary/dialect split. Five
+// of the most-read texts in the app would have carried a thinner audit
+// trail than sonnet 12, and the frontier reaching sonnet 18 is what
+// surfaced it. One ledger, one standard, 154 sonnets.
 
 // ── Working set, batch 1 (owner read and approved 2026-09-24) ──
 // Plain Meanings only: the Shakespeare course is Neutral American, so no
@@ -48,7 +52,26 @@ const VOICE_NOTE = 'Owner approval, read line by line against the original. Both
   + 'the target dialect. ONE person signed both halves — NOT an independent specialist '
   + 'review, and NOT a scholarly sign-off on the Shakespeare.';
 
+// ── The five pilots' Plain Meanings, MIGRATED 2026-09-25 ──
+// These are NOT new approvals. Sonnets 18, 29, 73, 116 and 130 have had
+// live Plain Meanings since the pilots shipped, recorded as
+// `plain: 'approved'` in TRANSPOSITION_REVIEW and read by the owner on
+// 2026-09-24. Unifying the gate means the loader reads this file instead
+// of that map, so without these five entries five live texts would have
+// silently reverted to draft — a content regression dressed up as a
+// refactor. The verdict is the owner's existing one, carried across with
+// its reviewer named for the first time.
+const PILOT_MIGRATION = ' Plain Meaning live since the pilots shipped; this entry '
+  + 'MIGRATES the owner’s existing approval (recorded 2026-09-24) into the one '
+  + 'ledger when the gate was unified on 2026-09-25. No new review took place.';
+
 export const EDITION_REVIEWS = {
+  '18.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE + PILOT_MIGRATION },
+  '29.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE + PILOT_MIGRATION },
+  '73.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE + PILOT_MIGRATION },
+  '116.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE + PILOT_MIGRATION },
+  '130.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE + PILOT_MIGRATION },
+
   '12.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
   '15.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
   '30.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
@@ -184,3 +207,22 @@ export const EDITION_REVIEWS = {
   '15.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
     revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
 };
+
+// Approval resolution — draft by construction unless a human recorded
+// the required review(s) above. Plain needs the literary review; a voice
+// needs BOTH literary and dialect/register review. A verdict with nobody's
+// name on it is not an approval, which is why the reviewer field is
+// checked and not just the status.
+//
+// It lives here, beside the ledger it reads, so that recasts.js can
+// resolve approval without importing editions/index.js — index.js already
+// imports recasts.js, and the reverse would be a cycle. index.js
+// re-exports this, so every existing caller is untouched.
+export function editionStatus(n, kind) {
+  const r = EDITION_REVIEWS[`${n}.${kind}`];
+  if (!r || r.verdict !== 'approved') return 'draft';
+  const lit = r.literary?.status === 'approved' && r.literary?.reviewer;
+  if (kind === 'plain') return lit ? 'approved' : 'draft';
+  const dia = r.dialect?.status === 'approved' && r.dialect?.reviewer;
+  return lit && dia ? 'approved' : 'draft';
+}

@@ -146,9 +146,15 @@ part of the app.
 
 ## Library shelves (not lessons)
 
-**Reading Shakespeare's Words** — the 160-entry lexicon, already written.
-False friends, obsolete words, elisions with their metre notes, and the
-grammar entries.
+**Shakespeare's Language** — the 160-entry lexicon. **BUILT AND LIVE
+2026-09-25**, shelved at Studio > Scripts & Speeches rather than waiting
+for the course, because it was written on 2026-09-24 and reachable from
+nowhere for a day. 70 false friends first, then 60 obsolete words, 17
+elisions with their metre notes, 13 grammar entries. Filtered by the
+shared single-select, searchable across every field, reference only.
+Badged awaiting review by a Shakespeare scholar or verse teacher. When
+the course is built the page moves onto its shelf; the data does not
+change when it does.
 
 **The Rhetoric Shelf** — roughly 17 figures, same entry shape.
 

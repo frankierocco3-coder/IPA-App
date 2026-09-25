@@ -357,6 +357,27 @@ def main():
         "qualified professional.") not in sp_course:
         fail("the Speech safety line drifted")
 
+    # 6n: Shakespeare's Language (2026-09-25). The lexicon was written on
+    # 2026-09-24 and imported by NOTHING for a day, so the shelf entry and
+    # the page are pinned: written content that nothing can open is the
+    # worst state for it to be in, and a silent unwiring would restore it.
+    if "title: 'Shakespeare\u2019s Language'" not in views_js:
+        fail("the Shakespeare lexicon lost its shelf card")
+    if "function renderShakespeareLexicon()" not in views_js:
+        fail("the Shakespeare lexicon page is gone")
+    # Nobody qualified has checked these definitions. The page must keep
+    # saying so, in the words a reader sees.
+    if "Awaiting review by a Shakespeare scholar or verse teacher" not in views_js:
+        fail("the lexicon dropped its awaiting-review disclosure")
+    # It is a reference. The moment it scores or stores, it is a lesson
+    # that never went through the course machinery.
+    lex_start = views_js.find("function renderShakespeareLexicon()")
+    lex_end = views_js.find('// "Your Instrument"', lex_start)
+    lex_fn = views_js[lex_start:lex_end] if lex_start >= 0 < lex_end else ""
+    for banned in ["addXp(", "markDone(", "localStorage"]:
+        if banned in lex_fn:
+            fail("the lexicon reference page gained lesson machinery: %r" % banned)
+
     # 6m: the three-workspace IA (2026-08-13)
     for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:
         if pin not in views_js:

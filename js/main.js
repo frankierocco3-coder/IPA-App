@@ -8,6 +8,7 @@ import { parseProvidedScene, sceneSpeeches, formTracker } from './scene-parse.js
 import { scriptAnalysisById } from './data/script-analysis.js';
 import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
+import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { CAPABILITIES } from './capabilities.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
@@ -21,7 +22,7 @@ import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech,
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
-import { RECASTS, TRANSPOSITION_LABELS, approvedTranspositions } from './data/recasts.js';
+import { RECASTS, TRANSPOSITION_LABELS } from './data/recasts.js';
 import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from './data/editions/index.js';
 import { actionFor, actionDrafts, DIALECT_ACTION_LIVE } from './data/dialect-in-action.js';
@@ -5917,6 +5918,7 @@ function textSpeechPane(pane) {
   // collections below, with nothing promoted or duplicated.
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
+    { icon: '📖', title: 'Shakespeare’s Language', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
     ...libs,
     { icon: '🎭', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
     { icon: '🎬', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
@@ -5930,6 +5932,145 @@ function textSpeechPane(pane) {
     </button>`).join('');
   pane.querySelectorAll('.track-card').forEach(b =>
     b.addEventListener('click', () => shown[+b.dataset.i].go()));
+}
+
+// ── Shakespeare's Language: the lexicon, on a shelf ──────────────
+//
+// 160 written entries that had no screen until now. Four kinds, and the
+// order is the argument: FALSE FRIENDS come first because a word an actor
+// does not know sends them to look it up, while a word they think they
+// know sends them on stage playing the wrong thing.
+//
+// It is a reference, not a lesson: no XP, no completion, no lock, nothing
+// stored. One page, filtered and searchable, because 160 short entries
+// want scanning rather than 160 detail pages to click through.
+//
+// REVIEW: these are original definitions of Shakespeare's usage, which is
+// a scholarly claim. Nobody qualified has checked them, so the page says
+// so in the place a reader will see it. The badge is the same honesty the
+// 62 articulation guides carry, not a placeholder.
+const LEXICON_GROUPS = {
+  'false-friend': {
+    label: 'False friends',
+    lead: 'Still in everyday use, and the meaning has moved. These are the dangerous ones: nothing on the page tells you that you have it wrong.',
+  },
+  obsolete: {
+    label: 'Words out of use',
+    lead: 'Gone from modern English. You will know you do not know them, which makes them honest work rather than hidden traps.',
+  },
+  elision: {
+    label: 'Elisions',
+    lead: 'Contractions the verse needs. These are scansion facts before they are vocabulary: say the full form and the line gains a syllable it cannot hold.',
+  },
+  grammar: {
+    label: 'Grammar',
+    lead: 'Constructions that read as errors and are not. Knowing the rule stops you smoothing the line into something flatter.',
+  },
+};
+
+const LEXICON_REVIEW_NOTE = 'Awaiting review by a Shakespeare scholar or verse teacher. '
+  + 'Every definition here is written for this app and none has been checked by a '
+  + 'qualified reader yet. Treat a reading you disagree with as a question, not an answer.';
+
+let lexFilters = { q: '', kind: 'all' };
+
+function lexiconHits() {
+  const q = lexFilters.q.trim().toLowerCase();
+  return SHAKESPEARE_LEXICON.filter(e => {
+    if (lexFilters.kind !== 'all' && e.kind !== lexFilters.kind) return false;
+    if (!q) return true;
+    return [e.term, e.modern, e.note, e.example, e.source]
+      .some(f => String(f ?? '').toLowerCase().includes(q));
+  });
+}
+
+const lexEntryHtml = e => `
+  <article class="lex-row">
+    <h3 class="lex-term">${esc(e.term)}<span class="lex-kind">${esc(LEXICON_GROUPS[e.kind]?.label ?? e.kind)}</span></h3>
+    <p class="lex-modern">${esc(e.modern)}</p>
+    <p class="lex-note">${esc(e.note)}</p>
+    ${e.metre ? `<p class="lex-metre"><span class="lex-label">Metre</span>${esc(e.metre)}</p>` : ''}
+    ${e.example ? `<p class="lex-eg">“${esc(e.example)}”${
+      e.source ? ` <span class="lex-src">${esc(e.source)}</span>` : ''}</p>` : ''}
+  </article>`;
+
+function renderShakespeareLexicon() {
+  record(renderShakespeareLexicon);       // replays with the current filters
+  stopSpeech();
+  // Fresh filters every visit, the same rule Words & Expressions follows:
+  // landing on a pre-filtered list reads as missing content.
+  lexFilters = { q: '', kind: 'all' };
+  // ONE option on screen at a time (owner order 2026-09-24). Five chips
+  // in a row wrap into three ragged lines on a phone, which is the exact
+  // thing that order was given about, so this reuses the shared select
+  // rather than repeating the mistake in a new place.
+  const kindOptions = [
+    { id: 'all', label: 'All', note: `${SHAKESPEARE_LEXICON.length} entries` },
+    ...LEXICON_KINDS.map(k => ({
+      id: k, label: LEXICON_GROUPS[k].label,
+      note: `${SHAKESPEARE_LEXICON.filter(e => e.kind === k).length} entries`,
+    })),
+  ];
+  app.innerHTML = `
+    ${pageTopbar('📖 Shakespeare’s Language', '#8a6d3b')}
+    <main class="guide">
+      <h1>Shakespeare’s Language</h1>
+      <p class="guide-text">The words and turns that stop an actor, and what they do in performance.
+        A definition is a dictionary. The line under each one is the craft: what changes in the playing
+        once you know.</p>
+      <p class="pane-note pane-caveat">${esc(LEXICON_REVIEW_NOTE)}</p>
+      <div id="lex-kind"></div>
+      <input class="sonnet-search" id="lex-search" type="search"
+        placeholder="Search words, meanings, lines…" aria-label="Search Shakespeare’s Language"
+        autocomplete="off">
+      <div id="lex-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('lex-list');
+  const searchEl = document.getElementById('lex-search');
+  const kindHost = document.getElementById('lex-kind');
+
+  // The select renders its own current value, so changing the filter means
+  // redrawing and rewiring it — the same shape the reader's dialect select
+  // uses when the chosen version changes.
+  const drawKind = () => {
+    kindHost.innerHTML = dialectSelectHtml({
+      id: 'lex', label: 'Show', current: lexFilters.kind, options: kindOptions,
+    });
+    wireDialectSelect(kindHost, 'lex', k => { lexFilters.kind = k; drawKind(); draw(); });
+  };
+
+  const draw = () => {
+    const hits = lexiconHits();
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(lexFilters.q)}”${
+          lexFilters.kind === 'all' ? '' : ` under ${esc(LEXICON_GROUPS[lexFilters.kind].label)}`}.</p>
+        <p><button class="btn-lite" id="lex-clear" type="button">Clear search and filters</button></p>`;
+      listEl.querySelector('#lex-clear').addEventListener('click', () => {
+        // Clearing resets the kind too, so the select is redrawn from the
+        // new state rather than left showing a filter that no longer applies.
+        lexFilters = { q: '', kind: 'all' };
+        searchEl.value = '';
+        drawKind();
+        draw();
+      });
+      return;
+    }
+    // A heading appears only where the filter leaves entries under it, so
+    // there is never an empty group with a lead paragraph under it.
+    const groups = LEXICON_KINDS
+      .map(k => [k, hits.filter(e => e.kind === k)])
+      .filter(([, list]) => list.length);
+    listEl.innerHTML = groups.map(([k, list]) => `
+      <h2 class="guide-heading">${esc(LEXICON_GROUPS[k].label)} · ${list.length}</h2>
+      <p class="guide-text">${esc(LEXICON_GROUPS[k].lead)}</p>
+      ${list.map(lexEntryHtml).join('')}`).join('');
+  };
+
+  searchEl.addEventListener('input', () => { lexFilters.q = searchEl.value; draw(); });
+  drawKind();
+  draw();
 }
 
 
