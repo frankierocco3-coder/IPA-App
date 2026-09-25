@@ -36,6 +36,18 @@ const OWNER_LIT = { status: 'approved', reviewer: 'Product owner', date: '2026-0
 const OWNER_NOTE = 'Owner editorial approval, read against the original at #review. '
   + 'NOT a scholarly sign-off: no Shakespeare specialist has reviewed this text.';
 
+// A VOICE needs a dialect/register review as well as a literary one, and
+// the owner gives both. He is a native speaker of Neutral American and
+// recorded the app's 42 nam phonemes himself, so the register read is
+// his to give — but it is one person signing both halves, which the
+// note states rather than leaving the two reviewer fields to imply
+// independence they do not have.
+const OWNER_DIA = { status: 'approved', reviewer: 'Product owner', date: '2026-09-24' };
+const VOICE_NOTE = 'Owner approval, read line by line against the original. Both the '
+  + 'literary and the Neutral American register read are his: he is a native speaker of '
+  + 'the target dialect. ONE person signed both halves — NOT an independent specialist '
+  + 'review, and NOT a scholarly sign-off on the Shakespeare.';
+
 export const EDITION_REVIEWS = {
   '12.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
   '15.plain': { literary: OWNER_LIT, verdict: 'approved', revisionNotes: OWNER_NOTE },
@@ -82,4 +94,43 @@ export const EDITION_REVIEWS = {
   '147.plain': { literary: OWNER_LIT, verdict: 'approved',
     revisionNotes: OWNER_NOTE + ' Revised before approval: added a note on the closing '
       + 'line, where blackness is doing moral work rather than description.' },
+
+  // ── In Today's Voice, Neutral American — batch 1 (2026-09-24) ──
+  // The FIRST dialect voices approved anywhere in the catalog. Until now
+  // every one of the 154 x 3 transpositions was a draft.
+  //
+  // What this unlocks: the transpositions are written one line per line
+  // of the original, so an approved nam voice makes Side by Side pair up
+  // line for line on that sonnet instead of showing the Plain Meaning
+  // paragraph. That is the point of approving them.
+  //
+  // A voice needs BOTH a literary and a dialect/register review, and
+  // these carry both from the same person. He is a native speaker of the
+  // target register and recorded the app's 42 Neutral American phonemes
+  // himself, so the dialect read is genuinely his to give. It is still
+  // an OWNER read rather than an independent specialist's, and it is not
+  // a scholarly sign-off on the Shakespeare. The notes say so on every
+  // entry, because the reviewer field alone would imply more.
+  //
+  // Read five at a time, line by line against the original, and called
+  // individually. Four lines were rewritten first and re-read before the
+  // batch was approved; each entry records which and why.
+  '1.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Line 8 rewritten before approval: “thy sweet self” is '
+      + 'his OWN self, and the draft split the line between him and the speaker '
+      + '(“someone I care about”), which loses the self-harm the line is about.' },
+  '2.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Line 9 rewritten before approval: the draft replaced '
+      + '“How much more praise deserv’d” with a bare stage direction, throwing away the '
+      + 'comparative the whole sestet turns on.' },
+  '3.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Lines 5 to 7 redistributed before approval: the draft '
+      + 'compressed the original’s 5 AND 6 into its line 5, so lines 6 and 7 were '
+      + 'answering the line above them. Matching line COUNTS had hidden it — only '
+      + 'reading the pairs shows it.' },
+  '4.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Line 1 rewritten before approval: “unthrifty” is '
+      + 'spendthrift, and the draft’s “cheap” pulled toward the miser, who is line 5.' },
+  '5.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
 };

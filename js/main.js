@@ -8517,7 +8517,7 @@ function pairedVoice(lines, today, prefer) {
 }
 
 // ── One dialect, one control ──────────────────────────────────
-// Owner order 2026-09-25: wherever a dialect is chosen, exactly one
+// Owner order 2026-09-24: wherever a dialect is chosen, exactly one
 // option is on screen at a time. The five-chip row wrapped to three
 // rows on a phone and pushed the text itself below the fold, which is
 // the wrong thing to spend a screen on in a reading app.

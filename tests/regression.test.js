@@ -1736,8 +1736,25 @@ export async function run({ navDoc = document } = {}) {
         return r?.verdict === 'approved' && r?.literary?.status === 'approved'
           && !!r?.literary?.reviewer && !!r?.literary?.date;
       }));
-    check('editions: no dialect voice is approved — the course is Neutral American',
-      edKeys.every(n => ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft')));
+    // Voices began to be approved 2026-09-24, Neutral American only and
+    // five at a time. So the invariant is no longer "none": it is that
+    // ssbe and aus stay untouched (the Shakespeare course is nam-only),
+    // and that an approved voice carries BOTH required reviews, each
+    // with a named reviewer and a date.
+    check('editions: only Neutral American voices are approved, never ssbe or aus',
+      edKeys.every(n => ['ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft')),
+      edKeys.filter(n => ['ssbe', 'aus'].some(d => editionStatus(n, d) === 'approved')).join(','));
+    const approvedNam = edKeys.filter(n => editionStatus(n, 'nam') === 'approved');
+    check('editions: an approved voice carries both reviews, both named and dated',
+      approvedNam.length > 0 && approvedNam.every(n => {
+        const r = EDITION_REVIEWS[`${n}.nam`];
+        return r?.verdict === 'approved'
+          && r?.literary?.status === 'approved' && !!r.literary.reviewer && !!r.literary.date
+          && r?.dialect?.status === 'approved' && !!r.dialect.reviewer && !!r.dialect.date;
+      }), `approved nam: ${approvedNam.join(',')}`);
+    check('editions: an approved voice says whose approval it is, and what it is not',
+      approvedNam.every(n => /NOT an independent specialist/.test(
+        EDITION_REVIEWS[`${n}.nam`]?.revisionNotes ?? '')));
     check('editions: the five pilots stay in the original queue, unduplicated',
       (await editionFor(18))?.legacy === true
       && (await editionFor(18)).voices.nam === RECASTS[18].recasts.nam
@@ -1791,10 +1808,13 @@ export async function run({ navDoc = document } = {}) {
       check('editions UI: no Featured Texts shelf — collections only',
         !card('Featured Texts'));
       clickIn(card('Shakespeare’s Sonnets')); await sleep(500);
-      clickIn(doc.querySelector('.sonnet-row[data-n="2"]'));
-      await until(() => doc.body.textContent.includes('Sonnet 2') && !!doc.querySelector('.sonnet-tabs'));
+      // Sonnet 7: nothing about it is approved — no Plain Meaning and no
+      // voice. (This used to be Sonnet 2, which stopped being a fully
+      // draft example once its Neutral American voice was approved.)
+      clickIn(doc.querySelector('.sonnet-row[data-n="7"]'));
+      await until(() => doc.body.textContent.includes('Sonnet 7') && !!doc.querySelector('.sonnet-tabs'));
       check('editions UI: a draft edition shows NO Plain/Today tabs to learners',
-        doc.body.textContent.includes('Sonnet 2')
+        doc.body.textContent.includes('Sonnet 7')
         && !tabs().some(t => t.includes('Plain')) && !tabs().some(t => t.includes('Voice')),
         tabs().join(','));
       clickIn(doc.getElementById('nav-back'));
@@ -1806,7 +1826,7 @@ export async function run({ navDoc = document } = {}) {
         && !tabs().some(t => t.includes('Voice')),
         tabs().join(','));
 
-      // One dialect on screen at a time (owner order 2026-09-25). The
+      // One dialect on screen at a time (owner order 2026-09-24). The
       // five-chip row is gone; the control names what is selected and
       // the alternatives live behind it.
       const dchip = () => doc.getElementById('rd-chip');
@@ -3710,12 +3730,17 @@ export async function run({ navDoc = document } = {}) {
       off.every(n => [26, 29, 73, 112].includes(n)),
       `unexpected misalignment: ${off.filter(n => ![26, 29, 73, 112].includes(n)).join(',')}`);
 
-    // Alignment is not permission. Nothing is approved, so no learner
-    // sees a paired column today and the paragraph is what renders.
-    const anyVoiceApproved = SONNETS.some(s =>
-      ['nam', 'ssbe', 'aus'].some(d => editionStatus(s.n, d) === 'approved'));
-    check('sbs: approval is a separate gate, and no voice has passed it yet',
-      anyVoiceApproved === false);
+    // Alignment is not permission — both gates have to pass. Batch 1
+    // (sonnets 1 to 5, Neutral American) is approved AND aligned, so
+    // those pair; everything else still falls back to the paragraph.
+    const paired = SONNETS.filter(s => editionStatus(s.n, 'nam') === 'approved');
+    check('sbs: only reviewed voices pair, and the reviewed batch is 1 to 5',
+      String(paired.map(s => s.n)) === '1,2,3,4,5');
+    check('sbs: every approved voice is also genuinely aligned',
+      (await Promise.all(paired.map(async s =>
+        !!alignedLines((await editionFor(s.n)).voices.nam, s.lines.length)))).every(Boolean));
+    check('sbs: an unreviewed sonnet still shows the paragraph, not a pairing',
+      editionStatus(7, 'nam') === 'draft' && editionStatus(26, 'nam') === 'draft');
 
     const sbsSrc = await viewSource();
     check('sbs: the pane pairs only when given a verified partner',
@@ -3730,7 +3755,7 @@ export async function run({ navDoc = document } = {}) {
       sbsCss.includes('.sbs.is-covered .sbs-meaning .guide-text,')
       && sbsCss.includes('.sbs.is-covered .sbs-meaning .sbs-line'));
 
-    // Owner order 2026-09-25 applies to EVERY dialect choice, not just
+    // Owner order 2026-09-24 applies to EVERY dialect choice, not just
     // the reader, so all three go through the one shared control.
     // One definition plus three call sites each — the regex sees the
     // `function` line too, which is why both counts are four.
