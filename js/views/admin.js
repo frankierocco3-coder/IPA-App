@@ -210,7 +210,7 @@ export function renderContentReview() {
       <div class="stats"><span class="stat">${drafts.length + transDrafts.length} + ${brDrafts.length} drafts</span></div>
     </header>
     <main class="guide audit-page">
-      <p class="pane-note">Owner tool, reached by typing <code>#review</code> — it is NOT authenticated, so treat everything here as public. Nothing below is on a learner surface. To approve: set the status fields in <code>js/data/dialect-in-action.js</code>, <code>js/data/recasts.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
+      <p class="pane-note">Owner tool, reached by typing <code>#review</code> — it is NOT authenticated, so treat everything here as public. Nothing below is on a learner surface. To approve: set the status fields in <code>js/data/dialect-in-action.js</code>, <code>js/data/bridge.js</code> or <code>js/data/edition-reviews.js</code>, record the reviewer, and commit. Since 2026-09-25 EVERY sonnet is approved in <code>js/data/edition-reviews.js</code>, the five pilots included — <code>js/data/recasts.js</code> still holds their TEXT but no longer gates anything. Approved pieces appear on their learner surfaces automatically — Dialect in Action in the Library, Accent Bridge under Practice, sonnet editions in Scripts &amp; Speeches. Nothing here may be batch-approved, and Claude may never approve its own writing. The prepared review packet — per-item concerns, checklists and per-claim citations — is <code>docs/REVIEW_PACKET_v1.md</code>.</p>
 
       <h1>The original 23-item queue</h1>
       <p class="pane-note">${drafts.length} Dialect in Action piece(s) + ${transDrafts.length} sonnet transposition(s) = the original ${drafts.length + transDrafts.length}-item review queue.</p>
@@ -338,7 +338,7 @@ export function renderContentReview() {
     if (!orig) { edView.innerHTML = '<p class="pane-note">No such sonnet.</p>'; return; }
     if (!ed) { edView.innerHTML = `<p class="pane-note">Sonnet ${n}: edition batch not written yet.</p>`; return; }
     if (ed.legacy) {
-      edView.innerHTML = `<p class="pane-note">Sonnet ${n} is one of the five pilots — its transpositions live in the original 23-item queue above (js/data/recasts.js).</p>`;
+      edView.innerHTML = `<p class="pane-note">Sonnet ${n} is one of the five pilots — its transposition TEXT lives in js/data/recasts.js and appears in the original 23-item queue above, but it is approved here in js/data/edition-reviews.js like every other sonnet.</p>`;
       return;
     }
     const block = (label, kind, text) => `

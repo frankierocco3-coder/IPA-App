@@ -708,6 +708,12 @@ recasts.js — never duplicated; the 15 pilot transpositions remain
 the original 23 queue) + js/data/edition-reviews.js approval ledger
 (absence = draft; plain needs literary review, voices need literary
 AND dialect; Claude never a reviewer; no batch approval).
+Sonnet review: batches of five in order. 1 to 20 approved in Neutral
+American as of 2026-09-25, every one line-aligned, so Side by Side
+pairs numbered line to numbered line across the run. 12, 15 and 18
+carry the complete set (Plain Meaning + paired Side by Side + In
+Today's Voice). Sonnet 18 is the FIRST PILOT transposition a learner
+can see, and the first recorded in the unified ledger.
 ONE GATE for all 154 (2026-09-25): where a sonnet's TEXT lives no longer
 decides how its approval is recorded. The pilots used to answer to a
 second map, TRANSPOSITION_REVIEW — a flat 'approved' string with no

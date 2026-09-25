@@ -264,8 +264,19 @@ export async function run({ navDoc = document } = {}) {
     const wrongly = approved.filter(d => editionStatus(+n, d) !== 'approved');
     check(`sonnet ${n}: approved transposition list honours the one ledger`, wrongly.length === 0);
   }
-  check('sonnet 18 structural pilot: drafts exist, none learner-visible yet',
-    Object.keys(RECASTS[18].recasts).length >= 3 && approvedTranspositions(18).length === 0);
+  // Sonnet 18 was the structural pilot and is now the first pilot a
+  // learner can see in Today's Voice, approved 2026-09-25 through the one
+  // ledger. Its other two dialects are still draft, which is the point:
+  // approval is per text, never per sonnet and never per file.
+  check('sonnet 18: the approved pilot voice is nam alone, the rest still draft',
+    Object.keys(RECASTS[18].recasts).length >= 3
+    && String(approvedTranspositions(18)) === 'nam'
+    && editionStatus(18, 'ssbe') === 'draft' && editionStatus(18, 'aus') === 'draft',
+    `approved: ${approvedTranspositions(18).join(',') || 'none'}`);
+  // Every pilot but 18 is untouched, so the unified gate cannot be quietly
+  // approving a whole file's worth of texts at once.
+  check('pilots: approving one pilot voice left the other four alone',
+    [29, 73, 116, 130].every(n => approvedTranspositions(n).length === 0));
 
   // The pilots' Plain Meanings were live before the gate was unified. If the
   // migration into edition-reviews.js had been forgotten, five shipped texts
@@ -283,17 +294,20 @@ export async function run({ navDoc = document } = {}) {
   // can reach learners without a named reviewer. Restored in finally so the
   // rest of the suite sees the real data.
   {
-    const before = TRANSPOSITION_REVIEW[18].nam;
+    // Written against a SYNTHETIC key rather than a real pilot, so it stays
+    // meaningful however many pilots get approved: sonnet 18's nam is
+    // approved now, which would have made the old version of this check
+    // pass for the wrong reason. Nothing real is mutated.
     let leaked = null;
     try {
-      TRANSPOSITION_REVIEW[18].nam = 'approved';
-      leaked = editionStatus(18, 'nam') === 'approved'
-        || approvedTranspositions(18).includes('nam');
+      TRANSPOSITION_REVIEW[999] = { nam: 'approved', plain: 'approved' };
+      leaked = editionStatus(999, 'nam') === 'approved'
+        || editionStatus(999, 'plain') === 'approved';
     } finally {
-      TRANSPOSITION_REVIEW[18].nam = before;
+      delete TRANSPOSITION_REVIEW[999];
     }
     check('pilots: the retired transposition map is inert — editing it gates nothing',
-      leaked === false && TRANSPOSITION_REVIEW[18].nam === before);
+      leaked === false && !(999 in TRANSPOSITION_REVIEW));
   }
 
   // Articulation-video manifest: approval + exact course/kind matching
@@ -1708,9 +1722,17 @@ export async function run({ navDoc = document } = {}) {
       // drafts listed separately with their reviewer requirements.
       w().location.hash = '#review'; await sleep(500);
       const rt = doc.body.textContent;
-      check('build D UI: the original 23-item queue stays identifiable',
+      // The queue SHRINKS as review proceeds, so pin its shape, not its
+      // size: the heading survives and the line counts the drafts that are
+      // actually left. 15 transpositions until 18's nam was approved on
+      // 2026-09-25, and it will keep falling.
+      const transLeft = Object.keys(RECASTS).reduce((n, s) =>
+        n + Object.keys(RECASTS[s].recasts ?? {})
+          .filter(d => editionStatus(+s, d) !== 'approved').length, 0);
+      check('build D UI: the original 23-item queue stays identifiable as it shrinks',
         rt.includes('The original 23-item queue')
-        && rt.includes('8 Dialect in Action piece(s) + 15 sonnet transposition(s)'));
+        && rt.includes(`8 Dialect in Action piece(s) + ${transLeft} sonnet transposition(s)`),
+        `transpositions still draft: ${transLeft}`);
       check('build D UI: bridge drafts are listed separately, never among the 23',
         rt.includes('Accent Bridge routes — 11 new draft route(s)')
         && rt.includes('not') && rt.includes('part of the original 23'));
@@ -1859,10 +1881,17 @@ export async function run({ navDoc = document } = {}) {
       await until(() => !!doc.getElementById('sonnet-search'));
       clickIn(doc.querySelector('.sonnet-row[data-n="18"]'));
       await until(() => doc.body.textContent.includes('Sonnet 18') && !!doc.querySelector('.sonnet-tabs'));
-      check('editions UI: pilot 18 keeps its live Plain Meaning, drafts stay hidden',
-        tabs().some(t => t.includes('Plain'))
-        && !tabs().some(t => t.includes('Voice')),
-        tabs().join(','));
+      // Sonnet 18 was the proof that a pilot's drafts stay hidden. Since
+      // 2026-09-25 its nam voice is approved through the one ledger, so it
+      // is now the proof of the harder thing: the tab appears for the ONE
+      // approved dialect and the two still-draft ones are not offered.
+      const t18 = tabs();
+      const namOn18 = editionStatus(18, 'nam') === 'approved';
+      check('editions UI: pilot 18 shows its Plain Meaning and only its approved voice',
+        t18.some(t => t.includes('Plain'))
+        && t18.some(t => t.includes('Voice')) === namOn18
+        && editionStatus(18, 'ssbe') === 'draft' && editionStatus(18, 'aus') === 'draft',
+        t18.join(','));
 
       // One dialect on screen at a time (owner order 2026-09-24). The
       // five-chip row is gone; the control names what is selected and

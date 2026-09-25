@@ -47,6 +47,12 @@ const OWNER_NOTE = 'Owner editorial approval, read against the original at #revi
 // note states rather than leaving the two reviewer fields to imply
 // independence they do not have.
 const OWNER_DIA = { status: 'approved', reviewer: 'Product owner', date: '2026-09-24' };
+
+// Batch 4 was read on the 25th. The date is the day the reviewer actually
+// read it, never the day the batch was written, so it gets its own pair
+// rather than borrowing the 24th's.
+const OWNER_LIT_25 = { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' };
+const OWNER_DIA_25 = { status: 'approved', reviewer: 'Product owner', date: '2026-09-25' };
 const VOICE_NOTE = 'Owner approval, read line by line against the original. Both the '
   + 'literary and the Neutral American register read are his: he is a native speaker of '
   + 'the target dialect. ONE person signed both halves — NOT an independent specialist '
@@ -206,6 +212,57 @@ export const EDITION_REVIEWS = {
     revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
   '15.nam': { literary: OWNER_LIT, dialect: OWNER_DIA, verdict: 'approved',
     revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+
+  // ── Batch 4, sonnets 16 to 20 (owner approved 2026-09-25) ──
+  // The batch that reached the first PILOT. Sonnet 18 is the first of the
+  // five to carry a full record here: before the gate was unified on
+  // 2026-09-25 it could only have been approved as a flat string with
+  // nobody's name on it, which is why the unification came first.
+  // One sonnet was rewritten (16). Four were approved unchanged, with
+  // several readings raised, weighed and KEPT — recorded so nobody
+  // “fixes” them later believing they were oversights.
+  '16.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' REWRITTEN before approval. Two line crossings were '
+      + 'found by reading the pairs: lines 1 and 2 had swapped their content, so the '
+      + 'numbered line about a “mightier way” sat beside the one about the bloody tyrant, '
+      + 'and “barren rhyme” was used twice because half of line 4 had migrated up to line '
+      + '2; lines 11 and 12 had inverted the negation and the verb. Both are now where '
+      + 'the original puts them. The line counts never changed, so alignedLines could '
+      + 'not have caught either one. Two readings KEPT: line 7 renders “virtuous wish” as '
+      + '“gladly”, dropping the chastity sense, and line 9 names “lines of life” as '
+      + 'children outright, which the original leaves as euphemism.' },
+  '17.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, with two word choices in line 11 '
+      + 'raised and KEPT: “true measure” for “true rights” (what is rightfully owed you), '
+      + 'which sits directly above “meter” in line 12 where the metrical word actually '
+      + 'belongs; and “poet’s hype” for “poet’s rage”, which moves poetic frenzy toward '
+      + 'commercial overselling. Both were offered for change and deliberately left.' },
+  '18.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' THE FIRST PILOT RECORDED HERE. Its text still lives in '
+      + 'js/data/recasts.js; only the approval moved. This is also the first pilot '
+      + 'transposition a learner can see: In Today’s Voice now appears on sonnet 18 in '
+      + 'Neutral American. Approved unchanged, and it is LOOSER than sonnets 1 to 17 '
+      + 'because it was written earlier, as the structural pilot, before the later '
+      + 'batches set the bar. Four readings were raised and KEPT: “eternal” is dropped at '
+      + 'lines 9 and 12 though it is the hinge the poem turns on; line 8 renders '
+      + '“nature’s changing course” as “time”, flattening the original’s chance-or-nature '
+      + 'pairing; line 13 renders “eyes can see” as “read”; and the couplet’s two claims, '
+      + 'that the verse lives and that it gives life, collapse into one. Never drifts '
+      + 'across a line: all fourteen carry their own line’s sense.' },
+  '19.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged. One reading raised and KEPT: line '
+      + '14 ends “my love stays young in this”, where the original names the verse '
+      + 'outright, so the pronoun points at nothing inside the American text. Offered '
+      + 'as “in my verse” and deliberately left.' },
+  '20.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, and it carries ONE DELIBERATE '
+      + 'EDITORIAL INTERVENTION, signed knowingly rather than let through: line 4 '
+      + 'renders “as is false women’s fashion” as what convention keeps accusing women '
+      + 'of. Shakespeare states it; the text attributes it to custom instead. That is '
+      + 'the one place in twenty sonnets where the voice argues with the original rather '
+      + 'than carrying it, and the Plain Meaning frames it the same way. Line 13 keeps '
+      + '“marked you out” for “prick’d thee out”, which drops the bawdy pun the Plain '
+      + 'Meaning already tells reviewers to note.' },
 };
 
 // Approval resolution — draft by construction unless a human recorded
