@@ -273,10 +273,17 @@ export async function run({ navDoc = document } = {}) {
     && String(approvedTranspositions(18)) === 'nam'
     && editionStatus(18, 'ssbe') === 'draft' && editionStatus(18, 'aus') === 'draft',
     `approved: ${approvedTranspositions(18).join(',') || 'none'}`);
-  // Every pilot but 18 is untouched, so the unified gate cannot be quietly
-  // approving a whole file's worth of texts at once.
-  check('pilots: approving one pilot voice left the other four alone',
-    [29, 73, 116, 130].every(n => approvedTranspositions(n).length === 0));
+  // The risk the unified gate introduces is blanket approval: the pilots
+  // share one file, so a careless edit could light up three dialects at
+  // once. Pin the PROPERTY instead of naming which pilots are approved,
+  // since that list grows every batch (18 on 2026-09-25, 29 the same day).
+  // No pilot has a complete set, and every approved pilot voice names a
+  // reviewer for both halves — the thing the retired map could not record.
+  check('pilots: approval is per text, never per sonnet and never per file',
+    LEGACY_SONNETS.every(n => approvedTranspositions(n).length < 3)
+    && LEGACY_SONNETS.flatMap(n => approvedTranspositions(n).map(d => `${n}.${d}`))
+      .every(k => EDITION_REVIEWS[k]?.literary?.reviewer && EDITION_REVIEWS[k]?.dialect?.reviewer),
+    LEGACY_SONNETS.map(n => `${n}:[${approvedTranspositions(n).join(',')}]`).join(' '));
 
   // The pilots' Plain Meanings were live before the gate was unified. If the
   // migration into edition-reviews.js had been forgotten, five shipped texts
@@ -1862,15 +1869,20 @@ export async function run({ navDoc = document } = {}) {
       check('editions UI: no Featured Texts shelf — collections only',
         !card('Featured Texts'));
       clickIn(card('Shakespeare’s Sonnets')); await sleep(500);
-      // FIND a fully draft sonnet rather than naming one. This was
-      // Sonnet 2, then Sonnet 7, and each time a review batch reached it
-      // the check broke for the right reason but the wrong file. Staying
-      // under 40 keeps it near the top of the list, which renders.
-      const draftN = SONNETS.map(s => s.n).find(n => n <= 40
-        && editionStatus(n, 'plain') === 'draft'
+      // FIND a fully draft sonnet rather than naming one. This was Sonnet
+      // 2, then Sonnet 7, and each time a review batch reached it the
+      // check broke for the right reason but the wrong file. It was then
+      // capped at 40 to keep it near the top of the list; batch 5 approved
+      // 21 to 45 and the cap ran out of sonnets, breaking five checks
+      // downstream. So it now searches the WHOLE catalogue, taking the
+      // lowest-numbered fully-draft sonnet, which is as near the top as
+      // there is. With 154 sonnets and three dialects still untouched,
+      // this cannot run dry until every dialect is approved outright.
+      const draftN = SONNETS.map(s => s.n).find(n =>
+        editionStatus(n, 'plain') === 'draft'
         && ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft'));
       check('editions: a fully draft sonnet still exists to test the gate with',
-        !!draftN, `frontier reached ${draftN ?? 'everything under 40'}`);
+        !!draftN, `frontier: ${draftN ?? 'nothing is fully draft any more'}`);
       clickIn(doc.querySelector(`.sonnet-row[data-n="${draftN}"]`));
       await until(() => doc.body.textContent.includes(`Sonnet ${draftN}`) && !!doc.querySelector('.sonnet-tabs'));
       check('editions UI: a draft edition shows NO Plain/Today tabs to learners',
@@ -3829,8 +3841,13 @@ export async function run({ navDoc = document } = {}) {
     check('sbs: every approved voice is also genuinely aligned',
       (await Promise.all(paired.map(async s =>
         !!alignedLines((await editionFor(s.n)).voices.nam, s.lines.length)))).every(Boolean));
+    // Sonnet 26 stood here as the named past-the-frontier case until batch
+    // 5 approved it. Derive both cases instead: the one just past the run,
+    // and the last sonnet in the book.
     check('sbs: sonnets past the frontier still show the paragraph, not a pairing',
-      editionStatus(paired.length + 1, 'nam') === 'draft' && editionStatus(26, 'nam') === 'draft');
+      editionStatus(paired.length + 1, 'nam') === 'draft'
+      && editionStatus(154, 'nam') === 'draft',
+      `frontier at ${paired.length}, next is ${editionStatus(paired.length + 1, 'nam')}`);
 
     const sbsSrc = await viewSource();
     check('sbs: the pane pairs only when given a verified partner',

@@ -263,6 +263,69 @@ export const EDITION_REVIEWS = {
       + 'than carrying it, and the Plain Meaning frames it the same way. Line 13 keeps '
       + '“marked you out” for “prick’d thee out”, which drops the bawdy pun the Plain '
       + 'Meaning already tells reviewers to note.' },
+
+  // ── Batch 5, sonnets 21 to 45 (owner approved 2026-09-25) ──
+  // TWENTY-FIVE at once, which was only possible because every one of the
+  // 134 unapproved Neutral American texts had just been read line against
+  // line and the twelve defects fixed first. The owner's read was against
+  // clean aligned pairs, not against drift, so it judged the VOICE rather
+  // than hunting for displaced lines.
+  //
+  // Five of these were rewritten during that audit and are marked. Four
+  // carry interpolations — words with no counterpart in the original —
+  // which were raised individually, weighed and KEPT, and are recorded so
+  // nobody "fixes" them later believing they were oversights.
+  // Sonnet 29 is the second pilot to be recorded in this ledger.
+  '21.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' REWRITTEN before approval: lines 10 to 12 had slid, so \u201cany mother\u2019s child\u201d sat on line 10 and \u201cgold candles\u201d on line 11, each a line ahead of itself. The line count was already correct, so nothing automated could have caught it.' },
+  '22.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '23.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged. Line 12 renders \u201cthat more hath more express\u2019d\u201d as \u201csaid more, better, louder\u201d. The triple is ours, not his; raised, weighed and KEPT because it plays aloud, which is what this text is for.' },
+  '24.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' REWRITTEN before approval: a consistent half-line pull across 10 to 12 meant line 11 carried the sun when it should have carried \u201cwindows to my breast\u201d. Now line for line.' },
+  '25.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '26.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' REWRITTEN before approval. The text ran to SIXTEEN lines against the original\u2019s fourteen, so it could not pair at all and fell back to the paragraph; re-lineated to fourteen with each line carrying its own sense. Lines 6 and 8 are noticeably longer than the rest, which is the cost of that, and was accepted knowingly.' },
+  '27.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '28.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '29.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' THE SECOND PILOT recorded here; its text still lives in js/data/recasts.js and only the approval is here. REWRITTEN before approval: it ran to THIRTEEN lines, compressing the original\u2019s 5 to 8 into three, so it never paired. Re-lineated to fourteen. The owner was told the rewrite trades swagger for fidelity \u2014 the old line 5 read \u201cwishing I had that guy\u2019s prospects, that guy\u2019s face\u201d \u2014 and approved the more faithful version with that trade stated.' },
+  '30.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' REWRITTEN before approval: lines 1 and 2 had swapped, so \u201cmemories of the past\u201d sat where \u201cthe sessions of sweet silent thought\u201d belongs. The same shape as the crossing found in sonnet 16.' },
+  '31.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '32.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '33.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '34.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, with one INTERPOLATION raised and KEPT: line 14 reads \u201cRich enough, damn it, to pay off everything\u201d. There is no \u201cdamn it\u201d in the original; it is ours, and it stays by owner decision.' },
+  '35.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, with one register choice raised and KEPT: line 5 renders \u201cAll men make faults\u201d as \u201cEveryone screws up\u201d.' },
+  '36.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '37.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '38.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '39.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '40.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '41.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, with one INTERPOLATION raised and KEPT: line 9 renders \u201cAy me!\u201d as \u201cBut \u2014 God \u2014\u201d. The oath is ours.' },
+  '42.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged, with one INTERPOLATION raised and KEPT: line 8 renders \u201capprove her\u201d as \u201caudition her\u201d. A theatre word, apt for this audience and absent from the original; kept deliberately.' },
+  '43.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '44.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
+  '45.nam': { literary: OWNER_LIT_25, dialect: OWNER_DIA_25, verdict: 'approved',
+    revisionNotes: VOICE_NOTE + ' Approved unchanged.' },
 };
 
 // Approval resolution — draft by construction unless a human recorded
