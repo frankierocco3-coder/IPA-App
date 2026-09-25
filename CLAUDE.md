@@ -1323,6 +1323,34 @@ three books, nothing published, house style on every line, that module 5
 still calls the typography contested, and that every rhetoric example is
 a real line from a text the app carries.
 
+OWNER TRIM (2026-09-25). Five changes to live content:
+* SCRIPT ANALYSIS IS SIX THINGS: Lines & Memory, The Four Lists, Through
+  Analysis, Marking Up the Script, Finding Your Own Marks, Question
+  Everything. EIGHT lessons were retired as redundant (ac-facts, ac-who,
+  ac-before, ac-changed, ac-relationships, ac-objective-text, ac-beats,
+  ac-subtext): they asked what The Four Lists and Question Everything
+  already ask. Playable Actions (ac-actions) was NOT retired — it was also
+  on the Actions & Rehearsal shelf, so it MOVED to the performance module
+  rather than being deleted out from under a shelf nobody asked about.
+  Acting is now 5 modules / 33 path lessons / 41 records / 45 items.
+  Lines & Memory is a PAGE, not a lesson record, so main.js puts it at the
+  head of the Script Analysis shelf and its standalone Library tile is
+  gone: the same page in two places was the redundancy being removed.
+* QUESTION EVERYTHING IS QUESTIONS ONLY. The textbook page dropped its
+  intro, every section lead and every close. DISSECT_SECTIONS still
+  CARRIES lead and close because the per-project worksheet runs on the
+  same records; only the page stopped showing them. The suite check that
+  pinned that prose verbatim is inverted: it now proves the page does not
+  show it and the data still holds it.
+* The shared-framework paragraph is deleted from ac-question.
+* Building a Character module 6 is "Build from your life" (id 'piece'
+  unchanged, so nothing stored moved).
+* THE SHAKESPEARE WORKSPACE OFFERS SHAKESPEARE TEXTS ONLY: sonnets, the
+  eight Shakespeare scenes, the lexicon and the rhetoric shelf. It used to
+  open the whole Scripts & Speeches shelf, which offered Chekhov, Ibsen,
+  O'Neill and Wilde inside a Shakespeare course. renderScenesShelf gained
+  an optional author-group filter; called with nothing it is unchanged.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.

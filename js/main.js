@@ -3434,11 +3434,10 @@ function actingLibraryPane(el) {
   const G1 = 'Prepare the text', G2 = 'Develop the performance',
         G3 = 'Find material', G4 = 'Deepen your practice';
   const cards = [
-    // Owner-supplied verbatim lesson; count = six sections + practice set.
-    { key: 'col:lines', tone: 'is-lavender', emoji: '🧠', img: 'img/ui/lines-memory.png', title: 'Lines & Memory',
-      group: G1,
-      keywords: 'the line you know vs the line you can find memory memorize lines retrieval storage fluency couch test off book practice set noice active experiencing',
-      go: renderLineLesson },
+    // Lines & Memory moved INSIDE Script Analysis (owner order
+    // 2026-09-25), so its standalone tile is gone: the same page in two
+    // places is exactly the redundancy that order was about. The page
+    // itself, and its owner-supplied verbatim copy, are untouched.
     { ...colTile('scene'), group: G1 },
     // The Four Lists tool sits with the collection it serves (owner
     // order, 2026-08-27): investigation first, then its worksheet.
@@ -3557,12 +3556,14 @@ function renderActingCollection(collectionId) {
     pageTopbar(`📚 ${B.libraryName}`, '#8a6d3b'),
     `<div class="ws-head">
        <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id] ?? c.icon}</span>${esc(moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }))}</h1>
-       <p class="ws-sub">${lessons.length} chapters · ${esc(B.libraryName)}</p>
+       <p class="ws-sub">${lessons.length + (c.id === 'scene' ? 1 : 0)} chapters · ${esc(B.libraryName)}</p>
      </div>`,
     `<p class="pane-note">Read in any order. This sequence is a suggested starting point.</p>
      <div class="item-grid">
+       ${collectionId === 'scene' ? itemTileHtml({
+         key: 'col:lines', seq: '01', title: 'Lines & Memory' }) : ''}
        ${lessons.map((l, i) => itemTileHtml({
-         key: l.id, seq: String(i + 1).padStart(2, '0'), title: l.title,
+         key: l.id, seq: String(i + 1 + (collectionId === 'scene' ? 1 : 0)).padStart(2, '0'), title: l.title,
          note: B.visible(l) ? '' : ACTING_DRAFT_BADGE,
          state: B.visible(l) ? '' : 'is-pending',
        })).join('')}
@@ -3571,6 +3572,10 @@ function renderActingCollection(collectionId) {
        <h2 class="sec-h">Acting Glossary</h2>
        <p class="pane-note">${Object.keys(ACTING_GLOSSARY).length} terms used across the acting chapters.</p>
        <dl class="anat-list sp-terms" id="ac-glossary-inline"></dl>` : ''}`);
+  // Lines & Memory is a standalone page, not a lesson record, so its
+  // tile is routed here rather than through the lesson opener.
+  app.querySelector('[data-tile="col:lines"]')
+    ?.addEventListener('click', () => navTo(renderLineLesson));
   if (collectionId === 'scene') {
     const gl = app.querySelector('#ac-glossary-inline');
     for (const t of Object.values(ACTING_GLOSSARY)) {
@@ -4458,7 +4463,7 @@ function shakespearePracticePane(el) {
     </button>
     <button class="track-card hub-card" id="shp-scenes" type="button">
       <div class="track-glyph">🎭</div>
-      <div class="track-info"><h2>Scenes</h2><p>Eight two-handers. The Scan tab marks verse, prose and every crossing between them.</p></div>
+      <div class="track-info"><h2>Shakespeare’s Scenes</h2><p>Eight two-handers. The Scan tab marks verse, prose and every crossing between them.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="shp-lexicon" type="button">
@@ -4467,16 +4472,22 @@ function shakespearePracticePane(el) {
       <div class="track-arrow">›</div>
     </button>`;
   el.querySelector('#shp-sonnets').addEventListener('click', () => navTo(renderSonnetList));
-  el.querySelector('#shp-scenes').addEventListener('click', () => navTo(renderScenesShelf));
+  el.querySelector('#shp-scenes').addEventListener('click', () => navTo(() => renderScenesShelf('Shakespeare')));
   el.querySelector('#shp-lexicon').addEventListener('click', () => navTo(renderShakespeareLexicon));
 }
 
-// The Shakespeare Studio: the three text surfaces the course works from.
-// Title-only, like every other Studio hub.
+// The Shakespeare Studio: SHAKESPEARE TEXTS ONLY (owner order
+// 2026-09-25). It used to open the whole Scripts & Speeches shelf, which
+// offered Chekhov, Ibsen, O'Neill and Wilde inside a Shakespeare course.
+// Now every door here leads to Shakespeare: the 154 sonnets, the eight
+// Shakespeare scenes, and the two reference shelves. Custom Work stays
+// because it is the learner's own text, whatever they paste into it.
 function shakespeareStudioPane(el) {
   const cards = [
-    { icon: '📜', title: 'Scripts & Speeches', go: renderTextsPage },
-    { icon: '🎭', title: 'Scenes', go: renderScenesShelf },
+    { icon: '📜', title: 'Shakespeare’s Sonnets', go: renderSonnetList },
+    { icon: '🎭', title: 'Shakespeare’s Scenes', go: () => renderScenesShelf('Shakespeare') },
+    { icon: '📖', title: 'Shakespeare’s Language', go: renderShakespeareLexicon },
+    { icon: '⚖️', title: 'Shakespeare’s Rhetoric', go: renderRhetoricShelf },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
@@ -6887,20 +6898,25 @@ const mmss = secs => `${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '
 // card behind which there is nothing.
 // PROVIDED_SCENES moved to js/data/scenes.js (pilot install 2026-09-15).
 
-function renderScenesShelf() {
-  record(renderScenesShelf);
+// `only` narrows the shelf to one author group, which is what the
+// Shakespeare workspace needs: a course about Shakespeare has no business
+// offering Chekhov. Called with nothing it is the whole shelf, exactly as
+// before, so every existing call site is unchanged.
+function renderScenesShelf(only = null) {
+  record(() => renderScenesShelf(only));
   stopSpeech();
+  const shown = only ? PROVIDED_SCENES.filter(s => s.authorGroup === only) : PROVIDED_SCENES;
   workspacePage(
     pageTopbar('🎭 Scenes', '#8a6d3b'),
     `<div class="ws-head">
-       <h1 class="page-h">Scenes</h1>
+       <h1 class="page-h">${only ? esc(only) + ' Scenes' : 'Scenes'}</h1>
        <p class="ws-sub">Two-hander scenes for partner work.</p>
      </div>`,
-    PROVIDED_SCENES.length
+    shown.length
       ? `${(() => {
           // Shelved by author (owner order 2026-09-16), in record order.
           let out = '', open = false, at = null;
-          for (const sc of PROVIDED_SCENES) {
+          for (const sc of shown) {
             if (sc.authorGroup !== at) {
               if (open) out += '</div>';
               at = sc.authorGroup;
@@ -7903,6 +7919,13 @@ function renderLineLesson() {
   wireBrandHome();
 }
 
+// QUESTIONS ONLY (owner order 2026-09-25). The page was the questions
+// wrapped in explanation: an intro, a lead line before each section and a
+// closing line after it. The owner asked for the questions alone, so the
+// prose is gone from the PAGE. DISSECT_SECTIONS still carries `lead` and
+// `close` because the per-project worksheet runs on the same records, and
+// deleting owner-supplied copy to change a layout would be the wrong
+// trade. Nothing here explains the method any more; it asks.
 function renderDissectTextbook() {
   record(renderDissectTextbook);
   stopSpeech();
@@ -7925,19 +7948,12 @@ function renderDissectTextbook() {
     ${pageTopbar('🔍 Question Everything', '#8a6d3b')}
     <main class="guide" id="sd-textbook">
       <h1 id="sd-title">Question Everything</h1>
-      <p class="guide-text">A script gives you the words. Question Everything helps you discover what is happening underneath them.</p>
-      <p class="guide-text">This is not about finding one perfect interpretation. It is an actor’s working process: examining the circumstances, objective, resistance, tactics and changes inside a piece of text.</p>
-      <p class="guide-text">Use these questions while reading a monologue, speech, scene or audition side. Return to them whenever the text feels unclear, general or emotionally disconnected.</p>
       ${DISSECT_SECTIONS.map(s => `
       <h2 class="guide-heading">${esc(s.h)}</h2>
-      <p class="guide-text">${esc(s.lead)}</p>
       ${asksHtml(s.asks)}
-      ${s.close.map(c => `<p class="guide-text">${esc(c)}</p>`).join('')}
       ${s.playable ? '<p><button class="btn-lite" id="sd-playable" type="button">🎯 Explore Playable Actions</button></p>' : ''}`).join('')}
       <h2 class="guide-heading">Keep Returning to the Text</h2>
-      <p class="guide-text">As you work, continue asking:</p>
       <ul class="sd-asks">${RETURNING.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>
-      <p class="guide-text">Question Everything is not about locking the performance into one answer. It gives the actor a specific, playable understanding from which discovery can continue.</p>
       <p class="pane-note">To work these questions on your own text, open a Studio project and press <b>🔍 Question Everything</b>.</p>
     </main>`;
   wireBrandHome();

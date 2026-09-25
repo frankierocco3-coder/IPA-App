@@ -100,24 +100,6 @@ export const ACTING_LESSONS = [
       { p: 'Speechcraft’s Question Everything framework, in the Actor’s Studio, walks this systematically for a text you are working on.' },
     ] },
 
-  { id: 'ac-facts', module: 'text', order: 2,
-    title: 'Facts, Assumptions and Unknowns',
-    requiredReviewer: 'acting-professional',
-    objective: 'Separate what the text states from what you have quietly assumed, and name what nobody can know.',
-    orientation: 'Three different kinds of knowledge get treated as one, and that is where most confident wrong choices come from.',
-    reflection: 'List one assumption you have been treating as a fact. What changes if the opposite is true?',
-    body: [
-      { p: 'A fact is something the text establishes. An assumption is something you have supplied, often without noticing. An unknown is something the text genuinely leaves open, and those are gifts rather than gaps.' },
-      { p: 'The discipline is simply to sort them. “She has been waiting an hour” may be a fact. “She is furious about it” is an assumption: a legitimate choice, but yours, not the play’s. “Whether she has decided to leave him before the scene starts” may be a real unknown, and deciding it deliberately is one of the most powerful choices an actor makes.' },
-      { h: 'Why the sort matters' },
-      { list: [
-        'Facts constrain honestly; they stop an interpretation drifting away from the play.',
-        'Assumptions, once named, can be tested: try the opposite and see what the scene does.',
-        'Unknowns are where the actor’s imagination is genuinely invited in.',
-      ] },
-      { p: 'Nothing here is scored. Two skilled actors will sort the same scene differently and both may be right.' },
-    ] },
-
   { id: 'ac-objective', module: 'work', order: 4,
     title: 'Objective',
     requiredReviewer: 'acting-professional',
@@ -225,7 +207,7 @@ export const ACTING_LESSONS = [
       { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything, next, is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Library shelf: they save with that project.' },
     ],
     reflection: 'Which of your four lists came out shortest? What does that absence tell you?' },
-  { id: 'ac-question', module: 'text', order: 1,
+  { id: 'ac-question', module: 'text', order: 4,
     title: 'Question Everything',
     requiredReviewer: 'acting-professional',
     sharedNote: 'Question Everything is one shared framework. The complete textbook lives in the Studio; this lesson introduces its use on a scene.',
@@ -236,112 +218,6 @@ export const ACTING_LESSONS = [
     body: [
       { p: 'A script gives you the words. Question Everything helps you discover what is happening underneath them, systematically, so the investigation does not stop at whatever occurred to you first.' },
       { p: 'A taste of the list, straight from the textbook. What is happening? When is this happening? Who am I speaking to? What is our relationship? What has just happened? Why am I speaking now? What is at stake? What do I want from the other person? What do I want them to feel? What do I want them to admit? Six sections of questions like these, and none of them settles for a first impression.' },
-      { p: 'The framework is shared across Speechcraft: the same questions, the same saved answers, whether you reach them from Speech or from Acting. In the Actor’s Studio they apply to your selected project, with optional answers, “I don’t know yet” and “Not relevant” always available. Nothing is required, and no answer is scored.' },
-    ] },
-
-  { id: 'ac-who', module: 'text', order: 3,
-    title: 'Who Am I Speaking To?',
-    requiredReviewer: 'acting-professional',
-    objective: 'Let the specific listener shape everything the character says.',
-    orientation: 'The same want, aimed at a different person, produces a different scene.',
-    reflection: 'What does this person know about your character that nobody else knows?',
-    body: [
-      { p: 'Speech is aimed. Who the character is speaking to shapes everything: their history together, the power between them, what they already know, what they will not say. All of it moves word choice, timing, how much is left unsaid and what is risked.' },
-      { p: 'For a monologue the same question applies with more force, because the answer is not standing in front of you. Who is this addressed to: another character, an absent person, the audience as confidant, the character’s own mind? Each produces a different piece.' },
-    ] },
-
-  { id: 'ac-before', module: 'text', order: 4,
-    title: 'What Happened Before?',
-    requiredReviewer: 'acting-professional',
-    objective: 'Establish the moment before, so the scene starts already in motion.',
-    orientation: 'Nobody enters a scene from nowhere. What the character carries in shapes the first line.',
-    reflection: 'What happened in the sixty seconds before your first line?',
-    body: [
-      { p: 'The scene is not the beginning of the character’s day. Something happened immediately before, a journey, an argument, a phone call, an hour of waiting, and it is still in the body when the first line arrives.' },
-      { p: 'Some of this the text gives you. The rest is a choice, and it is one of the most useful choices available: a specific prior moment makes the opening of a scene concrete instead of generic.' },
-    ] },
-
-  { id: 'ac-changed', module: 'text', order: 5,
-    title: 'What Has Changed?',
-    requiredReviewer: 'acting-professional',
-    objective: 'Track what is different by the end, for the character, the relationship and the situation.',
-    orientation: 'A scene where nothing changes is usually a scene that has not been read closely enough.',
-    reflection: 'What can your character no longer do, or no longer believe, once this scene ends?',
-    body: [
-      { p: 'Scenes exist because something moves. By the end, something is different: a decision has been made, a fact has come out, a relationship has shifted, an option has closed. Naming the change tells you what the scene is for.' },
-      { p: 'Change also gives you the shape of the pursuit. If you know where the character ends up, you can see what they tried, in what order, and where it stopped working.' },
-    ] },
-
-  { id: 'ac-relationships', module: 'text', order: 6,
-    title: 'Relationships',
-    requiredReviewer: 'acting-professional',
-    objective: 'Define the relationship in terms specific enough to play.',
-    orientation: '“Brother” is a label. What plays is history, power and expectation.',
-    reflection: 'What does your character want this person to think of them?',
-    body: [
-      { p: 'Relationship is not a category, it is a history. “Colleagues” covers admiration, resentment, dependency and rivalry equally, and each produces different behavior on the same line.' },
-      { p: 'Useful specifics: how long they have known each other, who has power and over what, what they have done for each other, what they have failed to do, what is habitually left unspoken, and what each wants the other to believe about them.' },
-    ] },
-
-  { id: 'ac-objective-text', module: 'text', order: 7,
-    title: 'Finding the Objective',
-    requiredReviewer: 'acting-professional',
-    objective: 'Read the scene for evidence of what your character wants from the other person.',
-    orientation: 'The objective is not chosen from taste. The text argues for it, and the argument is checkable.',
-    reflection: 'Name your character’s objective in one sentence aimed at the other person. What in the text supports it, and what pushes against it?',
-    glossary: ['objective'],
-    body: [
-      { p: 'Acting Principles defines the objective: what your character wants from the other person, here and now. Investigation asks a different question. Not what an objective is, but which one this text actually supports.' },
-      { p: 'The evidence is concrete. What does the character ask for, in the lines? What do they repeat? What do they refuse to drop even when the subject changes? A person reveals what they want by what they return to, and writers build that return into the dialogue.' },
-      { h: 'Reading for the want' },
-      { list: [
-        'Requests and demands: everything the character explicitly asks the other person to do, say or admit.',
-        'Returns: the subject the character keeps steering back to, however far the conversation drifts.',
-        'Reactions: where an answer satisfies them, and where it leaves them still pressing. Pressing past an answer means the stated question was not the real want.',
-        'The exit: what would let the character stop talking and leave. A scene usually ends when someone gets their objective or gives it up.',
-      ] },
-      { p: 'Write the objective as one sentence aimed at the other person: I want you to stay, I want you to admit it, I want you to forgive me. If the sentence has no you in it, it is a mood, not an objective, and it will not survive contact with a scene partner.' },
-      { p: 'Hold it lightly. The text supports a small number of readings, never exactly one, and rehearsal will test yours. The Objective Switch exercise in Practice runs several different wants through the same passage, which is the fastest way to feel what the choice changes.' },
-    ] },
-
-  { id: 'ac-beats', module: 'text', order: 8,
-    title: 'Beats and Turns',
-    requiredReviewer: 'acting-professional',
-    objective: 'Divide the scene where the thought, tactic or circumstance turns.',
-    orientation: 'Beats are not paragraph breaks. They mark where the pursuit changes.',
-    reflection: 'Where in your scene does your character change approach, and why there?',
-    glossary: ['beat'],
-    body: [
-      { p: 'A beat is a unit of the scene in which one action or subject holds. A new beat begins where something turns: the tactic stops working, new information lands, a subject changes, the balance of power shifts.' },
-      { p: 'Marking beats is analysis, not performance. Two actors will divide the same scene differently, and neither division is correct. What the exercise buys is attention: it forces you to notice where the scene actually moves rather than playing it as one continuous mood.' },
-      { p: 'The Beat Builder exercise in Practice lets you mark turns on your own text.' },
-    ] },
-
-  { id: 'ac-subtext', module: 'text', order: 9,
-    title: 'Subtext',
-    requiredReviewer: 'acting-professional',
-    objective: 'Work with the distance between what is said and what is meant.',
-    orientation: 'Subtext is not a secret code. It is the ordinary human gap between speech and intention.',
-    reflection: 'Where does your character say one thing while pursuing another?',
-    body: [
-      { p: 'People rarely say exactly what they want. They approach it, test it, disguise it, or talk about something else entirely while pursuing it. Subtext is that gap, and it is completely ordinary; it happens in most real conversations.' },
-      { p: 'For the actor, subtext is playable only through pursuit. You do not perform “I secretly resent him”; you pursue something while resentment shapes how you go about it. The line still means what it says on the surface, and something else is happening underneath.' },
-      { p: 'The Same Words, Different Subtext exercise in Practice explores this on a fixed line. As everywhere in Acting, there is no correct reading to find.' },
-    ] },
-
-  { id: 'ac-actions', module: 'text', order: 10,
-    title: 'Playable Actions',
-    requiredReviewer: 'acting-professional',
-    sharedNote: 'The Playable Actions library, twelve actions and six contrast pairs, is a single shared record used unchanged.',
-    sharedFrom: { workspace: 'studio', id: 'playable-actions', label: 'Playable Actions library' },
-    objective: 'Name what the character is doing to the other person, in verbs you can play.',
-    orientation: 'The governing question: what are you doing to the other person through these words?',
-    glossary: ['action', 'tactic'],
-    reflection: 'Choose one action for your strongest beat. Then try its opposite. What did the scene do?',
-    body: [
-      { p: 'An action is what you are doing TO the other person: to reassure, to confront, to draw out, to warn. Actions are playable because they are transitive. They land on someone, and you can tell whether they worked.' },
-      { p: 'Speechcraft’s Playable Actions library holds twelve actions organised into six contrast pairs, each pair sharing one practice line so the difference between them is audible in the same words. It lives in the Actor’s Studio and is used unchanged across the app.' },
-      { p: 'No action is the correct action for a beat. The library is a vocabulary, not an answer key.' },
     ] },
 
   // ── Module 3 · Listening and Responding ───────────────────────
@@ -418,6 +294,25 @@ export const ACTING_LESSONS = [
     ] },
 
   // ── Module 4 · Preparing the Performance ──────────────────────
+  // Playable Actions left Script Analysis on 2026-09-25 with the eight
+  // lessons retired around it, but it was ALSO on the Actions &
+  // Rehearsal shelf, so retiring it would have emptied a shelf the
+  // owner did not ask about. It moved here instead, keeping its id.
+  { id: 'ac-actions', module: 'performance', order: 0,
+    title: 'Playable Actions',
+    requiredReviewer: 'acting-professional',
+    sharedNote: 'The Playable Actions library, twelve actions and six contrast pairs, is a single shared record used unchanged.',
+    sharedFrom: { workspace: 'studio', id: 'playable-actions', label: 'Playable Actions library' },
+    objective: 'Name what the character is doing to the other person, in verbs you can play.',
+    orientation: 'The governing question: what are you doing to the other person through these words?',
+    glossary: ['action', 'tactic'],
+    reflection: 'Choose one action for your strongest beat. Then try its opposite. What did the scene do?',
+    body: [
+      { p: 'An action is what you are doing TO the other person: to reassure, to confront, to draw out, to warn. Actions are playable because they are transitive. They land on someone, and you can tell whether they worked.' },
+      { p: 'Speechcraft’s Playable Actions library holds twelve actions organised into six contrast pairs, each pair sharing one practice line so the difference between them is audible in the same words. It lives in the Actor’s Studio and is used unchanged across the app.' },
+      { p: 'No action is the correct action for a beat. The library is a vocabulary, not an answer key.' },
+    ] },
+
   { id: 'ac-monologue', module: 'performance', order: 1,
     title: 'Monologue Work',
     requiredReviewer: 'acting-professional',
@@ -553,7 +448,7 @@ export const ACTING_LESSONS = [
     ] },
 
   // ── Module 4 · Building a Character ─────────────
-  { id: 'ac-analysis', module: 'text', order: 11,
+  { id: 'ac-analysis', module: 'text', order: 1,
     title: 'Through Analysis',
     requiredReviewer: 'acting-professional',
     objective: 'Build a character from what the text gives you: the world, the facts, and what everyone says.',
@@ -566,7 +461,7 @@ export const ACTING_LESSONS = [
       { p: 'And when it does, do not stop there. Take that somebody to the other road. Carry everything the desk gave you into an empty room and let the person improvise, and watch the research turn into behavior. Or if you came here from the feeling road, run your discovered character through these tools and find out whether they can survive the facts of the play. Either order works. No right answers. The character is finished where the two roads meet.' },
     ] },
 
-  { id: 'ac-markup', module: 'text', order: 12,
+  { id: 'ac-markup', module: 'text', order: 2,
     title: 'Marking Up the Script',
     requiredReviewer: 'acting-professional',
     objective: 'Get the analysis onto the page in marks you can read at speed.',
@@ -625,7 +520,7 @@ export const ACTING_LESSONS = [
       { p: 'One rule holds across every system anyone uses: a mark you cannot read at speed is worse than no mark, because it stops you. If you have to work out what your own page means, the page has become another thing to act around.' },
     ] },
 
-  { id: 'ac-ownmarks', module: 'text', order: 13,
+  { id: 'ac-ownmarks', module: 'text', order: 3,
     title: 'Finding Your Own Marks',
     requiredReviewer: 'acting-professional',
     objective: 'Build a marking system you will actually keep using, from what you keep needing.',
@@ -870,10 +765,15 @@ export const ACTING_COLLECTIONS = [
   { id: 'listening', icon: '👂', title: 'Listening & Responding',
     lessons: ['ac-attention', 'ac-receiving', 'ac-moment', 'ac-newinfo',
               'ac-repetition', 'ac-playing'] },
+  // TRIMMED TO SIX (owner order 2026-09-25): Lines & Memory, The Four
+  // Lists, Through Analysis, Marking Up the Script, Finding Your Own
+  // Marks, Question Everything. Nine lessons were retired as redundant —
+  // they asked what The Four Lists and Question Everything already ask,
+  // and Playable Actions has its own Library shelf. Lines & Memory is a
+  // standalone page rather than a lesson, so main.js puts it at the head
+  // of this shelf; everything below is in the owner's stated order.
   { id: 'scene', icon: '🔍', title: 'Script Analysis',
-    lessons: ['ac-fourlists', 'ac-question', 'ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
-              'ac-objective-text', 'ac-beats', 'ac-subtext', 'ac-analysis',
-              'ac-markup', 'ac-ownmarks'] },
+    lessons: ['ac-fourlists', 'ac-analysis', 'ac-markup', 'ac-ownmarks', 'ac-question'] },
   // Monologue Work and Scene Work shelve here, matching their Learn
   // module (Preparing the Performance) — the shelf and the path must
   // not disagree about what these chapters are (owner fix, 2026-09-16).

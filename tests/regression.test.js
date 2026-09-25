@@ -2025,11 +2025,22 @@ export async function run({ navDoc = document } = {}) {
       check('textbook: the closing note names the button that actually exists',
         tbText().includes('press 🔍 Question Everything')
         && !tbText().includes('Dissect This'));
-      check('textbook: verbatim frame copy present',
-        tbText().includes('A script gives you the words.')
-        && tbText().includes('“I am angry” describes a feeling.')
-        && tbText().includes('A beat is not merely a pause')
-        && tbText().includes('not about locking the performance into one answer'));
+      // QUESTIONS ONLY (owner order 2026-09-25). The page used to carry an
+      // intro, a lead line before each section and a closing line after
+      // it, and this check pinned that prose verbatim. The owner asked for
+      // the questions alone, so the check is inverted: the explanation
+      // must be ABSENT from the page. The copy itself is not deleted —
+      // DISSECT_SECTIONS still carries lead and close for the worksheet —
+      // so this proves the PAGE dropped it, not that the data lost it.
+      check('textbook: questions only, with the explanation gone from the page',
+        !tbText().includes('A script gives you the words.')
+        && !tbText().includes('“I am angry” describes a feeling.')
+        && !tbText().includes('A beat is not merely a pause')
+        && !tbText().includes('not about locking the performance into one answer')
+        && DISSECT_SECTIONS.every(s => !tbText().includes(s.lead)),
+        DISSECT_SECTIONS.filter(s => tbText().includes(s.lead)).map(s => s.h).join(','));
+      check('textbook: the owner copy survives in the data for the worksheet',
+        DISSECT_SECTIONS.every(s => s.lead?.trim() && Array.isArray(s.close)));
       check('textbook: NO interactive answer controls of any kind',
         !tb().querySelector('textarea, input, select, .diss-mark, .diss-q, [data-mark]')
         && !tbText().includes('Saved ✓')
@@ -2935,13 +2946,19 @@ export async function run({ navDoc = document } = {}) {
     // Module 2 was renamed Investigating the Text -> Script Analysis on
     // 2026-09-24 and gained two lessons on recording the analysis. The
     // id stayed 'text', which is why nothing stored on a device moved.
-    check('acting: five modules hold the 41 path lessons; 8 Professional chapters shelve outside the path',
+    // 41 -> 33 path lessons and 49 -> 41 records on 2026-09-25, when the
+    // owner trimmed Script Analysis to six. EIGHT lessons were retired as
+    // redundant, since they asked what The Four Lists and Question
+    // Everything already ask. Playable Actions was NOT retired: it was
+    // also on the Actions & Rehearsal shelf, so it moved to that module
+    // rather than being deleted out from under a shelf nobody asked about.
+    check('acting: five modules hold the 33 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 5
       && String(ACTING_MODULES.map(m => m.title))
         === 'The Actor’s Work,Script Analysis,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
       && ACTING_MODULES.find(m => m.n === 2).id === 'text'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 41
-      && ACTING_LESSONS.length === 49
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 33
+      && ACTING_LESSONS.length === 41
       && !actingLessonById('ac-character')
       && actingLessonById('ac-analysis')?.module === 'text'
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
@@ -2972,6 +2989,21 @@ export async function run({ navDoc = document } = {}) {
       && SCENE_STUDY_AREAS.filter(a => a.qeSection != null)
            .reduce((n, a) => n + DISSECT_SECTIONS[a.qeSection].asks.length, 0)
          === DISSECT_SECTIONS.reduce((n, sec) => n + sec.asks.length, 0));
+    // Script Analysis is exactly the six the owner named (owner order
+    // 2026-09-25). Lines & Memory is a standalone page rather than a
+    // lesson record, so it is not in `lessons` — main.js puts it at the
+    // head of the shelf, and the drive below checks it renders there.
+    check('acting: Script Analysis holds the owner\u2019s five lessons, in order',
+      String(ACTING_COLLECTIONS.find(c => c.id === 'scene').lessons)
+        === 'ac-fourlists,ac-analysis,ac-markup,ac-ownmarks,ac-question',
+      String(ACTING_COLLECTIONS.find(c => c.id === 'scene').lessons));
+    check('acting: the eight retired lessons are gone from records and ledger alike',
+      ['ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
+       'ac-objective-text', 'ac-beats', 'ac-subtext']
+        .every(id => !actingLessonById(id) && !speechPublished(id))
+      // Playable Actions survived the trim by moving shelf, not by luck.
+      && actingLessonById('ac-actions')?.module === 'performance'
+      && speechPublished('ac-actions'));
     check('acting: the Library collections cover the lessons without duplication',
       ACTING_COLLECTIONS.length === 6
       && !ACTING_COLLECTIONS.some(c => c.id === 'character')
@@ -3022,7 +3054,7 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !doc.getElementById('freeplay'));
-      check('acting: all 53 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 45 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
           // item carries the owner's editorial verdict, none claims a
@@ -3032,8 +3064,9 @@ export async function run({ navDoc = document } = {}) {
           // Acting; 51 -> 53 on 2026-09-24 when Script Analysis gained
           // Marking Up the Script and Finding Your Own Marks. A lesson
           // added to a LIVE course without its ledger entry lands here.
+          // 53 -> 45 on 2026-09-25 when eight redundant lessons retired.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 53
+          return items.length === 45
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -3053,10 +3086,10 @@ export async function run({ navDoc = document } = {}) {
       // The shared right rail legitimately names the next acting chapter
       // in its "Next step" card on every section, so chapter titles are
       // asserted absent from the Library pane itself, never the whole body.
-      check('acting: the Library landing shows collections only, never all 47 items at once',
+      check('acting: the Library landing shows collections only, never all 39 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:lines,col:scene,col:lists,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          === 'col:scene,col:lists,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));

@@ -51,7 +51,7 @@ export const CHARACTER_MODULES = [
     blurb: 'The voice as a consequence of the body rather than a decision taken separately: how somebody thinks shows in how they phrase, what an accent can and cannot carry, and the words a person reaches for or refuses.' },
   { n: 5, id: 'status', title: 'Status',
     blurb: 'Status as behaviour rather than rank: what raises or lowers a person second by second, in the body, the voice and the room, and where in a scene it changes hands.' },
-  { n: 6, id: 'piece', title: 'Making the Piece',
+  { n: 6, id: 'piece', title: 'Build from your life',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
   { n: 9, id: 'role', title: 'Playing the Role',
     blurb: 'Where the whole course points: turning what the text found into choices a body can play, deciding how far to transform, holding it while you genuinely listen, and keeping one record of the person you can return to.' },
