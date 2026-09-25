@@ -83,11 +83,12 @@ export const EDITION_CATALOG_COMPLETE = true;
 // returns the split lines ONLY when the count matches, and null when it
 // does not, so a pane can never draw an alignment that is not there.
 //
-// ALL 154 match as of 2026-09-25. Four did not (26, 29, 73 and 112): two
-// had compressed four lines of the original into three, two had spread
-// them over more, and all four were re-lineated to fourteen. The fallback
-// stays because it still protects ssbe and aus, where nothing is aligned
-// yet, and because falling back is the correct failure.
+// ALL 462 texts match as of 2026-09-25 — every sonnet in all three
+// dialects. The American ones went first (26, 29, 73, 112), then the same
+// four broke in Standard British and Australian, because the three were
+// written together and carry the same structural error. The fallback
+// stays: it is what stops a pane drawing an alignment that is not there,
+// and falling back is the correct failure.
 //
 // Alignment is not permission. A caller still has to check the review
 // gate — this answers a question about SHAPE, not about approval.

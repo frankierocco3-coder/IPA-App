@@ -3861,12 +3861,19 @@ export async function run({ navDoc = document } = {}) {
     check('sbs: every one of the 154 Neutral American texts is line-aligned',
       counts.nam === 154 && off.length === 0 && SONNETS.length === 154,
       `nam aligned ${counts.nam}/154, off: ${off.join(',') || 'none'}`);
-    // The fallback still has to WORK — it is what protects ssbe and aus,
-    // where nothing is line-aligned yet.
-    check('sbs: the unaligned dialects still fall back rather than stretch',
-      counts.ssbe < 154 && counts.aus < 154
-      && alignedLines('one\ntwo', 14) === null && alignedLines(null, 14) === null,
-      `ssbe ${counts.ssbe}, aus ${counts.aus}`);
+    // ALL THREE dialects are line-aligned since 2026-09-25, when the
+    // British and Australian texts were audited the way the American ones
+    // had been: 7 misalignments re-lineated, the same four sonnets in each.
+    // So this no longer leans on a dialect being unaligned. It tests the
+    // fallback DIRECTLY, which is the only thing that was ever load-bearing:
+    // a mismatched count must return null rather than stretch to fit.
+    check('sbs: all three dialects are line-aligned across the whole book',
+      counts.nam === 154 && counts.ssbe === 154 && counts.aus === 154,
+      `nam ${counts.nam}, ssbe ${counts.ssbe}, aus ${counts.aus}`);
+    check('sbs: the fallback still refuses to stretch a mismatched text',
+      alignedLines('one\ntwo', 14) === null
+      && alignedLines(null, 14) === null
+      && alignedLines('a\nb\nc', 3)?.length === 3);
 
     // Alignment is not permission — both gates have to pass. Batch 1
     // (sonnets 1 to 5, Neutral American) is approved AND aligned, so
