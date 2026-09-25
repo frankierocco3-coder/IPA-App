@@ -6460,7 +6460,7 @@ function renderNewProject() {
         </div>
         <label class="field"><span class="field-label">Text</span>
           <textarea class="ct-area" id="np-text" placeholder="Paste the monologue, scene, speech or lyrics here — one line per line."></textarea></label>
-        <div class="dialect-picker"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="np-dialects"></div></div>
+        <div id="np-dialects"></div>
         <p class="pane-note">Your text stays private on this device. Song lyrics use the same tools — playback is a spoken diction reference, not singing.</p>
         <p class="pane-note pane-warn" id="np-warn" hidden></p>
         <div class="form-actions">
@@ -6472,13 +6472,14 @@ function renderNewProject() {
   wireBrandHome();
 
   const chipsEl = document.getElementById('np-dialects');
-  const drawChips = () => chipsEl.innerHTML = TEXT_DIALECTS.map(d =>
-    `<button class="dialect-chip ${d.id === accent ? 'on' : ''}" data-d="${d.id}" type="button"><span class="dialect-icon">${d.flag}</span>${d.label}</button>`).join('');
+  const drawChips = () => {
+    chipsEl.innerHTML = dialectSelectHtml({
+      id: 'np', label: 'Dialect', current: accent,
+      options: TEXT_DIALECTS.map(d => ({ id: d.id, icon: d.flag, label: d.label })),
+    });
+    wireDialectSelect(chipsEl, 'np', id => { accent = id; drawChips(); });
+  };
   drawChips();
-  chipsEl.addEventListener('click', e => {
-    const b = e.target.closest('.dialect-chip'); if (!b) return;
-    accent = b.dataset.d; drawChips();
-  });
   document.getElementById('np-cancel').addEventListener('click', goBack);
   document.getElementById('np-create').addEventListener('click', async () => {
     const title = document.getElementById('np-title').value.trim();
@@ -7976,11 +7977,8 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
     <main class="guide sonnet-view">
       ${metaHtml}
-      <p class="audio-avail">${narrated.length
-        ? `🎙 Recorded audio: ${narrated.map(d => `<span class="tag tag-dialect">${esc((TEXT_DIALECTS.find(x => x.id === d) ?? {}).flag ?? '')} ${esc(dialectName(d))}</span>`).join(' ')}`
-        : '🎙 Studio recordings coming soon — the reading below uses your device voice, clearly labelled.'}
-        ${TEXT_DIALECTS.filter(d => !narrated.includes(d.id)).map(d => `<span class="tag tag-off">${esc(d.label)} — coming soon</span>`).join(' ')}</p>
-      <div class="dialect-picker reader-dialects"><span class="dialect-label">Dialect</span><div class="dialect-chips" id="rd-dialects"></div></div>
+      <p class="audio-avail" id="rd-audio"></p>
+      <div class="reader-dialects" id="rd-dialects"></div>
       <div class="sonnet-tabs">
         <button class="son-tab on" data-mode="speak">🔊 Listen</button>
         <button class="son-tab" data-mode="scan">📐 Scan</button>
@@ -8000,14 +7998,34 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
 
   let cur = accent, mode = 'speak';
   const pane = document.getElementById('sonnet-pane');
-  const drawDialects = () => document.getElementById('rd-dialects').innerHTML =
-    TEXT_DIALECTS.map(d => {
-      const hasAudio = narrated.includes(d.id);
-      return `<button class="dialect-chip ${d.id === cur ? 'on' : ''} ${hasAudio ? '' : 'no-audio'}" data-d="${d.id}"
-        title="${hasAudio ? `${esc(d.label)} — recorded audio` : `${esc(d.label)} — no model recording for this text yet; the transcription and scansion views still work`}"
-        aria-label="${esc(d.label)}${hasAudio ? '' : ' — model recording coming soon; the transcription and scansion views still work'}">
-        <span class="dialect-icon">${d.flag}</span>${d.label}${hasAudio ? '' : ' <small class="chip-soon">· audio soon</small>'}</button>`;
-    }).join('');
+  // One dialect on screen, the rest a tap away. What each chip used to
+  // spell out in its own label now lives in the row's subtitle, so the
+  // availability is still stated and stated with more room.
+  const dialectOptions = () => TEXT_DIALECTS.map(d => ({
+    id: d.id, icon: d.flag, label: d.label,
+    note: narrated.includes(d.id) ? 'Recorded audio' : 'Audio soon',
+    aria: narrated.includes(d.id)
+      ? 'Recorded audio for this text'
+      : 'No model recording for this text yet; the transcription and scansion views still work',
+  }));
+  // The availability line used to badge all five dialects at once, which
+  // said the same thing the menu now says and said it three rows deep on
+  // a phone. It speaks about the dialect you actually chose instead.
+  const drawAudioLine = () => {
+    const el = document.getElementById('rd-audio');
+    if (!el) return;
+    el.innerHTML = narrated.includes(cur)
+      ? `🎙 Recorded audio in <b>${esc(dialectName(cur))}</b>.`
+      : `🎙 No studio recording in <b>${esc(dialectName(cur))}</b> for this text yet — the reading below uses your device voice, clearly labelled. Scan and IPA work either way.`;
+  };
+  const drawDialects = () => {
+    const host = document.getElementById('rd-dialects');
+    host.innerHTML = dialectSelectHtml({
+      id: 'rd', label: 'Dialect', options: dialectOptions(), current: cur,
+    });
+    wireDialectSelect(host, 'rd', id => { cur = id; drawDialects(); show(mode); });
+    drawAudioLine();
+  };
   const show = m => {
     stopSpeech();
     teardownAV();      // reader mode switches don't re-run record(): stop any capture here
@@ -8022,10 +8040,6 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(lines, cur, pane); }
   };
   drawDialects();
-  document.getElementById('rd-dialects').addEventListener('click', e => {
-    const b = e.target.closest('.dialect-chip'); if (!b) return;
-    cur = b.dataset.d; drawDialects(); show(mode);
-  });
   app.querySelectorAll('.son-tab').forEach(t => t.addEventListener('click', () => show(t.dataset.mode)));
   document.getElementById('rd-prev')?.addEventListener('click', () => { stopSpeech(); prev.go(); });
   document.getElementById('rd-next')?.addEventListener('click', () => { stopSpeech(); next.go(); });
@@ -8502,6 +8516,77 @@ function pairedVoice(lines, today, prefer) {
   return null;
 }
 
+// ── One dialect, one control ──────────────────────────────────
+// Owner order 2026-09-25: wherever a dialect is chosen, exactly one
+// option is on screen at a time. The five-chip row wrapped to three
+// rows on a phone and pushed the text itself below the fold, which is
+// the wrong thing to spend a screen on in a reading app.
+//
+// The vocabulary is the workspace chip's — a button that says what is
+// selected, a menu that lists the alternatives with a check against the
+// current one — so the app has one pattern for this and not two. What a
+// dialect chip used to carry in its label ("audio soon") moves into the
+// row's subtitle, where there is room to say it properly.
+//
+// `options` are { id, icon, label, note, aria }. `note` is the honest
+// availability line and may be empty.
+function dialectSelectHtml({ id, label, options, current }) {
+  const now = options.find(o => o.id === current) ?? options[0];
+  if (!now) return '';
+  return `
+    <div class="dialect-picker dialect-select">
+      <span class="dialect-label" id="${id}-lab">${esc(label)}</span>
+      <div class="dsel-wrap">
+        <button class="dsel-chip" id="${id}-chip" type="button"
+                aria-haspopup="menu" aria-expanded="false" aria-labelledby="${id}-lab ${id}-chip"
+                aria-label="${esc(label)}: ${esc(now.label)}${now.note ? `, ${esc(now.note)}` : ''}. Change it.">
+          ${now.icon ? `<span class="dialect-icon" aria-hidden="true">${now.icon}</span>` : ''}
+          <span class="dsel-name" aria-hidden="true">${esc(now.label)}</span>
+          ${now.note ? `<small class="dsel-note" aria-hidden="true">${esc(now.note)}</small>` : ''}
+          <span class="dsel-caret" aria-hidden="true">▾</span>
+        </button>
+        <div class="course-menu dsel-menu" id="${id}-menu" role="menu" hidden>
+          <p class="course-menu-h">${esc(label)}</p>
+          ${options.map(o => `
+            <button class="course-row ${o.id === current ? 'on' : ''}" data-d="${esc(o.id)}"
+                    role="menuitem" type="button"
+                    aria-label="${esc(o.label)}${o.aria ? `. ${esc(o.aria)}` : ''}">
+              ${o.icon ? `<span class="course-icon" aria-hidden="true">${o.icon}</span>` : ''}
+              <span class="course-row-info"><b>${esc(o.label)}</b>${o.note ? `<small>${esc(o.note)}</small>` : ''}</span>
+              ${o.id === current ? '<span class="course-check" aria-hidden="true">✓</span>' : ''}
+            </button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+// Opens, closes on a pick, on Escape, or on a click anywhere else, and
+// hands focus back to the chip so a keyboard never loses its place.
+function wireDialectSelect(root, id, onPick) {
+  const chip = root.querySelector(`#${id}-chip`);
+  const menu = root.querySelector(`#${id}-menu`);
+  if (!chip || !menu) return;
+  const close = ({ refocus = false } = {}) => {
+    if (menu.hidden) return;
+    menu.hidden = true;
+    chip.setAttribute('aria-expanded', 'false');
+    if (refocus) chip.focus();
+  };
+  const onDoc = e => { if (!menu.contains(e.target) && e.target !== chip) close(); };
+  const onKey = e => { if (e.key === 'Escape') close({ refocus: true }); };
+  chip.addEventListener('click', e => {
+    e.stopPropagation();
+    const opening = menu.hidden;
+    menu.hidden = !opening;
+    chip.setAttribute('aria-expanded', String(opening));
+    if (opening) menu.querySelector('.course-row.on, .course-row')?.focus();
+  });
+  menu.querySelectorAll('.course-row').forEach(b =>
+    b.addEventListener('click', () => { close(); onPick(b.dataset.d); }));
+  document.addEventListener('click', onDoc);
+  document.addEventListener('keydown', onKey);
+}
+
 function wireSideBySide(pane) {
   const btn = pane.querySelector('#sbs-cover');
   const box = pane.querySelector('#sbs');
@@ -8523,15 +8608,15 @@ function todayPane(pane, today) {
     const t = today.find(x => x.id === cur);
     pane.innerHTML = `
       <p class="pane-note">🗣 <b>In Today’s Voice</b> — the same argument and imagery, re-voiced in a present-day register. A <b>creative transposition</b>, not a literal translation; the original is always one tab away.</p>
-      ${today.length > 1 ? `
-      <div class="dialect-picker"><span class="dialect-label">Version</span><div class="dialect-chips" id="today-chips">
-        ${today.map(x => `<button class="dialect-chip ${x.id === cur ? 'on' : ''}" data-t="${esc(x.id)}" type="button">${esc(x.label)}</button>`).join('')}
-      </div></div>` : `<p class="sonnet-hint">${esc(t.label)}</p>`}
+      ${today.length > 1
+        ? `<div id="today-chips">${dialectSelectHtml({
+            id: 'today', label: 'Version', current: cur,
+            options: today.map(x => ({ id: x.id, label: x.label })),
+          })}</div>`
+        : `<p class="sonnet-hint">${esc(t.label)}</p>`}
       <div class="sonnet-lines today-lines">${t.text.split('\n').map(l => `<p class="guide-text">${esc(l)}</p>`).join('')}</div>`;
-    pane.querySelector('#today-chips')?.addEventListener('click', e => {
-      const b = e.target.closest('.dialect-chip'); if (!b) return;
-      cur = b.dataset.t; draw();
-    });
+    const host = pane.querySelector('#today-chips');
+    if (host) wireDialectSelect(host, 'today', id => { cur = id; draw(); });
   };
   draw();
 }

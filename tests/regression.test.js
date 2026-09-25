@@ -1805,6 +1805,36 @@ export async function run({ navDoc = document } = {}) {
         tabs().some(t => t.includes('Plain'))
         && !tabs().some(t => t.includes('Voice')),
         tabs().join(','));
+
+      // One dialect on screen at a time (owner order 2026-09-25). The
+      // five-chip row is gone; the control names what is selected and
+      // the alternatives live behind it.
+      const dchip = () => doc.getElementById('rd-chip');
+      const dmenu = () => doc.getElementById('rd-menu');
+      check('dialect: one control, one dialect showing, no chip row',
+        !!dchip() && dmenu()?.hidden === true
+        && doc.querySelectorAll('.reader-dialects .dialect-chip').length === 0
+        && dchip().textContent.includes('Neutral American')
+        && dchip().getAttribute('aria-haspopup') === 'menu'
+        && dchip().getAttribute('aria-expanded') === 'false');
+      check('dialect: the audio line speaks about the CHOSEN dialect only',
+        /Neutral American/.test(doc.getElementById('rd-audio')?.textContent ?? '')
+        && !/Cockney|Australian|Traditional RP/.test(doc.getElementById('rd-audio')?.textContent ?? ''),
+        doc.getElementById('rd-audio')?.textContent);
+      clickIn(dchip()); await sleep(200);
+      const rows = [...(dmenu()?.querySelectorAll('.course-row') ?? [])];
+      check('dialect: opening it offers every dialect, with the current one checked',
+        dmenu().hidden === false && rows.length === 5
+        && rows.filter(r => r.classList.contains('on')).length === 1
+        && rows.some(r => r.textContent.includes('Audio soon')));
+      clickIn(rows.find(r => r.textContent.includes('Australian'))); await sleep(400);
+      check('dialect: picking one closes the menu and switches the reader',
+        dmenu().hidden === true
+        && dchip().getAttribute('aria-expanded') === 'false'
+        && dchip().textContent.includes('Australian')
+        && /Australian/.test(doc.getElementById('rd-audio')?.textContent ?? ''),
+        dchip().textContent);
+
       clickIn(doc.getElementById('nav-back'));
       await until(() => !!doc.getElementById('sonnet-search'));
       check('editions UI: Back returns to the sonnet list',
@@ -3699,6 +3729,22 @@ export async function run({ navDoc = document } = {}) {
     check('sbs: the cover hides both shapes of the right-hand column',
       sbsCss.includes('.sbs.is-covered .sbs-meaning .guide-text,')
       && sbsCss.includes('.sbs.is-covered .sbs-meaning .sbs-line'));
+
+    // Owner order 2026-09-25 applies to EVERY dialect choice, not just
+    // the reader, so all three go through the one shared control.
+    // One definition plus three call sites each — the regex sees the
+    // `function` line too, which is why both counts are four.
+    check('dialect: every dialect choice uses the one shared select',
+      (sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length === 4
+      && (sbsSrc.match(/wireDialectSelect\(/g) ?? []).length === 4
+      && sbsSrc.includes("id: 'rd', label: 'Dialect'")
+      && sbsSrc.includes("id: 'np', label: 'Dialect'")
+      && sbsSrc.includes("id: 'today', label: 'Version'"),
+      `html:${(sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length} wire:${(sbsSrc.match(/wireDialectSelect\(/g) ?? []).length}`);
+    check('dialect: the control is reachable by keyboard and says what it is',
+      sbsSrc.includes('aria-haspopup="menu" aria-expanded="false"')
+      && sbsSrc.includes("if (e.key === 'Escape') close({ refocus: true })")
+      && sbsSrc.includes('role="menuitem"'));
   }
 
   // ── 21j. Sonnet 145 is in eights, and the scanner knows ──────
