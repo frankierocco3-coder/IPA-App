@@ -35,7 +35,13 @@ export const ACTING_MODULES = [
   // Being Off Book opens Module 1 (owner order, 2026-08-20). It used to
   // close it, which was backwards: none of the rest can be worked while
   // an actor is still holding the script.
-  { n: 1, id: 'work', title: 'The Actor’s Work',
+  // Renamed from The Actor’s Work (owner order, 2026-09-26). The old name
+  // described the whole course rather than this module: every one of the
+  // five is the actor’s work. What this module actually teaches is the
+  // situation a character is in and what it does to them, which is what
+  // the blurb has said since it was written. The id stays 'work' — ids are
+  // never renamed here, which is what keeps stored progress intact.
+  { n: 1, id: 'work', title: 'The Situation at Hand',
     blurb: 'Securing the text first, then where behavior comes from: circumstances, objective, obstacle, stakes.' },
   // Renamed from Investigating the Text (owner order, 2026-09-24): the
   // blurb had called it "the script-analysis course" since it was
@@ -59,7 +65,7 @@ export const ACTING_MODULES = [
 
 export const ACTING_LESSONS = [
 
-  // ── Module 1 · The Actor’s Work ───────────────────────────────
+  // ── Module 1 · The Situation at Hand ──────────────────────────
   { id: 'ac-behavior', module: 'work', order: 2,
     title: 'Behavior Comes From the Situation',
     requiredReviewer: 'acting-professional',

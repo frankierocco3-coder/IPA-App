@@ -50,6 +50,10 @@ import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from '../js/data/shakespeare-lexicon.js';
+import { lexMarkedExample, lexTermForms } from '../js/views/lexicon-mark.js';
+// The real esc, not a stand-in: the marker's escaping is only worth testing
+// against the function the app actually ships it with.
+import { esc as uiEsc } from '../js/ui.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
@@ -2308,6 +2312,37 @@ export async function run({ navDoc = document } = {}) {
         .every(k => SPEECH_TEXTS.some(t => t.kind === k))
       && SPEECH_TEXTS.every(t => t.provenance.includes('Original Speechcraft writing')
         && t.requiredReviewer === 'editorial'));
+    // ── The 22 provided practice texts are WITHDRAWN from the picker ──
+    // Owner order 2026-09-26. The records stay and so does the resolver,
+    // because a working text already set to one of them must keep working;
+    // what is gone is the door to choosing another. These two pins are the
+    // pair: the list is off the page, and nothing that resolves it was
+    // taken out with it.
+    {
+      const src = await viewSource();
+      const wtFn = src.slice(src.indexOf('function renderWorkingTextPicker('),
+        src.indexOf('function needWorkingText('));
+      check('working text: the 22 provided practice texts are off the picker',
+        !/SPEECH_TEXTS/.test(wtFn) && !/wt-builtin/.test(wtFn)
+        && !/Use a provided Speechcraft text/.test(src));
+      check('working text: a reference already set to a provided text still resolves',
+        /source === 'builtin'/.test(src) && /speechTextById/.test(src)
+        && SPEECH_TEXTS.length === 22);
+      // What a game offers as PROVIDED text is exactly two doors, named the
+      // same on both screens it appears on. Custom Work is the learner's own
+      // and is not one of the two.
+      const atpFn = src.slice(src.indexOf('function renderArcadeTextPicker('),
+        src.indexOf('function renderWorkingTextPicker('));
+      const doors = [...atpFn.matchAll(/data-group="(\w+)"/g)].map(m => m[1]);
+      check('games: the text picker offers two provided doors, Monologues & Speeches and Scenes',
+        String(doors) === 'speeches,scenes'
+        && /<h2>Monologues &amp; Speeches<\/h2>/.test(atpFn)
+        && /<h2>Scenes<\/h2>/.test(atpFn)
+        && /Paste or upload Custom Work/.test(atpFn),
+        doors.join(' '));
+      check('games: both screens call the first door the same thing',
+        (src.match(/Monologues &amp; Speeches/g) ?? []).length >= 3);
+    }
     const goalBefore = speechGoal();
     setSpeechGoal('totally-bogus');
     check('speech: a malformed stored goal falls back safely to none', speechGoal() === null);
@@ -2733,14 +2768,23 @@ export async function run({ navDoc = document } = {}) {
       // No working text yet: the exercise must ASK, never invent one.
       localStorage.removeItem('speechcraft-working-text');
       clickIn(doc.getElementById('sp-run')); await sleep(400);
-      check('speech: an exercise needing text asks honestly, offering every source',
+      // The 22 provided practice texts came off this page by owner order
+      // (2026-09-26). What it offers now is the two collections, the Studio
+      // and Custom Work — and it still ASKS rather than inventing a text.
+      check('speech: an exercise needing text asks honestly, offering the collections and your own work',
         doc.querySelector('main h1')?.textContent === 'My Working Text'
-        && !!doc.querySelector('[data-builtin]')
+        && !doc.querySelector('[data-builtin]')
         && !!doc.getElementById('wt-mono')
         && !!doc.getElementById('wt-scenes')
         && !!doc.getElementById('wt-projects')
         && !!doc.getElementById('wt-custom'));
-      clickIn(doc.querySelector('[data-builtin="st-line-3"]')); await sleep(350);
+      // A device that chose a provided text BEFORE the withdrawal still holds
+      // that reference, and it must still resolve — that is the whole reason
+      // the records and the resolver stayed. Back out, hold one, ask again.
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      localStorage.setItem('speechcraft-working-text',
+        JSON.stringify({ source: 'builtin', id: 'st-line-3', title: 'The window' }));
+      clickIn(doc.getElementById('sp-run')); await sleep(400);
       check('speech: the runner opens with comfort and safety language and the inert passage',
         doc.body.textContent.includes('adapt or skip anything')
         && doc.body.textContent.includes('Stop if you experience pain')
@@ -2779,9 +2823,9 @@ export async function run({ navDoc = document } = {}) {
         String(groups) === 'Build Fluency,Shape the Thought,Change the Circumstances,Change the Action'
         && doc.querySelectorAll('.mode-card').length === 11
         && !doc.body.textContent.includes('Context Shift'));
-      localStorage.removeItem('speechcraft-working-text');
-      clickIn(doc.querySelector('[data-game="first-letter"]')); await sleep(300);
-      clickIn(doc.querySelector('[data-builtin="st-apology-2"]')); await sleep(350);
+      localStorage.setItem('speechcraft-working-text',
+        JSON.stringify({ source: 'builtin', id: 'st-apology-2', title: 'Too late' }));
+      clickIn(doc.querySelector('[data-game="first-letter"]')); await sleep(350);
       const flText = doc.getElementById('sp-fl')?.textContent ?? '';
       check('speech: first-letter recall preserves punctuation and Unicode text',
         flText.startsWith('Y n m t s s t n, a I s n.'), flText.slice(0, 60));
@@ -2795,8 +2839,9 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('sp-done')); await sleep(300);
       clickIn(doc.getElementById('sp-refl-done')); await sleep(350);
       clickIn(card('Speechcraft Arcade')); await sleep(350);
-      clickIn(doc.querySelector('[data-game="move-pause"]')); await sleep(300);
-      clickIn(doc.querySelector('[data-builtin="st-line-1"]')); await sleep(350);
+      localStorage.setItem('speechcraft-working-text',
+        JSON.stringify({ source: 'builtin', id: 'st-line-1', title: 'The keys' }));
+      clickIn(doc.querySelector('[data-game="move-pause"]')); await sleep(350);
       const mpWords = () => [...doc.querySelectorAll('#sp-mp span')].map(s => s.textContent).join('');
       const wordsBefore19 = mpWords();
       clickIn(doc.querySelectorAll('.sp-gap')[2]); await sleep(150);
@@ -2959,7 +3004,11 @@ export async function run({ navDoc = document } = {}) {
     check('acting: five modules hold the 33 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 5
       && String(ACTING_MODULES.map(m => m.title))
-        === 'The Actor’s Work,Script Analysis,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
+        === 'The Situation at Hand,Script Analysis,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
+      // The ids are the part that must never move: two modules have been
+      // renamed by owner order and stored progress survived both because
+      // the renames never touched an id.
+      && ACTING_MODULES.find(m => m.n === 1).id === 'work'
       && ACTING_MODULES.find(m => m.n === 2).id === 'text'
       && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 33
       && ACTING_LESSONS.length === 41
@@ -4119,8 +4168,68 @@ export async function run({ navDoc = document } = {}) {
     check('lexicon: reference only — no XP, no completion, no storage, no audio',
       !/addXp|awardXp|markDone|completeLesson|localStorage|speak\(|playPhoneme/.test(lexFn),
       (lexFn.match(/addXp|awardXp|markDone|completeLesson|localStorage|speak\(|playPhoneme/g) ?? []).join(' '));
-    check('lexicon: every displayed field is escaped',
-      !/\$\{(?!esc\()(e|now)\.(term|modern|note|example|source|metre)/.test(lexFn));
+    // Read from the ROW BUILDER, not from the render function below it: the
+    // fields are interpolated in lexEntryHtml, so a slice that started at
+    // renderShakespeareLexicon never covered the line this pin is about.
+    const lexRow = lexSrc.slice(lexSrc.indexOf('const lexEntryHtml'),
+      lexSrc.indexOf('// "Your Instrument"'));
+    // A field read as a ternary GUARD (`${e.metre ? … : ''}`) decides whether
+    // a paragraph exists; it never reaches the page. What this pin is about
+    // is a field INTERPOLATED into the HTML, so the guard form is excluded
+    // by the trailing lookahead rather than by narrowing the slice.
+    const rawFields = lexRow.match(
+      /\$\{(?!esc\(|lexMarkedExample\()(e|now)\.(term|modern|note|example|source|metre)(?!\s*\?)/g) ?? [];
+    check('lexicon: every displayed field is escaped, or marked by the marker',
+      !rawFields.length
+      && /\$\{lexMarkedExample\(e\.term, e\.example, esc\)\}/.test(lexRow),
+      rawFields.join(' '));
+
+    // ── The slang is marked (owner order 2026-09-26) ─────────────
+    // The headword is marked on the page, and inside the quoted line the
+    // word is marked too. 20 of the 160 entries carry a line.
+    const withLine = SHAKESPEARE_LEXICON.filter(e => e.example);
+    const marks = e => (lexMarkedExample(e.term, e.example, uiEsc)
+      .match(/<mark class="lex-hit">([^<]*)<\/mark>/g) ?? [])
+      .map(m => m.replace(/<[^>]*>/g, ''));
+    // Whatever the marker adds, removing the tags must give back exactly the
+    // escaped line. This is the pin that matters: the output goes into
+    // innerHTML, so text may never reach the page unescaped and the marker
+    // may never silently drop a character of Shakespeare.
+    check('lexicon marks: the line survives the marker, escaped exactly once',
+      SHAKESPEARE_LEXICON.every(e => lexMarkedExample(e.term, e.example, uiEsc)
+        .replace(/<\/?mark[^>]*>/g, '') === uiEsc(String(e.example ?? ''))));
+    check('lexicon marks: hostile text is escaped, not marked into HTML',
+      !/<img|<script/.test(lexMarkedExample('nice',
+        '<img src=x onerror="alert(1)"> a nice \'trick\'', uiEsc))
+      && lexMarkedExample('nice', 'a nice trick', uiEsc).includes('<mark class="lex-hit">nice</mark>'));
+    // Every line that carries its word gets it marked, inflected or not. The
+    // one that does not is SH-155, whose term names a construction rather
+    // than a word — no highlight is the honest answer there.
+    const unmarked = withLine.filter(e => !marks(e).length).map(e => e.id);
+    check('lexicon marks: every line carrying its headword lights it up',
+      withLine.length === 20 && String(unmarked) === 'SH-155',
+      `${withLine.length} with a line, unmarked: ${unmarked.join(' ') || 'none'}`);
+    // The inflected hits, named: these are the four the dictionary form misses.
+    check('lexicon marks: inflections are found, not just the dictionary form',
+      [['SH-004', 'owest'], ['SH-016', 'lets'], ['SH-020', 'rivals'], ['SH-090', 'tells'],
+        ['SH-033', '’Tis']].every(([id, word]) =>
+        marks(SHAKESPEARE_LEXICON.find(e => e.id === id)).includes(word)));
+    // A whole word or nothing: an affix entry must never light up three
+    // letters inside a word, and a construction name must never guess.
+    check('lexicon marks: affix and construction entries match nothing',
+      ['-èd', '-est ending', 'a- prefix', 'double comparatives', 'emphatic do']
+        .every(t => !lexMarkedExample(t, 'The most unkindest cutted thing of all.', uiEsc)
+          .includes('<mark')));
+    check('lexicon marks: alternates and glosses resolve to the words themselves',
+      lexTermForms('yon / yonder').has('yonder')
+      && lexTermForms('anon (as reply)').has('anon')
+      && !lexTermForms('anon (as reply)').has('as')
+      && lexTermForms('thou / thee / thy / thine').has('thine'));
+    const lexCss = await fetch('../css/style.css').then(r => r.text()).catch(() => '');
+    check('lexicon marks: the headword is marked and the styles exist',
+      /<span class="lex-word">\$\{esc\(e\.term\)\}<\/span>/.test(lexRow)
+      && /\.lex-word,\s*\.lex-hit\s*\{/.test(lexCss)
+      && /--lex-mark:/.test(lexCss) && /--lex-mark-ink:/.test(lexCss));
   }
 
   // ── 21k. The Shakespeare course: written in part, hidden by default ──
@@ -4354,17 +4463,29 @@ export async function run({ navDoc = document } = {}) {
   // ── 21c. Speak-aloud drills: a full bank per accent course ───
   {
     const accs = ['nam', 'rp', 'ssbe', 'aus', 'cockney'];
-    check('drills: every accent course carries six twisters and six sentences',
+    // A FLOOR, not an exact count: the bank grew unevenly by owner order
+    // (2026-09-26, the Tuesday sentences) and an exact-count pin would have
+    // demanded three accents grow to match, which is the pin driving the
+    // content instead of guarding it.
+    check('drills: every accent course carries at least six twisters and six sentences',
       accs.every(a => {
         const xs = SPEAK_DRILLS.filter(x => x.accent === a);
-        return xs.filter(x => x.kind === 'twister').length === 6
-          && xs.filter(x => x.kind === 'sentence').length === 6
+        return xs.filter(x => x.kind === 'twister').length >= 6
+          && xs.filter(x => x.kind === 'sentence').length >= 6
           && xs.every(x => x.text && x.focus);
-      }) && SPEAK_DRILLS.length === accs.length * 12);
+      })
+      && SPEAK_DRILLS.length >= accs.length * 12
+      && SPEAK_DRILLS.every(x => accs.includes(x.accent) && ['twister', 'sentence'].includes(x.kind)));
     check('drills: focus notes keep house style and honest tiers',
       SPEAK_DRILLS.every(x => !x.focus.includes('\u2014'))
       && SPEAK_DRILLS.filter(x => x.accent === 'ssbe' && /glottal|\[\u0294\]/.test(x.focus))
         .every(x => /option/.test(x.focus)));
+    // The coalesced yod is the feature a British actor is heard on first,
+    // so both British courses carry a Tuesday sentence, not only a twister.
+    check('drills: Standard British and Cockney each drill Tuesday in a sentence',
+      ['ssbe', 'cockney'].every(a => SPEAK_DRILLS.some(x =>
+        x.accent === a && x.kind === 'sentence' && /Tuesday/.test(x.text)
+        && /coalescence/.test(x.focus))));
   }
 
   // ── 22. Offline capability (PWA) ─────────────────────────────

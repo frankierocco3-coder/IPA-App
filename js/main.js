@@ -48,7 +48,10 @@ import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
          OBJECTIVE_DECK, OBSTACLE_DECK, TEMPO_DECK } from './data/speech/arcade.js';
-import { SPEECH_TEXTS, speechTextById, speechTextBody } from './data/speech/texts.js';
+// SPEECH_TEXTS itself is no longer imported here: the picker that listed
+// the twenty provided texts was withdrawn (2026-09-26). The two resolvers
+// stay, because a working text already set to one of them must keep working.
+import { speechTextById, speechTextBody } from './data/speech/texts.js';
 import { parseScript, speechUnits, unitText, cuedSpeeches } from './script.js';
 import { mountNotebook } from './notebook.js';
 import { CHARACTER_KINDS, MAX_FIELD_LEN, MAX_NAME_LEN, kindLabel, fieldsFor, listCharacters, getCharacter,
@@ -109,6 +112,7 @@ import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, 
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
+import { lexMarkedExample } from './views/lexicon-mark.js';
 import { renderDialectAction, renderDialectActionPending } from './views/dialect-action.js';
 import { CMUDICT_LICENCE } from './data/pron-licence.js';
 import { openWhatIsIpa, renderChart, renderSoundDetail, speakableWord, releaseTryIt, whatIsIpaCard, wiiQuestion, wireTryIt, wireWhatIsIpaCard, wireWiiQuestions, wordChip } from './views/reference.js';
@@ -1405,8 +1409,19 @@ async function resolveWorkingText() {
 // ── The Acting Arcade's own text-first picker ─────────────────
 // Text FIRST, exercise second: pick the piece you want to work on, then
 // the arcade opens with it already loaded. Exactly two ways in — the
-// pieces we ship, and your own pasted work. No provided Speechcraft
-// practice texts here; those belong to Speech, which still offers them.
+// pieces we ship, and your own pasted work.
+//
+// TWO PROVIDED DOORS, AND ONLY TWO (owner order, 2026-09-26): Monologues
+// & Speeches, and Scenes. Every game reaches its text through this
+// function, so naming them here names them everywhere a game asks. The
+// first door was called "Speeches" until now, which did not match the
+// same door on My Working Text; one name, both screens. Your own Custom
+// Work keeps its own heading below and is not one of the two — the two
+// are the choice of PROVIDED text, which is what a game offers to load.
+//
+// The 22 provided Speechcraft practice texts have never appeared here,
+// and as of the same order they no longer appear on My Working Text
+// either; see renderWorkingTextPicker.
 function renderArcadeTextPicker(onChosen, opts = {}) {
   // `only` narrows YOUR OWN work to one content type (owner order,
   // 2026-08-20): custom monologues, scenes, speeches and the rest stay
@@ -1434,7 +1449,7 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
         <h2 class="chart-h">Choose a provided text</h2>
         <button class="track-card" data-group="speeches" type="button">
           <div class="track-glyph">📜</div>
-          <div class="track-info"><h2>Speeches</h2>
+          <div class="track-info"><h2>Monologues &amp; Speeches</h2>
             <p>${count(c => c.key !== 'scene')} texts · sonnets, monologues and speeches</p></div>
           <div class="track-arrow">›</div>
         </button>
@@ -1452,7 +1467,7 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
     const cols = scriptCollections().filter(c => c.key !== 'scene');
     return `
         <button class="btn-lite" id="atp-back" type="button">‹ Back</button>
-        <h2 class="chart-h">Speeches</h2>
+        <h2 class="chart-h">Monologues &amp; Speeches</h2>
         ${cols.map(c => `
           <button class="track-card" data-col="${esc(c.key)}" type="button">
             <div class="track-glyph">${c.icon}</div>
@@ -1493,7 +1508,7 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
           ? 'Pick the text you want to work on. What you choose opens next, already loaded.'
           : state.group === 'speeches'
             ? 'Pick a collection, then the text you want to work on.'
-            : 'Speeches or Scenes — or paste your own work below.'}</p>
+            : 'Monologues &amp; Speeches or Scenes — or paste your own work below.'}</p>
         ${state.col ? listHtml() : state.group === 'speeches' ? groupHtml() : shelfHtml()}
       </main>`;
     wireBrandHome();
@@ -1578,6 +1593,20 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
   draw();
 }
 
+// The 22 provided Speechcraft practice texts were WITHDRAWN from this page
+// by owner order (2026-09-26): a learner arriving here scrolled past 22
+// short exercises before reaching the monologues, the scenes and their own
+// work, which put the smallest material first. What is offered now is what
+// an actor actually works on — the collections, Studio projects and Custom
+// Work — and that is the same pair of provided doors the games show.
+//
+// The DATA is not deleted and neither is the resolver. js/data/speech/texts.js
+// still ships, workingText() still resolves a stored { source: 'builtin' }
+// reference, and admin.js still lists the texts for editorial review. Anyone
+// whose working text is one of them keeps it; what is gone is the door to
+// choosing another. Deleting the records instead would have silently emptied
+// a working text that a learner had chosen, which is the one thing a
+// withdrawal must not do.
 function renderWorkingTextPicker(onChosen) {
   record(() => renderWorkingTextPicker(onChosen));
   stopSpeech();
@@ -1586,8 +1615,6 @@ function renderWorkingTextPicker(onChosen) {
     <main class="track-list">
       <h1 class="page-h">My Working Text</h1>
       <p class="track-blurb">Choose the text you want to work on. It stays with you across Speech lessons, practice and the Studio until you change it. Nothing is copied — Studio projects are read live from your own records.</p>
-      <h2 class="chart-h">Use a provided Speechcraft text</h2>
-      <div id="wt-builtin"></div>
       <h2 class="chart-h">Choose from the Speechcraft collections</h2>
       <button class="track-card" id="wt-mono" type="button">
         <div class="track-glyph">📜</div>
@@ -1613,21 +1640,6 @@ function renderWorkingTextPicker(onChosen) {
     </main>`;
   wireBrandHome();
 
-  const bEl = document.getElementById('wt-builtin');
-  for (const t of SPEECH_TEXTS) {
-    const btn = document.createElement('button');
-    btn.className = 'track-card'; btn.type = 'button';
-    btn.dataset.builtin = t.id;
-    btn.innerHTML = `<div class="track-glyph">${t.kind === 'scene' ? '💬' : '📄'}</div>
-      <div class="track-info"><h2></h2><p></p></div><div class="track-arrow">›</div>`;
-    btn.querySelector('h2').textContent = t.title;
-    btn.querySelector('p').textContent = t.kind;
-    btn.addEventListener('click', () => {
-      setWorkingTextRef({ source: 'builtin', id: t.id, title: t.title });
-      if (onChosen) onChosen(workingText()); else goBack();
-    });
-    bEl.appendChild(btn);
-  }
   // The collection doors open the in-place picker, so one tap on a piece
   // actually SETS the working text (the old door only led to the reading
   // shelf). Without a caller to return to, drop both picker pages from
@@ -1644,7 +1656,7 @@ function renderWorkingTextPicker(onChosen) {
 
   (async () => {
     const listEl = document.getElementById('wt-projects');
-    if (!dbSupported()) { listEl.innerHTML = '<p class="pane-note">Local storage is unavailable in this browser, so Studio projects can’t be listed — the provided texts above all work.</p>'; return; }
+    if (!dbSupported()) { listEl.innerHTML = '<p class="pane-note">Local storage is unavailable in this browser, so Studio projects can’t be listed — the collections above all work.</p>'; return; }
     let projects = [];
     try { projects = (await listProjects()).filter(p => (p.text ?? '').trim()); }
     catch { listEl.innerHTML = '<p class="pane-note pane-warn">Could not read your Studio projects just now.</p>'; return; }
@@ -6087,11 +6099,11 @@ function lexiconHits() {
 
 const lexEntryHtml = e => `
   <article class="lex-row">
-    <h3 class="lex-term">${esc(e.term)}<span class="lex-kind">${esc(LEXICON_GROUPS[e.kind]?.label ?? e.kind)}</span></h3>
+    <h3 class="lex-term"><span class="lex-word">${esc(e.term)}</span><span class="lex-kind">${esc(LEXICON_GROUPS[e.kind]?.label ?? e.kind)}</span></h3>
     <p class="lex-modern">${esc(e.modern)}</p>
     <p class="lex-note">${esc(e.note)}</p>
     ${e.metre ? `<p class="lex-metre"><span class="lex-label">Metre</span>${esc(e.metre)}</p>` : ''}
-    ${e.example ? `<p class="lex-eg">“${esc(e.example)}”${
+    ${e.example ? `<p class="lex-eg">“${lexMarkedExample(e.term, e.example, esc)}”${
       e.source ? ` <span class="lex-src">${esc(e.source)}</span>` : ''}</p>` : ''}
   </article>`;
 

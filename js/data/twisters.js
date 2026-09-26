@@ -7,6 +7,14 @@
 // WRITTEN practice only: the learner speaks, nothing plays, nothing
 // listens, nothing is scored. All lines are original Speechcraft
 // writing; none is a traditional twister reproduced.
+//
+// The bank started as six twisters and six sentences per accent. It is no
+// longer symmetrical: owner order 2026-09-26 added a seventh sentence to
+// Standard British and to Cockney, both on Tuesday, because the coalesced
+// yod is the feature a British actor is heard on first and one line each
+// was thin. The regression suite pins a FLOOR of six per kind rather than
+// an exact count, so the bank can grow where a course needs it without
+// forcing four other accents to grow to match.
 export const SPEAK_DRILLS = [
   // ── Neutral American ─────────────────────────────────────────
   { accent: 'nam', kind: 'twister', text: 'A little water bottle rattled at the metal party.',
@@ -85,6 +93,8 @@ export const SPEAK_DRILLS = [
     focus: 'Broad BATH /ɑː/ in class, can’t, laugh, past.' },
   { accent: 'ssbe', kind: 'sentence', text: 'No, don’t go home alone over the snow.',
     focus: 'GOAT /əʊ/ carried through no, don’t, go, home, alone, over, snow.' },
+  { accent: 'ssbe', kind: 'sentence', text: 'It’s Tuesday, isn’t it? The tutor is due at two.',
+    focus: 'Yod coalescence, the course target: Tuesday lands as “chewsday”, tutor as “chooter”, due as “Jew”. Two keeps plain /t/, so the line sets the fused sound against the one place it cannot happen. Traditional RP holds /tj dj/ apart and now reads as formal.' },
 
   // ── Australian ───────────────────────────────────────────────
   { accent: 'aus', kind: 'twister', text: 'They say the rain came late again today, mate.',
@@ -137,6 +147,8 @@ export const SPEAK_DRILLS = [
     focus: 'The shift together: PRICE [ɑɪ] in my; FACE [æɪ] in mate, stayed, late, way; GOAT [æʊ] in home.' },
   { accent: 'cockney', kind: 'sentence', text: 'Don’t tune it on Tuesday during dinner.',
     focus: 'Yod coalescence: tune and Tuesday toward [tʃ], during toward [dʒ]; the final t of don’t and it on [ʔ].' },
+  { accent: 'cockney', kind: 'sentence', text: 'We’re down the market Tuesday, innit? Tuesday, not tomorrow.',
+    focus: 'Yod coalescence, a core feature: Tuesday lands as “chewsday” [ˈtʃuːzdeɪ]. The tag innit carries its own t as a glottal [ʔ], so nothing sounds after the second n; market keeps broad BATH /ɑː/ and drops the r.' },
 ];
 
 export const drillsFor = accent => SPEAK_DRILLS.filter(x => x.accent === accent);

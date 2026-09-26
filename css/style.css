@@ -24,6 +24,8 @@
   --accent-tint: #e6ebdd; /* sage tint */
   --bad-tint: #f2e3dc;    /* terracotta tint */
   --gold: #c9a24b;
+  --lex-mark: #f7e4b5;    /* highlighter ochre, readable over cream */
+  --lex-mark-ink: #5f4a23; /* AA on the tint at both sizes it is used at */
   --serif: "Iowan Old Style", "Palatino", "Georgia", serif;
 }
 
@@ -2255,6 +2257,20 @@ body.nb-full #app { display: none; }
 }
 .lex-eg { margin: 0; font-family: var(--serif); font-size: 15px; color: var(--ink); opacity: .9; }
 .lex-src { font-family: var(--sans); font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+/* The slang itself, marked (owner order 2026-09-26): the headword, and the
+   same word inside the quoted line where the entry carries one. Highlighter
+   ochre rather than the row's lighter #8a6d3b, which reads as heading colour
+   and not as a mark. .lex-word is decoration on a word already announced as
+   the heading, so it stays a plain span; .lex-hit inside a quotation is
+   <mark>, because there the highlight is the information. */
+.lex-word, .lex-hit {
+  background: var(--lex-mark); color: var(--lex-mark-ink);
+  border-radius: 3px; padding: 0 4px;
+}
+.lex-hit {
+  /* A marked word that wraps keeps its padding and corners on both halves. */
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
 @media (max-width: 620px) {
   .lex-row { padding-left: 12px; }
 }
