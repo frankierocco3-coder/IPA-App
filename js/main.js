@@ -3557,6 +3557,11 @@ function renderActorIpaTools() {
     }));
 }
 
+// The tile key for Lines & Memory, written once so the renderer and the
+// handler cannot disagree about it again. They did, and the page became
+// unreachable; see the wiring at the foot of this function.
+const LINES_TILE = 'col:lines';
+
 function renderActingCollection(collectionId) {
   record(() => renderActingCollection(collectionId));
   stopSpeech();
@@ -3573,7 +3578,7 @@ function renderActingCollection(collectionId) {
     `<p class="pane-note">Read in any order. This sequence is a suggested starting point.</p>
      <div class="item-grid">
        ${collectionId === 'scene' ? itemTileHtml({
-         key: 'col:lines', seq: '01', title: 'Lines & Memory' }) : ''}
+         key: LINES_TILE, seq: '01', title: 'Lines & Memory' }) : ''}
        ${lessons.map((l, i) => itemTileHtml({
          key: l.id, seq: String(i + 1 + (collectionId === 'scene' ? 1 : 0)).padStart(2, '0'), title: l.title,
          note: B.visible(l) ? '' : ACTING_DRAFT_BADGE,
@@ -3584,10 +3589,6 @@ function renderActingCollection(collectionId) {
        <h2 class="sec-h">Acting Glossary</h2>
        <p class="pane-note">${Object.keys(ACTING_GLOSSARY).length} terms used across the acting chapters.</p>
        <dl class="anat-list sp-terms" id="ac-glossary-inline"></dl>` : ''}`);
-  // Lines & Memory is a standalone page, not a lesson record, so its
-  // tile is routed here rather than through the lesson opener.
-  app.querySelector('[data-tile="col:lines"]')
-    ?.addEventListener('click', () => navTo(renderLineLesson));
   if (collectionId === 'scene') {
     const gl = app.querySelector('#ac-glossary-inline');
     for (const t of Object.values(ACTING_GLOSSARY)) {
@@ -3597,8 +3598,19 @@ function renderActingCollection(collectionId) {
       row.append(dt, dd); gl.appendChild(row);
     }
   }
+  // Lines & Memory is a standalone page, not a lesson record, so it is
+  // routed here rather than through the chapter opener.
+  //
+  // It used to be wired by its own querySelector on [data-tile="col:lines"],
+  // which never matched anything: itemTileHtml emits data-ITEM, and
+  // data-tile belongs to the other tile component. The `?.` swallowed the
+  // miss, so the tile fell through to the generic handler below and asked
+  // for a chapter called 'col:lines', which does not exist. That was the
+  // ONLY door left after the standalone shelf tile was retired (owner
+  // order 2026-09-25), so Lines & Memory could not be opened at all.
+  // One handler now, so a key can never be wired twice or not at all.
   app.querySelectorAll('[data-item]').forEach(b => b.addEventListener('click', () =>
-    renderActingChapter(b.dataset.item)));
+    (b.dataset.item === LINES_TILE ? navTo(renderLineLesson) : renderActingChapter(b.dataset.item))));
 }
 
 function renderActingGlossary() {

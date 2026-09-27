@@ -1884,19 +1884,44 @@ export async function run({ navDoc = document } = {}) {
       // lowest-numbered fully-draft sonnet, which is as near the top as
       // there is. With 154 sonnets and three dialects still untouched,
       // this cannot run dry until every dialect is approved outright.
-      const draftN = SONNETS.map(s => s.n).find(n =>
-        editionStatus(n, 'plain') === 'draft'
-        && ['nam', 'ssbe', 'aus'].every(d => editionStatus(n, d) === 'draft'));
-      check('editions: a fully draft sonnet still exists to test the gate with',
-        !!draftN, `frontier: ${draftN ?? 'nothing is fully draft any more'}`);
-      clickIn(doc.querySelector(`.sonnet-row[data-n="${draftN}"]`));
-      await until(() => doc.body.textContent.includes(`Sonnet ${draftN}`) && !!doc.querySelector('.sonnet-tabs'));
-      check('editions UI: a draft edition shows NO Plain/Today tabs to learners',
-        doc.body.textContent.includes(`Sonnet ${draftN}`)
-        && !tabs().some(t => t.includes('Plain')) && !tabs().some(t => t.includes('Voice')),
-        `sonnet ${draftN}: ${tabs().join(',')}`);
-      clickIn(doc.getElementById('nav-back'));
-      await until(() => !!doc.getElementById('sonnet-search'));
+      // THIS USED TO HUNT FOR A FULLY DRAFT SONNET and assert it showed no
+      // tabs. That subject is gone: the owner approved all 154 Plain
+      // Meanings and all 154 American voices on 2026-09-27, so no sonnet is
+      // fully draft and none ever will be again. The check had already been
+      // re-pointed twice (sonnet 2, then 7, then a search) as batches ate
+      // its subject, which is the sign of a pin written against the state
+      // rather than the rule.
+      //
+      // The RULE is what gets pinned now: the tabs a sonnet offers are
+      // exactly the texts editionStatus calls approved. That holds whether
+      // nothing is approved or everything is, so no future batch can break
+      // it — and it still fails if the gate ever leaks a draft.
+      const offered = n => {
+        const plain = editionStatus(n, 'plain') === 'approved';
+        const voice = ['nam', 'ssbe', 'aus'].some(d => editionStatus(n, d) === 'approved');
+        return { plain, voice };
+      };
+      const tabsMatchGate = async n => {
+        clickIn(doc.querySelector(`.sonnet-row[data-n="${n}"]`));
+        await until(() => doc.body.textContent.includes(`Sonnet ${n}`) && !!doc.querySelector('.sonnet-tabs'));
+        const t = tabs(), want = offered(n);
+        const ok = t.some(x => x.includes('Plain')) === want.plain
+          && t.some(x => x.includes('Voice')) === want.voice;
+        clickIn(doc.getElementById('nav-back'));
+        await until(() => !!doc.getElementById('sonnet-search'));
+        return { ok, detail: `sonnet ${n}: tabs[${t.join(',')}] want plain=${want.plain} voice=${want.voice}` };
+      };
+      // First and last, so the run is checked at both ends of the catalogue.
+      const gateFirst = await tabsMatchGate(1);
+      const gateLast = await tabsMatchGate(154);
+      check('editions UI: the tabs offered are exactly what the review gate approves',
+        gateFirst.ok && gateLast.ok, `${gateFirst.detail} | ${gateLast.detail}`);
+      // The two unapproved dialects are the gate's live subject now: every
+      // Standard British and Australian text is still a draft, and none of
+      // them may reach a learner surface.
+      check('editions: the still-draft dialects are held back across the whole catalogue',
+        SONNETS.every(s => editionStatus(s.n, 'ssbe') === 'draft'
+          && editionStatus(s.n, 'aus') === 'draft'));
       clickIn(doc.querySelector('.sonnet-row[data-n="18"]'));
       await until(() => doc.body.textContent.includes('Sonnet 18') && !!doc.querySelector('.sonnet-tabs'));
       // Sonnet 18 was the proof that a pilot's drafts stay hidden. Since
@@ -3156,6 +3181,25 @@ export async function run({ navDoc = document } = {}) {
         doc.querySelectorAll('.item-tile').length === ACTING_COLLECTIONS[0].lessons.length
         && doc.body.textContent.includes('Behavior Comes From the Situation'));
       clickIn(doc.getElementById('nav-back')); await sleep(350);
+      // EVERY tile on a collection page opens something. Lines & Memory was
+      // wired by a querySelector on [data-tile=...] while itemTileHtml emits
+      // data-ITEM, so it matched nothing, the `?.` swallowed the miss, and
+      // the tile fell through to the chapter opener asking for a chapter
+      // that does not exist. It was the only door left after the standalone
+      // shelf tile was retired, so the page could not be reached at all.
+      // Clicking it is the check; a source pin would not have caught it.
+      clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
+      const scTiles = [...doc.querySelectorAll('.item-tile')].map(b => b.dataset.item);
+      check('acting: Script Analysis leads with Lines & Memory and every tile carries a key',
+        scTiles[0] === 'col:lines' && scTiles.every(Boolean)
+        && scTiles.length === 6, scTiles.join(' '));
+      clickIn(doc.querySelector('[data-item="col:lines"]')); await sleep(450);
+      check('acting: the Lines & Memory tile actually opens Lines & Memory',
+        doc.querySelector('.track-title')?.textContent.includes('Lines & Memory')
+        && /The Line You Know/.test(doc.querySelector('#line-lesson h1')?.textContent ?? ''),
+        doc.querySelector('#line-lesson h1')?.textContent ?? 'no heading');
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
       // A chapter with figures: both render with their alt text and
       // captions, from same-origin files, lazily.
       clickIn(doc.querySelector('[data-tile="col:rehearsal"]')); await sleep(400);
@@ -3731,10 +3775,16 @@ export async function run({ navDoc = document } = {}) {
       && text.includes('Helga Noice') && text.includes('Michael Caine')
       && text.includes('That’s the whole trade.'));
     const mainSrc2 = await viewSource();
-    check('memory lesson: read-only page — renderer exists, no controls, tile shelved',
+    // The tile key is now a named constant used by BOTH the renderer and
+    // the click handler. It used to be a literal in one place and a
+    // different literal in a querySelector in the other, which is how the
+    // page became unreachable; pin the single source instead of the string.
+    check('memory lesson: read-only page — renderer exists, no controls, tile keyed once',
       /function renderLineLesson/.test(mainSrc2)
       && !/renderLineLesson[\s\S]{0,1600}<(textarea|input|select)/.test(mainSrc2.slice(mainSrc2.indexOf('function renderLineLesson')))
-      && /key: 'col:lines'/.test(mainSrc2));
+      && /const LINES_TILE = 'col:lines'/.test(mainSrc2)
+      && /key: LINES_TILE/.test(mainSrc2)
+      && /dataset\.item === LINES_TILE/.test(mainSrc2));
   }
 
   // ── 27. The Cockney course: gate, data, derivation, audio parity ─
@@ -3944,10 +3994,19 @@ export async function run({ navDoc = document } = {}) {
     // Sonnet 26 stood here as the named past-the-frontier case until batch
     // 5 approved it. Derive both cases instead: the one just past the run,
     // and the last sonnet in the book.
-    check('sbs: sonnets past the frontier still show the paragraph, not a pairing',
-      editionStatus(paired.length + 1, 'nam') === 'draft'
-      && editionStatus(154, 'nam') === 'draft',
-      `frontier at ${paired.length}, next is ${editionStatus(paired.length + 1, 'nam')}`);
+    // There is no longer a frontier to be past: all 154 American voices
+    // were approved on 2026-09-27. What this check was really protecting
+    // is that the paragraph fallback is REACHED whenever a pairing is not
+    // earned, so pin that instead of the vanished draft tail — a voice
+    // pairs only if the gate approved it AND it genuinely aligns, and the
+    // two still-draft dialects prove the fallback is still live.
+    check('sbs: a pairing is earned — approved AND aligned, never one without the other',
+      SONNETS.every(s => {
+        const ok = editionStatus(s.n, 'nam') === 'approved';
+        return ok === paired.includes(s);
+      })
+      && ['ssbe', 'aus'].every(d => SONNETS.every(s => editionStatus(s.n, d) === 'draft')),
+      `paired: ${paired.length} of ${SONNETS.length}`);
 
     const sbsSrc = await viewSource();
     check('sbs: the pane pairs only when given a verified partner',
