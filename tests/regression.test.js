@@ -3176,6 +3176,26 @@ export async function run({ navDoc = document } = {}) {
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
+      // FINDABLE BY ITS OWN NAME. Lines & Memory is a standalone page, not
+      // a lesson record, so it is in no collection's lesson list — and the
+      // shelf search is built from lesson titles. When its standalone card
+      // was retired (owner order 2026-09-25) "lines", "memory" and "Lines &
+      // Memory" all began returning nothing at all, which to a reader is
+      // indistinguishable from the page not existing.
+      if (libSearch20) {
+        const found = [];
+        for (const q of ['lines', 'memory', 'Lines & Memory', 'running lines']) {
+          libSearch20.value = q;
+          libSearch20.dispatchEvent(new w20.Event('input', { bubbles: true }));
+          await sleep(260);
+          found.push(`${q}:${[...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile).join('|') || 'NOTHING'}`);
+        }
+        check('acting: searching for Lines & Memory finds the shelf it lives on',
+          found.every(f => f.includes('col:scene')), found.join(' '));
+        libSearch20.value = '';
+        libSearch20.dispatchEvent(new w20.Event('input', { bubbles: true }));
+        await sleep(250);
+      }
       clickIn(doc.querySelector('[data-tile="col:principles"]')); await sleep(400);
       check('acting: opening a collection reveals its chapters',
         doc.querySelectorAll('.item-tile').length === ACTING_COLLECTIONS[0].lessons.length

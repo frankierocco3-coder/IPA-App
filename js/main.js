@@ -3430,12 +3430,24 @@ function actingLibraryPane(el) {
     scene: 'img/ui/text-investigation.png', rehearsal: 'img/ui/rehearsal.png',
     rhythm: 'img/ui/rhythm.png', professional: 'img/ui/professional.png',
   };
+  // Search keywords are the collection's LESSON TITLES, which is why
+  // retiring the standalone Lines & Memory card (owner order 2026-09-25)
+  // made the page unfindable: it is a standalone page, not a lesson
+  // record, so it is in no collection's lesson list and "lines", "memory"
+  // and "Lines & Memory" all returned nothing. A page that cannot be
+  // searched for by its own name is missing as far as a reader is
+  // concerned. Its home shelf now carries its name and its subject.
+  const EXTRA_KEYWORDS = {
+    scene: 'lines memory Lines & Memory off book learning lines running lines '
+      + 'forgetting recall retrieval cue',
+  };
   const colTile = id => {
     const c = ACTING_COLLECTIONS.find(x => x.id === id);
     return {
       key: `col:${c.id}`, tone: ACTING_COLLECTION_TONE[c.id],
       emoji: ACTING_COLLECTION_EMOJI[c.id], img: COL_ART[c.id], title: c.title,
-      keywords: c.lessons.map(lid => actingLessonById(lid)?.title ?? '').join(' '),
+      keywords: [c.lessons.map(lid => actingLessonById(lid)?.title ?? '').join(' '),
+        EXTRA_KEYWORDS[c.id] ?? ''].join(' ').trim(),
       go: () => renderActingCollection(c.id),
     };
   };
