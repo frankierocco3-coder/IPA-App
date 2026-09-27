@@ -5914,6 +5914,18 @@ function hubHandbook(hub, d, track) {
 
 function hubIdiom(hub, d, track) {
   const name = dialectName(d);
+  // Whether this dialect HAS period material, asked of the data rather than
+  // hardcoded per course. The American library went contemporary-only on
+  // 2026-09-27, and a course with no period entries must not explain the
+  // period category in its opening line or offer a Period filter — that is
+  // the same dead-control rule the rest of the app follows. RP is period by
+  // design and keeps both.
+  const hasPeriod = IDIOM.some(e => e.dialect === d && e.era === 'period');
+  // idiomFilters is shared across dialects. Filtering to Period on RP and
+  // then opening American would otherwise leave the list silently filtered
+  // with no control on screen to clear it — a hidden filter is worse than a
+  // dead one, so the filter is reset the moment its control cannot exist.
+  if (!hasPeriod && idiomFilters.era === 'period') idiomFilters.era = 'all';
 
   const draw = () => {
     const f = idiomFilters;
@@ -5956,16 +5968,16 @@ function hubIdiom(hub, d, track) {
 
   hub.innerHTML = `
     <div id="idiom-tryit"></div>
-    <p class="pane-note">${d === 'ssbe'
-      ? `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. Contemporary usage is the default view; use the Era filter for older material.`
+    <p class="pane-note">${!hasPeriod
+      ? `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. Everything here is present-day usage, like the course itself.`
       : `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.`}</p>
     <div class="practice-row"><button class="btn btn-practice" id="idiom-drill" type="button">🗣 Drill these — no hearts lost</button></div>
     <input class="sonnet-search" id="idiom-q" type="search" aria-label="Search words and expressions" placeholder="Search term, meaning or example…" autocomplete="off">
-    <div class="dialect-picker"><span class="dialect-label">Era</span><div class="dialect-chips" id="idiom-era">
+    ${hasPeriod ? `<div class="dialect-picker"><span class="dialect-label">Era</span><div class="dialect-chips" id="idiom-era">
       ${chip('era', 'all', 'All', idiomFilters.era === 'all')}
       ${chip('era', 'period', 'Period', idiomFilters.era === 'period')}
       ${chip('era', 'contemporary', 'Contemporary', idiomFilters.era === 'contemporary')}
-    </div></div>
+    </div></div>` : ''}
     <div class="dialect-picker"><span class="dialect-label">Type</span><div class="dialect-chips" id="idiom-type">
       ${chip('type', 'all', 'All', idiomFilters.type === 'all')}
       ${chip('type', 'word', 'Words', idiomFilters.type === 'word')}
@@ -6020,8 +6032,11 @@ function hubIdiom(hub, d, track) {
   });
   hub.querySelector('#idiom-q').addEventListener('input', e => { idiomFilters.q = e.target.value; draw(); });
   hub.querySelector('#idiom-flagged').addEventListener('change', e => { idiomFilters.flagged = e.target.checked; draw(); });
+  // The Era control is absent on a dialect with no period material, so this
+  // wires what is there rather than assuming both. Without the guard, a
+  // course that dropped the control would throw on every visit.
   [['#idiom-era', 'era'], ['#idiom-type', 'type']].forEach(([sel, key]) =>
-    hub.querySelector(sel).addEventListener('click', e => {
+    hub.querySelector(sel)?.addEventListener('click', e => {
       const b = e.target.closest('.dialect-chip'); if (!b) return;
       idiomFilters[key] = b.dataset.v;
       hub.querySelector(sel).querySelectorAll('.dialect-chip').forEach(x => x.classList.toggle('on', x === b));

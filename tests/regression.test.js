@@ -1576,14 +1576,49 @@ export async function run({ navDoc = document } = {}) {
       && BRIDGE_ROUTES.every(r => !/SSBE|Educated Southern|Contemporary British/.test(r.title))
       && routeStatus('rp', 'ssbe') === 'draft' && routeStatus('ssbe', 'rp') === 'draft');
 
+    // The 2026-09-27 pass finished what this list started: js/data/dialects.js
+    // declares the American course "period: Contemporary", so the Prohibition
+    // register did not belong in it. Only the unambiguous terms are pinned —
+    // 'swell', 'keen', 'sap', 'dogs' and 'mug' were retired as entries too,
+    // but they are ordinary words that may legitimately appear elsewhere, and
+    // a lint that banned them outright would be banning English.
     const removed = ['jake', 'copacetic', 'the berries', 'horsefeathers', 'hooey', 'bunk',
       'palooka', 'take a powder', 'sawbuck', 'simoleons', 'kale', 'hooch', 'giggle water',
-      'flapper', 'dead soldiers', 'on the level', 'the brush off', 'shoot the breeze'];
+      'flapper', 'dead soldiers', 'on the level', 'the brush off', 'shoot the breeze',
+      'hotsy-totsy', 'applesauce', 'the bee’s knees', "the bee's knees",
+      'the cat’s pajamas', "the cat's pajamas", 'bathtub gin', 'blind pig',
+      'speakeasy', 'jalopy', 'gams', 'two bits'];
     const idiomText = IDIOM.map(e => [e.term, e.meaning, e.example, e.note].join(' ')).join(' ');
     const actionText = DIALECT_ACTION.map(p => p.lines.map(l => l.text).join(' ')).join(' ');
     check('no removed NAM expression resurfaces in idioms or pieces',
       removed.every(t => !new RegExp(`\\b${t.replace(/ /g, '\\s+')}\\b`, 'i').test(idiomText)
         && !new RegExp(`\\b${t.replace(/ /g, '\\s+')}\\b`, 'i').test(actionText)));
+    // The RULE behind that word list, so a new period term cannot simply be
+    // added under a name nobody thought to ban. js/data/dialects.js declares
+    // the American course "period: Contemporary — present-day stage, film and
+    // broadcast work". RP is the course declared historical, and it keeps its
+    // period idiom by design, so this is asserted for nam alone.
+    const namIdiom = IDIOM.filter(e => e.dialect === 'nam');
+    check('idiom: the American library is contemporary, like the course it serves',
+      namIdiom.length > 50 && namIdiom.every(e => e.era !== 'period')
+      && IDIOM.some(e => e.dialect === 'rp' && e.era === 'period'),
+      `nam: ${namIdiom.length} entries, ${namIdiom.filter(e => e.era === 'period').length} period`);
+    // The owner's expression bank files these under "Regional flags: not part
+    // of the neutral core" — they name a place and belong in researched
+    // regional modules, not in the default working accent.
+    check('idiom: no regional flag is smuggled into the neutral American core',
+      !namIdiom.some(e => /^(y.all|all y.all|fixin|might could|over yonder|deadass|brick|bodega|jawn|youse|yinz|wicked|ope|yinzer|hella)$/i
+        .test(e.term.trim())),
+      namIdiom.map(e => e.term).filter(t => /y.all|deadass|jawn|yinz|hella/i.test(t)).join(' '));
+    // A course with no period entries must not explain the period category
+    // nor offer a Period filter, and must not leave a stale era filter with
+    // no control to clear it. RP is period by design and keeps both.
+    const idiomSrc = await viewSource();
+    check('idiom: the Era control exists only where there is period material',
+      /const hasPeriod = IDIOM\.some\(e => e\.dialect === d && e\.era === 'period'\)/.test(idiomSrc)
+      && /if \(!hasPeriod && idiomFilters\.era === 'period'\) idiomFilters\.era = 'all'/.test(idiomSrc)
+      && /\$\{hasPeriod \? `<div class="dialect-picker"><span class="dialect-label">Era/.test(idiomSrc)
+      && /hub\.querySelector\(sel\)\?\.addEventListener/.test(idiomSrc));
 
     check('action: eight pieces — one scene and one monologue per course',
       DIALECT_ACTION.length === 8

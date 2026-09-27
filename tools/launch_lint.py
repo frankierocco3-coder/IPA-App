@@ -246,11 +246,17 @@ def main():
         return _re.sub(r"^\s*//.*$", "", src, flags=_re.M)
     idiom_code = _strip_comments((ROOT / "js" / "data" / "idiom.js").read_text(encoding="utf-8"))
     action_code = _strip_comments((ROOT / "js" / "data" / "dialect-in-action.js").read_text(encoding="utf-8"))
+    # The 2026-09-27 pass finished the job: the nam course declares itself
+    # contemporary in dialects.js, so every remaining Prohibition-era term
+    # went too. Same rule, same list.
     removed = ["jake", "copacetic", "the berries", "horsefeathers", "hooey",
                "bunk", "palooka", "take a powder", "sawbuck", "simoleons",
                "kale", "hooch", "giggle water", "flapper", "dead soldiers",
                "on the level", "the brush off", "the brush-off",
-               "shoot the breeze"]
+               "shoot the breeze",
+               "hotsy-totsy", "applesauce", "the bee's knees",
+               "the cat's pajamas", "bathtub gin", "blind pig", "speakeasy",
+               "jalopy", "gams", "two bits"]
     for term in removed:
         for src, name in ((idiom_code, "idiom.js"), (action_code, "dialect-in-action.js")):
             if _re.search(r"\b" + _re.escape(term) + r"\b", src, _re.I):
