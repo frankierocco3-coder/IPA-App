@@ -256,7 +256,14 @@ def main():
                "shoot the breeze",
                "hotsy-totsy", "applesauce", "the bee's knees",
                "the cat's pajamas", "bathtub gin", "blind pig", "speakeasy",
-               "jalopy", "gams", "two bits"]
+               "jalopy", "gams", "two bits",
+               "you said a mouthful", "the big idea", "bet your bottom dollar",
+               "bring home the bacon", "zonked", "baloney",
+               "not on your life", "what do you take me for"]
+    # rube and yokel are NOT pinned. The hick entry names them in its note
+    # to tell an actor reading an old script that they mean the same thing
+    # and are archaic, which is the lint's own job done in prose. Pinning
+    # the words would ban the sentence that warns about them.
     for term in removed:
         for src, name in ((idiom_code, "idiom.js"), (action_code, "dialect-in-action.js")):
             if _re.search(r"\b" + _re.escape(term) + r"\b", src, _re.I):

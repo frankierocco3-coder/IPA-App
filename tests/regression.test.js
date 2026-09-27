@@ -1587,7 +1587,12 @@ export async function run({ navDoc = document } = {}) {
       'flapper', 'dead soldiers', 'on the level', 'the brush off', 'shoot the breeze',
       'hotsy-totsy', 'applesauce', 'the bee’s knees', "the bee's knees",
       'the cat’s pajamas', "the cat's pajamas", 'bathtub gin', 'blind pig',
-      'speakeasy', 'jalopy', 'gams', 'two bits'];
+      'speakeasy', 'jalopy', 'gams', 'two bits',
+      'you said a mouthful', 'the big idea', 'bet your bottom dollar',
+      'bring home the bacon', 'zonked', 'baloney',
+      'not on your life', 'what do you take me for'];
+    // rube and yokel are deliberately absent: the hick entry names them in
+    // its note as archaic synonyms, which warns rather than offers.
     const idiomText = IDIOM.map(e => [e.term, e.meaning, e.example, e.note].join(' ')).join(' ');
     const actionText = DIALECT_ACTION.map(p => p.lines.map(l => l.text).join(' ')).join(' ');
     check('no removed NAM expression resurfaces in idioms or pieces',

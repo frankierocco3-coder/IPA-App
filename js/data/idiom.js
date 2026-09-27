@@ -389,6 +389,17 @@ export const IDIOM = [
   // words among them (swell, keen, sap, dogs, mug) are NOT pinned, because a
   // lint that bans those is banning English.
   //
+  // SECOND PASS, THE OWNER'S OWN READ (2026-09-27). Given the list of what
+  // still read old-timey, he kept four and cut the rest. ELEVEN MORE RETIRED,
+  // ids never reused: you said a mouthful, what's the big idea, wise up, not
+  // on your life, bet your bottom dollar, zonked, bring home the bacon,
+  // baloney, beat it, what do you take me for, fork over. Fifteen of those
+  // came from his own expression bank; overriding it was his call to make.
+  //
+  // KEPT BY NAME, against my recommendation on three of them: a wise guy,
+  // I wasn't born yesterday, get a load of this. And son of a gun, which was
+  // not in the library at all, so keeping it meant writing it.
+  //
   // NOT NEUTRAL CORE (2026-09-27): 'y’all' and 'deadass' were added in this
   // same pass and then removed again. The owner's own expression bank files
   // both under "Regional flags: not part of the neutral core", to be given
@@ -400,16 +411,6 @@ export const IDIOM = [
   // KEPT, DELIBERATELY: 'baloney', 'beat it' and 'the john' are informal and
   // skew older, but they are still said. Retiring them would be pruning
   // register rather than removing a period costume.
-  { id: 'NAM-012', dialect: 'nam', term: 'baloney',
-    meaning: 'Nonsense',
-    example: 'Don\'t feed me that baloney.',
-    era: 'both', type: 'word', flag: null, category: null, ipa: null,
-    note: '' },
-  { id: 'NAM-018', dialect: 'nam', term: 'beat it',
-    meaning: 'Get out',
-    example: 'Beat it, kid.',
-    era: 'both', type: 'phrase', flag: null, category: null, ipa: null,
-    note: '' },
   // REWRITTEN, not retired (2026-09-27). The word is alive; the entry was
   // not. It read "to traffic illegal liquor" with the example "He
   // bootlegged all through '24", which is the Prohibition sense and the
@@ -570,11 +571,14 @@ export const IDIOM = [
     example: 'Twenty bucks, tops.',
     era: 'both', type: 'word', flag: null, category: 'money', ipa: null,
     note: '' },
-  { id: 'NAM-068', dialect: 'nam', term: 'hick / rube / yokel',
+  // Narrowed from 'hick / rube / yokel' (owner order 2026-09-27). Rube and
+  // yokel are archaic; hick is alive. The id is unchanged — ids are never
+  // renamed here, which is what keeps stored progress intact.
+  { id: 'NAM-068', dialect: 'nam', term: 'hick',
     meaning: 'An unsophisticated country person',
     example: 'They think we\'re all hicks out here.',
-    era: 'contemporary', type: 'word', flag: 'dated-offensive', category: 'people', ipa: null,
-    note: '' },
+    era: 'contemporary', type: 'word', flag: null, category: 'people', ipa: null,
+    note: 'Insulting from an outsider, and often reclaimed by the people it describes. Rube and yokel mean the same and are archaic.' },
   { id: 'NAM-069', dialect: 'nam', term: 'pissed / pissed off',
     meaning: 'Angry (not drunk — see false friends)',
     example: 'He was pissed I missed the cue.',
@@ -803,11 +807,6 @@ export const IDIOM = [
     example: 'Don’t get uptight about it.',
     era: 'contemporary', type: 'word', flag: null, category: 'emotion', ipa: null,
     note: 'Criticises a temperament, not a mood. Reads as a sixties word that never left.' },
-  { id: 'NAM-114', dialect: 'nam', term: 'zonked',
-    meaning: 'Completely exhausted, or deeply asleep',
-    example: 'I was zonked by ten.',
-    era: 'contemporary', type: 'word', flag: null, category: 'body-health', ipa: null,
-    note: 'Stronger than tired and slightly comic.' },
   { id: 'NAM-115', dialect: 'nam', term: 'pumped',
     meaning: 'Excited and full of energy',
     example: 'I’m so pumped for opening.',
@@ -953,11 +952,6 @@ export const IDIOM = [
     example: 'Quit sucking up.',
     era: 'contemporary', type: 'phrase', flag: null, category: 'people', ipa: null,
     note: 'Harsher than buttering up, and specifically upward.' },
-  { id: 'NAM-144', dialect: 'nam', term: 'wise up',
-    meaning: 'Start seeing things as they are',
-    example: 'Wise up — they were never going to call.',
-    era: 'contemporary', type: 'phrase', flag: null, category: 'affirm-deny', ipa: null,
-    note: 'An instruction, usually impatient.' },
   { id: 'NAM-145', dialect: 'nam', term: 'cough it up',
     meaning: 'Hand it over reluctantly',
     example: 'Come on, cough it up.',
@@ -973,11 +967,6 @@ export const IDIOM = [
     example: 'I shelled out for the good seats.',
     era: 'contemporary', type: 'phrase', flag: null, category: 'money', ipa: null,
     note: 'The amount felt like too much.' },
-  { id: 'NAM-148', dialect: 'nam', term: 'fork over',
-    meaning: 'Hand over unwillingly',
-    example: 'He forked over the keys.',
-    era: 'contemporary', type: 'phrase', flag: null, category: 'money', ipa: null,
-    note: 'Physical handing, under pressure.' },
   { id: 'NAM-149', dialect: 'nam', term: 'hunker down',
     meaning: 'Settle in for something difficult',
     example: 'We hunkered down and learned it.',
@@ -1025,11 +1014,6 @@ export const IDIOM = [
     example: 'Who do you think you’re talking to?',
     era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
     note: 'Status made explicit. Rarely a real question.' },
-  { id: 'NAM-158', dialect: 'nam', term: 'what do you take me for?',
-    meaning: 'Do you think I am that stupid?',
-    example: 'What do you take me for?',
-    era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
-    note: 'Wounded pride, not curiosity.' },
   { id: 'NAM-159', dialect: 'nam', term: 'I wasn’t born yesterday',
     meaning: 'I am not naive',
     example: 'I wasn’t born yesterday, you know.',
@@ -1090,11 +1074,6 @@ export const IDIOM = [
     example: 'Sell the house? Over my dead body.',
     era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
     note: 'Theatrical by design. Comic or deadly by tone alone.' },
-  { id: 'NAM-171', dialect: 'nam', term: 'not on your life',
-    meaning: 'Definitely not',
-    example: 'Lend him the car? Not on your life.',
-    era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
-    note: 'Emphatic refusal, slightly older register.' },
   { id: 'NAM-172', dialect: 'nam', term: 'you can count on it',
     meaning: 'It is guaranteed',
     example: 'Seven sharp. You can count on it.',
@@ -1105,11 +1084,6 @@ export const IDIOM = [
     example: 'Long rehearsal. — You can say that again.',
     era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
     note: 'Never a literal request to repeat. Non-native speakers take it literally.' },
-  { id: 'NAM-174', dialect: 'nam', term: 'you said a mouthful',
-    meaning: 'That was a lot of truth at once',
-    example: 'You said a mouthful there.',
-    era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
-    note: 'Warm, older, slightly rural flavour.' },
   { id: 'NAM-175', dialect: 'nam', term: 'that’s more like it',
     meaning: 'Now it is as it should be',
     example: 'There — that’s more like it.',
@@ -1261,11 +1235,6 @@ export const IDIOM = [
     example: 'What’s your problem?',
     era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
     note: 'Confrontational. Not a genuine enquiry.' },
-  { id: 'NAM-205', dialect: 'nam', term: 'what’s the big idea?',
-    meaning: 'What do you think you are doing?',
-    example: 'Hey — what’s the big idea?',
-    era: 'contemporary', type: 'saying', flag: null, category: 'affirm-deny', ipa: null,
-    note: 'Older register; comic in a modern mouth.' },
   { id: 'NAM-206', dialect: 'nam', term: 'what gives?',
     meaning: 'What is going on?',
     example: 'Nobody’s here. What gives?',
@@ -1678,11 +1647,6 @@ export const IDIOM = [
     example: 'The theatre footed the bill.',
     era: 'contemporary', type: 'saying', flag: null, category: 'money', ipa: null,
     note: 'Often about an institution rather than a person.' },
-  { id: 'NAM-288', dialect: 'nam', term: 'bring home the bacon',
-    meaning: 'Earn the household income',
-    example: 'She brings home the bacon.',
-    era: 'contemporary', type: 'saying', flag: null, category: 'money', ipa: null,
-    note: 'Slightly dated and still warm.' },
   { id: 'NAM-289', dialect: 'nam', term: 'cash in on something',
     meaning: 'Profit from an opportunity',
     example: 'They cashed in on the reviews.',
@@ -1703,11 +1667,6 @@ export const IDIOM = [
     example: 'The contract nickel-and-dimes you.',
     era: 'contemporary', type: 'saying', flag: null, category: 'money', ipa: null,
     note: 'Petty extraction, resented more than a big bill.' },
-  { id: 'NAM-293', dialect: 'nam', term: 'bet your bottom dollar',
-    meaning: 'Be completely certain',
-    example: 'You can bet your bottom dollar he’ll be late.',
-    era: 'contemporary', type: 'saying', flag: null, category: 'money', ipa: null,
-    note: 'Your last dollar. Total confidence.' },
   { id: 'NAM-294', dialect: 'nam', term: 'go big or go home',
     meaning: 'Commit fully or not at all',
     example: 'Go big or go home.',
@@ -1740,6 +1699,13 @@ export const IDIOM = [
     example: 'Opening night, full house — it doesn’t get any better than that.',
     era: 'contemporary', type: 'saying', flag: null, category: 'intensity', ipa: null,
     note: 'Superlative praise, usually about an experience rather than a thing.' },
+  // Kept by name on the owner's read of the old-timey list (2026-09-27),
+  // and it was not in the library at all — so keeping it meant writing it.
+  { id: 'NAM-300', dialect: 'nam', term: 'son of a gun',
+    meaning: 'Mild oath of surprise, or a person regarded with grudging affection',
+    example: 'Well, I’ll be a son of a gun. — He rebuilt it himself, the son of a gun.',
+    era: 'contemporary', type: 'phrase', flag: null, category: 'exclamation', ipa: null,
+    note: 'The clean stand-in for the obscene version, and the reason it survives. Affectionate as often as angry: about a person it is nearly always admiring. Dates a speaker older rather than rougher.' },
   // ── Australian ──────────────────────────────────
   { id: 'AUS-001', dialect: 'aus', term: 'arvo',
     meaning: 'Afternoon',
