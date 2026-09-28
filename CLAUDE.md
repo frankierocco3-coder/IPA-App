@@ -1230,9 +1230,13 @@ blurs the meaning without reflowing. It appears wherever a recast has an
 approved `plain`, which today is the 25 owner-approved sonnets plus the
 5 pilots. It makes NO claim to align line for line, because the Plain
 Meaning is one prose paragraph and the alignment data does not exist.
-**Shakespeare's Language** is the 160-entry lexicon
-(js/data/shakespeare-lexicon.js) on a reference page of its own:
-Studio > Scripts & Speeches > Shakespeare's Language. 70 false
+**The Shakespeare Dictionary** is the 160-entry lexicon
+(js/data/shakespeare-lexicon.js) on a reference page of its own.
+Called Shakespeare's Language until 2026-09-28, when the owner renamed
+it and moved it INTO the Shakespeare Library: it is reading, and reading
+shelves. It is no longer on Shakespeare Practice or the Shakespeare
+Studio, and the retired name is lint-banned from the view layer. The
+data file and every SH-### id are unchanged. 70 false
 friends first (a word you THINK you know sends you on stage playing
 the wrong thing), then 60 obsolete words, 17 elisions carrying their
 scansion effect, 13 points of grammar. Filtered by the shared
@@ -1375,7 +1379,8 @@ OWNER TRIM (2026-09-25). Five changes to live content:
   pinned that prose verbatim is inverted: it now proves the page does not
   show it and the data still holds it.
 * The shared-framework paragraph is deleted from ac-question.
-* Building a Character module 6 is "Build from your life" (id 'piece'
+* Building a Character module 6 is "From the inside out" (renamed from
+  "Build from your life" by owner order 2026-09-28; id 'piece'
   unchanged, so nothing stored moved).
 * THE SHAKESPEARE WORKSPACE OFFERS SHAKESPEARE TEXTS ONLY: sonnets, the
   eight Shakespeare scenes, the lexicon and the rhetoric shelf. It used to

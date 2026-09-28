@@ -262,7 +262,7 @@ export const SHAKESPEARE_LESSONS = [
         'Verbs took endings that are gone now: thou hast, he doth, she knoweth.',
         'Syllables were elided to fit the metre: o’er, ’tis, ne’er. These are scansion facts before they are vocabulary.',
       ] },
-      { p: 'Three of those five are in the lexicon shelf, with an actor-facing note on every entry, so this course does not drill them. Open Shakespeare’s Language and work through the false friends first. They are the ones that send a performer on stage playing the wrong thing.' },
+      { p: 'Three of those five are in the lexicon shelf, with an actor-facing note on every entry, so this course does not drill them. Open the Shakespeare Dictionary in the Library and work through the false friends first. They are the ones that send a performer on stage playing the wrong thing.' },
       { h: 'What did not move' },
       { p: 'Almost everything that matters to an actor. The order of subject and verb in a plain sentence. The way a question rises. The fact that a short word landing after several long ones gets weight. The way a person interrupts themselves when they are frightened. You already have all of it, because you speak the language it grew into.' },
       { p: 'Pronunciation is a separate question and a contested one. The plays were spoken with sounds that are not the sounds of any living accent, and the reconstruction of that is a scholarly field with real disagreement inside it. This course does not ask you to attempt it. Speak the text in the accent you are working in, which for this course is Neutral American.' },

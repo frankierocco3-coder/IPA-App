@@ -94,7 +94,7 @@ export const RHETORIC = [
     note: 'Where anaphora builds forward, this one closes doors. Each clause arrives somewhere different and lands on the same word, so the repetition sounds like a verdict the speaker cannot get away from.',
     examples: [
       { text: 'of the people, by the people, for the people',
-        source: 'Lincoln, Gettysburg Address, 1863 — three endings on the same two words' },
+        source: 'Lincoln, Gettysburg Address, 1863' },
     ] },
 
   { id: 'RH-006', term: 'Epizeuxis',
@@ -110,7 +110,7 @@ export const RHETORIC = [
     note: 'It keeps a word in the air and works it. The listener hears the same word arrive with a different weight, which is how a speaker can argue without ever stating the argument.',
     examples: [
       { text: 'Put out the light, and then put out the light.',
-        source: 'Othello V.ii — the candle, then her life' },
+        source: 'Othello V.ii' },
     ] },
 
   { id: 'RH-008', term: 'Antimetabole',

@@ -371,12 +371,17 @@ def main():
         "qualified professional.") not in sp_course:
         fail("the Speech safety line drifted")
 
-    # 6n: Shakespeare's Language (2026-09-25). The lexicon was written on
-    # 2026-09-24 and imported by NOTHING for a day, so the shelf entry and
-    # the page are pinned: written content that nothing can open is the
-    # worst state for it to be in, and a silent unwiring would restore it.
-    if "title: 'Shakespeare\u2019s Language'" not in views_js:
-        fail("the Shakespeare lexicon lost its shelf card")
+    # 6n: The Shakespeare Dictionary (2026-09-25; renamed from
+    # Shakespeare's Language and moved into the Shakespeare Library by owner
+    # order 2026-09-28). The lexicon was written on 2026-09-24 and imported
+    # by NOTHING for a day, so the shelf entry and the page are pinned:
+    # written content that nothing can open is the worst state for it to be
+    # in, and a silent unwiring would restore it.
+    if "title: 'The Shakespeare Dictionary'" not in views_js:
+        fail("the Shakespeare Dictionary lost its shelf card")
+    # The old name described the whole subject of a seven-module course.
+    if "Shakespeare\u2019s Language" in views_js:
+        fail("the retired name Shakespeare's Language is back on a learner surface")
     if "function renderShakespeareLexicon()" not in views_js:
         fail("the Shakespeare lexicon page is gone")
     # Nobody qualified has checked these definitions. The page must keep

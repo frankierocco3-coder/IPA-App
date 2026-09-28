@@ -35,7 +35,7 @@ export const RHETORIC_PRINCIPLE =
 // Six modules. Module 1 is written; 2 to 6 are outlined and carry no
 // lessons yet, which is why the shelf shows one collection and not six.
 export const RHETORIC_MODULES = [
-  { n: 1, id: 'ground', title: 'What Rhetoric Is',
+  { n: 1, id: 'ground', title: 'What is Rhetoric?',
     blurb: 'The word, the reputation it lost, and the three questions every persuasive speech answers.' },
   { n: 2, id: 'audience', title: 'The Person Opposite',
     blurb: 'Who you are actually talking to, what they already believe, and why timing is part of the argument.' },
@@ -54,7 +54,7 @@ const SHELF_ICON = { ground: '🏛️', audience: '👂', invention: '🔎',
 
 export const RHETORIC_LESSONS = [
 
-  // ── Module 1 · What Rhetoric Is ───────────────────────────────
+  // ── Module 1 · What is Rhetoric? ───────────────────────────────
   { id: 'rh-what', module: 'ground', order: 1,
     title: 'What the Word Actually Means',
     attribution: 'Speechcraft original',

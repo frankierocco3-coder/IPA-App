@@ -34,15 +34,22 @@
 //   ask      the question that catches it — both added 2026-09-28 so this
 //            shelf reads exactly like All Fallacies next door. The two are
 //            the same craft and were being presented two different ways.
-//   examples ONE, the strongest, same order and same day. A constructed
-//            case where the error is anonymous, a cited one where a real
-//            instance exists, and the source line always says which.
+//   examples ONE, the strongest, same order and same day. `source` is
+//            OPTIONAL and carries a SHORT provenance tag, nothing else.
 //
 // ON THE EXAMPLES. A fallacy example has to be a BAD argument, and bad
 // arguments are mostly anonymous: people do not sign them. So most of
-// these are constructed, and each says so in its source line rather than
-// borrowing false authority. Where Aristotle gives his own example it is
-// cited to him, and where a famous instance exists it is named.
+// these are written for this course, and the shelf says so once, at the
+// top, instead of stamping every card. `source` appears ONLY where there
+// is a real one: Aristotle's own examples, and the two stock cases old
+// enough that inventing them here would be a lie.
+//
+// The source line is a TAG, not a remark. Owner order 2026-09-28: the
+// commentary that used to ride along with it ("the canonical example, and
+// still the clearest because both answers convict") is gone from every
+// entry. It praised the choice of example instead of teaching anything,
+// and a reader does not need to be told an example is good. Do not put a
+// sentence back in this field.
 //
 // HOUSE STYLE applies to `what` and `note`. It does NOT apply to the
 // examples, which have to be allowed to sound like people talking.
@@ -76,8 +83,7 @@ export const FALLACIES = [
     overlook: 'That the word changed meaning between one premise and the next. Nobody lied, and the word is genuinely doing both jobs.',
     ask: 'What does that word mean in each place it appears? Say both out loud.',
     examples: [
-      { text: 'The sign says “Fine for parking here.” So it is fine to park here.',
-        source: 'Constructed. One word, two senses, and a real sign that really does say it.' },
+      { text: 'The sign says “Fine for parking here.” So it is fine to park here.' },
     ] },
 
   { id: 'FA-002', term: 'Amphiboly', group: 'language',
@@ -86,8 +92,7 @@ export const FALLACIES = [
     overlook: 'That the sentence has a second reading. The listener settles on one and never sees the other.',
     ask: 'Which reading do you need for that to follow?',
     examples: [
-      { text: 'The teacher told the student that he was confused.',
-        source: 'Constructed. No word in it is ambiguous; the pronoun is, and the whole meaning turns on it.' },
+      { text: 'The teacher told the student that he was confused.' },
     ] },
 
   { id: 'FA-003', term: 'Composition', group: 'language',
@@ -97,7 +102,7 @@ export const FALLACIES = [
     ask: 'Taken together, or taken separately?',
     examples: [
       { text: 'Is it possible for a man who is sitting to walk? Taken together, no. Taken apart — a man who is sitting is able to walk — yes.',
-        source: 'Aristotle, Sophistical Refutations — his own example of the figure.' },
+        source: 'Aristotle, Sophistical Refutations' },
     ] },
 
   { id: 'FA-004', term: 'Division', group: 'language',
@@ -107,7 +112,7 @@ export const FALLACIES = [
     ask: 'That was said of the whole. Are you now saying it of each part?',
     examples: [
       { text: 'Five is two and three. So five is two, and five is three.',
-        source: 'Aristotle, Sophistical Refutations — the classical example.' },
+        source: 'Aristotle, Sophistical Refutations' },
     ] },
 
   { id: 'FA-005', term: 'Accent', group: 'language',
@@ -116,8 +121,7 @@ export const FALLACIES = [
     overlook: 'That the emphasis carried a claim the words never made, which is why the speaker can deny it afterwards.',
     ask: 'What do the words say without the stress?',
     examples: [
-      { text: 'I did not say he stole the money. Seven words, seven meanings, one for each word you stress.',
-        source: 'Constructed; the standard demonstration, and the cleanest proof that emphasis is a claim.' },
+      { text: 'I did not say he stole the money. Seven words, seven meanings, one for each word you stress.' },
     ] },
 
   { id: 'FA-006', term: 'Figure of speech', group: 'language',
@@ -127,7 +131,7 @@ export const FALLACIES = [
     ask: 'Are these the same kind of thing, or only the same shape of word?',
     examples: [
       { text: 'Whatever is capable of being seen is a visible. This is capable of being seen. So this is a visible thing.',
-        source: 'Aristotle, Sophistical Refutations — the form of the word standing in for the argument.' },
+        source: 'Aristotle, Sophistical Refutations' },
     ] },
 
   // ── Not depending on language: the seven ─────────────────────
@@ -139,7 +143,7 @@ export const FALLACIES = [
     ask: 'What is different about this particular case?',
     examples: [
       { text: 'What you bought yesterday you ate today. You bought raw meat yesterday. So you ate raw meat today.',
-        source: 'Aristotle, Sophistical Refutations — his own example, and still the clearest.' },
+        source: 'Aristotle, Sophistical Refutations' },
     ] },
 
   { id: 'FA-008', term: 'Secundum quid', group: 'matter',
@@ -149,8 +153,7 @@ export const FALLACIES = [
     overlook: 'The qualification that fell off between one sentence and the next. It usually falls; it is rarely removed.',
     ask: 'True when, where, and for whom?',
     examples: [
-      { text: 'This medicine helps people with the condition. So this medicine helps people.',
-        source: 'Constructed. One dropped qualification and the claim has changed entirely.' },
+      { text: 'This medicine helps people with the condition. So this medicine helps people.' },
     ] },
 
   { id: 'FA-009', term: 'Ignoratio elenchi', group: 'matter',
@@ -160,8 +163,7 @@ export const FALLACIES = [
     overlook: 'That a real proof succeeded at the wrong target. The audience watches an argument work and scores it.',
     ask: 'What was the claim, and is this a proof of that?',
     examples: [
-      { text: 'A lawyer proves at length that the crime was terrible, when the question was whether this defendant committed it.',
-        source: 'Constructed; the courtroom form, and the reason judges interrupt.' },
+      { text: 'A lawyer proves at length that the crime was terrible, when the question was whether this defendant committed it.' },
     ] },
 
   { id: 'FA-010', term: 'Begging the question', group: 'matter',
@@ -171,8 +173,7 @@ export const FALLACIES = [
     overlook: 'The circle, when it is wide enough that the beginning and the end look like different sentences.',
     ask: 'Is there support here I could accept without already believing the conclusion?',
     examples: [
-      { text: 'This book is true, because it says of itself that it is true, and a true book would not lie.',
-        source: 'Constructed; a tight circle, shown small so the shape is visible.' },
+      { text: 'This book is true, because it says of itself that it is true, and a true book would not lie.' },
     ] },
 
   { id: 'FA-011', term: 'False cause', group: 'matter',
@@ -183,7 +184,7 @@ export const FALLACIES = [
     ask: 'What else happened, and what would we see if this were not the cause?',
     examples: [
       { text: 'The cock crows before dawn, so the cock causes the dawn.',
-        source: 'Traditional; the oldest illustration of post hoc, and it survives because nobody can pretend to believe it.' },
+        source: 'Traditional' },
     ] },
 
   { id: 'FA-012', term: 'Consequent', group: 'matter',
@@ -193,8 +194,7 @@ export const FALLACIES = [
     overlook: 'The other causes that produce exactly the same result. The theory predicted the evidence, and so would several others.',
     ask: 'What else would produce exactly this?',
     examples: [
-      { text: 'If it rained, the ground is wet. The ground is wet. So it rained.',
-        source: 'Constructed; the minimal form. A burst pipe produces the same wet ground.' },
+      { text: 'If it rained, the ground is wet. The ground is wet. So it rained.' },
     ] },
 
   { id: 'FA-013', term: 'Many questions', group: 'matter',
@@ -205,7 +205,7 @@ export const FALLACIES = [
     ask: 'What am I agreeing to by answering this?',
     examples: [
       { text: 'Have you stopped beating your wife?',
-        source: 'Traditional; the canonical example, and still the clearest because both answers convict.' },
+        source: 'Traditional' },
     ] },
 
 ];

@@ -149,10 +149,11 @@ part of the app.
 
 ## Library shelves (not lessons)
 
-**Shakespeare's Language** — the 160-entry lexicon. **BUILT AND LIVE
-2026-09-25**, shelved at Studio > Scripts & Speeches rather than waiting
-for the course, because it was written on 2026-09-24 and reachable from
-nowhere for a day. 70 false friends first, then 60 obsolete words, 17
+**The Shakespeare Dictionary** — the 160-entry lexicon. **BUILT AND LIVE
+2026-09-25**, first shelved at Studio > Scripts & Speeches rather than
+waiting for the course, because it was written on 2026-09-24 and reachable
+from nowhere for a day. RENAMED and moved into the Shakespeare Library by
+owner order 2026-09-28; it is no longer on Practice or the Studio. 70 false friends first, then 60 obsolete words, 17
 elisions with their metre notes, 13 grammar entries. Filtered by the
 shared single-select, searchable across every field, reference only.
 Badged awaiting review by a Shakespeare scholar or verse teacher. When

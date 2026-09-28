@@ -4356,10 +4356,14 @@ export async function run({ navDoc = document } = {}) {
       SHAKESPEARE_LEXICON.every(e => !e.source || e.example));
 
     const lexSrc = await viewSource();
-    check('lexicon: it is on a shelf and the shelf opens it',
-      lexSrc.includes("title: 'Shakespeare’s Language'")
+    // Renamed The Shakespeare Dictionary and moved into the Shakespeare
+    // Library by owner order 2026-09-28. Both halves are pinned: the card
+    // exists, and the old name is gone rather than surviving in one place.
+    check('dictionary: it is on a shelf, the shelf opens it, the old name is gone',
+      lexSrc.includes("title: 'The Shakespeare Dictionary'")
       && lexSrc.includes('go: renderShakespeareLexicon')
-      && lexSrc.includes('function renderShakespeareLexicon()'));
+      && lexSrc.includes('function renderShakespeareLexicon()')
+      && !lexSrc.includes('Shakespeare’s Language'));
     check('lexicon: the page says plainly that nobody qualified has checked it',
       lexSrc.includes('Awaiting review by a Shakespeare scholar or verse teacher'));
     // A reference, not a lesson: nothing scored, nothing stored, nothing locked.
@@ -4486,16 +4490,30 @@ export async function run({ navDoc = document } = {}) {
       FALLACIES.every(f => f.term && f.what?.trim() && f.note?.trim()
         && f.overlook?.trim() && f.ask?.trim()
         && f.examples?.length === 1
-        && f.examples.every(x => x.text?.trim() && x.source?.trim())
+        && f.examples.every(x => x.text?.trim())
         && FALLACY_GROUPS[f.group]));
-    // Most examples are invented, which is honest for bad arguments and
-    // dishonest if unsaid. Every source line must declare what it is.
-    check('fallacies: every example says whether it is constructed or cited',
-      FALLACIES.flatMap(f => f.examples)
-        .every(x => /Constructed|Traditional|Aristotle|Herodotus|common practice|ordinary speech|standing philosophical/i.test(x.source)));
+    // Owner order 2026-09-28: the commentary that used to ride along with a
+    // source line is gone ("Traditional; the canonical example, and still
+    // the clearest because both answers convict"). It praised the choice of
+    // example instead of teaching anything. `source` is now OPTIONAL and is
+    // a TAG, so the pin is on its shape: short, and one of the two real
+    // provenances this shelf has.
+    const faSources = FALLACIES.flatMap(f => f.examples).map(x => x.source).filter(Boolean);
+    check('fallacies: a source is a short tag, never a remark about the example',
+      faSources.length === 6
+      && faSources.every(s => s.length <= 40 && !/[;—]/.test(s)
+        && /^(Aristotle, Sophistical Refutations|Traditional)$/.test(s)),
+      faSources.join(' | '));
     check('fallacies: they are a SEPARATE shelf from the figures, not folded in',
       RHETORIC.every(r => !FALLACIES.some(f => f.term === r.term)));
     const faSrc = await viewSource();
+    // Honesty about provenance moved from forty source lines to one sentence
+    // at the top of EACH shelf. If it is dropped, an example written here
+    // reads as a quotation, so both shelves are pinned, not just one.
+    check('fallacies: both shelves say once that an unsourced example is ours',
+      /written for this course unless a source is named/.test(faSrc)
+      && (faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length === 2,
+      String((faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length));
     check('fallacies: the shelf is reachable and is a reference, not a lesson',
       /function renderFallacyShelf\(\)/.test(faSrc)
       && /The Thirteen Fallacies/.test(faSrc)
@@ -4525,6 +4543,18 @@ export async function run({ navDoc = document } = {}) {
         && f.overlook?.trim() && f.ask?.trim() && f.repair === undefined)
       && new Set(MODERN_FALLACIES.map(f => f.id)).size === MODERN_FALLACIES.length
       && MODERN_FALLACIES.every(f => /^MF-\d{3}$/.test(f.id)));
+    // One example each, owner order 2026-09-28 — the thirteen had one and
+    // these had none, so the two shelves read differently on the one thing a
+    // reader learns from. NONE is attributed: attributing a bad argument to
+    // a named speaker is a claim about that person this file cannot support.
+    check('families: every entry carries exactly one example, and none is attributed',
+      MODERN_FALLACIES.every(f => f.examples?.length === 1
+        && f.examples.every(x => x.text?.trim() && x.source === undefined)),
+      MODERN_FALLACIES.filter(f => f.examples?.length !== 1).map(f => f.id).join(' '));
+    check('families: house style holds on our prose, examples exempt',
+      MODERN_FALLACIES.flatMap(f => [f.what, f.overlook, f.ask, f.note ?? ''])
+        .every(t2 => !/[—–"]/.test(t2)
+          && !/n’t\b|’(re|ll|ve|m|d)\b/.test(t2)));
     // THE OVERLAP IS THE POINT. Five modern names ARE Aristotle's, and two
     // shelves defining one error twice would make the app look as though it
     // did not know. Each must POINT at the thirteen, and the id must resolve.

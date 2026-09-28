@@ -1011,7 +1011,8 @@ function renderSpeechModule(n) {
 }
 
 // Per-workspace Library search state.
-const libState = { speech: { query: '' }, acting: { query: '' }, dialect: { query: '' }, rhetoric: { query: '' } };
+const libState = { speech: { query: '' }, acting: { query: '' }, dialect: { query: '' },
+  rhetoric: { query: '' }, shakespeare: { query: '' } };
 let speechLibQuery = '';
 
 // Collection identity: one tone and one emoji per collection, applied
@@ -2847,7 +2848,11 @@ function runArcadeGame(gameId, text) {
 const TILE_TONES = ['is-sage', 'is-terracotta', 'is-blue', 'is-lavender', 'is-gold'];
 
 
-function workspaceLibrary(el, { workspace, cards, state }) {
+// `subject` is the workspace's name as it reads INSIDE a sentence. It
+// defaults to the lowercased name, which is right for acting, speech and
+// rhetoric and wrong for Shakespeare: lowercasing a proper noun was a live
+// copy defect the moment that library came through here (2026-09-28).
+function workspaceLibrary(el, { workspace, subject, cards, state }) {
   const q = (state.query ?? '').trim().toLowerCase();
   const match = c => !q
     || c.title.toLowerCase().includes(q)
@@ -2865,7 +2870,7 @@ function workspaceLibrary(el, { workspace, cards, state }) {
   el.innerHTML = `
     <div class="ws-head">
       <h1 class="page-h">${esc(workspace)} Library</h1>
-      <p class="ws-sub">Browse the complete ${esc(workspace.toLowerCase())} reference by topic.</p>
+      <p class="ws-sub">Browse the complete ${esc(subject ?? workspace.toLowerCase())} reference by topic.</p>
     </div>
     <label class="field sp-search-field" for="lib-search">
       <span class="field-label">Search the Library</span>
@@ -2904,14 +2909,14 @@ function workspaceLibrary(el, { workspace, cards, state }) {
   input.addEventListener('input', () => {
     state.query = input.value;
     const at = input.selectionStart;
-    workspaceLibrary(el, { workspace, cards, state });
+    workspaceLibrary(el, { workspace, subject, cards, state });
     const again = el.querySelector('#lib-search');
     again.focus();
     try { again.setSelectionRange(at, at); } catch { /* fine */ }
   });
   el.querySelector('#lib-clear')?.addEventListener('click', () => {
     state.query = '';
-    workspaceLibrary(el, { workspace, cards, state });
+    workspaceLibrary(el, { workspace, subject, cards, state });
     el.querySelector('#lib-search').focus();
   });
   state.wire?.(el);
@@ -4526,10 +4531,21 @@ function fallacyRowHtml(f) {
       <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
       <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
       <p class="lex-note">${esc(f.note)}</p>
-      ${f.examples.map(x => `
-        <p class="lex-eg">“${esc(x.text)}”<span class="lex-src">${esc(x.source)}</span></p>`).join('')}
+      ${f.examples.map(egHtml).join('')}
     </article>`;
 }
+
+// One example row. `source` is OPTIONAL and is a TAG, never a remark: the
+// commentary that used to ride along with it went by owner order
+// 2026-09-28, and both shelves now say once, at the top, that an example
+// with no source was written for this course.
+const egHtml = x => `
+  <p class="lex-eg">“${esc(x.text)}”${
+    x.source ? `<span class="lex-src">${esc(x.source)}</span>` : ''}</p>`;
+
+// Said once per shelf instead of stamped on every card.
+const EG_PROVENANCE = 'The examples are written for this course unless a source is named. '
+  + 'A fallacy example has to be a bad argument, and bad arguments are mostly anonymous.';
 
 function renderFallacyShelf() {
   record(renderFallacyShelf);
@@ -4545,6 +4561,7 @@ function renderFallacyShelf() {
       <p class="guide-text">This is Aristotle’s list and nobody else’s. Modern handbooks run to a
         hundred names; he gives thirteen and divides them once. Thirteen is a number a person can
         carry into a room.</p>
+      <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(FALLACY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fa-search" type="search"
         placeholder="Search fallacies, effects, examples…" aria-label="Search the fallacies"
@@ -4557,7 +4574,7 @@ function renderFallacyShelf() {
   const draw = () => {
     const q = fallQuery.trim().toLowerCase();
     const hits = q
-      ? FALLACIES.filter(f => [f.term, f.what, f.note,
+      ? FALLACIES.filter(f => [f.term, f.modern, f.what, f.note, f.overlook, f.ask,
           ...f.examples.flatMap(x => [x.text, x.source])]
           .some(v => String(v ?? '').toLowerCase().includes(q)))
       : FALLACIES;
@@ -4608,6 +4625,7 @@ function modernFallacyHtml(f) {
       <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
       <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
       ${f.note ? `<p class="lex-note">${esc(f.note)}</p>` : ''}
+      ${(f.examples ?? []).map(egHtml).join('')}
     </article>`;
 }
 
@@ -4624,9 +4642,10 @@ function renderFamilyShelf() {
         question at the head of each group is the one worth carrying.</p>
       <p class="guide-text">Naming a fallacy begins an examination. It does not finish one, and it
         is never a way to win an argument without having the better case.</p>
+      <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(FAMILY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fam-search" type="search"
-        placeholder="Search by name, by what it hides, by the question…"
+        placeholder="Search names, effects, questions, examples…"
         aria-label="Search all fallacies" autocomplete="off">
       <div id="fam-list" aria-live="polite"></div>
     </main>`;
@@ -4636,7 +4655,8 @@ function renderFamilyShelf() {
   const draw = () => {
     const q = famQuery.trim().toLowerCase();
     const hits = q
-      ? MODERN_FALLACIES.filter(f => [f.term, f.what, f.overlook, f.ask, f.repair, f.note]
+      ? MODERN_FALLACIES.filter(f => [f.term, f.what, f.overlook, f.ask, f.note,
+          ...(f.examples ?? []).map(x => x.text)]
           .some(v => String(v ?? '').toLowerCase().includes(q)))
       : MODERN_FALLACIES;
     if (!hits.length) {
@@ -4709,7 +4729,37 @@ function rhetoricLibraryPane(el) {
   ];
   workspaceLibrary(el, { workspace: 'Rhetoric', cards, state: libState.rhetoric });
 }
-function shakespeareLibraryPane(el) { return bookLibraryPane(el, BOOKS.shakespeare); }
+// The Shakespeare Library holds the course reading AND the Dictionary
+// (owner order 2026-09-28). The lexicon used to hang off Practice and the
+// Studio, which is where a reader looking for a word would not think to
+// look: it is reading, and reading shelves. Built the way Rhetoric's
+// library is, for the same reason — two kinds of thing on one shelf want a
+// search box and a heading over each kind.
+function shakespeareLibraryPane(el) {
+  const B = BOOKS.shakespeare;
+  const G1 = 'The reading', G2 = 'The references';
+  const cards = [
+    ...B.collections.map(c => {
+      const m = B.modules.find(x => x.id === c.id) ?? { id: c.id, title: c.title };
+      return {
+        // No count on a curricular tile (owner UI pass 2026-09-15: counts
+        // belong on material shelves). The Dictionary below carries one
+        // because 160 entries is the fact a reader wants before opening it.
+        key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon,
+        title: moduleTitle(B, m), group: G1,
+        keywords: `${m.blurb ?? ''} shakespeare chapter lesson`,
+        go: () => renderActingCollection(c.id),
+      };
+    }),
+    { key: 'col:sh-dictionary', tone: 'is-gold', emoji: '📖',
+      title: 'The Shakespeare Dictionary',
+      group: G2, count: SHAKESPEARE_LEXICON.length, unit: 'entry',
+      keywords: 'lexicon vocabulary false friends obsolete elision grammar words meaning glossary',
+      go: renderShakespeareLexicon },
+  ];
+  workspaceLibrary(el, { workspace: 'Shakespeare', subject: 'Shakespeare',
+    cards, state: libState.shakespeare });
+}
 // Parameterised 2026-09-25 when Shakespeare became the third book. The
 // body is Character's, unchanged except for the book it is handed.
 function bookLibraryPane(el, B) {
@@ -4759,7 +4809,7 @@ function characterPracticePane(el) {
 function shakespearePracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Shakespeare Practice</h1>
-    <p class="pane-note">No exercise has been built for this course yet. What is here is the text itself, with the tools the lessons point at. Nothing below is scored.</p>
+    <p class="pane-note">No exercise has been built for this course yet. What is here is the text itself, with the tools the lessons point at. Nothing below is scored. The Shakespeare Dictionary is in the Library, which is where reading belongs.</p>
     <button class="track-card hub-card" id="shp-sonnets" type="button">
       <div class="track-glyph">📜</div>
       <div class="track-info"><h2>The Sonnets</h2><p>Scan the metre, and read Side by Side where a voice is approved.</p></div>
@@ -4769,15 +4819,9 @@ function shakespearePracticePane(el) {
       <div class="track-glyph">🎭</div>
       <div class="track-info"><h2>Shakespeare’s Scenes</h2><p>Eight two-handers. The Scan tab marks verse, prose and every crossing between them.</p></div>
       <div class="track-arrow">›</div>
-    </button>
-    <button class="track-card hub-card" id="shp-lexicon" type="button">
-      <div class="track-glyph">📖</div>
-      <div class="track-info"><h2>Shakespeare’s Language</h2><p>The words that stop an actor, and what changes when you play them right.</p></div>
-      <div class="track-arrow">›</div>
     </button>`;
   el.querySelector('#shp-sonnets').addEventListener('click', () => navTo(renderSonnetList));
   el.querySelector('#shp-scenes').addEventListener('click', () => navTo(() => renderScenesShelf('Shakespeare')));
-  el.querySelector('#shp-lexicon').addEventListener('click', () => navTo(renderShakespeareLexicon));
 }
 
 // The Shakespeare Studio: SHAKESPEARE TEXTS ONLY (owner order
@@ -4790,7 +4834,6 @@ function shakespeareStudioPane(el) {
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', go: renderSonnetList },
     { icon: '🎭', title: 'Shakespeare’s Scenes', go: () => renderScenesShelf('Shakespeare') },
-    { icon: '📖', title: 'Shakespeare’s Language', go: renderShakespeareLexicon },
     { icon: '⚖️', title: 'Shakespeare’s Rhetoric', go: renderRhetoricShelf },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
@@ -6337,7 +6380,7 @@ function textSpeechPane(pane) {
   // collections below, with nothing promoted or duplicated.
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
-    { icon: '📖', title: 'Shakespeare’s Language', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
+    { icon: '📖', title: 'The Shakespeare Dictionary', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
     { icon: '⚖️', title: 'Shakespeare’s Rhetoric', blurb: `${RHETORIC.length} shapes a speech is built from — what each one does to the person being spoken to.`, go: renderRhetoricShelf },
     ...libs,
     { icon: '🎭', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
@@ -6354,9 +6397,15 @@ function textSpeechPane(pane) {
     b.addEventListener('click', () => shown[+b.dataset.i].go()));
 }
 
-// ── Shakespeare's Language: the lexicon, on a shelf ──────────────
+// ── The Shakespeare Dictionary: the lexicon, on a shelf ──────────
 //
-// 160 written entries that had no screen until now. Four kinds, and the
+// Called Shakespeare's Language until 2026-09-28, when the owner renamed
+// it and moved it into the Shakespeare Library. The old name described the
+// whole subject of a seven-module course; this one describes the shelf. The
+// data file keeps its name (shakespeare-lexicon.js) and every id is
+// untouched, which is what preserves anything stored against it.
+//
+// 160 written entries. Four kinds, and the
 // order is the argument: FALSE FRIENDS come first because a word an actor
 // does not know sends them to look it up, while a word they think they
 // know sends them on stage playing the wrong thing.
@@ -6432,16 +6481,16 @@ function renderShakespeareLexicon() {
     })),
   ];
   app.innerHTML = `
-    ${pageTopbar('📖 Shakespeare’s Language', '#8a6d3b')}
+    ${pageTopbar('📖 The Shakespeare Dictionary', '#8a6d3b')}
     <main class="guide">
-      <h1>Shakespeare’s Language</h1>
+      <h1>The Shakespeare Dictionary</h1>
       <p class="guide-text">The words and turns that stop an actor, and what they do in performance.
         A definition is a dictionary. The line under each one is the craft: what changes in the playing
         once you know.</p>
       <p class="pane-note pane-caveat">${esc(LEXICON_REVIEW_NOTE)}</p>
       <div id="lex-kind"></div>
       <input class="sonnet-search" id="lex-search" type="search"
-        placeholder="Search words, meanings, lines…" aria-label="Search Shakespeare’s Language"
+        placeholder="Search words, meanings, lines…" aria-label="Search the Shakespeare Dictionary"
         autocomplete="off">
       <div id="lex-list" aria-live="polite"></div>
     </main>`;
