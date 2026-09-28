@@ -20,6 +20,8 @@ import { phonemesForAccent } from '../engine.js';
 import { app, esc, goHome, phonemeSlug, record } from '../ui.js';
 import { actionPieceHtml, wireActionPiece } from './action-piece.js';
 import { SCRIPT_ANALYSIS } from '../data/script-analysis.js';
+import { IDIOM, idiomDrafts } from '../data/idiom.js';
+import { idiomStatus, CARRIED } from '../data/idiom-reviews.js';
 import { scriptAnalysisApproved } from '../data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './script-analysis.js';
 
@@ -202,6 +204,9 @@ export function renderContentReview() {
   const brDrafts = bridgeDrafts();
   const brComps = brDrafts.reduce((n, r) => n + r.comparisons.length, 0);
   const saDrafts = SCRIPT_ANALYSIS.filter(w => !scriptAnalysisApproved(w.id));
+  const xpDrafts = idiomDrafts();
+  const xpCarried = IDIOM.filter(e => idiomStatus(e.id) === 'carried');
+  const xpByDialect = xpDrafts.reduce((a, e) => (a[e.dialect] = (a[e.dialect] ?? 0) + 1, a), {});
   const revLine = (label, r) => `${label}: <b>${esc(r?.status ?? 'pending')}</b>${r?.reviewer ? ` — ${esc(r.reviewer)}${r.date ? `, ${esc(r.date)}` : ''}` : ''}`;
   app.innerHTML = `
     <header class="topbar">
@@ -273,6 +278,18 @@ export function renderContentReview() {
         <section class="review-piece">
           <p class="sonnet-hint">scene <code>${esc(w.id)}</code> · ${w.beats.length} beat(s) · ${w.metre.length} metre note(s) · status <b>draft</b> · awaiting acting-professional review</p>
           ${scriptAnalysisHtml(w, { heading: false })}
+        </section>`).join('')}
+
+      <h1 id="idiom-drafts">Words &amp; Expressions — ${xpDrafts.length} draft(s), ${xpCarried.length} carried</h1>
+      <p class="pane-note">The idiom library had NO gate until 2026-09-27, and this section exists because of that. It is tracked in <code>js/data/idiom-reviews.js</code> — absence from that file means draft, and a draft appears neither in the Library nor in any drill. Required reviewer: a <b>native or expert speaker</b> of the dialect, confirming that the term is really said, in that register, with that meaning, and that the example sentence is natural. Claude may never approve his own writing.</p>
+      <p class="pane-note pane-caveat">Two states are not the same and are not shown as the same. <b>${xpCarried.length} carried</b> entries predate the gate and stay visible on their documented provenance (converted from idiom-lists-v1.md, recorded there as authored and reviewed as prose) — that is a history, NOT a named review, and they still owe one. <b>${xpDrafts.length} drafts</b> have no reviewer at all and are hidden. Nothing in this library has had a named specialist read.</p>
+      <p class="pane-note">Drafts by dialect: ${Object.entries(xpByDialect).map(([d, n]) => `${esc(d)} <b>${n}</b>`).join(' · ') || 'none'}.</p>
+      ${xpDrafts.map(e => `
+        <section class="review-piece">
+          <p class="sonnet-hint">id <code>${esc(e.id)}</code> · ${esc(e.dialect)} · ${esc(e.era)} · ${esc(e.type)} · status <b>draft</b> · awaiting dialect review</p>
+          <p class="idiom-meaning"><b>${esc(e.term)}</b> — ${esc(e.meaning)}</p>
+          ${e.example ? `<p class="idiom-example">“${esc(e.example)}”</p>` : ''}
+          ${e.note ? `<p class="idiom-note">${esc(e.note)}</p>` : ''}
         </section>`).join('')}
 
       <h1 id="speech-drafts">Speech system — draft content</h1>

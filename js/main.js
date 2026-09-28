@@ -79,7 +79,7 @@ import { ONEILL } from './data/oneill.js';
 import { WILDE } from './data/wilde.js';
 import { PIRANDELLO } from './data/pirandello.js';
 import { IBSEN } from './data/ibsen.js';
-import { IDIOM, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS, MLE } from './data/idiom.js';
+import { IDIOM, idiomFor, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS, MLE } from './data/idiom.js';
 import { scanLine } from './scan.js';
 import { PENTAMETER, metreOfSonnet } from './data/sonnet-metre.js';
 import { loadPron, ipaFor } from './pron.js';
@@ -4931,7 +4931,7 @@ function libraryMain(el, course, ws = activeWorkspace()) {
       keywords: 'phoneme chart transcription',
       go: () => renderInventory(d) },
     { key: 'words', tone: 'is-terracotta', emoji: '🗣', img: 'img/ui/words.png', title: 'Words & Expressions',
-      count: IDIOM.filter(e => e.dialect === d).length, unit: 'expression',
+      count: idiomFor(d).length, unit: 'expression',
       keywords: 'idiom slang vocabulary', go: () => renderIdioms(d) },
     { key: 'drills', tone: 'is-sage', emoji: '👅', title: 'Twisters & Sentences',
       count: drillsFor(d).length, unit: 'drill',
@@ -5920,7 +5920,7 @@ function hubIdiom(hub, d, track) {
   // period category in its opening line or offer a Period filter — that is
   // the same dead-control rule the rest of the app follows. RP is period by
   // design and keeps both.
-  const hasPeriod = IDIOM.some(e => e.dialect === d && e.era === 'period');
+  const hasPeriod = idiomFor(d).some(e => e.era === 'period');
   // idiomFilters is shared across dialects. Filtering to Period on RP and
   // then opening American would otherwise leave the list silently filtered
   // with no control on screen to clear it — a hidden filter is worse than a
@@ -5929,8 +5929,7 @@ function hubIdiom(hub, d, track) {
 
   const draw = () => {
     const f = idiomFilters;
-    const rows = IDIOM.filter(e => {
-      if (e.dialect !== d) return false;
+    const rows = idiomFor(d).filter(e => {
       if (e.flag && !f.flagged) return false;
       if (f.era !== 'all' && e.era !== f.era && e.era !== 'both') return false;
       if (f.type !== 'all' && e.type !== f.type) return false;

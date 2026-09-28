@@ -3,7 +3,7 @@
 
 import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
 import { EXERCISES_PER_LESSON } from './data/dialect-course.js';
-import { IDIOM, IDIOM_DIALOGUES, IDIOM_SITUATIONS, IDIOM_LITERAL } from './data/idiom.js';
+import { IDIOM, idiomFor, IDIOM_DIALOGUES, IDIOM_SITUATIONS, IDIOM_LITERAL } from './data/idiom.js';
 import { voicesWith, clipIndexLoaded } from './audio.js';
 
 // Exercises that promise audio only use words with a real, playable
@@ -541,7 +541,7 @@ function genAccentEar(to, fromAccent) {
 // and are never served as an exercise.
 
 function idiomPool(accent) {
-  return IDIOM.filter(e => e.dialect === accent && !e.flag);
+  return idiomFor(accent).filter(e => !e.flag);
 }
 
 function genIdiom(accent) {
@@ -601,7 +601,7 @@ function idiomRegisterOf(e) {
 }
 
 function genIdiomRegister(accent) {
-  const pool = IDIOM.filter(e => e.dialect === (accent ?? 'ssbe'));
+  const pool = idiomFor(accent ?? 'ssbe');
   if (pool.length < 4) return null;
   const entry = pick(pool);
   const right = idiomRegisterOf(entry);

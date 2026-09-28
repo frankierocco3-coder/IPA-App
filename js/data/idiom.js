@@ -22,6 +22,16 @@
 //   ipa       null unless the source gave a specific transcription — see IPA note
 //   note      actor-facing caution: false friend, register, class marking
 
+import { idiomVisible } from './idiom-reviews.js';
+
+// THE LEARNER-FACING ACCESSORS. Every surface that shows an expression to a
+// learner goes through these; IDIOM itself is the full catalogue and is for
+// #review and the suite. Mirrors actionFor() in dialect-in-action.js, and
+// exists so the gate cannot be forgotten at one call site out of six.
+export const idiomFor = dialect =>
+  IDIOM.filter(e => e.dialect === dialect && idiomVisible(e.id));
+export const idiomDrafts = () => IDIOM.filter(e => !idiomVisible(e.id));
+
 export const CATEGORIES = [
   'greeting',
   'time',

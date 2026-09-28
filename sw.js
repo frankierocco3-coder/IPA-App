@@ -63,7 +63,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v18';                     // 2026-09-27: bumped for a CONTENT fix, against the rule above, and deliberately — see the note below
+const VERSION = 'sc-v19';                     // 2026-09-27: the module graph gained js/data/idiom-reviews.js — the ordinary reason to bump, this time
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

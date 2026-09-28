@@ -4,6 +4,7 @@
 // change: every declaration keeps its name and its body.
 
 import { IDIOM } from '../data/idiom.js';
+import { idiomVisible } from '../data/idiom-reviews.js';
 import { esc, openModal } from '../ui.js';
 import { dialectName } from './context.js';
 
@@ -39,12 +40,18 @@ export function wireActionPiece(root) {
     b.addEventListener('click', () => {
       const entry = IDIOM.find(e => e.id === b.dataset.xp);
       if (!entry) return;
+      // A piece may link an expression whose OWN review is still pending
+      // (the gate arrived 2026-09-27, after these pieces were written). The
+      // link still opens — the word is in the dialogue either way — but it
+      // must not quietly present unreviewed writing as settled vocabulary.
+      const pending = !idiomVisible(entry.id);
       openModal({
         title: `“${entry.term}”`,
         body: `
           <p class="idiom-meaning">${esc(entry.meaning)}</p>
           ${entry.example ? `<p class="idiom-example">“${esc(entry.example)}”</p>` : ''}
           ${entry.note ? `<p class="idiom-note">${esc(entry.note)}</p>` : ''}
+          ${pending ? '<p class="pane-note pane-caveat">This entry is awaiting a dialect review and is not yet published to Words &amp; Expressions.</p>' : ''}
           <p class="pane-note">From ${esc(dialectName(entry.dialect))} Words &amp; Expressions.</p>`,
         actions: '<button class="btn btn-primary" id="xp-close" type="button">Done</button>',
         onMount: (rootEl, close) => rootEl.querySelector('#xp-close').addEventListener('click', close),

@@ -60,7 +60,8 @@ import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
          loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
-import { IDIOM } from '../js/data/idiom.js';
+import { IDIOM, idiomFor, idiomDrafts } from '../js/data/idiom.js';
+import { idiomStatus, idiomVisible, CARRIED, IDIOM_REVIEWS } from '../js/data/idiom-reviews.js';
 import { SPEECH_LESSONS, SPEECH_COLLECTIONS, SPEECH_MODULES, speechModuleGroups, speechReading,
          TEXTBOOK_PARTS, TEXTBOOK_END_MATTER, textbookOrder, textbookPartChapters, chapterTitle,
          speechLessonsFor, speechLessonById,
@@ -1609,6 +1610,44 @@ export async function run({ navDoc = document } = {}) {
       namIdiom.length > 50 && namIdiom.every(e => e.era !== 'period')
       && IDIOM.some(e => e.dialect === 'rp' && e.era === 'period'),
       `nam: ${namIdiom.length} entries, ${namIdiom.filter(e => e.era === 'period').length} period`);
+    // ── The gate the idiom library never had (2026-09-27) ────────
+    // Until this existed, an expression reached learners the moment it was
+    // written. These pin the gate itself, not today's numbers, so they stay
+    // true as entries are reviewed and the draft pile shrinks to nothing.
+    check('idiom gate: every entry resolves to exactly one of three states',
+      IDIOM.every(e => ['approved', 'carried', 'draft'].includes(idiomStatus(e.id)))
+      && IDIOM.length === IDIOM.filter(e => idiomStatus(e.id) === 'approved').length
+        + IDIOM.filter(e => idiomStatus(e.id) === 'carried').length
+        + idiomDrafts().length);
+    check('idiom gate: a draft never reaches a learner surface',
+      idiomDrafts().every(e => !idiomVisible(e.id))
+      && ['nam', 'rp', 'ssbe', 'aus', 'cockney'].every(d =>
+        idiomFor(d).every(e => idiomVisible(e.id) && e.dialect === d)));
+    // A verdict with nobody's name on it is not an approval — the same rule
+    // edition-reviews.js enforces, and the one that stops Claude approving
+    // his own writing by editing a status field.
+    check('idiom gate: approval demands a NAMED reviewer, not just a verdict',
+      Object.entries(IDIOM_REVIEWS).every(([id, r]) =>
+        idiomStatus(id) !== 'approved'
+        || (r.dialect?.status === 'approved' && !!r.dialect?.reviewer)));
+    // Carried is a documented provenance, not a review, and must never be
+    // silently promoted into one.
+    check('idiom gate: carried entries are visible but still count as awaiting',
+      IDIOM.filter(e => idiomStatus(e.id) === 'carried')
+        .every(e => idiomVisible(e.id) && !IDIOM_REVIEWS[e.id])
+      && CARRIED.size > 0);
+    // Six call sites read this data. The gate is worth nothing if one of
+    // them reads IDIOM directly, so the accessor is pinned at each.
+    const idiomSrc2 = await viewSource();
+    const engineSrc = await fetch('../js/engine.js').then(r => r.text()).catch(() => '');
+    check('idiom gate: every learner surface goes through idiomFor, not raw IDIOM',
+      /count: idiomFor\(d\)\.length/.test(idiomSrc2)
+      && /const rows = idiomFor\(d\)\.filter/.test(idiomSrc2)
+      && /const hasPeriod = idiomFor\(d\)\.some/.test(idiomSrc2)
+      && /return idiomFor\(accent\)\.filter\(e => !e\.flag\)/.test(engineSrc)
+      && /const pool = idiomFor\(accent \?\? 'ssbe'\)/.test(engineSrc)
+      && !/IDIOM\.filter\(e => e\.dialect === /.test(engineSrc));
+
     // The owner's expression bank files these under "Regional flags: not part
     // of the neutral core" — they name a place and belong in researched
     // regional modules, not in the default working accent.
@@ -1621,7 +1660,7 @@ export async function run({ navDoc = document } = {}) {
     // no control to clear it. RP is period by design and keeps both.
     const idiomSrc = await viewSource();
     check('idiom: the Era control exists only where there is period material',
-      /const hasPeriod = IDIOM\.some\(e => e\.dialect === d && e\.era === 'period'\)/.test(idiomSrc)
+      /const hasPeriod = idiomFor\(d\)\.some\(e => e\.era === 'period'\)/.test(idiomSrc)
       && /if \(!hasPeriod && idiomFilters\.era === 'period'\) idiomFilters\.era = 'all'/.test(idiomSrc)
       && /\$\{hasPeriod \? `<div class="dialect-picker"><span class="dialect-label">Era/.test(idiomSrc)
       && /hub\.querySelector\(sel\)\?\.addEventListener/.test(idiomSrc));
