@@ -4630,17 +4630,35 @@ export async function run({ navDoc = document } = {}) {
     check('rhetoric: 17 figures, ids unique and in the stable RH-### form',
       RHETORIC.length === 17 && new Set(rhIds).size === 17
       && rhIds.every(id => /^RH-\d{3}$/.test(id)));
-    check('rhetoric: every figure carries a definition, an effect and a source',
+    check('rhetoric: every figure carries a definition, an effect and five examples',
       RHETORIC.every(r => r.term && r.what?.trim() && r.note?.trim()
-        && r.example?.trim() && r.source?.trim()));
+        && r.examples?.length === 5
+        && r.examples.every(x => x.text?.trim() && x.source?.trim())));
     // Build the corpus the same way the reader can: sonnets plus scenes.
+    //
+    // THE GUARANTEE NARROWED ON 2026-09-28 and the check narrowed with it.
+    // Every example used to come from this app's own texts and every one was
+    // verified here. Five examples per figure means most now come from the
+    // wider history of argument, and nothing in this repository holds
+    // Lincoln or the King James Bible, so no check can confirm their
+    // wording. What is still enforced is that EVERY figure keeps at least
+    // one example the app can prove, and that every inApp claim is true.
     const flat = s2 => String(s2).replace(/\s+/g, ' ').trim();
     const corpus = flat(SONNETS.flatMap(s2 => s2.lines).join(' ') + ' '
       + PROVIDED_SCENES.map(s2 => s2.text ?? '').join(' '));
-    const unverified = RHETORIC.filter(r => !corpus.includes(flat(r.example)));
-    check('rhetoric: every example is a real line from a text this app carries',
-      unverified.length === 0,
-      unverified.map(r => r.id + ' ' + r.example.slice(0, 40)).join(' | '));
+    const badInApp = RHETORIC.flatMap(r => r.examples
+      .filter(x => x.inApp && !corpus.includes(flat(x.text)))
+      .map(x => r.id + ' ' + x.text.slice(0, 40)));
+    check('rhetoric: every inApp example really is a line this app carries',
+      badInApp.length === 0, badInApp.join(' | '));
+    check('rhetoric: every figure keeps at least one example the app can prove',
+      RHETORIC.every(r => r.examples.some(x => x.inApp)),
+      RHETORIC.filter(r => !r.examples.some(x => x.inApp)).map(r => r.id).join(' '));
+    // Churchill and King are the two most quoted rhetors in English and both
+    // are still in copyright. They must not appear.
+    const rhCites = RHETORIC.flatMap(r => r.examples.map(x => x.source)).join(' ');
+    check('rhetoric: no in-copyright orator is quoted',
+      !/Churchill|Martin Luther King|King, 1963/i.test(rhCites));
     // House style applies to OUR prose, never to the quotations, which
     // keep the edition's own punctuation including its em dashes.
     const rhProse = RHETORIC.flatMap(r => [r.what, r.note]);
