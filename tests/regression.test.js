@@ -4572,6 +4572,36 @@ export async function run({ navDoc = document } = {}) {
     check('families: the shelf is reachable and is a reference, not a lesson',
       /function renderFamilyShelf\(\)/.test(famSrc)
       && /All Fallacies/.test(famSrc));
+    // ALL FOUR SHELVES IN THE LIBRARY (owner order 2026-09-28). They were
+    // split across Learn, Practice and Studio, so a reader looking for the
+    // figures had to know which section somebody had filed them under.
+    // Everything you READ in this course is in one place now, and Practice
+    // and Studio keep no second copy of the doors.
+    check('rhetoric: the Library holds the reading and all three references',
+      /function rhetoricLibraryPane\(el\) \{[\s\S]{0,2200}col:rh-figures/.test(famSrc)
+      && /col:rh-thirteen/.test(famSrc)
+      && /col:rh-all/.test(famSrc)
+      && /workspaceLibrary\(el, \{ workspace: 'Rhetoric'/.test(famSrc));
+    // Bound each pane at its OWN closing brace. Slicing "from this function
+    // to the next named one" broke the moment the shelf renderers were moved
+    // to sit between them: the slice swallowed two function definitions and
+    // the check failed on code that was not the pane at all.
+    const fnBody = (src2, name) => {
+      const i = src2.indexOf(`function ${name}(`);
+      if (i < 0) return '';
+      const end = src2.indexOf('\n}\n', i);
+      return end < 0 ? src2.slice(i) : src2.slice(i, end);
+    };
+    const rhPractice = fnBody(famSrc, 'rhetoricPracticePane');
+    const rhStudio = fnBody(famSrc, 'rhetoricStudioPane');
+    check('library: a unit ending in -y pluralises properly, not as fallacys',
+      /const plural = u => u\.endsWith\('y'\)/.test(famSrc)
+      && !/\$\{c\.unit\}\$\{c\.count === 1 \? '' : 's'\}/.test(famSrc));
+    check('rhetoric: Practice and Studio keep no second copy of the shelves',
+      !!rhPractice && !!rhStudio
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf/.test(rhPractice)
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf/.test(rhStudio),
+      `practice ${rhPractice.length}ch, studio ${rhStudio.length}ch`);
     // Aristotle's composition and division are LINGUISTIC, not the modern
     // part-and-whole fallacy that borrowed the names. Got this wrong first
     // time; the correction is pinned so it cannot quietly revert.

@@ -1011,7 +1011,7 @@ function renderSpeechModule(n) {
 }
 
 // Per-workspace Library search state.
-const libState = { speech: { query: '' }, acting: { query: '' }, dialect: { query: '' } };
+const libState = { speech: { query: '' }, acting: { query: '' }, dialect: { query: '' }, rhetoric: { query: '' } };
 let speechLibQuery = '';
 
 // Collection identity: one tone and one emoji per collection, applied
@@ -2854,8 +2854,13 @@ function workspaceLibrary(el, { workspace, cards, state }) {
     || (c.keywords ?? '').toLowerCase().includes(q);
   const shown = cards.filter(match);
 
+  // Plural by appending 's' was fine while every unit was chapter, scene,
+  // monologue and drill. "fallacy" broke it into "fallacys" the day Rhetoric
+  // reached the Library, so the -y case is handled rather than the unit being
+  // bent to fit the pluraliser.
+  const plural = u => u.endsWith('y') && !/[aeiou]y$/.test(u) ? `${u.slice(0, -1)}ies` : `${u}s`;
   const countLabel = c => c.count == null ? ''
-    : `${c.count} ${c.unit}${c.count === 1 ? '' : 's'}`;
+    : `${c.count} ${c.count === 1 ? c.unit : plural(c.unit)}`;
 
   el.innerHTML = `
     <div class="ws-head">
@@ -4491,30 +4496,12 @@ function setRhetoricPreview(on) {
 function rhetoricPracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Rhetoric Practice</h1>
-    <p class="pane-note">No exercise has been built for this course yet. Module 1 is written and the rest is outlined, so what is here is the reading and the figures the later modules will point at. Nothing below is scored.</p>
-    <button class="track-card hub-card" id="rhp-figures" type="button">
-      <div class="track-glyph">⚖️</div>
-      <div class="track-info"><h2>The Figures</h2><p>Seventeen shapes of thought, each with a real example. Module 4 teaches what they are for.</p></div>
-      <div class="track-arrow">›</div>
-    </button>
-    <button class="track-card hub-card" id="rhp-fallacies" type="button">
-      <div class="track-glyph">🧩</div>
-      <div class="track-info"><h2>The Thirteen Fallacies</h2><p>Aristotle’s list: six that depend on language, seven that do not.</p></div>
-      <div class="track-arrow">›</div>
-    </button>
-    <button class="track-card hub-card" id="rhp-families" type="button">
-      <div class="track-glyph">🧭</div>
-      <div class="track-info"><h2>All Fallacies</h2><p>Forty modern errors in eight families, grouped by what the speaker is doing.</p></div>
-      <div class="track-arrow">›</div>
-    </button>
+    <p class="pane-note">No exercise has been built for this course yet. Module 1 is written and the rest is outlined. Everything there is to READ lives in the Library now (owner order 2026-09-28) rather than being split across three sections, so this page sends you there instead of keeping its own copy of the doors.</p>
     <button class="track-card hub-card" id="rhp-library" type="button">
       <div class="track-glyph">🏛️</div>
-      <div class="track-info"><h2>Rhetoric Library</h2><p>What Rhetoric Is: six chapters, free to read in any order.</p></div>
+      <div class="track-info"><h2>Rhetoric Library</h2><p>The reading, the figures, the thirteen fallacies and all forty, in one place.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
-  el.querySelector('#rhp-figures').addEventListener('click', () => navTo(renderRhetoricShelf));
-  el.querySelector('#rhp-fallacies').addEventListener('click', () => navTo(renderFallacyShelf));
-  el.querySelector('#rhp-families').addEventListener('click', () => navTo(renderFamilyShelf));
   el.querySelector('#rhp-library').addEventListener('click', () => goSection('library'));
 }
 
@@ -4675,27 +4662,53 @@ function renderFamilyShelf() {
 }
 
 function rhetoricStudioPane(el) {
-  const cards = [
-    { icon: '⚖️', title: 'The Figures', go: renderRhetoricShelf },
-    { icon: '🧩', title: 'The Thirteen Fallacies', go: renderFallacyShelf },
-    { icon: '🧭', title: 'All Fallacies', go: renderFamilyShelf },
-    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
-  ];
   el.innerHTML = `
     <div class="ws-head"><h1 class="page-h">Studio</h1>
-      <p class="ws-sub">A speech of your own is the studio work this course is heading toward. For now, paste one into Custom Work.</p></div>
-    ${cards.map((c, i) => `
-      <button class="track-card hub-card" data-i="${i}" type="button">
-        <div class="track-glyph">${c.icon}</div>
-        <div class="track-info"><h2>${esc(c.title)}</h2></div>
-        <div class="track-arrow">›</div>
-      </button>`).join('')}`;
-  el.querySelectorAll('[data-i]').forEach(b =>
-    b.addEventListener('click', () => navTo(cards[+b.dataset.i].go)));
+      <p class="ws-sub">A speech of your own is the studio work this course is heading toward. For now, paste one into Custom Work. The reference shelves moved to the Library, which is where reading belongs.</p></div>
+    <button class="track-card hub-card" id="rhs-custom" type="button">
+      <div class="track-glyph">🎬</div>
+      <div class="track-info"><h2>Custom Work</h2></div>
+      <div class="track-arrow">›</div>
+    </button>`;
+  el.querySelector('#rhs-custom').addEventListener('click', () => navTo(renderCustomWork));
 }
 
 function characterLibraryPane(el) { return bookLibraryPane(el, BOOKS.character); }
-function rhetoricLibraryPane(el) { return bookLibraryPane(el, BOOKS.rhetoric); }
+// The Rhetoric Library holds ALL FOUR shelves (owner order 2026-09-28):
+// the course reading and the three references together. They were split
+// across Learn, Practice and Studio, which meant a reader looking for the
+// figures had to already know which section somebody had filed them under.
+// Everything you READ in this course is now in one place, which is what a
+// library is for. It uses the Acting Library's searchable card pane rather
+// than the plain book pane, because four shelves want a search box.
+function rhetoricLibraryPane(el) {
+  const G1 = 'The reading', G2 = 'The references';
+  const written = RHETORIC_COLLECTIONS.length;
+  const cards = [
+    ...RHETORIC_COLLECTIONS.map(c => ({
+      key: `col:${c.id}`, tone: 'is-sage', emoji: c.icon, title: c.title,
+      group: G1, count: c.lessons.length, unit: 'chapter',
+      keywords: `${c.note} rhetoric course lesson`,
+      // renderActingCollection is the SHARED collection renderer despite the
+      // name; it resolves the book through bookOfCollection, which has known
+      // about Rhetoric since the workspace was added.
+      go: () => renderActingCollection(c.id),
+    })),
+    { key: 'col:rh-figures', tone: 'is-terracotta', emoji: '⚖️', title: 'The Figures',
+      group: G2, count: RHETORIC.length, unit: 'figure',
+      keywords: 'antithesis anaphora chiasmus tricolon device shape of thought repetition',
+      go: renderRhetoricShelf },
+    { key: 'col:rh-thirteen', tone: 'is-lavender', emoji: '🧩', title: 'The Thirteen Fallacies',
+      group: G2, count: FALLACIES.length, unit: 'fallacy',
+      keywords: 'aristotle sophistical refutations equivocation amphiboly accident consequent classical',
+      go: renderFallacyShelf },
+    { key: 'col:rh-all', tone: 'is-gold', emoji: '🧭', title: 'All Fallacies',
+      group: G2, count: MODERN_FALLACIES.length, unit: 'fallacy',
+      keywords: 'straw man red herring ad hominem whataboutism cherry picking slippery slope modern families',
+      go: renderFamilyShelf },
+  ];
+  workspaceLibrary(el, { workspace: 'Rhetoric', cards, state: libState.rhetoric });
+}
 function shakespeareLibraryPane(el) { return bookLibraryPane(el, BOOKS.shakespeare); }
 // Parameterised 2026-09-25 when Shakespeare became the third book. The
 // body is Character's, unchanged except for the book it is handed.
