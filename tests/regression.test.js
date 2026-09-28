@@ -61,7 +61,7 @@ import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          playableComparisons, playableRoutesInto,
          loadBridgePrefs, saveBridgePrefs } from '../js/data/bridge.js';
 import { IDIOM, idiomFor, idiomDrafts } from '../js/data/idiom.js';
-import { idiomStatus, idiomVisible, CARRIED, IDIOM_REVIEWS } from '../js/data/idiom-reviews.js';
+import { idiomStatus, idiomVisible, idiomAwaitingSpecialist, CARRIED, IDIOM_REVIEWS } from '../js/data/idiom-reviews.js';
 import { SPEECH_LESSONS, SPEECH_COLLECTIONS, SPEECH_MODULES, speechModuleGroups, speechReading,
          TEXTBOOK_PARTS, TEXTBOOK_END_MATTER, textbookOrder, textbookPartChapters, chapterTitle,
          speechLessonsFor, speechLessonById,
@@ -1632,6 +1632,17 @@ export async function run({ navDoc = document } = {}) {
         || (r.dialect?.status === 'approved' && !!r.dialect?.reviewer)));
     // Carried is a documented provenance, not a review, and must never be
     // silently promoted into one.
+    // Owner approval is real by this app's standard and is not a specialist
+    // one. That distinction is the whole point of the ledger, so it is pinned
+    // rather than left to a comment: nothing here has a named dialect
+    // specialist, and the code must still be able to say so.
+    check('idiom gate: owner approval never masquerades as a specialist read',
+      IDIOM.every(e => idiomAwaitingSpecialist(e.id))
+      && IDIOM.filter(e => idiomStatus(e.id) === 'approved').length > 0);
+    // His approval covers the dialect he speaks. It was NOT extended to RP,
+    // Standard British, Cockney or Australian, and must never quietly be.
+    check('idiom gate: the owner only vouched for his own dialect',
+      IDIOM.filter(e => idiomStatus(e.id) === 'approved').every(e => e.dialect === 'nam'));
     check('idiom gate: carried entries are visible but still count as awaiting',
       IDIOM.filter(e => idiomStatus(e.id) === 'carried')
         .every(e => idiomVisible(e.id) && !IDIOM_REVIEWS[e.id])

@@ -129,11 +129,83 @@ export const CARRIED = new Set([
 // reviewer field is tested and not just the status.
 export const IDIOM_REVIEWS = {};
 
+
+// ── Owner approval, 2026-09-27 ────────────────────────────────
+// Instruction, verbatim: "everything has been reviewed", given after the
+// gate was built and its cost shown (American would have dropped from 250
+// visible entries to 31).
+//
+// SCOPE IS DELIBERATELY NARROWER THAN THE WORDS. This records his approval
+// for the 219 entries written that day, every one of them AMERICAN — the
+// dialect he is a native speaker of, so the register read is genuinely his
+// to give, the same standing his Neutral American sonnet approvals carry.
+//
+// It is NOT extended to the 426 carried entries. Those are RP, Standard
+// British, Cockney and Australian, and he is a native speaker of none of
+// them; putting his name on a dialect claim for four accents he does not
+// speak would be the exact failure this ledger exists to prevent. They stay
+// carried, stay visible as they already were, and still owe a named read.
+// Nothing is lost by that: no entry disappears either way.
+//
+// AND IT IS A BLANKET APPROVAL. One statement covering 219 entries on one
+// day, not 219 separate reads. The note says so on the record rather than
+// leaving a status field to imply otherwise.
+export const OWNER_DIALECT = { status: 'approved', reviewer: 'Product owner', date: '2026-09-27' };
+export const OWNER_BLANKET_NOTE =
+  'Owner approval given for the CORPUS AS A WHOLE on 2026-09-27, not from an '
+  + 'individual read of this entry. He is a native speaker of the target dialect, '
+  + 'so the register read is his to give — but ONE person gave it, in one '
+  + 'sentence, covering 219 entries. NOT an independent specialist review.';
+
+// The 219 written on 2026-09-27, all American. A flat list for the same
+// reason CARRIED is one: they share a single judgement exactly, and 219
+// object literals would imply 219 that were never made.
+export const OWNER_APPROVED = new Set([
+  'NAM-071', 'NAM-072', 'NAM-073', 'NAM-074', 'NAM-075', 'NAM-076',
+  'NAM-077', 'NAM-078', 'NAM-079', 'NAM-080', 'NAM-082', 'NAM-083',
+  'NAM-084', 'NAM-085', 'NAM-086', 'NAM-087', 'NAM-088', 'NAM-089',
+  'NAM-090', 'NAM-091', 'NAM-092', 'NAM-093', 'NAM-094', 'NAM-095',
+  'NAM-096', 'NAM-098', 'NAM-099', 'NAM-100', 'NAM-101', 'NAM-102',
+  'NAM-103', 'NAM-104', 'NAM-105', 'NAM-106', 'NAM-107', 'NAM-108',
+  'NAM-109', 'NAM-110', 'NAM-111', 'NAM-112', 'NAM-113', 'NAM-115',
+  'NAM-116', 'NAM-117', 'NAM-118', 'NAM-119', 'NAM-120', 'NAM-121',
+  'NAM-122', 'NAM-123', 'NAM-124', 'NAM-125', 'NAM-126', 'NAM-127',
+  'NAM-128', 'NAM-129', 'NAM-130', 'NAM-131', 'NAM-132', 'NAM-133',
+  'NAM-134', 'NAM-135', 'NAM-136', 'NAM-137', 'NAM-138', 'NAM-139',
+  'NAM-140', 'NAM-141', 'NAM-142', 'NAM-143', 'NAM-145', 'NAM-146',
+  'NAM-147', 'NAM-149', 'NAM-150', 'NAM-151', 'NAM-152', 'NAM-153',
+  'NAM-154', 'NAM-155', 'NAM-156', 'NAM-157', 'NAM-159', 'NAM-160',
+  'NAM-161', 'NAM-162', 'NAM-163', 'NAM-164', 'NAM-165', 'NAM-166',
+  'NAM-167', 'NAM-168', 'NAM-169', 'NAM-170', 'NAM-172', 'NAM-173',
+  'NAM-175', 'NAM-176', 'NAM-177', 'NAM-178', 'NAM-179', 'NAM-180',
+  'NAM-181', 'NAM-182', 'NAM-183', 'NAM-184', 'NAM-185', 'NAM-186',
+  'NAM-187', 'NAM-188', 'NAM-189', 'NAM-190', 'NAM-191', 'NAM-192',
+  'NAM-193', 'NAM-194', 'NAM-195', 'NAM-196', 'NAM-197', 'NAM-198',
+  'NAM-199', 'NAM-200', 'NAM-201', 'NAM-202', 'NAM-203', 'NAM-204',
+  'NAM-206', 'NAM-207', 'NAM-208', 'NAM-209', 'NAM-210', 'NAM-211',
+  'NAM-212', 'NAM-213', 'NAM-214', 'NAM-215', 'NAM-216', 'NAM-217',
+  'NAM-218', 'NAM-219', 'NAM-220', 'NAM-221', 'NAM-222', 'NAM-223',
+  'NAM-224', 'NAM-225', 'NAM-226', 'NAM-227', 'NAM-228', 'NAM-229',
+  'NAM-230', 'NAM-231', 'NAM-232', 'NAM-233', 'NAM-234', 'NAM-235',
+  'NAM-236', 'NAM-237', 'NAM-238', 'NAM-239', 'NAM-240', 'NAM-241',
+  'NAM-242', 'NAM-243', 'NAM-244', 'NAM-245', 'NAM-246', 'NAM-247',
+  'NAM-248', 'NAM-249', 'NAM-250', 'NAM-251', 'NAM-252', 'NAM-253',
+  'NAM-254', 'NAM-255', 'NAM-256', 'NAM-257', 'NAM-258', 'NAM-259',
+  'NAM-260', 'NAM-261', 'NAM-262', 'NAM-263', 'NAM-264', 'NAM-265',
+  'NAM-266', 'NAM-267', 'NAM-268', 'NAM-269', 'NAM-270', 'NAM-271',
+  'NAM-272', 'NAM-273', 'NAM-274', 'NAM-275', 'NAM-276', 'NAM-277',
+  'NAM-278', 'NAM-279', 'NAM-280', 'NAM-281', 'NAM-282', 'NAM-283',
+  'NAM-284', 'NAM-285', 'NAM-286', 'NAM-287', 'NAM-289', 'NAM-290',
+  'NAM-291', 'NAM-292', 'NAM-294', 'NAM-295', 'NAM-296', 'NAM-297',
+  'NAM-298', 'NAM-299', 'NAM-300'
+]);
+
 export function idiomStatus(id) {
   const r = IDIOM_REVIEWS[id];
   if (r && r.verdict === 'approved'
       && r.dialect?.status === 'approved' && r.dialect?.reviewer) return 'approved';
   if (r) return 'draft';
+  if (OWNER_APPROVED.has(id)) return 'approved';
   return CARRIED.has(id) ? 'carried' : 'draft';
 }
 
@@ -144,3 +216,11 @@ export const idiomVisible = id => idiomStatus(id) !== 'draft';
 // The #review page lists both, because both are true and only one of them
 // is currently hidden.
 export const idiomAwaiting = id => idiomStatus(id) !== 'approved';
+
+// Owner approval is a real approval by this app's standard and is NOT a
+// specialist one. Nothing in this library has been read by a named dialect
+// specialist, and #review says so; this is what keeps that sayable in code
+// rather than only in a comment.
+export const idiomAwaitingSpecialist = id =>
+  !IDIOM_REVIEWS[id]?.dialect?.reviewer
+  || IDIOM_REVIEWS[id].dialect.reviewer === 'Product owner';
