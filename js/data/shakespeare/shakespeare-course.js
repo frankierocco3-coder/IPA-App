@@ -1,12 +1,20 @@
 // Shakespeare — the fifth workspace (owner decision 2026-09-24:
 // Shakespeare is its OWN course, not a module inside Acting).
 //
-// Outline and plan: docs/SHAKESPEARE_COURSE_OUTLINE.md. ALL SEVEN MODULES
-// ARE WRITTEN as of 2026-09-25: 40 lessons, plus two Library shelves (the
-// 160-entry lexicon and the 17-entry rhetoric glossary). The outline
-// estimated roughly 42 lessons and the built course is 40, because
-// module 6 keeps its figures as a SHELF rather than expanding them into
-// seventeen lessons, which is what the outline asked for.
+// Outline and plan: docs/SHAKESPEARE_COURSE_OUTLINE.md. SIX MODULES, 37
+// lessons, plus one Library shelf: The Shakespeare Dictionary.
+//
+// RHETORIC IS NOT PART OF THIS COURSE (owner order 2026-09-28: "get rid of
+// rhetoric from shakespeare"). It was module 6, three lessons and a shelf.
+// Rhetoric is its own workspace now, and a Rhetoric module inside
+// Shakespeare taught one subject twice under two owners. The seventeen
+// figures survive whole as The Figures in the Rhetoric Library; only the
+// Shakespeare doors to them are gone.
+//
+// RETIRED IDS, NEVER TO BE REUSED: sh-speechaction, sh-shapes,
+// sh-playfigure. Assigning one of these to a new lesson would silently
+// mark it complete for anybody who finished the old one. Retire, never
+// reassign — the same rule ac-character was retired under.
 //
 // Records have the same shape as js/data/acting/acting-course.js and are
 // shown by the same lesson, chapter and module screens (main.js resolves
@@ -67,9 +75,7 @@ export const SHAKESPEARE_MODULES = [
     blurb: 'The pulse under the line, what happens when it bends, and why an irregular line is information rather than a mistake.' },
   { n: 5, id: 'folio', title: 'The First Folio and Textual Clues',
     blurb: 'Where the plays came from, why two editions of one play disagree, and how much of what looks like instruction is somebody else at the printing house.' },
-  { n: 6, id: 'rhetoric', title: 'Rhetoric',
-    blurb: 'Speech built to do something to another person: what the shapes are for, and how to play the intention rather than the label.' },
-  { n: 7, id: 'soliloquy', title: 'Soliloquies and Monologues',
+  { n: 6, id: 'soliloquy', title: 'Soliloquies and Monologues',
     blurb: 'Who you are talking to, what it costs to include the audience, and how to think a speech rather than recite it.' },
 ];
 
@@ -824,75 +830,7 @@ export const SHAKESPEARE_LESSONS = [
       { p: 'That habit is the whole point, and it generalises past this author. An actor who knows the difference between the text and the edition is harder to mislead, in any period, by anybody.' },
     ] },
 
-  // ── Module 6 · Rhetoric ───────────────────────────────────────
-  // Three lessons and a shelf. The seventeen figures are a GLOSSARY
-  // (js/data/shakespeare/rhetoric.js), not seventeen lessons: that would
-  // be the dullest part of the app.
-
-  { id: 'sh-speechaction', module: 'rhetoric', order: 1,
-    title: 'Speech As Action',
-    attribution: 'Speechcraft original',
-    requiredReviewer: 'acting-professional',
-    objective: 'Understand what rhetoric is for, and stop treating it as decoration.',
-    orientation: 'A structure built to do something to another person.',
-    reflection: 'In your speech, what does the other person do differently because of it? If the answer is nothing, something has been missed.',
-    body: [
-      { p: 'Rhetoric has a bad reputation, and the word is now mostly used to mean empty. In the period these plays were written it meant something closer to the opposite: the study of how speech changes people, taught at school, to boys, as a practical skill.' },
-      { p: 'The characters went to that school. So did the audience, in whatever measure. When a character builds a speech in a recognisable shape, they are doing something deliberate, and the room could hear the deliberation.' },
-      { h: 'Why this is an acting lesson and not a literature lesson' },
-      { p: 'Because it says the same thing Acting says, in different words. A speech is an action taken against somebody to get something. Rhetoric is the name for how that action is built.' },
-      { p: 'Which means the figures are not ornament laid on afterwards. A character does not decide to persuade and then decorate. The shape is the persuasion.' },
-      { h: 'The test' },
-      { p: 'Every time you find a device, ask what it is doing to the listener. Not what it is called and not what it sounds like: what it does.' },
-      { p: 'A list of three makes the third item land. A repeated opening makes a complaint feel endless. A question they have to answer in their own head makes them complicit. Those are effects on a person, and effects on a person are playable in the ordinary way.' },
-      { p: 'The rhetoric shelf gives you seventeen of these with the effect written out on each one. Use it the way you use the lexicon: not to memorise, but to look something up when you find it.' },
-    ] },
-
-  { id: 'sh-shapes', module: 'rhetoric', order: 2,
-    title: 'The Shapes of Thought',
-    attribution: 'Speechcraft original',
-    requiredReviewer: 'acting-professional',
-    objective: 'Recognise the handful of structures that carry most of the work, and read them as evidence of what a character wants.',
-    orientation: 'A few shapes do most of the lifting, and they are easy to see once you know them.',
-    reflection: 'Find the antitheses in your speech. Do they all pull the same way, or is the character arguing with themselves?',
-    body: [
-      { p: 'You do not need all seventeen to start. Four shapes account for most of what you will meet, and each one tells you something different about the person speaking.' },
-      { h: 'Antithesis: the character is choosing' },
-      { p: 'Two things set against each other. It is the commonest structure in the plays and the most immediately useful, because it hands you the alternatives the character is weighing. Find them, play the opposition, and the line does much of the work.' },
-      { p: 'A speech full of antitheses is a mind that keeps splitting. A speech with one, late, is a mind that has arrived somewhere.' },
-      { h: 'Repetition: the character is stuck, or building' },
-      { p: 'Repetition at the start of clauses builds and accumulates. Repetition at the end closes doors. A word repeated immediately, with nothing between, is somebody who cannot move past it. In every case the repetition is not emphasis for its own sake; it is a report on what the speaker cannot leave alone.' },
-      { h: 'Lists: the character is piling or chaining' },
-      { p: 'A list with the conjunctions stripped out is fast and out of control. A list with every conjunction kept is relentless and feels endless. Same items, different states of mind, and the difference is visible on the page.' },
-      { h: 'Balance and inversion: the character is proving' },
-      { p: 'Mirrored structures sound like proof, because symmetry implies something has been weighed. That is why they belong to characters winning arguments, and why they are worth distrusting when you find them.' },
-      { p: 'Four shapes. Antithesis, repetition, lists, balance. The other thirteen entries on the shelf are refinements of these.' },
-    ] },
-
-  { id: 'sh-playfigure', module: 'rhetoric', order: 3,
-    title: 'Playing the Figure',
-    attribution: 'Speechcraft original',
-    requiredReviewer: 'acting-professional',
-    objective: 'Turn a device you have found into an intention you can play, without ever performing the label.',
-    orientation: 'Find the device, then forget its name.',
-    reflection: 'Could somebody watching you tell which figure you had identified? If yes, you are performing the analysis.',
-    body: [
-      { p: 'The danger with this module is that an actor learns the names and starts showing them. It is a real failure mode and it sounds like somebody pointing at their own speech.' },
-      { p: 'The method is three steps, and the third is the one that matters.' },
-      { steps: [
-        'Find it. Mark the device on the page, in the margin, with its name if that helps you.',
-        'Name the effect. Not the figure: what it does to the person hearing it. The shelf gives you this on every entry.',
-        'Throw the name away. Play the intention. The shape will happen because it is written into the words, and it does not need your help.',
-      ] },
-      { h: 'Why the shape does not need help' },
-      { p: 'Because it is already there. The repetition repeats whether or not you lean on it. The three items arrive in order whether or not you count them aloud. An actor who reinforces a structure the text has already built produces the same effect twice, and the second one sounds like technique.' },
-      { p: 'Trust the writing. It was made by somebody who expected actors to say it, and the effects were built to survive ordinary speaking.' },
-      { h: 'What to do instead' },
-      { p: 'Spend the attention on the person you are speaking to. A device is a move against somebody, so the useful question is never how to perform the antithesis. It is what you need this person to understand, and why the plain version would not have worked.' },
-      { p: 'This is the same instruction module 3 gave about form changes and module 4 gave about irregular lines, which is not an accident. Everything in this course arrives at the same place: the text is information, the information is about what you are doing to somebody, and the doing is the acting.' },
-    ] },
-
-  // ── Module 7 · Soliloquies and Monologues ─────────────────────
+  // ── Module 6 · Soliloquies and Monologues ─────────────────────
 
   { id: 'sh-soliloquy', module: 'soliloquy', order: 1,
     title: 'What a Soliloquy Is',
@@ -1033,7 +971,7 @@ export const SHAKESPEARE_LESSONS = [
 
 // One Library shelf per module, in path order.
 const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
-  metre: '🥁', folio: '📜', rhetoric: '⚖️', soliloquy: '🗣️' };
+  metre: '🥁', folio: '📜', soliloquy: '🗣️' };
 export const SHAKESPEARE_COLLECTIONS = SHAKESPEARE_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], title: m.title,
   lessons: SHAKESPEARE_LESSONS.filter(l => l.module === m.id && !l.reference)

@@ -424,9 +424,20 @@ def main():
         # Ids are never renamed here: that is what preserves stored progress.
         for pin in ["id: 'sh-hard'", "id: 'sh-syntax'", "id: 'sh-findswitch'",
                     "id: 'sh-bends'", "id: 'sh-sharedlines'", "id: 'sh-whymatters'",
-                    "id: 'sh-capitals'", "id: 'sh-playfigure'", "id: 'sh-famous'"]:
+                    "id: 'sh-capitals'", "id: 'sh-soliloquy'", "id: 'sh-famous'"]:
             if pin not in sh_src:
                 fail("a Shakespeare lesson id changed or vanished: %r" % pin)
+        # Rhetoric left this course by owner order 2026-09-28. Its three
+        # lesson ids are RETIRED, and retired means never reassigned: a new
+        # lesson wearing one would read as already complete for anybody who
+        # finished the old one. sh-playfigure stood in the pin list above
+        # until this change, which is why it is named here rather than just
+        # deleted -- the discipline is visible either way.
+        for retired in ["id: 'sh-speechaction'", "id: 'sh-shapes'", "id: 'sh-playfigure'"]:
+            if retired in sh_src:
+                fail("a retired Shakespeare lesson id was reused: %r" % retired)
+        if "id: 'rhetoric'" in sh_src:
+            fail("the Rhetoric module is back inside the Shakespeare course")
         # The course exists to APPLY the craft, not to re-teach what is
         # already built. If these pointers go, the lessons have started
         # duplicating the lexicon, the scanner and Acting.
@@ -442,16 +453,27 @@ def main():
         # started teaching one school as fact.
         if "very largely not the author" not in sh_src:
             fail("lesson 5.3 stopped saying the Folio typography is not the author's")
-    # The rhetoric shelf: a glossary, deliberately not seventeen lessons.
+    # The Figures: a glossary, deliberately not seventeen lessons. It lives
+    # in the Rhetoric Library since 2026-09-28; the data file keeps its path
+    # under shakespeare/ because moving a file renames nothing worth the
+    # churn, and the ids are RH-### either way.
     rh_path = ROOT / "js" / "data" / "shakespeare" / "rhetoric.js"
     if not rh_path.exists():
-        fail("the rhetoric shelf is missing")
+        fail("the figures shelf is missing")
     else:
         rh_src = rh_path.read_text(encoding="utf-8")
         if rh_src.count("{ id: 'RH-") != 17:
-            fail("the rhetoric shelf should carry exactly 17 figures")
+            fail("the figures shelf should carry exactly 17 figures")
         if "function renderRhetoricShelf()" not in views_js:
-            fail("the rhetoric shelf has no page")
+            fail("the figures shelf has no page")
+        # It was Shakespeare's Rhetoric until the owner took rhetoric out of
+        # that course. The old name must not survive anywhere a reader sees,
+        # and the shelf must stay REACHABLE: written content nothing can open
+        # is the worst state for it, and a move is how that happens.
+        if "Shakespeare’s Rhetoric" in views_js:
+            fail("the retired name Shakespeare's Rhetoric is back on a learner surface")
+        if "title: 'The Figures'" not in views_js:
+            fail("The Figures lost the Library card that opens it")
 
     # 6m: the three-workspace IA (2026-08-13)
     for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:

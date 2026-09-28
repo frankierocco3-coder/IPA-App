@@ -4713,20 +4713,32 @@ export async function run({ navDoc = document } = {}) {
       } catch {}
     }
 
-    check('shakespeare: all seven modules, in outline order, keeping their numbers',
-      String(SHAKESPEARE_MODULES.map(m => m.n)) === '1,2,3,4,5,6,7'
+    // SIX modules since 2026-09-28: Rhetoric was module 6 and the owner
+    // took it out, because rhetoric is its own workspace and a Rhetoric
+    // module here taught one subject twice. Soliloquies renumbered into the
+    // gap, keeping its id, the same way Acting's modules renumbered when it
+    // handed Building a Character over.
+    check('shakespeare: six modules, in outline order, keeping their numbers',
+      String(SHAKESPEARE_MODULES.map(m => m.n)) === '1,2,3,4,5,6'
       && String(SHAKESPEARE_MODULES.map(m => m.title))
         === 'Shakespeare 101,The Language,Verse and Prose,Iambic Pentameter,'
-          + 'The First Folio and Textual Clues,Rhetoric,Soliloquies and Monologues',
+          + 'The First Folio and Textual Clues,Soliloquies and Monologues',
       SHAKESPEARE_MODULES.map(m => m.n + ':' + m.title).join(' | '));
-    // 40, not the outline's estimate of 42, because module 6 keeps its
-    // figures as a SHELF instead of expanding them into seventeen lessons.
-    check('shakespeare: 40 lessons, 7 + 6 + 4 + 8 + 6 + 3 + 6, matching the outline',
-      SHAKESPEARE_LESSONS.length === 40
+    check('shakespeare: 37 lessons, 7 + 6 + 4 + 8 + 6 + 6, with Rhetoric gone',
+      SHAKESPEARE_LESSONS.length === 37
       && String(SHAKESPEARE_MODULES.map(m =>
-        SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length)) === '7,6,4,8,6,3,6',
+        SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length)) === '7,6,4,8,6,6',
       SHAKESPEARE_MODULES.map(m =>
         m.id + ':' + SHAKESPEARE_LESSONS.filter(l => l.module === m.id).length).join(' '));
+    // Ids are RETIRED here, never reused: reassigning one would mark a new
+    // lesson complete for anybody who finished the old one. Pinned as
+    // absent from the course AND from the ledger, so a stale approval
+    // cannot outlive the lesson it approved.
+    check('shakespeare: the three retired rhetoric ids are gone and stay gone',
+      ['sh-speechaction', 'sh-shapes', 'sh-playfigure'].every(id =>
+        !SHAKESPEARE_LESSONS.some(l => l.id === id) && !speechApproved(id)),
+      ['sh-speechaction', 'sh-shapes', 'sh-playfigure']
+        .filter(id => SHAKESPEARE_LESSONS.some(l => l.id === id) || speechApproved(id)).join(','));
     check('shakespeare: every record is whole, and every id is an sh- id',
       SHAKESPEARE_LESSONS.every(l => /^sh-[a-z]+$/.test(l.id)
         && l.title && l.objective && l.orientation && l.reflection
@@ -4746,10 +4758,16 @@ export async function run({ navDoc = document } = {}) {
         return new Set(o).size === o.length
           && String([...o].sort((a, b) => a - b)) === String(o.map((_, i) => i + 1));
       }));
+    // Derived from the modules rather than hardcoded: this said 7 and broke
+    // the day Rhetoric was removed, which is a check failing on the number
+    // instead of on the rule it exists to protect.
     check('shakespeare: one Library shelf per module, in path order',
-      SHAKESPEARE_COLLECTIONS.length === 7
+      SHAKESPEARE_COLLECTIONS.length === SHAKESPEARE_MODULES.length
+      && String(SHAKESPEARE_COLLECTIONS.map(c => c.id))
+        === String(SHAKESPEARE_MODULES.map(m => m.id))
       && SHAKESPEARE_COLLECTIONS.every(c =>
-        c.lessons.length === SHAKESPEARE_LESSONS.filter(l => l.module === c.id).length));
+        c.lessons.length === SHAKESPEARE_LESSONS.filter(l => l.module === c.id).length),
+      `${SHAKESPEARE_COLLECTIONS.length} shelves, ${SHAKESPEARE_MODULES.length} modules`);
     // NOTHING is approved. The course has no ledger entries, so with the
     // preview off not one lesson would be visible even if the flag flipped.
     // All 40 were owner-approved on 2026-09-25. Publication and specialist
@@ -4850,9 +4868,15 @@ export async function run({ navDoc = document } = {}) {
       rhProse.filter(t2 => /[\u2014\u2013"]/.test(t2)).slice(0, 2).join(' | '));
     // The note is the reason the shelf exists: it must be about EFFECT.
     const shSrc = await viewSource();
-    check('rhetoric: the shelf is reachable, and it is a reference not a lesson',
+    // Owner order 2026-09-28: rhetoric is out of Shakespeare. The shelf is
+    // The Figures now, it is opened from the Rhetoric Library, and the
+    // Shakespeare-branded name is gone from the whole view layer. It is
+    // still pinned as REACHABLE, because a shelf nothing opens is the worst
+    // state for written content and this move is exactly how that happens.
+    check('figures: the shelf is reachable from Rhetoric, and Shakespeare no longer owns it',
       shSrc.includes('function renderRhetoricShelf()')
-      && shSrc.includes("title: 'Shakespeare\u2019s Rhetoric'"));
+      && shSrc.includes("title: 'The Figures'")
+      && !shSrc.includes('Shakespeare\u2019s Rhetoric'));
   }
 
   // ── 21d. The Warmup: four movements, house copy ─────────────

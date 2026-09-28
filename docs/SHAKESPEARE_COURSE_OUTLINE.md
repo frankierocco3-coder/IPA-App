@@ -120,7 +120,14 @@ treats every capital as a direction. This module's actual subject is
 **that the question is contested** — an actor who believes the typography
 is Shakespeare speaking has been misled. 5.3 carries that weight.
 
-## Module 6: Rhetoric (3 lessons + a shelf)
+## Module 6: Rhetoric (3 lessons + a shelf) — **REMOVED 2026-09-28**
+
+Owner order: "get rid of rhetoric from shakespeare". Rhetoric became its
+own workspace, so this module taught one subject twice under two owners.
+The three lessons are gone and their ids are RETIRED, never to be reused:
+`sh-speechaction`, `sh-shapes`, `sh-playfigure`. The seventeen figures
+survive whole as **The Figures** in the Rhetoric Library. What follows is
+the historical plan, kept so the removal is legible as a removal.
 
 | # | Lesson | One line |
 |---|---|---|
@@ -160,7 +167,8 @@ Badged awaiting review by a Shakespeare scholar or verse teacher. When
 the course is built the page moves onto its shelf; the data does not
 change when it does.
 
-**The Rhetoric Shelf** — roughly 17 figures, same entry shape.
+**The Rhetoric Shelf** — roughly 17 figures, same entry shape. Built, then
+handed to the Rhetoric workspace as **The Figures** on 2026-09-28.
 
 **Shakespeare Basically** — the reading tool. See below.
 
@@ -399,8 +407,9 @@ still the first thing to cut.
    crossing on the Scan tab; 4.8 uses the broken lines after the murder
    in Macbeth; 3.1 names this app's own verse-for-prose error as the
    reason not to trust the shape of a page.
-3. The rhetoric shelf, then Module 6.
-4. Module 7, then Modules 1 and 5.
+3. ~~The rhetoric shelf, then Module 6.~~ Built, then removed from this
+   course 2026-09-28; the shelf moved to Rhetoric.
+4. Module 7 (now 6), then Modules 1 and 5.
 5. ~~Shakespeare Basically~~ — Side by Side shipped for the 25 approved
    sonnet Plain Meanings; Script Analysis written for all eight scenes and
    awaiting review.

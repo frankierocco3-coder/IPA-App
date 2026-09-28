@@ -4828,13 +4828,16 @@ function shakespearePracticePane(el) {
 // 2026-09-25). It used to open the whole Scripts & Speeches shelf, which
 // offered Chekhov, Ibsen, O'Neill and Wilde inside a Shakespeare course.
 // Now every door here leads to Shakespeare: the 154 sonnets, the eight
-// Shakespeare scenes, and the two reference shelves. Custom Work stays
+// Shakespeare scenes, and Custom Work. The Dictionary moved to the Library
+// and Rhetoric left the workspace entirely (owner orders 2026-09-28), so no
+// reference shelf is offered from here any more. Custom Work stays
 // because it is the learner's own text, whatever they paste into it.
 function shakespeareStudioPane(el) {
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', go: renderSonnetList },
+    // Rhetoric is gone from this workspace (owner order 2026-09-28). The
+    // figures are The Figures, in the Rhetoric Library, which owns them.
     { icon: '🎭', title: 'Shakespeare’s Scenes', go: () => renderScenesShelf('Shakespeare') },
-    { icon: '⚖️', title: 'Shakespeare’s Rhetoric', go: renderRhetoricShelf },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
@@ -6381,7 +6384,6 @@ function textSpeechPane(pane) {
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
     { icon: '📖', title: 'The Shakespeare Dictionary', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
-    { icon: '⚖️', title: 'Shakespeare’s Rhetoric', blurb: `${RHETORIC.length} shapes a speech is built from — what each one does to the person being spoken to.`, go: renderRhetoricShelf },
     ...libs,
     { icon: '🎭', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
     { icon: '🎬', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
@@ -6543,19 +6545,27 @@ function renderShakespeareLexicon() {
 }
 
 
-// ── Shakespeare's Rhetoric: the figures, on a shelf ──────────────
+// ── The Figures: seventeen shapes, on a shelf ───────────────────
 //
-// Seventeen figures, built exactly like the lexicon and for the same
-// reason: module 6 teaches what rhetoric is FOR in three lessons, and
-// seventeen lessons on figures of speech would be the dullest part of
-// the app. This is the glossary those lessons send you to.
+// Called Shakespeare's Rhetoric, and owned by the Shakespeare course, until
+// 2026-09-28: the owner took rhetoric out of Shakespeare, so the shelf
+// belongs to the Rhetoric Library, which is the only place that opens it.
+// Seventeen figures and not seventeen lessons, because seventeen lessons on
+// figures of speech would be the dullest part of the app.
 //
-// Every example is a VERBATIM line from a text this app already carries,
-// and the suite checks each one against that corpus. A glossary that
-// quotes texts the reader cannot open would be worse than no glossary.
+// WHILE RHETORIC_COURSE_LIVE IS FALSE THIS IS OWNER-PREVIEW ONLY. That is a
+// real consequence of the move and it is recorded here rather than left to
+// be discovered: shipped writing that nothing can open is the worst state
+// for it, and launching Rhetoric is the owner's decision.
 //
 // Reference, not lesson: no XP, no completion, nothing stored.
-const RHETORIC_REVIEW_NOTE = 'Awaiting review by a Shakespeare scholar or verse teacher. '
+// The reviewer this shelf needs changed with the shelf. It asked for a
+// Shakespeare specialist while this was a Shakespeare shelf and every
+// example came from the sonnets and scenes. The examples are now Lincoln, the King
+// James Bible and Caesar as well, and the shelf belongs to Rhetoric (owner
+// order 2026-09-28), so naming a Shakespeare specialist would be asking the
+// wrong person. It matches the two fallacy shelves next to it.
+const RHETORIC_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric reader. '
   + 'The names of these figures are not stable across sources, and several carry two or '
   + 'three names depending on who is writing. Where that is true the entry says so.';
 
@@ -6577,15 +6587,15 @@ function renderRhetoricShelf() {
   stopSpeech();
   rhetQuery = '';
   app.innerHTML = `
-    ${pageTopbar('⚖️ Shakespeare’s Rhetoric', '#8a6d3b')}
+    ${pageTopbar('⚖️ The Figures', '#8a6d3b')}
     <main class="guide">
-      <h1>Shakespeare’s Rhetoric</h1>
+      <h1>The Figures</h1>
       <p class="guide-text">A speech is a structure built to do something to another person.
         These are the shapes it is built from. The line under each one is what matters:
         not what the figure is called, but what it does to whoever is listening.</p>
       <p class="pane-note pane-caveat">${esc(RHETORIC_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="rh-search" type="search"
-        placeholder="Search figures, effects, lines…" aria-label="Search Shakespeare’s Rhetoric"
+        placeholder="Search figures, effects, lines…" aria-label="Search the figures"
         autocomplete="off">
       <div id="rh-list" aria-live="polite"></div>
     </main>`;

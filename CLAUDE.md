@@ -1281,17 +1281,24 @@ crossing called out. Offered only where `authorGroup === 'Shakespeare'`
 
 THE SHAKESPEARE COURSE (2026-09-25): the FIFTH workspace, hidden behind
 SHAKESPEARE_LIVE=false in js/views/context.js, the mechanism
-CHARACTER_LIVE used. ALL SEVEN MODULES ARE WRITTEN, 40 lessons:
-Shakespeare 101 (7), The Language (6), Verse and Prose (4), Iambic
-Pentameter (8), The First Folio and Textual Clues (6), Rhetoric (3),
-Soliloquies and Monologues (6). 40 and not the outline's estimate of 42
-because module 6 keeps its seventeen figures as a SHELF rather than
-expanding them into seventeen lessons, which is what the outline asked
-for. TWO LIBRARY SHELVES: the 160-entry lexicon (live since 2026-09-25 on
-Scripts & Speeches) and js/data/shakespeare/rhetoric.js, 17 figures whose
-EVERY EXAMPLE is a verbatim line from the sonnets or the eight scenes and
-is verified against that corpus by the suite, the discipline the Script
-Analysis quotations use. Module 1 is deliberately the shortest and least
+CHARACTER_LIVE used. SIX MODULES, 37 lessons: Shakespeare 101 (7), The
+Language (6), Verse and Prose (4), Iambic Pentameter (8), The First Folio
+and Textual Clues (6), Soliloquies and Monologues (6).
+RHETORIC LEFT THIS COURSE 2026-09-28 by owner order ("get rid of rhetoric
+from shakespeare"). It was module 6, three lessons and a shelf; rhetoric is
+its own workspace now, so a Rhetoric module here taught one subject twice
+under two owners. Soliloquies renumbered 7 → 6 keeping its id. The three
+lesson ids are RETIRED AND NEVER REUSED (sh-speechaction, sh-shapes,
+sh-playfigure) and their ledger entries went with them; launch_lint fails
+if one is reassigned or if the module comes back. ONE LIBRARY SHELF now:
+The Shakespeare Dictionary. The 17 figures in
+js/data/shakespeare/rhetoric.js are THE FIGURES, in the Rhetoric Library,
+and the page is no longer called Shakespeare's Rhetoric — that name is
+lint-banned from the view layer. Its examples are Lincoln, the King James
+Bible and Caesar as well as Shakespeare (owner order 2026-09-27), so its
+awaiting-review badge asks for a rhetoric reader rather than a Shakespeare
+scholar. NOTE: while RHETORIC_COURSE_LIVE is false, The Figures is
+reachable ONLY in the owner's Rhetoric preview. Module 1 is deliberately the shortest and least
 actor-facing; every lesson in it ends at a consequence for performance.
 MODULE 5 IS THE ACCURACY HAZARD: Folio capitalisation and punctuation as
 acting instruction is contested, and 5.3 says outright that the
@@ -1322,14 +1329,17 @@ built and says so, pointing at the sonnets, the scenes and the lexicon
 instead of inventing a drill to fill the page. Its Studio drops the
 Personal Dictionary, which is accent work.
 Suite section 21k (19 checks) pins the hidden flag, the stored-workspace
-fallback, the 7+6+4+8+6+3+6 shape, whole records, no id clash across the
-three books, nothing published, house style on every line, that module 5
-still calls the typography contested, and that every rhetoric example is
-a real line from a text the app carries.
+fallback, the shape (7+6+4+8+6+3+6 until Rhetoric left on 2026-09-28,
+7+6+4+8+6+6 now), whole records, no id clash across the three books,
+nothing published, house style on every line, that module 5 still calls
+the typography contested, and that the three retired rhetoric ids stay
+retired in both the course and the ledger.
 
 OWNER REVIEW PASS (2026-09-25). The owner read and approved the two
 outstanding blocks, 48 items, and both ledgers now carry his name:
-* THE 40 SHAKESPEARE LESSONS are published in js/data/speech/reviews.js,
+* THE 40 SHAKESPEARE LESSONS were published in js/data/speech/reviews.js
+  (37 now: the three Rhetoric lessons left the course 2026-09-28 and their
+  ledger entries went with them, so no approval outlives its lesson),
   reviewerType product-owner-editorial. SHAKESPEARE_LIVE IS STILL FALSE,
   so approving them published nothing: launching is a separate decision.
   Five entries carry extra notes because they make claims outside his
