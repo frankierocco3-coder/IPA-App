@@ -9,6 +9,7 @@ import { scriptAnalysisById } from './data/script-analysis.js';
 import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
+import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -108,7 +109,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -684,6 +685,7 @@ function learnMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLearnPane(el);
   if (ws === 'character') return bookLearnPane(el, BOOKS.character);
   if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
+  if (ws === 'rhetoric') return bookLearnPane(el, BOOKS.rhetoric);
   if (ws === 'speech') return speechLearnPane(el);
   ipaLearnPane(el, course);
 }
@@ -775,6 +777,7 @@ function practiceMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingPracticePane(el);
   if (ws === 'character') return characterPracticePane(el);
   if (ws === 'shakespeare') return shakespearePracticePane(el);
+  if (ws === 'rhetoric') return rhetoricPracticePane(el);
   if (ws === 'speech') return speechPracticePane(el);
   ipaPracticePane(el, course);
 }
@@ -2981,9 +2984,14 @@ const BOOKS = {
     principle: SHAKESPEARE_PRINCIPLE, modules: SHAKESPEARE_MODULES, lessons: SHAKESPEARE_LESSONS,
     collections: SHAKESPEARE_COLLECTIONS, visible: shakespeareVisible,
     moduleTone: () => 'is-terracotta', reviewCats: () => ({ total: 0 }) },
+  rhetoric: { ws: 'rhetoric', icon: '🏛️', title: 'Rhetoric', libraryName: 'Rhetoric Library',
+    principle: RHETORIC_PRINCIPLE, modules: RHETORIC_MODULES, lessons: RHETORIC_LESSONS,
+    collections: RHETORIC_COLLECTIONS, visible: rhetoricVisible,
+    moduleTone: () => 'is-gold', reviewCats: () => ({ total: 0 }) },
 };
 const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
 const SHAKESPEARE_IDS = new Set(SHAKESPEARE_LESSONS.map(l => l.id));
+const RHETORIC_IDS = new Set(RHETORIC_LESSONS.map(l => l.id));
 // Whose thinking a lesson comes from, shown ONLY in the owner preview of
 // the hidden course (owner request 2026-09-22, to sort the course out).
 // Practitioner names stay out of learner-facing copy: when the course
@@ -2998,12 +3006,18 @@ const moduleAttribution = (B, m) => {
   return names.size === 1 ? [...names][0] : null;
 };
 const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m)) || m.title;
-// Three books now, so these resolve by id rather than by one ternary.
+// Four books now, so these resolve by id rather than by one ternary.
 // Acting stays the fallback, which is what keeps every existing 'ac-' id
 // and every unknown id behaving exactly as it did.
 const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
+  : RHETORIC_IDS.has(id) ? BOOKS.rhetoric
   : CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
+// Order matters and matches bookOf: Shakespeare owns the collection id
+// 'rhetoric' (its own module 6), while the Rhetoric COURSE uses ids like
+// 'ground' and 'delivery'. Two different namespaces that happen to share
+// a word, resolved by asking Shakespeare first.
 const bookOfCollection = id => SHAKESPEARE_COLLECTIONS.some(c => c.id === id) ? BOOKS.shakespeare
+  : RHETORIC_COLLECTIONS.some(c => c.id === id) ? BOOKS.rhetoric
   : CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
 const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // A `reference: true` record is a page you are sent to, never a step on
@@ -3039,10 +3053,24 @@ function bookLearnPane(el, B) {
     const lessons = bookLessonsFor(B, m.id);
     const ready = lessons.filter(B.visible);
     const mDone = ready.filter(l => speechLessonDone(l.id)).length;
-    const st = groupStatus({ available: ready.length, done: mDone, prepared: lessons.length - ready.length });
+    // THREE STATES, NOT TWO. An OUTLINED module — one with no lessons
+    // written at all — used to fall into the same branch as a module whose
+    // lessons are written and unreviewed, and claim "Prepared lessons
+    // awaiting review" when there were no lessons to prepare. Rhetoric
+    // shipped five outlined modules on 2026-09-28 and made that visible.
+    //
+    // The reviewer is also read off the lessons now instead of being
+    // hardcoded to acting-professional, which was true while only Acting
+    // used this pane and became false the moment a second course did.
+    const outlined = lessons.length === 0;
+    const reviewer = [...new Set(lessons.map(l => l.requiredReviewer).filter(Boolean))];
+    const st = outlined ? null
+      : groupStatus({ available: ready.length, done: mDone, prepared: lessons.length - ready.length });
     return tileHtml({
       key: `mod:${m.n}`, tone: B.moduleTone(m.n), title: moduleTitle(B, m), badge: st,
-      meta: ready.length ? m.blurb : 'Prepared lessons awaiting acting-professional review',
+      meta: ready.length ? m.blurb
+        : outlined ? `${m.blurb} Outlined, not written yet.`
+        : `Prepared lessons awaiting ${reviewer.length === 1 ? reviewer[0] : 'specialist'} review`,
       progress: ready.length && mDone ? { done: mDone, total: ready.length } : null,
     });
   }).join('');
@@ -4440,7 +4468,62 @@ function setShakespearePreview(on) {
   setWorkspace(on ? 'shakespeare' : 'acting');
 }
 
+// The same door again for the hidden Rhetoric course (owner decision
+// 2026-09-28). #rhetoric-preview opens it, #rhetoric-preview-off closes it.
+const RHETORIC_PREVIEW_HASHES = ['#rhetoric-preview', '#rhetoric-preview-off'];
+function setRhetoricPreview(on) {
+  try {
+    if (on) localStorage.setItem(RHETORIC_PREVIEW_KEY, 'on');
+    else localStorage.removeItem(RHETORIC_PREVIEW_KEY);
+  } catch {}
+  setWorkspace(on ? 'rhetoric' : 'acting');
+}
+
+
+// Rhetoric Practice and Studio. The course is one module old, so neither
+// pane pretends otherwise: they say what exists and point at the two
+// shelves that already hold rhetorical material rather than inventing
+// exercises to fill a screen. Without these, both sections would fall
+// through to the accent panes and show a learner vowel drills inside a
+// course about persuasion.
+function rhetoricPracticePane(el) {
+  el.innerHTML = `
+    <h1 class="page-h">Rhetoric Practice</h1>
+    <p class="pane-note">No exercise has been built for this course yet. Module 1 is written and the rest is outlined, so what is here is the reading and the figures the later modules will point at. Nothing below is scored.</p>
+    <button class="track-card hub-card" id="rhp-figures" type="button">
+      <div class="track-glyph">⚖️</div>
+      <div class="track-info"><h2>The Figures</h2><p>Seventeen shapes of thought, each with a real example. Module 4 teaches what they are for.</p></div>
+      <div class="track-arrow">›</div>
+    </button>
+    <button class="track-card hub-card" id="rhp-library" type="button">
+      <div class="track-glyph">🏛️</div>
+      <div class="track-info"><h2>Rhetoric Library</h2><p>What Rhetoric Is: six chapters, free to read in any order.</p></div>
+      <div class="track-arrow">›</div>
+    </button>`;
+  el.querySelector('#rhp-figures').addEventListener('click', () => navTo(renderRhetoricShelf));
+  el.querySelector('#rhp-library').addEventListener('click', () => goSection('library'));
+}
+
+function rhetoricStudioPane(el) {
+  const cards = [
+    { icon: '⚖️', title: 'The Figures', go: renderRhetoricShelf },
+    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
+  ];
+  el.innerHTML = `
+    <div class="ws-head"><h1 class="page-h">Studio</h1>
+      <p class="ws-sub">A speech of your own is the studio work this course is heading toward. For now, paste one into Custom Work.</p></div>
+    ${cards.map((c, i) => `
+      <button class="track-card hub-card" data-i="${i}" type="button">
+        <div class="track-glyph">${c.icon}</div>
+        <div class="track-info"><h2>${esc(c.title)}</h2></div>
+        <div class="track-arrow">›</div>
+      </button>`).join('')}`;
+  el.querySelectorAll('[data-i]').forEach(b =>
+    b.addEventListener('click', () => navTo(cards[+b.dataset.i].go)));
+}
+
 function characterLibraryPane(el) { return bookLibraryPane(el, BOOKS.character); }
+function rhetoricLibraryPane(el) { return bookLibraryPane(el, BOOKS.rhetoric); }
 function shakespeareLibraryPane(el) { return bookLibraryPane(el, BOOKS.shakespeare); }
 // Parameterised 2026-09-25 when Shakespeare became the third book. The
 // body is Character's, unchanged except for the book it is handed.
@@ -4924,6 +5007,7 @@ function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLibraryPane(el);
   if (ws === 'character') return characterLibraryPane(el);
   if (ws === 'shakespeare') return shakespeareLibraryPane(el);
+  if (ws === 'rhetoric') return rhetoricLibraryPane(el);
   if (ws === 'speech') return speechLibraryPane(el);
   const d = course.id === 'core' ? null : course.id;
   const cards = (d ? [
@@ -6662,6 +6746,7 @@ function studioMain(el) {
   // Shakespeare gets the text surfaces and NOT the Personal Dictionary,
   // which is accent work and has no place in a course about reading verse.
   if (activeWorkspace() === 'shakespeare') return shakespeareStudioPane(el);
+  if (activeWorkspace() === 'rhetoric') return rhetoricStudioPane(el);
   const inSpeech = activeWorkspace() === 'speech';
   // Playable Actions is acting work — it shelves in the Acting Library
   // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
@@ -10193,6 +10278,7 @@ if (!framedHostile) {
   // the owner (and #character-preview-off closes it again).
   if (CHARACTER_PREVIEW_HASHES.includes(location.hash)) setCharacterPreview(location.hash === '#character-preview');
   if (SHAKESPEARE_PREVIEW_HASHES.includes(location.hash)) setShakespearePreview(location.hash === '#shakespeare-preview');
+  if (RHETORIC_PREVIEW_HASHES.includes(location.hash)) setRhetoricPreview(location.hash === '#rhetoric-preview');
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool
   else gateThreshold();   // threshold for fresh users; grandfathers everyone else
@@ -10208,6 +10294,9 @@ if (!framedHostile) {
       renderShell('learn');
     } else if (SHAKESPEARE_PREVIEW_HASHES.includes(location.hash)) {
       setShakespearePreview(location.hash === '#shakespeare-preview');
+      renderShell('learn');
+    } else if (RHETORIC_PREVIEW_HASHES.includes(location.hash)) {
+      setRhetoricPreview(location.hash === '#rhetoric-preview');
       renderShell('learn');
     }
   });

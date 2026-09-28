@@ -55,6 +55,7 @@ import { lexMarkedExample, lexTermForms } from '../js/views/lexicon-mark.js';
 // against the function the app actually ships it with.
 import { esc as uiEsc } from '../js/ui.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
+import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -4427,6 +4428,54 @@ export async function run({ navDoc = document } = {}) {
       /<span class="lex-word">\$\{esc\(e\.term\)\}<\/span>/.test(lexRow)
       && /\.lex-word,\s*\.lex-hit\s*\{/.test(lexCss)
       && /--lex-mark:/.test(lexCss) && /--lex-mark-ink:/.test(lexCss));
+  }
+
+  // ── 21m. Rhetoric: the sixth workspace, one module written ──
+  // Owner decision 2026-09-28. Hidden while it is written, the route
+  // Character and Shakespeare both took.
+  {
+    const ctxR = await import('../js/views/context.js');
+    check('rhetoric: six modules outlined, and only the written one is shelved',
+      RHETORIC_MODULES.length === 6
+      && String(RHETORIC_MODULES.map(m => m.id))
+        === 'ground,audience,invention,shape,delivery,ethics'
+      && RHETORIC_COLLECTIONS.length === 1
+      && RHETORIC_COLLECTIONS[0].id === 'ground',
+      `${RHETORIC_COLLECTIONS.length} collection(s)`);
+    check('rhetoric: module 1 is six lessons, in order, each with a body',
+      RHETORIC_LESSONS.length === 6
+      && RHETORIC_LESSONS.every(l => l.module === 'ground')
+      && String(RHETORIC_LESSONS.map(l => l.order)) === '1,2,3,4,5,6'
+      && RHETORIC_LESSONS.every(l => l.body?.length && l.objective && l.reflection));
+    // Nothing here is approved. Claude wrote it, so the ledger must be
+    // empty of rh- ids until a human records one.
+    check('rhetoric: nothing is approved — Claude may not approve his own writing',
+      RHETORIC_LESSONS.every(l => !speechApproved(l.id) && !speechPublished(l.id)));
+    check('rhetoric: hidden from learners, and the workspace agrees with the flag',
+      ctxR.RHETORIC_COURSE_LIVE === false
+      && ctxR.liveWorkspaces().some(w => w.id === 'rhetoric') === ctxR.rhetoricOpen()
+      && ctxR.ACCENTLESS_WORKSPACES.includes('rhetoric'));
+    // An OUTLINED module must not claim lessons it does not have. Before
+    // Rhetoric there was only ever one course using this pane, every module
+    // had lessons, and the empty case fell through to "Prepared lessons
+    // awaiting acting-professional review" — a sentence with two false
+    // claims in it for a module with nothing written.
+    const modSrc = await viewSource();
+    check('learn pane: an outlined module says so, instead of claiming lessons',
+      /const outlined = lessons\.length === 0;/.test(modSrc)
+      && /Outlined, not written yet\./.test(modSrc)
+      && /awaiting \$\{reviewer\.length === 1 \? reviewer\[0\] : 'specialist'\} review/.test(modSrc)
+      && !/meta: ready\.length \? m\.blurb : 'Prepared lessons awaiting acting-professional review'/.test(modSrc));
+    // The two rhetorics must not be confused: main.js RHETORIC_LIVE hides a
+    // Plato reading pathway and has nothing to do with this course.
+    const rSrc = await viewSource();
+    check('rhetoric: the course flag is distinct from the reading-pathway flag',
+      /RHETORIC_COURSE_LIVE/.test(rSrc) && /const RHETORIC_LIVE = false;/.test(rSrc));
+    check('rhetoric: house style holds — no dashes, no contractions, curly quotes',
+      RHETORIC_LESSONS.every(l => {
+        const t = JSON.stringify([l.title, l.objective, l.orientation, l.reflection, l.body]);
+        return !/\u2014|\u2013/.test(t) && !/\b\w+'(s|t|re|ve|ll|d|m)\b/.test(t);
+      }));
   }
 
   // ── 21k. The Shakespeare course: written in part, hidden by default ──

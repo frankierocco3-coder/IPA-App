@@ -88,6 +88,13 @@ export const WORKSPACES = [
   // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
   // the conservatory class name. The internal id stays 'ipa' (stored
   // values, lint pins); the IPA Foundations course chip stays inside.
+  // Rhetoric is the sixth workspace (owner decision 2026-09-28: separate,
+  // like Acting and Building a Character, not a module inside Shakespeare).
+  // It sits after Shakespeare and before the instrument, which keeps the
+  // owner's 2026-09-25 ordering intact: the work first, then the
+  // instrument, then the accents.
+  { id: 'rhetoric', icon: '🏛️', label: 'Rhetoric',
+    context: 'How speech changes what people think and do, built on purpose rather than by luck' },
   { id: 'ipa', icon: 'ʃə', label: 'Voice & Speech',
     context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
   { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
@@ -145,13 +152,28 @@ export const shakespearePreview = () => {
   try { return localStorage.getItem(SHAKESPEARE_PREVIEW_KEY) === 'on'; } catch { return false; }
 };
 export const shakespeareOpen = () => SHAKESPEARE_LIVE || shakespearePreview();
+// The course flag. NOT the same thing as RHETORIC_LIVE in js/main.js,
+// which hides a reading pathway of three Plato dialogues and predates
+// this by months. Two different features, two different names, and the
+// distinction is worth the longer name.
+//
+// Hidden while it is written, the route Character and Shakespeare both
+// took. Module 1 is written; modules 2 to 6 are outlined and empty, so
+// the course cannot stand alone yet and must not reach a learner.
+export const RHETORIC_COURSE_LIVE = false;
+export const RHETORIC_PREVIEW_KEY = 'speechcraft-rhetoric-preview';
+export const rhetoricPreview = () => {
+  try { return localStorage.getItem(RHETORIC_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const rhetoricOpen = () => RHETORIC_COURSE_LIVE || rhetoricPreview();
 export const liveWorkspaces = () => WORKSPACES.filter(w =>
   (SPEECH_LIVE || w.id !== 'speech')
   && (w.id !== 'character' || characterOpen())
-  && (w.id !== 'shakespeare' || shakespeareOpen()));
+  && (w.id !== 'shakespeare' || shakespeareOpen())
+  && (w.id !== 'rhetoric' || rhetoricOpen()));
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
-export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'shakespeare'];
+export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'shakespeare', 'rhetoric'];
 export const WORKSPACE_KEY = 'speechcraft-workspace';
 export const activeWorkspace = () => {
   try {
@@ -159,6 +181,7 @@ export const activeWorkspace = () => {
     if (v === 'speech' && !SPEECH_LIVE) return 'acting';
     if (v === 'character' && !characterOpen()) return 'acting';
     if (v === 'shakespeare' && !shakespeareOpen()) return 'acting';
+    if (v === 'rhetoric' && !rhetoricOpen()) return 'acting';
     if (WORKSPACES.some(w => w.id === v)) return v;
     // Migration from the retired page-level tabs, then inference from
     // the stored course — existing users land exactly where they were.
@@ -193,6 +216,10 @@ export const characterVisible = l => characterPreview() || speechPublished(l.id)
 // workspace is hidden the owner sees every written lesson; when it goes
 // live, each lesson needs its own publication entry like every other.
 export const shakespeareVisible = l => shakespearePreview() || speechPublished(l.id);
+// Rhetoric follows the same rule: the owner sees every written lesson
+// while the course is hidden, and once it launches each lesson needs its
+// own publication entry like every other.
+export const rhetoricVisible = l => rhetoricPreview() || speechPublished(l.id);
 // Dialects you can read/scan/transcribe any text in.
 export const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
