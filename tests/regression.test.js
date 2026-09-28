@@ -4480,9 +4480,12 @@ export async function run({ navDoc = document } = {}) {
       && new Set(FALLACIES.map(f => f.id)).size === 13
       && FALLACIES.every(f => /^FA-\d{3}$/.test(f.id)),
       `${FALLACIES.length} total, ${fallaciesIn('language').length} language`);
-    check('fallacies: every one carries a definition, an effect and three examples',
+    // Owner order 2026-09-28: the thirteen read exactly like All Fallacies
+    // next door — what it hides, then the question — and carry ONE example.
+    check('fallacies: every one carries what it hides, what to ask, and one example',
       FALLACIES.every(f => f.term && f.what?.trim() && f.note?.trim()
-        && f.examples?.length === 3
+        && f.overlook?.trim() && f.ask?.trim()
+        && f.examples?.length === 1
         && f.examples.every(x => x.text?.trim() && x.source?.trim())
         && FALLACY_GROUPS[f.group]));
     // Most examples are invented, which is honest for bad arguments and
@@ -4568,7 +4571,7 @@ export async function run({ navDoc = document } = {}) {
     const famSrc = await viewSource();
     check('families: the shelf is reachable and is a reference, not a lesson',
       /function renderFamilyShelf\(\)/.test(famSrc)
-      && /How Arguments Go Wrong/.test(famSrc));
+      && /All Fallacies/.test(famSrc));
     // Aristotle's composition and division are LINGUISTIC, not the modern
     // part-and-whole fallacy that borrowed the names. Got this wrong first
     // time; the correction is pinned so it cannot quietly revert.
@@ -4740,9 +4743,13 @@ export async function run({ navDoc = document } = {}) {
     check('rhetoric: 17 figures, ids unique and in the stable RH-### form',
       RHETORIC.length === 17 && new Set(rhIds).size === 17
       && rhIds.every(id => /^RH-\d{3}$/.test(id)));
-    check('rhetoric: every figure carries a definition, an effect and five examples',
+    // Back to ONE example per figure (owner order 2026-09-28). Five was too
+    // many on the page. The one kept is the strongest on teaching grounds,
+    // which is sometimes ours and sometimes the best-known instance in
+    // English, so the mix of inApp and cited is deliberate and uneven.
+    check('rhetoric: every figure carries a definition, an effect and one example',
       RHETORIC.every(r => r.term && r.what?.trim() && r.note?.trim()
-        && r.examples?.length === 5
+        && r.examples?.length === 1
         && r.examples.every(x => x.text?.trim() && x.source?.trim())));
     // Build the corpus the same way the reader can: sonnets plus scenes.
     //
@@ -4761,9 +4768,13 @@ export async function run({ navDoc = document } = {}) {
       .map(x => r.id + ' ' + x.text.slice(0, 40)));
     check('rhetoric: every inApp example really is a line this app carries',
       badInApp.length === 0, badInApp.join(' | '));
-    check('rhetoric: every figure keeps at least one example the app can prove',
-      RHETORIC.every(r => r.examples.some(x => x.inApp)),
-      RHETORIC.filter(r => !r.examples.some(x => x.inApp)).map(r => r.id).join(' '));
+    // With one example per figure this can no longer be "every figure keeps a
+    // provable one" — the best example is often Lincoln or the KJV, which this
+    // repository does not hold. What survives is the honest half: any example
+    // CLAIMING to be from our corpus must really be, and some still are.
+    check('rhetoric: some examples are still ones the app can prove',
+      RHETORIC.filter(r => r.examples.some(x => x.inApp)).length >= 4,
+      `${RHETORIC.filter(r => r.examples.some(x => x.inApp)).length} of ${RHETORIC.length} verifiable`);
     // Churchill and King are the two most quoted rhetors in English and both
     // are still in copyright. They must not appear.
     const rhCites = RHETORIC.flatMap(r => r.examples.map(x => x.source)).join(' ');

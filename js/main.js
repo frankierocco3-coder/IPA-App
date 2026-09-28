@@ -4504,7 +4504,7 @@ function rhetoricPracticePane(el) {
     </button>
     <button class="track-card hub-card" id="rhp-families" type="button">
       <div class="track-glyph">🧭</div>
-      <div class="track-info"><h2>How Arguments Go Wrong</h2><p>Forty modern errors in eight families, grouped by what the speaker is doing.</p></div>
+      <div class="track-info"><h2>All Fallacies</h2><p>Forty modern errors in eight families, grouped by what the speaker is doing.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="rhp-library" type="button">
@@ -4536,6 +4536,8 @@ function fallacyRowHtml(f) {
       <h3 class="lex-term"><span class="lex-word">${esc(f.term)}${
         f.modern ? ` (${esc(f.modern)})` : ''}</span></h3>
       <p class="lex-modern">${esc(f.what)}</p>
+      <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
+      <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
       <p class="lex-note">${esc(f.note)}</p>
       ${f.examples.map(x => `
         <p class="lex-eg">“${esc(x.text)}”<span class="lex-src">${esc(x.source)}</span></p>`).join('')}
@@ -4594,7 +4596,7 @@ function renderFallacyShelf() {
   draw();
 }
 
-// ── How arguments go wrong: eight families ──────────────────────
+// ── All Fallacies: the modern errors in eight families ──────────
 // Owner decision 2026-09-28. Organised by what the speaker is DOING,
 // because that is the only form a listener can use in a room: eight
 // questions beat forty names. Each family leads with its own counter-move,
@@ -4627,9 +4629,9 @@ function renderFamilyShelf() {
   stopSpeech();
   famQuery = '';
   app.innerHTML = `
-    ${pageTopbar('🧭 How Arguments Go Wrong', '#8a6d3b')}
+    ${pageTopbar('🧭 All Fallacies', '#8a6d3b')}
     <main class="guide">
-      <h1>How Arguments Go Wrong</h1>
+      <h1>All Fallacies</h1>
       <p class="guide-text">Forty errors, grouped by what the speaker is doing rather than by
         alphabet. A listener cannot hold forty names. They can hold eight questions, and the
         question at the head of each group is the one worth carrying.</p>
@@ -4638,7 +4640,7 @@ function renderFamilyShelf() {
       <p class="pane-note pane-caveat">${esc(FAMILY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fam-search" type="search"
         placeholder="Search by name, by what it hides, by the question…"
-        aria-label="Search how arguments go wrong" autocomplete="off">
+        aria-label="Search all fallacies" autocomplete="off">
       <div id="fam-list" aria-live="polite"></div>
     </main>`;
   wireBrandHome();
@@ -4676,7 +4678,7 @@ function rhetoricStudioPane(el) {
   const cards = [
     { icon: '⚖️', title: 'The Figures', go: renderRhetoricShelf },
     { icon: '🧩', title: 'The Thirteen Fallacies', go: renderFallacyShelf },
-    { icon: '🧭', title: 'How Arguments Go Wrong', go: renderFamilyShelf },
+    { icon: '🧭', title: 'All Fallacies', go: renderFamilyShelf },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
