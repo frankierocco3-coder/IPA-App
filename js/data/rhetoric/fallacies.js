@@ -73,26 +73,26 @@ export const FALLACIES = [
     note: 'Equivocation happens in a word; this happens in a sentence. It is the fallacy of headlines and of oracles, and the reason legal drafting is so ugly: the ugliness is the cost of closing the second reading. If a sentence in an argument can be diagrammed two ways, find out which one the speaker needs before you agree to it.',
     examples: [
       { text: 'The oracle told Croesus that if he crossed the river he would destroy a great empire. He crossed, and destroyed his own.', source: 'Herodotus, Histories I — the most famous amphiboly in antiquity.' },
-      { text: 'I once shot an elephant in my pyjamas.', source: 'Constructed; the standard grammatical illustration, and a joke because the second reading is the funnier one.' },
+      { text: 'The teacher told the student that he was confused.', source: 'Constructed. Nothing in it is an ambiguous word; the pronoun is, and the whole meaning turns on it.' },
       { text: 'Visiting relatives can be tiresome.', source: 'Constructed. Two readings, opposite complaints, and no word in it is ambiguous on its own.' },
     ] },
 
   { id: 'FA-003', term: 'Composition', group: 'language',
-    what: 'What is true of the parts taken separately is assumed true of them taken together.',
-    note: 'It feels like addition and it is not. The give-away is an argument that never says why the property should survive being combined, because the speaker has not noticed that it might not. Most bad arguments about teams, committees and casts are this one.',
+    what: 'Words that should be taken separately are taken together, and the sentence changes meaning.',
+    note: 'THIS IS NOT THE MODERN PART-AND-WHOLE FALLACY, which shares the name and is a different error entirely. Aristotle’s composition is about grouping: the same words, combined one way, say something they do not say combined another way. It is a real ambiguity of reading rather than a mistake about parts and wholes, which is why it sits among the six that depend on language. The modern version is on the families shelf, where it belongs.',
     examples: [
-      { text: 'Every player on this team is the best in the league at their position. So this is the best team in the league.', source: 'Constructed. The premise can be entirely true and the conclusion entirely false.' },
-      { text: 'Each part of this machine is light, so the machine is light.', source: 'Constructed; the plainest form, and worth saying first because the error is obvious here and invisible elsewhere.' },
-      { text: 'Every scene in the play works. Therefore the play works.', source: 'Constructed, and the reason a run-through is not a series of scenes.' },
+      { text: 'Is it possible for a man who is sitting to walk? Taken together, no. Taken apart — a man who is sitting is able to walk — yes.', source: 'Aristotle, Sophistical Refutations — his own example of the figure.' },
+      { text: 'I can carry five stones and I can carry ten stones, so I can carry five and ten stones.', source: 'Constructed on the classical pattern; each separately, not both together.' },
+      { text: 'He learned to fight while blind drunk. Combined, a boast; separated, two different claims.', source: 'Constructed. The words never change and the grouping does all the work.' },
     ] },
 
   { id: 'FA-004', term: 'Division', group: 'language',
-    what: 'What is true of a whole is assumed true of each of its parts. The mirror of composition.',
-    note: 'Runs the same error backwards, and is easier to spot only because the claim usually sounds absurd on arrival. It hides best in talk about groups of people, where the whole has a statistical property that no individual member has at all.',
+    what: 'Words that should be taken together are taken apart, and the sentence changes meaning. The mirror of composition.',
+    note: 'Again NOT the modern whole-to-parts fallacy that borrowed the name. Aristotle’s division separates what was meant as one unit. The arithmetic form is the clearest: a sum said of a total, then said of each part of it. Watch for a phrase that was doing one job being split into two jobs.',
     examples: [
-      { text: 'This company is enormously profitable, so every department in it must be profitable.', source: 'Constructed.' },
-      { text: 'The audience was restless, so every person in it was restless.', source: 'Constructed, and worth an actor’s attention: the note you are given is about the room, not about anybody in it.' },
-      { text: 'Water is not flammable. Water is hydrogen and oxygen. So hydrogen is not flammable.', source: 'Constructed; the form where the conclusion is not merely unproven but plainly false.' },
+      { text: 'Five is two and three. So five is two, and five is three.', source: 'Aristotle, Sophistical Refutations — the classical example, and the reason the figure is easy to state and hard to spot.' },
+      { text: 'Two and three are even and odd. So two and three are even, and two and three are odd.', source: 'Constructed on the classical pattern.' },
+      { text: 'The men carried the boat. Together they did; separately, not one of them could.', source: 'Constructed. Splitting the subject splits the claim.' },
     ] },
 
   { id: 'FA-005', term: 'Accent', group: 'language',

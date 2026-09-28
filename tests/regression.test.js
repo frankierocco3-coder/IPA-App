@@ -56,7 +56,8 @@ import { lexMarkedExample, lexTermForms } from '../js/views/lexicon-mark.js';
 import { esc as uiEsc } from '../js/ui.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
-import { FALLACIES, FALLACY_GROUPS, fallaciesIn } from '../js/data/rhetoric/fallacies.js';
+import { FALLACIES, FALLACY_GROUPS, fallaciesIn, fallacyById } from '../js/data/rhetoric/fallacies.js';
+import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from '../js/data/rhetoric/families.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -4500,6 +4501,58 @@ export async function run({ navDoc = document } = {}) {
       FALLACIES.flatMap(f => [f.what, f.note]).every(t2 =>
         !/[\u2014\u2013"]/.test(t2)
         && !/n\u2019t\b|\u2019(re|ll|ve|m|d)\b/.test(t2)));
+
+    // ── The eight families ───────────────────────────────────
+    // Owner 2026-09-28: he kept Aristotle's thirteen and asked for this
+    // separately BECAUSE of how it is organised. So the organisation is
+    // what gets pinned, not the count.
+    check('families: eight, each with a lead and a counter-move, every entry placed',
+      FAMILIES.length === 8
+      && FAMILIES.every(f => f.title && f.lead?.trim() && f.counter?.trim() && f.icon)
+      && String(FAMILIES.map(f => f.n)) === '1,2,3,4,5,6,7,8'
+      && MODERN_FALLACIES.every(f => FAMILIES.some(x => x.id === f.family))
+      && FAMILIES.every(f => fallaciesInFamily(f.id).length > 0),
+      FAMILIES.map(f => `${f.id}:${fallaciesInFamily(f.id).length}`).join(' '));
+    check('families: every entry says what it hides, what to ask, and how to repair it',
+      MODERN_FALLACIES.length >= 40
+      && MODERN_FALLACIES.every(f => f.term && f.what?.trim()
+        && f.overlook?.trim() && f.ask?.trim() && f.repair?.trim())
+      && new Set(MODERN_FALLACIES.map(f => f.id)).size === MODERN_FALLACIES.length
+      && MODERN_FALLACIES.every(f => /^MF-\d{3}$/.test(f.id)));
+    // THE OVERLAP IS THE POINT. Five modern names ARE Aristotle's, and two
+    // shelves defining one error twice would make the app look as though it
+    // did not know. Each must POINT at the thirteen, and the id must resolve.
+    // FOUR, not the five first counted: 'false cause' is deliberately NOT
+    // given a modern entry of its own, because Aristotle's FA-011 already
+    // is it and post hoc is the useful modern subspecies. Adding it would
+    // have put the same error on one shelf twice, which is the exact
+    // problem the overlap handling exists to prevent.
+    check('families: every Aristotle overlap is declared and resolves',
+      aristotleOverlaps().length === 4
+      && aristotleOverlaps().every(f => !!fallacyById(f.alsoAristotle))
+      && !MODERN_FALLACIES.some(f => f.term.toLowerCase() === 'false cause'),
+      aristotleOverlaps().map(f => `${f.term}->${f.alsoAristotle}`).join(' '));
+    // The qualifications are the most valuable part of the shelf and the
+    // easiest to lose in an edit. They are named and pinned individually.
+    const famNotes = MODERN_FALLACIES.map(f => f.note ?? '').join(' ')
+      + FAMILIES.map(f => f.lead).join(' ');
+    check('families: the qualifications survive — expertise, slippery slope, experience',
+      /NOT AN ARGUMENT AGAINST EXPERTISE/.test(famNotes)
+      && /NOT AUTOMATICALLY A FALLACY/.test(famNotes)
+      && /NOT A DISMISSAL OF LIVED EXPERIENCE/.test(famNotes)
+      && /Emotion is not a fallacy/.test(famNotes));
+    check('families: nutpicking stays out, as internet jargon that will date',
+      !MODERN_FALLACIES.some(f => /nutpick/i.test(f.term)));
+    const famSrc = await viewSource();
+    check('families: the shelf is reachable and is a reference, not a lesson',
+      /function renderFamilyShelf\(\)/.test(famSrc)
+      && /How Arguments Go Wrong/.test(famSrc));
+    // Aristotle's composition and division are LINGUISTIC, not the modern
+    // part-and-whole fallacy that borrowed the names. Got this wrong first
+    // time; the correction is pinned so it cannot quietly revert.
+    check('fallacies: composition and division are Aristotle\u2019s, not the modern namesakes',
+      /NOT THE MODERN PART-AND-WHOLE FALLACY/.test(fallacyById('FA-003').note)
+      && /Five is two and three/.test(JSON.stringify(fallacyById('FA-004').examples)));
 
     // The two rhetorics must not be confused: main.js RHETORIC_LIVE hides a
     // Plato reading pathway and has nothing to do with this course.

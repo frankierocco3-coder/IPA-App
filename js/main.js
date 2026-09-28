@@ -10,7 +10,8 @@ import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
-import { FALLACIES, FALLACY_GROUPS } from './data/rhetoric/fallacies.js';
+import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
+import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -4501,6 +4502,11 @@ function rhetoricPracticePane(el) {
       <div class="track-info"><h2>The Thirteen Fallacies</h2><p>Aristotle’s list: six that depend on language, seven that do not.</p></div>
       <div class="track-arrow">›</div>
     </button>
+    <button class="track-card hub-card" id="rhp-families" type="button">
+      <div class="track-glyph">🧭</div>
+      <div class="track-info"><h2>How Arguments Go Wrong</h2><p>Forty modern errors in eight families, grouped by what the speaker is doing.</p></div>
+      <div class="track-arrow">›</div>
+    </button>
     <button class="track-card hub-card" id="rhp-library" type="button">
       <div class="track-glyph">🏛️</div>
       <div class="track-info"><h2>Rhetoric Library</h2><p>What Rhetoric Is: six chapters, free to read in any order.</p></div>
@@ -4508,6 +4514,7 @@ function rhetoricPracticePane(el) {
     </button>`;
   el.querySelector('#rhp-figures').addEventListener('click', () => navTo(renderRhetoricShelf));
   el.querySelector('#rhp-fallacies').addEventListener('click', () => navTo(renderFallacyShelf));
+  el.querySelector('#rhp-families').addEventListener('click', () => navTo(renderFamilyShelf));
   el.querySelector('#rhp-library').addEventListener('click', () => goSection('library'));
 }
 
@@ -4586,10 +4593,90 @@ function renderFallacyShelf() {
   draw();
 }
 
+// ── How arguments go wrong: eight families ──────────────────────
+// Owner decision 2026-09-28. Organised by what the speaker is DOING,
+// because that is the only form a listener can use in a room: eight
+// questions beat forty names. Each family leads with its own counter-move,
+// which is the thing worth memorising if nothing else is.
+//
+// Where an entry IS one of Aristotle's thirteen under a modern name, the
+// card says so and links to it rather than defining it twice.
+const FAMILY_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric or logic reader. '
+  + 'Written for this app and not yet checked by a qualified reader. Naming a fallacy begins '
+  + 'an examination; it does not finish one, and nothing here is a way to win an argument '
+  + 'without having the better case.';
+
+let famQuery = '';
+
+function modernFallacyHtml(f) {
+  const a = f.alsoAristotle ? fallacyById(f.alsoAristotle) : null;
+  return `
+    <article class="lex-row">
+      <h3 class="lex-term"><span class="lex-word">${esc(f.term)}</span>${
+        a ? `<span class="lex-kind">also Aristotle · ${esc(a.term)}</span>` : ''}</h3>
+      <p class="lex-modern">${esc(f.what)}</p>
+      <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
+      <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
+      <p class="lex-note"><b>Repair:</b> ${esc(f.repair)}</p>
+      ${f.note ? `<p class="lex-note">${esc(f.note)}</p>` : ''}
+    </article>`;
+}
+
+function renderFamilyShelf() {
+  record(renderFamilyShelf);
+  stopSpeech();
+  famQuery = '';
+  app.innerHTML = `
+    ${pageTopbar('🧭 How Arguments Go Wrong', '#8a6d3b')}
+    <main class="guide">
+      <h1>How Arguments Go Wrong</h1>
+      <p class="guide-text">Forty errors, grouped by what the speaker is doing rather than by
+        alphabet. A listener cannot hold forty names. They can hold eight questions, and the
+        question at the head of each group is the one worth carrying.</p>
+      <p class="guide-text">Naming a fallacy begins an examination. It does not finish one, and it
+        is never a way to win an argument without having the better case.</p>
+      <p class="pane-note pane-caveat">${esc(FAMILY_REVIEW_NOTE)}</p>
+      <input class="sonnet-search" id="fam-search" type="search"
+        placeholder="Search by name, by what it hides, by the question…"
+        aria-label="Search how arguments go wrong" autocomplete="off">
+      <div id="fam-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('fam-list');
+  const searchEl = document.getElementById('fam-search');
+  const draw = () => {
+    const q = famQuery.trim().toLowerCase();
+    const hits = q
+      ? MODERN_FALLACIES.filter(f => [f.term, f.what, f.overlook, f.ask, f.repair, f.note]
+          .some(v => String(v ?? '').toLowerCase().includes(q)))
+      : MODERN_FALLACIES;
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(famQuery)}”.</p>
+        <p><button class="btn-lite" id="fam-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#fam-clear').addEventListener('click', () => {
+        famQuery = ''; searchEl.value = ''; draw();
+      });
+      return;
+    }
+    listEl.innerHTML = FAMILIES
+      .map(fam => [fam, hits.filter(f => f.family === fam.id)])
+      .filter(([, list]) => list.length)
+      .map(([fam, list]) => `
+        <h2 class="guide-heading">${fam.icon} ${fam.n}. ${esc(fam.title)} · ${list.length}</h2>
+        <p class="guide-text">${esc(fam.lead)}</p>
+        <p class="pane-note"><b>The counter:</b> ${esc(fam.counter)}</p>
+        ${list.map(modernFallacyHtml).join('')}`).join('');
+  };
+  searchEl.addEventListener('input', () => { famQuery = searchEl.value; draw(); });
+  draw();
+}
+
 function rhetoricStudioPane(el) {
   const cards = [
     { icon: '⚖️', title: 'The Figures', go: renderRhetoricShelf },
     { icon: '🧩', title: 'The Thirteen Fallacies', go: renderFallacyShelf },
+    { icon: '🧭', title: 'How Arguments Go Wrong', go: renderFamilyShelf },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
