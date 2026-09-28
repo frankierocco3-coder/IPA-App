@@ -10,6 +10,7 @@ import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
+import { FALLACIES, FALLACY_GROUPS } from './data/rhetoric/fallacies.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -4495,18 +4496,100 @@ function rhetoricPracticePane(el) {
       <div class="track-info"><h2>The Figures</h2><p>Seventeen shapes of thought, each with a real example. Module 4 teaches what they are for.</p></div>
       <div class="track-arrow">›</div>
     </button>
+    <button class="track-card hub-card" id="rhp-fallacies" type="button">
+      <div class="track-glyph">🧩</div>
+      <div class="track-info"><h2>The Thirteen Fallacies</h2><p>Aristotle’s list: six that depend on language, seven that do not.</p></div>
+      <div class="track-arrow">›</div>
+    </button>
     <button class="track-card hub-card" id="rhp-library" type="button">
       <div class="track-glyph">🏛️</div>
       <div class="track-info"><h2>Rhetoric Library</h2><p>What Rhetoric Is: six chapters, free to read in any order.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
   el.querySelector('#rhp-figures').addEventListener('click', () => navTo(renderRhetoricShelf));
+  el.querySelector('#rhp-fallacies').addEventListener('click', () => navTo(renderFallacyShelf));
   el.querySelector('#rhp-library').addEventListener('click', () => goSection('library'));
+}
+
+// ── The thirteen fallacies, on a shelf ──────────────────────────
+// Aristotle's list and only his (owner decision 2026-09-28), kept
+// SEPARATE from the figures by his own division: six that depend on
+// language, seven that do not. The grouping is the argument, so the page
+// renders the two groups with their leads rather than one flat list.
+const FALLACY_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric or logic reader. '
+  + 'Every definition and every note here is written for this app and none has been checked '
+  + 'by a qualified reader yet. Most examples are constructed rather than quoted, and each '
+  + 'one says which it is.';
+
+let fallQuery = '';
+
+function fallacyRowHtml(f) {
+  return `
+    <article class="lex-row">
+      <h3 class="lex-term"><span class="lex-word">${esc(f.term)}</span></h3>
+      <p class="lex-modern">${esc(f.what)}</p>
+      <p class="lex-note">${esc(f.note)}</p>
+      ${f.examples.map(x => `
+        <p class="lex-eg">“${esc(x.text)}”<span class="lex-src">${esc(x.source)}</span></p>`).join('')}
+    </article>`;
+}
+
+function renderFallacyShelf() {
+  record(renderFallacyShelf);
+  stopSpeech();
+  fallQuery = '';
+  app.innerHTML = `
+    ${pageTopbar('🧩 The Thirteen Fallacies', '#8a6d3b')}
+    <main class="guide">
+      <h1>The Thirteen Fallacies</h1>
+      <p class="guide-text">A figure is a shape that makes an argument land. A fallacy is a shape
+        that makes a bad argument look like a good one. Same craft, opposite direction, which is
+        why these are on their own shelf.</p>
+      <p class="guide-text">This is Aristotle’s list and nobody else’s. Modern handbooks run to a
+        hundred names; he gives thirteen and divides them once. Thirteen is a number a person can
+        carry into a room.</p>
+      <p class="pane-note pane-caveat">${esc(FALLACY_REVIEW_NOTE)}</p>
+      <input class="sonnet-search" id="fa-search" type="search"
+        placeholder="Search fallacies, effects, examples…" aria-label="Search the fallacies"
+        autocomplete="off">
+      <div id="fa-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('fa-list');
+  const searchEl = document.getElementById('fa-search');
+  const draw = () => {
+    const q = fallQuery.trim().toLowerCase();
+    const hits = q
+      ? FALLACIES.filter(f => [f.term, f.what, f.note,
+          ...f.examples.flatMap(x => [x.text, x.source])]
+          .some(v => String(v ?? '').toLowerCase().includes(q)))
+      : FALLACIES;
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(fallQuery)}”.</p>
+        <p><button class="btn-lite" id="fa-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#fa-clear').addEventListener('click', () => {
+        fallQuery = ''; searchEl.value = ''; draw();
+      });
+      return;
+    }
+    // A heading appears only where the search leaves entries under it.
+    listEl.innerHTML = Object.keys(FALLACY_GROUPS)
+      .map(g => [g, hits.filter(f => f.group === g)])
+      .filter(([, list]) => list.length)
+      .map(([g, list]) => `
+        <h2 class="guide-heading">${esc(FALLACY_GROUPS[g].label)} · ${list.length}</h2>
+        <p class="guide-text">${esc(FALLACY_GROUPS[g].lead)}</p>
+        ${list.map(fallacyRowHtml).join('')}`).join('');
+  };
+  searchEl.addEventListener('input', () => { fallQuery = searchEl.value; draw(); });
+  draw();
 }
 
 function rhetoricStudioPane(el) {
   const cards = [
     { icon: '⚖️', title: 'The Figures', go: renderRhetoricShelf },
+    { icon: '🧩', title: 'The Thirteen Fallacies', go: renderFallacyShelf },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `

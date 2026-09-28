@@ -56,6 +56,7 @@ import { lexMarkedExample, lexTermForms } from '../js/views/lexicon-mark.js';
 import { esc as uiEsc } from '../js/ui.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
+import { FALLACIES, FALLACY_GROUPS, fallaciesIn } from '../js/data/rhetoric/fallacies.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -4466,6 +4467,40 @@ export async function run({ navDoc = document } = {}) {
       && /Outlined, not written yet\./.test(modSrc)
       && /awaiting \$\{reviewer\.length === 1 \? reviewer\[0\] : 'specialist'\} review/.test(modSrc)
       && !/meta: ready\.length \? m\.blurb : 'Prepared lessons awaiting acting-professional review'/.test(modSrc));
+    // ── The thirteen fallacies ───────────────────────────────
+    // Aristotle's list and only his (owner decision 2026-09-28). The COUNT
+    // is the point: the reason to use his list rather than a modern one is
+    // that it is closed and a person can hold it. A drift to fourteen is a
+    // drift back into the hundred-name handbooks.
+    check('fallacies: thirteen, six on language and seven not, ids stable',
+      FALLACIES.length === 13
+      && fallaciesIn('language').length === 6
+      && fallaciesIn('matter').length === 7
+      && new Set(FALLACIES.map(f => f.id)).size === 13
+      && FALLACIES.every(f => /^FA-\d{3}$/.test(f.id)),
+      `${FALLACIES.length} total, ${fallaciesIn('language').length} language`);
+    check('fallacies: every one carries a definition, an effect and three examples',
+      FALLACIES.every(f => f.term && f.what?.trim() && f.note?.trim()
+        && f.examples?.length === 3
+        && f.examples.every(x => x.text?.trim() && x.source?.trim())
+        && FALLACY_GROUPS[f.group]));
+    // Most examples are invented, which is honest for bad arguments and
+    // dishonest if unsaid. Every source line must declare what it is.
+    check('fallacies: every example says whether it is constructed or cited',
+      FALLACIES.flatMap(f => f.examples)
+        .every(x => /Constructed|Traditional|Aristotle|Herodotus|common practice|ordinary speech|standing philosophical/i.test(x.source)));
+    check('fallacies: they are a SEPARATE shelf from the figures, not folded in',
+      RHETORIC.every(r => !FALLACIES.some(f => f.term === r.term)));
+    const faSrc = await viewSource();
+    check('fallacies: the shelf is reachable and is a reference, not a lesson',
+      /function renderFallacyShelf\(\)/.test(faSrc)
+      && /The Thirteen Fallacies/.test(faSrc)
+      && !/renderFallacyShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/.test(faSrc.slice(faSrc.indexOf('function renderFallacyShelf'))));
+    check('fallacies: house style holds on our prose, examples exempt',
+      FALLACIES.flatMap(f => [f.what, f.note]).every(t2 =>
+        !/[\u2014\u2013"]/.test(t2)
+        && !/n\u2019t\b|\u2019(re|ll|ve|m|d)\b/.test(t2)));
+
     // The two rhetorics must not be confused: main.js RHETORIC_LIVE hides a
     // Plato reading pathway and has nothing to do with this course.
     const rSrc = await viewSource();
