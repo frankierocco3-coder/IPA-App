@@ -1521,15 +1521,29 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 
 /* ── Continue-learning card: the dominant action on Learn ──── */
+/* The button keeps its width (white-space: nowrap, correctly — "Continue
+   lesson" must not break in half), so in a narrow column it was the TITLE
+   that gave way: "Why He Still Matters to Actors" came out over five lines
+   beside it. Chapter titles here are sentences, not labels, so that is the
+   common case and not an edge one.
+
+   The card now wraps instead. cc-info asks for 15rem before anything else
+   gives, and below 780px the button drops to its own full-width line —
+   measured against the width the title actually broke at, not guessed. */
 .continue-card {
   display: flex; align-items: center; gap: 16px; justify-content: space-between;
+  flex-wrap: wrap;
   background: var(--panel); border: 2px solid var(--line); border-radius: 16px;
   padding: 16px 18px; margin-bottom: 14px;
 }
+.cc-info { flex: 1 1 15rem; min-width: 0; }
 .cc-stage { font-size: 12.5px; font-weight: 700; letter-spacing: 0.4px; color: var(--muted); text-transform: uppercase; }
 .continue-card h2 { font-family: var(--serif); font-size: 24px; margin: 3px 0 2px; }
 .cc-meta { color: var(--muted); font-size: 13.5px; margin: 0; }
-.cc-go { white-space: nowrap; min-height: 44px; }
+.cc-go { white-space: nowrap; min-height: 44px; flex: 0 0 auto; }
+@media (max-width: 780px) {
+  .cc-go { flex: 1 0 100%; }
+}
 
 /* ── Path labels: what each node is, without opening it ────── */
 .path-label {

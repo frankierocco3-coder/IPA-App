@@ -3225,6 +3225,29 @@ export async function run({ navDoc = document } = {}) {
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join());
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
+      // THE COURSE HERO MUST NOT SHRED ITS OWN TITLE. The Start button keeps
+      // its width by design, so in a narrow column the title was what gave
+      // way: "Why He Still Matters to Actors" came out over FIVE lines when
+      // Shakespeare launched. Chapter titles here are sentences, so that is
+      // the common case. Measured, not grepped — a CSS source pin would miss
+      // this regressing from some other rule.
+      {
+        const cardLines = () => {
+          const h2 = doc.querySelector('.continue-card h2');
+          if (!h2) return null;
+          const r = doc.createRange(); r.selectNodeContents(h2);
+          return r.getClientRects().length;
+        };
+        const oldWcc = frame.style.width;
+        frame.style.width = '718px'; await sleep(300);
+        const wide = cardLines();
+        frame.style.width = '375px'; await sleep(300);
+        const narrow = cardLines();
+        frame.style.width = oldWcc; await sleep(250);
+        check('IA: the course hero title never shreds into a column beside the button',
+          wide !== null && wide <= 2 && narrow !== null && narrow <= 3,
+          `718px=${wide} lines, 375px=${narrow} lines`);
+      }
       check('acting: the workspace keeps its guided course and its Library',
         !!doc.querySelector('.page-h')
         && [...doc.querySelectorAll('.side-nav .side-label')].some(e => e.textContent.trim() === 'Learn'));
