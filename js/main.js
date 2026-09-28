@@ -2971,7 +2971,27 @@ function actingReviewCategories() {
   return { groups, total: groups.reduce((n, g) => n + g.count, 0) };
 }
 
-const ACTING_DRAFT_BADGE = 'Prepared draft — awaiting acting-professional review';
+// THE SPECIALIST A DRAFT WAITS ON IS READ OFF THE RECORD, never assumed.
+// Every one of these surfaces said "acting-professional" and "a qualified
+// acting teacher or coach", which was true while Acting was the only course
+// using these screens and became false the moment Rhetoric launched
+// (2026-09-28): its chapters ask for a rhetoric reviewer. Naming the wrong
+// specialist is not a cosmetic slip — the whole point of these badges is to
+// tell a reader exactly who has NOT checked this yet.
+const REVIEWER_PHRASE = {
+  'acting-professional': 'a qualified acting teacher or coach',
+  'voice-professional': 'a qualified voice professional',
+  rhetoric: 'a knowledgeable rhetoric reader',
+};
+const reviewerKindOf = l => l?.requiredReviewer || 'acting-professional';
+const reviewerPhraseOf = l => REVIEWER_PHRASE[reviewerKindOf(l)] ?? 'a qualified specialist';
+const draftBadgeFor = l => `Prepared draft — awaiting ${reviewerKindOf(l)} review`;
+// One book's outstanding reviewer, where its own records agree on one.
+const bookReviewerKind = B => {
+  const kinds = [...new Set(pathLessons(B).map(l => l.requiredReviewer).filter(Boolean))];
+  return kinds.length === 1 ? kinds[0] : 'specialist';
+};
+const bookReviewerPhrase = B => REVIEWER_PHRASE[bookReviewerKind(B)] ?? 'a qualified specialist';
 const approachPublished = a => speechPublished(a.id);
 
 // ── Acting → Learn ────────────────────────────────────────────
@@ -3109,14 +3129,15 @@ function bookLearnPane(el, B) {
       <div class="cc-info">
         <h2>${avail.length ? 'Every available lesson complete' : 'The course is written and in review'}</h2>
         <p class="cc-meta">${avail.length
-          ? 'More lessons are prepared and waiting on acting-professional review.'
-          : `All ${pathLessons(B).length} lessons are written and waiting on a qualified acting teacher or coach. The Library, Actor’s Studio and Acting Practice are open meanwhile.`}</p>
+          ? `More lessons are prepared and waiting on ${bookReviewerKind(B)} review.`
+          : `All ${pathLessons(B).length} lessons are written and waiting on ${bookReviewerPhrase(B)}. The ${B.libraryName} is open meanwhile.`}</p>
       </div>
       <button class="btn btn-primary cc-go" id="ac-to-library" type="button">Browse the ${esc(B.libraryName)}</button>
     </section>`}
     <h2 class="sec-h">Course modules</h2>
     <div class="tile-grid">${cards}</div>
-    ${cats.total ? reviewStripHtml('ac-review-link', cats.total, 'Acting drafts awaiting acting-professional review') : ''}
+    ${cats.total ? reviewStripHtml('ac-review-link', cats.total,
+      `${esc(B.title)} drafts awaiting ${bookReviewerKind(B)} review`) : ''}
     <p class="pane-note sp-explore-more">
       <button class="linkish" id="ac-to-library-2" type="button">Browse everything in the ${esc(B.libraryName)}</button>
     </p>`;
@@ -3149,7 +3170,7 @@ function renderActingModule(n, ws = 'acting') {
     `<div class="item-grid">
        ${lessons.map(l => itemTileHtml({
          key: l.id, seq: bookLessonNumber(B, l), title: l.title,
-         note: B.visible(l) ? (speechLessonDone(l.id) ? 'Completed' : l.objective) : ACTING_DRAFT_BADGE,
+         note: B.visible(l) ? (speechLessonDone(l.id) ? 'Completed' : l.objective) : draftBadgeFor(l),
          state: B.visible(l) ? '' : 'is-pending',
        })).join('')}
      </div>`);
@@ -3282,17 +3303,21 @@ function maskProfileHtml(id) {
 
 function actingDraftGate(l, where) {
   app.innerHTML = `
-    ${pageTopbar('🎭 ' + esc(l.title), '#8a6d3b')}
+    ${pageTopbar(`${bookOf(l.id).icon} ${esc(l.title)}`, '#8a6d3b')}
     <main class="guide">
       <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
-      <p><span class="sp-badge">${esc(ACTING_DRAFT_BADGE)}</span></p>
-      <p class="guide-text">This lesson is fully written. It stays out of ${where} until a qualified acting teacher or coach has reviewed it.</p>
+      <p><span class="sp-badge">${esc(draftBadgeFor(l))}</span></p>
+      <p class="guide-text">This lesson is fully written. It stays out of ${where} until ${esc(reviewerPhraseOf(l))} has reviewed it.</p>
       <p class="pane-note">${esc(DRAFT_VISIBILITY_NOTE)} ${esc(AI_DRAFT_NOTE)}</p>
-      <div class="practice-row"><button class="btn btn-lite" id="ac-open-review" type="button">See its review status</button></div>
+      ${bookOf(l.id) === BOOKS.acting ? `
+      <div class="practice-row"><button class="btn btn-lite" id="ac-open-review" type="button">See its review status</button></div>` : ''}
     </main>`;
   wireBrandHome();
   app.querySelector('#ac-h').focus();
-  document.getElementById('ac-open-review').addEventListener('click', renderActingReviewStatus);
+  // The review-status page is ACTING's inventory. Offering it from a
+  // Rhetoric chapter would send a reader to a page about somebody else's
+  // drafts, so the door only appears for the book it belongs to.
+  document.getElementById('ac-open-review')?.addEventListener('click', renderActingReviewStatus);
 }
 
 // ── Acting → Library chapter (reference, never a lesson) ──────
@@ -3633,7 +3658,7 @@ function renderActingCollection(collectionId) {
          key: LINES_TILE, seq: '01', title: 'Lines & Memory' }) : ''}
        ${lessons.map((l, i) => itemTileHtml({
          key: l.id, seq: String(i + 1 + (collectionId === 'scene' ? 1 : 0)).padStart(2, '0'), title: l.title,
-         note: B.visible(l) ? '' : ACTING_DRAFT_BADGE,
+         note: B.visible(l) ? '' : draftBadgeFor(l),
          state: B.visible(l) ? '' : 'is-pending',
        })).join('')}
      </div>

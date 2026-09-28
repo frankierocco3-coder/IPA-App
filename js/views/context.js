@@ -160,7 +160,7 @@ export const shakespeareOpen = () => SHAKESPEARE_LIVE || shakespearePreview();
 // Hidden while it is written, the route Character and Shakespeare both
 // took. Module 1 is written; modules 2 to 6 are outlined and empty, so
 // the course cannot stand alone yet and must not reach a learner.
-export const RHETORIC_COURSE_LIVE = false;
+export const RHETORIC_COURSE_LIVE = true;
 export const RHETORIC_PREVIEW_KEY = 'speechcraft-rhetoric-preview';
 export const rhetoricPreview = () => {
   try { return localStorage.getItem(RHETORIC_PREVIEW_KEY) === 'on'; } catch { return false; }

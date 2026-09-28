@@ -4457,10 +4457,32 @@ export async function run({ navDoc = document } = {}) {
     // empty of rh- ids until a human records one.
     check('rhetoric: nothing is approved — Claude may not approve his own writing',
       RHETORIC_LESSONS.every(l => !speechApproved(l.id) && !speechPublished(l.id)));
-    check('rhetoric: hidden from learners, and the workspace agrees with the flag',
-      ctxR.RHETORIC_COURSE_LIVE === false
-      && ctxR.liveWorkspaces().some(w => w.id === 'rhetoric') === ctxR.rhetoricOpen()
-      && ctxR.ACCENTLESS_WORKSPACES.includes('rhetoric'));
+    // LAUNCHED 2026-09-28 by owner order. The flag is his to set, so what
+    // is pinned now is the state the launch must not be dishonest in: the
+    // workspace is live, and because the six chapters are NOT approved,
+    // every surface about them has to name the reviewer they really want.
+    // Rhetoric is the first course to launch with its reading still gated,
+    // which is exactly when a hardcoded "acting teacher or coach" becomes
+    // a false statement to the reader it matters most to.
+    check('rhetoric: live, accent-free, and every chapter asks for a rhetoric reviewer',
+      ctxR.RHETORIC_COURSE_LIVE === true
+      && ctxR.liveWorkspaces().some(w => w.id === 'rhetoric')
+      && ctxR.ACCENTLESS_WORKSPACES.includes('rhetoric')
+      && RHETORIC_LESSONS.every(l => l.requiredReviewer === 'rhetoric'),
+      [...new Set(RHETORIC_LESSONS.map(l => l.requiredReviewer))].join(','));
+    // The badge, the gate sentence and the course-status card all said
+    // acting. They are read off the record now; the old hardcoded forms are
+    // pinned as gone so they cannot come back one surface at a time.
+    const revSrc = await viewSource();
+    check('review copy: the specialist is read off the record, never hardcoded to acting',
+      /const draftBadgeFor = l =>/.test(revSrc)
+      && /const bookReviewerPhrase = B =>/.test(revSrc)
+      // Narrowly the GENERIC form. Acting's own review page still says
+      // "acting draft(s) ... waiting on a qualified acting teacher or
+      // coach", which is true there and must not be caught by this.
+      && !/lessons are written and waiting on a qualified acting teacher/.test(revSrc)
+      && !/awaiting acting-professional review'/.test(revSrc)
+      && !/Actor’s Studio and Acting Practice/.test(revSrc));
     // An OUTLINED module must not claim lessons it does not have. Before
     // Rhetoric there was only ever one course using this pane, every module
     // had lessons, and the empty case fell through to "Prepared lessons
