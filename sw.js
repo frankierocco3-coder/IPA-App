@@ -38,6 +38,23 @@
  * Bumping VERSION drops the old cache wholesale, so the next load fetches
  * one consistent graph.
  *
+ * WHY sc-v18 BREAKS THE RULE ABOVE (2026-09-27). Ordinary content updates
+ * need no bump, because stale-while-revalidate refreshes them by itself —
+ * on the load AFTER the one that fetched them. That second-load delay is
+ * normally invisible and entirely acceptable.
+ *
+ * It stopped being acceptable here. Lines & Memory was unreachable, the
+ * owner reported it, it was fixed and deployed, and he reported it again —
+ * because his installed copy was still serving the cached main.js while the
+ * fix sat one revalidation away. Telling somebody to reload twice is not a
+ * fix; it is an instruction to work around the cache. When a deploy exists
+ * specifically to repair something a user is actively hitting, the old cache
+ * is the bug, and dropping it wholesale is the repair.
+ *
+ * The cost is real and worth naming: this also drops the MEDIA cache, so an
+ * installed device re-downloads its audio clips. That is the price of the
+ * next load being correct rather than the one after it.
+ *
  * Every fetch here goes past the browser's own HTTP cache ('no-cache' /
  * 'reload'). GitHub Pages marks files max-age=600, so for ten minutes after
  * a visit a plain fetch() can be handed the OLD file without asking the
@@ -46,7 +63,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v17';                     // 2026-09-26: the slang highlighting — the module graph gained js/views/lexicon-mark.js, and an installed app holding the old main.js would never fetch it
+const VERSION = 'sc-v18';                     // 2026-09-27: bumped for a CONTENT fix, against the rule above, and deliberately — see the note below
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
