@@ -402,7 +402,8 @@ export const IDIOM = [
   //
   // THE EIGHTIES AND NINETIES GO TOO (owner order 2026-09-27). A different
   // flavour of dated from the Prohibition block, and cut on the same
-  // principle: my bad, bogus, amped / wired, jonesing for. Ids retired.
+  // principle: bogus, amped / wired, jonesing for. Ids retired. 'my bad'
+  // was cut in that pass and RESTORED the same day — see its entry above.
   //
   // Two of them were LOAD-BEARING: Dialect in Action linked my bad and
   // bogus from live dialogue, so the pieces were edited in the same pass
@@ -450,6 +451,15 @@ export const IDIOM = [
     example: 'She ghosted me after two dates.',
     era: 'contemporary', type: 'word', flag: null, category: 'people', ipa: null,
     note: '' },
+  // RESTORED 2026-09-27 on the owner's call, to its ORIGINAL id. That is
+  // not a reassignment: NAM-042 meant 'my bad' before and means it again,
+  // so anything holding the id still resolves to the same thing. Giving it
+  // a fresh number would have been the riskier move, not the safer one.
+  { id: 'NAM-042', dialect: 'nam', term: 'my bad',
+    meaning: 'My mistake',
+    example: 'My bad, I read the call sheet wrong.',
+    era: 'contemporary', type: 'phrase', flag: null, category: null, ipa: null,
+    note: 'Began as 1980s basketball slang and is now general across every American register and age. Brief and unceremonious: it admits the error without dwelling on it, which is the opposite of an apology.' },
   { id: 'NAM-043', dialect: 'nam', term: 'hit me up',
     meaning: 'Get in touch',
     example: 'Hit me up when you land.',
