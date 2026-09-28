@@ -120,12 +120,26 @@ export const characterPreview = () => {
 };
 export const characterOpen = () => CHARACTER_LIVE || characterPreview();
 // Shakespeare is the fifth workspace (owner decision 2026-09-24: its own
-// course, not a module inside Acting). It is WRITTEN IN PART — modules 2,
-// 3 and 4, 18 of a planned 42 lessons — and hidden behind this flag until
-// it can stand alone, which is the lesson the Speech withdrawal taught
-// and the route Building a Character took. The owner reads it through the
-// preview key meanwhile, exactly as Character was read.
-export const SHAKESPEARE_LIVE = false;
+// course, not a module inside Acting). It was hidden behind this flag
+// while it was written — the lesson the Speech withdrawal taught and the
+// route Building a Character took.
+//
+// LAUNCHED 2026-09-27 on the owner's order, and it can stand alone: seven
+// modules and forty lessons, every one carrying its own publication entry
+// in js/data/speech/reviews.js, plus the eight scene analyses (all
+// approved), the 160-entry lexicon and the seventeen rhetorical figures.
+// Nothing renders as a locked shelf, which is the failure the Character
+// launch taught us to check for before flipping rather than after.
+//
+// WHAT LAUNCHING DOES NOT MEAN: it publishes on the OWNER'S EDITORIAL
+// approval alone. No Shakespeare scholar, verse teacher or acting
+// professional has reviewed any of the forty, awaitingSpecialist() is
+// true for every one, and the pages say so where a reader will see it.
+// Do not let a later edit imply a sign-off that never happened.
+//
+// The preview key stays. It costs nothing and it is how the next course
+// gets read before it launches.
+export const SHAKESPEARE_LIVE = true;
 export const SHAKESPEARE_PREVIEW_KEY = 'speechcraft-shakespeare-preview';
 export const shakespearePreview = () => {
   try { return localStorage.getItem(SHAKESPEARE_PREVIEW_KEY) === 'on'; } catch { return false; }

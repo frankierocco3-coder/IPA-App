@@ -3090,7 +3090,7 @@ export async function run({ navDoc = document } = {}) {
     // absence of Speech, so assert that first and the order second.
     check('speech: the workspace is withdrawn — no Speech row among the live workspaces',
       !wsRows.includes('speech')
-      && String(wsRows) === 'acting,character,ipa,accents',
+      && String(wsRows) === String(liveWorkspaces().map(w => w.id)),
       String(wsRows));
     check('speech: withdrawal is a flag, not a deletion — every record survives it',
       SPEECH_LESSONS.length === 25 && textbookOrder().length === 25
@@ -3212,12 +3212,16 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(200);
       // The array order IS the screen order (owner order 2026-09-25):
-      // Acting, Building a Character, Shakespeare, Voice & Speech,
-      // Accents & Dialects. Speech is withdrawn and Shakespeare is hidden,
-      // so the live selector shows four of the six.
+      // Acting, Building a Character, Shakespeare, Voice & Speech, Accents
+      // & Dialects. WHICH of them are live changes — Character launched on
+      // the 23rd, Shakespeare on the 27th — so the expected list is derived
+      // from liveWorkspaces() and only the ORDER and the withdrawal are
+      // pinned. A hardcoded list here fails every launch, for the wrong
+      // reason, and that is what it did on the 27th.
       check('acting: the selector offers every live workspace in order, Speech withdrawn',
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join()
-          === 'Acting,Building a Character,Voice & Speech,Accents & Dialects',
+          === liveWorkspaces().map(w => w.label).join()
+        && !liveWorkspaces().some(w => w.id === 'speech'),
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join());
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
@@ -4418,21 +4422,44 @@ export async function run({ navDoc = document } = {}) {
       savedShPreview = localStorage.getItem(ctx.SHAKESPEARE_PREVIEW_KEY);
       localStorage.removeItem(ctx.SHAKESPEARE_PREVIEW_KEY);
     } catch {}
-    check('shakespeare: the workspace is hidden from learners until it can stand alone',
-      ctx.SHAKESPEARE_LIVE === false
-      && !ctx.liveWorkspaces().some(w => w.id === 'shakespeare'),
-      `LIVE=${ctx.SHAKESPEARE_LIVE}`);
-    check('shakespeare: it is in the workspace list, ready to be switched on',
+    // LAUNCHED 2026-09-27. This check used to pin the flag FALSE, which was
+    // right while the course was being written and is now just a pin against
+    // the owner's own decision. What replaces it is the rule that outlasts
+    // either state: the flag and the workspace agree, and a LIVE course
+    // never shows a learner a shelf of locked chapters — the failure the
+    // Building a Character launch taught us to check before flipping.
+    check('shakespeare: the flag and the workspace agree, whichever way it is set',
+      ctx.liveWorkspaces().some(w => w.id === 'shakespeare') === ctx.shakespeareOpen(),
+      `LIVE=${ctx.SHAKESPEARE_LIVE} open=${ctx.shakespeareOpen()}`);
+    check('shakespeare: live means every lesson is published, not locked',
+      !ctx.SHAKESPEARE_LIVE
+      || SHAKESPEARE_LESSONS.every(l => speechPublished(l.id)),
+      `${SHAKESPEARE_LESSONS.filter(l => !speechPublished(l.id)).length} unpublished`);
+    // Launching on owner editorial approval is NOT a specialist sign-off,
+    // and the app must keep being able to say so.
+    check('shakespeare: launching did not invent a specialist review',
+      SHAKESPEARE_LESSONS.every(l => awaitingSpecialist(l.id)));
+    check('shakespeare: it is in the workspace list and stays accent-free',
       ctx.WORKSPACES.some(w => w.id === 'shakespeare')
       && ctx.ACCENTLESS_WORKSPACES.includes('shakespeare'));
-    // A stored workspace of 'shakespeare' must not strand a learner on a
-    // hidden course, the same fallback Speech and Character have.
+    // A stored workspace must never strand a learner on a CLOSED course.
+    // Shakespeare launched 2026-09-27, so it is no longer the closed one —
+    // asserting it falls back would now be asserting against the launch.
+    // Speech is withdrawn and is the standing case, so the rule is tested
+    // where it still applies, and Shakespeare is tested for the opposite:
+    // a stored workspace for a LIVE course is honoured.
     let saved = null;
     try { saved = localStorage.getItem('speechcraft-workspace'); } catch {}
     try {
       localStorage.setItem('speechcraft-workspace', 'shakespeare');
-      check('shakespeare: a stored hidden workspace falls back to Acting',
-        ctx.activeWorkspace() === 'acting', ctx.activeWorkspace());
+      check('workspace: a stored LIVE course is honoured, a closed one falls back',
+        ctx.activeWorkspace() === (ctx.shakespeareOpen() ? 'shakespeare' : 'acting'),
+        `stored=shakespeare open=${ctx.shakespeareOpen()} -> ${ctx.activeWorkspace()}`);
+      try {
+        localStorage.setItem('speechcraft-workspace', 'speech');
+        check('workspace: the withdrawn Speech workspace still falls back to Acting',
+          ctx.activeWorkspace() === 'acting', ctx.activeWorkspace());
+      } catch {}
     } finally {
       try { saved === null ? localStorage.removeItem('speechcraft-workspace')
         : localStorage.setItem('speechcraft-workspace', saved); } catch {}

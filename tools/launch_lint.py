@@ -392,13 +392,25 @@ def main():
         if banned in lex_fn:
             fail("the lexicon reference page gained lesson machinery: %r" % banned)
 
-    # 6o: the Shakespeare course (2026-09-25). Modules 2, 3 and 4 of a
-    # planned seven. It is HIDDEN, and the flag being false is the pin
-    # that matters: a course 18 lessons into 42 must not reach learners,
-    # and nothing here is approved by any reviewer.
+    # 6o: the Shakespeare course. LAUNCHED 2026-09-27; the pin moved with
+    # it. While it was hidden, the thing worth guarding was the flag being
+    # false. Now that it is live, the flag is the owner's to set and the
+    # thing worth guarding is that a LIVE course never shows a locked
+    # shelf: every lesson must carry a publication entry, or learners get
+    # forty draft-gated chapters. That is the failure the Building a
+    # Character launch taught, and it is checked for real in the browser
+    # suite, which can call speechPublished. Here we pin the pair that
+    # must not drift apart in source.
     ctx_src = (ROOT / "js" / "views" / "context.js").read_text(encoding="utf-8")
-    if "export const SHAKESPEARE_LIVE = false;" not in ctx_src:
-        fail("SHAKESPEARE_LIVE must stay false until the course can stand alone")
+    if "export const SHAKESPEARE_LIVE" not in ctx_src:
+        fail("the SHAKESPEARE_LIVE flag is missing from context.js")
+    if "export const shakespeareVisible" not in ctx_src:
+        fail("shakespeareVisible is missing — a live course with no gate would "
+             "publish unreviewed lessons")
+    sh_reviews = (ROOT / "js" / "data" / "speech" / "reviews.js").read_text(encoding="utf-8")
+    if "export const SHAKESPEARE_LIVE = true;" in ctx_src and "'sh-" not in sh_reviews:
+        fail("Shakespeare is LIVE but no sh- lesson has a publication entry — "
+             "learners would see a shelf of locked chapters")
     sh_path = ROOT / "js" / "data" / "shakespeare" / "shakespeare-course.js"
     if not sh_path.exists():
         fail("the Shakespeare course data is missing")
