@@ -24,8 +24,12 @@
   --accent-tint: #e6ebdd; /* sage tint */
   --bad-tint: #f2e3dc;    /* terracotta tint */
   --gold: #c9a24b;
-  --lex-mark: #f7e4b5;    /* highlighter ochre, readable over cream */
-  --lex-mark-ink: #5f4a23; /* AA on the tint at both sizes it is used at */
+  /* The term highlight. It began as highlighter ochre (2026-09-27) and moved
+     to the sage tint on 2026-09-28: "dont highlight anything yellow". The
+     EMPHASIS is the part that was asked for and it stays; only the colour
+     changed. 6.4:1 on the tint, so it clears AA at every size it is used. */
+  --lex-mark: #e6ebdd;
+  --lex-mark-ink: #46583a;
   --serif: "Iowan Old Style", "Palatino", "Georgia", serif;
 }
 
@@ -2287,4 +2291,25 @@ body.nb-full #app { display: none; }
 }
 @media (max-width: 620px) {
   .lex-row { padding-left: 12px; }
+}
+
+/* A shelf section heading is a BREAK in continued reading, not another
+   subhead (owner order 2026-09-28). It has to read as "a new part starts
+   here" when somebody is forty entries deep, so it takes a rule above it,
+   real space, and the count pushed out to the margin where it stops
+   competing with the title. */
+.shelf-section {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  margin: 38px 0 4px; padding: 20px 0 8px;
+  border-top: 2px solid var(--line);
+  font-family: var(--serif); font-size: 22px; font-weight: 700;
+  letter-spacing: 0.2px; color: var(--ink);
+}
+.shelf-section:first-child { margin-top: 14px; border-top: none; padding-top: 0; }
+.shelf-section span {
+  font-family: var(--sans); font-size: 12px; font-weight: 800;
+  letter-spacing: .09em; color: var(--muted); white-space: nowrap;
+}
+@media (max-width: 620px) {
+  .shelf-section { font-size: 19px; margin-top: 30px; }
 }

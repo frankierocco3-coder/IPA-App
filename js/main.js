@@ -4533,7 +4533,8 @@ let fallQuery = '';
 function fallacyRowHtml(f) {
   return `
     <article class="lex-row">
-      <h3 class="lex-term"><span class="lex-word">${esc(f.term)}</span></h3>
+      <h3 class="lex-term"><span class="lex-word">${esc(f.term)}${
+        f.modern ? ` (${esc(f.modern)})` : ''}</span></h3>
       <p class="lex-modern">${esc(f.what)}</p>
       <p class="lex-note">${esc(f.note)}</p>
       ${f.examples.map(x => `
@@ -4585,7 +4586,7 @@ function renderFallacyShelf() {
       .map(g => [g, hits.filter(f => f.group === g)])
       .filter(([, list]) => list.length)
       .map(([g, list]) => `
-        <h2 class="guide-heading">${esc(FALLACY_GROUPS[g].label)} · ${list.length}</h2>
+        <h2 class="shelf-section">${esc(FALLACY_GROUPS[g].label)}<span>${list.length}</span></h2>
         <p class="guide-text">${esc(FALLACY_GROUPS[g].lead)}</p>
         ${list.map(fallacyRowHtml).join('')}`).join('');
   };
@@ -4617,7 +4618,6 @@ function modernFallacyHtml(f) {
       <p class="lex-modern">${esc(f.what)}</p>
       <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
       <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
-      <p class="lex-note"><b>Repair:</b> ${esc(f.repair)}</p>
       ${f.note ? `<p class="lex-note">${esc(f.note)}</p>` : ''}
     </article>`;
 }
@@ -4663,7 +4663,7 @@ function renderFamilyShelf() {
       .map(fam => [fam, hits.filter(f => f.family === fam.id)])
       .filter(([, list]) => list.length)
       .map(([fam, list]) => `
-        <h2 class="guide-heading">${fam.icon} ${fam.n}. ${esc(fam.title)} · ${list.length}</h2>
+        <h2 class="shelf-section">${fam.icon} ${fam.n}. ${esc(fam.title)}<span>${list.length}</span></h2>
         <p class="guide-text">${esc(fam.lead)}</p>
         <p class="pane-note"><b>The counter:</b> ${esc(fam.counter)}</p>
         ${list.map(modernFallacyHtml).join('')}`).join('');

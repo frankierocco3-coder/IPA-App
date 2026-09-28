@@ -4513,10 +4513,13 @@ export async function run({ navDoc = document } = {}) {
       && MODERN_FALLACIES.every(f => FAMILIES.some(x => x.id === f.family))
       && FAMILIES.every(f => fallaciesInFamily(f.id).length > 0),
       FAMILIES.map(f => `${f.id}:${fallaciesInFamily(f.id).length}`).join(' '));
-    check('families: every entry says what it hides, what to ask, and how to repair it',
+    // `repair` was removed by owner order 2026-09-28 — three fields per card
+    // was one more than the page could carry. Pinned as ABSENT so it cannot
+    // creep back in one entry at a time.
+    check('families: every entry says what it hides and what to ask, and nothing repairs',
       MODERN_FALLACIES.length >= 40
       && MODERN_FALLACIES.every(f => f.term && f.what?.trim()
-        && f.overlook?.trim() && f.ask?.trim() && f.repair?.trim())
+        && f.overlook?.trim() && f.ask?.trim() && f.repair === undefined)
       && new Set(MODERN_FALLACIES.map(f => f.id)).size === MODERN_FALLACIES.length
       && MODERN_FALLACIES.every(f => /^MF-\d{3}$/.test(f.id)));
     // THE OVERLAP IS THE POINT. Five modern names ARE Aristotle's, and two
@@ -4541,6 +4544,25 @@ export async function run({ navDoc = document } = {}) {
       && /NOT AUTOMATICALLY A FALLACY/.test(famNotes)
       && /NOT A DISMISSAL OF LIVED EXPERIENCE/.test(famNotes)
       && /Emotion is not a fallacy/.test(famNotes));
+    // Modern names on the thirteen, in parentheses, ONLY where one exists
+    // (owner order 2026-09-28). Equivocation and amphiboly are still called
+    // what Aristotle called them, and inventing an alias for them would be
+    // inventing scholarship.
+    check('fallacies: a modern name appears only where the error really has one',
+      FALLACIES.filter(f => f.modern).length === 7
+      && FALLACIES.filter(f => f.modern).every(f =>
+        f.modern.trim() && f.modern.toLowerCase() !== f.term.toLowerCase())
+      && !fallacyById('FA-001').modern && !fallacyById('FA-002').modern,
+      FALLACIES.filter(f => f.modern).map(f => `${f.term}(${f.modern})`).join(' '));
+    // Nothing yellow (owner order 2026-09-28). The highlight itself stays —
+    // he asked for it the day before on the Shakespeare slang — but the
+    // colour is the app's sage tint now, and the ochre must not return.
+    const shelfCss = await fetch('../css/style.css').then(r => r.text()).catch(() => '');
+    check('shelves: the term highlight is not yellow, and sections read as breaks',
+      /--lex-mark: #e6ebdd/.test(shelfCss)
+      && !/#f7e4b5/.test(shelfCss)
+      && /\.shelf-section \{/.test(shelfCss)
+      && /border-top: 2px solid var\(--line\)/.test(shelfCss));
     check('families: nutpicking stays out, as internet jargon that will date',
       !MODERN_FALLACIES.some(f => /nutpick/i.test(f.term)));
     const famSrc = await viewSource();

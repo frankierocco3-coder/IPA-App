@@ -19,6 +19,12 @@
 //   term     the name in the form it is usually met, with the traditional
 //            Latin or Greek label where that is what handbooks print
 //   group    'language' (in dictione) | 'matter' (extra dictionem)
+//   modern   OPTIONAL. The name this error goes by in modern handbooks,
+//            shown in parentheses after the classical one (owner order
+//            2026-09-28). Present only where the modern name is genuinely
+//            different: equivocation, amphiboly and the rest are still
+//            called what Aristotle called them, and inventing a modern
+//            alias for them would be inventing scholarship.
 //   what     what the error IS, in one plain sentence
 //   note     THE FIELD THAT EARNS THE SHELF: why it works on a listener,
 //            and what it feels like from inside the argument. A
@@ -115,6 +121,7 @@ export const FALLACIES = [
 
   // ── Not depending on language: the seven ─────────────────────
   { id: 'FA-007', term: 'Accident', group: 'matter',
+    modern: 'sweeping generalisation',
     what: 'A property that a thing happens to have is treated as one it must have, and a rule is applied where it does not reach.',
     note: 'The fallacy of the rule pressed past its purpose. Every general statement has an unstated scope, and this is what happens when the scope is ignored: the rule is true, the case is real, and the two have nothing to do with each other. It overlaps with the next entry, and the handbooks disagree about where one ends.',
     examples: [
@@ -124,6 +131,7 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-008', term: 'Secundum quid', group: 'matter',
+    modern: 'hasty generalisation',
     what: 'A statement true only with a qualification is taken as true without it, or the reverse.',
     note: 'Also called converse accident, and often given as hasty generalisation, which is the same move from the other end. Listen for the qualification going quietly missing between one sentence and the next. The speaker rarely removes it on purpose; it falls off, and the argument gets stronger as it falls.',
     examples: [
@@ -133,6 +141,7 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-009', term: 'Ignoratio elenchi', group: 'matter',
+    modern: 'irrelevant conclusion',
     what: 'Something is proved, and it is not the thing that was in dispute.',
     note: 'Irrelevant conclusion, or missing the point. The broadest name on the list: some handbooks treat every other fallacy as a species of it, which is a fair complaint. Its power is that the proof can be genuinely good. The audience watches an argument succeed and does not notice it was aimed elsewhere. The counter is one question, asked flatly: what was the claim?',
     examples: [
@@ -142,6 +151,7 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-010', term: 'Begging the question', group: 'matter',
+    modern: 'circular reasoning',
     what: 'The thing to be proved is assumed somewhere in the proof.',
     note: 'Petitio principii. Note what it does NOT mean: in ordinary modern use the phrase has come to mean “raises the question”, and that use is now commoner than the logical one. In an argument it means the circle, and the circle is usually wide enough that nobody sees it close. The test is to write the premises and the conclusion down and look for the conclusion sitting in a premise wearing different words.',
     examples: [
@@ -151,6 +161,7 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-011', term: 'False cause', group: 'matter',
+    modern: 'post hoc',
     what: 'Something is treated as the cause of a thing when it is not, often because it merely came first.',
     note: 'Non causa pro causa, and its famous subspecies, post hoc ergo propter hoc: after this, therefore because of this. Human beings are built to find causes and will supply one whether or not there is one to find. Two questions dissolve most instances: what else changed at the same time, and what would we expect to see if this were NOT the cause?',
     examples: [
@@ -159,9 +170,10 @@ export const FALLACIES = [
       { text: 'The cock crows before dawn, so the cock causes the dawn.', source: 'Traditional; the oldest illustration of post hoc, and it survives because nobody can pretend to believe it.' },
     ] },
 
-  { id: 'FA-012', term: 'Affirming the consequent', group: 'matter',
+  { id: 'FA-012', term: 'Consequent', group: 'matter',
+    modern: 'affirming the consequent',
     what: 'From “if this, then that” and “that”, it is concluded that “this”.',
-    note: 'The one formal fallacy on the list, and the one that feels most like reasoning while being none. It is how conspiracy theories are built and how bad diagnoses are made: the theory predicts the evidence, the evidence appears, and the theory is declared proved. But other causes predict the same evidence. Always ask what else would produce exactly this.',
+    note: 'Aristotle calls it simply the fallacy of the consequent; the modern handbooks call it affirming the consequent, which is the name most readers will know. The one formal fallacy on the list, and the one that feels most like reasoning while being none. It is how conspiracy theories are built and how bad diagnoses are made: the theory predicts the evidence, the evidence appears, and the theory is declared proved. But other causes predict the same evidence. Always ask what else would produce exactly this.',
     examples: [
       { text: 'If it rained, the ground is wet. The ground is wet. So it rained.', source: 'Constructed; the minimal form. A burst pipe produces the same wet ground.' },
       { text: 'If he were guilty he would look nervous. He looks nervous. So he is guilty.', source: 'Constructed, and the reason demeanour is such poor evidence in a courtroom.' },
@@ -169,6 +181,7 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-013', term: 'Many questions', group: 'matter',
+    modern: 'loaded question',
     what: 'Two questions are asked as one, so that any single answer concedes the first.',
     note: 'Plurium interrogationum, and the loaded question. It is not really a fallacy of arguing but of trapping: the damage is done by answering at all. The only sound response is to refuse the frame and separate the questions out loud, which always sounds evasive, which is why the trap works. For an actor it is one of the most playable moves on this shelf, because the victim can see it and still cannot get out.',
     examples: [
