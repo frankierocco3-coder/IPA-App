@@ -4510,6 +4510,26 @@ export async function run({ navDoc = document } = {}) {
     // Honesty about provenance moved from forty source lines to one sentence
     // at the top of EACH shelf. If it is dropped, an example written here
     // reads as a quotation, so both shelves are pinned, not just one.
+    // Owner order 2026-09-28: label them. They were bold lead-ins running
+    // into their own sentences, sitting under a `what` line that is bolder
+    // still, so the two fields a reader scans a fallacy card FOR were the
+    // hardest things on it to find. One shared builder, so the two shelves
+    // cannot drift apart, and the old inline form is pinned as gone.
+    // Bounded to the TWO row builders. The first version of this banned
+    // `<b>Ask:</b>` across the whole view layer and failed on Question
+    // Everything, which has its own single-question line and nothing to do
+    // with fallacies: a ban is only as good as the region it is scoped to.
+    const builderSrc = ['const fallacyRowHtml', 'function fallacyRowHtml',
+      'const modernFallacyHtml', 'function modernFallacyHtml']
+      .map(sig => faSrc.indexOf(sig)).filter(i => i >= 0)
+      .map(i => faSrc.slice(i, faSrc.indexOf('\n}', i)));
+    check('fallacies: what it hides and ask are labelled, on both shelves',
+      builderSrc.length === 2
+      && builderSrc.every(b => /\$\{hidesAskHtml\(f\)\}/.test(b)
+        && !/<b>(What it hides|Ask):<\/b>/.test(b))
+      && /<span class="lex-label">What it hides<\/span>/.test(faSrc)
+      && /<span class="lex-label">Ask<\/span>/.test(faSrc),
+      `${builderSrc.length} row builders found`);
     check('fallacies: both shelves say once that an unsourced example is ours',
       /written for this course unless a source is named/.test(faSrc)
       && (faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length === 2,

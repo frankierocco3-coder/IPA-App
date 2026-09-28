@@ -4528,12 +4528,21 @@ function fallacyRowHtml(f) {
       <h3 class="lex-term"><span class="lex-word">${esc(f.term)}${
         f.modern ? ` (${esc(f.modern)})` : ''}</span></h3>
       <p class="lex-modern">${esc(f.what)}</p>
-      <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
-      <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
+      ${hidesAskHtml(f)}
       <p class="lex-note">${esc(f.note)}</p>
       ${f.examples.map(egHtml).join('')}
     </article>`;
 }
+
+// What it hides, then the question. LABELLED (owner order 2026-09-28), with
+// the same .lex-label the Dictionary uses on Metre rather than a new style:
+// a bold lead-in ran into its own sentence and sat beneath the `what` line,
+// which is bolder still, so the two fields a reader actually scans for were
+// the least findable things on the card. Both shelves share this, because
+// the whole point of the pair is that they read alike.
+const hidesAskHtml = f => `
+  <p class="lex-note"><span class="lex-label">What it hides</span>${esc(f.overlook)}</p>
+  <p class="lex-note"><span class="lex-label">Ask</span>${esc(f.ask)}</p>`;
 
 // One example row. `source` is OPTIONAL and is a TAG, never a remark: the
 // commentary that used to ride along with it went by owner order
@@ -4622,8 +4631,7 @@ function modernFallacyHtml(f) {
       <h3 class="lex-term"><span class="lex-word">${esc(f.term)}</span>${
         a ? `<span class="lex-kind">also Aristotle · ${esc(a.term)}</span>` : ''}</h3>
       <p class="lex-modern">${esc(f.what)}</p>
-      <p class="lex-note"><b>What it hides:</b> ${esc(f.overlook)}</p>
-      <p class="lex-note"><b>Ask:</b> ${esc(f.ask)}</p>
+      ${hidesAskHtml(f)}
       ${f.note ? `<p class="lex-note">${esc(f.note)}</p>` : ''}
       ${(f.examples ?? []).map(egHtml).join('')}
     </article>`;
