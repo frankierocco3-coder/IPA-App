@@ -4441,18 +4441,31 @@ export async function run({ navDoc = document } = {}) {
   // Character and Shakespeare both took.
   {
     const ctxR = await import('../js/views/context.js');
-    check('rhetoric: six modules outlined, and only the written one is shelved',
+    // A module reaches the Library by being WRITTEN, never by being planned.
+    // Derived rather than counted, so writing module 3 does not need this
+    // edited: the shelf list must equal exactly the modules with lessons.
+    const writtenModules = RHETORIC_MODULES.filter(m =>
+      RHETORIC_LESSONS.some(l => l.module === m.id)).map(m => m.id);
+    check('rhetoric: six modules planned, and only the written ones are shelved',
       RHETORIC_MODULES.length === 6
       && String(RHETORIC_MODULES.map(m => m.id))
         === 'ground,audience,invention,shape,delivery,ethics'
-      && RHETORIC_COLLECTIONS.length === 1
-      && RHETORIC_COLLECTIONS[0].id === 'ground',
-      `${RHETORIC_COLLECTIONS.length} collection(s)`);
-    check('rhetoric: module 1 is six lessons, in order, each with a body',
-      RHETORIC_LESSONS.length === 6
-      && RHETORIC_LESSONS.every(l => l.module === 'ground')
-      && String(RHETORIC_LESSONS.map(l => l.order)) === '1,2,3,4,5,6'
-      && RHETORIC_LESSONS.every(l => l.body?.length && l.objective && l.reflection));
+      && String(RHETORIC_COLLECTIONS.map(c => c.id)) === String(writtenModules)
+      && writtenModules.length >= 2,
+      `shelved: ${RHETORIC_COLLECTIONS.map(c => c.id).join(',') || 'none'}`);
+    // Modules 1 and 2 are written, six lessons each. Every module's orders
+    // must run 1..n with no gap and no repeat, or the path forks.
+    check('rhetoric: modules 1 and 2 are six lessons each, in order, each whole',
+      RHETORIC_LESSONS.length === 12
+      && writtenModules.every(id => {
+        const o = RHETORIC_LESSONS.filter(l => l.module === id).map(l => l.order);
+        return o.length === 6
+          && String([...o].sort((a, b) => a - b)) === String(o.map((_, i) => i + 1));
+      })
+      && RHETORIC_LESSONS.every(l => l.body?.length && l.objective && l.orientation && l.reflection)
+      && new Set(RHETORIC_LESSONS.map(l => l.id)).size === RHETORIC_LESSONS.length
+      && RHETORIC_LESSONS.every(l => /^rh-[a-z]+$/.test(l.id)),
+      RHETORIC_LESSONS.map(l => l.id).join(' '));
     // Nothing here is approved. Claude wrote it, so the ledger must be
     // empty of rh- ids until a human records one.
     check('rhetoric: nothing is approved — Claude may not approve his own writing',

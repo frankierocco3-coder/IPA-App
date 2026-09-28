@@ -32,8 +32,10 @@
 export const RHETORIC_PRINCIPLE =
   'Persuasion is not something done to a person. It is the work of making your reasons available to somebody who does not yet hold them, and the same craft that does it honestly is the craft that does it dishonestly.';
 
-// Six modules. Module 1 is written; 2 to 6 are outlined and carry no
-// lessons yet, which is why the shelf shows one collection and not six.
+// Six modules. Modules 1 and 2 are written; 3 to 6 are outlined and carry
+// no lessons yet, which is why the shelf shows two collections and not six.
+// RHETORIC_COLLECTIONS filters to modules that actually have lessons, so a
+// module joins the Library by being written and never before.
 export const RHETORIC_MODULES = [
   { n: 1, id: 'ground', title: 'What is Rhetoric?',
     blurb: 'The word, the reputation it lost, and the three questions every persuasive speech answers.' },
@@ -176,6 +178,144 @@ export const RHETORIC_LESSONS = [
       { p: 'The third says that the defensive use justifies the study: you cannot see what is being done to you unless you know how it is done. This one holds up best, and it is the reason the subject survives in a world suspicious of it.' },
       { h: 'Where this course lands' },
       { p: 'Nowhere comfortable, on purpose. The tools are real, they work, and they do not care who holds them. Learning them makes you more effective and more responsible in the same movement, and the responsibility is not a bonus lesson at the end. It is why module 6 exists and why this lesson is in module 1 rather than hidden at the back.' },
+    ] },
+
+  // ── Module 2 · The Person Opposite ─────────────────────────────
+  // Written 2026-09-28. Module 1 answered what rhetoric is; this one is
+  // about the only thing that decides whether any of it works.
+  //
+  // WHAT IT DELIBERATELY DOES NOT RE-TEACH. Ethos and pathos are module 1
+  // (rh-three) and are pointed at, not restated. The unstated premise is
+  // module 1 (rh-claim) from the SPEAKER’s side, finding your own buried
+  // assumption; rh-supply is the listener’s side of the same fact, and says
+  // so. Voice, body and pause are module 5, and rh-adjust says so rather
+  // than starting delivery early.
+
+  { id: 'rh-who', module: 'audience', order: 1,
+    title: 'Who Is Actually Listening',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Identify the listener whose mind actually has to change, who is frequently not the person being addressed.',
+    orientation: 'The person you are speaking to and the person you are trying to move are often two different people.',
+    reflection: 'Think of an argument you lost. Who else was in the room, and were you speaking to them or at your opponent?',
+    body: [
+      { p: 'The first question in this craft is not what to say. It is who the saying is for, and the answer is less obvious than it looks, because the person being addressed and the person who decides are regularly not the same person.' },
+      { h: 'The decisive listener' },
+      { p: 'A lawyer speaks to a witness and argues to the jury. In a meeting you answer the loudest objection in the room and persuade the quiet person who has not spoken yet, because they are the one who has not made up their mind. In a family argument the two people shouting are rarely each other’s audience; the audience is the third person at the table, and both of them know it.' },
+      { p: 'A speech aimed at the wrong listener can be faultless and useless. This is the commonest structural failure in ordinary speech, and it is invisible from inside, because the speaker is getting a response. It is simply a response from somebody whose mind was never the point.' },
+      { h: 'The overhearer' },
+      { p: 'Most speech has an audience beyond the room: the minutes, the recording, the person who will be told about it afterwards, the version that gets repeated. Knowing they are there changes what can be said and often changes what should be.' },
+      { p: 'It is worth being honest about the cost. Speaking for the record is how an exchange stops being an exchange. A conversation in which both people are performing for somebody absent has the shape of a discussion and none of the function, and everybody present can feel it.' },
+      { h: 'For an actor' },
+      { p: 'A character speaking to one person while aiming at another is among the most playable situations there is, and it is written into a great many scenes. Somebody answers the question their scene partner asked, and builds the answer for the person listening at the door. Nothing in the words announces it. Everything in where the line is aimed does.' },
+      { p: 'The doing is the acting, which is the same instruction the Acting course gives about objective. Playable Actions in the Acting Library is the shelf for naming what the line is doing, and to whom.' },
+    ] },
+
+  { id: 'rh-common', module: 'audience', order: 2,
+    title: 'What They Already Believe',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Build from something the listener already holds, because there is nothing else available to build with.',
+    orientation: 'You do not choose the starting point of an argument. They do.',
+    reflection: 'Name one thing the person you need to persuade believes that you believe too. That sentence is where your argument starts.',
+    body: [
+      { p: 'The tradition holds that arguments begin from opinions already held by the people you are speaking to. Not because those opinions are true, and not as a gesture of respect, but because nothing else will bear weight.' },
+      { p: 'A premise the listener does not accept is not a premise. It is a second argument you have not made yet, and stacking the first on top of it means neither one stands.' },
+      { h: 'Common ground is structural, not polite' },
+      { p: 'Every step of an argument rests on something already accepted, or the step does not get taken. This is why finding shared ground is the real preparation and why it cannot be done in the room: it is research about a person, and it takes longer than choosing words.' },
+      { h: 'The two common failures' },
+      { p: 'The first is assuming shared premises that are not shared. The speaker builds from their own world and never notices the gap, and the argument fails at a joint neither party can see. Two people can agree on every fact in a dispute and divide on one buried value, which is the point module 1 makes about the unstated premise.' },
+      { p: 'The second is refusing to stand on a belief you think is wrong. You can start from somebody’s premise and end somewhere they did not expect. That is what an argument is for. Refusing the starting point because you dislike it guarantees you never get anywhere near the conclusion.' },
+      { h: 'When there is no common ground' },
+      { p: 'Sometimes there genuinely is none, and the honest move is to say the disagreement is deeper than the subject in front of you. Manufacturing agreement you do not feel is worse than admitting the gap: it is visible, and it costs the one thing that was holding the exchange together, which module 1 calls ethos.' },
+      { h: 'For an actor' },
+      { p: 'Characters talk past each other because each is standing on ground the other does not hold, and neither has noticed. What is playable is the certainty. A person who thinks their premise is obvious does not argue for it; they repeat the conclusion louder, which is exactly what people do.' },
+    ] },
+
+  { id: 'rh-supply', module: 'audience', order: 3,
+    title: 'The Argument They Finish',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Learn why a conclusion the listener reaches is held harder than one they are handed, and where that stops being honest.',
+    orientation: 'The strongest arguments leave a step for the listener to take.',
+    reflection: 'Take an argument you made recently. Which step could you have left out and trusted them to supply?',
+    body: [
+      { p: 'The classical name for an argument with a step left unsaid is the enthymeme, and it is the ordinary shape of real persuasion. The speaker states a claim and a reason; the listener supplies the premise that joins them, usually without noticing they have done it.' },
+      { p: 'Module 1 approached the unstated premise from the speaker’s side: finding the assumption buried in your own case. This is the same fact from the other side. The listener completes the argument, and the completing is where the persuading happens.' },
+      { h: 'Why the missing step is the strong one' },
+      { p: 'A conclusion you arrived at yourself is yours. One that was handed to you belongs to the person who handed it over, and it can be handed back the moment they are out of the room. Nobody defends a position they were merely given with the energy they bring to one they worked out.' },
+      { p: 'It is also a test. If the listener supplies the premise, they hold it, and you have confirmed your common ground without asking. If they do not supply it, the argument stalls in a way you can see, which is better information than agreement would have been.' },
+      { h: 'The same move is the best way to smuggle' },
+      { p: 'A premise that is never stated is a premise that is never examined. This is precisely the mechanism behind the family of errors All Fallacies groups under smuggling in assumptions, and the efficiency that makes the enthymeme good is what makes it dangerous.' },
+      { p: 'The line is straightforward to state and requires honesty to hold. Leaving a step out because the listener already holds it is argument. Leaving it out because they would reject it if they heard it said aloud is not.' },
+      { h: 'For an actor and anybody who writes' },
+      { p: 'The audience finishing the thought is the engine of a good line. A line that explains itself has nothing left for anybody to do, and lands dead. The laugh, or the silence, happens in the half second where they get there first, and an actor who fills that half second has taken the moment away from the only person who could have had it.' },
+    ] },
+
+  { id: 'rh-resist', module: 'audience', order: 4,
+    title: 'Meeting Resistance',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Find what a listener is actually resisting, which is rarely the claim they are arguing against.',
+    orientation: 'Almost nobody resists a proposition. They resist what accepting it would cost.',
+    reflection: 'Think of somebody who will not be moved on something. What would it cost them to agree with you?',
+    body: [
+      { p: 'People hold positions for reasons that are frequently not the reason they give, and this is not usually dishonesty. The stated reason is the one available for saying out loud.' },
+      { h: 'What resistance usually is' },
+      { p: 'The cost of agreeing. Being wrong in front of people who watched them be certain. A loyalty to somebody who holds the same view. An identity the position is part of. Work they would have to do, money they would have to spend, or an apology that would become owed the moment they conceded.' },
+      { p: 'Argue with the stated reason and you can win every exchange in the conversation and move nobody, because you have been dismantling a position that was never load bearing.' },
+      { h: 'Build their case before you touch it' },
+      { p: 'State their position in words they would accept. If you cannot do it, you are not arguing with them yet, you are arguing with a version of them, and All Fallacies has a whole family about what that produces.' },
+      { p: 'Doing it properly buys something no technique buys: a listener who has just heard their own view put fairly is, for a short while, actually listening. That is the practical value, and it is why the habit survives in every serious account of the subject.' },
+      { h: 'Concession' },
+      { p: 'Conceding a real point is the cheapest credibility available. It narrows the argument to what genuinely divides you, and it demonstrates that you are capable of being moved, which is the precondition for asking somebody else to be.' },
+      { p: 'False concession does the opposite. The sentence that begins by granting something and pivots on “but” before the granting has landed is heard as a tactic, because it is one, and it costs more than the point was worth.' },
+      { h: 'Knowing when to stop' },
+      { p: 'Some people will not be moved, and continuing past that point is not persistence. It is a failure to notice. The craft includes recognising the moment when the person in front of you has become the occasion rather than the audience, and the listener who matters is somebody else in the room.' },
+    ] },
+
+  { id: 'rh-timing', module: 'audience', order: 5,
+    title: 'Timing',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Judge whether the moment can receive the argument, because one made too early fails the way a wrong one fails.',
+    orientation: 'The tradition treated the right moment as part of the argument rather than as luck.',
+    reflection: 'Name something true you said at the wrong moment. What happened to it afterwards?',
+    body: [
+      { p: 'Greek had a word for the opportune moment, and the tradition treated finding it as a skill rather than a piece of good fortune. It has nothing to do with scheduling. It is about the state of the listener and the state of the room.' },
+      { h: 'Too early looks exactly like wrong' },
+      { p: 'A true argument made into a moment that cannot receive it gets rejected, and the rejection is the expensive part. The argument is now harder to make later, because it has been refused once and reviving it means asking somebody to reverse themselves rather than to decide.' },
+      { p: 'This is why the instinct to say the true thing immediately is not always the honest one. Waiting is sometimes the only way the true thing gets heard at all.' },
+      { h: 'What makes a moment' },
+      { p: 'What has just happened. What they have just conceded, which is a door that closes quickly. What they are frightened of right now rather than in general. How tired everybody is. Who has just left the room, and whether the thing that could not be said in front of them can be said now.' },
+      { h: 'Making the moment instead of waiting for it' },
+      { p: 'A good speaker builds receptiveness rather than hoping for it: naming an objection before it hardens into a position, asking for something smaller first, or separating a decision from the question of who was to blame for needing it.' },
+      { h: 'The honest limit' },
+      { p: 'Timing is also the most respectable excuse available. An argument permanently postponed until the moment is right is sometimes an argument the speaker is afraid to make, and the vocabulary of good judgement is what makes that comfortable. Worth asking which one is happening, because from the inside they feel identical.' },
+      { h: 'For an actor' },
+      { p: 'A scene turns on when a line arrives. The same sentence one beat earlier is a different event, and frequently a different play. That is the subject of Tempo-Rhythm in the Acting course, and this is the argument-side of it: a character who says the right thing at the wrong moment has not been clumsy, they have been early, and early is playable.' },
+    ] },
+
+  { id: 'rh-adjust', module: 'audience', order: 6,
+    title: 'Adjusting While You Speak',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Change the route through an argument in the room, which is what all the preparation was for.',
+    orientation: 'A speaker who cannot watch the listener is reciting, not arguing.',
+    reflection: 'When did you last change an argument mid-sentence because of somebody’s face? What did you see?',
+    body: [
+      { p: 'Everything in this module so far is preparation, and none of it survives contact unchanged. The listener you prepared for is an estimate. The one in front of you is the fact.' },
+      { h: 'Why memory is a live skill' },
+      { p: 'Module 1 lists memory as one of the five canons and calls it the stage that looks obsolete and is not. This is why. A speaker reading a script is watching the page, and a speaker watching the page cannot see the moment the room turns. Lines and Memory, in the Acting Library, is the practical shelf for that problem.' },
+      { h: 'What to watch for' },
+      { p: 'The moment they stop listening and begin waiting to speak, which has a look. The nod that means agreement against the nod that means go on, which are different. Questions that are objections wearing a question mark. And the particular stillness of somebody who has decided and is being polite about it.' },
+      { h: 'What to change, and what not to' },
+      { p: 'Change the route: the order, the example, which premise you are standing on, how much you are asking for. Any of those can move without damage.' },
+      { p: 'Do not change the claim. A speaker who revises what they are arguing for in response to resistance is heard as having no position, and the listener stops attending to the argument and starts watching the speaker manoeuvre. The claim is the one fixed thing; everything else was always negotiable.' },
+      { h: 'Delivery is the next module' },
+      { p: 'Voice, body, pause and the room are module 5, and they are half of whether any of this arrives. This lesson is about the argument rather than the speaking of it, and the separation is deliberate: a great many speakers try to fix a structural problem with delivery, which module 1 warns about in its account of the canons.' },
+      { h: 'For an actor' },
+      { p: 'This is listening, which is the live half of the job and the thing the Acting course spends a whole collection on in Listening and Responding. A character who adjusts is doing something visibly different from a character who delivers, and an audience can tell instantly which one they are watching, even when they could not say what the difference was.' },
     ] },
 
 ];
