@@ -400,6 +400,15 @@ export const IDIOM = [
   // I wasn't born yesterday, get a load of this. And son of a gun, which was
   // not in the library at all, so keeping it meant writing it.
   //
+  // THE EIGHTIES AND NINETIES GO TOO (owner order 2026-09-27). A different
+  // flavour of dated from the Prohibition block, and cut on the same
+  // principle: my bad, bogus, amped / wired, jonesing for. Ids retired.
+  //
+  // Two of them were LOAD-BEARING: Dialect in Action linked my bad and
+  // bogus from live dialogue, so the pieces were edited in the same pass
+  // rather than left pointing at entries that no longer exist. See
+  // js/data/dialect-in-action.js.
+  //
   // NOT NEUTRAL CORE (2026-09-27): 'y’all' and 'deadass' were added in this
   // same pass and then removed again. The owner's own expression bank files
   // both under "Regional flags: not part of the neutral core", to be given
@@ -441,11 +450,6 @@ export const IDIOM = [
     example: 'She ghosted me after two dates.',
     era: 'contemporary', type: 'word', flag: null, category: 'people', ipa: null,
     note: '' },
-  { id: 'NAM-042', dialect: 'nam', term: 'my bad',
-    meaning: 'My mistake',
-    example: 'My bad, I read the call sheet wrong.',
-    era: 'contemporary', type: 'phrase', flag: null, category: null, ipa: null,
-    note: '' },
   { id: 'NAM-043', dialect: 'nam', term: 'hit me up',
     meaning: 'Get in touch',
     example: 'Hit me up when you land.',
@@ -456,11 +460,6 @@ export const IDIOM = [
     example: 'Nice ride.',
     era: 'contemporary', type: 'word', flag: null, category: 'transport', ipa: null,
     note: '' },
-  { id: 'NAM-045', dialect: 'nam', term: 'bogus',
-    meaning: 'Fake; unfair',
-    example: 'That excuse is bogus.',
-    era: 'contemporary', type: 'word', flag: null, category: null, ipa: null,
-    note: '' },
   { id: 'NAM-046', dialect: 'nam', term: 'bummed',
     meaning: 'Disappointed',
     example: 'Pretty bummed about the callback.',
@@ -469,11 +468,6 @@ export const IDIOM = [
   { id: 'NAM-047', dialect: 'nam', term: 'stoked / psyched',
     meaning: 'Excited',
     example: 'I\'m so stoked for this.',
-    era: 'contemporary', type: 'word', flag: null, category: null, ipa: null,
-    note: '' },
-  { id: 'NAM-048', dialect: 'nam', term: 'amped / wired',
-    meaning: 'Keyed up, over-energised',
-    example: 'Too much coffee — I\'m wired.',
     era: 'contemporary', type: 'word', flag: null, category: null, ipa: null,
     note: '' },
   { id: 'NAM-049', dialect: 'nam', term: 'blow off',
@@ -490,11 +484,6 @@ export const IDIOM = [
     meaning: 'To sleep; to attend uninvited',
     example: 'Can I crash on your couch?',
     era: 'both', type: 'word', flag: null, category: null, ipa: null,
-    note: '' },
-  { id: 'NAM-051', dialect: 'nam', term: 'jonesing for',
-    meaning: 'Craving',
-    example: 'Jonesing for a real coffee.',
-    era: 'contemporary', type: 'phrase', flag: null, category: null, ipa: null,
     note: '' },
   { id: 'NAM-052', dialect: 'nam', term: 'salty',
     meaning: 'Bitter, resentful',

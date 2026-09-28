@@ -1590,7 +1590,8 @@ export async function run({ navDoc = document } = {}) {
       'speakeasy', 'jalopy', 'gams', 'two bits',
       'you said a mouthful', 'the big idea', 'bet your bottom dollar',
       'bring home the bacon', 'zonked', 'baloney',
-      'not on your life', 'what do you take me for'];
+      'not on your life', 'what do you take me for',
+      'my bad', 'bogus', 'jonesing', 'amped'];
     // rube and yokel are deliberately absent: the hick entry names them in
     // its note as archaic synonyms, which warns rather than offers.
     const idiomText = IDIOM.map(e => [e.term, e.meaning, e.example, e.note].join(' ')).join(' ');

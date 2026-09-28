@@ -259,7 +259,8 @@ def main():
                "jalopy", "gams", "two bits",
                "you said a mouthful", "the big idea", "bet your bottom dollar",
                "bring home the bacon", "zonked", "baloney",
-               "not on your life", "what do you take me for"]
+               "not on your life", "what do you take me for",
+               "my bad", "bogus", "jonesing", "amped"]
     # rube and yokel are NOT pinned. The hick entry names them in its note
     # to tell an actor reading an old script that they mean the same thing
     # and are archaic, which is the lint's own job done in prose. Pinning
