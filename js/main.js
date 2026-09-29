@@ -6706,8 +6706,7 @@ function rhetoricRowHtml(r) {
     <article class="lex-row">
       <h3 class="lex-term">${esc(r.term)}</h3>
       <p class="lex-modern">${esc(r.what)}</p>
-      <p class="lex-note"><span class="lex-label">Rhetorical effect</span>${esc(r.effect)}</p>
-      <p class="lex-note"><span class="lex-label">In performance</span>${esc(r.performance)}</p>
+      <p class="lex-note">${esc(r.effect)}</p>
       ${r.examples.map(egHtml).join('')}
     </article>`;
 }
@@ -6735,7 +6734,7 @@ function renderRhetoricShelf() {
   const draw = () => {
     const q = rhetQuery.trim().toLowerCase();
     const hits = q
-      ? RHETORIC.filter(r => [r.term, r.what, r.effect, r.performance,
+      ? RHETORIC.filter(r => [r.term, r.what, r.effect,
           ...r.examples.flatMap(x => [x.text, x.source])]
           .some(f => String(f ?? '').toLowerCase().includes(q)))
       : RHETORIC;
