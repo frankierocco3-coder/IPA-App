@@ -1096,6 +1096,37 @@ export async function run({ navDoc = document } = {}) {
     check('import: absent and valid dissections raise no flag',
       mkBundle({ title: 'Old export', text: 'x' }).dissectionDropped === false
       && bundle[0].dissectionDropped === false);
+    // EXPORT AND IMPORT ARE CALLED FROM A CARD AND WERE DEFINED NOWHERE.
+    // Both were deleted on 2026-08-21 as collateral in a commit about moving
+    // DISSECT_SECTIONS, their call sites were left behind, and both threw
+    // ReferenceError for five weeks. Every check nearby passed the whole
+    // time, because they tested the validator and the message helper and
+    // never once named these two functions.
+    //
+    // So this resolves the call sites themselves: every function the Studio
+    // card handler invokes must be defined in main.js or imported into it.
+    // It generalises, so a third action deleted the same way fails here.
+    {
+      const src = await viewSource();
+      const at = src.indexOf("if (act === 'open')");
+      const handler = src.slice(at, at + 700);
+      const GLOBALS = ['if', 'for', 'while', 'switch', 'catch', 'return', 'confirm',
+        'alert', 'prompt', 'fetch', 'Number', 'String', 'Boolean', 'Array', 'Object',
+        'JSON', 'Math', 'Date', 'Promise', 'setTimeout'];
+      // The leading (^|[^.\w$]) excludes method calls like .querySelector(
+      const called = [...new Set(
+        [...handler.matchAll(/(^|[^.\w$])([a-zA-Z_$][\w$]*)\s*\(/g)].map(m => m[2]))]
+        .filter(n => !GLOBALS.includes(n));
+      const defined = n =>
+        new RegExp(`(async\\s+)?function\\s+${n}\\b|const\\s+${n}\\s*=`).test(src)
+        || new RegExp(`[,{\\s]${n}\\s*[,}]`).test(src.slice(0, src.indexOf('\n\n\n')));
+      const missing = called.filter(n => !defined(n));
+      // Proven non-vacuous against the real defect: deleting exportProject's
+      // definition from the source puts it straight back in `missing`.
+      check('studio: every action the project card calls actually exists',
+        called.length >= 5 && missing.length === 0,
+        missing.length ? `undefined: ${missing.join(', ')}` : `${called.length} resolved`);
+    }
     check('import: the visible result reports drops and only drops',
       importResultMessage(1, 0) === 'Imported 1 project.'
       && importResultMessage(2, 0) === 'Imported 2 projects.'

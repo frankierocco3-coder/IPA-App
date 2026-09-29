@@ -8683,6 +8683,104 @@ function renderDissectTextbook() {
   document.getElementById('sd-playable').addEventListener('click', renderPlayableActions);
 }
 
+// ── Project export and import ───────────────────────────────────
+// BOTH OF THESE WERE DELETED ON 2026-08-21 and their call sites were left
+// behind, so Export and Import on a Studio project card have thrown
+// ReferenceError for five weeks. The deletion was collateral in a commit
+// about moving DISSECT_SECTIONS into dissect.js; nothing in that commit
+// was about export. Restored from 5a5be28^ with one correction, marked
+// below. With no backend, export IS the backup path here.
+
+async function exportProject(id) {
+  const p = await getProject(id);
+  if (!p) return;
+  const takes = await listTakes({ projectId: id });
+  const diss = await dissectionFor('project', id).catch(() => null);
+  // Explicit allow-list: only these fields are ever written to a shared file.
+  // No internal database ids, no object URLs, no device information.
+  const payload = {
+    format: 'speechcraft-project',
+    formatVersion: 1,
+    exportedAt: new Date().toISOString(),
+    audioIncluded: false,
+    note: 'Audio is never included. Recordings stay on the device that made them.',
+    projects: [{
+      title: p.title, source: p.source, author: p.author,
+      character: p.character, scene: p.scene, accent: p.accent,
+      contentType: p.contentType ?? 'other',
+      text: p.text, notes: p.notes, pronunciationNotes: p.pronunciationNotes,
+      difficultWords: (p.difficultWords ?? []).map(w => ({ word: w.word, note: w.note ?? '' })),
+      overrides: {
+        words: p.overrides?.words ?? {},
+        occurrence: p.overrides?.occurrence ?? {},
+      },
+      status: p.status,
+      createdAt: p.createdAt,
+      // Metadata only, and deliberately without blob ids: a file cannot claim
+      // audio it does not carry.
+      recordings: takes.map(t => ({
+        level: t.level, label: t.label, rating: t.rating,
+        note: t.note, durationMs: t.durationMs, createdAt: t.createdAt,
+      })),
+      // The project's dissection travels with it — allow-listed fields
+      // only, no internal ids or target keys (import rebuilds those
+      // around the NEW project id).
+      //
+      // THE CORRECTION: this allow-listed QUICK_QUESTIONS, the original six.
+      // The very commit that deleted this function expanded the worksheet to
+      // the whole Question Everything set, so restoring it verbatim would
+      // have exported six answers and silently dropped the rest — the same
+      // class of bug that commit was fixing in saveAnswer.
+      ...(diss ? { dissection: {
+        schemaVersion: 1,
+        materialType: diss.materialType,
+        createdAt: diss.createdAt,
+        answers: Object.fromEntries(dissectQuestions().flatMap(({ id: qid }) => {
+          const a = diss.answers?.[qid];
+          return a ? [[qid, { value: a.value, status: a.status, updatedAt: a.updatedAt }]] : [];
+        })),
+      } } : {}),
+    }],
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase().slice(0, 60)}.speechcraft.json`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+async function importProjectFile(file) {
+  const raw = await readJsonFile(file);
+  const projects = validateProjectBundle(raw, { newId: () => emptyProject().id });
+
+  const dropped = projects.reduce((n, p) => n + (p.droppedRecordings || 0), 0);
+  const withDiss = projects.filter(p => p.dissection).length;
+  const summary = [
+    `Import ${projects.length} project${projects.length === 1 ? '' : 's'}?`,
+    '',
+    ...projects.slice(0, 8).map(p => `  \u2022 ${p.title}`),
+    projects.length > 8 ? `  \u2026and ${projects.length - 8} more` : '',
+    '',
+    'These are added alongside your existing projects \u2014 nothing is replaced.',
+    withDiss ? `${withDiss} project${withDiss === 1 ? ' carries its' : 's carry their'} dissection.` : '',
+    dropped ? `Audio is never included in project files, so ${dropped} recording reference${dropped === 1 ? '' : 's'} will be skipped.` : '',
+  ].filter(Boolean).join('\n');
+  if (!confirm(summary)) return { count: 0, droppedDissections: 0 };
+
+  let n = 0, droppedDiss = 0;
+  for (const p of projects) {
+    const { droppedRecordings, dissection, dissectionDropped, ...clean } = p;
+    await saveProject(clean);
+    // Rebuilt around the NEW project id (never the file's) — see dissect.js.
+    if (dissection) await attachImportedDissection(clean.id, clean.title, dissection);
+    if (dissectionDropped) droppedDiss++;
+    n++;
+  }
+  return { count: n, droppedDissections: droppedDiss };
+}
+
 async function renderDissect(id) {
   record(() => renderDissect(id));
   let p;
