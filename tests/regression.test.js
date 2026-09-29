@@ -2111,13 +2111,20 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Library')); await sleep(350);
-      // It shelved as its own Library tile until 2026-09-29; it is now a
-      // page INSIDE Script Analysis, carrying the same full textbook, so
-      // the route to it is one click deeper.
-      clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
-      const qeTile = () => doc.querySelector('[data-item="col:question"]');
-      check('textbook: Question Everything shelves inside Script Analysis',
+      // TWO doors on purpose (owner, 2026-09-29): a Library card of its own,
+      // because it is the reference people arrive wanting by name, AND a
+      // place in the Script Analysis reading order. Both are pinned, and
+      // both must open the same full textbook.
+      const qeTile = () => doc.querySelector('[data-tile="col:question"]');
+      check('textbook: Question Everything keeps a Library card of its own',
         !!qeTile() && qeTile().textContent.includes('Question Everything'));
+      check('textbook: and it is also in the Script Analysis reading order',
+        (await (async () => {
+          clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
+          const inShelf = !!doc.querySelector('[data-item="col:question"]');
+          clickIn(doc.getElementById('nav-back')); await sleep(350);
+          return inShelf;
+        })()));
       const dissBefore = (await idbAll(STORES.dissections)).length;
       clickIn(qeTile());
       await until(() => !!doc.getElementById('sd-title'));
@@ -3297,9 +3304,11 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 39 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          // col:lists and col:question left this landing on 2026-09-29: both
-          // are now pages INSIDE col:scene, carrying the full textbook.
-          === 'col:scene,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          // col:lists left this landing on 2026-09-29 and is reached through
+          // the collection it serves. col:question KEEPS its card: it is
+          // also a page inside col:scene, and having both was the owner's
+          // correction the same day, not an oversight.
+          === 'col:scene,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));

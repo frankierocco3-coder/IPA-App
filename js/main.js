@@ -3546,16 +3546,27 @@ function actingLibraryPane(el) {
     // 2026-09-25), so its standalone tile is gone: the same page in two
     // places is exactly the redundancy that order was about. The page
     // itself, and its owner-supplied verbatim copy, are untouched.
-    // ONE door for preparing the text (owner order 2026-09-29). The Four
-    // Lists and Question Everything had tiles of their own here AND lessons
-    // of the same name inside Script Analysis, so each was two doors onto
-    // one subject. They now shelve inside that collection carrying the FULL
-    // textbook, which is what the order asked for, and the tiles are gone.
-    // Their keywords moved to EXTRA_KEYWORDS above rather than being
-    // deleted with them: retiring the Lines & Memory tile in September took
-    // its search terms with it and made the page unfindable by its own
-    // name, and this is the same shelf making the same move twice more.
+    // The Four Lists and Question Everything had tiles of their own here AND
+    // lessons of the same name inside Script Analysis. Both now shelve
+    // inside that collection carrying the FULL textbook (owner order
+    // 2026-09-29), which is what that order asked for.
+    //
+    // THE FOUR LISTS TILE IS GONE; QUESTION EVERYTHING'S IS NOT. Removing
+    // both was an inference and it went too far: the order was about which
+    // version the shelf opens, not about deleting doors. Question Everything
+    // is the one reference here somebody arrives wanting by name, so it
+    // keeps a card of its own AND its place in the reading order (owner
+    // correction, same day). Four Lists is a short tool page and is reached
+    // through the collection it serves.
+    //
+    // Both sets of keywords stay in EXTRA_KEYWORDS regardless: retiring the
+    // Lines & Memory tile in September took its search terms with it and
+    // made the page unfindable by its own name.
     { ...colTile('scene'), group: G1 },
+    { key: 'col:question', tone: 'is-lavender', emoji: '🔍', img: 'img/ui/question.png',
+      title: 'Question Everything', group: G1,
+      keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
+      go: renderDissectTextbook },
     { ...colTile('principles'), group: G2 },
     { ...colTile('listening'), group: G2 },
     // The Building a Character shelf left Acting on 2026-09-23 with its
