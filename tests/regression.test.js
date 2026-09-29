@@ -4503,10 +4503,13 @@ export async function run({ navDoc = document } = {}) {
       && String(RHETORIC_COLLECTIONS.map(c => c.id)) === String(writtenModules)
       && writtenModules.length >= 2,
       `shelved: ${RHETORIC_COLLECTIONS.map(c => c.id).join(',') || 'none'}`);
-    // Modules 1 and 2 are written, six lessons each. Every module's orders
-    // must run 1..n with no gap and no repeat, or the path forks.
-    check('rhetoric: modules 1 and 2 are six lessons each, in order, each whole',
-      RHETORIC_LESSONS.length === 12
+    // Every written module is six lessons. Derived from the written list so
+    // that writing module 4 needs no edit here, the same way the shelf check
+    // above derives. Every module's orders must run 1..n with no gap and no
+    // repeat, or the path forks.
+    check('rhetoric: every written module is six lessons, in order, each whole',
+      RHETORIC_LESSONS.length === writtenModules.length * 6
+      && writtenModules.length === 3
       && writtenModules.every(id => {
         const o = RHETORIC_LESSONS.filter(l => l.module === id).map(l => l.order);
         return o.length === 6

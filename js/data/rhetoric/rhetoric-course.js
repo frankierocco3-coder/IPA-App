@@ -32,8 +32,8 @@
 export const RHETORIC_PRINCIPLE =
   'Persuasion is not something done to a person. It is the work of making your reasons available to somebody who does not yet hold them, and the same craft that does it honestly is the craft that does it dishonestly.';
 
-// Six modules. Modules 1 and 2 are written; 3 to 6 are outlined and carry
-// no lessons yet, which is why the shelf shows two collections and not six.
+// Six modules. Modules 1, 2 and 3 are written; 4 to 6 are outlined and
+// carry no lessons yet, which is why the shelf shows three collections.
 // RHETORIC_COLLECTIONS filters to modules that actually have lessons, so a
 // module joins the Library by being written and never before.
 export const RHETORIC_MODULES = [
@@ -316,6 +316,149 @@ export const RHETORIC_LESSONS = [
       { p: 'Voice, body, pause and the room are module 5, and they are half of whether any of this arrives. This lesson is about the argument rather than the speaking of it, and the separation is deliberate: a great many speakers try to fix a structural problem with delivery, which module 1 warns about in its account of the canons.' },
       { h: 'For an actor' },
       { p: 'This is listening, which is the live half of the job and the thing the Acting course spends a whole collection on in Listening and Responding. A character who adjusts is doing something visibly different from a character who delivers, and an audience can tell instantly which one they are watching, even when they could not say what the difference was.' },
+    ] },
+
+  // ── Module 3 · Finding the Argument ────────────────────────────
+  // Written 2026-09-29. This is the first and second canons, invention and
+  // arrangement, which module 1 explicitly sends here.
+  //
+  // WHAT IT DELIBERATELY DOES NOT RE-TEACH. Claim, reason and evidence is
+  // module 1 (rh-claim). Common ground is module 2 (rh-common), and rh-order
+  // leans on it rather than restating it. The enthymeme from the listener's
+  // side is module 2 (rh-supply); rh-proof treats it as one of two MODES of
+  // proof and points there for what the listener does with it. Figures are
+  // module 4 and delivery is module 5. Named errors stay on the fallacy
+  // shelves: this module points at them and defines none of them twice.
+
+  { id: 'rh-find', module: 'invention', order: 1,
+    title: 'Where Arguments Come From',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Treat invention as finding rather than inventing, because most of what you need is already in the situation.',
+    orientation: 'The arguments are usually there before you arrive. The work is locating them.',
+    reflection: 'Take a case you have to make. List every argument available to you, including the ones you will not use. Which did you miss the first time?',
+    body: [
+      { p: 'The first canon is invention, and the word is misleading in modern English. It does not mean making something up. It means finding what is already available in this particular case, which is a search rather than an act of creation.' },
+      { h: 'Why searching beats inventing' },
+      { p: 'A speaker who asks what shall I say produces whatever occurs to them, and what occurs first is usually the most obvious thing available. A speaker who asks what is available here produces a list, and then chooses from it.' },
+      { p: 'The difference shows under pressure. An argument you picked out of five is one you can abandon for another. An argument that simply arrived is the only one you have, and when it fails you have nothing left to say.' },
+      { h: 'Collect before you choose' },
+      { p: 'Write down the arguments you do not intend to use. The weak ones are worth having on paper because they are what the other side will reach for, and because a case you can argue from both directions is one you actually understand.' },
+      { p: 'This is also the honest test of whether you have a case at all. If the search produces one argument and it is the one you started with, you have a conviction rather than an argument, and the rest of this module will not help until that changes.' },
+      { h: 'For an actor' },
+      { p: 'Characters do this badly, visibly, and in ways worth playing. Somebody with one argument repeats it louder. Somebody with five is calm, because losing one costs them nothing. How much a person has in reserve is legible in how they behave when contradicted.' },
+    ] },
+
+  { id: 'rh-topics', module: 'invention', order: 2,
+    title: 'The Common Topics',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Learn the handful of questions that generate arguments about anything, so that a blank page stops being blank.',
+    orientation: 'A few questions, asked of any subject, produce more arguments than most speakers can use.',
+    reflection: 'Run your case through definition, comparison and cause. Which one produced an argument you had not thought of?',
+    body: [
+      { p: 'The tradition calls these the topics, or the commonplaces, and both names obscure what they are. The Greek means places: places to go and look. They are not subjects and they are not arguments. They are the small number of questions that reliably produce arguments when asked of anything at all.' },
+      { h: 'Definition: what kind of thing is this?' },
+      { p: 'A surprising number of disputes are about whether something belongs in a category, and almost none of them announce themselves that way. Settle what a thing is and the argument about what to do often settles with it.' },
+      { h: 'Comparison: what is it like, and is it more or less?' },
+      { p: 'Analogy and degree. If we already act on something worse, this follows. If we refuse something smaller, this cannot stand. Comparison is the topic that does the most work in ordinary argument and the one most open to abuse, which is why false equivalence sits on the fallacy shelf.' },
+      { h: 'Relationship: what caused it, what follows from it, what is its opposite?' },
+      { p: 'Cause backwards and consequence forwards. The opposite is the one people forget: showing what the contrary would look like frequently makes a claim visible that direct statement could not.' },
+      { h: 'Circumstance: is it possible, and has it happened before?' },
+      { p: 'Whether a thing can be done, and whether it has been. Precedent is among the strongest moves available in almost any setting, because it converts an argument about the future into a statement about the past.' },
+      { h: 'Testimony: who says so, and what do they gain?' },
+      { p: 'Witnesses, documents, records, numbers, precedent. The tradition keeps these separate from the rest because they are not made by the speaker, only presented. Presenting them well is a real skill and an underrated one.' },
+      { h: 'Use them as a checklist' },
+      { p: 'Run the subject through each in turn. Most will produce nothing, which is fine and expected. One or two will produce something you had not thought of, and that is the entire return on the method.' },
+    ] },
+
+  { id: 'rh-stasis', module: 'invention', order: 3,
+    title: 'Finding the Real Disagreement',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Identify which question is actually in dispute, because arguing the wrong one is the commonest way to lose.',
+    orientation: 'Four questions, in order. The argument lives at the first one you disagree about.',
+    reflection: 'In a dispute you are in, which of the four is the real one? Are you arguing there, or somewhere more comfortable?',
+    body: [
+      { p: 'The tradition has a doctrine for this, and it is the most immediately useful thing in the whole subject. The name means the standing point: the place where an argument comes to rest and the two sides are genuinely opposed.' },
+      { h: 'Did it happen?' },
+      { p: 'A question of fact. Either it occurred or it did not, and evidence settles it or nothing does.' },
+      { h: 'What is it?' },
+      { p: 'A question of definition. Both sides agree on what happened and divide on what to call it. A great many public arguments are here and almost none of them say so.' },
+      { h: 'How serious is it?' },
+      { p: 'A question of quality. Agreed on the facts, agreed on the name, divided on whether it is grave or trivial, excusable or not.' },
+      { h: 'Is this the right place to settle it?' },
+      { p: 'A question of procedure. Who decides, under what authority, by what process. It sounds like a technicality and it is frequently the whole case.' },
+      { h: 'Why the order matters' },
+      { p: 'You are in dispute at the FIRST point where you diverge, and everything after it is not yet in question. Two people arguing about how serious something is, who have not noticed they disagree about what it is, will not converge no matter how long they go on, because they are answering different questions and each can hear that the other is not making sense.' },
+      { h: 'The honest part' },
+      { p: 'People move between the four to avoid losing, and doing it deliberately is a tactic rather than an argument. Retreating from a strong claim to a modest one, or raising the standard once it has been met, both have names on All Fallacies. Naming the level out loud is usually enough to stop it.' },
+      { h: 'For an actor' },
+      { p: 'Two characters stuck at different levels is a scene that can run for pages without resolving, which is exactly why writers use it. Neither is being stupid. Each is answering the question they think is in front of them, and the audience can see both.' },
+    ] },
+
+  { id: 'rh-proof', module: 'invention', order: 4,
+    title: 'What Counts as Proof',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Judge evidence by what a listener can do with it, rather than by what would satisfy a logician.',
+    orientation: 'A listener is not a proof checker, and what moves them is not therefore irrational.',
+    reflection: 'What is the most vivid TRUE thing you could show them? Why is it not in your argument yet?',
+    body: [
+      { p: 'The tradition separates the proofs a speaker makes from the proofs a speaker finds. Reasoning is made. Documents, witnesses, records and numbers are found, and they need presenting rather than constructing, which is a different job and one most speakers do carelessly.' },
+      { h: 'Two ways to reason' },
+      { p: 'From cases to a general claim, which is the example, and from a shared premise to a conclusion, which is the enthymeme. Module 2 covers what the listener does with the second, and the short version is that they finish it themselves, which is why it holds.' },
+      { h: 'Why the vivid beats the general' },
+      { p: 'One case a listener can picture moves them more than a figure covering a million people. This is worth being honest about rather than scolding: it is not a defect in listeners, it is how understanding works. A number is a claim about a world nobody has seen. An instance is a thing you can hold, and a speaker who supplies none has left the listener nothing to think with.' },
+      { p: 'THE LINE IS SHARP AND WORTH SAYING PLAINLY. Using a vivid case to illustrate a general claim that is true is teaching. Using one to stand in place of a general claim that is not true is the move All Fallacies files under misusing evidence. Same technique, opposite honesty, and the only difference is whether the general claim would survive without the story.' },
+      { h: 'What evidence cannot do' },
+      { p: 'It cannot make somebody care. A listener who does not want the outcome will find the evidence uninteresting rather than unconvincing, and no amount of it changes that. That is what module 1 means by pathos, and it is why evidence alone loses arguments it should win.' },
+      { h: 'Test your own' },
+      { p: 'Ask what you would expect to see if the claim were false, and whether anybody has looked. If the answer is that nothing would look different, you are not holding evidence. You are holding an interpretation.' },
+    ] },
+
+  { id: 'rh-order', module: 'invention', order: 5,
+    title: 'The Order of a Case',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Arrange the same reasons so that they build, because order decides whether an identical set of arguments persuades.',
+    orientation: 'Arrangement is the second canon, and the one most often skipped entirely.',
+    reflection: 'Write your arguments on separate lines and reorder them. Which order makes the last one land hardest?',
+    body: [
+      { p: 'The same arguments, in a different order, win or lose. This is the least intuitive claim in the course and the easiest to verify: take three reasons, put the weakest first, then put it last, and read both aloud.' },
+      { h: 'The classical parts, without the pedantry' },
+      { p: 'An opening that gives them a reason to listen. The facts, told plainly. The proposition, which is what you are actually asking for. The proof. The answer to the objection. The close. It is not a template to fill in, and treating it as one produces the stiff, over-signposted speech everybody recognises. It is a checklist for what is MISSING, which is usually the proposition.' },
+      { h: 'What decides the order' },
+      { p: 'Dependency. Every step has to stand on something the listener already accepts, so the order is set by what they must agree to before the next point can land. The first stone is the common ground from module 2, and if you cannot name it the order will not come out right however you shuffle it.' },
+      { h: 'Strongest first or strongest last' },
+      { p: 'The tradition argues about this and so has everybody since, which is itself the useful information: there is no settled answer. Strong first buys the attention you need to be heard at all. Strong last is what they carry out of the room. The common compromise is to open strong, put the rest in the middle, and finish strongest.' },
+      { p: 'What actually decides it is whether they will still be listening at the end. If attention is uncertain, lead. If you have the room, build.' },
+      { h: 'The statement of facts is never neutral' },
+      { p: 'A plain account of what happened is already an argument. What you include, what you leave out and the order you tell it in do most of the work, and they do it before anybody thinks to start disagreeing. In many cases it is the most powerful part of the speech and the part least defended against.' },
+      { h: 'For an actor' },
+      { p: 'The order a character puts things in shows their mind. Somebody who states the conclusion first and reasons backwards is not the same person as somebody who builds to it and cannot say it until the end. Neither is written in the words. Both are in the sequence.' },
+    ] },
+
+  { id: 'rh-objection', module: 'invention', order: 6,
+    title: 'Where the Objection Goes',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Answer the strongest objection on purpose, and decide deliberately whether to raise it before they do.',
+    orientation: 'Every case has one real objection. Behaving as though it does not is the most visible weakness a speech can have.',
+    reflection: 'What is the strongest thing that can be said against you? If you cannot state it well, you do not yet understand your own case.',
+    body: [
+      { p: 'Refutation is a part of arrangement rather than an afterthought, and where it goes is a decision. Most speakers make it by accident, which usually means leaving the objection out and hoping.' },
+      { h: 'Find the real one' },
+      { p: 'Not the easiest objection, which is the one speakers answer because answering it feels good. The real one is the objection you keep hoping nobody raises, and you already know what it is.' },
+      { h: 'Raise it yourself, or wait' },
+      { p: 'If they will certainly think of it, raise it first. You get to state it in your own words, you get the credit for honesty, and you are answering rather than defending. If they will probably not think of it, raising it hands them a weapon they did not have.' },
+      { p: 'So the question is likelihood, and the temptation is to answer it conveniently rather than accurately. Be honest about how obvious the objection is. A speaker who convinces themselves nobody will notice is usually the only person in the room who has not.' },
+      { h: 'How to answer one' },
+      { p: 'Concede what is true in it, then show precisely what it does not reach. An objection that is flatly denied stays alive in the listener, because they can see the part of it that was right and now they are watching you avoid it.' },
+      { h: 'The one you cannot answer' },
+      { p: 'Sometimes there is an objection you genuinely cannot meet. Saying so costs far less than concealing it. A case with an acknowledged weakness is still a case, and listeners will weigh it. A case caught hiding one is finished, and the weakness is no longer the issue.' },
+      { h: 'For an actor' },
+      { p: 'A character gives themselves away by which objection they will not name. Everything they are willing to argue about is a screen in front of the one thing they are not, and an audience feels the shape of the absence long before it is spoken.' },
     ] },
 
 ];
