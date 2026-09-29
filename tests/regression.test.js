@@ -25,6 +25,7 @@ import { QUICK_QUESTIONS, ANSWER_STATUS, newDissection, dissectionFor, putDissec
          materialTypeFrom, coverageOf, coverageLine, createSaver, MAX_ANSWER_LEN,
          attachImportedDissection, dissectQuestions, DISSECT_SECTIONS } from '../js/dissect.js';
 import { validateDissection, validateProjectBundle, importResultMessage } from '../js/validate.js';
+import { RHETORIC_SECTIONS, rhetoricQuestions, dissectKey, DISSECT_MODES } from '../js/dissect.js';
 import { PROVIDED_SCENES } from '../js/data/scenes.js';
 import { parseProvidedScene, sceneSpeeches, formTracker } from '../js/scene-parse.js';
 import { SCRIPT_ANALYSIS } from '../js/data/script-analysis.js';
@@ -4799,6 +4800,71 @@ export async function run({ navDoc = document } = {}) {
     const rSrc = await viewSource();
     check('rhetoric: the course flag is distinct from the reading-pathway flag',
       /RHETORIC_COURSE_LIVE/.test(rSrc) && /const RHETORIC_LIVE = false;/.test(rSrc));
+    // THE RHETORIC WORKSHEET (owner order 2026-09-29): eight parts, saved,
+    // on the learner's own text. It shares the dissections store with
+    // Question Everything rather than growing a second machine for saved
+    // answers, so what is pinned is the SEPARATION between them.
+    check('worksheet: eight parts, every ask has an id that cannot collide',
+      RHETORIC_SECTIONS.length === 8
+      && RHETORIC_SECTIONS.every(s => s.h?.trim() && s.asks?.length)
+      && rhetoricQuestions().length === RHETORIC_SECTIONS.reduce((n, s) => n + s.asks.length, 0)
+      && rhetoricQuestions().every(q => /^rw\.\d+\.\d+$/.test(q.id) && q.q?.trim() && q.section)
+      && !rhetoricQuestions().some(q => dissectQuestions().some(x => x.id === q.id)),
+      `${RHETORIC_SECTIONS.length} parts, ${rhetoricQuestions().length} questions`);
+    // THE KEY FOR 'quick' MUST NOT CHANGE. Every dissection written before
+    // modes existed carries `project:<id>`, and a new suffix on that key
+    // would orphan all of them at once.
+    check('worksheet: the existing key shape is untouched, only a new mode is suffixed',
+      dissectKey('project', 'abc') === 'project:abc'
+      && dissectKey('project', 'abc', 'quick') === 'project:abc'
+      && dissectKey('project', 'abc', 'rhetoric') === 'project:abc:rhetoric'
+      && String(DISSECT_MODES) === 'quick,rhetoric');
+    check('worksheet: each mode gets its own question set, quick still the default',
+      dissectQuestions().length === dissectQuestions('quick').length
+      && dissectQuestions('rhetoric').length === rhetoricQuestions().length
+      && dissectQuestions('rhetoric').length !== dissectQuestions().length);
+    {
+      // Deleting a project has to take EVERY mode's worksheet with it. The
+      // key is an exact-match index, so a mode the cascade does not name is
+      // simply left behind, which is silent and permanent.
+      const wsSrc = await viewSource();
+      check('worksheet: the Studio offers it, and the picker is honest when empty',
+        /function renderRhetoricPicker/.test(wsSrc)
+        && /Take a Speech Apart/.test(wsSrc)
+        && /No texts saved yet/.test(wsSrc)
+        && /renderDissect\(b\.dataset\.proj, 'rhetoric'\)/.test(wsSrc));
+      if (dbSupported()) {
+        try {
+          const pW = await createProject({ title: '__regression worksheet (safe to delete)' });
+          const rw = newDissection({ targetType: 'project', targetId: pW.id,
+            targetLabel: pW.title, mode: 'rhetoric' });
+          await putDissection(rw);
+          await saveAnswer(rw.id, 'rw.0.0', { value: 'A dedication.' });
+          const qk = newDissection({ targetType: 'project', targetId: pW.id,
+            targetLabel: pW.title, mode: 'quick' });
+          await putDissection(qk);
+          await saveAnswer(qk.id, 'quick.happening', { value: 'A battlefield.' });
+          const gotR = await dissectionFor('project', pW.id, 'rhetoric');
+          const gotQ = await dissectionFor('project', pW.id, 'quick');
+          check('worksheet: both worksheets live on one project without touching each other',
+            gotR.id !== gotQ.id && gotR.mode === 'rhetoric' && gotQ.mode === 'quick'
+            && gotR.answers['rw.0.0']?.value === 'A dedication.'
+            && gotQ.answers['quick.happening']?.value === 'A battlefield.'
+            && !('quick.happening' in gotR.answers) && !('rw.0.0' in gotQ.answers));
+          const removed = await deleteDissectionsFor(pW.id);
+          check('worksheet: deleting a project takes EVERY mode, leaving no orphan',
+            removed === 2
+            && !(await dissectionFor('project', pW.id, 'rhetoric'))
+            && !(await dissectionFor('project', pW.id, 'quick')),
+            `${removed} removed`);
+          await deleteProject(pW.id);
+        } catch (err) {
+          check('worksheet: both worksheets live on one project without touching each other',
+            false, String(err));
+        }
+      }
+    }
+
     // NAME THE MOVE (owner order 2026-09-29), the first Rhetoric exercise.
     // Three decks, one per shelf, every round built from an entry's own
     // example. What is pinned is the honesty envelope, because that is what

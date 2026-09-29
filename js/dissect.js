@@ -98,7 +98,8 @@ export const DISSECT_SECTIONS = [
 // and every ask beneath it. The six original headline ids are preserved
 // exactly, so any answer written before this expanded the set is still
 // found and still shown.
-export function dissectQuestions() {
+export function dissectQuestions(mode = 'quick') {
+  if (mode === 'rhetoric') return rhetoricQuestions();
   const out = [];
   DISSECT_SECTIONS.forEach((sec, si) => {
     const head = QUICK_QUESTIONS[si];
@@ -107,6 +108,84 @@ export function dissectQuestions() {
   });
   return out;
 }
+
+// ── The rhetoric worksheet: eight parts ───────────────────────
+// Owner order 2026-09-29. The same store, the same autosave and the same
+// privacy wipe as Question Everything, with its own question set, because
+// a second machine for saved answers would be a second thing to get wrong.
+//
+// It is the course applied to one text: the occasion and the three
+// speakers from the threshold and module 1, the listener and timing from
+// module 2, evidence and the unstated premise from module 3, the figures,
+// and the question module 6 exists to ask. Ids are `rw.<section>.<ask>`
+// and cannot collide with `quick.*` or `qe.*`.
+export const RHETORIC_SECTIONS = [
+  { h: '1. The situation', asks: [
+    'What kind of speech is this: about what to do next, about what happened, or about what we value?',
+    'What had just happened before it?',
+    'Where is it being given, and who chose that place?',
+    'What is at stake, and for whom?',
+    'Was this the moment for it, or was it early?',
+  ] },
+  { h: '2. The speaker', asks: [
+    'Who is speaking, and what do they want out of this?',
+    'What gives them the standing to be heard here?',
+    'What do they admit to? What do they never mention?',
+    'Of the three speakers: one who has examined this, one who is certain past what they know, or one working the room to stop it being examined?',
+    'What would it cost them to be wrong in public?',
+  ] },
+  { h: '3. The listener', asks: [
+    'Who is being addressed, and who is the listener who actually decides?',
+    'Who else can hear this, and does the speaker know it?',
+    'What does this audience already believe that the speaker can build on?',
+    'What would it cost them to agree?',
+    'Which step is left for them to finish themselves?',
+  ] },
+  { h: '4. The language', asks: [
+    'Which shapes are doing the work: opposition, repetition, a list, a mirrored structure?',
+    'Which words are doing more than one job?',
+    'What is named, and what is carefully not named?',
+    'Say the plainest version of the central sentence. What is lost, and what is exposed?',
+  ] },
+  { h: '5. The action', asks: [
+    'What is this speech trying to DO to somebody?',
+    'Which action describes it best?',
+    'Where does the tactic change, and why there?',
+    'What is the listener meant to do next?',
+  ] },
+  { h: '6. Knowledge and evidence', asks: [
+    'What is the claim, and what is offered in support of it?',
+    'What is the unstated premise the argument rests on?',
+    'What would we expect to see if this were false, and has anybody looked?',
+    'Which support is found (documents, testimony, record) and which is reasoned?',
+    'What is the strongest objection, and is it answered or avoided?',
+  ] },
+  { h: '7. Emotion and ethics', asks: [
+    'What feeling is produced, and at exactly which moment?',
+    'Is that emotion carrying knowledge, or standing in for knowledge that is missing?',
+    'Is the listener left able to examine this, question it and refuse it?',
+    'What does this speech make it hard to ask?',
+  ] },
+  { h: '8. The outcome', asks: [
+    'What changed, if anything?',
+    'What did it get the speaker?',
+    'Who paid for it?',
+    'What would you have done differently, and what would that have cost?',
+  ] },
+];
+
+export function rhetoricQuestions() {
+  const out = [];
+  RHETORIC_SECTIONS.forEach((sec, si) =>
+    (sec.asks ?? []).forEach((a, ai) =>
+      out.push({ id: `rw.${si}.${ai}`, q: a, section: sec.h })));
+  return out;
+}
+
+// Every mode's question set, in one place, so a guard can never know about
+// one of them and silently throw away answers to another. That is exactly
+// what saveAnswer did before 2026-08-20.
+export const DISSECT_MODES = ['quick', 'rhetoric'];
 
 export const ANSWER_STATUS = { answered: 'answered', unknown: 'unknown', na: 'na' };
 
@@ -127,17 +206,23 @@ export const materialTypeFrom = (contentType) =>
 
 /** A fresh Quick record in the §8 shape — reserved fields declared empty
  *  so later modes need no migration. */
-export function newDissection({ targetType, targetId, targetLabel, materialType }) {
+// The key keeps its old shape for 'quick' so every record written before
+// modes existed is still found by exactly the query that found it before.
+// Only a new mode adds a suffix.
+export const dissectKey = (targetType, targetId, mode = 'quick') =>
+  mode === 'quick' ? `${targetType}:${targetId}` : `${targetType}:${targetId}:${mode}`;
+
+export function newDissection({ targetType, targetId, targetLabel, materialType, mode = 'quick' }) {
   const now = Date.now();
   return {
     id: uid('diss'),
     schemaVersion: 1,
-    targetKey: `${targetType}:${targetId}`,
+    targetKey: dissectKey(targetType, targetId, mode),
     targetType,
     targetId,
     targetLabel: String(targetLabel ?? '').slice(0, 200),
     materialType: materialTypeFrom(materialType),
-    mode: 'quick',
+    mode: DISSECT_MODES.includes(mode) ? mode : 'quick',
     level: 'beginner',
     createdAt: now,
     updatedAt: now,
@@ -155,8 +240,9 @@ export function newDissection({ targetType, targetId, targetLabel, materialType 
 export const getDissection = (id) => idbGet(STORES.dissections, id);
 
 /** The dissection for a target, or null. One per target in this build. */
-export async function dissectionFor(targetType, targetId) {
-  const all = await idbAllBy(STORES.dissections, 'targetKey', `${targetType}:${targetId}`);
+export async function dissectionFor(targetType, targetId, mode = 'quick') {
+  const all = await idbAllBy(STORES.dissections, 'targetKey',
+    dissectKey(targetType, targetId, mode));
   return all[0] ?? null;
 }
 
@@ -174,7 +260,7 @@ export async function saveAnswer(id, questionId, { value, status } = {}) {
   // The worksheet asks the WHOLE Question Everything set (2026-08-20), so
   // the guard has to know all of them — it previously knew only the
   // original six and threw on every other answer, silently losing it.
-  if (!dissectQuestions().some(q => q.id === questionId)) throw new Error('unknown question id');
+  if (!dissectQuestions(d.mode).some(q => q.id === questionId)) throw new Error('unknown question id');
   const text = String(value ?? '').slice(0, MAX_ANSWER_LEN);
   const st = status ?? (text.trim() ? ANSWER_STATUS.answered : null);
   if (st === null) delete d.answers[questionId];
@@ -188,14 +274,21 @@ export const deleteDissection = (id) => idbDelete(STORES.dissections, id);
 /** Remove every dissection attached to a project — called from project
  *  deletion, which already cascades to the project's recordings. */
 export async function deleteDissectionsFor(projectId) {
-  const all = await idbAllBy(STORES.dissections, 'targetKey', `project:${projectId}`);
-  for (const d of all) await idbDelete(STORES.dissections, d.id);
-  return all.length;
+  // EVERY mode, or deleting a project orphans the worksheets it does not
+  // know about. The key is exact-match on an index, so each mode's key has
+  // to be asked for by name.
+  let n = 0;
+  for (const mode of DISSECT_MODES) {
+    const all = await idbAllBy(STORES.dissections, 'targetKey',
+      dissectKey('project', projectId, mode));
+    for (const d of all) { await idbDelete(STORES.dissections, d.id); n++; }
+  }
+  return n;
 }
 
 /** Coverage, never a score: how many of the six are explored, and how. */
 export function coverageOf(d) {
-  const qs = dissectQuestions();
+  const qs = dissectQuestions(d?.mode);
   const counts = { answered: 0, unknown: 0, na: 0, blank: 0, total: qs.length };
   for (const { id } of qs) {
     const a = d?.answers?.[id];

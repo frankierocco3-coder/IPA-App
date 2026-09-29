@@ -4992,13 +4992,54 @@ function renderFamilyShelf() {
 function rhetoricStudioPane(el) {
   el.innerHTML = `
     <div class="ws-head"><h1 class="page-h">Studio</h1>
-      <p class="ws-sub">A speech of your own is the studio work this course is heading toward. For now, paste one into Custom Work. The reference shelves moved to the Library, which is where reading belongs.</p></div>
+      <p class="ws-sub">Paste a speech, a debate, an interview or a scene into Custom Work, then take it apart. Your answers save as you type and stay on this device.</p></div>
+    <button class="track-card hub-card" id="rhs-take" type="button">
+      <div class="track-glyph">⚖️</div>
+      <div class="track-info"><h2>Take a Speech Apart</h2><p>Eight parts, on one of your own texts. Saved.</p></div>
+      <div class="track-arrow">›</div>
+    </button>
     <button class="track-card hub-card" id="rhs-custom" type="button">
       <div class="track-glyph">🎬</div>
-      <div class="track-info"><h2>Custom Work</h2></div>
+      <div class="track-info"><h2>Custom Work</h2><p>Your texts, private to this device.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
+  el.querySelector('#rhs-take').addEventListener('click', () => navTo(renderRhetoricPicker));
   el.querySelector('#rhs-custom').addEventListener('click', () => navTo(renderCustomWork));
+}
+
+// Which text? A list of the learner's own projects, each showing how far
+// its rhetoric worksheet has got. With none saved yet it says so and sends
+// them to Custom Work rather than opening an empty worksheet on nothing.
+async function renderRhetoricPicker() {
+  record(renderRhetoricPicker);
+  stopSpeech();
+  let projects = [];
+  let err = null;
+  try { projects = await listProjects(); } catch (e) { err = e; }
+  const covers = await Promise.all(projects.map(p =>
+    dissectionFor('project', p.id, 'rhetoric').then(d => (d ? coverageLine(d) : '')).catch(() => '')));
+  app.innerHTML = `
+    ${pageTopbar('⚖️ Take a Speech Apart', '#8a6d3b')}
+    <main class="guide">
+      <h1>Take a Speech Apart</h1>
+      <p class="guide-text">Eight parts, run on one text: the situation, the speaker, the listener,
+        the language, the action, the evidence, the ethics, and what it got. It saves as you type,
+        it stays on this device, and nothing in it is scored.</p>
+      ${err ? `<p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p>` : ''}
+      ${projects.length ? projects.map((p, i) => `
+        <button class="track-card hub-card" data-proj="${esc(p.id)}" type="button">
+          <div class="track-glyph">📄</div>
+          <div class="track-info"><h2>${esc(p.title || 'Untitled project')}</h2>
+            <p>${esc(covers[i] || 'Not started')}</p></div>
+          <div class="track-arrow">›</div>
+        </button>`).join('')
+      : `<p class="pane-note">No texts saved yet. Paste one into Custom Work and it will appear here.</p>
+         <div class="practice-row"><button class="btn btn-primary" id="rp-custom" type="button">Open Custom Work</button></div>`}
+    </main>`;
+  wireBrandHome();
+  app.querySelectorAll('[data-proj]').forEach(b =>
+    b.addEventListener('click', () => navTo(() => renderDissect(b.dataset.proj, 'rhetoric'))));
+  document.getElementById('rp-custom')?.addEventListener('click', () => navTo(renderCustomWork));
 }
 
 function characterLibraryPane(el) { return bookLibraryPane(el, BOOKS.character); }
@@ -8781,29 +8822,53 @@ async function importProjectFile(file) {
   return { count: n, droppedDissections: droppedDiss };
 }
 
-async function renderDissect(id) {
-  record(() => renderDissect(id));
+// The worksheet serves two question sets now (owner order 2026-09-29).
+// Everything below it is identical for both: the same store, the same
+// debounced saver, the same marks, the same privacy wipe. Only these three
+// things differ, so only these three are configured.
+const DISSECT_MODE_UI = {
+  quick: {
+    glyph: '🔍', verb: 'Dissect',
+    intro: 'The whole of <b>Question Everything</b>, run on this text — six sections and every '
+      + 'question under them. <b>“I don’t know yet” is a real answer</b>: an honest open question '
+      + 'is worth more than a guess. Nothing here is scored.',
+    playableQid: 'quick.doing',
+  },
+  rhetoric: {
+    glyph: '⚖️', verb: 'Take apart',
+    intro: 'Eight parts, run on one speech: the situation, the speaker, the listener, the '
+      + 'language, the action, the evidence, the ethics, and what it got. <b>“I don’t know yet” '
+      + 'is a real answer</b>: an honest open question is worth more than a guess. Nothing here '
+      + 'is scored, and it saves as you type.',
+    playableQid: 'rw.4.1',
+  },
+};
+
+async function renderDissect(id, mode = 'quick') {
+  const ui = DISSECT_MODE_UI[mode] ?? DISSECT_MODE_UI.quick;
+  record(() => renderDissect(id, mode));
   let p;
   try { p = await getProject(id); }
   catch (err) {
-    app.innerHTML = `${pageTopbar('🔍 Dissect', '#8a6d3b')}
+    app.innerHTML = `${pageTopbar(`${ui.glyph} ${ui.verb}`, '#8a6d3b')}
       <main class="guide"><p class="pane-note pane-warn">${esc(dbErrorMessage(err))}</p></main>`;
     wireBrandHome();
     return;
   }
   if (!p) return renderCustomWork();   // project gone — back to the list
   app.innerHTML = `
-    ${pageTopbar('🔍 Dissect: ' + esc(p.title || 'Untitled'), '#8a6d3b')}
+    ${pageTopbar(`${ui.glyph} ${ui.verb}: ` + esc(p.title || 'Untitled'), '#8a6d3b')}
     <main class="guide">
       <h1 class="piece-title">${esc(p.title || 'Untitled project')}</h1>
       <div id="diss-screen"></div>
     </main>`;
   wireBrandHome();
-  paneDissect(document.getElementById('diss-screen'), p, id);
+  paneDissect(document.getElementById('diss-screen'), p, id, mode);
 }
 
-async function paneDissect(pane, p, id) {
-  let d = await dissectionFor('project', id);
+async function paneDissect(pane, p, id, mode = 'quick') {
+  const ui = DISSECT_MODE_UI[mode] ?? DISSECT_MODE_UI.quick;
+  let d = await dissectionFor('project', id, mode);
 
   const STATUS_GLYPH = { answered: '✓', unknown: '?', na: '—', blank: '○' };
   const STATUS_WORD = { answered: 'answered', unknown: 'marked "I don\'t know yet"',
@@ -8816,12 +8881,12 @@ async function paneDissect(pane, p, id) {
 
   pane.innerHTML = `
     <div class="proj-form">
-      <p class="pane-note">The whole of <b>Question Everything</b>, run on this text — six sections
-        and every question under them. <b>“I don’t know yet” is a real answer</b>: an honest open
-        question is worth more than a guess. Nothing here is scored.</p>
+      <p class="pane-note">${ui.intro}</p>
       <p class="diss-coverage" id="diss-cov" aria-live="polite"></p>
       <div id="diss-list">
-        ${dissectQuestions().map(({ id: qid, q }, i) => `
+        ${dissectQuestions(mode).map(({ id: qid, q, section }, i, arr) => `
+        ${section && section !== arr[i - 1]?.section
+          ? `<h2 class="sec-h diss-sec">${esc(section)}</h2>` : ''}
         <section class="diss-q" data-q="${qid}">
           <h3 class="diss-h">
             <button class="diss-head" type="button" aria-expanded="false" aria-controls="db-${i}">
@@ -8840,7 +8905,7 @@ async function paneDissect(pane, p, id) {
               <button class="btn-lite diss-mark" data-mark="na" type="button" aria-pressed="false">Not relevant</button>
               <button class="btn-lite diss-clear" type="button">Clear</button>
             </div>
-            ${qid === 'quick.doing' ? `
+            ${qid === ui.playableQid ? `
             <p class="pane-note diss-pa">Looking for the verb underneath the line?
               <button class="btn-lite" data-pa-link type="button">Explore Playable Actions</button></p>` : ''}
           </div>
@@ -8874,7 +8939,7 @@ async function paneDissect(pane, p, id) {
     if (!d) {
       d = newDissection({ targetType: 'project', targetId: id,
         targetLabel: p.title || 'Untitled project',
-        materialType: materialTypeFrom(p.contentType) });
+        materialType: materialTypeFrom(p.contentType), mode });
       await putDissection(d);
     }
     return d;
