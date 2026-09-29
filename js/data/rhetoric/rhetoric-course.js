@@ -73,10 +73,16 @@ export const RHETORIC_THRESHOLD = {
   condition: 'You can skip all of it and use the shelves. The figures and the fallacies are open to anybody who opens them. But knowing how a thing works on people is not a neutral possession, and there is only one honest condition on holding it: whatever you learn to do to somebody, be willing to have it done to you.',
 };
 
-// Six modules. Modules 1 to 4 are written; 5 and 6 are outlined and carry
-// no lessons yet, which is why the shelf shows four collections.
+// Six modules, ALL WRITTEN as of 2026-09-29: thirty-six lessons.
 // RHETORIC_COLLECTIONS filters to modules that actually have lessons, so a
-// module joins the Library by being written and never before.
+// module joins the Library by being written and never before. The filter
+// is a no-op today and stays, because it is what makes a half-written
+// seventh module impossible to ship by accident.
+//
+// WRITTEN IS NOT APPROVED. Not one of the thirty-six is published: every
+// record needs an entry in js/data/speech/reviews.js from a knowledgeable
+// rhetoric or oratory reviewer, and Claude may never approve his own
+// writing. The workspace is live and its whole body is gated.
 export const RHETORIC_MODULES = [
   { n: 1, id: 'ground', title: 'What is Rhetoric?',
     blurb: 'The word, the reputation it lost, and the three questions every persuasive speech answers.' },
@@ -665,6 +671,353 @@ export const RHETORIC_LESSONS = [
       { h: 'For an actor' },
       { p: 'The shape of a sentence is written instruction about the thought, and the suspended sentence is the clearest case. It cannot be played by somebody who knows how it ends, because the character does not: they are assembling it as they speak, the delay is the event, and an actor who has decided the destination in advance flattens the only thing happening.' },
       { p: 'Verse makes the same demand with a metre instead of a clause, which is what the Verse and Prose module in the Shakespeare course is about. The instruction is identical: the shape tells you where the thought was still moving.' },
+    ] },
+
+  // ── Module 5 · Delivery ────────────────────────────────────────
+  // Written 2026-09-29. The fifth canon.
+  //
+  // WHY THIS IS NOT A VOICE MODULE. Acting's Tempo-Rhythm module already
+  // teaches the craft of it, and teaches it well: tempo against rhythm as
+  // two dials (ac-dials), pauses as rests written into the music
+  // (ac-rests), and the two missing speeds (ac-speeds). Writing pace and
+  // pause again here would be the Shakespeare-rhetoric mistake all over
+  // again, one subject taught twice under two owners. This module is what
+  // delivery does to an ARGUMENT and to a LISTENER, and it points at the
+  // craft rather than restating it.
+  //
+  // WHAT IT DELIBERATELY DOES NOT RE-TEACH. Changing the route through an
+  // argument mid-room is module 2 (rh-adjust); rh-body and rh-nerve treat
+  // eye and attention as what MAKES that possible and say so. Weight at
+  // the end of a sentence is module 4 (rh-sentence), and rh-stress is the
+  // same question in the mouth, where stress can overrule position. The
+  // level a room can hold is module 4 (rh-levels). Memory is module 1 and
+  // the Lines and Memory page. Named errors stay on the fallacy shelves.
+  //
+  // EVERY CROSS-REFERENCE HERE WAS CHECKED AGAINST THE APP: Tempo-Rhythm,
+  // Two Rhythms at Once, Listening and Responding, Lines and Memory and
+  // the Warmup all exist under those names. A pointer to a shelf that is
+  // not there is worse than no pointer.
+
+  { id: 'rh-arrives', module: 'delivery', order: 1,
+    title: 'The Half That Is Not on the Page',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'See how much of an argument is decided after the words are fixed, and what delivery cannot repair.',
+    orientation: 'The tradition put delivery last of the five canons, and several of its teachers thought it mattered most.',
+    reflection: 'Think of two people making the same case, one convincing and one not. What was different? Name it precisely.',
+    body: [
+      { p: 'The fifth canon is delivery: the voice and the body doing the speaking. It is the stage that does not survive on paper, which is why it is the least written about and the most decisive.' },
+      { h: 'The oldest claim about it' },
+      { p: 'The tradition records a teacher asked what mattered most in oratory, who answered delivery. Asked what came second, he answered delivery. Asked what came third, delivery.' },
+      { p: 'It is an overstatement and the overstatement is the point. Everything found, ordered and worded in the four canons before it arrives through this one, and an argument nobody attended to was not made.' },
+      { h: 'What is actually being decided' },
+      { p: 'Whether they are listening at all. Which of your sentences they carry out of the room. Whether you appear to believe what you are saying, which is module 1’s ethos arriving before a single one of your reasons does.' },
+      { p: 'None of that is in the words, and most of it is settled in the first half minute, before you have said anything you would want judged.' },
+      { h: 'What it cannot do' },
+      { p: 'It cannot repair a structure. Module 1 says most inexperienced speakers begin at style and then blame nerves for what was a structural problem, and delivery is where that bill arrives. A case in the wrong order, or resting on a premise the listener does not hold, is delivered confidently and fails confidently.' },
+      { p: 'Which gives a diagnostic worth having. If a speech went badly and you can name the sentence where you lost them, that is a delivery problem. If you cannot, the fault is earlier and no amount of work on the speaking will find it.' },
+      { h: 'The hazard, stated once' },
+      { p: 'Delivery works identically for a true case and a false one, and it does so more reliably than any other canon, because it operates below the level at which anybody is examining. Before You Begin says the speaker who knows, the speaker who is merely certain and the speaker who is working you are frequently indistinguishable in a room. This is the canon that makes them so.' },
+      { h: 'Where the craft of it lives' },
+      { p: 'This module is about what delivery does to an argument and to a listener. The physical craft is taught elsewhere in this app and taught properly: Tempo-Rhythm in the Acting course for speed and pause, and the Warmup in Acting Practice for the body and the voice before you use them.' },
+      { p: 'Nothing here repeats that. The two are meant to be held together, and a reader who wants the technique should go and get it there.' },
+    ] },
+
+  { id: 'rh-stress', module: 'delivery', order: 2,
+    title: 'Which Word Carries the Line',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Place emphasis deliberately, because the stressed word decides what the sentence is actually claiming.',
+    orientation: 'One sentence, six words, six different arguments, and not a word changes.',
+    reflection: 'Take your central sentence. Say it aloud stressing a different word each time. How many of those did you not mean?',
+    body: [
+      { p: 'Module 4 asked where the important word sits in a sentence, which is a question about the page. This is the same question in the mouth, and it is the more powerful of the two, because stress can overrule position: a word buried in the middle takes the weight the moment you put it there.' },
+      { h: 'The demonstration' },
+      { p: 'Take the sentence “I never said he stole the money.”' },
+      { p: 'Lean on the first word and you are denying that it was you who said it, which quietly concedes that somebody did. Lean on the second and you are denying that you ever said it, which leaves open what you implied. Lean on the fourth and the accusation was about a different person. Lean on the last and he took something, but not the money.' },
+      { p: 'Six placements, six different claims, several of them admissions, and the sentence is identical every time. Nothing about this is subtle, and almost nobody does it on purpose.' },
+      { h: 'What emphasis actually is' },
+      { p: 'A claim about contrast. Stressing a word says: this one, rather than the alternative. That is why it changes the argument and not merely the volume.' },
+      { p: 'It also explains the commonest fault, which is too much rather than too little. A speaker who wants to be taken seriously stresses heavily and continuously, and asserts nothing at all: if every word is set against an alternative, no contrast has been drawn. Emphasis is paid for by the unstressed words around it.' },
+      { h: 'The dishonest version' },
+      { p: 'Because stress asserts a contrast, it can assert one that was never argued. Emphasis can imply that somebody would disagree, that a finding is surprising, or that a source is doubtful, and none of it has been said, so none of it can be answered.' },
+      { p: 'This is module 2’s smuggling performed with the voice, and it is the hardest form to call out, because the transcript exonerates you. The words on the page are exactly what you would have been willing to defend.' },
+      { h: 'For an actor' },
+      { p: 'Which word a character leans on is a choice about what they believe they are up against. Somebody answering an accusation nobody made is stressing against an imagined contrast, and the stress is the only evidence that the accusation exists in their head at all.' },
+      { p: 'That is playable, it is specific, and it is written nowhere in the line.' },
+    ] },
+
+  { id: 'rh-silence', module: 'delivery', order: 3,
+    title: 'Silence',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Use silence as part of the argument rather than as the gap you are trying to get out of.',
+    orientation: 'The most under-used instrument in speech, and the only one that costs nothing.',
+    reflection: 'When a silence last felt unbearable to you, how long was it really? Count it next time.',
+    body: [
+      { p: 'Acting owns the craft of the pause and has the better metaphor for it: a rest is written into the music, and it is not the music stopping. That is Tempo-Rhythm, and it is the right way to think about timing a line.' },
+      { p: 'This lesson is the other half. Not what a pause does to a line, but what silence does to somebody’s reasoning.' },
+      { h: 'Before, and after' },
+      { p: 'Silence before a sentence buys attention for it. The room registers the break and turns toward whatever follows, which is why the pause is the cheapest emphasis available and needs no figure.' },
+      { p: 'Silence after a sentence is where the sentence is understood. A speaker who moves straight on has answered their own point before anybody had the chance to be persuaded by it. Most speakers manage the first occasionally and the second almost never, because the second feels like failure from the inside.' },
+      { h: 'The half second that belongs to them' },
+      { p: 'Module 2 says the strongest arguments leave a step for the listener to take, and that a conclusion somebody reaches themselves is held harder than one handed over. Silence is when they take it.' },
+      { p: 'So the unstated step is a structural device on the page and a timing device in the room, and they are the same device. A speaker who fills that gap has taken the conclusion back and returned it ready-made, which is the weaker form of the identical argument.' },
+      { h: 'Why it feels longer than it is' },
+      { p: 'Two seconds is a long pause and feels like ten from inside. This is a reliable distortion rather than a personal failing, and the only cure is to have measured one once. Almost nothing that sounds unbearably slow to a speaker is even noticed as slow by a room.' },
+      { h: 'The silence after a question' },
+      { p: 'A question asked and then left alone does work that no follow-up does. A speaker who asks and then rescues everybody from the discomfort has asked nothing, and has taught the room that their questions are rhetorical.' },
+      { p: 'It is also where silence stops being neutral. An answer extracted by waiting is not quite the same as one offered, and a long enough silence is pressure whatever the words were. Worth keeping in view, because it is the one instrument in this module that works on somebody without their noticing it is being used.' },
+      { h: 'What it is not' },
+      { p: 'It is not the silence of somebody searching for the next word. A room tells the difference instantly: one silence is aimed at them and the other is simply happening in front of them, and only the first one is doing anything.' },
+    ] },
+
+  { id: 'rh-body', module: 'delivery', order: 4,
+    title: 'The Body Argues First',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Know what the body has already claimed before the first sentence, and what it cannot honestly claim at all.',
+    orientation: 'A listener has concluded something about a speaker before the speaker has said anything worth judging.',
+    reflection: 'Watch somebody speak for one minute with the sound off. What did you conclude, and on what evidence?',
+    body: [
+      { p: 'The audience starts reading a speaker on arrival: how they stand, how they get to the place they are speaking from, what they do with their hands while somebody else is still talking. Whatever that produces is in place before the first argument, and every argument afterwards is heard through it. Module 1 calls this ethos and puts it first for exactly this reason.' },
+      { h: 'Stillness' },
+      { p: 'Stillness reads as authority and is rarer than it sounds. Most untrained movement is discharge rather than expression: weight shifting from foot to foot, hands finding pockets, a step backwards after a strong sentence that undoes the sentence. None of it is meant. All of it is read.' },
+      { p: 'The remedy is not to freeze, which reads as fear being held still. It is to give the body somewhere to be, so that what does move is movement rather than leakage.' },
+      { h: 'Gesture that means something' },
+      { p: 'A gesture that shapes what is being said helps a listener hold it: two things weighed against each other, a sequence laid out in the air, a size shown. It is doing the work module 4 gives to a figure, in a different medium.' },
+      { p: 'A gesture that runs continuously underneath everything stops carrying information and becomes weather. The audience stops seeing it within a minute, which means the one time you needed a gesture to land, it did not.' },
+      { h: 'The eye' },
+      { p: 'Eye contact is what makes a speech addressed rather than merely delivered. It is also the thing that makes module 2 possible at all: a speaker looking at the room is receiving information continuously and can change the route, and a speaker looking at a page is reciting and will find out afterwards.' },
+      { h: 'An honest limit' },
+      { p: 'There is a large popular literature claiming that particular gestures reveal particular inner states, and most of it is not supported by anything. Nothing in this lesson says a body reveals the truth about a speaker.' },
+      { p: 'It says something narrower and more useful: a body makes claims, listeners read those claims whether or not they are accurate, and a speaker who ignores this is not being authentic, only unaware. Before You Begin puts the harder version of it plainly, and it applies here more than anywhere else in the course: from the outside, at speed, the confident and the correct look the same.' },
+      { h: 'For an actor' },
+      { p: 'All of this is your subject already, and the Acting course goes further into it than this module will. What is added here is the argument frame: a character’s physical behaviour while they speak is a second case being made alongside the words, and it can support them, undercut them or contradict them outright.' },
+      { p: 'Two Rhythms at Once, in the Acting course, is the same observation from the inside. A person hiding something runs two rhythms, and the gap between them is what the audience is actually reading.' },
+    ] },
+
+  { id: 'rh-room', module: 'delivery', order: 5,
+    title: 'The Room',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Read the physical conditions as part of the argument, and change them when you are able to.',
+    orientation: 'The room has already made several decisions about how your speech is going to go.',
+    reflection: 'Think of a meeting that went badly. Describe the room it happened in. How much of it was the room?',
+    body: [
+      { p: 'A speech does not happen in the abstract. It happens somewhere, and where decides a surprising amount of what is possible inside it. This is the least discussed item in the whole subject and among the most decisive.' },
+      { h: 'What the arrangement decides' },
+      { p: 'Whether people can see each other changes what they are willing to say. A room where everybody faces the speaker produces an audience. A room where they face each other produces a discussion. Choosing between those is a rhetorical decision, and almost nobody notices making it.' },
+      { p: 'Size sets the level of style, which is module 4: a large room will not hold a quiet, intimate sentence, and a small one refuses a grand one and makes the speaker look as though they have misjudged the occasion, which they have.' },
+      { h: 'Changing it is legitimate, and frequently decisive' },
+      { p: 'Moving a conversation somewhere else. Standing when everybody else is sitting, or sitting when everybody expects you to stand. Asking for a screen to be turned off. Waiting until somebody has left the room.' },
+      { p: 'None of these is a trick played around the argument. The conditions are part of the occasion, and arranging them is as much a part of preparation as deciding the order of your reasons.' },
+      { h: 'What has just happened in it' },
+      { p: 'A room carries whatever preceded you. Following an item that was long and badly run, or bad news, or somebody who was funny, changes what your first half minute has to do before it can do anything else.' },
+      { p: 'About half the time this is knowable in advance, and a speaker who has asked what comes before them has bought information nobody else in the room has bothered to get. Module 2 treats the moment as part of the argument, and this is the most practical form of that.' },
+      { h: 'Unglamorous and worth knowing' },
+      { p: 'A microphone flattens a voice: the quiet end of your range disappears, so emphasis has to come from stress and silence rather than volume. Sitting costs breath, and what breath pays for is the ends of sentences, which is where module 4 put the important word.' },
+      { p: 'Neither is a reason to avoid a microphone or a chair. Both are reasons to know which one you are in before you find out.' },
+      { h: 'The one to check first' },
+      { p: 'Whether they can hear you. It is the least interesting item here and the one that most often decides the outcome, and a speaker who has not checked it has made every other preparation conditional on luck.' },
+    ] },
+
+  { id: 'rh-nerve', module: 'delivery', order: 6,
+    title: 'Nerves',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Treat nerves as a set of specific, predictable effects with structural answers, rather than as a state to be talked out of.',
+    orientation: 'Being told to relax has never once worked. Knowing exactly what nerves do is more useful than being reassured.',
+    reflection: 'What does your own nerve actually do? Name the physical effect, not the feeling.',
+    body: [
+      { p: 'Nerve is not a defect of character and it does not go away with experience. What experience changes is its shape: it arrives earlier, lasts a shorter time and becomes more manageable. Expecting it to disappear is most of what makes it worse.' },
+      { h: 'What it does, specifically' },
+      { p: 'It speeds everything up, and the speaker cannot hear that it has. It shortens the breath, which drops the ends of sentences, which is precisely where module 4 put the word that mattered. It sends the eyes up and away, which costs the information module 2 depends on. It makes silences feel twice their true length, so they get filled. And it turns attention inward at the exact moment the job is to be watching somebody else.' },
+      { p: 'That list is the useful part of this lesson. Every item on it is specific, and every one has a structural answer rather than an emotional one.' },
+      { h: 'The answers are structural' },
+      { p: 'Know your first sentence exactly, because the speed of the whole thing is set in it. Know the shape rather than the wording: a memorised wording has one failure mode and it is total, while a known shape can be rebuilt live.' },
+      { p: 'Have more arguments than you need. Module 3 recommends that for a different reason and it pays again here, because a speaker holding five is calm when one fails, and a speaker holding one is not.' },
+      { p: 'And give the body somewhere to be before you begin, which is what the Warmup in Acting Practice is for.' },
+      { h: 'The part that is not a problem' },
+      { p: 'Some nerve is the price of caring how it goes, and a room reads it accurately as that. An audience forgives visible nerve far more readily than it forgives evident indifference, and the speaker who is entirely comfortable is frequently the one nobody believes has anything at stake.' },
+      { h: 'The thing that helps most' },
+      { p: 'Attention outward. Nerve is attention pointed at yourself, and the most reliable way to reduce it is to take on a job that requires watching somebody else: what they have understood, what they are resisting, whether the last point landed.' },
+      { p: 'Module 2 calls that adjusting and the Acting course calls it Listening and Responding. It is the same instruction either way, and the fact that it also happens to be the cure for nerves is the most practical thing in this module.' },
+    ] },
+
+  // ── Module 6 · Honest Persuasion ───────────────────────────────
+  // Written 2026-09-29. The module the whole course has been deferring
+  // to, and the one it owes: rh-what promises it ("module 6 is about
+  // nothing else"), rh-bad asks the reader to write their own line
+  // BEFORE this module argues with it, and rh-supply, rh-metaphor and
+  // rh-notice each hand it a specific debt. Those debts are paid here by
+  // name rather than in general.
+  //
+  // IT DOES NOT ARRIVE AS A CODE OF CONDUCT. Every tool in this course
+  // appears on both sides of the line, which is the fact the threshold
+  // opens with, so a list of forbidden moves would be both useless and
+  // dishonest. The line is about what the LISTENER is left able to do,
+  // which is what RHETORIC_PRINCIPLE says and what rh-line unpacks.
+  //
+  // IT IS ADDRESSED INWARD ON PURPOSE. An ethics of persuasion that
+  // mainly produced ways to accuse other people would be doing the exact
+  // thing module 1 warns this subject does. rh-defence is the one lesson
+  // pointed outward, and it says plainly that the defence has a cost.
+  //
+  // WHAT IT DELIBERATELY DOES NOT RE-TEACH. Named errors stay on the two
+  // fallacy shelves and are pointed at, never redefined. Pathos is module
+  // 1. The unstated premise is module 1 and module 2. Stating the other
+  // side fairly is module 2 (rh-resist). The threshold is not a lesson
+  // and is quoted as the condition it is.
+
+  { id: 'rh-line', module: 'ethics', order: 1,
+    title: 'Where the Line Is',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'State the difference between persuading somebody and working on them in a form you can actually apply in a room.',
+    orientation: 'Not technique, not sincerity, not outcome. What the person is left able to do.',
+    reflection: 'Module 1 asked you to write your own line before this module argued with it. Get that sentence out and compare.',
+    body: [
+      { p: 'Module 1 put the charge at full strength and promised this module would answer it: if skill at persuasion can be taught separately from having good reasons, then teaching it hands an advantage to whoever is most willing to use it. Four modules of tools later, nothing has weakened that. This one has to say where the line falls.' },
+      { h: 'What the line is not' },
+      { p: 'It is not technique. Every tool in this course appears on both sides: the figure, the metaphor, the silence, the order of a case, the stress on a word. There is no move that is manipulative in itself, which is why a list of forbidden moves cannot be the answer and why both fallacy shelves are diagnostic rather than a code of conduct.' },
+      { p: 'It is not sincerity. Believing your case is entirely compatible with doing something indefensible to get it accepted, and the next lesson is about nothing else.' },
+      { p: 'It is not outcome. A true claim can be planted dishonestly and a false one argued in good faith. Judging yourself by whether you turned out to be right is judging yourself by luck.' },
+      { h: 'The line' },
+      { p: 'Ethical persuasion makes your reasons available while leaving the person able to examine them, question them and refuse them.' },
+      { p: 'Every word there is carrying weight. AVAILABLE: the reasons have to be visible, which rules out the case that only works while part of it stays out of sight. EXAMINE: they need the time and the information to check. QUESTION: they have to be able to raise an objection without paying for raising it. REFUSE: a persuasion that does not survive a refusal was not persuasion.' },
+      { h: 'Refusal is the sharpest of the four' },
+      { p: 'Ask what happens if they say no. If the answer is that you accept it, you were arguing. If the answer is that you escalate, wear them down, raise the cost of refusing or go around them, then the argument was a formality and the pressure was the actual mechanism.' },
+      { p: 'Almost everybody can feel this instantly from the receiving end, and loses the ability to see it in themselves within about a sentence.' },
+      { h: 'Three tests you can apply to yourself' },
+      { p: 'THE REVERSAL. Would you accept this being done to you by somebody arguing the opposite? Before You Begin sets this as the single condition on holding the craft at all, and it is the most reliable of the three.' },
+      { p: 'THE DAYLIGHT TEST. Would your case survive the listener knowing exactly what you are doing and why? An honest technique survives being named out loud. Saying that you are putting the strongest objection first so that nobody thinks you are hiding it costs you nothing, because it was true.' },
+      { p: 'THE INTEREST TEST. Would it survive their knowing what you get out of it?' },
+      { h: 'Where it actually sits' },
+      { p: 'The line does not fall between persuasion and plain information, which is a fiction: module 3 says a statement of facts is already an argument, and the most powerful part of many speeches is the part nobody thought to defend against. It falls between persuasion that can be checked and persuasion built so that it cannot be.' },
+    ] },
+
+  { id: 'rh-sincere', module: 'ethics', order: 2,
+    title: 'Sincerity Is Not the Test',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Stop treating your own conviction as evidence that you are arguing honestly.',
+    orientation: 'The second of the three speakers is not lying. That is exactly what makes them the hard case.',
+    reflection: 'Name something you are certain of and cannot fully evidence. What are you doing with that certainty when you argue?',
+    body: [
+      { p: 'Before You Begin describes three speakers, and the middle one is the difficulty: they speak past the edge of what they know and they are not lying. They have mistaken the feeling of being sure for the fact of being right, which everybody does, including you, including now.' },
+      { h: 'Why sincerity feels like it ought to count' },
+      { p: 'Because deception seems to require an intention to deceive, so where the intention is absent the charge looks absurd. But the listener is not injured by your intention. They are injured by walking out more confident than the evidence supports, and a sincere speaker does that as efficiently as a cynical one, with more conviction behind it.' },
+      { h: 'The specific failure' },
+      { p: 'It is not saying false things. It is conveying more certainty than you hold. The honest version of most claims has a qualification somewhere in it, and the qualification is the first thing to go, because it weakens the line and nobody in the room will notice it missing.' },
+      { p: 'The tradition has a name for dropping a qualification and it is on The 13 Fallacies, filed as an error rather than a sin. That is the right place for it: this mostly happens to people who are trying.' },
+      { h: 'What honest confidence sounds like' },
+      { p: 'Confidence proportioned to what you actually have. That means saying which parts you are sure of and which you are not, and it is not hedging. Hedging is uniform vagueness spread over a whole case; this is precision about where the strength is and where it is not.' },
+      { p: 'It also costs far less than people fear. A speaker who marks the weak joint in their own case is believed more readily on the strong ones, which is module 1’s ethos and module 3’s instruction to answer the real objection before somebody else raises it.' },
+      { h: 'The test' },
+      { p: 'Ask what would change your mind, and whether anything could. Module 3 puts that question to your evidence. Here it goes to you.' },
+      { p: 'A position that nothing could change is not a conclusion you reached. It is one you are defending, and you are entitled to hold it as a commitment. You are not entitled to present it as an argument.' },
+      { h: 'For an actor' },
+      { p: 'The most convincing people on a stage are frequently the most wrong, and playing certainty is not the same as playing knowledge. A character who knows and a character who is merely sure behave differently the moment they are contradicted: the first can examine, the second can only repeat, louder.' },
+      { p: 'That difference is this entire lesson, made visible, and it is one of the most useful things in the course to be able to play.' },
+    ] },
+
+  { id: 'rh-pressure', module: 'ethics', order: 3,
+    title: 'The Moves That Remove Examination',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Recognise the specific mechanisms that take away a listener’s ability to examine, in other people and in yourself.',
+    orientation: 'Manipulation is not a tone of voice. It is a short list of things done to the conditions for thinking.',
+    reflection: 'When did somebody last make it expensive for you to say no? What exactly did they do?',
+    body: [
+      { p: 'The line is about what the listener can still do. So the dishonest moves are not the ones that argue hard. They are the ones that go after the conditions under which arguing is possible at all, and there are not many of them.' },
+      { h: 'Urgency that is manufactured' },
+      { p: 'The most effective one and the most common. Examination takes time, so removing time removes examination without touching the argument. A real deadline is a fact about the world and a manufactured one is a claim, and the question that separates them can be asked out loud: what actually happens if this waits a week.' },
+      { h: 'Volume' },
+      { p: 'More claims than anybody could answer, delivered fast, so that failing to rebut each one reads as agreement. All Fallacies has a name for it. It is not an argument at all, it is an attack on the listener’s capacity to keep up, and the counter is to refuse the pace and take one claim.' },
+      { h: 'Raising the cost of the question' },
+      { p: 'Making the objection socially expensive rather than answering it: meeting a question with visible surprise that it was asked, or with an implication about the person asking. Nothing false has been said, and that question will not be raised again, by them or by anybody who watched.' },
+      { h: 'Isolation' },
+      { p: 'Separating somebody from the people who would give them another view, or from the information that would check yours. This is the most serious item here and the least like ordinary argument, and it is worth naming because it almost never announces itself. It arrives looking like confidentiality, or efficiency, or not troubling anybody else with it yet.' },
+      { h: 'Aiming at a known weakness' },
+      { p: 'Going at the one thing about this particular person that gets past their judgement: their fear about their job, their guilt about their family, their need to be the reasonable one in the room.' },
+      { p: 'This is where pathos stops being module 1’s honest work of making a consequence real, and the difference is testable. Ask whether the feeling you are raising is ABOUT the thing you want them to decide. If it is, you are helping them see what is at stake. If it is not, you are using a lever that happens to be attached to them.' },
+      { h: 'The uncomfortable part' },
+      { p: 'Every one of these has a legitimate twin. Real deadlines exist. Some cases honestly do require a great deal of evidence. Some questions really are asked in bad faith. Some matters really are confidential. Feelings really are relevant to decisions.' },
+      { p: 'So they cannot be banned, and a list of forbidden moves would have been useless anyway. What separates each from its twin is the test from the last lesson, applied to the EFFECT rather than to the move: when you are finished, can this person still examine, question and refuse.' },
+    ] },
+
+  { id: 'rh-advocate', module: 'ethics', order: 4,
+    title: 'Making a Case You Do Not Hold',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Separate arguing for a position from asserting it, and know what has to stay visible for that to remain honest.',
+    orientation: 'Lawyers do it, actors do it, and so does anybody asked to present the other side in a meeting.',
+    reflection: 'When did you last argue for something you were not sure of? Did the room know that was what was happening?',
+    body: [
+      { p: 'The tradition’s central exercise was arguing both sides of a question, and it is also the oldest thing the subject was attacked for. Module 3 asks you to write down the arguments you do not intend to use, and gives the reason: a case you can argue from both directions is one you actually understand.' },
+      { h: 'Why it is not lying' },
+      { p: 'Because the frame is understood. A defence advocate is not claiming a personal belief in the client’s innocence, everybody present knows what that role is, and the whole arrangement depends on both sides being put as well as they can be. An actor is not asserting the character’s opinions.' },
+      { p: 'In both cases the listener knows what kind of speech they are hearing, which is precisely the availability the line requires. Nothing is hidden, so nothing needs to be.' },
+      { h: 'Where it goes wrong' },
+      { p: 'When the frame stops being visible. Somebody presenting a position they were handed, in a room that believes they are giving their own view, is not doing advocacy. They are borrowing the credibility of sincerity for a case they do not hold, and the listener cannot discount it because they do not know there is anything to discount.' },
+      { p: 'The repair is one sentence and it costs almost nothing: say which of the two you are doing.' },
+      { h: 'The harder version' },
+      { p: 'Arguing a position well changes what you believe about it, reliably, in the direction you argued. That is worth knowing about yourself. The exercise is genuinely educational and it is simultaneously a mechanism for talking yourself into things, and the second one is invisible from inside while it is happening.' },
+      { h: 'For an actor' },
+      { p: 'This is your working condition, and it is a large part of why a rhetoric course belongs in an acting app. A character’s argument has to be made at full strength, by somebody who means it, and the performer need not agree with a word of it.' },
+      { p: 'What the performance owes is that the argument be a real one rather than a weak version built to lose, which is the same obligation module 2 describes when it says to state the other position in words they would accept. A play that defeats a straw man has not dramatised the disagreement, it has avoided it.' },
+      { p: 'Playable Actions, in the Acting Library, is the shelf for the other half: what the line is doing to the person opposite, which is a different question from what it asserts.' },
+    ] },
+
+  { id: 'rh-defence', module: 'ethics', order: 5,
+    title: 'When You Are the Audience',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Use the craft in the direction it is most reliably useful, which is on what is being done to you.',
+    orientation: 'Module 1 calls the defensive use the strongest argument for studying any of this. This is it, cashed out.',
+    reflection: 'Think of something you were persuaded of and later reversed. What did you not ask at the time?',
+    body: [
+      { p: 'Module 1 sets out three defences of the subject and finds the third the strongest: you cannot see what is being done to you unless you know how it is done. Five modules later that comes down to a short list of things to notice.' },
+      { h: 'Four questions' },
+      { p: 'WHAT IS BEING ASKED OF ME, PLAINLY? A case that resists being reduced to a request is frequently built that way on purpose.' },
+      { p: 'WHAT WOULD I HAVE TO BELIEVE FOR THIS TO FOLLOW? That is module 1’s unstated premise, and it is where the disagreement almost always turns out to be.' },
+      { p: 'WHAT IS THE STRONGEST THING AGAINST THIS, AND DID THEY MENTION IT? Module 3 says a case caught hiding its weakness is finished. From this side, you are checking whether it was hidden.' },
+      { p: 'WHAT HAPPENS IF I SAY NO? The line from the first lesson, from the receiving end. It is the fastest of the four and usually the most informative.' },
+      { h: 'What naming a fallacy is for' },
+      { p: 'Both shelves say it at the top and it belongs here too: naming one begins an examination, it does not finish one. A named fallacy is a reason to look harder at a step, not a verdict on a conclusion, and a badly argued case can still be perfectly true.' },
+      { p: 'Used as a verdict, the shelves become the thing module 1 warns the whole subject can be, which is a way of winning without having the better case. The word for that is not scepticism.' },
+      { h: 'The defence has a cost' },
+      { p: 'Permanent suspicion is not the goal and it is not free. Somebody who has learned to see technique everywhere can become unpersuadable, which is not the same thing as being careful. It is its own error, and it makes you proof against good arguments as reliably as bad ones.' },
+      { p: 'The aim is to notice the mechanism and remain movable by a real reason. That is harder than either credulity or refusal, and it is the actual skill this module is asking for.' },
+      { h: 'The asymmetry worth remembering' },
+      { p: 'You will always be better at seeing this in other people than in yourself. Everything in this module works more reliably outward than inward, which is exactly why the last lesson is about what you owe rather than about what to watch for.' },
+    ] },
+
+  { id: 'rh-owe', module: 'ethics', order: 6,
+    title: 'What You Owe',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Take on the one obligation that comes with holding this craft, and know what to do once you have already crossed the line.',
+    orientation: 'The end of the course, and the same condition it opened with.',
+    reflection: 'Where have you already used something from this course on somebody? Would you have accepted it?',
+    body: [
+      { p: 'Six modules, and the subject does not resolve. The tools are real, they work, and they do not care who is holding them. That was module 1’s position and nothing since has improved on it.' },
+      { p: 'What can be settled is what follows for you.' },
+      { h: 'The condition' },
+      { p: 'Before You Begin states it, and the course ends where it started: whatever you learn to do to somebody, be willing to have it done to you.' },
+      { p: 'It does not decide hard cases and it is not a philosophy. It is the one thing on this shelf you can apply in a room, in the moment, at speed, without consulting anything.' },
+      { h: 'It is addressed inward, on purpose' },
+      { p: 'You cannot make other people argue honestly, and nothing in this module is leverage over them. All of it is aimed at the only speaker you control.' },
+      { p: 'That is unsatisfying and it is the truthful version. An ethics of persuasion that mainly handed you ways to accuse other people would be a sixth module doing precisely what module 1 warns this subject does.' },
+      { h: 'When you find you have crossed it' },
+      { p: 'You will, and the useful question is what to do afterwards rather than how to be certain of never doing it. Say so, to the person. A speaker who goes back to a decision and says that the case was pushed harder than it deserved gives back the exact thing that was taken, which was the chance to examine it.' },
+      { p: 'That costs less than it feels as though it will. Refusing to pay it turns one overreach into a standing position you now have to keep defending, and defending it will require more of the same.' },
+      { h: 'What the craft is for' },
+      { p: 'The honest use is simple and it is worth ending on. Most true things are not self-evident and do not arrive persuasively by themselves. Somebody has to carry them into a room where attention is short, the stakes are real, and another person is arguing the other way. That work takes skill, and without it the better case loses to the better speaker as a matter of routine.' },
+      { p: 'That is the argument for learning this. Not that the craft is neutral, which module 1 calls cold comfort and means it, but that the alternative is leaving it entirely to people who are not asking the question this module asks.' },
+      { h: 'The last thing' },
+      { p: 'This course has taught you to find arguments, to order them, to shape them and to deliver them. None of it tells you whether you are right. That was never on offer here, it is the work of a lifetime, and the only protection anybody has against becoming the second of the three speakers is the habit of going and checking.' },
     ] },
 
   { id: 'rh-notice', module: 'shape', order: 6,

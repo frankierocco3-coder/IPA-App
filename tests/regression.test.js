@@ -5216,6 +5216,73 @@ export async function run({ navDoc = document } = {}) {
       && shapeText.includes('verse and prose')
       && revSrc.includes('The Shapes of Argument') && revSrc.includes('All Fallacies')
       && SHAKESPEARE_MODULES.some(m => m.title === 'Verse and Prose'));
+
+    // ── Module 5 · Delivery (written 2026-09-29) ──
+    // Acting's Tempo-Rhythm already teaches the CRAFT of pace and pause,
+    // and teaching it again here would be the Shakespeare-rhetoric mistake
+    // repeated: one subject owned twice. So the module points instead, and
+    // a pointer is only worth anything if the thing is really called that.
+    // Everything it names is checked against the live data, not trusted.
+    const delivery = RHETORIC_LESSONS.filter(l => l.module === 'delivery');
+    const delText = JSON.stringify(delivery.map(l => l.body));
+    const namesAct = ['Tempo-Rhythm', 'Listening and Responding'];
+    check('module 5: every Acting module, chapter and page it names really exists',
+      delivery.length === 6
+      && namesAct.every(n => delText.includes(n) && ACTING_MODULES.some(m => m.title === n))
+      && delText.includes('Two Rhythms at Once')
+      && ACTING_LESSONS.some(l => l.title === 'Two Rhythms at Once')
+      && delText.includes('Warmup') && revSrc.includes('<h1>Warmup</h1>')
+      && delText.includes(RHETORIC_THRESHOLD.title),
+      namesAct.join(' · '));
+    // The division of labour is the whole reason this module is six
+    // lessons and not a voice course. If it ever starts teaching the two
+    // dials or the rest, Tempo-Rhythm has been duplicated and one of the
+    // two will drift out of date without anybody noticing which.
+    check('module 5: it points at Tempo-Rhythm rather than re-teaching it',
+      !/Two Dials|Notes and Rests|The Two Missing Speeds/.test(delText)
+      && !delivery.some(l => /^(Pace|Pause|Tempo|Rhythm)\b/.test(l.title)),
+      delivery.map(l => l.title).join(' · '));
+
+    // ── Module 6 · Honest Persuasion (written 2026-09-29) ──
+    // The course is complete at thirty-six lessons. That is a milestone and
+    // not an approval: the check below this one is the one that matters.
+    check('rhetoric: all six modules are written, thirty-six lessons, every shelf distinct',
+      RHETORIC_COLLECTIONS.length === RHETORIC_MODULES.length
+      && RHETORIC_LESSONS.length === 36
+      && new Set(RHETORIC_LESSONS.map(l => l.id)).size === 36,
+      `${RHETORIC_LESSONS.length} lessons in ${RHETORIC_COLLECTIONS.length} collections`);
+    const ethics = RHETORIC_LESSONS.filter(l => l.module === 'ethics');
+    const ethText = JSON.stringify(ethics.map(l => l.body));
+    const lineText = JSON.stringify(
+      RHETORIC_LESSONS.find(l => l.id === 'rh-line')?.body ?? '');
+    // THE LESSON AND THE PRINCIPLE MUST MOVE TOGETHER. RHETORIC_PRINCIPLE is
+    // the course's governing claim and rh-line is where it is unpacked. The
+    // principle was already revised once, for contradicting the app's own
+    // preface; if it is revised again and the lesson is not, the course
+    // states the line twice and differently, which is worse than not
+    // stating it. The three verbs are what carry it, in both places.
+    const verbs = ['examine', 'question', 'refuse'];
+    check('module 6: rh-line states the line in the same terms as the principle',
+      ethics.length === 6
+      && verbs.every(v => lineText.includes(v) && RHETORIC_PRINCIPLE.includes(v)),
+      verbs.filter(v => !lineText.includes(v)).join(',') || 'all three present');
+    // The course ends on the condition it opened with, and quotes it rather
+    // than paraphrasing it into something milder. Tied to the threshold, so
+    // that editing the condition fails here until the ending follows it.
+    const condition = 'be willing to have it done to you';
+    check('module 6: the course closes on the threshold’s own condition',
+      RHETORIC_THRESHOLD.condition.includes(condition)
+      && ethText.includes(condition)
+      && ethText.includes(RHETORIC_THRESHOLD.title),
+      condition);
+    // Ethics points at the fallacy shelves and never becomes a third one.
+    // A module that started defining named errors would be the same subject
+    // owned twice, which is what the shelves exist to prevent.
+    const fallacyTerms = [...FALLACIES, ...MODERN_FALLACIES].map(f => f.term.toLowerCase());
+    check('module 6: it points at the fallacy shelves and redefines nothing',
+      !ethics.some(l => fallacyTerms.includes(l.title.toLowerCase()))
+      && /All Fallacies|The 13 Fallacies/.test(ethText),
+      ethics.map(l => l.title).join(' · '));
   }
 
   // ── 21k. The Shakespeare course: written in part, hidden by default ──
