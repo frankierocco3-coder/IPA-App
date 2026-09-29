@@ -4536,12 +4536,20 @@ export async function run({ navDoc = document } = {}) {
       && writtenModules.length >= 2,
       `shelved: ${RHETORIC_COLLECTIONS.map(c => c.id).join(',') || 'none'}`);
     // Every written module is six lessons. Derived from the written list so
-    // that writing module 4 needs no edit here, the same way the shelf check
+    // that writing module 5 needs no edit here, the same way the shelf check
     // above derives. Every module's orders must run 1..n with no gap and no
     // repeat, or the path forks.
+    //
+    // The old form of this pinned `writtenModules.length === 3`, which
+    // contradicted the comment above it and had to be edited to write a
+    // module. What it was really protecting is the invariant below: the
+    // written modules are a PREFIX of the planned six, so a module can
+    // never be written out of order and leave a hole in the course path.
+    // That claim needs no edit and is the stronger one.
     check('rhetoric: every written module is six lessons, in order, each whole',
       RHETORIC_LESSONS.length === writtenModules.length * 6
-      && writtenModules.length === 3
+      && String(writtenModules)
+        === String(RHETORIC_MODULES.slice(0, writtenModules.length).map(m => m.id))
       && writtenModules.every(id => {
         const o = RHETORIC_LESSONS.filter(l => l.module === id).map(l => l.order);
         return o.length === 6
@@ -4953,6 +4961,53 @@ export async function run({ navDoc = document } = {}) {
       [...RHETORIC_LESSONS.map(l => JSON.stringify([l.title, l.objective, l.orientation, l.reflection, l.body])),
         JSON.stringify(RHETORIC_THRESHOLD), RHETORIC_PRINCIPLE].every(t =>
         !/\u2014|\u2013/.test(t) && !/\b\w+'(s|t|re|ve|ll|d|m)\b/.test(t)));
+
+    // \u2500\u2500 Module 4 \u00b7 The Shapes of Language (written 2026-09-29) \u2500\u2500
+    // Style is the module most at risk of quietly becoming a vocabulary
+    // list, and the two decisions that stop it being one are both claims
+    // about the SHELF rather than about the prose. Both are checkable.
+    const shapeL = RHETORIC_LESSONS.filter(l => l.module === 'shape');
+    const shapeText = JSON.stringify(shapeL.map(l => l.body)).toLowerCase();
+    const named = RHETORIC.filter(f => shapeText.includes(f.term.toLowerCase()));
+    // The module hands the reader the shelf and states its size. If a
+    // figure is ever added there, "seventeen" in the lesson becomes a false
+    // sentence, and this is the only thing that would notice.
+    check('module 4: hands over The Shapes of Argument rather than restating it',
+      shapeL.length === 6
+      && shapeText.includes('the shapes of argument')
+      && RHETORIC.length === 17 && shapeText.includes('holds seventeen')
+      // A few named in passing is teaching. Naming most of them is a second
+      // copy of the shelf, which is what this module exists not to be.
+      && named.length <= 4,
+      `figures named in module 4: ${named.map(f => f.term).join(',') || 'none'}`);
+    // rh-metaphor is a LESSON and not a pointer for exactly one reason: the
+    // shelf holds no metaphor entry and nothing else in the app teaches it.
+    // Add one to the shelf and the two overlap, and somebody has to decide
+    // which owns it. Better to fail here than to ship both.
+    check('module 4: metaphor is a lesson because the figures shelf holds none',
+      shapeL.some(l => l.id === 'rh-metaphor')
+      && !RHETORIC.some(f => /metaphor/i.test(f.term)),
+      `${RHETORIC.length} figures, none metaphor`);
+    // Module 4 was first written with \u2696\ufe0f, which is already The Shapes of
+    // Argument's tile on the SAME Library: two shelves reading as copies of
+    // each other. Every icon on that Library has to be its own.
+    const refIcons = ['col:rh-threshold', 'col:rh-figures', 'col:rh-thirteen', 'col:rh-all']
+      .map(k => (new RegExp(`${k}[\\s\\S]{0,140}?emoji: '([^']+)'`).exec(revSrc) || [])[1])
+      .filter(Boolean);
+    const allIcons = [...RHETORIC_COLLECTIONS.map(c => c.icon), ...refIcons];
+    check('rhetoric Library: no two shelves share an icon',
+      refIcons.length === 4 && new Set(allIcons).size === allIcons.length,
+      allIcons.join(' '));
+    // A pointer to a shelf that does not exist is worse than no pointer: the
+    // reader goes looking, does not find it, and concludes the app is
+    // careless. Everything module 4 sends somebody to must be findable
+    // under the name the lesson uses for it.
+    check('module 4: every shelf and module it names exists under that name',
+      shapeText.includes('the shapes of argument')
+      && shapeText.includes('all fallacies')
+      && shapeText.includes('verse and prose')
+      && revSrc.includes('The Shapes of Argument') && revSrc.includes('All Fallacies')
+      && SHAKESPEARE_MODULES.some(m => m.title === 'Verse and Prose'));
   }
 
   // ── 21k. The Shakespeare course: written in part, hidden by default ──

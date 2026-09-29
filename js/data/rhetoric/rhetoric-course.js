@@ -19,9 +19,11 @@
 // different names, on purpose.
 //
 // THE FIGURES ARE ALREADY WRITTEN. js/data/shakespeare/rhetoric.js holds
-// seventeen figures with verified examples. Module 4 teaches what a figure
-// IS and sends the reader to that shelf rather than restating it; the
-// shelf moves to this workspace when module 4 is built.
+// seventeen figures with verified examples, shelved here as The Shapes of
+// Argument since 2026-09-28. Module 4 teaches what a figure IS and sends
+// the reader to that shelf rather than restating it, which is why it is
+// six lessons and not seventeen. Note what the shelf does NOT hold:
+// metaphor, which is why rh-metaphor is a lesson rather than a pointer.
 //
 // REVIEW: every lesson here is a draft until a human records it in
 // js/data/speech/reviews.js. Required reviewer is 'rhetoric' — a
@@ -71,8 +73,8 @@ export const RHETORIC_THRESHOLD = {
   condition: 'You can skip all of it and use the shelves. The figures and the fallacies are open to anybody who opens them. But knowing how a thing works on people is not a neutral possession, and there is only one honest condition on holding it: whatever you learn to do to somebody, be willing to have it done to you.',
 };
 
-// Six modules. Modules 1, 2 and 3 are written; 4 to 6 are outlined and
-// carry no lessons yet, which is why the shelf shows three collections.
+// Six modules. Modules 1 to 4 are written; 5 and 6 are outlined and carry
+// no lessons yet, which is why the shelf shows four collections.
 // RHETORIC_COLLECTIONS filters to modules that actually have lessons, so a
 // module joins the Library by being written and never before.
 export const RHETORIC_MODULES = [
@@ -83,15 +85,17 @@ export const RHETORIC_MODULES = [
   { n: 3, id: 'invention', title: 'Finding the Argument',
     blurb: 'Where arguments come from, how they are ordered, and what counts as proof to a listener rather than to a logician.' },
   { n: 4, id: 'shape', title: 'The Shapes of Language',
-    blurb: 'Figures as structures of thought rather than ornament, and how to play one without announcing it.' },
+    blurb: 'Clarity before ornament, the level a moment can hold, and why a figure is a claim rather than a decoration.' },
   { n: 5, id: 'delivery', title: 'Delivery',
     blurb: 'The half of rhetoric that is not on the page: voice, body, pause, and the room.' },
   { n: 6, id: 'ethics', title: 'Honest Persuasion',
     blurb: 'The line between persuading somebody and working on them, and how to tell which one you are doing.' },
 ];
 
+// Module 4 is NOT ⚖️, which is The Shapes of Argument's tile on the same
+// Library. Two shelves with one icon read as a duplicate of each other.
 const SHELF_ICON = { ground: '🏛️', audience: '👂', invention: '🔎',
-  shape: '⚖️', delivery: '🗣️', ethics: '⚓' };
+  shape: '🪶', delivery: '🗣️', ethics: '⚓' };
 
 export const RHETORIC_LESSONS = [
 
@@ -498,6 +502,196 @@ export const RHETORIC_LESSONS = [
       { p: 'Sometimes there is an objection you genuinely cannot meet. Saying so costs far less than concealing it. A case with an acknowledged weakness is still a case, and listeners will weigh it. A case caught hiding one is finished, and the weakness is no longer the issue.' },
       { h: 'For an actor' },
       { p: 'A character gives themselves away by which objection they will not name. Everything they are willing to argue about is a screen in front of the one thing they are not, and an audience feels the shape of the absence long before it is spoken.' },
+    ] },
+
+  // ── Module 4 · The Shapes of Language ──────────────────────────
+  // Written 2026-09-29. This is the third canon, style, which module 1
+  // sends here.
+  //
+  // WHY IT IS SIX LESSONS AND NOT SEVENTEEN. The figures are a GLOSSARY
+  // on The Shapes of Argument, with an example each. Teaching them one per
+  // lesson would be the dullest stretch in the app, and it would teach the
+  // names rather than the craft. rh-figure teaches what a figure IS and
+  // hands the reader the shelf.
+  //
+  // WHY METAPHOR IS A LESSON AND NOT A POINTER. The shelf does not hold
+  // it. Seventeen figures, and all but a few are shapes of ARRANGEMENT;
+  // metaphor is the most consequential turn of MEANING in the language and
+  // there is nowhere else in the app it is taught.
+  //
+  // WHAT IT DELIBERATELY DOES NOT RE-TEACH. Arrangement of the whole case
+  // is module 3 (rh-order), and rh-sentence says outright that it is the
+  // same principle one scale down. Why a vivid instance beats a general
+  // figure is module 3 (rh-proof), which owns it as a question about
+  // EVIDENCE; rh-clear touches the same fact about WORDS and points there.
+  // Voice, breath, pause and the room are module 5, and rh-sentence and
+  // rh-notice both mark the border rather than starting delivery early.
+  // Named errors stay on the fallacy shelves.
+
+  { id: 'rh-clear', module: 'shape', order: 1,
+    title: 'Clarity Comes First',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Put being understood ahead of being admired, because a sentence the listener has to solve has already lost its moment.',
+    orientation: 'The tradition ranked the virtues of style, and ornament came last in the list every time.',
+    reflection: 'Find a sentence of your own you are proud of. Say it aloud to somebody outside the subject. Did they need it twice?',
+    body: [
+      { p: 'Style is the third canon: the choice of words and the shape of sentences. It has the worst reputation of the five, because it is the stage most people think rhetoric consists entirely of, and because it is the one that can be practised without having anything to say.' },
+      { p: 'The correction is to stop treating style as decoration applied to a finished argument. It is how the argument arrives, and an argument that arrives wrong has not arrived.' },
+      { h: 'The virtues, in order' },
+      { p: 'The tradition lists four qualities of good style and puts them in a sequence: correctness, clarity, appropriateness, ornament. The order is the whole teaching, and ornament is at the back of it.' },
+      { p: 'Correctness comes first for an unglamorous reason. Errors in the language your listener speaks spend credibility on nothing at all, and module 1 calls that ethos: the least interesting way to lose it is to lose it on a mistake that had no bearing on your case.' },
+      { h: 'Why clarity outranks everything after it' },
+      { p: 'A reader can go back. A listener cannot, and a listener who has stopped to work out your last sentence has missed the one you are saying now. Speech happens once, at your pace, and every obscurity costs the sentence after it as well as itself.' },
+      { p: 'So clarity in speech is not the same virtue as clarity on a page. It is a constraint on how much a single sentence may carry, and most unclear speech is not badly worded. It is overloaded.' },
+      { h: 'What obscurity is usually doing' },
+      { p: 'Three honest causes. The speaker has not finished thinking, and the sentence is doing the thinking in public. The subject is genuinely difficult and has not been broken into pieces yet. Or the sentence is carrying three claims and would be three sentences.' },
+      { p: 'And one dishonest one, which is worth naming plainly because it is common and rewarded: obscurity as a claim to depth. A sentence nobody can pin down cannot be shown to be wrong, and it borrows the authority of difficulty without doing anything difficult. It is the only failure of clarity that gets mistaken for a strength.' },
+      { h: 'Abstraction' },
+      { p: 'An abstract noun is a lid. Put one on a sentence and the listener cannot see what is inside, which is frequently the point and frequently an accident. Restructuring is not a decision, an initiative is not a thing anybody did, and a challenge is not a problem until somebody says whose.' },
+      { p: 'This is a fact about words, and it has a companion in module 3, which says the same thing about evidence: one case a listener can picture does more than a figure covering a million people. Concrete language and concrete proof are the same instinct at two different stages of the work.' },
+      { h: 'The test' },
+      { p: 'Say it to somebody who does not work in your subject, and watch for the slow nod. The slow nod is not agreement. It is a person deciding not to ask, and every one of them marks a sentence to cut or split.' },
+      { p: 'An actor has a version of the same test, and it is stricter. You cannot play a sentence you have not understood, and an audience can hear the difference between a performer who knows what a line means and one who has learnt its shape. A line you can only deliver is a line you have not read.' },
+    ] },
+
+  { id: 'rh-levels', module: 'shape', order: 2,
+    title: 'High, Middle and Plain',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Match the level of language to the occasion, the subject and the listener, because a mismatch is heard as a misjudgement about all three.',
+    orientation: 'Three registers. The skill is not managing the grand one, it is knowing what the moment can hold.',
+    reflection: 'Name a speech pitched too high for its occasion. What did the excess actually tell you about the speaker?',
+    body: [
+      { p: 'The tradition divides style into three levels, and the division survives because it describes something speakers get wrong constantly and cannot name.' },
+      { h: 'Plain' },
+      { p: 'For teaching and for proving. Short constructions, ordinary words, nothing calling attention to itself. It is not the artless level, and it is the hardest of the three to do well, because there is nothing in it to hide behind: if the thought is thin, a plain sentence shows it immediately.' },
+      { h: 'Middle' },
+      { p: 'The working register of nearly all real speech. Fuller than plain, no heat in it, pleasant enough to keep somebody listening through an explanation that has several steps. Most speech should live here and most speakers can already do it.' },
+      { h: 'Grand' },
+      { p: 'For moving people to feel something or to act. Longer sentences, stronger figures, a subject the audience already agrees is serious. It is the level everybody thinks of as rhetoric and the one that fails most visibly.' },
+      { h: 'Appropriateness decides, not taste' },
+      { p: 'The third virtue of style governs the choice, and three things set it: the occasion, which module 1 divides into decisions, judgements and praise; the subject, and specifically how grave the audience already believes it to be; and the listener, which is the whole of module 2.' },
+      { p: 'None of those is a preference. The level is not something you choose because it suits you, and a speaker with one register is not stylish. They are limited, and they will be right about one occasion in three.' },
+      { h: 'The mismatch, both directions' },
+      { p: 'Grand language on a small subject is the commoner error and the more expensive. The audience does not hear grandeur, they hear somebody who has misjudged what matters, and that judgement transfers instantly to everything else the speaker says.' },
+      { p: 'Plain language on a genuinely grave matter fails the other way, and speakers who pride themselves on plainness rarely believe it. At a funeral, in an apology, on the occasion somebody has waited years for, flatness does not read as restraint. It reads as insufficient care, which is a claim about how much the speaker minds.' },
+      { h: 'Height is spent, not held' },
+      { p: 'The grand style draws on the audience’s willingness to be moved, and that account is finite. A speech at height throughout arrives nowhere, because there is no height left to arrive at, and the audience has stopped registering the elevation by the middle.' },
+      { p: 'Which is why coming down is a technique rather than a failure of nerve. A plain sentence after a long ascent carries more weight than anything in the ascent, and it is the most reliable way in this whole subject to make one sentence land.' },
+      { h: 'For an actor' },
+      { p: 'Level is characterisation before it is style. A person who speaks in one register whatever the room is a specific person, usually one who is frightened of something; a person who moves between registers has a different kind of authority, and the movement is where it shows.' },
+      { p: 'And a character reaching for the grand style and not managing it is among the most exposed things available to play. Nothing in the words says the reach failed. Everything in the gap between the size of the sentence and the size of the speaker does.' },
+    ] },
+
+  { id: 'rh-figure', module: 'shape', order: 3,
+    title: 'What a Figure Actually Is',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Understand a figure as a shape that makes a claim, so that naming one stops being mistaken for using one.',
+    orientation: 'Not an ornament added to a sentence. A pattern that asserts something the words do not say.',
+    reflection: 'Put one sentence of your own into a shape: balance it against its opposite, or repeat its opening words. What changed in the meaning, rather than the sound?',
+    body: [
+      { p: 'The figures arrive with long Greek names and a reputation for being a vocabulary test. The Shapes of Argument, in this Library, holds seventeen of them with an example each, and that shelf is where you meet them. This lesson is about what they are, which the names conceal.' },
+      { p: 'A figure is a departure from the plainest available way of saying a thing, where the departure does work. If the plainest way would have done the same job, there is no figure, only a longer sentence.' },
+      { h: 'Two families' },
+      { p: 'The tradition separates shapes of arrangement from turns of meaning, and calls them schemes and tropes. In a shape of arrangement the words mean what they usually mean and the ORDER does the work: repetition, balance, reversal, a series. In a turn of meaning a word stops meaning itself: one thing called another, a thing overstated, a thing named as its own opposite.' },
+      { p: 'The shelf is weighted toward the first family, and it is honest about that. The most consequential member of the second is metaphor, which the shelf does not hold at all, and it has the next lesson to itself.' },
+      { h: 'The shape is the claim' },
+      { p: 'This is the part that turns a vocabulary list into a subject. A pattern asserts something that no word in the sentence states.' },
+      { p: 'Balance claims that two things are the same kind of thing and can be weighed against each other. Setting two halves in opposition claims that they genuinely are opposed, rather than merely different. Repeating the opening words of successive clauses claims the items are members of one series, of one importance, going in one direction. Three claims, none of them argued, all of them carried by the form.' },
+      { p: 'So a figure is not decoration on an argument. It is frequently the argument, delivered in a way that never has to defend itself.' },
+      { h: 'Which means a figure can lie' },
+      { p: 'A balanced sentence can hold two things that are not comparable, and the balance does the persuading before anybody examines the pair. All Fallacies has a whole family for what that produces, and this is the mechanism underneath it.' },
+      { p: 'It is also exactly what module 2 describes: a premise that is never stated is a premise that is never examined. A figure can carry the unstated step in its shape, which is more efficient than saying it and completely invisible.' },
+      { h: 'Naming is not the skill' },
+      { p: 'Being able to say that a sentence is an antimetabole is worth having for reading and worth nothing for speaking. Nobody builds a sentence by selecting a figure from a list of seventeen.' },
+      { p: 'What the shelf is for is noticing. Once you can see the shapes, you see them working on you, which is the defensive use module 1 argues is the best reason to study any of this, and a few of them settle into your hand without being chosen.' },
+      { h: 'For an actor' },
+      { p: 'The shape is the route the thought took, so the shape is evidence about the thinking. A speech in balanced pairs is a mind weighing two things and not yet done. A speech in mounting repetitions is a mind that has stopped weighing and is now driving. Neither is stated anywhere in the words, and both are on the page in the pattern.' },
+    ] },
+
+  { id: 'rh-metaphor', module: 'shape', order: 4,
+    title: 'Metaphor Is an Argument',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'See that a metaphor makes a claim about what kind of thing something is, and test that claim before using it.',
+    orientation: 'The most powerful single move in style, and the one that persuades without ever stating what it says.',
+    reflection: 'Find the metaphor inside an argument you believe. Say plainly what the comparison asserts. Does it survive being said plainly?',
+    body: [
+      { p: 'A metaphor says one thing is another. Everybody present knows it is not literally so and makes the transfer anyway, and what transfers is not a picture. It is a set of conclusions, and they arrive already agreed.' },
+      { h: 'What actually crosses over' },
+      { p: 'Call a negotiation a battle. Nothing further needs arguing: there are two sides, one of them wins, ground given is ground lost, and compromise becomes a kind of defeat. Nobody said any of that, and everybody in the room now believes it.' },
+      { p: 'Call the same negotiation a piece of building work. The conclusions invert. Both parties are working on one object, what one adds the other does not lose, and the question stops being how much to concede and becomes what to make.' },
+      { p: 'Neither is a fact about the negotiation. Both decide how the negotiation will be conducted, and they decide it before the first substantive sentence.' },
+      { h: 'It answers a question module 3 asks' },
+      { p: 'Module 3 says an argument comes to rest at the first question the two sides diverge on, and that the second of those questions is what a thing IS. A metaphor answers that question. It settles the definition, silently, and whoever set the metaphor has chosen the ground the argument will be fought on.' },
+      { p: 'This is why metaphor belongs with invention rather than with ornament, and why it is in this module under protest: it is filed as style because it is made of words, and it behaves like a premise.' },
+      { h: 'The dead ones are the strongest' },
+      { p: 'A strong economy, a broken system, the head of an organisation, a war on something. Nobody hears these as figures, which is precisely what makes them effective: a dead metaphor is a claim that has stopped being examined because it has stopped being visible.' },
+      { p: 'They are not faults. Language runs on them and speech would be unusable without them. But the ones near the centre of your own argument are worth waking up, because an assumption you inherited in a phrase is still an assumption you are asserting.' },
+      { h: 'Test your own' },
+      { p: 'Say plainly what the comparison asserts, in a sentence with no figure in it, and ask whether you would defend that sentence out loud. If the metaphor is claiming more than you would say, it is doing work you have not earned, and the audience is being asked to accept it on the strength of the phrasing.' },
+      { p: 'THE LINE IS THE SAME ONE MODULE 2 DRAWS. A metaphor that makes a true relation graspable is teaching, and it is frequently the only way a difficult thing becomes holdable at all. A metaphor that imports conclusions the speaker could not defend if they were stated is smuggling, in the most efficient form the language offers.' },
+      { h: 'Following one too far' },
+      { p: 'A metaphor extended past its use starts generating conclusions nobody meant. If the battle acquires a budget and a stakeholder, the figure has collapsed, and the audience has stopped following the argument and started watching the machinery. The repair is to stop earlier, not to build the comparison out further.' },
+      { h: 'For an actor' },
+      { p: 'A character’s metaphors are the surest evidence there is of how they see. Somebody who speaks about their family in the language of business, or their work in the language of war, or their own body as something separate that has let them down, has told you what they believe they are inside, and they have not said a word about it.' },
+      { p: 'It is available to be played and it must never be announced. The moment the performance underlines the figure, the character becomes somebody making a comparison rather than somebody for whom that is simply what the thing is.' },
+    ] },
+
+  { id: 'rh-sentence', module: 'shape', order: 5,
+    title: 'The Shape of a Sentence',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Build a sentence whose shape carries its meaning, and put the weight where you want it to fall.',
+    orientation: 'Where the important word sits, and how long the listener is made to wait for it.',
+    reflection: 'Take your most important sentence and move its key word to the end. Read both aloud. Which one lands?',
+    body: [
+      { p: 'Module 3 was the order of the arguments. This is the order inside one sentence, which is the same principle one scale down, and it is the scale at which most speakers have never made a decision at all.' },
+      { h: 'Two shapes' },
+      { p: 'A suspended sentence withholds its completion: the listener cannot know what is being said until the final clause arrives, and the meaning of everything before it is provisional until then. A running sentence states its point and then adds to it, so the listener has the claim early and the rest accumulates.' },
+      { p: 'Suspension buys attention and spends goodwill. It is a small demand made of the listener, and it pays only if the ending justifies the wait. A running sentence is easier to follow, harder to make memorable, and the right default for anything complicated.' },
+      { h: 'The end of a sentence is the strongest position' },
+      { p: 'Whatever sits last is what the listener carries. The opening is second strongest, and the middle is where things go to be unnoticed, which is worth knowing in both directions: it is where a qualification goes when you want it heard less, and noticing that in somebody else’s sentence is the defensive skill.' },
+      { p: 'Most weak sentences are weak because the important word is in the middle and something procedural is at the end. The repair is not more words. It is moving one.' },
+      { h: 'Length is a rhythm, and sameness is silence' },
+      { p: 'A run of sentences of the same length stops being heard as sentences at all. It becomes a texture, and the listener’s attention drifts off it without any single sentence being at fault.' },
+      { p: 'So a short sentence after three long ones is emphasis that costs nothing and needs no figure. This is the cheapest technique in the module and the most reliable.' },
+      { h: 'Why three' },
+      { p: 'Two items read as a comparison, and the listener weighs them against each other. Four or more read as a list, and the listener stops attending to the members. Three reads as complete, which is why the series of three is the most heavily used shape in English public speech. It is on the shelf as tricolon, and the reason it works is arithmetic about attention rather than magic about the number.' },
+      { h: 'This is the page, not the room' },
+      { p: 'Breath, pause and pace are module 5, and they are half of whether a sentence arrives. They can support a shape or fight it, and they cannot rescue a sentence whose weight is in the wrong place. Composition first, because delivery has nothing to work with otherwise.' },
+      { h: 'For an actor' },
+      { p: 'The shape of a sentence is written instruction about the thought, and the suspended sentence is the clearest case. It cannot be played by somebody who knows how it ends, because the character does not: they are assembling it as they speak, the delay is the event, and an actor who has decided the destination in advance flattens the only thing happening.' },
+      { p: 'Verse makes the same demand with a metre instead of a clause, which is what the Verse and Prose module in the Shakespeare course is about. The instruction is identical: the shape tells you where the thought was still moving.' },
+    ] },
+
+  { id: 'rh-notice', module: 'shape', order: 6,
+    title: 'Using One Without Announcing It',
+    attribution: 'Speechcraft original',
+    requiredReviewer: 'rhetoric',
+    objective: 'Decide whether a figure should be noticed, because a shape the listener sees as technique stops arguing and starts advertising.',
+    orientation: 'The same figure can be invisible or ceremonial. Which one it is depends on whether the occasion licenses the display.',
+    reflection: 'Think of a speech where you noticed the technique. What did noticing do to your trust in the speaker?',
+    body: [
+      { p: 'The moment a listener thinks that was well put, their attention has moved from the argument to the speaker, and the argument is standing still waiting for them to come back. Sometimes that trade is worth making. Most of the time it is a loss, and it is a loss the speaker never sees, because from the inside it feels like the line went well.' },
+      { h: 'What makes a figure visible' },
+      { p: 'Density, first: one is a sentence, three in a row is a style, and a style is a thing the audience is now watching. Second, disproportion, which is the level-of-style error from earlier in this module in miniature: a grand shape on a small point announces itself by being too large for what it carries. Third, and least under your control, a shape the audience has heard used to sell things. Some patterns have been spent by advertising and cannot be borrowed back.' },
+      { h: 'When you want it seen' },
+      { p: 'Some occasions license visible artifice and some require it. Module 1 calls them epideictic: the toast, the eulogy, the tribute, the award. The audience has come partly for the language, everybody present knows the speech was written, and plainness there does not read as honesty. It reads as insufficient care.' },
+      { p: 'Ceremony is the place a figure is supposed to show. The mistake is carrying the ceremonial register into the other two occasions, where it does something close to the opposite.' },
+      { h: 'When it costs you' },
+      { p: 'In speech about a decision, and in speech about what somebody did, visible artifice raises a question the speaker cannot answer: what is it for. A listener who has just admired a sentence begins wondering why that sentence needed to be admirable, and suspicion of technique is the one defence almost every audience has, whatever else they know about rhetoric.' },
+      { h: 'One at a time, on the sentence that matters' },
+      { p: 'The economy is the same as the grand style earlier in this module. Attention spent on a minor point is not available later, and the commonest waste in prepared speech is the best shape in it landing on the third least important claim. Find the sentence the whole case rests on, and let that one have the shape.' },
+      { h: 'The honest reason, which is not an aesthetic one' },
+      { p: 'A listener who is admiring is not examining. That is the entire problem, and it is the condition this course was opened with: what distinguishes honest persuasion is what the listener is left able to do. A figure that dazzles and moves on quickly has taken the examining away, and it is the exact accusation module 6 has to answer.' },
+      { h: 'The test on the page' },
+      { p: 'Read the sentence and ask whether a person in that situation could plausibly have said it that way. A shape only a prepared speaker could have produced announces the preparation, and announcing the preparation is how a speech stops being addressed to anybody.' },
+      { h: 'For an actor' },
+      { p: 'A character using a figure is using it for a reason inside the scene, and the reason is never that the writer liked the shape. Somebody who has clearly prepared their sentences is a specific person in a specific state, and frequently one who is frightened of what happens if they improvise.' },
+      { p: 'The danger is presenting the figure. Presenting it tells the audience the speaker is performing rather than arguing, and if that is not true of the character, it is not the character showing. It is the actor.' },
     ] },
 
 ];
