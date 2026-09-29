@@ -4768,6 +4768,43 @@ export async function run({ navDoc = document } = {}) {
     const rSrc = await viewSource();
     check('rhetoric: the course flag is distinct from the reading-pathway flag',
       /RHETORIC_COURSE_LIVE/.test(rSrc) && /const RHETORIC_LIVE = false;/.test(rSrc));
+    // NAME THE MOVE (owner order 2026-09-29), the first Rhetoric exercise.
+    // Three decks, one per shelf, every round built from an entry's own
+    // example. What is pinned is the honesty envelope, because that is what
+    // is easy to lose: it may tally, since the answer is objectively right
+    // or wrong, and it must NOT award XP, take a heart, write to storage or
+    // drop the awaiting-review line while the material is unreviewed.
+    const drillSrc = await viewSource();
+    const drillFn = drillSrc.slice(drillSrc.indexOf('const RHET_DECKS'),
+      drillSrc.indexOf('// \u2500\u2500 Before You Begin'));
+    check('drill: three decks, one per shelf, drawn from the shelves themselves',
+      /thirteen:[\s\S]{0,200}FALLACIES\.map/.test(drillFn)
+      && /all:[\s\S]{0,200}MODERN_FALLACIES\.map/.test(drillFn)
+      && /figures:[\s\S]{0,200}RHETORIC\.map/.test(drillFn)
+      && /const RHET_ROUNDS = 8/.test(drillFn));
+    check('drill: nothing scored beyond the page — no XP, no hearts, no storage',
+      !/addXp|awardXp|markDone|completeLesson|loseHeart|hearts|localStorage|metaSet|recordAttempt/
+        .test(drillFn),
+      (drillFn.match(/addXp|awardXp|loseHeart|hearts|localStorage|recordAttempt/g) ?? []).join(' '));
+    check('drill: it says the material is unreviewed, like the shelves it drills',
+      /has not been checked by a qualified rhetoric reader/.test(drillFn));
+    // A round is only a test if the wrong answers are plausible, so the
+    // distractors come from the answer's own group before anywhere else.
+    check('drill: distractors are neighbours first, not a category giveaway',
+      /e\.peer === answer\.peer/.test(drillFn) && /e\.peer !== answer\.peer/.test(drillFn));
+    // Every deck entry must actually have an example, or a round renders an
+    // empty quotation and the answer becomes unguessable.
+    check('drill: every entry a deck can draw carries an example',
+      FALLACIES.every(f => f.examples?.[0]?.text?.trim())
+      && MODERN_FALLACIES.every(f => f.examples?.[0]?.text?.trim())
+      && RHETORIC.every(r => r.examples?.[0]?.text?.trim()));
+    // Practice said no exercise existed. That line was true and is not.
+    check('drill: Rhetoric Practice offers it and no longer says none exists',
+      /data-deck=/.test(drillSrc)
+      && !/No exercise has been built for this course yet, and inventing one/.test(
+        drillSrc.slice(drillSrc.indexOf('function rhetoricPracticePane'),
+          drillSrc.indexOf('function rhetoricPracticePane') + 1400)));
+
     // THE THRESHOLD (owner order 2026-09-29). Three speakers, both
     // directions of emotion, and the condition on using the shelves. It is
     // NOT a lesson and must never become one: no objective, no reflection,

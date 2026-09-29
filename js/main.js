@@ -4603,6 +4603,130 @@ function setRhetoricPreview(on) {
 // exercises to fill a screen. Without these, both sections would fall
 // through to the accent panes and show a learner vowel drills inside a
 // course about persuasion.
+// ── Name the Move: the first Rhetoric exercise ──────────────────
+// Owner order 2026-09-29. Practice said outright that no exercise had been
+// built, which was honest and was the gap between a library and a course.
+//
+// WHAT IT DRILLS, and why this one and not something larger: recognising a
+// move from an example is the single thing all three shelves are FOR. It
+// also has an objectively correct answer, which is the app's own condition
+// for tallying anything (interpretive work is completion-only everywhere
+// else, and nothing here asks a learner what a passage means).
+//
+// NOTHING IS SCORED BEYOND THE SESSION. No XP, no hearts, no storage, no
+// analytics. The content is unreviewed, so the drill carries the same
+// awaiting-review line the shelves do: practising against material nobody
+// qualified has checked is fine as long as it never pretends otherwise.
+//
+// The distractors come from the same group as the answer, so a round is a
+// real discrimination between neighbours rather than a category guess.
+const RHET_DECKS = {
+  thirteen: {
+    title: 'The Thirteen Fallacies', icon: '🧩',
+    entries: () => FALLACIES.map(f => ({ ...f, peer: f.group })),
+    reveal: f => [['What it hides', f.overlook], ['Ask', f.ask]],
+    shelf: renderFallacyShelf,
+  },
+  all: {
+    title: 'All Fallacies', icon: '🧭',
+    entries: () => MODERN_FALLACIES.map(f => ({ ...f, peer: f.family })),
+    reveal: f => [['What it hides', f.overlook], ['Ask', f.ask]],
+    shelf: renderFamilyShelf,
+  },
+  figures: {
+    title: 'The Figures', icon: '⚖️',
+    entries: () => RHETORIC.map(r => ({ ...r, peer: 'figure' })),
+    reveal: r => [['What it does', r.effect]],
+    shelf: renderRhetoricShelf,
+  },
+};
+const RHET_ROUNDS = 8;
+
+const rhetShuffle = a => a.map(x => [Math.random(), x]).sort((p, q) => p[0] - q[0]).map(x => x[1]);
+
+function rhetoricDrillSession(deckId) {
+  const deck = RHET_DECKS[deckId];
+  const all = deck.entries().filter(e => e.examples?.[0]?.text);
+  return {
+    deckId, deck, score: 0, index: 0,
+    queue: rhetShuffle(all).slice(0, Math.min(RHET_ROUNDS, all.length)),
+    pool: all,
+  };
+}
+
+function renderRhetoricDrill(deckId) {
+  const s = rhetoricDrillSession(deckId);
+  record(() => renderRhetoricDrill(deckId));
+  rhetoricDrillRound(s);
+}
+
+function rhetoricDrillRound(s) {
+  if (s.index >= s.queue.length) return rhetoricDrillResults(s);
+  const answer = s.queue[s.index];
+  // Neighbours first: a round is only a test if the wrong answers are
+  // plausible. Falls back to the rest of the deck where a group is small.
+  const near = s.pool.filter(e => e.id !== answer.id && e.peer === answer.peer);
+  const far = s.pool.filter(e => e.id !== answer.id && e.peer !== answer.peer);
+  const wrong = [...rhetShuffle(near), ...rhetShuffle(far)].slice(0, 3);
+  const choices = rhetShuffle([answer, ...wrong]);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar(`${s.deck.icon} Name the Move`, '#8a6d3b')}
+    <main class="guide">
+      <p class="pane-note">${esc(s.deck.title)} · ${s.index + 1} of ${s.queue.length}</p>
+      <h1 class="prompt">Which one is this?</h1>
+      <p class="lex-eg">“${esc(answer.examples[0].text)}”</p>
+      <div class="choices" id="choices">
+        ${choices.map((c, i) => `
+          <button class="btn choice" data-i="${i}" type="button">
+            <span class="choice-label">${esc(c.term)}</span>
+          </button>`).join('')}
+      </div>
+      <div id="rh-reveal"></div>
+    </main>`;
+  wireBrandHome();
+  app.querySelectorAll('.choice').forEach(btn => btn.addEventListener('click', () => {
+    if (document.getElementById('rh-reveal').childElementCount) return;
+    const chosen = choices[+btn.dataset.i];
+    const ok = chosen.id === answer.id;
+    app.querySelectorAll('.choice').forEach(b => { b.disabled = true; });
+    btn.classList.add(ok ? 'good' : 'bad');
+    if (ok) s.score++;
+    document.getElementById('rh-reveal').innerHTML = `
+      <section class="br-reveal ${ok ? 'good' : 'bad'}" role="status" aria-label="Answer">
+        <p class="br-verdict"><strong>${ok ? 'Yes.' : 'Not this one.'}</strong> ${esc(answer.term)}</p>
+        <p class="guide-note">${esc(answer.what)}</p>
+        ${s.deck.reveal(answer).filter(([, v]) => v).map(([label, v]) =>
+          `<p class="guide-note"><b>${esc(label)}:</b> ${esc(v)}</p>`).join('')}
+        <button class="btn continue" id="rh-continue" type="button">Continue</button>
+      </section>`;
+    const cont = document.getElementById('rh-continue');
+    cont.addEventListener('click', () => { s.index++; rhetoricDrillRound(s); });
+    cont.focus();
+  }));
+}
+
+function rhetoricDrillResults(s) {
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar(`${s.deck.icon} Name the Move`, '#8a6d3b')}
+    <main class="guide">
+      <h1>${s.score} of ${s.queue.length}</h1>
+      <p class="guide-text">Naming a move is where it starts and not where it ends. What the shelf
+        is for is the line under each one: what it does to somebody listening, and the question
+        that catches it.</p>
+      <p class="pane-note pane-caveat">Nothing here is stored or scored beyond this page, and the
+        material has not been checked by a qualified rhetoric reader.</p>
+      <div class="practice-row">
+        <button class="btn btn-primary" id="rh-again" type="button">Again</button>
+        <button class="btn btn-lite" id="rh-shelf" type="button">Open ${esc(s.deck.title)}</button>
+      </div>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('rh-again').addEventListener('click', () => renderRhetoricDrill(s.deckId));
+  document.getElementById('rh-shelf').addEventListener('click', () => navTo(s.deck.shelf));
+}
+
 // ── Before You Begin: the Rhetoric threshold ────────────────────
 // Owner order 2026-09-29. The warning he described from the start: three
 // speakers, the difference between emotion that carries knowledge and
@@ -4669,17 +4793,20 @@ function renderRhetoricThreshold() {
 function rhetoricPracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Rhetoric Practice</h1>
-    <!-- This line carried an internal changelog note, "(owner order
-         2026-09-28)", on a learner-facing page, and a hardcoded claim about
-         which modules were written that went stale the day module 2 was.
-         Both are gone: production notes belong in source control, and a
-         count belongs to the records that hold it. -->
-    <p class="pane-note">No exercise has been built for this course yet, and inventing one to fill the page would be worse than saying so. Everything there is to read is in the Library, in one place rather than split across three sections, so this page sends you there.</p>
+    <p class="pane-note">One exercise so far. It drills the thing all three shelves are for: naming a move from an example, then reading what it does to whoever is listening. Nothing is scored beyond the page, and the material has not been checked by a qualified rhetoric reader.</p>
+    ${Object.entries(RHET_DECKS).map(([id, d]) => `
+      <button class="track-card hub-card" data-deck="${esc(id)}" type="button">
+        <div class="track-glyph">${d.icon}</div>
+        <div class="track-info"><h2>Name the Move</h2><p>${esc(d.title)} · ${RHET_ROUNDS} rounds</p></div>
+        <div class="track-arrow">›</div>
+      </button>`).join('')}
     <button class="track-card hub-card" id="rhp-library" type="button">
       <div class="track-glyph">🏛️</div>
       <div class="track-info"><h2>Rhetoric Library</h2><p>The reading, the figures, the thirteen fallacies and all forty, in one place.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
+  el.querySelectorAll('[data-deck]').forEach(b =>
+    b.addEventListener('click', () => navTo(() => renderRhetoricDrill(b.dataset.deck))));
   el.querySelector('#rhp-library').addEventListener('click', () => goSection('library'));
 }
 
