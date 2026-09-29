@@ -166,7 +166,7 @@ export const MODERN_FALLACIES = [
     overlook: 'That a real proof succeeded at the wrong target.',
     ask: 'What was the claim, and is this a proof of THAT?',
     alsoAristotle: 'FA-009',
-    note: 'This IS Aristotle’s ignoratio elenchi under its modern name, and he treats it as the general case that several of the others are species of. Defined once, on the Thirteen shelf.',
+    note: 'This IS Aristotle’s ignoratio elenchi under its modern name, and he treats it as the general case that several of the others are species of. Defined once, on The 13 Fallacies.',
     examples: [
       { text: 'You say this bill will not reduce burglary. I have shown you, at length and with figures, that burglary is a serious problem in this city.' },
     ] },
@@ -208,7 +208,7 @@ export const MODERN_FALLACIES = [
     overlook: 'The circle, when it is wide enough that the beginning and the end look like different sentences.',
     ask: 'Is there independent support here, or is the conclusion restated in other words?',
     alsoAristotle: 'FA-010',
-    note: 'Aristotle’s petitio principii, unchanged. Defined once, on the Thirteen shelf. Note the modern drift: in ordinary speech the phrase now usually means “raises the question”, which is not this.',
+    note: 'Aristotle’s petitio principii, unchanged. Defined once, on The 13 Fallacies. Note the modern drift: in ordinary speech the phrase now usually means “raises the question”, which is not this.',
     examples: [
       { text: 'We know the witness is reliable, because she would not say a thing like that unless it were true. And we know she would not say it unless it were true, because she is reliable.' },
     ] },

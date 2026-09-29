@@ -2,7 +2,7 @@
 //
 // A GLOSSARY, not seventeen lessons: seventeen lessons on figures of
 // speech would be the dullest part of the app. Written for the Shakespeare
-// course, which no longer owns it; the shelf is The Figures, in the
+// course, which no longer owns it; the shelf is The Shapes of Argument, in the
 // Rhetoric Library, since 2026-09-28.
 //
 // ── Entry shape ───────────────────────────────────────────────

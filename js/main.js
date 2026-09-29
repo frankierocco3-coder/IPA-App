@@ -4622,7 +4622,7 @@ function setRhetoricPreview(on) {
 // real discrimination between neighbours rather than a category guess.
 const RHET_DECKS = {
   thirteen: {
-    title: 'The Thirteen Fallacies', icon: '🧩',
+    title: 'The 13 Fallacies', icon: '🧩',
     entries: () => FALLACIES.map(f => ({ ...f, peer: f.group })),
     reveal: f => [['What it hides', f.overlook], ['Ask', f.ask]],
     shelf: renderFallacyShelf,
@@ -4634,7 +4634,7 @@ const RHET_DECKS = {
     shelf: renderFamilyShelf,
   },
   figures: {
-    title: 'The Figures', icon: '⚖️',
+    title: 'The Shapes of Argument', icon: '⚖️',
     entries: () => RHETORIC.map(r => ({ ...r, peer: 'figure' })),
     reveal: r => [['What it does', r.effect]],
     shelf: renderRhetoricShelf,
@@ -4782,7 +4782,7 @@ function renderRhetoricThreshold() {
   record(renderRhetoricThreshold);
   stopSpeech();
   app.innerHTML = `
-    ${pageTopbar('⚖️ ' + esc(RHETORIC_THRESHOLD.title), '#8a6d3b')}
+    ${pageTopbar('🚪 ' + esc(RHETORIC_THRESHOLD.title), '#8a6d3b')}
     <main class="guide">
       <h1>${esc(RHETORIC_THRESHOLD.title)}</h1>
       ${rhetoricThresholdHtml()}
@@ -4861,9 +4861,9 @@ function renderFallacyShelf() {
   stopSpeech();
   fallQuery = '';
   app.innerHTML = `
-    ${pageTopbar('🧩 The Thirteen Fallacies', '#8a6d3b')}
+    ${pageTopbar('🧩 The 13 Fallacies', '#8a6d3b')}
     <main class="guide">
-      <h1>The Thirteen Fallacies</h1>
+      <h1>The 13 Fallacies</h1>
       <p class="guide-text">A figure is a shape that makes an argument land. A fallacy is a shape
         that makes a bad argument look like a good one. Same craft, opposite direction, which is
         why these are on their own shelf.</p>
@@ -5015,7 +5015,7 @@ function rhetoricLibraryPane(el) {
   const cards = [
     // First, and before the course: the condition on using any of it. This
     // is the permanent door to the overlay shown once on a first visit.
-    { key: 'col:rh-threshold', tone: 'is-sage', emoji: '⚖️', title: RHETORIC_THRESHOLD.title,
+    { key: 'col:rh-threshold', tone: 'is-sage', emoji: '🚪', title: RHETORIC_THRESHOLD.title,
       group: G1,
       keywords: 'threshold warning ethics three speakers emotion knowledge manipulation responsibility before you begin',
       go: renderRhetoricThreshold },
@@ -5028,11 +5028,11 @@ function rhetoricLibraryPane(el) {
       // about Rhetoric since the workspace was added.
       go: () => renderActingCollection(c.id),
     })),
-    { key: 'col:rh-figures', tone: 'is-terracotta', emoji: '⚖️', title: 'The Figures',
+    { key: 'col:rh-figures', tone: 'is-terracotta', emoji: '⚖️', title: 'The Shapes of Argument',
       group: G2, count: RHETORIC.length, unit: 'figure',
       keywords: 'antithesis anaphora chiasmus tricolon device shape of thought repetition',
       go: renderRhetoricShelf },
-    { key: 'col:rh-thirteen', tone: 'is-lavender', emoji: '🧩', title: 'The Thirteen Fallacies',
+    { key: 'col:rh-thirteen', tone: 'is-lavender', emoji: '🧩', title: 'The 13 Fallacies',
       group: G2, count: FALLACIES.length, unit: 'fallacy',
       keywords: 'aristotle sophistical refutations equivocation amphiboly accident consequent classical',
       go: renderFallacyShelf },
@@ -5150,7 +5150,7 @@ function shakespeareStudioPane(el) {
   const cards = [
     { icon: '📜', title: 'Shakespeare’s Sonnets', go: renderSonnetList },
     // Rhetoric is gone from this workspace (owner order 2026-09-28). The
-    // figures are The Figures, in the Rhetoric Library, which owns them.
+    // figures are The Shapes of Argument, in the Rhetoric Library.
     { icon: '🎭', title: 'Shakespeare’s Scenes', go: () => renderScenesShelf('Shakespeare') },
     { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
   ];
@@ -6874,7 +6874,7 @@ function renderShakespeareLexicon() {
 }
 
 
-// ── The Figures: seventeen shapes, on a shelf ───────────────────
+// ── The Shapes of Argument: seventeen figures, on a shelf ───────
 //
 // Called Shakespeare's Rhetoric, and owned by the Shakespeare course, until
 // 2026-09-28: the owner took rhetoric out of Shakespeare, so the shelf
@@ -6919,9 +6919,9 @@ function renderRhetoricShelf() {
   stopSpeech();
   rhetQuery = '';
   app.innerHTML = `
-    ${pageTopbar('⚖️ The Figures', '#8a6d3b')}
+    ${pageTopbar('⚖️ The Shapes of Argument', '#8a6d3b')}
     <main class="guide">
-      <h1>The Figures</h1>
+      <h1>The Shapes of Argument</h1>
       <p class="guide-text">A speech is a structure built to do something to another person.
         These are the shapes it is built from. The line under each one is what matters:
         not what the figure is called, but what it does to whoever is listening.</p>

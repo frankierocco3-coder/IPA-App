@@ -8,7 +8,7 @@
 // rhetoric from shakespeare"). It was module 6, three lessons and a shelf.
 // Rhetoric is its own workspace now, and a Rhetoric module inside
 // Shakespeare taught one subject twice under two owners. The seventeen
-// figures survive whole as The Figures in the Rhetoric Library; only the
+// figures survive whole as The Shapes of Argument in the Rhetoric Library; only the
 // Shakespeare doors to them are gone.
 //
 // RETIRED IDS, NEVER TO BE REUSED: sh-speechaction, sh-shapes,

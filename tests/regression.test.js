@@ -4624,7 +4624,7 @@ export async function run({ navDoc = document } = {}) {
       String((faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length));
     check('fallacies: the shelf is reachable and is a reference, not a lesson',
       /function renderFallacyShelf\(\)/.test(faSrc)
-      && /The Thirteen Fallacies/.test(faSrc)
+      && /The 13 Fallacies/.test(faSrc)
       && !/renderFallacyShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/.test(faSrc.slice(faSrc.indexOf('function renderFallacyShelf'))));
     check('fallacies: house style holds on our prose, examples exempt',
       FALLACIES.flatMap(f => [f.what, f.note]).every(t2 =>
@@ -5063,13 +5063,13 @@ export async function run({ navDoc = document } = {}) {
     // The note is the reason the shelf exists: it must be about EFFECT.
     const shSrc = await viewSource();
     // Owner order 2026-09-28: rhetoric is out of Shakespeare. The shelf is
-    // The Figures now, it is opened from the Rhetoric Library, and the
+    // The Shapes of Argument now, opened from the Rhetoric Library, and the
     // Shakespeare-branded name is gone from the whole view layer. It is
     // still pinned as REACHABLE, because a shelf nothing opens is the worst
     // state for written content and this move is exactly how that happens.
     check('figures: the shelf is reachable from Rhetoric, and Shakespeare no longer owns it',
       shSrc.includes('function renderRhetoricShelf()')
-      && shSrc.includes("title: 'The Figures'")
+      && shSrc.includes("title: 'The Shapes of Argument'")
       && !shSrc.includes('Shakespeare\u2019s Rhetoric'));
   }
 

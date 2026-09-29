@@ -453,7 +453,7 @@ def main():
         # started teaching one school as fact.
         if "very largely not the author" not in sh_src:
             fail("lesson 5.3 stopped saying the Folio typography is not the author's")
-    # The Figures: a glossary, deliberately not seventeen lessons. It lives
+    # The Shapes of Argument: a glossary, deliberately not seventeen lessons. It lives
     # in the Rhetoric Library since 2026-09-28; the data file keeps its path
     # under shakespeare/ because moving a file renames nothing worth the
     # churn, and the ids are RH-### either way.
@@ -472,8 +472,8 @@ def main():
         # is the worst state for it, and a move is how that happens.
         if "Shakespeare’s Rhetoric" in views_js:
             fail("the retired name Shakespeare's Rhetoric is back on a learner surface")
-        if "title: 'The Figures'" not in views_js:
-            fail("The Figures lost the Library card that opens it")
+        if "title: 'The Shapes of Argument'" not in views_js:
+            fail("The Shapes of Argument lost the Library card that opens it")
 
     # 6m: the three-workspace IA (2026-08-13)
     for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:
