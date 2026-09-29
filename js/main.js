@@ -6697,14 +6697,18 @@ const RHETORIC_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric reader
 
 let rhetQuery = '';
 
+// Two labelled fields, the rhetorical one first (owner order 2026-09-29).
+// They were one paragraph that led with the acting, which is what the shelf
+// inherited from the Shakespeare course. Same .lex-label the fallacy shelves
+// and the Dictionary use, so a reader can scan for one and skip the other.
 function rhetoricRowHtml(r) {
   return `
     <article class="lex-row">
       <h3 class="lex-term">${esc(r.term)}</h3>
       <p class="lex-modern">${esc(r.what)}</p>
-      <p class="lex-note">${esc(r.note)}</p>
-      ${r.examples.map(x => `
-        <p class="lex-eg">“${esc(x.text)}”<span class="lex-src">${esc(x.source)}</span></p>`).join('')}
+      <p class="lex-note"><span class="lex-label">Rhetorical effect</span>${esc(r.effect)}</p>
+      <p class="lex-note"><span class="lex-label">In performance</span>${esc(r.performance)}</p>
+      ${r.examples.map(egHtml).join('')}
     </article>`;
 }
 
@@ -6731,7 +6735,7 @@ function renderRhetoricShelf() {
   const draw = () => {
     const q = rhetQuery.trim().toLowerCase();
     const hits = q
-      ? RHETORIC.filter(r => [r.term, r.what, r.note,
+      ? RHETORIC.filter(r => [r.term, r.what, r.effect, r.performance,
           ...r.examples.flatMap(x => [x.text, x.source])]
           .some(f => String(f ?? '').toLowerCase().includes(q)))
       : RHETORIC;

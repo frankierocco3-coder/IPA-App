@@ -4949,8 +4949,13 @@ export async function run({ navDoc = document } = {}) {
     // many on the page. The one kept is the strongest on teaching grounds,
     // which is sometimes ours and sometimes the best-known instance in
     // English, so the mix of inApp and cited is deliberate and uneven.
-    check('rhetoric: every figure carries a definition, an effect and one example',
-      RHETORIC.every(r => r.term && r.what?.trim() && r.note?.trim()
+    // TWO fields since 2026-09-29, and the split is the point: `effect` is
+    // what the figure does to a listener, `performance` is how somebody
+    // might embody it. Pinned as BOTH present and `note` as gone, so the
+    // acting half cannot quietly reabsorb the rhetorical one.
+    check('rhetoric: every figure carries a definition, an effect, a performance note and one example',
+      RHETORIC.every(r => r.term && r.what?.trim()
+        && r.effect?.trim() && r.performance?.trim() && r.note === undefined
         && r.examples?.length === 1
         && r.examples.every(x => x.text?.trim() && x.source?.trim())));
     // Build the corpus the same way the reader can: sonnets plus scenes.
@@ -4984,7 +4989,7 @@ export async function run({ navDoc = document } = {}) {
       !/Churchill|Martin Luther King|King, 1963/i.test(rhCites));
     // House style applies to OUR prose, never to the quotations, which
     // keep the edition's own punctuation including its em dashes.
-    const rhProse = RHETORIC.flatMap(r => [r.what, r.note]);
+    const rhProse = RHETORIC.flatMap(r => [r.what, r.effect, r.performance]);
     check('rhetoric: house style holds on our prose, and quotations are exempt',
       rhProse.every(t2 => !/[\u2014\u2013"]/.test(t2)
         && !/n\u2019t\b|\u2019(re|ll|ve|m|d)\b/.test(t2)
