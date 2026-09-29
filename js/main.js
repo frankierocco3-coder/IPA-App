@@ -111,7 +111,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -4992,18 +4992,21 @@ function renderFamilyShelf() {
 function rhetoricStudioPane(el) {
   el.innerHTML = `
     <div class="ws-head"><h1 class="page-h">Studio</h1>
-      <p class="ws-sub">Paste a speech, a debate, an interview or a scene into Custom Work, then take it apart. Your answers save as you type and stay on this device.</p></div>
+      <p class="ws-sub">${RHETORIC_WORKSHEET_LIVE
+        ? 'Paste a speech, a debate, an interview or a scene into Custom Work, then take it apart. Your answers save as you type and stay on this device.'
+        : 'A speech of your own is the studio work this course is heading toward. For now, paste one into Custom Work. The reference shelves are in the Library, which is where reading belongs.'}</p></div>
+    ${RHETORIC_WORKSHEET_LIVE ? `
     <button class="track-card hub-card" id="rhs-take" type="button">
       <div class="track-glyph">⚖️</div>
       <div class="track-info"><h2>Take a Speech Apart</h2><p>Eight parts, on one of your own texts. Saved.</p></div>
       <div class="track-arrow">›</div>
-    </button>
+    </button>` : ''}
     <button class="track-card hub-card" id="rhs-custom" type="button">
       <div class="track-glyph">🎬</div>
       <div class="track-info"><h2>Custom Work</h2><p>Your texts, private to this device.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
-  el.querySelector('#rhs-take').addEventListener('click', () => navTo(renderRhetoricPicker));
+  el.querySelector('#rhs-take')?.addEventListener('click', () => navTo(renderRhetoricPicker));
   el.querySelector('#rhs-custom').addEventListener('click', () => navTo(renderCustomWork));
 }
 

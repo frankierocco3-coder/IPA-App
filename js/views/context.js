@@ -161,6 +161,18 @@ export const shakespeareOpen = () => SHAKESPEARE_LIVE || shakespearePreview();
 // took. Module 1 is written; modules 2 to 6 are outlined and empty, so
 // the course cannot stand alone yet and must not reach a learner.
 export const RHETORIC_COURSE_LIVE = true;
+
+// The saved eight-part worksheet, Take a Speech Apart. WITHDRAWN by owner
+// order 2026-09-29, the same day it was built, and withdrawn rather than
+// deleted because the kill switch in this app is a flag: the questions,
+// the store mode, the picker and the screen are all whole behind it, and
+// flipping this one line brings the door back.
+//
+// The data layer stays live on purpose and is safe either way. The key
+// shape for existing dissections is untouched, and the delete cascade
+// covering every mode is a fix worth keeping whether or not a learner can
+// ever write a rhetoric worksheet.
+export const RHETORIC_WORKSHEET_LIVE = false;
 export const RHETORIC_PREVIEW_KEY = 'speechcraft-rhetoric-preview';
 export const rhetoricPreview = () => {
   try { return localStorage.getItem(RHETORIC_PREVIEW_KEY) === 'on'; } catch { return false; }

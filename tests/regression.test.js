@@ -4827,12 +4827,31 @@ export async function run({ navDoc = document } = {}) {
       // Deleting a project has to take EVERY mode's worksheet with it. The
       // key is an exact-match index, so a mode the cascade does not name is
       // simply left behind, which is silent and permanent.
+      // WITHDRAWN by owner order 2026-09-29, behind a flag rather than
+      // deleted, the way Speech and Dialect in Action are. So the pin is
+      // the withdrawal AND the wholeness: the flag is off, no door appears
+      // in the Studio, and every piece behind it is still there, because a
+      // kill switch that quietly rots what it hides is not a kill switch.
       const wsSrc = await viewSource();
-      check('worksheet: the Studio offers it, and the picker is honest when empty',
-        /function renderRhetoricPicker/.test(wsSrc)
-        && /Take a Speech Apart/.test(wsSrc)
+      const ctxW = await import('../js/views/context.js');
+      check('worksheet: withdrawn behind a flag, and whole behind it',
+        ctxW.RHETORIC_WORKSHEET_LIVE === false
+        && /function renderRhetoricPicker/.test(wsSrc)
         && /No texts saved yet/.test(wsSrc)
-        && /renderDissect\(b\.dataset\.proj, 'rhetoric'\)/.test(wsSrc));
+        && /renderDissect\(b\.dataset\.proj, 'rhetoric'\)/.test(wsSrc)
+        && /RHETORIC_WORKSHEET_LIVE \? `/.test(wsSrc));
+      {
+        // Every mention of the card in the Studio must sit INSIDE the flag
+        // guard. Grepping for the words alone would pass while the card
+        // rendered unconditionally, so this checks containment.
+        const fn = wsSrc.slice(wsSrc.indexOf('function rhetoricStudioPane'),
+          wsSrc.indexOf('function rhetoricStudioPane') + 1400);
+        const guardAt = fn.indexOf('RHETORIC_WORKSHEET_LIVE ? `');
+        const cardAt = fn.indexOf('Take a Speech Apart');
+        check('worksheet: the Studio card sits inside the flag guard, not beside it',
+          guardAt > 0 && cardAt > guardAt && fn.indexOf('` : \'\'}') > cardAt,
+          `guard@${guardAt} card@${cardAt}`);
+      }
       if (dbSupported()) {
         try {
           const pW = await createProject({ title: '__regression worksheet (safe to delete)' });
