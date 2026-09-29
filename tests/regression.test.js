@@ -2118,10 +2118,10 @@ export async function run({ navDoc = document } = {}) {
       const qeTile = () => doc.querySelector('[data-tile="col:question"]');
       check('textbook: Question Everything keeps a Library card of its own',
         !!qeTile() && qeTile().textContent.includes('Question Everything'));
-      check('textbook: and it is also in the Script Analysis reading order',
+      check('textbook: the LESSON of the same name is in the Script Analysis order',
         (await (async () => {
           clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
-          const inShelf = !!doc.querySelector('[data-item="col:question"]');
+          const inShelf = !!doc.querySelector('[data-item="ac-question"]');
           clickIn(doc.getElementById('nav-back')); await sleep(350);
           return inShelf;
         })()));
@@ -3304,11 +3304,9 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 39 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          // col:lists left this landing on 2026-09-29 and is reached through
-          // the collection it serves. col:question KEEPS its card: it is
-          // also a page inside col:scene, and having both was the owner's
-          // correction the same day, not an oversight.
-          === 'col:scene,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          // Both cards are back (owner, 2026-09-29). Removing them was my
+          // misreading of an order that was about what the LESSON carries.
+          === 'col:scene,col:lists,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -3350,16 +3348,15 @@ export async function run({ navDoc = document } = {}) {
       // Clicking it is the check; a source pin would not have caught it.
       clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
       const scTiles = [...doc.querySelectorAll('.item-tile')].map(b => b.dataset.item);
-      // Six tiles still: Lines & Memory leads, then the five lessons with
-      // two of them swapped for the full textbook pages they summarised
-      // (owner order 2026-09-29). The swap must happen IN PLACE, so the
-      // short lessons must not also appear beside the pages that replaced
-      // them, which is the duplication the order removed.
+      // Lines & Memory leads, then the owner's five lessons. The two that
+      // were briefly swapped for their full pages are LESSONS again: the
+      // full text lives inside the lesson record now, which is what the
+      // order actually asked for.
       check('acting: Script Analysis leads with Lines & Memory and every tile carries a key',
         scTiles[0] === 'col:lines' && scTiles.every(Boolean)
         && scTiles.length === 6
-        && scTiles.includes('col:lists') && scTiles.includes('col:question')
-        && !scTiles.includes('ac-fourlists') && !scTiles.includes('ac-question'),
+        && scTiles.includes('ac-fourlists') && scTiles.includes('ac-question')
+        && !scTiles.includes('col:lists') && !scTiles.includes('col:question'),
         scTiles.join(' '));
       clickIn(doc.querySelector('[data-item="col:lines"]')); await sleep(450);
       check('acting: the Lines & Memory tile actually opens Lines & Memory',
@@ -3367,26 +3364,25 @@ export async function run({ navDoc = document } = {}) {
         && /The Line You Know/.test(doc.querySelector('#line-lesson h1')?.textContent ?? ''),
         doc.querySelector('#line-lesson h1')?.textContent ?? 'no heading');
       clickIn(doc.getElementById('nav-back')); await sleep(350);
-      // EVERY page tile opens its FULL page, not the short lesson. Clicking
-      // is the check: a source pin would not catch a handler that resolves
-      // the key to the wrong renderer, which is exactly how Lines & Memory
-      // broke the first time.
-      clickIn(doc.querySelector('[data-item="col:lists"]')); await sleep(450);
-      check('acting: the Four Lists tile opens the full page, not the short lesson',
-        /The Four Lists/.test(doc.querySelector('.page-h')?.textContent ?? '')
-        && doc.body.textContent.includes('open The Four Lists'),
-        doc.querySelector('.page-h')?.textContent ?? 'no heading');
+      // THE LESSON CARRIES THE WHOLE REFERENCE (owner order 2026-09-29),
+      // not a sample of it with the rest behind a link. Both render from
+      // the record the standalone page uses, so the lesson cannot fall out
+      // of step with it. Clicking is the check: the block types are
+      // resolved at render time and a source pin would not catch a
+      // misspelled key silently producing an empty string.
+      clickIn(doc.querySelector('[data-item="ac-question"]')); await sleep(500);
+      check('acting: the Question Everything LESSON states why, then asks every question',
+        doc.body.textContent.includes('A script gives you the words')
+        && doc.querySelectorAll('.sd-asks li').length >= 80
+        && DISSECT_SECTIONS.every(s => doc.body.textContent.includes(s.h)),
+        `${doc.querySelectorAll('.sd-asks li').length} questions`);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
-      clickIn(doc.querySelector('[data-item="col:question"]')); await sleep(450);
-      // The point is FULL versus short: the lesson of the same name is four
-      // paragraphs, the textbook is every question. Counting headings was
-      // the wrong test and asserted 6 when the page has 7 (the six numbered
-      // sections plus Keep Returning to the Text), so it counts the
-      // questions instead, which is the thing that makes it the textbook.
-      check('acting: the Question Everything tile opens the full textbook',
-        doc.getElementById('sd-title')?.textContent === 'Question Everything'
-        && doc.querySelectorAll('#sd-textbook li').length >= 80,
-        `${doc.querySelectorAll('#sd-textbook li').length} questions`);
+      clickIn(doc.querySelector('[data-item="ac-fourlists"]')); await sleep(500);
+      check('acting: the Four Lists LESSON states why, then gives all four lists',
+        doc.body.textContent.includes('evidence rather than biography')
+        && ['incontrovertible facts', 'says about themselves', 'says about others',
+          'What others say about your character', 'What the lists are not']
+          .every(h => doc.body.textContent.includes(h)));
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       // A chapter with figures: both render with their alt text and

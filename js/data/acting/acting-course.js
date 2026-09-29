@@ -210,7 +210,11 @@ export const ACTING_LESSONS = [
     body: [
       { p: 'Before you interpret a word, collect what the play already states. Five read-throughs and four inventories: the facts the text gives outright, what your character says about themselves, what they say about everyone else, and what everyone else says about them. The first reading has no pen in it at all.' },
       { p: 'The lists are evidence rather than biography, and the useful part is where they disagree. A character whose account of themselves contradicts the stated facts, or whose reputation contradicts their own account, has handed you the argument the play is having about them.' },
-      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything, next, is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Library shelf: they save with that project.' },
+      // The whole method, not a summary of it (owner order 2026-09-29),
+      // rendered from FOUR_LISTS_SECTIONS so the lesson and the page
+      // cannot drift apart.
+      { fourLists: true },
+      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything, next, is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Script Analysis shelf: they save with that project.' },
     ],
     reflection: 'Which of your four lists came out shortest? What does that absence tell you?' },
   { id: 'ac-question', module: 'text', order: 4,
@@ -223,7 +227,13 @@ export const ACTING_LESSONS = [
     reflection: 'Which question about your scene are you avoiding because you do not like the answer?',
     body: [
       { p: 'A script gives you the words. Question Everything helps you discover what is happening underneath them, systematically, so the investigation does not stop at whatever occurred to you first.' },
-      { p: 'A taste of the list, straight from the textbook. What is happening? When is this happening? Who am I speaking to? What is our relationship? What has just happened? Why am I speaking now? What is at stake? What do I want from the other person? What do I want them to feel? What do I want them to admit? Six sections of questions like these, and none of them settles for a first impression.' },
+      { p: 'Six sections, in order, and none of them settles for a first impression. Work them on the text in front of you rather than reading them through: the value is in the answering, and the questions you least want to answer are usually the ones the scene turns on.' },
+      // THE COMPLETE LIST, not a sample (owner order 2026-09-29). It used
+      // to be ten questions quoted as "a taste of the list" with the rest
+      // behind a link, which is the version this replaces. It renders from
+      // DISSECT_SECTIONS, the same record the textbook page and the
+      // per-project worksheet both run on, so there is no second copy.
+      { dissect: true },
     ] },
 
   // ── Module 3 · Listening and Responding ───────────────────────

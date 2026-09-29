@@ -3212,6 +3212,11 @@ function actingChapterBlocks(l) {
     : b.mask ? maskSheetHtml(b.mask)
     : b.profile ? maskProfileHtml(b.profile)
     : b.roster ? maskRosterHtml(b.roster)
+    // The complete reference, inside the lesson that explains why it
+    // exists (owner order 2026-09-29). Both resolve from the one record
+    // the page uses, so the lesson and the reference cannot disagree.
+    : b.dissect ? dissectQuestionsHtml({ button: false })
+    : b.fourLists ? fourListsHtml()
     : b.markup ? scriptMarkupHtml(b.markup) : '').join('');
 }
 
@@ -3563,6 +3568,10 @@ function actingLibraryPane(el) {
     // Lines & Memory tile in September took its search terms with it and
     // made the page unfindable by its own name.
     { ...colTile('scene'), group: G1 },
+    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', img: 'img/ui/four-lists.png',
+      title: 'The Four Lists', group: G1,
+      keywords: 'character facts says about others reading five times building a character',
+      go: renderFourListsLesson },
     { key: 'col:question', tone: 'is-lavender', emoji: '🔍', img: 'img/ui/question.png',
       title: 'Question Everything', group: G1,
       keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
@@ -3677,13 +3686,15 @@ function renderActorIpaTools() {
 // guided sequence still has a step for each idea. What changed is which
 // version the READING shelf opens, which is the surface the order was about.
 const LINES_TILE = 'col:lines';
+// NOTHING REPLACES A LESSON ANY MORE. For one day the shelf swapped these
+// two lessons for the full pages, which was my misreading of "in the four
+// lists lesson module and the question everything lets put the text book
+// lessons instead": the owner meant the full text belongs INSIDE the lesson
+// record, not that the tile should open a different page. It does now, so
+// the shelf shows the lessons and the pages keep their own Library cards.
 const SHELF_PAGES = {
   scene: [
     { key: LINES_TILE, title: 'Lines & Memory', go: renderLineLesson },
-    { key: 'col:lists', title: 'The Four Lists', go: renderFourListsLesson,
-      replaces: 'ac-fourlists' },
-    { key: 'col:question', title: 'Question Everything', go: renderDissectTextbook,
-      replaces: 'ac-question' },
   ],
 };
 
@@ -7568,6 +7579,43 @@ function renderProvidedScene(id) {
 // The Library card opens the EXPLANATION (owner order, 2026-08-20): what
 // the method is and what each list is for. Working the lists on your own
 // text is offered at the foot, not in place of the reading.
+// THE FOUR LISTS, in one record for the same reason the questions are.
+// The page and the lesson both show this (owner order 2026-09-29): the
+// lesson states why the work exists and then carries the whole thing, the
+// page is the lists themselves. It was HTML inside one render function
+// until now, which is why it could only ever appear in one place.
+const FOUR_LISTS_INTRO = [
+  'You read the whole play five times. Not the scene, the play. A character is built from everything the text knows about them, and most of that sits outside the pages you happen to be in.',
+  'The first reading is just reading. No pen, no marking, no decisions. You are finding out what happens. Every choice you make before you know the story is a choice made in the dark, and you will defend it later out of pride rather than sense.',
+  'Each reading after that has exactly one job. One list at a time, because the four are genuinely different kinds of evidence, and mixing them is how an assumption ends up filed as a fact.',
+];
+const FOUR_LISTS_SECTIONS = [
+  { h: '2. The incontrovertible facts about your character', ps: [
+    'Only what the text states outright. Age, job, where they live, who they are related to, what they did. Not what you infer, not what you would like to be true: what could be read aloud in court without argument.',
+    'This list is usually shorter than actors expect, and that is the point. Everything not on it is interpretation, and knowing which is which is what lets you change your mind later without losing your footing.',
+  ] },
+  { h: '3. What your character says about themselves', ps: [
+    'Their own account of who they are. Write it down whether or not you believe it. A character lying about themselves is telling you something exact, about what they need other people to think, and about what they cannot afford to say.',
+    'Watch for the gap between this list and the first one. That gap is often the part worth playing.',
+  ] },
+  { h: '4. What your character says about others', ps: [
+    'How they describe everyone else. What they notice first, what they never mention, whether the description changes depending on who is listening.',
+    'People reveal themselves most carelessly when they are talking about someone else. This list is frequently the richest of the four.',
+  ] },
+  { h: '5. What others say about your character', ps: [
+    'Everything said about you, to your face and behind your back. Again: record it, do not yet settle whether it is fair. Who says it matters as much as what is said.',
+    'When the last list contradicts the second, you have found the argument the play is actually having about this person.',
+  ] },
+  { h: 'What the lists are not', ps: [
+    'They are not a character biography, and finishing them does not finish the work. They are evidence, gathered before interpretation, so that the choices you make later are made against the text rather than against your first impression of it.',
+  ] },
+];
+const fourListsHtml = () => `
+  ${FOUR_LISTS_INTRO.map(p => `<p class="guide-text">${esc(p)}</p>`).join('')}
+  ${FOUR_LISTS_SECTIONS.map(s => `
+    <h2 class="guide-heading">${esc(s.h)}</h2>
+    ${s.ps.map(p => `<p class="guide-text">${esc(p)}</p>`).join('')}`).join('')}`;
+
 function renderFourListsLesson() {
   record(renderFourListsLesson);
   stopSpeech();
@@ -7578,49 +7626,7 @@ function renderFourListsLesson() {
        <p class="ws-sub">Five read-throughs, four inventories — where a character comes from.</p>
      </div>`,
     `<p><span class="sp-badge">${esc(ACTING_DRAFT_BADGE)}</span></p>
-
-     <p class="guide-text">You read the whole play five times. Not the scene — the play. A character
-       is built from everything the text knows about them, and most of that sits outside the pages
-       you happen to be in.</p>
-     <p class="guide-text">The <b>first reading is just reading</b>. No pen, no marking, no
-       decisions. You are finding out what happens. Every choice you make before you know the story
-       is a choice made in the dark, and you will defend it later out of pride rather than sense.</p>
-     <p class="guide-text">Each reading after that has exactly one job. One list at a time, because
-       the four are genuinely different kinds of evidence, and mixing them is how an assumption ends
-       up filed as a fact.</p>
-
-     <h2 class="guide-heading">2. The incontrovertible facts about your character</h2>
-     <p class="guide-text">Only what the text states outright. Age, job, where they live, who they
-       are related to, what they did. Not what you infer, not what you would like to be true — what
-       could be read aloud in court without argument.</p>
-     <p class="guide-text">This list is usually shorter than actors expect, and that is the point.
-       Everything not on it is interpretation, and knowing which is which is what lets you change
-       your mind later without losing your footing.</p>
-
-     <h2 class="guide-heading">3. What your character says about themselves</h2>
-     <p class="guide-text">Their own account of who they are. Write it down whether or not you
-       believe it. A character lying about themselves is telling you something exact — about what
-       they need other people to think, and about what they cannot afford to say.</p>
-     <p class="guide-text">Watch for the gap between this list and the first one. That gap is often
-       the part worth playing.</p>
-
-     <h2 class="guide-heading">4. What your character says about others</h2>
-     <p class="guide-text">How they describe everyone else. What they notice first, what they never
-       mention, whether the description changes depending on who is listening.</p>
-     <p class="guide-text">People reveal themselves most carelessly when they are talking about
-       someone else. This list is frequently the richest of the four.</p>
-
-     <h2 class="guide-heading">5. What others say about your character</h2>
-     <p class="guide-text">Everything said about you — to your face, and behind your back. Again:
-       record it, do not yet settle whether it is fair. Who says it matters as much as what is said.</p>
-     <p class="guide-text">When the last list contradicts the second, you have found the argument the
-       play is actually having about this person.</p>
-
-     <h2 class="guide-heading">What the lists are not</h2>
-     <p class="guide-text">They are not a character biography, and finishing them does not finish the
-       work. They are evidence, gathered before interpretation, so that the choices you make later
-       are made against the text rather than against your first impression of it.</p>
-
+     ${fourListsHtml()}
      <p class="pane-note">Work the lists on one of your own texts:
        <button class="linkish" id="fl-start" type="button">open The Four Lists</button>.
        They save with that project.</p>`);
@@ -8402,34 +8408,48 @@ function renderLineLesson() {
 // `close` because the per-project worksheet runs on the same records, and
 // deleting owner-supplied copy to change a layout would be the wrong
 // trade. Nothing here explains the method any more; it asks.
+const DISSECT_RETURNING = ['What evidence supports my choice?',
+  'Am I playing the words or imposing an unrelated idea?',
+  'Am I making a specific choice or relying on a general emotion?',
+  'Does this interpretation make the relationship clearer?',
+  'Does it increase the urgency of speaking?', 'Can the other person affect me?',
+  'Am I allowing my actions to change?', 'What remains uncertain?',
+  'What new question should I take back to the text?'];
+// A section with a single question states it inline — "Ask:" over a
+// one-item bullet list reads as a list that lost its other items.
+const dissectAsksHtml = list => list.length === 1
+  ? `<p class="guide-text sd-ask-one"><b>Ask:</b> ${esc(list[0])}</p>`
+  : `
+    <p class="pane-note">Ask:</p>
+    <ul class="sd-asks">${list.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>`;
+
+// THE QUESTIONS THEMSELVES, rendered from the one record that holds them.
+// Two surfaces show them now (owner order 2026-09-29): the textbook page,
+// which is the questions ALONE, and the lesson, which states why the work
+// exists first and then carries the same complete list. Copying a hundred
+// questions into the lesson data would have been a second copy of the
+// thing the worksheet also runs on, and it would have drifted.
+//
+// `button` is false inside a lesson: the chapter renderer does not wire
+// sd-playable, and a button that does nothing is worse than a sentence.
+const dissectQuestionsHtml = ({ button = true } = {}) => `
+  ${DISSECT_SECTIONS.map(s => `
+    <h2 class="guide-heading">${esc(s.h)}</h2>
+    ${dissectAsksHtml(s.asks)}
+    ${s.playable ? (button
+      ? '<p><button class="btn-lite" id="sd-playable" type="button">🎯 Explore Playable Actions</button></p>'
+      : '<p class="pane-note">The twelve actions are on the Playable Actions shelf in the Acting Library.</p>') : ''}`).join('')}
+  <h2 class="guide-heading">Keep Returning to the Text</h2>
+  <ul class="sd-asks">${DISSECT_RETURNING.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>`;
+
 function renderDissectTextbook() {
   record(renderDissectTextbook);
   stopSpeech();
-
-  const RETURNING = ['What evidence supports my choice?',
-    'Am I playing the words or imposing an unrelated idea?',
-    'Am I making a specific choice or relying on a general emotion?',
-    'Does this interpretation make the relationship clearer?',
-    'Does it increase the urgency of speaking?', 'Can the other person affect me?',
-    'Am I allowing my actions to change?', 'What remains uncertain?',
-    'What new question should I take back to the text?'];
-  // A section with a single question states it inline — "Ask:" over a
-  // one-item bullet list reads as a list that lost its other items.
-  const asksHtml = list => list.length === 1
-    ? `<p class="guide-text sd-ask-one"><b>Ask:</b> ${esc(list[0])}</p>`
-    : `
-      <p class="pane-note">Ask:</p>
-      <ul class="sd-asks">${list.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>`;
   app.innerHTML = `
     ${pageTopbar('🔍 Question Everything', '#8a6d3b')}
     <main class="guide" id="sd-textbook">
       <h1 id="sd-title">Question Everything</h1>
-      ${DISSECT_SECTIONS.map(s => `
-      <h2 class="guide-heading">${esc(s.h)}</h2>
-      ${asksHtml(s.asks)}
-      ${s.playable ? '<p><button class="btn-lite" id="sd-playable" type="button">🎯 Explore Playable Actions</button></p>' : ''}`).join('')}
-      <h2 class="guide-heading">Keep Returning to the Text</h2>
-      <ul class="sd-asks">${RETURNING.map(a => `<li class="guide-text">${esc(a)}</li>`).join('')}</ul>
+      ${dissectQuestionsHtml()}
       <p class="pane-note">To work these questions on your own text, open a Studio project and press <b>🔍 Question Everything</b>.</p>
     </main>`;
   wireBrandHome();
