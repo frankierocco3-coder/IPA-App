@@ -4658,10 +4658,16 @@ export async function run({ navDoc = document } = {}) {
       && /<span class="lex-label">What it hides<\/span>/.test(faSrc)
       && /<span class="lex-label">Ask<\/span>/.test(faSrc),
       `${builderSrc.length} row builders found`);
-    check('fallacies: both shelves say once that an unsourced example is ours',
+    // THREE since 2026-09-29, not two. The rule was never "two shelves", it
+    // is that WHEREVER AN EXAMPLE IS SHOWN the provenance is stated, or an
+    // example written here reads as a quotation. A fallacy now has its own
+    // page, that page shows the example, so it says it too. If a fourth
+    // surface ever shows an example, this is the check that should fail.
+    const provCount = (faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length;
+    check('fallacies: every surface that shows an example says an unsourced one is ours',
       /written for this course unless a source is named/.test(faSrc)
-      && (faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length === 2,
-      String((faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length));
+      && provCount === 3,
+      `${provCount} surfaces`);
     check('fallacies: the shelf is reachable and is a reference, not a lesson',
       /function renderFallacyShelf\(\)/.test(faSrc)
       && /The 13 Fallacies/.test(faSrc)
@@ -4796,6 +4802,208 @@ export async function run({ navDoc = document } = {}) {
       && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf/.test(rhPractice)
       && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf/.test(rhStudio),
       `practice ${rhPractice.length}ch, studio ${rhStudio.length}ch`);
+
+    // ── Both fallacy shelves are cards, and a card LEADS SOMEWHERE ──
+    // Owner order 2026-09-29. Fifty-three entries stacked down two pages is
+    // what nobody reaches the end of, so each fallacy is a card and the card
+    // opens that fallacy's own page — The Cast's pattern, which NAVIGATES.
+    //
+    // It was a dialog first and that was wrong, so the pins here are about
+    // navigation specifically: a page that can be arrived at, returned to
+    // and left by the same Back button as every other page. Three ways this
+    // reverts: a shelf goes back to printing everything, a card stops
+    // leading anywhere, or it goes back to a panel over the shelf.
+    const thirteenFn = fnBody(famSrc, 'renderFallacyShelf');
+    const fortyFn = fnBody(famSrc, 'renderFamilyShelf');
+    check('fallacies: both shelves render cards, and a card leads to its own page',
+      /falCardHtml/.test(thirteenFn) && /falCardHtml/.test(fortyFn)
+      // The row builders are still REFERENCED, as the page's body. What must
+      // be gone is a shelf mapping them onto the list.
+      && !/\.map\(fallacyRowHtml\)/.test(thirteenFn)
+      && !/\.map\(modernFallacyHtml\)/.test(fortyFn)
+      && /wireFallacyCards\(listEl, 'thirteen'\)/.test(thirteenFn)
+      && /wireFallacyCards\(listEl, 'modern'\)/.test(fortyFn)
+      // A real page: recorded so Back works, and reached through navTo so
+      // the page turn animates like every other one.
+      && /function renderFallacyPage\(kind, id\)/.test(famSrc)
+      && /record\(\(\) => renderFallacyPage\(kind, id\)\)/.test(famSrc)
+      && /navTo\(\(\) => renderFallacyPage\(kind, b\.dataset\.fal\)\)/.test(famSrc),
+      `13:${thirteenFn.length}ch 40:${fortyFn.length}ch`);
+    // No panel. The dialog version shipped nowhere, but the wiring is one
+    // edit away from coming back and it would look like a fix.
+    check('fallacies: a card opens a page, never a dialog over the shelf',
+      !/openFallacyDialog/.test(famSrc)
+      && !/function wireFallacyCards[\s\S]{0,400}openModal/.test(famSrc));
+    // The card carries the LABEL and nothing else: no summary, no ask, no
+    // example creeping back onto the shelf one field at a time. And the card
+    // and the page heading are the same function, so a card can never say
+    // one thing and the page it opens another.
+    check('fallacies: a card is the title alone, and the page heading is the same string',
+      /const falCardHtml = f => `[\s\S]{0,260}fal-card-name/.test(famSrc)
+      && !/const falCardHtml = f => `[\s\S]{0,400}(f\.what|f\.ask|f\.overlook|hidesAskHtml)/.test(famSrc)
+      && /const fallacyLabel = f =>/.test(famSrc)
+      && /<span class="fal-card-name">\$\{esc\(fallacyLabel\(f\)\)\}<\/span>/.test(famSrc)
+      && /<h1 id="fal-title" tabindex="-1">\$\{esc\(fallacyLabel\(f\)\)\}<\/h1>/.test(famSrc));
+    // BECAUSE A CARD LEAVES THE SHELF, THE SEARCH HAS TO SURVIVE. Both
+    // shelves used to clear their query on every render, which was invisible
+    // while the shelf was the only screen and became a bug the moment a card
+    // led away: search forty names, open one, come back to an unfiltered
+    // list. Pinned as gone, and the input seeded from the surviving value.
+    check('fallacies: the shelf search survives a trip to a page and back',
+      !/fallQuery = '';\n\s+app\.innerHTML/.test(famSrc)
+      && !/famQuery = '';\n\s+app\.innerHTML/.test(famSrc)
+      && /value="\$\{esc\(fallQuery\)\}"/.test(famSrc)
+      && /value="\$\{esc\(famQuery\)\}"/.test(famSrc));
+    // The same sentence on both shelves, from one constant, because two
+    // shelves written to read alike drift the moment the copy is duplicated.
+    check('fallacies: one instruction sentence, used by both shelves',
+      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 2,
+      String((famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length));
+
+    // Driven: the shelves a reader actually meets. Both of them, because
+    // "each fallacy is a card" is a claim about fifty-three cards, and no
+    // amount of source reading tells a live card from a dead one.
+    if (appWin) {
+      // THE FRAME IS RELOADED BY EARLIER SECTIONS, so the `navDoc` captured
+      // at the top of the run is a DETACHED document by the time this one is
+      // reached: every click lands on nothing, every query returns null, and
+      // the failures read as "0 cards" rather than as a stale handle. Every
+      // late drive in this suite re-acquires, and re-reads contentWindow on
+      // each dispatch, because a reload swaps the realm too.
+      const frame = document.querySelector('iframe');
+      const sleep = scSleep;
+      let doc = frame.contentDocument;
+      for (let i = 0; i < 40; i++) {
+        doc = frame.contentDocument;
+        if (doc?.querySelector('.side-nav .side-item')) break;
+        await sleep(150);
+      }
+      const clickIn = el => { const win = frame.contentWindow;
+        el?.dispatchEvent(new win.MouseEvent('click', { bubbles: true })); };
+      const sideItem = name =>
+        [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const h1Of = () => doc.querySelector('main h1')?.textContent ?? '';
+      try {
+        // Start from the shell. A deep page has no stats bar and therefore
+        // no workspace chip, and every click after that would be a no-op.
+        clickIn(doc.getElementById('brand-home')); await sleep(400);
+        clickIn(doc.getElementById('ws-chip')); await sleep(250);
+        clickIn(doc.querySelector('#ws-menu [data-ws="rhetoric"]')); await sleep(600);
+        // A FIRST visit to Rhetoric shows the threshold. Step through it
+        // rather than assuming this browser profile has already seen it,
+        // which is the assumption that makes a suite pass on one machine
+        // and fail on a clean one.
+        if (doc.getElementById('rht-learn') || doc.getElementById('rht-tools')) {
+          clickIn(doc.getElementById('rht-tools') ?? doc.getElementById('rht-learn'));
+          await sleep(500);
+        }
+        clickIn(sideItem('Library')); await sleep(450);
+
+        // ── The 13 Fallacies ──
+        clickIn(doc.querySelector('[data-tile="col:rh-thirteen"]')); await sleep(550);
+        const c13 = [...doc.querySelectorAll('.fal-card')];
+        check('fallacies: the thirteen are cards, with no breakdown printed on the shelf',
+          c13.length === FALLACIES.length
+          && !doc.querySelector('#fa-list .lex-modern')
+          && !doc.querySelector('#fa-list .lex-label')
+          && !doc.querySelector('#fa-list .lex-eg')
+          && c13.every(c => c.querySelector('.fal-card-name')?.textContent.trim()),
+          `${c13.length} cards`);
+        // Six of the thirteen carry a modern name and the card has to show
+        // it. "Secundum quid" on its own is not a thing a reader can find.
+        const labelled = c13.map(c => c.querySelector('.fal-card-name')?.textContent ?? '');
+        check('fallacies: a card shows the modern name wherever the entry has one',
+          labelled.filter(t => t.includes('(')).length === FALLACIES.filter(f => f.modern).length
+          && labelled.includes('Ignoratio elenchi (irrelevant conclusion)'),
+          labelled.filter(t => t.includes('(')).join(' | '));
+        clickIn(doc.querySelector('[data-fal="FA-009"]')); await sleep(600);
+        check('fallacies: one of the thirteen opens its OWN PAGE, not a panel',
+          h1Of() === 'Ignoratio elenchi (irrelevant conclusion)'
+          && !doc.querySelector('.modal-wrap')
+          && !doc.querySelector('.fal-card')
+          && String([...doc.querySelectorAll('.lex-label')].map(e => e.textContent))
+            === 'What it hides,Ask'
+          && !!doc.querySelector('.lex-eg')
+          // The provenance and the review gate travel with the entry: a page
+          // reached from a card is where a reader would otherwise meet
+          // neither, and an unsourced example would read as a quotation.
+          && /written for this course unless a source is named/.test(doc.body.textContent)
+          && /Awaiting review/.test(doc.body.textContent),
+          h1Of() || '(no page)');
+        clickIn(doc.getElementById('nav-back')); await sleep(650);
+        check('fallacies: Back from a page returns to the shelf it was opened from',
+          h1Of() === 'The 13 Fallacies'
+          && doc.querySelectorAll('.fal-card').length === FALLACIES.length,
+          h1Of());
+        clickIn(doc.getElementById('nav-back')); await sleep(650);
+
+        // ── All Fallacies ──
+        clickIn(doc.querySelector('[data-tile="col:rh-all"]')); await sleep(550);
+        const c40 = [...doc.querySelectorAll('.fal-card')];
+        check('families: the forty are cards, grouped, with no breakdown on the shelf',
+          c40.length === MODERN_FALLACIES.length
+          && doc.querySelectorAll('.fal-cards').length === FAMILIES.length
+          && !doc.querySelector('#fam-list .lex-modern')
+          && !doc.querySelector('#fam-list .lex-label')
+          && !doc.querySelector('#fam-list .lex-eg'),
+          `${c40.length} cards, ${doc.querySelectorAll('.fal-cards').length} grids`);
+        clickIn(doc.querySelector('[data-fal="MF-004"]')); await sleep(600);
+        check('families: a card opens its own page, carrying the family counter-move',
+          h1Of() === 'Motte-and-bailey'
+          && !doc.querySelector('.modal-wrap')
+          && !doc.querySelector('.fal-card')
+          && String([...doc.querySelectorAll('.lex-label')].map(e => e.textContent))
+            === 'What it hides,Ask'
+          && !!doc.querySelector('.lex-eg')
+          // The counter is the most useful line on that shelf and has to
+          // travel with the entry rather than stay behind on the list.
+          && /The counter:/.test(doc.body.textContent),
+          h1Of() || '(no page)');
+        // Three of the examples are NARRATIVES opening with their own quoted
+        // speech, because the fallacy is the exchange rather than one line.
+        // The shared renderer wrapped them anyway, so they carried a doubled
+        // opening quote and a closing one that never opened.
+        const egText = doc.querySelector('.lex-eg')?.textContent ?? '';
+        check('fallacies: an example that quotes itself is not quoted twice',
+          /^“/.test(egText) && !/^““/.test(egText),
+          egText.slice(0, 28));
+        clickIn(doc.getElementById('nav-back')); await sleep(650);
+        // A card LEAVES the shelf, so an unrestored search would strand the
+        // reader in an unfiltered list of forty. Driven end to end, because
+        // this is the exact regression the persistence was added for.
+        const famSearch = doc.getElementById('fam-search');
+        famSearch.value = 'goalposts';
+        famSearch.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
+        await sleep(300);
+        const narrowed = doc.querySelectorAll('.fal-card').length;
+        clickIn(doc.querySelector('.fal-card')); await sleep(600);
+        const opened = h1Of();
+        clickIn(doc.getElementById('nav-back')); await sleep(650);
+        check('families: search, open a card, come back — the list is as it was left',
+          narrowed === 1 && opened === 'Moving the goalposts'
+          && doc.querySelectorAll('.fal-card').length === narrowed
+          && doc.getElementById('fam-search')?.value === 'goalposts',
+          `narrowed ${narrowed}, back to ${doc.querySelectorAll('.fal-card').length}, ` +
+          `box "${doc.getElementById('fam-search')?.value ?? ''}"`);
+        // Leave the query clear so nothing downstream inherits a filter.
+        const clearBox = doc.getElementById('fam-search');
+        clearBox.value = '';
+        clearBox.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
+        await sleep(250);
+      } catch (err) {
+        bad('fallacy shelves drive', String(err));
+      } finally {
+        // Everything after this expects the accents workspace, the way the
+        // Shakespeare section restores what it borrowed.
+        try {
+          clickIn(doc.getElementById('ws-chip')); await sleep(250);
+          clickIn(doc.querySelector('#ws-menu [data-ws="accents"]')); await sleep(550);
+          clickIn(doc.getElementById('brand-home')); await sleep(350);
+        } catch { /* best effort */ }
+      }
+    } else {
+      ok('fallacy shelves drive (runner only — run tests/run-all.html)');
+    }
     // Aristotle's composition and division are LINGUISTIC, not the modern
     // part-and-whole fallacy that borrowed the names. Got this wrong first
     // time; the correction is pinned so it cannot quietly revert.

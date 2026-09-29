@@ -4820,13 +4820,19 @@ const FALLACY_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric or logi
   + 'by a qualified reader yet. Most examples are constructed rather than quoted, and each '
   + 'one says which it is.';
 
+// The query survives in module state so Back from a fallacy's own page
+// returns to the exact list the reader left, the way Playable Actions
+// does. It is NOT cleared on render: clearing it was invisible while the
+// shelf was the only screen, and became a bug the moment a card led away.
 let fallQuery = '';
 
+// The breakdown for ONE of the thirteen. Owner order 2026-09-29: both
+// fallacy shelves show names only and open the breakdown on a click, so
+// this carries no heading of its own — the dialog title is the name, and
+// repeating it would be the only thing above the fold.
 function fallacyRowHtml(f) {
   return `
-    <article class="lex-row">
-      <h3 class="lex-term"><span class="lex-word">${esc(f.term)}${
-        f.modern ? ` (${esc(f.modern)})` : ''}</span></h3>
+    <article class="lex-row is-bare">
       <p class="lex-modern">${esc(f.what)}</p>
       ${hidesAskHtml(f)}
       <p class="lex-note">${esc(f.note)}</p>
@@ -4848,18 +4854,102 @@ const hidesAskHtml = f => `
 // commentary that used to ride along with it went by owner order
 // 2026-09-28, and both shelves now say once, at the top, that an example
 // with no source was written for this course.
-const egHtml = x => `
-  <p class="lex-eg">“${esc(x.text)}”${
+// Three of the fifty-three examples are NARRATIVES that open with their
+// own quoted speech, because the fallacy is the exchange rather than one
+// line. Wrapping those gave them a doubled opening quote and a closing one
+// that never opened. Quote only what is not already quoting itself.
+const egHtml = x => {
+  const t = String(x.text ?? '');
+  const selfQuoted = t.trimStart().startsWith('“');
+  return `
+  <p class="lex-eg">${selfQuoted ? esc(t) : `“${esc(t)}”`}${
     x.source ? `<span class="lex-src">${esc(x.source)}</span>` : ''}</p>`;
+};
 
 // Said once per shelf instead of stamped on every card.
 const EG_PROVENANCE = 'The examples are written for this course unless a source is named. '
   + 'A fallacy example has to be a bad argument, and bad arguments are mostly anonymous.';
 
+// One sentence, both shelves, so the instruction cannot drift into two
+// slightly different sentences for two shelves that read alike.
+const OPEN_CARD_NOTE = 'Open a card for what the move hides, the question that exposes it, '
+  + 'and an example.';
+
+// ── Both fallacy shelves are cards, and a card LEADS SOMEWHERE ──
+// Owner order 2026-09-29. Forty entries down one page, and thirteen on the
+// shelf beside it, is a page nobody reaches the end of. Both shelves show
+// names, and a card opens that fallacy's own page, the way The Cast opens
+// a commedia character's own chapter.
+//
+// It was a dialog first, and that was wrong. The Cast NAVIGATES, and the
+// reason is not decoration: a page can be arrived at, returned to and left
+// with the Back button every other page in the app answers to, while a
+// panel over the shelf is a state the reader has to dismiss before the app
+// behaves normally again.
+//
+// BECAUSE A CARD NOW LEAVES THE SHELF, THE SEARCH HAS TO SURVIVE. Both
+// shelves used to clear their query on every render, which was invisible
+// while the shelf was the only screen. Now it would mean searching forty
+// names, opening one and coming back to an unfiltered list. The query
+// lives in module state and Back replays the render, which is exactly what
+// Playable Actions does and for exactly this reason.
+//
+// The card carries the heading the shelf ALREADY used, which on the
+// thirteen includes the modern name in brackets. That is the title rather
+// than a second field: "Secundum quid" on its own is not findable, and the
+// bracket is how this shelf has always named that entry.
+const fallacyLabel = f => `${f.term}${f.modern ? ` (${f.modern})` : ''}`;
+
+const falCardHtml = f => `
+  <button class="fal-card" type="button" data-fal="${esc(f.id)}">
+    <span class="fal-card-name">${esc(fallacyLabel(f))}</span>
+    <span class="tile-chev" aria-hidden="true">›</span>
+  </button>`;
+
+// One page renderer for both shelves. `kind` is the only thing that
+// differs: the thirteen are grouped by what the error depends on, the
+// forty by what the speaker is doing, and the forty carry their family's
+// counter-move — the single most useful line on that shelf, which has to
+// travel with the entry rather than stay behind on the list.
+//
+// Both provenance notes travel too. They exist so that an example with no
+// source is never read as a quotation, and a page reached straight from a
+// card is precisely where a reader would otherwise never meet them.
+function renderFallacyPage(kind, id) {
+  const thirteen = kind === 'thirteen';
+  const f = thirteen ? fallacyById(id) : MODERN_FALLACIES.find(x => x.id === id);
+  if (!f) return thirteen ? renderFallacyShelf() : renderFamilyShelf();
+  record(() => renderFallacyPage(kind, id));
+  stopSpeech();
+  const fam = thirteen ? null : FAMILIES.find(x => x.id === f.family);
+  const where = thirteen
+    ? (FALLACY_GROUPS[f.group]?.label ?? '')
+    : `${fam.n}. ${fam.title}`;
+  app.innerHTML = `
+    ${pageTopbar(thirteen ? '🧩 The 13 Fallacies' : '🧭 All Fallacies', '#8a6d3b')}
+    <main class="guide">
+      <h1 id="fal-title" tabindex="-1">${esc(fallacyLabel(f))}</h1>
+      <p class="pane-note">${esc(where)}</p>
+      ${thirteen ? fallacyRowHtml(f) : modernFallacyHtml(f)}
+      ${fam ? `<p class="pane-note"><b>The counter:</b> ${esc(fam.counter)}</p>` : ''}
+      <p class="pane-note">${esc(EG_PROVENANCE)}</p>
+      <p class="pane-note pane-caveat">${esc(thirteen ? FALLACY_REVIEW_NOTE : FAMILY_REVIEW_NOTE)}</p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('fal-title')?.focus();
+}
+
+// draw() replaces the list on every keystroke, so cards are wired per draw
+// and never once at the end of a render. navTo, because this is a page
+// turn and the app animates those.
+function wireFallacyCards(listEl, kind) {
+  listEl.querySelectorAll('[data-fal]').forEach(b => b.addEventListener('click',
+    () => navTo(() => renderFallacyPage(kind, b.dataset.fal))));
+}
+
 function renderFallacyShelf() {
   record(renderFallacyShelf);
   stopSpeech();
-  fallQuery = '';
   app.innerHTML = `
     ${pageTopbar('🧩 The 13 Fallacies', '#8a6d3b')}
     <main class="guide">
@@ -4870,11 +4960,12 @@ function renderFallacyShelf() {
       <p class="guide-text">This is Aristotle’s list and nobody else’s. Modern handbooks run to a
         hundred names; he gives thirteen and divides them once. Thirteen is a number a person can
         carry into a room.</p>
+      <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
       <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(FALLACY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fa-search" type="search"
         placeholder="Search fallacies, effects, examples…" aria-label="Search the fallacies"
-        autocomplete="off">
+        value="${esc(fallQuery)}" autocomplete="off">
       <div id="fa-list" aria-live="polite"></div>
     </main>`;
   wireBrandHome();
@@ -4903,7 +4994,8 @@ function renderFallacyShelf() {
       .map(([g, list]) => `
         <h2 class="shelf-section">${esc(FALLACY_GROUPS[g].label)}<span>${list.length}</span></h2>
         <p class="guide-text">${esc(FALLACY_GROUPS[g].lead)}</p>
-        ${list.map(fallacyRowHtml).join('')}`).join('');
+        <div class="fal-cards">${list.map(falCardHtml).join('')}</div>`).join('');
+    wireFallacyCards(listEl, 'thirteen');
   };
   searchEl.addEventListener('input', () => { fallQuery = searchEl.value; draw(); });
   draw();
@@ -4922,14 +5014,21 @@ const FAMILY_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric or logic
   + 'an examination; it does not finish one, and nothing here is a way to win an argument '
   + 'without having the better case.';
 
+// The query survives in module state so Back from a fallacy's own page
+// returns to the exact list the reader left, the way Playable Actions
+// does. It is NOT cleared on render: clearing it was invisible while the
+// shelf was the only screen, and became a bug the moment a card led away.
 let famQuery = '';
 
+// The breakdown for ONE modern fallacy, shown in the dialog a card opens.
+// No heading of its own: the dialog title is the name. The "also
+// Aristotle" marker moves out of the old heading onto its own line, so it
+// survives the change rather than going with the h3 that carried it.
 function modernFallacyHtml(f) {
   const a = f.alsoAristotle ? fallacyById(f.alsoAristotle) : null;
   return `
-    <article class="lex-row">
-      <h3 class="lex-term"><span class="lex-word">${esc(f.term)}</span>${
-        a ? `<span class="lex-kind">also Aristotle · ${esc(a.term)}</span>` : ''}</h3>
+    <article class="lex-row is-bare">
+      ${a ? `<p class="lex-kind">also Aristotle · ${esc(a.term)}</p>` : ''}
       <p class="lex-modern">${esc(f.what)}</p>
       ${hidesAskHtml(f)}
       ${f.note ? `<p class="lex-note">${esc(f.note)}</p>` : ''}
@@ -4940,7 +5039,6 @@ function modernFallacyHtml(f) {
 function renderFamilyShelf() {
   record(renderFamilyShelf);
   stopSpeech();
-  famQuery = '';
   app.innerHTML = `
     ${pageTopbar('🧭 All Fallacies', '#8a6d3b')}
     <main class="guide">
@@ -4950,11 +5048,12 @@ function renderFamilyShelf() {
         question at the head of each group is the one worth carrying.</p>
       <p class="guide-text">Naming a fallacy begins an examination. It does not finish one, and it
         is never a way to win an argument without having the better case.</p>
+      <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
       <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(FAMILY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fam-search" type="search"
         placeholder="Search names, effects, questions, examples…"
-        aria-label="Search all fallacies" autocomplete="off">
+        aria-label="Search all fallacies" value="${esc(famQuery)}" autocomplete="off">
       <div id="fam-list" aria-live="polite"></div>
     </main>`;
   wireBrandHome();
@@ -4983,7 +5082,8 @@ function renderFamilyShelf() {
         <h2 class="shelf-section">${fam.icon} ${fam.n}. ${esc(fam.title)}<span>${list.length}</span></h2>
         <p class="guide-text">${esc(fam.lead)}</p>
         <p class="pane-note"><b>The counter:</b> ${esc(fam.counter)}</p>
-        ${list.map(modernFallacyHtml).join('')}`).join('');
+        <div class="fal-cards">${list.map(falCardHtml).join('')}</div>`).join('');
+    wireFallacyCards(listEl, 'modern');
   };
   searchEl.addEventListener('input', () => { famQuery = searchEl.value; draw(); });
   draw();

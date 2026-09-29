@@ -2293,6 +2293,28 @@ body.nb-full #app { display: none; }
   .lex-row { padding-left: 12px; }
 }
 
+/* Both fallacy shelves are title-only cards and the breakdown opens in a
+   dialog (owner order 2026-09-29). A grid rather than a column, because a
+   fallacy name is short and fifty-three of them stacked is the wall the
+   cards were asked for instead of. The cards borrow The Cast's vocabulary
+   so the two parts of the app look like one app. */
+.fal-cards {
+  display: grid; gap: 8px; margin: 6px 0 22px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+}
+.fal-card {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; text-align: left; cursor: pointer;
+  border: 1px solid var(--line); background: var(--panel); border-radius: 12px;
+  padding: 11px 13px; font: inherit; color: inherit;
+}
+.fal-card:hover, .fal-card:focus-visible { border-color: var(--green); background: var(--accent-tint); }
+.fal-card-name { font-family: var(--serif); font-size: 16px; font-weight: 700; }
+.fal-card .tile-chev { flex: 0 0 auto; color: var(--muted); }
+/* Inside the dialog the row is the whole body, so the left rule that
+   separates stacked entries on a page has nothing to separate it from. */
+.lex-row.is-bare { margin: 0; padding-left: 0; border-left: 0; }
+
 /* A shelf section heading is a BREAK in continued reading, not another
    subhead (owner order 2026-09-28). It has to read as "a new part starts
    here" when somebody is forty entries deep, so it takes a rule above it,
