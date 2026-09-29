@@ -83,7 +83,7 @@ export const RHETORIC = [
 
   { id: 'RH-004', term: 'Asyndeton',
     what: 'Conjunctions removed, so items arrive one after another with nothing between them.',
-    note: 'The opposite pressure to polysyndeton. It is fast and it sounds out of control, because nothing is joining the items up. A speaker using it has stopped organising and started piling.',
+    note: 'The opposite pressure to polysyndeton. Stripping the conjunctions makes a list fast, and what that speed sounds like depends entirely on the speaker. Three verbs with nothing between them can be a man losing his grip, or it can be a general reporting a conquest as though it cost him nothing. Decide which before you play it.',
     examples: [
       { text: 'I came, I saw, I conquered.',
         source: 'Julius Caesar, reported by Plutarch and Suetonius' },
@@ -170,8 +170,8 @@ export const RHETORIC = [
     ] },
 
   { id: 'RH-015', term: 'Epanalepsis',
-    what: 'A passage that ends where it began, returning to its opening words.',
-    note: 'It frames, and the frame tells you nothing has moved. A speaker who arrives back at their first phrase has argued their way round a circle, and whether that is exhaustion or a trap depends on the scene.',
+    what: 'The same word or phrase at the beginning and at the end of one clause or sentence.',
+    note: 'The word closes the door it opened, which is why it so often lands as a verdict rather than a thought in progress. A clause that ends on its own first word has not travelled, and a speaker who talks this way is stating a rule and refusing to be argued out of it.',
     examples: [
       { text: 'Nothing will come of nothing.',
         source: 'Lear, King Lear I.i' },
@@ -187,7 +187,7 @@ export const RHETORIC = [
 
   { id: 'RH-017', term: 'Aposiopesis',
     what: 'A sentence broken off before it finishes, usually because the speaker cannot or will not complete it.',
-    note: 'The break is the event. Something has interrupted the thought from inside, and the actor has to know what: a sound, a fear, a thing they decided not to say. Lady Macbeth interrupts her own sentence twice in one line, and both breaks are her listening.',
+    note: 'The break is the event. Something has interrupted the thought from inside, and the speaker has to know what: a fear, a realisation, a thing they decided not to say. Lear breaks off twice inside one threat, and the second break is the admission that he cannot name the revenges he is promising.',
     examples: [
       { text: 'I will have such revenges on you both That all the world shall—I will do such things—',
         source: 'Lear, King Lear II.iv' },

@@ -16,7 +16,7 @@
 
 import { metaGet, metaSet, dbSupported } from './db.js';
 import { esc } from './ui.js';
-import { characterOpen } from './views/context.js';
+import { characterOpen, shakespeareOpen, rhetoricOpen } from './views/context.js';
 
 const TABS_KEY = 'notebook:tabs';
 const noteKey = id => `notebook:${id}`;
@@ -42,7 +42,19 @@ const ACTING_BOOK = { id: 'acting', label: 'Acting' };
 // Shown only while the Building a Character course is open, so a hidden
 // course never leaks through the notebook.
 const CHARACTER_BOOK = { id: 'character', label: 'Building a Character' };
-const builtIns = () => [ACTING_BOOK, ...IPA_BOOKS, ...(characterOpen() ? [CHARACTER_BOOK] : [])];
+// One notebook per workspace a learner actually works in. Shakespeare and
+// Rhetoric launched without one, so notes taken in either course were filed
+// under Acting or nowhere; each is gated on its own course being open, so a
+// hidden course still never leaks a tab. NEW IDS ONLY: the existing ids are
+// the storage keys and are never renamed.
+const SHAKESPEARE_BOOK = { id: 'shakespeare', label: 'Shakespeare' };
+const RHETORIC_BOOK = { id: 'rhetoric', label: 'Rhetoric' };
+const optionalBooks = () => [
+  ...(characterOpen() ? [CHARACTER_BOOK] : []),
+  ...(shakespeareOpen() ? [SHAKESPEARE_BOOK] : []),
+  ...(rhetoricOpen() ? [RHETORIC_BOOK] : []),
+];
+const builtIns = () => [ACTING_BOOK, ...IPA_BOOKS, ...optionalBooks()];
 const isIpa = id => IPA_BOOKS.some(b => b.id === id);
 
 // The IPA row is a DISCLOSURE, not a permanent second row (owner order,
@@ -62,6 +74,8 @@ let els = null;
 export function notebookForContext(workspace, course) {
   if (workspace === 'acting') return 'acting';
   if (workspace === 'character') return characterOpen() ? 'character' : 'acting';
+  if (workspace === 'shakespeare') return shakespeareOpen() ? 'shakespeare' : 'acting';
+  if (workspace === 'rhetoric') return rhetoricOpen() ? 'rhetoric' : 'acting';
   if (workspace === 'ipa') return 'ipa';
   if (workspace === 'accents') return isIpa(course) ? course : 'ipa';
   return 'acting';
@@ -90,7 +104,7 @@ function drawTabs() {
   els.tabs.innerHTML =
     tab(ACTING_BOOK.id, ACTING_BOOK.label, active === 'acting')
     + tab('ipa-group', ipaLabel, ipaOn, `aria-controls="nb-sub" aria-expanded="${showSub}"`)
-    + (characterOpen() ? tab(CHARACTER_BOOK.id, CHARACTER_BOOK.label, active === CHARACTER_BOOK.id) : '')
+    + optionalBooks().map(b => tab(b.id, b.label, active === b.id)).join('')
     + custom.map(t => tab(t.id, t.label, t.id === active)).join('')
     + '<button class="nb-tab nb-add" id="nb-add" type="button" aria-label="New notebook">+</button>';
 

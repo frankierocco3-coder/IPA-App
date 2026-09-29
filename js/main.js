@@ -4599,7 +4599,12 @@ function setRhetoricPreview(on) {
 function rhetoricPracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Rhetoric Practice</h1>
-    <p class="pane-note">No exercise has been built for this course yet. Module 1 is written and the rest is outlined. Everything there is to READ lives in the Library now (owner order 2026-09-28) rather than being split across three sections, so this page sends you there instead of keeping its own copy of the doors.</p>
+    <!-- This line carried an internal changelog note, "(owner order
+         2026-09-28)", on a learner-facing page, and a hardcoded claim about
+         which modules were written that went stale the day module 2 was.
+         Both are gone: production notes belong in source control, and a
+         count belongs to the records that hold it. -->
+    <p class="pane-note">No exercise has been built for this course yet, and inventing one to fill the page would be worse than saying so. Everything there is to read is in the Library, in one place rather than split across three sections, so this page sends you there.</p>
     <button class="track-card hub-card" id="rhp-library" type="button">
       <div class="track-glyph">🏛️</div>
       <div class="track-info"><h2>Rhetoric Library</h2><p>The reading, the figures, the thirteen fallacies and all forty, in one place.</p></div>
@@ -5013,6 +5018,10 @@ function characterProgressPane(el) {
 function shakespeareProgressPane(el) {
   return bookProgressPane(el, BOOKS.shakespeare, 'Shakespeare Progress',
     'What you have studied. Nothing here is scored: reading a text well is not a thing with a mark out of ten.');
+}
+function rhetoricProgressPane(el) {
+  return bookProgressPane(el, BOOKS.rhetoric, 'Rhetoric Progress',
+    'What you have studied. Nothing here is scored: whether an argument persuaded somebody is not a thing this app can see.');
 }
 // Parameterised 2026-09-25 alongside the Library pane, same reason.
 function bookProgressPane(el, B, heading, blurb) {
@@ -5700,6 +5709,11 @@ function progressMain(el) {
   if (activeWorkspace() === 'acting') return actingProgressPane(el);
   if (activeWorkspace() === 'character') return characterProgressPane(el);
   if (activeWorkspace() === 'shakespeare') return shakespeareProgressPane(el);
+  // Rhetoric had NO branch here, so it fell through to the accent pane and
+  // showed a rhetoric learner their weak sounds and pronunciation scores.
+  // Same defect learnMain had when this workspace was added: a new course
+  // has to be routed at every section, not just the obvious ones.
+  if (activeWorkspace() === 'rhetoric') return rhetoricProgressPane(el);
   if (activeWorkspace() === 'speech') return speechProgressPane(el);
   // Before anything is earned there is nothing to chart — say so on purpose
   // instead of showing a dashboard of zeroes.
@@ -6247,6 +6261,12 @@ function renderCredits() {
       <h2 class="guide-heading">Commedia dell’arte</h2>
       <p class="guide-text">The Building a Character course names period documents and books by what they are rather than by author, so the lessons stay readable. The full references are here. The earliest surviving contract for a professional company was signed in Padua on 25 February 1545. A Roman contract of 10 October 1564 names Lucrezia di Siena, the earliest woman known by name to have been hired as an actress. The printed collection of fifty scenarios is Flaminio Scala’s <i>Il teatro delle favole rappresentative</i> (1611). The published stock of a Captain’s material is Francesco Andreini’s <i>Le bravure del Capitano Spavento</i> (1607). The treatise on acting from a written text and from improvisation, which also describes the principal masks, is Andrea Perrucci’s <i>Dell’arte rappresentativa premeditata e all’improvviso</i> (1699).</p>
       <p class="guide-text">Stances, walks, centres of gravity and movement sequences in that course are <b>not</b> drawn from those sources. Very little about how commedia performers actually moved was written down. Those sections restate movement vocabulary reconstructed by twentieth-century teachers and in common use in commedia training today, or are Speechcraft’s own playable interpretation, and every character chapter says which is which.</p>` : ''}
+      ${rhetoricOpen() ? `
+      <h2 class="guide-heading">Rhetoric</h2>
+      <p class="guide-text">The thirteen fallacies are Aristotle’s <i>Sophistical Refutations</i> (<i>De Sophisticis Elenchis</i>), and the division into those depending on language and those not depending on it is his. The three appeals, the three occasions and the five canons come from his <i>Rhetoric</i>. Both are ancient works in the public domain, read in standard English translations; the definitions and every line of explanation in this app are <b>original Speechcraft educational content</b> rather than quotation, except where an example is explicitly cited to Aristotle.</p>
+      <p class="guide-text">The forty modern fallacies use names in general circulation, and no single source owns the list. Two are recent enough to date: <b>Gish gallop</b> was named in the 1990s for a debater who used it, and <b>motte-and-bailey</b> was named in 2005 after a form of Norman castle. Where the boundaries between named errors are argued about, the entry says so instead of presenting one account as settled.</p>
+      <p class="guide-text">The figures quote Lincoln’s Gettysburg Address (1863), the King James Bible (Genesis 1, 1 Corinthians 15), words attributed to Julius Caesar by Plutarch and Suetonius, and lines from Shakespeare. All are public-domain texts, and every Shakespeare example is a verbatim line from a play or sonnet this app carries in full.</p>
+      <p class="pane-note">Nothing in the Rhetoric course has been reviewed by a qualified rhetoric reader. Every shelf and every chapter says so where a reader will see it.</p>` : ''}
       <h2 class="guide-heading">Everything else</h2>
       <p class="guide-text">Design, course content, exercises, transcriptions and code are original to Speechcraft. General American pronunciation data derives from the Carnegie Mellon University Pronouncing Dictionary (CMUdict), used under its licence, which is reproduced below; the adaptations for the other accents are rule-derived and marked ≈.</p>
       <details class="guide-details">

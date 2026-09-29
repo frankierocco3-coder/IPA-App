@@ -121,7 +121,7 @@ export const FALLACIES = [
     overlook: 'That the emphasis carried a claim the words never made, which is why the speaker can deny it afterwards.',
     ask: 'What do the words say without the stress?',
     examples: [
-      { text: 'I did not say he stole the money. Seven words, seven meanings, one for each word you stress.' },
+      { text: 'I did not say he stole the money. Eight words, eight meanings, one for each word you stress.' },
     ] },
 
   { id: 'FA-006', term: 'Figure of speech', group: 'language',
