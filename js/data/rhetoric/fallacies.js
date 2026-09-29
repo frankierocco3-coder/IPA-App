@@ -147,9 +147,9 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-008', term: 'Secundum quid', group: 'matter',
-    modern: 'hasty generalisation',
+    modern: 'dropping a qualification',
     what: 'A statement true only with a qualification is taken as true without it, or the reverse.',
-    note: 'Also called converse accident, and often given as hasty generalisation, which is the same move from the other end. Listen for the qualification going quietly missing between one sentence and the next. The speaker rarely removes it on purpose; it falls off, and the argument gets stronger as it falls.',
+    note: 'Also called converse accident. Handbooks frequently give it as hasty generalisation, and that is the one name it should NOT have here: hasty generalisation is arguing from too few cases, which is its own card on All Fallacies, while this is a qualified claim losing its qualification. Listen for the condition going quietly missing between one sentence and the next. The speaker rarely removes it on purpose; it falls off, and the argument gets stronger as it falls.',
     overlook: 'The qualification that fell off between one sentence and the next. It usually falls; it is rarely removed.',
     ask: 'True when, where, and for whom?',
     examples: [
@@ -177,14 +177,12 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-011', term: 'False cause', group: 'matter',
-    modern: 'post hoc',
-    what: 'Something is treated as the cause of a thing when it is not, often because it merely came first.',
-    note: 'Non causa pro causa, and its famous subspecies, post hoc ergo propter hoc: after this, therefore because of this. Human beings are built to find causes and will supply one whether or not there is one to find. Two questions dissolve most instances: what else changed at the same time, and what would we expect to see if this were NOT the cause?',
-    overlook: 'Everything else that changed at the same time. We are built to find causes whether or not there is one.',
-    ask: 'What else happened, and what would we see if this were not the cause?',
+    what: 'In a refutation, a supposition that took no part in producing the contradiction is blamed for it.',
+    note: 'Non causa pro causa, and NARROWER than it looks. Aristotle is describing a move inside a refutation: you grant several things to see where they lead, the argument reaches an impossibility, and one supposition is then declared the culprit although the impossibility did not come from it. It is not the modern habit of reading a cause into a sequence of events. That habit is real and common and has its own card, post hoc, on All Fallacies; the two are relatives rather than the same error, and giving this one the modern name would quietly file it under its neighbour.',
+    overlook: 'Which supposition actually did the work. The contradiction is real, so the blame feels earned.',
+    ask: 'Take that supposition out. Does the impossibility still follow?',
     examples: [
-      { text: 'The cock crows before dawn, so the cock causes the dawn.',
-        source: 'Traditional' },
+      { text: 'Three things are granted, the argument reaches an impossibility, and the third is blamed for it. The first two produced the impossibility on their own, and the third took no part in it.' },
     ] },
 
   { id: 'FA-012', term: 'Consequent', group: 'matter',
@@ -198,14 +196,13 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-013', term: 'Many questions', group: 'matter',
-    modern: 'loaded question',
-    what: 'Two questions are asked as one, so that any single answer concedes the first.',
-    note: 'Plurium interrogationum, and the loaded question. It is not really a fallacy of arguing but of trapping: the damage is done by answering at all. The only sound response is to refuse the frame and separate the questions out loud, which always sounds evasive, which is why the trap works. For an actor it is one of the most playable moves on this shelf, because the victim can see it and still cannot get out.',
-    overlook: 'The premise you concede by answering at all. Both answers convict, which is the design.',
-    ask: 'What am I agreeing to by answering this?',
+    modern: 'compound question',
+    what: 'Several questions are put as one and a single answer is demanded, when no single answer can be true of them all.',
+    note: 'Plurium interrogationum. NOT the loaded question, which is the other trap and has its own card on All Fallacies: a loaded question smuggles in a presupposition, while this one welds separate questions together. Aristotle gives the defence himself, and it is still the only one: say how many questions that was, and answer them separately. It sounds evasive every time, which is exactly why the move keeps working.',
+    overlook: 'That it was more than one question. A single answer has to be wrong about at least one of them, and whichever you give can be quoted back.',
+    ask: 'How many questions is that? Take them one at a time.',
     examples: [
-      { text: 'Have you stopped beating your wife?',
-        source: 'Traditional' },
+      { text: 'Are these two people honest? One is and one is not, so neither yes nor no is a true answer, and either one can be used against you.' },
     ] },
 
 ];

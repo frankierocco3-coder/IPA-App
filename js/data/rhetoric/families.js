@@ -9,10 +9,15 @@
 // names. They can hold eight questions.
 //
 // ── The Aristotle overlap, handled rather than hidden ─────────
-// FIVE of the entries below ARE fallacies from js/data/rhetoric/fallacies.js
-// wearing modern names: irrelevant conclusion is ignoratio elenchi,
-// begging the question and loaded question are his, false cause is his,
-// and post hoc is a species of it. Two shelves defining the same error
+// TWO of the entries below ARE fallacies from js/data/rhetoric/fallacies.js
+// wearing modern names: irrelevant conclusion is ignoratio elenchi, and
+// begging the question is petitio principii. It was five, then four, and
+// is two: loaded question and post hoc were both claimed as his and
+// neither is. His many questions is the COMPOUND question, not the loaded
+// one, and his false cause belongs to refutation rather than to reading a
+// cause into a sequence. Both keep a pointer in their note, because the
+// relationship is real and only the identity was wrong.
+// Two shelves defining the same error
 // twice would make the app look as though it did not know. So every such
 // entry carries `alsoAristotle` with the FA id, says so in its note, and
 // defines nothing twice. The overlap becomes the lesson: the errors did
@@ -211,10 +216,9 @@ export const MODERN_FALLACIES = [
     what: 'An unproven assumption is hidden inside a question, so that answering concedes it.',
     overlook: 'The premise. The trap is that any direct answer accepts it.',
     ask: 'What am I agreeing to by answering at all?',
-    alsoAristotle: 'FA-013',
-    note: 'Aristotle’s many questions. Defined once, on the Thirteen shelf.',
+    note: 'Close to Aristotle’s many questions (FA-013) and regularly given as the same thing, but they are two different traps. His welds several questions into one and demands a single answer. This one asks a single question with an unproven premise already sitting inside it. They overlap in a room and not on the page.',
     examples: [
-      { text: 'Why do you keep refusing to take responsibility for this?' },
+      { text: 'Have you stopped beating your wife?', source: 'Traditional' },
     ] },
   { id: 'MF-017', term: 'False dilemma', family: 'smuggle',
     what: 'Two options are presented when more exist.',
@@ -289,8 +293,7 @@ export const MODERN_FALLACIES = [
     what: 'One thing followed another, so the first is treated as the cause.',
     overlook: 'Everything else that changed in between.',
     ask: 'What else happened at the same time?',
-    alsoAristotle: 'FA-011',
-    note: 'A species of Aristotle’s false cause, which is defined on the Thirteen shelf. Post hoc ergo propter hoc: after this, therefore because of this.',
+    note: 'Post hoc ergo propter hoc: after this, therefore because of this. Related to Aristotle’s false cause (FA-011) and frequently given as the same error, which it is not: his is a move inside a refutation, blaming a supposition that did no work. This is reading causation into a sequence of events, and it is by far the commoner mistake.',
     examples: [
       { text: 'I started the supplement on Monday and by Friday the headache had gone. It works.' },
     ] },

@@ -4588,7 +4588,7 @@ export async function run({ navDoc = document } = {}) {
     // provenances this shelf has.
     const faSources = FALLACIES.flatMap(f => f.examples).map(x => x.source).filter(Boolean);
     check('fallacies: a source is a short tag, never a remark about the example',
-      faSources.length === 6
+      faSources.length === 4
       && faSources.every(s => s.length <= 40 && !/[;—]/.test(s)
         && /^(Aristotle, Sophistical Refutations|Traditional)$/.test(s)),
       faSources.join(' | '));
@@ -4655,9 +4655,15 @@ export async function run({ navDoc = document } = {}) {
     // these had none, so the two shelves read differently on the one thing a
     // reader learns from. NONE is attributed: attributing a bad argument to
     // a named speaker is a claim about that person this file cannot support.
-    check('families: every entry carries exactly one example, and none is attributed',
+    // A source may be a bare provenance TAG; what it may never be is a
+    // person. The first version of this banned every source outright, which
+    // was too strong: "Traditional" says a stock example was not invented
+    // here, and that is honesty rather than attribution. What the rule is
+    // actually about is never pinning a bad argument on a named speaker.
+    check('families: every entry carries exactly one example, and none names a speaker',
       MODERN_FALLACIES.every(f => f.examples?.length === 1
-        && f.examples.every(x => x.text?.trim() && x.source === undefined)),
+        && f.examples.every(x => x.text?.trim()
+          && (x.source === undefined || /^(Constructed|Traditional)$/.test(x.source)))),
       MODERN_FALLACIES.filter(f => f.examples?.length !== 1).map(f => f.id).join(' '));
     check('families: house style holds on our prose, examples exempt',
       MODERN_FALLACIES.flatMap(f => [f.what, f.overlook, f.ask, f.note ?? ''])
@@ -4671,8 +4677,12 @@ export async function run({ navDoc = document } = {}) {
     // is it and post hoc is the useful modern subspecies. Adding it would
     // have put the same error on one shelf twice, which is the exact
     // problem the overlap handling exists to prevent.
+    // TWO. Loaded question and post hoc both claimed to BE one of the
+    // thirteen and neither is: his many questions is the compound question,
+    // his false cause belongs to refutation. Both keep a pointer in their
+    // note, so the relationship survives and only the false identity went.
     check('families: every Aristotle overlap is declared and resolves',
-      aristotleOverlaps().length === 4
+      aristotleOverlaps().length === 2
       && aristotleOverlaps().every(f => !!fallacyById(f.alsoAristotle))
       && !MODERN_FALLACIES.some(f => f.term.toLowerCase() === 'false cause'),
       aristotleOverlaps().map(f => `${f.term}->${f.alsoAristotle}`).join(' '));
@@ -4689,8 +4699,14 @@ export async function run({ navDoc = document } = {}) {
     // (owner order 2026-09-28). Equivocation and amphiboly are still called
     // what Aristotle called them, and inventing an alias for them would be
     // inventing scholarship.
+    // SIX, not seven. FA-011 gave up its modern name on 2026-09-29: it was
+    // labelled "post hoc", which is a neighbouring error with its own card,
+    // and Aristotle's false cause is the narrower move inside a refutation.
+    // A modern name appears only where the error really has one, and that
+    // rule has to bite when the tempting name belongs to somebody else.
     check('fallacies: a modern name appears only where the error really has one',
-      FALLACIES.filter(f => f.modern).length === 7
+      FALLACIES.filter(f => f.modern).length === 6
+      && !fallacyById('FA-011').modern
       && FALLACIES.filter(f => f.modern).every(f =>
         f.modern.trim() && f.modern.toLowerCase() !== f.term.toLowerCase())
       && !fallacyById('FA-001').modern && !fallacyById('FA-002').modern,
