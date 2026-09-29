@@ -2111,8 +2111,12 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Library')); await sleep(350);
-      const qeTile = () => doc.querySelector('[data-tile="col:question"]');
-      check('textbook: a permanent Question Everything card shelves in the Acting Library',
+      // It shelved as its own Library tile until 2026-09-29; it is now a
+      // page INSIDE Script Analysis, carrying the same full textbook, so
+      // the route to it is one click deeper.
+      clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
+      const qeTile = () => doc.querySelector('[data-item="col:question"]');
+      check('textbook: Question Everything shelves inside Script Analysis',
         !!qeTile() && qeTile().textContent.includes('Question Everything'));
       const dissBefore = (await idbAll(STORES.dissections)).length;
       clickIn(qeTile());
@@ -3293,7 +3297,9 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the Library landing shows collections only, never all 39 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
-          === 'col:scene,col:lists,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          // col:lists and col:question left this landing on 2026-09-29: both
+          // are now pages INSIDE col:scene, carrying the full textbook.
+          === 'col:scene,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -3305,13 +3311,17 @@ export async function run({ navDoc = document } = {}) {
       // indistinguishable from the page not existing.
       if (libSearch20) {
         const found = [];
-        for (const q of ['lines', 'memory', 'Lines & Memory', 'running lines']) {
+        // All three standalone pages on this shelf, not just the one that
+        // taught us the lesson. Each lost its own tile at some point and
+        // would have lost its name from the search with it.
+        for (const q of ['lines', 'memory', 'Lines & Memory', 'running lines',
+          'four lists', 'question everything', 'dissection']) {
           libSearch20.value = q;
           libSearch20.dispatchEvent(new w20.Event('input', { bubbles: true }));
           await sleep(260);
           found.push(`${q}:${[...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile).join('|') || 'NOTHING'}`);
         }
-        check('acting: searching for Lines & Memory finds the shelf it lives on',
+        check('acting: every standalone page on the shelf is findable by its own name',
           found.every(f => f.includes('col:scene')), found.join(' '));
         libSearch20.value = '';
         libSearch20.dispatchEvent(new w20.Event('input', { bubbles: true }));
@@ -3331,14 +3341,43 @@ export async function run({ navDoc = document } = {}) {
       // Clicking it is the check; a source pin would not have caught it.
       clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
       const scTiles = [...doc.querySelectorAll('.item-tile')].map(b => b.dataset.item);
+      // Six tiles still: Lines & Memory leads, then the five lessons with
+      // two of them swapped for the full textbook pages they summarised
+      // (owner order 2026-09-29). The swap must happen IN PLACE, so the
+      // short lessons must not also appear beside the pages that replaced
+      // them, which is the duplication the order removed.
       check('acting: Script Analysis leads with Lines & Memory and every tile carries a key',
         scTiles[0] === 'col:lines' && scTiles.every(Boolean)
-        && scTiles.length === 6, scTiles.join(' '));
+        && scTiles.length === 6
+        && scTiles.includes('col:lists') && scTiles.includes('col:question')
+        && !scTiles.includes('ac-fourlists') && !scTiles.includes('ac-question'),
+        scTiles.join(' '));
       clickIn(doc.querySelector('[data-item="col:lines"]')); await sleep(450);
       check('acting: the Lines & Memory tile actually opens Lines & Memory',
         doc.querySelector('.track-title')?.textContent.includes('Lines & Memory')
         && /The Line You Know/.test(doc.querySelector('#line-lesson h1')?.textContent ?? ''),
         doc.querySelector('#line-lesson h1')?.textContent ?? 'no heading');
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      // EVERY page tile opens its FULL page, not the short lesson. Clicking
+      // is the check: a source pin would not catch a handler that resolves
+      // the key to the wrong renderer, which is exactly how Lines & Memory
+      // broke the first time.
+      clickIn(doc.querySelector('[data-item="col:lists"]')); await sleep(450);
+      check('acting: the Four Lists tile opens the full page, not the short lesson',
+        /The Four Lists/.test(doc.querySelector('.page-h')?.textContent ?? '')
+        && doc.body.textContent.includes('open The Four Lists'),
+        doc.querySelector('.page-h')?.textContent ?? 'no heading');
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
+      clickIn(doc.querySelector('[data-item="col:question"]')); await sleep(450);
+      // The point is FULL versus short: the lesson of the same name is four
+      // paragraphs, the textbook is every question. Counting headings was
+      // the wrong test and asserted 6 when the page has 7 (the six numbered
+      // sections plus Keep Returning to the Text), so it counts the
+      // questions instead, which is the thing that makes it the textbook.
+      check('acting: the Question Everything tile opens the full textbook',
+        doc.getElementById('sd-title')?.textContent === 'Question Everything'
+        && doc.querySelectorAll('#sd-textbook li').length >= 80,
+        `${doc.querySelectorAll('#sd-textbook li').length} questions`);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       // A chapter with figures: both render with their alt text and
@@ -3924,8 +3963,14 @@ export async function run({ navDoc = document } = {}) {
       /function renderLineLesson/.test(mainSrc2)
       && !/renderLineLesson[\s\S]{0,1600}<(textarea|input|select)/.test(mainSrc2.slice(mainSrc2.indexOf('function renderLineLesson')))
       && /const LINES_TILE = 'col:lines'/.test(mainSrc2)
-      && /key: LINES_TILE/.test(mainSrc2)
-      && /dataset\.item === LINES_TILE/.test(mainSrc2));
+      // Stronger than the old pin, which required one literal in the tile
+      // and a matching comparison in the handler. Both the tiles AND the
+      // handler are now built from the SAME SHELF_PAGES list, so a page
+      // cannot be added to one and missed by the other at all. That was
+      // the actual failure this check exists for.
+      && /const SHELF_PAGES = \{/.test(mainSrc2)
+      && /key: LINES_TILE, title: 'Lines & Memory', go: renderLineLesson/.test(mainSrc2)
+      && /pages\.find\(x => x\.key === b\.dataset\.item\)/.test(mainSrc2));
   }
 
   // ── 27. The Cockney course: gate, data, derivation, audio parity ─

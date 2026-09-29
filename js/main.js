@@ -2992,6 +2992,16 @@ const bookReviewerKind = B => {
   return kinds.length === 1 ? kinds[0] : 'specialist';
 };
 const bookReviewerPhrase = B => REVIEWER_PHRASE[bookReviewerKind(B)] ?? 'a qualified specialist';
+// The acting default, for the three surfaces that carry no lesson record to
+// read a reviewer off: Acting's own review inventory, its draft reader, and
+// The Four Lists, which is a page rather than a lesson.
+//
+// THIS CONSTANT WAS DELETED ON 2026-09-28 AND THREE USES WERE LEFT BEHIND.
+// The Four Lists page threw ReferenceError on render and could not be opened
+// at all, and it shipped: the check that would have caught it did not exist
+// until a shelf tile was added for that page the next day. Its value is
+// unchanged, so the three surfaces read exactly as they did before.
+const ACTING_DRAFT_BADGE = draftBadgeFor(null);
 const approachPublished = a => speechPublished(a.id);
 
 // ── Acting → Learn ────────────────────────────────────────────
@@ -3503,8 +3513,17 @@ function actingLibraryPane(el) {
   // searched for by its own name is missing as far as a reader is
   // concerned. Its home shelf now carries its name and its subject.
   const EXTRA_KEYWORDS = {
+    // Lines & Memory, The Four Lists and Question Everything are all
+    // standalone PAGES on this shelf rather than lesson records, so none of
+    // them is in any collection's lesson list and none contributes a word
+    // to the shelf search, which is built from lesson titles. Every time a
+    // page has lost its own tile here it has also lost its name from the
+    // search, which to a reader is indistinguishable from it not existing.
     scene: 'lines memory Lines & Memory off book learning lines running lines '
-      + 'forgetting recall retrieval cue',
+      + 'forgetting recall retrieval cue '
+      + 'four lists The Four Lists character facts says about others reading five times '
+      + 'question everything Question Everything dissection given circumstances objective '
+      + 'obstacle tactics text investigation questions',
   };
   const colTile = id => {
     const c = ACTING_COLLECTIONS.find(x => x.id === id);
@@ -3527,20 +3546,16 @@ function actingLibraryPane(el) {
     // 2026-09-25), so its standalone tile is gone: the same page in two
     // places is exactly the redundancy that order was about. The page
     // itself, and its owner-supplied verbatim copy, are untouched.
+    // ONE door for preparing the text (owner order 2026-09-29). The Four
+    // Lists and Question Everything had tiles of their own here AND lessons
+    // of the same name inside Script Analysis, so each was two doors onto
+    // one subject. They now shelve inside that collection carrying the FULL
+    // textbook, which is what the order asked for, and the tiles are gone.
+    // Their keywords moved to EXTRA_KEYWORDS above rather than being
+    // deleted with them: retiring the Lines & Memory tile in September took
+    // its search terms with it and made the page unfindable by its own
+    // name, and this is the same shelf making the same move twice more.
     { ...colTile('scene'), group: G1 },
-    // The Four Lists tool sits with the collection it serves (owner
-    // order, 2026-08-27): investigation first, then its worksheet.
-    { key: 'col:lists', tone: 'is-lavender', emoji: '📋', img: 'img/ui/four-lists.png', title: 'The Four Lists',
-      group: G1,
-      keywords: 'character facts says about others reading five times building a character',
-      go: () => renderFourListsLesson() },
-    // Question Everything — the text-dissection textbook. Moved here from
-    // the Studio hub (owner order, 2026-08-19): it is reading, so it lives
-    // on the shelf. Count = the six numbered DISSECT_SECTIONS.
-    { key: 'col:question', tone: 'is-lavender', emoji: '🔍', img: 'img/ui/question.png', title: 'Question Everything',
-      group: G1,
-      keywords: 'dissection given circumstances objective obstacle tactics text investigation questions',
-      go: renderDissectTextbook },
     { ...colTile('principles'), group: G2 },
     { ...colTile('listening'), group: G2 },
     // The Building a Character shelf left Acting on 2026-09-23 with its
@@ -3634,10 +3649,32 @@ function renderActorIpaTools() {
     }));
 }
 
-// The tile key for Lines & Memory, written once so the renderer and the
-// handler cannot disagree about it again. They did, and the page became
-// unreachable; see the wiring at the foot of this function.
+// STANDALONE PAGES THAT SHELVE INSIDE A COLLECTION, rather than lesson
+// records. Written once so the renderer and the handler cannot disagree
+// about a key again. They did, and Lines & Memory became unreachable; see
+// the wiring at the foot of renderActingCollection.
+//
+// Lines & Memory has shelved this way since 2026-09-25. The Four Lists and
+// Question Everything join it 2026-09-29 by owner order, and they bring the
+// FULL textbook: each one REPLACES the short lesson that summarised it, in
+// that lesson's own position on the shelf, and their separate Library tiles
+// are retired. The same thing behind two doors was the duplication, and it
+// is the third time this shelf has had it removed.
+//
+// The lesson records are NOT retired. ac-fourlists and ac-question stay in
+// the Learn path exactly as they were, so nothing stored moves and the
+// guided sequence still has a step for each idea. What changed is which
+// version the READING shelf opens, which is the surface the order was about.
 const LINES_TILE = 'col:lines';
+const SHELF_PAGES = {
+  scene: [
+    { key: LINES_TILE, title: 'Lines & Memory', go: renderLineLesson },
+    { key: 'col:lists', title: 'The Four Lists', go: renderFourListsLesson,
+      replaces: 'ac-fourlists' },
+    { key: 'col:question', title: 'Question Everything', go: renderDissectTextbook,
+      replaces: 'ac-question' },
+  ],
+};
 
 function renderActingCollection(collectionId) {
   record(() => renderActingCollection(collectionId));
@@ -3646,20 +3683,30 @@ function renderActingCollection(collectionId) {
   const c = B.collections.find(x => x.id === collectionId);
   if (!c) return goSection('library');
   const lessons = c.lessons.map(x => bookLessonById(B, x)).filter(Boolean);
+  // Page tiles that lead the shelf, then the lessons in order, with any
+  // lesson a page REPLACES swapped for that page in its own position. The
+  // seq numbers and the chapter count both come off this one list, so they
+  // cannot drift from what is actually on the shelf.
+  const pages = SHELF_PAGES[collectionId] ?? [];
+  const swapped = new Map(pages.filter(p => p.replaces).map(p => [p.replaces, p]));
+  const entries = [
+    ...pages.filter(p => !p.replaces).map(p => ({ key: p.key, title: p.title })),
+    ...lessons.map(l => swapped.get(l.id)
+      ? { key: swapped.get(l.id).key, title: swapped.get(l.id).title }
+      : { key: l.id, title: l.title,
+          note: B.visible(l) ? '' : draftBadgeFor(l),
+          state: B.visible(l) ? '' : 'is-pending' }),
+  ];
   workspacePage(
     pageTopbar(`📚 ${B.libraryName}`, '#8a6d3b'),
     `<div class="ws-head">
        <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id] ?? c.icon}</span>${esc(moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }))}</h1>
-       <p class="ws-sub">${lessons.length + (c.id === 'scene' ? 1 : 0)} chapters · ${esc(B.libraryName)}</p>
+       <p class="ws-sub">${entries.length} chapters · ${esc(B.libraryName)}</p>
      </div>`,
     `<p class="pane-note">Read in any order. This sequence is a suggested starting point.</p>
      <div class="item-grid">
-       ${collectionId === 'scene' ? itemTileHtml({
-         key: LINES_TILE, seq: '01', title: 'Lines & Memory' }) : ''}
-       ${lessons.map((l, i) => itemTileHtml({
-         key: l.id, seq: String(i + 1 + (collectionId === 'scene' ? 1 : 0)).padStart(2, '0'), title: l.title,
-         note: B.visible(l) ? '' : draftBadgeFor(l),
-         state: B.visible(l) ? '' : 'is-pending',
+       ${entries.map((e, i) => itemTileHtml({
+         ...e, seq: String(i + 1).padStart(2, '0'),
        })).join('')}
      </div>
      ${collectionId === 'scene' ? `
@@ -3685,9 +3732,13 @@ function renderActingCollection(collectionId) {
   // for a chapter called 'col:lines', which does not exist. That was the
   // ONLY door left after the standalone shelf tile was retired (owner
   // order 2026-09-25), so Lines & Memory could not be opened at all.
-  // One handler now, so a key can never be wired twice or not at all.
-  app.querySelectorAll('[data-item]').forEach(b => b.addEventListener('click', () =>
-    (b.dataset.item === LINES_TILE ? navTo(renderLineLesson) : renderActingChapter(b.dataset.item))));
+  // One handler now, so a key can never be wired twice or not at all. It
+  // resolves against the SAME list the tiles were built from, which is what
+  // stops a third page being added to one and not the other.
+  app.querySelectorAll('[data-item]').forEach(b => b.addEventListener('click', () => {
+    const p = pages.find(x => x.key === b.dataset.item);
+    return p ? navTo(p.go) : renderActingChapter(b.dataset.item);
+  }));
 }
 
 function renderActingGlossary() {
