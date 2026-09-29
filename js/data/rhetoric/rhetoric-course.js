@@ -29,8 +29,47 @@
 // that ledger already defines. Claude may write these and may never
 // approve them.
 
+// REVISED 2026-09-29. It used to open "Persuasion is not something done to
+// a person", which contradicted the app's own preface three screens away:
+// that says plainly that speech is an action performed upon somebody. Both
+// cannot be true, and the preface is right. What distinguishes honest
+// persuasion is not that nothing is being done, it is what the person is
+// left able to do afterwards.
 export const RHETORIC_PRINCIPLE =
-  'Persuasion is not something done to a person. It is the work of making your reasons available to somebody who does not yet hold them, and the same craft that does it honestly is the craft that does it dishonestly.';
+  'Ethical persuasion is not merely something done to a person. It makes your reasons available while leaving them able to examine those reasons, question them and refuse them, and the same craft that does it honestly is the craft that does it dishonestly.';
+
+// ── Before You Begin ──────────────────────────────────────────
+// The warning, shown once on the first visit to Rhetoric and readable any
+// time from the Library. Owner order 2026-09-29.
+//
+// It is NOT a lesson: it carries no objective, no reflection and no ledger
+// entry, because it is not making a claim about rhetoric that a reviewer
+// would sign. It is the condition on using the shelves, and it has to be
+// readable before anything is approved, which a gated lesson could not be.
+//
+// The three speakers are the point. The course cannot tell them apart for
+// a reader and does not pretend to; what it can do is say that the tools
+// work identically for all three, which is the fact the whole subject has
+// been accused of ever since Athens.
+export const RHETORIC_THRESHOLD = {
+  title: 'Before You Begin',
+  lead: 'This course teaches how speech moves people. That knowledge does not arrive with a conscience attached, and it is worth being plain about that before you take any of it.',
+  speakers: [
+    { h: 'The speaker who knows',
+      p: 'They say what they have actually examined. Their confidence is earned, it matches what they understand, and it can be checked by anybody who cares to. When they reach for a technique, the technique is carrying something true to somebody who did not have it.' },
+    { h: 'The speaker who is certain',
+      p: 'They speak past the edge of what they know, and they are not lying. They have mistaken the feeling of being sure for the fact of being right, which everybody does. Everything in this course makes them more convincing without making them any more correct.' },
+    { h: 'The speaker who is working you',
+      p: 'They understand exactly how an audience moves, and they use that to stop the audience examining anything. This is the speaker rhetoric has been accused of producing since the subject was invented, and the accusation is not unfair: the craft does produce them.' },
+  ],
+  hard: 'From the outside, at speed, in a room, the three are frequently indistinguishable. That is the problem, and no technique in this course solves it. The tools work identically for all three.',
+  emotion: [
+    'Emotion grounded in knowledge deepens understanding. It makes a consequence real enough to act on, and without it a true argument frequently moves nobody at all.',
+    'Emotion covering an absence of knowledge replaces understanding. It supplies the certainty the evidence did not, and it feels, to everybody present, exactly like the first one.',
+    'Same feeling in the room. Opposite function. Telling them apart in yourself, before you worry about anybody else, is most of what this course is for.',
+  ],
+  condition: 'You can skip all of it and use the shelves. The figures and the fallacies are open to anybody who opens them. But knowing how a thing works on people is not a neutral possession, and there is only one honest condition on holding it: whatever you learn to do to somebody, be willing to have it done to you.',
+};
 
 // Six modules. Modules 1, 2 and 3 are written; 4 to 6 are outlined and
 // carry no lessons yet, which is why the shelf shows three collections.

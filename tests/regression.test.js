@@ -55,7 +55,7 @@ import { lexMarkedExample, lexTermForms } from '../js/views/lexicon-mark.js';
 // against the function the app actually ships it with.
 import { esc as uiEsc } from '../js/ui.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
-import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
+import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallaciesIn, fallacyById } from '../js/data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from '../js/data/rhetoric/families.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
@@ -4768,11 +4768,38 @@ export async function run({ navDoc = document } = {}) {
     const rSrc = await viewSource();
     check('rhetoric: the course flag is distinct from the reading-pathway flag',
       /RHETORIC_COURSE_LIVE/.test(rSrc) && /const RHETORIC_LIVE = false;/.test(rSrc));
+    // THE THRESHOLD (owner order 2026-09-29). Three speakers, both
+    // directions of emotion, and the condition on using the shelves. It is
+    // NOT a lesson and must never become one: no objective, no reflection,
+    // no ledger entry, because it makes no claim a reviewer would sign and
+    // it has to be readable while every lesson is still gated.
+    check('threshold: three speakers, emotion both ways, and the condition',
+      RHETORIC_THRESHOLD.speakers.length === 3
+      && RHETORIC_THRESHOLD.speakers.every(s => s.h?.trim() && s.p?.trim())
+      && RHETORIC_THRESHOLD.emotion.length === 3
+      && RHETORIC_THRESHOLD.lead?.trim() && RHETORIC_THRESHOLD.hard?.trim()
+      && RHETORIC_THRESHOLD.condition?.trim()
+      && !RHETORIC_LESSONS.some(l => l.id === 'rh-threshold'),
+      `${RHETORIC_THRESHOLD.speakers.length} speakers`);
+    // Shown once and never trapping anybody: one flag, two ways out, and a
+    // permanent Library door that writes nothing when it is read again.
+    const thrSrc = await viewSource();
+    check('threshold: once on first visit, skippable, and permanently readable',
+      /if \(!store\.introsSeen\.rhetoric\) showRhetoricThreshold\(\)/.test(thrSrc)
+      && /id="rht-learn"/.test(thrSrc) && /id="rht-tools"/.test(thrSrc)
+      && /function renderRhetoricThreshold/.test(thrSrc)
+      && /col:rh-threshold/.test(thrSrc)
+      && !/function renderRhetoricThreshold[\s\S]{0,700}markIntroSeen/.test(
+        thrSrc.slice(thrSrc.indexOf('function renderRhetoricThreshold'))));
+    // The principle contradicted the app's own preface, which says speech
+    // IS an action performed on somebody. Pinned so it cannot drift back.
+    check('rhetoric: the principle no longer denies that persuasion acts on a person',
+      /^Ethical persuasion is not merely something done to a person/.test(RHETORIC_PRINCIPLE)
+      && /examine those reasons, question them and refuse them/.test(RHETORIC_PRINCIPLE));
     check('rhetoric: house style holds — no dashes, no contractions, curly quotes',
-      RHETORIC_LESSONS.every(l => {
-        const t = JSON.stringify([l.title, l.objective, l.orientation, l.reflection, l.body]);
-        return !/\u2014|\u2013/.test(t) && !/\b\w+'(s|t|re|ve|ll|d|m)\b/.test(t);
-      }));
+      [...RHETORIC_LESSONS.map(l => JSON.stringify([l.title, l.objective, l.orientation, l.reflection, l.body])),
+        JSON.stringify(RHETORIC_THRESHOLD), RHETORIC_PRINCIPLE].every(t =>
+        !/\u2014|\u2013/.test(t) && !/\b\w+'(s|t|re|ve|ll|d|m)\b/.test(t)));
   }
 
   // ── 21k. The Shakespeare course: written in part, hidden by default ──

@@ -9,7 +9,7 @@ import { scriptAnalysisById } from './data/script-analysis.js';
 import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
-import { RHETORIC_PRINCIPLE, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
+import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
@@ -687,7 +687,14 @@ function learnMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLearnPane(el);
   if (ws === 'character') return bookLearnPane(el, BOOKS.character);
   if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
-  if (ws === 'rhetoric') return bookLearnPane(el, BOOKS.rhetoric);
+  if (ws === 'rhetoric') {
+    bookLearnPane(el, BOOKS.rhetoric);
+    // Once, on the first visit, and never again unless asked for. The
+    // Library card below is the permanent door, the way About Standard
+    // British is the permanent door to that course's intro.
+    if (!store.introsSeen.rhetoric) showRhetoricThreshold();
+    return;
+  }
   if (ws === 'speech') return speechLearnPane(el);
   ipaLearnPane(el, course);
 }
@@ -4596,6 +4603,69 @@ function setRhetoricPreview(on) {
 // exercises to fill a screen. Without these, both sections would fall
 // through to the accent panes and show a learner vowel drills inside a
 // course about persuasion.
+// ── Before You Begin: the Rhetoric threshold ────────────────────
+// Owner order 2026-09-29. The warning he described from the start: three
+// speakers, the difference between emotion that carries knowledge and
+// emotion that stands in for it, and the condition on using the shelves.
+//
+// Shown ONCE on the first visit to Rhetoric Learn, on the intro-overlay
+// mechanism the Standard British course already uses, and readable any
+// time from the Library. The two ways out are the real ones: start the
+// course, or go straight to the shelves. Nobody is made to read it twice,
+// and nobody is prevented from skipping it, because a warning that traps
+// somebody is not a warning, it is a toll.
+function rhetoricThresholdHtml() {
+  const T = RHETORIC_THRESHOLD;
+  return `
+    <p class="guide-text">${esc(T.lead)}</p>
+    ${T.speakers.map(s => `
+      <h2 class="guide-heading">${esc(s.h)}</h2>
+      <p class="guide-text">${esc(s.p)}</p>`).join('')}
+    <p class="guide-text"><b>${esc(T.hard)}</b></p>
+    <h2 class="guide-heading">Emotion, both ways</h2>
+    ${T.emotion.map(p => `<p class="guide-text">${esc(p)}</p>`).join('')}
+    <h2 class="guide-heading">What you are agreeing to</h2>
+    <p class="guide-text">${esc(T.condition)}</p>`;
+}
+
+function showRhetoricThreshold() {
+  if (document.querySelector('.intro-overlay')) return;
+  const ov = document.createElement('div');
+  ov.className = 'intro-overlay';
+  ov.innerHTML = `
+    <div class="intro-card" role="dialog" aria-modal="true" aria-label="${esc(RHETORIC_THRESHOLD.title)}" tabindex="-1">
+      <button class="quit intro-close" aria-label="Close" type="button">✕</button>
+      <h1>${esc(RHETORIC_THRESHOLD.title)}</h1>
+      ${rhetoricThresholdHtml()}
+      <div class="ob-actions ob-actions-col">
+        <button class="btn btn-primary" id="rht-learn" type="button">Learn the craft</button>
+        <button class="btn-lite" id="rht-tools" type="button">Go straight to the tools</button>
+      </div>
+      <p class="pane-note">This appears once. It is in the Library whenever you want it again.</p>
+    </div>`;
+  document.body.appendChild(ov);
+  const done = () => { store.markIntroSeen('rhetoric'); ov.remove(); };
+  ov.querySelector('.intro-close').addEventListener('click', done);
+  ov.querySelector('#rht-learn').addEventListener('click', done);
+  ov.querySelector('#rht-tools').addEventListener('click', () => { done(); goSection('library'); });
+  ov.addEventListener('keydown', e => { if (e.key === 'Escape') done(); });
+  ov.querySelector('.intro-card').focus();
+}
+
+// The permanent door. Reading it again must never re-arm the overlay or
+// touch anything stored, so this renders the same copy and writes nothing.
+function renderRhetoricThreshold() {
+  record(renderRhetoricThreshold);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('⚖️ ' + esc(RHETORIC_THRESHOLD.title), '#8a6d3b')}
+    <main class="guide">
+      <h1>${esc(RHETORIC_THRESHOLD.title)}</h1>
+      ${rhetoricThresholdHtml()}
+    </main>`;
+  wireBrandHome();
+}
+
 function rhetoricPracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Rhetoric Practice</h1>
@@ -4816,6 +4886,12 @@ function rhetoricLibraryPane(el) {
   const G1 = 'The reading', G2 = 'The references';
   const written = RHETORIC_COLLECTIONS.length;
   const cards = [
+    // First, and before the course: the condition on using any of it. This
+    // is the permanent door to the overlay shown once on a first visit.
+    { key: 'col:rh-threshold', tone: 'is-sage', emoji: '⚖️', title: RHETORIC_THRESHOLD.title,
+      group: G1,
+      keywords: 'threshold warning ethics three speakers emotion knowledge manipulation responsibility before you begin',
+      go: renderRhetoricThreshold },
     ...RHETORIC_COLLECTIONS.map(c => ({
       key: `col:${c.id}`, tone: 'is-sage', emoji: c.icon, title: c.title,
       group: G1, count: c.lessons.length, unit: 'chapter',
