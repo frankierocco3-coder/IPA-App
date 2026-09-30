@@ -4834,9 +4834,9 @@ function fallacyRowHtml(f) {
   return `
     <article class="lex-row is-bare">
       <p class="lex-modern">${esc(f.what)}</p>
+      ${f.examples.map(x => egHtml(x, 'Example')).join('')}
       ${hidesAskHtml(f)}
-      <p class="lex-note">${esc(f.note)}</p>
-      ${f.examples.map(egHtml).join('')}
+      ${breakdownHtml(f)}
     </article>`;
 }
 
@@ -4858,11 +4858,19 @@ const hidesAskHtml = f => `
 // own quoted speech, because the fallacy is the exchange rather than one
 // line. Wrapping those gave them a doubled opening quote and a closing one
 // that never opened. Quote only what is not already quoting itself.
-const egHtml = x => {
+// The note, last and labelled (owner order 2026-09-29). It is the part a
+// reader consults rather than reads, so it goes after the question that
+// exposes the move, not between the definition and the example.
+const breakdownHtml = f => f.note
+  ? `<p class="lex-note"><span class="lex-label">Further breakdown</span>${esc(f.note)}</p>`
+  : '';
+
+const egHtml = (x, label) => {
   const t = String(x.text ?? '');
   const selfQuoted = t.trimStart().startsWith('“');
   return `
-  <p class="lex-eg">${selfQuoted ? esc(t) : `“${esc(t)}”`}${
+  <p class="lex-eg">${label ? `<span class="lex-label">${esc(label)}</span>` : ''}${
+    selfQuoted ? esc(t) : `“${esc(t)}”`}${
     x.source ? `<span class="lex-src">${esc(x.source)}</span>` : ''}</p>`;
 };
 
@@ -5030,9 +5038,9 @@ function modernFallacyHtml(f) {
     <article class="lex-row is-bare">
       ${a ? `<p class="lex-kind">also Aristotle · ${esc(a.term)}</p>` : ''}
       <p class="lex-modern">${esc(f.what)}</p>
+      ${(f.examples ?? []).map(x => egHtml(x, 'Example')).join('')}
       ${hidesAskHtml(f)}
-      ${f.note ? `<p class="lex-note">${esc(f.note)}</p>` : ''}
-      ${(f.examples ?? []).map(egHtml).join('')}
+      ${breakdownHtml(f)}
     </article>`;
 }
 
@@ -7054,7 +7062,7 @@ function rhetoricRowHtml(r) {
       <h3 class="lex-term">${esc(r.term)}</h3>
       <p class="lex-modern">${esc(r.what)}</p>
       <p class="lex-note">${esc(r.effect)}</p>
-      ${r.examples.map(egHtml).join('')}
+      ${r.examples.map(x => egHtml(x)).join('')}
     </article>`;
 }
 

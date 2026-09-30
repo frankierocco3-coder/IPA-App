@@ -95,7 +95,7 @@ export const MODERN_FALLACIES = [
     what: 'The other person’s position is replaced with a weaker or more extreme version, and that version is attacked.',
     overlook: 'That the argument being demolished was never made. The audience watches a real refutation of an unreal claim and scores it as a win.',
     ask: 'Would the other person recognise that as their position?',
-    note: 'Modern name, not Aristotle’s, though it functions as a species of his ignoratio elenchi. The strongest habit in this whole shelf is the opposite move: build their case at its best before you touch it.',
+    note: 'Modern name, not Aristotle’s, though it works as a species of his ignoratio elenchi. The strongest habit on this shelf is the opposite move: build their case at its best before you touch it.',
     examples: [
       { text: 'You want to cut two percent from the defence budget. So your plan is that we simply have no army at all.' },
     ] },
@@ -128,7 +128,7 @@ export const MODERN_FALLACIES = [
     what: 'Attention is drawn to a different issue so the original question fades from view.',
     overlook: 'That the question was never answered. A red herring usually introduces something TRUE, which is why it works.',
     ask: 'Did that answer the question, or did it make me think about something else?',
-    note: 'The classic pairing with the straw man, and the two are regularly confused. A straw man SUBSTITUTES an argument and attacks it. A red herring CHANGES THE SUBJECT. A single passage can do both.',
+    note: 'The classic pairing with the straw man, and the two are constantly confused. A straw man SUBSTITUTES an argument and attacks it. A red herring CHANGES THE SUBJECT. One passage can do both.',
     examples: [
       { text: 'You ask why the accounts are eight months late. Let me tell you what the people in this department did during the flood.' },
     ] },
@@ -157,7 +157,7 @@ export const MODERN_FALLACIES = [
     what: 'So many weak claims are made so quickly that answering them all is impossible in the time available.',
     overlook: 'That volume is not weight. Every unanswered claim looks conceded.',
     ask: 'Which of these actually carries the argument? Answer that one properly.',
-    note: 'Principally a debate tactic rather than a reasoning error, named in the 1990s. The individual claims still each need examining, which is exactly the thing the tactic makes impossible.',
+    note: 'A debate tactic rather than a reasoning error, named in the 1990s. Each claim still needs examining, which is exactly what the tactic makes impossible.',
     examples: [
       { text: 'In the two minutes I have: the dating is wrong, the sample is wrong, the statistics are wrong, the author has been discredited, the journal is captured, the funding is foreign, and there are nine other errors I will not reach.' },
     ] },
@@ -208,7 +208,7 @@ export const MODERN_FALLACIES = [
     overlook: 'The circle, when it is wide enough that the beginning and the end look like different sentences.',
     ask: 'Is there independent support here, or is the conclusion restated in other words?',
     alsoAristotle: 'FA-010',
-    note: 'Aristotle’s petitio principii, unchanged. Defined once, on The 13 Fallacies. Note the modern drift: in ordinary speech the phrase now usually means “raises the question”, which is not this.',
+    note: 'Aristotle’s petitio principii, unchanged, and defined once on The 13 Fallacies. Note the modern drift: in ordinary speech the phrase now usually means raises the question, which is not this.',
     examples: [
       { text: 'We know the witness is reliable, because she would not say a thing like that unless it were true. And we know she would not say it unless it were true, because she is reliable.' },
     ] },
@@ -216,7 +216,7 @@ export const MODERN_FALLACIES = [
     what: 'An unproven assumption is hidden inside a question, so that answering concedes it.',
     overlook: 'The premise. The trap is that any direct answer accepts it.',
     ask: 'What am I agreeing to by answering at all?',
-    note: 'Close to Aristotle’s many questions (FA-013) and regularly given as the same thing, but they are two different traps. His welds several questions into one and demands a single answer. This one asks a single question with an unproven premise already sitting inside it. They overlap in a room and not on the page.',
+    note: 'Close to Aristotle’s many questions (FA-013) and regularly given as the same thing, but they are two traps. His welds several questions into one and demands a single answer. This one asks a single question with an unproven premise already inside it.',
     examples: [
       { text: 'Have you stopped beating your wife?', source: 'Traditional' },
     ] },
@@ -293,7 +293,7 @@ export const MODERN_FALLACIES = [
     what: 'One thing followed another, so the first is treated as the cause.',
     overlook: 'Everything else that changed in between.',
     ask: 'What else happened at the same time?',
-    note: 'Post hoc ergo propter hoc: after this, therefore because of this. Related to Aristotle’s false cause (FA-011) and frequently given as the same error, which it is not: his is a move inside a refutation, blaming a supposition that did no work. This is reading causation into a sequence of events, and it is by far the commoner mistake.',
+    note: 'Post hoc ergo propter hoc: after this, therefore because of this. Often given as Aristotle’s false cause (FA-011) and it is not: his is a move inside a refutation, blaming a supposition that did no work. This is reading causation into a sequence, and it is far the commoner mistake.',
     examples: [
       { text: 'I started the supplement on Monday and by Friday the headache had gone. It works.' },
     ] },
@@ -315,7 +315,7 @@ export const MODERN_FALLACIES = [
     what: 'One step is said to lead inevitably to an extreme end, without the links being shown.',
     overlook: 'The missing steps. The end point is vivid and the chain is never examined.',
     ask: 'What makes each step follow from the one before it?',
-    note: 'A SLIPPERY SLOPE IS NOT AUTOMATICALLY A FALLACY. It becomes a sound causal argument the moment the speaker can give evidence for each link, and some of the most important arguments in law and policy are exactly this done well.',
+    note: 'A SLIPPERY SLOPE IS NOT AUTOMATICALLY A FALLACY. It becomes a sound causal argument the moment the speaker can evidence each link, and some of the most important arguments in law and policy are exactly this done well.',
     examples: [
       { text: 'Let them put one warehouse on the green belt and in ten years the whole county is concrete.' },
     ] },

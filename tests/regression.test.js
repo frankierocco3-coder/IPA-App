@@ -4859,6 +4859,47 @@ export async function run({ navDoc = document } = {}) {
     check('fallacies: one instruction sentence, used by both shelves',
       (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 2,
       String((famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length));
+    // Owner order 2026-09-29. Both builders lay the entry out the same way,
+    // and the ORDER is the instruction: the example sits between the
+    // definition and the question that exposes the move, and the breakdown
+    // goes last because it is consulted rather than read. Pinned in source
+    // as well as in the DOM, so that a shelf which stops rendering entirely
+    // cannot pass this by having no labels to compare.
+    const layout = b => {
+      const i = t => b.indexOf(t);
+      return i('lex-modern') >= 0 && i("egHtml(x, 'Example')") > i('lex-modern')
+        && i('hidesAskHtml(f)') > i("egHtml(x, 'Example')")
+        && i('breakdownHtml(f)') > i('hidesAskHtml(f)');
+    };
+    check('fallacies: definition, example, hides, ask, breakdown — both builders',
+      builderSrc.length === 2 && builderSrc.every(layout)
+      && /const breakdownHtml = f => f\.note/.test(famSrc)
+      && /<span class="lex-label">Further breakdown<\/span>/.test(famSrc),
+      builderSrc.map(b => (layout(b) ? 'ok' : 'WRONG ORDER')).join(' '));
+    // The figures shelf SHARES egHtml and was never asked for a label, so
+    // it must keep passing one example and no label. It used to call
+    // `.map(egHtml)`, which handed the array index in as the new second
+    // argument: harmless while every figure has one example, and a label
+    // reading "1" the moment one gets a second.
+    check('figures: the shared example renderer stays unlabelled there',
+      /r\.examples\.map\(x => egHtml\(x\)\)/.test(famSrc)
+      && !/r\.examples\.map\(egHtml\)/.test(famSrc));
+    // The breakdowns were cut on 2026-09-29 and the cut had to keep the
+    // distinctions, which ARE the substance. These four are the ones a
+    // reader is most likely to be misled without, and each was at risk
+    // precisely because it is the longest part of its note.
+    const allNotes = [...FALLACIES, ...MODERN_FALLACIES].map(f => f.note ?? '').join(' ');
+    check('fallacies: shortening the breakdowns kept every distinction they drew',
+      /NOT THE MODERN PART-AND-WHOLE FALLACY/.test(allNotes)
+      && /NOT A DISMISSAL OF LIVED EXPERIENCE/.test(allNotes)
+      && /NOT AUTOMATICALLY A FALLACY/.test(allNotes)
+      && /NOT AN ARGUMENT AGAINST EXPERTISE/.test(allNotes)
+      // Each of these four names the neighbour it is confused with, and
+      // losing the pointer is how two shelves end up defining one error.
+      && /hasty generalisation/.test(fallacyById('FA-008').note)
+      && /post hoc/.test(fallacyById('FA-011').note)
+      && /loaded question/i.test(fallacyById('FA-013').note)
+      && /FA-011/.test(MODERN_FALLACIES.find(f => f.id === 'MF-026').note));
 
     // Driven: the shelves a reader actually meets. Both of them, because
     // "each fallacy is a card" is a claim about fifty-three cards, and no
@@ -4921,8 +4962,13 @@ export async function run({ navDoc = document } = {}) {
           h1Of() === 'Ignoratio elenchi (irrelevant conclusion)'
           && !doc.querySelector('.modal-wrap')
           && !doc.querySelector('.fal-card')
+          // OWNER ORDER 2026-09-29, and the labels in DOM order are the
+          // check: definition, then the example, then what it hides, then
+          // the question, and the breakdown last. Reordering the parts is
+          // a one-line edit in a template and invisible to every other
+          // check in this suite.
           && String([...doc.querySelectorAll('.lex-label')].map(e => e.textContent))
-            === 'What it hides,Ask'
+            === 'Example,What it hides,Ask,Further breakdown'
           && !!doc.querySelector('.lex-eg')
           // The provenance and the review gate travel with the entry: a page
           // reached from a card is where a reader would otherwise meet
@@ -4952,8 +4998,13 @@ export async function run({ navDoc = document } = {}) {
           h1Of() === 'Motte-and-bailey'
           && !doc.querySelector('.modal-wrap')
           && !doc.querySelector('.fal-card')
+          // OWNER ORDER 2026-09-29, and the labels in DOM order are the
+          // check: definition, then the example, then what it hides, then
+          // the question, and the breakdown last. Reordering the parts is
+          // a one-line edit in a template and invisible to every other
+          // check in this suite.
           && String([...doc.querySelectorAll('.lex-label')].map(e => e.textContent))
-            === 'What it hides,Ask'
+            === 'Example,What it hides,Ask,Further breakdown'
           && !!doc.querySelector('.lex-eg')
           // The counter is the most useful line on that shelf and has to
           // travel with the entry rather than stay behind on the list.
@@ -4963,10 +5014,15 @@ export async function run({ navDoc = document } = {}) {
         // speech, because the fallacy is the exchange rather than one line.
         // The shared renderer wrapped them anyway, so they carried a doubled
         // opening quote and a closing one that never opened.
-        const egText = doc.querySelector('.lex-eg')?.textContent ?? '';
+        // Read past the label. Since the reorder the example carries an
+        // "Example" span INSIDE .lex-eg, so textContent no longer starts at
+        // the quotation mark and a naive read of it measures the label.
+        const egEl = doc.querySelector('.lex-eg');
+        const egLabel = egEl?.querySelector('.lex-label')?.textContent ?? '';
+        const egText = (egEl?.textContent ?? '').slice(egLabel.length);
         check('fallacies: an example that quotes itself is not quoted twice',
-          /^“/.test(egText) && !/^““/.test(egText),
-          egText.slice(0, 28));
+          !!egLabel && /^“/.test(egText) && !/^““/.test(egText),
+          `${egLabel} | ${egText.slice(0, 24)}`);
         clickIn(doc.getElementById('nav-back')); await sleep(650);
         // A card LEAVES the shelf, so an unrestored search would strand the
         // reader in an unfiltered list of forty. Driven end to end, because
