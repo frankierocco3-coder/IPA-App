@@ -4559,10 +4559,34 @@ export async function run({ navDoc = document } = {}) {
       && new Set(RHETORIC_LESSONS.map(l => l.id)).size === RHETORIC_LESSONS.length
       && RHETORIC_LESSONS.every(l => /^rh-[a-z]+$/.test(l.id)),
       RHETORIC_LESSONS.map(l => l.id).join(' '));
-    // Nothing here is approved. Claude wrote it, so the ledger must be
-    // empty of rh- ids until a human records one.
-    check('rhetoric: nothing is approved — Claude may not approve his own writing',
-      RHETORIC_LESSONS.every(l => !speechApproved(l.id) && !speechPublished(l.id)));
+    // WAS "nothing is approved", which was true only while nothing was.
+    // The owner approved module 1 on 2026-09-30, so what gets pinned now is
+    // the invariant that outlasts any approval: no rhetoric chapter ever
+    // claims the SPECIALIST its own record asks for, every published one
+    // names who signed it, and the whole course is still awaiting a
+    // rhetoric reader. Claude may record an owner's approval; he may not
+    // be the approver, and 'approved' is the verdict that would mean he
+    // had been.
+    const rhPub = RHETORIC_LESSONS.filter(l => speechPublished(l.id));
+    check('rhetoric: owner-approved only, and every chapter still awaits a rhetoric reader',
+      RHETORIC_LESSONS.every(l => !speechApproved(l.id))
+      && RHETORIC_LESSONS.every(l => awaitingSpecialist(l.id))
+      && rhPub.every(l => speechReviewFor(l.id)?.reviewer && speechReviewFor(l.id)?.date)
+      && rhPub.every(l => speechReviewFor(l.id)?.verdict === 'owner-approved'),
+      `${rhPub.length} of ${RHETORIC_LESSONS.length} published, 0 specialist-approved`);
+    // A module publishes whole or not at all: six chapters, or none. A
+    // half-published module is a shelf where some chapters open and the
+    // rest are gated with nothing saying why.
+    check('rhetoric: modules publish whole, never in part',
+      RHETORIC_MODULES.every(m => {
+        const ls = RHETORIC_LESSONS.filter(l => l.module === m.id);
+        const pub = ls.filter(l => speechPublished(l.id)).length;
+        return !ls.length || pub === 0 || pub === ls.length;
+      }),
+      RHETORIC_MODULES.map(m => {
+        const ls = RHETORIC_LESSONS.filter(l => l.module === m.id);
+        return `${m.id}:${ls.filter(l => speechPublished(l.id)).length}/${ls.length}`;
+      }).join(' '));
     // LAUNCHED 2026-09-28 by owner order. The flag is his to set, so what
     // is pinned now is the state the launch must not be dishonest in: the
     // workspace is live, and because the six chapters are NOT approved,

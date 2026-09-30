@@ -49,6 +49,36 @@
 // 'owner-approved' verdict the Acting order introduced: published
 // exactly as before, specialist review honestly still outstanding.
 export const SPEECH_REVIEWS = {
+
+// RHETORIC, MODULE 1 (owner order 2026-09-30). The owner read What is
+// Rhetoric? and approved its six chapters for publication. Recorded here
+// exactly as Acting, Building a Character and Shakespeare were: the
+// verdict is 'owner-approved', never 'approved', so the chapters publish
+// while awaitingSpecialist() stays TRUE for every one of them. No
+// rhetoric or oratory reviewer has read a word of this course.
+//
+// Four of the six carry an extra note because they make claims about the
+// classical tradition that are outside the owner’s expertise. They were
+// made checkable by the flag pass on 2026-09-29; they have not been
+// checked. The other thirty chapters remain drafts and are not listed.
+  'rh-what': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial', reviewer: 'Product owner',
+    date: '2026-09-30', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication. This is an owner editorial decision, NOT the rhetoric review this record asks for: no knowledgeable rhetoric or oratory reviewer has read it, and awaitingSpecialist stays true. Carries a claim about the history of European education that is outside the owner’s expertise and wants a reader who can check it.' },
+  'rh-three': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial', reviewer: 'Product owner',
+    date: '2026-09-30', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication. This is an owner editorial decision, NOT the rhetoric review this record asks for: no knowledgeable rhetoric or oratory reviewer has read it, and awaitingSpecialist stays true. Attributes the three appeals to the tradition. Checkable, and unchecked.' },
+  'rh-occasions': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial', reviewer: 'Product owner',
+    date: '2026-09-30', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication. This is an owner editorial decision, NOT the rhetoric review this record asks for: no knowledgeable rhetoric or oratory reviewer has read it, and awaitingSpecialist stays true. Attributes the three occasions to the tradition and states the end of epideictic as honour. That sentence was corrected on 2026-09-29 after it drifted from the source, which is the kind of thing a rhetoric reader should be hardest on.' },
+  'rh-canons': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial', reviewer: 'Product owner',
+    date: '2026-09-30', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication. This is an owner editorial decision, NOT the rhetoric review this record asks for: no knowledgeable rhetoric or oratory reviewer has read it, and awaitingSpecialist stays true. Attributes the five canons to the tradition rather than to a named source, which is deliberate and worth a reader’s check.' },
+  'rh-claim': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial', reviewer: 'Product owner',
+    date: '2026-09-30', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication. This is an owner editorial decision, NOT the rhetoric review this record asks for: no knowledgeable rhetoric or oratory reviewer has read it, and awaitingSpecialist stays true.' },
+  'rh-bad': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial', reviewer: 'Product owner',
+    date: '2026-09-30', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication. This is an owner editorial decision, NOT the rhetoric review this record asks for: no knowledgeable rhetoric or oratory reviewer has read it, and awaitingSpecialist stays true.' },
   'sp-f-instrument': { verdict: 'owner-approved', reviewerType: 'product-owner', reviewer: 'Product owner',
     date: '2026-08-14', version: 1,
     notes: 'Approved by the product owner for learner-facing publication. This is an owner decision, not a clinical sign-off: no doctor, speech-language pathologist or voice specialist has reviewed this chapter.' },
