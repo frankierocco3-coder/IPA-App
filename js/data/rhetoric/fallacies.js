@@ -26,10 +26,20 @@
 //            called what Aristotle called them, and inventing a modern
 //            alias for them would be inventing scholarship.
 //   what     what the error IS, in one plain sentence
-//   note     THE FIELD THAT EARNS THE SHELF: why it works on a listener,
-//            and what it feels like from inside the argument. A
-//            definition tells you the name. This tells you how to catch
-//            it in the room, which is the only place it matters.
+//
+// THERE IS NO NOTE FIELD. Every entry carried one, shown on the page as
+// "Further breakdown", and the owner removed all twenty-seven on
+// 2026-09-29: they were commentary about the error rather than help in
+// catching it, which is what `overlook` and `ask` already do. The removed
+// text is in git history if any of it is ever wanted.
+//
+// ONE THING WENT WITH THEM and is recorded here rather than lost. Several
+// notes separated an entry from the modern error it gets confused with:
+// composition and division from the modern part-and-whole fallacy,
+// secundum quid from hasty generalisation, false cause from post hoc, and
+// many questions from the loaded question. Those distinctions are real
+// and the shelves no longer state them. If two shelves ever look as
+// though they define one error twice, this is why.
 //   overlook what the error makes a listener fail to notice, and
 //   ask      the question that catches it — both added 2026-09-28 so this
 //            shelf reads exactly like All Fallacies next door. The two are
@@ -79,7 +89,6 @@ export const FALLACIES = [
   // ── Depending on language: the six ───────────────────────────
   { id: 'FA-001', term: 'Equivocation', group: 'language',
     what: 'One word used in two senses inside the same argument, as though it were one sense.',
-    note: 'The commonest of the thirteen and the hardest to catch live, because the word really is doing both jobs and nobody has lied. Watch for an argument that turns on one word appearing in both premises. Say what it means in each, out loud, and the join usually comes apart.',
     overlook: 'That the word changed meaning between one premise and the next. Nobody lied, and the word is genuinely doing both jobs.',
     ask: 'What does that word mean in each place it appears? Say both out loud.',
     examples: [
@@ -88,7 +97,6 @@ export const FALLACIES = [
 
   { id: 'FA-002', term: 'Amphiboly', group: 'language',
     what: 'The grammar, rather than a single word, can be read two ways, and the argument uses both.',
-    note: 'Equivocation happens in a word; this happens in a sentence. It is the fallacy of headlines and of oracles, and the reason legal drafting is so ugly: the ugliness is the cost of closing the second reading. If a sentence can be read two ways, settle which before you agree to it.',
     overlook: 'That the sentence has a second reading. The listener settles on one and never sees the other.',
     ask: 'Which reading do you need for that to follow?',
     examples: [
@@ -97,7 +105,6 @@ export const FALLACIES = [
 
   { id: 'FA-003', term: 'Composition', group: 'language',
     what: 'Words that should be taken separately are taken together, and the sentence changes meaning.',
-    note: 'NOT THE MODERN PART-AND-WHOLE FALLACY, which borrowed the name. Aristotle’s is about grouping: the same words combined one way say something they do not combined another. An ambiguity of reading, which is why it sits among the six that depend on language. The modern one has its own card on All Fallacies.',
     overlook: 'That the words were grouped one way rather than the other, and that the grouping is the whole claim.',
     ask: 'Taken together, or taken separately?',
     examples: [
@@ -107,7 +114,6 @@ export const FALLACIES = [
 
   { id: 'FA-004', term: 'Division', group: 'language',
     what: 'Words that should be taken together are taken apart, and the sentence changes meaning. The mirror of composition.',
-    note: 'Again NOT the modern whole-to-parts fallacy that borrowed the name. Aristotle’s division separates what was meant as one unit. The arithmetic form is clearest: a sum said of a total, then said of each part. Watch for a phrase doing one job being split into two.',
     overlook: 'That the phrase was one unit before it was split, and stopped being true when it was.',
     ask: 'That was said of the whole. Are you now saying it of each part?',
     examples: [
@@ -117,7 +123,6 @@ export const FALLACIES = [
 
   { id: 'FA-005', term: 'Accent', group: 'language',
     what: 'The meaning is changed by where the stress falls, or by how the words are pointed and read aloud.',
-    note: 'Aristotle meant Greek pitch accent, where a written word is ambiguous until spoken. In English it is the fallacy of emphasis, and the one here that most belongs to an actor: the same line stressed differently makes a different claim. Quotation out of context is its modern form.',
     overlook: 'That the emphasis carried a claim the words never made, which is why the speaker can deny it afterwards.',
     ask: 'What do the words say without the stress?',
     examples: [
@@ -126,7 +131,6 @@ export const FALLACIES = [
 
   { id: 'FA-006', term: 'Figure of speech', group: 'language',
     what: 'Two words that share a form are assumed to share a kind of meaning.',
-    note: 'Arguing from grammar to reality: a verb form or a noun ending treated as evidence about the thing itself. The least-used name on the list, and an error that is everywhere, usually as a claim that two words which look alike must work alike.',
     overlook: 'That grammar made two unlike things look like the same kind of thing.',
     ask: 'Are these the same kind of thing, or only the same shape of word?',
     examples: [
@@ -138,7 +142,6 @@ export const FALLACIES = [
   { id: 'FA-007', term: 'Accident', group: 'matter',
     modern: 'sweeping generalisation',
     what: 'A property that a thing happens to have is treated as one it must have, and a rule is applied where it does not reach.',
-    note: 'The rule pressed past its purpose. Every general statement has an unstated scope, and this is what happens when the scope is ignored: the rule is true, the case is real, and the two have nothing to do with each other. It overlaps with the next entry, and the handbooks disagree about where one ends.',
     overlook: 'The circumstance that puts this case outside the rule. The rule is real, which is what makes it persuasive.',
     ask: 'What is different about this particular case?',
     examples: [
@@ -149,7 +152,6 @@ export const FALLACIES = [
   { id: 'FA-008', term: 'Secundum quid', group: 'matter',
     modern: 'dropping a qualification',
     what: 'A statement true only with a qualification is taken as true without it, or the reverse.',
-    note: 'Also called converse accident. Handbooks often give it as hasty generalisation, which is the one name it should not have: that is arguing from too few cases and has its own card on All Fallacies. This is a qualified claim losing its qualification. Listen for the condition going missing between one sentence and the next. It is rarely dropped on purpose, and the argument gets stronger as it falls off.',
     overlook: 'The qualification that fell off between one sentence and the next. It usually falls; it is rarely removed.',
     ask: 'True when, where, and for whom?',
     examples: [
@@ -159,7 +161,6 @@ export const FALLACIES = [
   { id: 'FA-009', term: 'Ignoratio elenchi', group: 'matter',
     modern: 'irrelevant conclusion',
     what: 'Something is proved, and it is not the thing that was in dispute.',
-    note: 'Irrelevant conclusion, or missing the point, and the broadest name on the list: some handbooks treat every other fallacy as a species of it. Its power is that the proof can be genuinely good, so an audience watches an argument succeed without noticing it was aimed elsewhere. The counter is one flat question: what was the claim?',
     overlook: 'That a real proof succeeded at the wrong target. The audience watches an argument work and scores it.',
     ask: 'What was the claim, and is this a proof of that?',
     examples: [
@@ -169,7 +170,6 @@ export const FALLACIES = [
   { id: 'FA-010', term: 'Begging the question', group: 'matter',
     modern: 'circular reasoning',
     what: 'The thing to be proved is assumed somewhere in the proof.',
-    note: 'Petitio principii. In ordinary use the phrase now means raises the question, which is not this. In an argument it means the circle, usually wide enough that nobody sees it close. Write the premises and the conclusion down, and look for the conclusion sitting in a premise in other words.',
     overlook: 'The circle, when it is wide enough that the beginning and the end look like different sentences.',
     ask: 'Is there support here I could accept without already believing the conclusion?',
     examples: [
@@ -178,7 +178,6 @@ export const FALLACIES = [
 
   { id: 'FA-011', term: 'False cause', group: 'matter',
     what: 'In a refutation, a supposition that took no part in producing the contradiction is blamed for it.',
-    note: 'Non causa pro causa, and narrower than it looks. Aristotle means a move inside a refutation: several things are granted to see where they lead, the argument reaches an impossibility, and one supposition is blamed although it took no part. It is not the modern habit of reading a cause into a sequence of events. That has its own card, post hoc, on All Fallacies. Relatives, not the same error.',
     overlook: 'Which supposition actually did the work. The contradiction is real, so the blame feels earned.',
     ask: 'Take that supposition out. Does the impossibility still follow?',
     examples: [
@@ -188,7 +187,6 @@ export const FALLACIES = [
   { id: 'FA-012', term: 'Consequent', group: 'matter',
     modern: 'affirming the consequent',
     what: 'From “if this, then that” and “that”, it is concluded that “this”.',
-    note: 'Aristotle calls it the fallacy of the consequent; handbooks call it affirming the consequent. The one formal fallacy here, and the one that feels most like reasoning while being none. It is how conspiracy theories are built and how bad diagnoses are made: the theory predicts the evidence, the evidence appears, the theory is declared proved. Other causes predict the same evidence. Ask what else would produce exactly this.',
     overlook: 'The other causes that produce exactly the same result. The theory predicted the evidence, and so would several others.',
     ask: 'What else would produce exactly this?',
     examples: [
@@ -198,7 +196,6 @@ export const FALLACIES = [
   { id: 'FA-013', term: 'Many questions', group: 'matter',
     modern: 'compound question',
     what: 'Several questions are put as one and a single answer is demanded, when no single answer can be true of them all.',
-    note: 'Plurium interrogationum. NOT the loaded question, which is the other trap and has its own card on All Fallacies: that smuggles in a presupposition, while this welds separate questions together. Aristotle gives the only defence there is: say how many questions that was, and answer them separately.',
     overlook: 'That it was more than one question. A single answer has to be wrong about at least one of them, and whichever you give can be quoted back.',
     ask: 'How many questions is that? Take them one at a time.',
     examples: [

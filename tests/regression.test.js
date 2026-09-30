@@ -4615,7 +4615,7 @@ export async function run({ navDoc = document } = {}) {
     // Owner order 2026-09-28: the thirteen read exactly like All Fallacies
     // next door — what it hides, then the question — and carry ONE example.
     check('fallacies: every one carries what it hides, what to ask, and one example',
-      FALLACIES.every(f => f.term && f.what?.trim() && f.note?.trim()
+      FALLACIES.every(f => f.term && f.what?.trim()
         && f.overlook?.trim() && f.ask?.trim()
         && f.examples?.length === 1
         && f.examples.every(x => x.text?.trim())
@@ -4655,8 +4655,12 @@ export async function run({ navDoc = document } = {}) {
       builderSrc.length === 2
       && builderSrc.every(b => /\$\{hidesAskHtml\(f\)\}/.test(b)
         && !/<b>(What it hides|Ask):<\/b>/.test(b))
-      && /<span class="lex-label">What it hides<\/span>/.test(faSrc)
-      && /<span class="lex-label">Ask<\/span>/.test(faSrc),
+      // They are real <h2> section titles since 2026-09-29, not a label
+      // inside a paragraph: a fallacy is a PAGE now, and the list styles
+      // these used were built for fifty-three entries on one shelf.
+      && /<h2 class="guide-heading">What it hides<\/h2>/.test(faSrc)
+      && /<h2 class="guide-heading">Ask<\/h2>/.test(faSrc)
+      && !/<span class="lex-label">(What it hides|Ask)<\/span>/.test(faSrc),
       `${builderSrc.length} row builders found`);
     // THREE since 2026-09-29, not two. The rule was never "two shelves", it
     // is that WHEREVER AN EXAMPLE IS SHOWN the provenance is stated, or an
@@ -4673,7 +4677,7 @@ export async function run({ navDoc = document } = {}) {
       && /The 13 Fallacies/.test(faSrc)
       && !/renderFallacyShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/.test(faSrc.slice(faSrc.indexOf('function renderFallacyShelf'))));
     check('fallacies: house style holds on our prose, examples exempt',
-      FALLACIES.flatMap(f => [f.what, f.note]).every(t2 =>
+      FALLACIES.flatMap(f => [f.what, f.overlook, f.ask]).every(t2 =>
         !/[\u2014\u2013"]/.test(t2)
         && !/n\u2019t\b|\u2019(re|ll|ve|m|d)\b/.test(t2)));
 
@@ -4712,7 +4716,7 @@ export async function run({ navDoc = document } = {}) {
           && (x.source === undefined || /^(Constructed|Traditional)$/.test(x.source)))),
       MODERN_FALLACIES.filter(f => f.examples?.length !== 1).map(f => f.id).join(' '));
     check('families: house style holds on our prose, examples exempt',
-      MODERN_FALLACIES.flatMap(f => [f.what, f.overlook, f.ask, f.note ?? ''])
+      MODERN_FALLACIES.flatMap(f => [f.what, f.overlook, f.ask])
         .every(t2 => !/[—–"]/.test(t2)
           && !/n’t\b|’(re|ll|ve|m|d)\b/.test(t2)));
     // THE OVERLAP IS THE POINT. Five modern names ARE Aristotle's, and two
@@ -4736,11 +4740,18 @@ export async function run({ navDoc = document } = {}) {
     // easiest to lose in an edit. They are named and pinned individually.
     const famNotes = MODERN_FALLACIES.map(f => f.note ?? '').join(' ')
       + FAMILIES.map(f => f.lead).join(' ');
-    check('families: the qualifications survive — expertise, slippery slope, experience',
-      /NOT AN ARGUMENT AGAINST EXPERTISE/.test(famNotes)
-      && /NOT AUTOMATICALLY A FALLACY/.test(famNotes)
-      && /NOT A DISMISSAL OF LIVED EXPERIENCE/.test(famNotes)
-      && /Emotion is not a fallacy/.test(famNotes));
+    // THREE OF THESE FOUR NO LONGER EXIST. They lived in entry notes, and
+    // the owner deleted every note on 2026-09-29: that a slippery slope is
+    // not automatically a fallacy, that the authority entry is not an
+    // argument against expertise, and that the anecdote entry is not a
+    // dismissal of lived experience. Nothing in the app states them now.
+    // The fourth was written into a FAMILY LEAD instead of a note, which is
+    // the only reason it survived, and it is pinned here so the last of the
+    // set cannot go quietly too.
+    check('families: the one qualification written into a lead survives the cut',
+      /Emotion is not a fallacy/.test(FAMILIES.map(f => f.lead).join(' '))
+      && !MODERN_FALLACIES.some(f => f.note),
+      famNotes.length ? 'notes still present' : 'notes gone, lead intact');
     // Modern names on the thirteen, in parentheses, ONLY where one exists
     // (owner order 2026-09-28). Equivocation and amphiboly are still called
     // what Aristotle called them, and inventing an alias for them would be
@@ -4867,39 +4878,44 @@ export async function run({ navDoc = document } = {}) {
     // cannot pass this by having no labels to compare.
     const layout = b => {
       const i = t => b.indexOf(t);
-      return i('lex-modern') >= 0 && i("egHtml(x, 'Example')") > i('lex-modern')
-        && i('hidesAskHtml(f)') > i("egHtml(x, 'Example')")
-        && i('breakdownHtml(f)') > i('hidesAskHtml(f)');
+      return i('fal-def') >= 0 && i('fallacyEgHtml(f)') > i('fal-def')
+        && i('hidesAskHtml(f)') > i('fallacyEgHtml(f)');
     };
-    check('fallacies: definition, example, hides, ask, breakdown — both builders',
-      builderSrc.length === 2 && builderSrc.every(layout)
-      && /const breakdownHtml = f => f\.note/.test(famSrc)
-      && /<span class="lex-label">Further breakdown<\/span>/.test(famSrc),
+    check('fallacies: definition, example, what it hides, ask — both builders',
+      builderSrc.length === 2 && builderSrc.every(layout),
       builderSrc.map(b => (layout(b) ? 'ok' : 'WRONG ORDER')).join(' '));
-    // The figures shelf SHARES egHtml and was never asked for a label, so
-    // it must keep passing one example and no label. It used to call
-    // `.map(egHtml)`, which handed the array index in as the new second
-    // argument: harmless while every figure has one example, and a label
-    // reading "1" the moment one gets a second.
-    check('figures: the shared example renderer stays unlabelled there',
-      /r\.examples\.map\(x => egHtml\(x\)\)/.test(famSrc)
-      && !/r\.examples\.map\(egHtml\)/.test(famSrc));
-    // The breakdowns were cut on 2026-09-29 and the cut had to keep the
-    // distinctions, which ARE the substance. These four are the ones a
-    // reader is most likely to be misled without, and each was at risk
-    // precisely because it is the longest part of its note.
-    const allNotes = [...FALLACIES, ...MODERN_FALLACIES].map(f => f.note ?? '').join(' ');
-    check('fallacies: shortening the breakdowns kept every distinction they drew',
-      /NOT THE MODERN PART-AND-WHOLE FALLACY/.test(allNotes)
-      && /NOT A DISMISSAL OF LIVED EXPERIENCE/.test(allNotes)
-      && /NOT AUTOMATICALLY A FALLACY/.test(allNotes)
-      && /NOT AN ARGUMENT AGAINST EXPERTISE/.test(allNotes)
-      // Each of these four names the neighbour it is confused with, and
-      // losing the pointer is how two shelves end up defining one error.
-      && /hasty generalisation/.test(fallacyById('FA-008').note)
-      && /post hoc/.test(fallacyById('FA-011').note)
-      && /loaded question/i.test(fallacyById('FA-013').note)
-      && /FA-011/.test(MODERN_FALLACIES.find(f => f.id === 'MF-026').note));
+    // Two example renderers, deliberately. The figures shelf shows an
+    // example as one line in a LIST and keeps egHtml; a fallacy page shows
+    // the only quotation on the screen and gets a blockquote. Both quote
+    // through one helper, so the fix for an example that already opens with
+    // a quotation mark cannot be applied in one place and missed in the
+    // other. egHtml takes a single argument, which is what stops the array
+    // index reaching it from a bare `.map(egHtml)`.
+    check('examples: one quoting helper, two renderers, no second argument to trip on',
+      /const egQuoted = x =>/.test(famSrc)
+      && /const egHtml = x => `/.test(famSrc)
+      && /const fallacyEgHtml = f =>/.test(famSrc)
+      && (famSrc.match(/egQuoted\(x\)/g) ?? []).length === 2
+      && /<blockquote class="th-quote">/.test(famSrc));
+    // Owner order 2026-09-29: every note deleted, so a page is the
+    // definition, the example, what it hides and the question. Pinned as
+    // GONE FROM THE DATA rather than merely unrendered, because a field
+    // kept in the data and dropped from the view is exactly the state in
+    // which somebody re-adds the paragraph believing it was an oversight.
+    check('fallacies: no entry carries a further breakdown, on either shelf',
+      ![...FALLACIES, ...MODERN_FALLACIES].some(f => f.note)
+      && !/Further breakdown/.test(famSrc)
+      && !/breakdownHtml/.test(famSrc),
+      `${[...FALLACIES, ...MODERN_FALLACIES].filter(f => f.note).length} notes left`);
+    // The group line comes off the PAGE and the shelves KEEP their
+    // headings, where the grouping still does navigational work. Both
+    // halves are pinned: each is a one-line edit, and losing the second
+    // would flatten fifty-three cards into two undifferentiated lists.
+    check('fallacies: no group line on a page, and both shelves keep their headings',
+      !/const where = thirteen/.test(famSrc)
+      && !/<p class="pane-note">\$\{esc\(where\)\}<\/p>/.test(famSrc)
+      && /shelf-section">\$\{esc\(FALLACY_GROUPS\[g\]\.label\)\}/.test(famSrc)
+      && /shelf-section">\$\{fam\.icon\} \$\{fam\.n\}\. \$\{esc\(fam\.title\)\}/.test(famSrc));
 
     // Driven: the shelves a reader actually meets. Both of them, because
     // "each fallacy is a card" is a claim about fifty-three cards, and no
@@ -4946,8 +4962,8 @@ export async function run({ navDoc = document } = {}) {
         check('fallacies: the thirteen are cards, with no breakdown printed on the shelf',
           c13.length === FALLACIES.length
           && !doc.querySelector('#fa-list .lex-modern')
-          && !doc.querySelector('#fa-list .lex-label')
-          && !doc.querySelector('#fa-list .lex-eg')
+          && !doc.querySelector('#fa-list .guide-heading')
+          && !doc.querySelector('#fa-list .th-quote')
           && c13.every(c => c.querySelector('.fal-card-name')?.textContent.trim()),
           `${c13.length} cards`);
         // Six of the thirteen carry a modern name and the card has to show
@@ -4967,9 +4983,14 @@ export async function run({ navDoc = document } = {}) {
           // the question, and the breakdown last. Reordering the parts is
           // a one-line edit in a template and invisible to every other
           // check in this suite.
-          && String([...doc.querySelectorAll('.lex-label')].map(e => e.textContent))
-            === 'Example,What it hides,Ask,Further breakdown'
-          && !!doc.querySelector('.lex-eg')
+          && String([...doc.querySelectorAll('main .guide-heading')].map(e => e.textContent))
+            === 'Example,What it hides,Ask'
+          && !!doc.querySelector('.th-quote')
+          // Owner order 2026-09-29: the classical group is a shelf heading
+          // and nothing else. Checked in the DOM as well as in source,
+          // because the shelf this page was opened FROM carries that same
+          // string and a page that failed to replace it would look right.
+          && !doc.body.textContent.includes('Not depending on language')
           // The provenance and the review gate travel with the entry: a page
           // reached from a card is where a reader would otherwise meet
           // neither, and an unsourced example would read as a quotation.
@@ -4990,8 +5011,11 @@ export async function run({ navDoc = document } = {}) {
           c40.length === MODERN_FALLACIES.length
           && doc.querySelectorAll('.fal-cards').length === FAMILIES.length
           && !doc.querySelector('#fam-list .lex-modern')
-          && !doc.querySelector('#fam-list .lex-label')
-          && !doc.querySelector('#fam-list .lex-eg'),
+          && !doc.querySelector('#fam-list .guide-heading')
+          && !doc.querySelector('#fam-list .th-quote')
+          // The counter-move stays HERE, heading its family, which is the
+          // only place it is not a near-copy of some entry's own Ask.
+          && /The counter:/.test(doc.getElementById('fam-list')?.textContent ?? ''),
           `${c40.length} cards, ${doc.querySelectorAll('.fal-cards').length} grids`);
         clickIn(doc.querySelector('[data-fal="MF-004"]')); await sleep(600);
         check('families: a card opens its own page, carrying the family counter-move',
@@ -5003,26 +5027,37 @@ export async function run({ navDoc = document } = {}) {
           // the question, and the breakdown last. Reordering the parts is
           // a one-line edit in a template and invisible to every other
           // check in this suite.
-          && String([...doc.querySelectorAll('.lex-label')].map(e => e.textContent))
-            === 'Example,What it hides,Ask,Further breakdown'
-          && !!doc.querySelector('.lex-eg')
-          // The counter is the most useful line on that shelf and has to
-          // travel with the entry rather than stay behind on the list.
-          && /The counter:/.test(doc.body.textContent),
+          // THREE, the same as the thirteen. The counter-move was a fourth
+          // section here until 2026-09-29 and it went: it is a FAMILY line,
+          // it heads the group on the shelf where it does its work, and on
+          // four cards it restated that entry's own Ask almost word for
+          // word, which is the opposite of easier to read.
+          && String([...doc.querySelectorAll('main .guide-heading')].map(e => e.textContent))
+            === 'Example,What it hides,Ask'
+          && !!doc.querySelector('.th-quote')
+          // Gone from the page, and still on the shelf the card came from.
+          && !/The counter/.test(doc.querySelector('main')?.textContent ?? ''),
           h1Of() || '(no page)');
         // Three of the examples are NARRATIVES opening with their own quoted
         // speech, because the fallacy is the exchange rather than one line.
         // The shared renderer wrapped them anyway, so they carried a doubled
         // opening quote and a closing one that never opened.
-        // Read past the label. Since the reorder the example carries an
-        // "Example" span INSIDE .lex-eg, so textContent no longer starts at
-        // the quotation mark and a naive read of it measures the label.
-        const egEl = doc.querySelector('.lex-eg');
-        const egLabel = egEl?.querySelector('.lex-label')?.textContent ?? '';
-        const egText = (egEl?.textContent ?? '').slice(egLabel.length);
+        // The heading is outside the quotation now, so this reads the
+        // blockquote itself and nothing else.
+        //
+        // BALANCED, not "ends with a closing mark". Three examples are
+        // narratives that open with quoted speech and finish on plain
+        // prose, so demanding a closing quote at the very end fails them
+        // for being written correctly. This asserted exactly that and was
+        // wrong: what makes a quotation well formed here is that the marks
+        // pair up and the text does not open with two of them.
+        const egText = (doc.querySelector('.th-quote p')?.textContent ?? '').trim();
+        const opens = (egText.match(/“/g) ?? []).length;
+        const closes = (egText.match(/”/g) ?? []).length;
         check('fallacies: an example that quotes itself is not quoted twice',
-          !!egLabel && /^“/.test(egText) && !/^““/.test(egText),
-          `${egLabel} | ${egText.slice(0, 24)}`);
+          /^“/.test(egText) && !/^““/.test(egText)
+          && opens > 0 && opens === closes,
+          `${opens} open / ${closes} close · ${egText.slice(0, 24)}`);
         clickIn(doc.getElementById('nav-back')); await sleep(650);
         // A card LEAVES the shelf, so an unrestored search would strand the
         // reader in an unfiltered list of forty. Driven end to end, because
@@ -5063,8 +5098,19 @@ export async function run({ navDoc = document } = {}) {
     // Aristotle's composition and division are LINGUISTIC, not the modern
     // part-and-whole fallacy that borrowed the names. Got this wrong first
     // time; the correction is pinned so it cannot quietly revert.
-    check('fallacies: composition and division are Aristotle\u2019s, not the modern namesakes',
-      /NOT THE MODERN PART-AND-WHOLE FALLACY/.test(fallacyById('FA-003').note)
+    // The note said outright that these are NOT the modern part-and-whole
+    // fallacy, and it went with the rest. Two things still keep them apart
+    // and both are checkable: their own definitions are about GROUPING
+    // WORDS rather than parts and wholes, and All Fallacies carries no
+    // composition or division card to be confused with. That second half
+    // also caught a false claim in the deleted note, which told readers the
+    // modern version had its own card there. It never did. If one is added,
+    // this fails, and that is the moment somebody has to decide where the
+    // distinction gets stated now that no note can state it.
+    check('fallacies: composition and division stay Aristotle\u2019s, with no namesake to collide with',
+      /taken together/.test(fallacyById('FA-003').what)
+      && /taken apart/.test(fallacyById('FA-004').what)
+      && !MODERN_FALLACIES.some(f => /composition|division/i.test(f.term))
       && /Five is two and three/.test(JSON.stringify(fallacyById('FA-004').examples)));
 
     // The two rhetorics must not be confused: main.js RHETORIC_LIVE hides a

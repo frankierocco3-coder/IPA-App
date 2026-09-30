@@ -15,12 +15,12 @@
 // is two: loaded question and post hoc were both claimed as his and
 // neither is. His many questions is the COMPOUND question, not the loaded
 // one, and his false cause belongs to refutation rather than to reading a
-// cause into a sequence. Both keep a pointer in their note, because the
-// relationship is real and only the identity was wrong.
+// cause into a sequence. Those two kept a pointer in their note, which
+// went with every other note on 2026-09-29; the relationship is real, it
+// is no longer stated anywhere, and that is recorded in fallacies.js.
 // Two shelves defining the same error
 // twice would make the app look as though it did not know. So every such
-// entry carries `alsoAristotle` with the FA id, says so in its note, and
-// defines nothing twice. The overlap becomes the lesson: the errors did
+// entry carries `alsoAristotle` with the FA id and defines nothing twice. The overlap becomes the lesson: the errors did
 // not change in two thousand years, only the names did.
 //
 // ── Entry shape ───────────────────────────────────────────────
@@ -35,7 +35,15 @@
 //                Owner order 2026-09-28: the `repair` field was removed. Three
 //                fields per card was one more than the page could carry, and
 //                the question is the part a reader actually uses in a room.
-//   note         optional; used where the name is disputed or dating
+//   (there is NO note field. All fourteen went by owner order
+//                2026-09-29, with the thirteen next door: they were
+//                commentary about the error rather than help catching it,
+//                which `overlook` and `ask` already give. Three of them
+//                carried qualifications that nothing else states now —
+//                that a slippery slope is not automatically a fallacy,
+//                that the authority entry is not an argument against
+//                expertise, and that the anecdote entry is not a dismissal
+//                of lived experience. The text is in git history.)
 //   alsoAristotle  optional FA id, where this IS one of the thirteen
 //   examples     EXACTLY ONE (owner order 2026-09-28), the same shape the
 //                thirteen use, so the two shelves read alike.
@@ -50,7 +58,7 @@
 // example is: the source line is a tag where there is a real source and
 // absent where there is not.
 //
-// HOUSE STYLE applies to `what`, `overlook`, `ask` and `note`. It does NOT
+// HOUSE STYLE applies to `what`, `overlook` and `ask`. It does NOT
 // apply to the examples, which have to sound like people talking.
 //
 // ── What is deliberately NOT here ─────────────────────────────
@@ -95,7 +103,6 @@ export const MODERN_FALLACIES = [
     what: 'The other person’s position is replaced with a weaker or more extreme version, and that version is attacked.',
     overlook: 'That the argument being demolished was never made. The audience watches a real refutation of an unreal claim and scores it as a win.',
     ask: 'Would the other person recognise that as their position?',
-    note: 'Modern name, not Aristotle’s, though it works as a species of his ignoratio elenchi. The strongest habit on this shelf is the opposite move: build their case at its best before you touch it.',
     examples: [
       { text: 'You want to cut two percent from the defence budget. So your plan is that we simply have no army at all.' },
     ] },
@@ -110,7 +117,6 @@ export const MODERN_FALLACIES = [
     what: 'Words are lifted out of their context so that they appear to say something else.',
     overlook: 'The sentence on either side. A quotation looks like evidence precisely because it is verbatim.',
     ask: 'What came immediately before and after, and does the speaker still hold this?',
-    note: 'Aristotle’s accent, the fallacy of emphasis, is the same move made with stress rather than scissors. See FA-005.',
     examples: [
       { text: 'Their own report says, and I quote, “the evidence is inconclusive.” Even they admit it. (The sentence runs: inconclusive on the second question and overwhelming on the first.)' },
     ] },
@@ -118,7 +124,6 @@ export const MODERN_FALLACIES = [
     what: 'A strong, contentious claim is advanced, and when challenged the speaker retreats to a modest claim nobody disputes, then returns to the strong one later.',
     overlook: 'That two different claims are in play. Each looks reasonable at the moment it is defended.',
     ask: 'Which version are we discussing right now, and is it the version that was asserted?',
-    note: 'Named in 2005 from a form of Norman castle: an indefensible field around a defensible tower. Recent, and it has stuck because nothing else named the move.',
     examples: [
       { text: '“The dictionary is a political document.” Challenged, the same speaker says: “I only claimed that words matter, and nobody disputes that.” Ten minutes later the dictionary is political again.' },
     ] },
@@ -128,7 +133,6 @@ export const MODERN_FALLACIES = [
     what: 'Attention is drawn to a different issue so the original question fades from view.',
     overlook: 'That the question was never answered. A red herring usually introduces something TRUE, which is why it works.',
     ask: 'Did that answer the question, or did it make me think about something else?',
-    note: 'The classic pairing with the straw man, and the two are constantly confused. A straw man SUBSTITUTES an argument and attacks it. A red herring CHANGES THE SUBJECT. One passage can do both.',
     examples: [
       { text: 'You ask why the accounts are eight months late. Let me tell you what the people in this department did during the flood.' },
     ] },
@@ -157,7 +161,6 @@ export const MODERN_FALLACIES = [
     what: 'So many weak claims are made so quickly that answering them all is impossible in the time available.',
     overlook: 'That volume is not weight. Every unanswered claim looks conceded.',
     ask: 'Which of these actually carries the argument? Answer that one properly.',
-    note: 'A debate tactic rather than a reasoning error, named in the 1990s. Each claim still needs examining, which is exactly what the tactic makes impossible.',
     examples: [
       { text: 'In the two minutes I have: the dating is wrong, the sample is wrong, the statistics are wrong, the author has been discredited, the journal is captured, the funding is foreign, and there are nine other errors I will not reach.' },
     ] },
@@ -166,7 +169,6 @@ export const MODERN_FALLACIES = [
     overlook: 'That a real proof succeeded at the wrong target.',
     ask: 'What was the claim, and is this a proof of THAT?',
     alsoAristotle: 'FA-009',
-    note: 'This IS Aristotle’s ignoratio elenchi under its modern name, and he treats it as the general case that several of the others are species of. Defined once, on The 13 Fallacies.',
     examples: [
       { text: 'You say this bill will not reduce burglary. I have shown you, at length and with figures, that burglary is a serious problem in this city.' },
     ] },
@@ -176,7 +178,6 @@ export const MODERN_FALLACIES = [
     what: 'The speaker’s character is attacked instead of the argument answered.',
     overlook: 'That the argument is still standing. Discrediting a person feels like refuting them.',
     ask: 'If somebody blameless said exactly this, would it be any better an argument?',
-    note: 'The commonest false accusation on this shelf. Questioning a witness’s reliability, an expert’s field or a funder’s interest is legitimate and often necessary. It becomes the fallacy when it REPLACES examination rather than informing it.',
     examples: [
       { text: 'The man never finished school. Why would anybody listen to him on education?' },
     ] },
@@ -208,7 +209,6 @@ export const MODERN_FALLACIES = [
     overlook: 'The circle, when it is wide enough that the beginning and the end look like different sentences.',
     ask: 'Is there independent support here, or is the conclusion restated in other words?',
     alsoAristotle: 'FA-010',
-    note: 'Aristotle’s petitio principii, unchanged, and defined once on The 13 Fallacies. Note the modern drift: in ordinary speech the phrase now usually means raises the question, which is not this.',
     examples: [
       { text: 'We know the witness is reliable, because she would not say a thing like that unless it were true. And we know she would not say it unless it were true, because she is reliable.' },
     ] },
@@ -216,7 +216,6 @@ export const MODERN_FALLACIES = [
     what: 'An unproven assumption is hidden inside a question, so that answering concedes it.',
     overlook: 'The premise. The trap is that any direct answer accepts it.',
     ask: 'What am I agreeing to by answering at all?',
-    note: 'Close to Aristotle’s many questions (FA-013) and regularly given as the same thing, but they are two traps. His welds several questions into one and demands a single answer. This one asks a single question with an unproven premise already inside it.',
     examples: [
       { text: 'Have you stopped beating your wife?', source: 'Traditional' },
     ] },
@@ -254,7 +253,6 @@ export const MODERN_FALLACIES = [
     what: 'One personal story is treated as sufficient proof of a general claim.',
     overlook: 'The cases that did not become stories. A story is concrete and a statistic is not, so the story wins the room.',
     ask: 'What does this experience genuinely show, and what does it not establish by itself?',
-    note: 'THIS ENTRY IS NOT A DISMISSAL OF LIVED EXPERIENCE. Firsthand knowledge is real knowledge and frequently sees what the research missed. The error is in the size of the conclusion, never in the having of the experience.',
     examples: [
       { text: 'My grandfather smoked forty a day until he was ninety-one. The whole thing is overblown.' },
     ] },
@@ -283,7 +281,6 @@ export const MODERN_FALLACIES = [
     what: 'A pattern is found after the data is examined and then presented as though it had been predicted.',
     overlook: 'The hypothesis that was written afterwards. Any large enough body of data contains patterns.',
     ask: 'Was this prediction made before the data was seen?',
-    note: 'Named for a man firing at the side of a barn and then painting the target around the closest cluster of holes.',
     examples: [
       { text: 'We went through every postcode in the county and found four cases clustered in one of them. Something in that neighbourhood is causing this.' },
     ] },
@@ -293,7 +290,6 @@ export const MODERN_FALLACIES = [
     what: 'One thing followed another, so the first is treated as the cause.',
     overlook: 'Everything else that changed in between.',
     ask: 'What else happened at the same time?',
-    note: 'Post hoc ergo propter hoc: after this, therefore because of this. Often given as Aristotle’s false cause (FA-011) and it is not: his is a move inside a refutation, blaming a supposition that did no work. This is reading causation into a sequence, and it is far the commoner mistake.',
     examples: [
       { text: 'I started the supplement on Monday and by Friday the headache had gone. It works.' },
     ] },
@@ -315,7 +311,6 @@ export const MODERN_FALLACIES = [
     what: 'One step is said to lead inevitably to an extreme end, without the links being shown.',
     overlook: 'The missing steps. The end point is vivid and the chain is never examined.',
     ask: 'What makes each step follow from the one before it?',
-    note: 'A SLIPPERY SLOPE IS NOT AUTOMATICALLY A FALLACY. It becomes a sound causal argument the moment the speaker can evidence each link, and some of the most important arguments in law and policy are exactly this done well.',
     examples: [
       { text: 'Let them put one warehouse on the green belt and in ten years the whole county is concrete.' },
     ] },
@@ -332,7 +327,6 @@ export const MODERN_FALLACIES = [
     what: 'Something is held true because an important person said it.',
     overlook: 'Whether the authority is an authority in THIS subject, and whether they gave reasons.',
     ask: 'Qualified in this field, representing the evidence accurately, and giving reasons I could examine?',
-    note: 'THIS IS NOT AN ARGUMENT AGAINST EXPERTISE, and it is the entry most often misused as one. Deferring to qualified consensus is usually rational. The fallacy is surrendering judgment, not exercising it by trusting somebody who has looked properly.',
     examples: [
       { text: 'A Nobel laureate says the vitamin cures it. Are you telling me you know better than a Nobel laureate? (The prize was for chemistry.)' },
     ] },

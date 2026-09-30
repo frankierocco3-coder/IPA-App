@@ -4815,10 +4815,15 @@ function rhetoricPracticePane(el) {
 // SEPARATE from the figures by his own division: six that depend on
 // language, seven that do not. The grouping is the argument, so the page
 // renders the two groups with their leads rather than one flat list.
+// The old wording promised "every definition and every note", and the
+// notes were deleted on 2026-09-29. It also said each example says whether
+// it was constructed, which the shelf now states once at the top instead
+// of stamping on every card. Both were true when written and neither was
+// afterwards, which is how a review gate quietly stops describing the
+// thing it gates.
 const FALLACY_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric or logic reader. '
-  + 'Every definition and every note here is written for this app and none has been checked '
-  + 'by a qualified reader yet. Most examples are constructed rather than quoted, and each '
-  + 'one says which it is.';
+  + 'Every definition, every question and every example here is written for this app, and '
+  + 'none has been checked by a qualified reader yet.';
 
 // The query survives in module state so Back from a fallacy's own page
 // returns to the exact list the reader left, the way Playable Actions
@@ -4832,12 +4837,9 @@ let fallQuery = '';
 // repeating it would be the only thing above the fold.
 function fallacyRowHtml(f) {
   return `
-    <article class="lex-row is-bare">
-      <p class="lex-modern">${esc(f.what)}</p>
-      ${f.examples.map(x => egHtml(x, 'Example')).join('')}
-      ${hidesAskHtml(f)}
-      ${breakdownHtml(f)}
-    </article>`;
+    <p class="guide-text fal-def">${esc(f.what)}</p>
+    ${fallacyEgHtml(f)}
+    ${hidesAskHtml(f)}`;
 }
 
 // What it hides, then the question. LABELLED (owner order 2026-09-28), with
@@ -4847,8 +4849,10 @@ function fallacyRowHtml(f) {
 // the least findable things on the card. Both shelves share this, because
 // the whole point of the pair is that they read alike.
 const hidesAskHtml = f => `
-  <p class="lex-note"><span class="lex-label">What it hides</span>${esc(f.overlook)}</p>
-  <p class="lex-note"><span class="lex-label">Ask</span>${esc(f.ask)}</p>`;
+  <h2 class="guide-heading">What it hides</h2>
+  <p class="guide-text">${esc(f.overlook)}</p>
+  <h2 class="guide-heading">Ask</h2>
+  <p class="guide-text">${esc(f.ask)}</p>`;
 
 // One example row. `source` is OPTIONAL and is a TAG, never a remark: the
 // commentary that used to ride along with it went by owner order
@@ -4858,21 +4862,22 @@ const hidesAskHtml = f => `
 // own quoted speech, because the fallacy is the exchange rather than one
 // line. Wrapping those gave them a doubled opening quote and a closing one
 // that never opened. Quote only what is not already quoting itself.
-// The note, last and labelled (owner order 2026-09-29). It is the part a
-// reader consults rather than reads, so it goes after the question that
-// exposes the move, not between the definition and the example.
-const breakdownHtml = f => f.note
-  ? `<p class="lex-note"><span class="lex-label">Further breakdown</span>${esc(f.note)}</p>`
-  : '';
-
-const egHtml = (x, label) => {
+const egQuoted = x => {
   const t = String(x.text ?? '');
-  const selfQuoted = t.trimStart().startsWith('“');
-  return `
-  <p class="lex-eg">${label ? `<span class="lex-label">${esc(label)}</span>` : ''}${
-    selfQuoted ? esc(t) : `“${esc(t)}”`}${
-    x.source ? `<span class="lex-src">${esc(x.source)}</span>` : ''}</p>`;
+  return t.trimStart().startsWith('“') ? esc(t) : `“${esc(t)}”`;
 };
+
+// The figures shelf, where an example is one line in a list.
+const egHtml = x => `
+  <p class="lex-eg">${egQuoted(x)}${
+    x.source ? `<span class="lex-src">${esc(x.source)}</span>` : ''}</p>`;
+
+// A fallacy PAGE, where the example is the only quotation on the screen
+// and gets the blockquote the rest of the app gives a quotation.
+const fallacyEgHtml = f => (f.examples ?? []).map(x => `
+  <h2 class="guide-heading">Example</h2>
+  <blockquote class="th-quote"><p>${egQuoted(x)}</p>${
+    x.source ? `<footer class="th-attrib">${esc(x.source)}</footer>` : ''}</blockquote>`).join('');
 
 // Said once per shelf instead of stamped on every card.
 const EG_PROVENANCE = 'The examples are written for this course unless a source is named. '
@@ -4929,17 +4934,11 @@ function renderFallacyPage(kind, id) {
   if (!f) return thirteen ? renderFallacyShelf() : renderFamilyShelf();
   record(() => renderFallacyPage(kind, id));
   stopSpeech();
-  const fam = thirteen ? null : FAMILIES.find(x => x.id === f.family);
-  const where = thirteen
-    ? (FALLACY_GROUPS[f.group]?.label ?? '')
-    : `${fam.n}. ${fam.title}`;
   app.innerHTML = `
     ${pageTopbar(thirteen ? '🧩 The 13 Fallacies' : '🧭 All Fallacies', '#8a6d3b')}
     <main class="guide">
       <h1 id="fal-title" tabindex="-1">${esc(fallacyLabel(f))}</h1>
-      <p class="pane-note">${esc(where)}</p>
       ${thirteen ? fallacyRowHtml(f) : modernFallacyHtml(f)}
-      ${fam ? `<p class="pane-note"><b>The counter:</b> ${esc(fam.counter)}</p>` : ''}
       <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(thirteen ? FALLACY_REVIEW_NOTE : FAMILY_REVIEW_NOTE)}</p>
     </main>`;
@@ -5035,13 +5034,10 @@ let famQuery = '';
 function modernFallacyHtml(f) {
   const a = f.alsoAristotle ? fallacyById(f.alsoAristotle) : null;
   return `
-    <article class="lex-row is-bare">
-      ${a ? `<p class="lex-kind">also Aristotle · ${esc(a.term)}</p>` : ''}
-      <p class="lex-modern">${esc(f.what)}</p>
-      ${(f.examples ?? []).map(x => egHtml(x, 'Example')).join('')}
-      ${hidesAskHtml(f)}
-      ${breakdownHtml(f)}
-    </article>`;
+    ${a ? `<p class="pane-note">also Aristotle · ${esc(a.term)}</p>` : ''}
+    <p class="guide-text fal-def">${esc(f.what)}</p>
+    ${fallacyEgHtml(f)}
+    ${hidesAskHtml(f)}`;
 }
 
 function renderFamilyShelf() {
@@ -7062,7 +7058,7 @@ function rhetoricRowHtml(r) {
       <h3 class="lex-term">${esc(r.term)}</h3>
       <p class="lex-modern">${esc(r.what)}</p>
       <p class="lex-note">${esc(r.effect)}</p>
-      ${r.examples.map(x => egHtml(x)).join('')}
+      ${r.examples.map(egHtml).join('')}
     </article>`;
 }
 
