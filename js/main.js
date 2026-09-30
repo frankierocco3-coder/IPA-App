@@ -4879,10 +4879,6 @@ const fallacyEgHtml = f => (f.examples ?? []).map(x => `
   <blockquote class="th-quote"><p>${egQuoted(x)}</p>${
     x.source ? `<footer class="th-attrib">${esc(x.source)}</footer>` : ''}</blockquote>`).join('');
 
-// Said once per shelf instead of stamped on every card.
-const EG_PROVENANCE = 'The examples are written for this course unless a source is named. '
-  + 'A fallacy example has to be a bad argument, and bad arguments are mostly anonymous.';
-
 // One sentence, both shelves, so the instruction cannot drift into two
 // slightly different sentences for two shelves that read alike.
 const OPEN_CARD_NOTE = 'Open a card for what the move hides, the question that exposes it, '
@@ -4939,7 +4935,6 @@ function renderFallacyPage(kind, id) {
     <main class="guide">
       <h1 id="fal-title" tabindex="-1">${esc(fallacyLabel(f))}</h1>
       ${thirteen ? fallacyRowHtml(f) : modernFallacyHtml(f)}
-      <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(thirteen ? FALLACY_REVIEW_NOTE : FAMILY_REVIEW_NOTE)}</p>
     </main>`;
   wireBrandHome();
@@ -4968,7 +4963,6 @@ function renderFallacyShelf() {
         hundred names; he gives thirteen and divides them once. Thirteen is a number a person can
         carry into a room.</p>
       <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
-      <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(FALLACY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fa-search" type="search"
         placeholder="Search fallacies, effects, examples…" aria-label="Search the fallacies"
@@ -5016,10 +5010,15 @@ function renderFallacyShelf() {
 //
 // Where an entry IS one of Aristotle's thirteen under a modern name, the
 // card says so and links to it rather than defining it twice.
+// "examples included" is doing real work since the provenance line was
+// removed on 2026-09-29. Without it this shelf makes no statement at all
+// about where its examples came from, and an unsourced bad argument then
+// reads as a quotation from somebody. The thirteen's note next door names
+// examples for the same reason; the two shelves are written to read alike.
 const FAMILY_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric or logic reader. '
-  + 'Written for this app and not yet checked by a qualified reader. Naming a fallacy begins '
-  + 'an examination; it does not finish one, and nothing here is a way to win an argument '
-  + 'without having the better case.';
+  + 'Written for this app, examples included, and not yet checked by a qualified reader. '
+  + 'Naming a fallacy begins an examination; it does not finish one, and nothing here is a '
+  + 'way to win an argument without having the better case.';
 
 // The query survives in module state so Back from a fallacy's own page
 // returns to the exact list the reader left, the way Playable Actions
@@ -5053,7 +5052,6 @@ function renderFamilyShelf() {
       <p class="guide-text">Naming a fallacy begins an examination. It does not finish one, and it
         is never a way to win an argument without having the better case.</p>
       <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
-      <p class="pane-note">${esc(EG_PROVENANCE)}</p>
       <p class="pane-note pane-caveat">${esc(FAMILY_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="fam-search" type="search"
         placeholder="Search names, effects, questions, examples…"

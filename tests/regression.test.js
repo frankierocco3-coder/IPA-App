@@ -4662,16 +4662,19 @@ export async function run({ navDoc = document } = {}) {
       && /<h2 class="guide-heading">Ask<\/h2>/.test(faSrc)
       && !/<span class="lex-label">(What it hides|Ask)<\/span>/.test(faSrc),
       `${builderSrc.length} row builders found`);
-    // THREE since 2026-09-29, not two. The rule was never "two shelves", it
-    // is that WHEREVER AN EXAMPLE IS SHOWN the provenance is stated, or an
-    // example written here reads as a quotation. A fallacy now has its own
-    // page, that page shows the example, so it says it too. If a fourth
-    // surface ever shows an example, this is the check that should fail.
-    const provCount = (faSrc.match(/esc\(EG_PROVENANCE\)/g) ?? []).length;
-    check('fallacies: every surface that shows an example says an unsourced one is ours',
-      /written for this course unless a source is named/.test(faSrc)
-      && provCount === 3,
-      `${provCount} surfaces`);
+    // THE PROVENANCE LINE IS GONE (owner order 2026-09-29), and the claim
+    // it carried is not: both review notes say the content is written for
+    // this app, and both now name EXAMPLES specifically. That is what
+    // stops an unsourced bad argument reading as a quotation from a real
+    // person, so it is pinned on both shelves rather than assumed. The
+    // forty's note said only "written for this app" until the line was
+    // removed, at which point that shelf said nothing about its examples
+    // at all.
+    check('fallacies: both shelves still say their examples are written here',
+      !/EG_PROVENANCE/.test(faSrc)
+      && !/bad arguments are mostly anonymous/.test(faSrc)
+      && /every example here is written for this app/.test(faSrc)
+      && /Written for this app, examples included/.test(faSrc));
     check('fallacies: the shelf is reachable and is a reference, not a lesson',
       /function renderFallacyShelf\(\)/.test(faSrc)
       && /The 13 Fallacies/.test(faSrc)
@@ -4991,10 +4994,11 @@ export async function run({ navDoc = document } = {}) {
           // because the shelf this page was opened FROM carries that same
           // string and a page that failed to replace it would look right.
           && !doc.body.textContent.includes('Not depending on language')
-          // The provenance and the review gate travel with the entry: a page
-          // reached from a card is where a reader would otherwise meet
-          // neither, and an unsourced example would read as a quotation.
-          && /written for this course unless a source is named/.test(doc.body.textContent)
+          // The review gate travels with the entry: a page reached straight
+          // from a card is where a reader would otherwise never meet it,
+          // and it is what now carries the provenance too.
+          && !/bad arguments are mostly anonymous/.test(doc.body.textContent)
+          && /written for this app/.test(doc.body.textContent)
           && /Awaiting review/.test(doc.body.textContent),
           h1Of() || '(no page)');
         clickIn(doc.getElementById('nav-back')); await sleep(650);
