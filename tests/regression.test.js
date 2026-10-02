@@ -4962,6 +4962,16 @@ export async function run({ navDoc = document } = {}) {
       // All three books that had no route now have one.
       && (famSrc.match(/reviewCats\(\) \{ return bookReviewCategories\(this\); \}/g) ?? []).length === 3
       && !/reviewCats: \(\) => \(\{ total: 0 \}\)/.test(famSrc));
+    // THE BADGE IS READ OFF THE RECORD TOO. The inventory row and the draft
+    // reader both used ACTING_DRAFT_BADGE — a constant for the surfaces
+    // that carry no record — so every Rhetoric chapter listed itself as
+    // "awaiting acting-professional review" directly under a heading that
+    // said a rhetoric reader. It shipped, and was caught by LOOKING at the
+    // page rather than by any check here, which is why the driven check
+    // below now reads the badge text.
+    check('review: the row and the draft badge are read off the record, not assumed',
+      /<span class="sp-badge">\$\{esc\(draftBadgeFor\(it\.record\)\)\}<\/span><\/td>/.test(famSrc)
+      && /<span class="sp-badge">\$\{esc\(draftBadgeFor\(item\.record\)\)\}<\/span>/.test(famSrc));
     check('review: the draft gate leads somewhere for EVERY book, and the page takes one',
       // The button used to render only when the lesson was an Acting one.
       !/bookOf\(l\.id\) === BOOKS\.acting \? `/.test(famSrc)
@@ -5142,40 +5152,38 @@ export async function run({ navDoc = document } = {}) {
         clearBox.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
         await sleep(250);
 
-        // ── a gated chapter is READABLE, which it was not before ──
-        // Source pins cannot tell a route that exists from a route that
-        // works. This walks the path the owner took when he asked "where is
-        // the copy?", and follows it to the words.
-        //
-        // BRAND-HOME FIRST. This drive is standing on a SHELF, which is a
-        // deep page with no side nav, so sideItem() returns undefined and
-        // every click after it is a silent no-op. That is exactly how the
-        // first version of this failed, reporting "All Fallacies" as the
-        // page it had supposedly navigated away from.
+        // ── THE COURSE IS PUBLISHED, so the gate must be gone ──
+        // These checks drove the draft route when thirty chapters were
+        // gated. The owner approved all thirty on 2026-10-01, so there is
+        // no draft left to open and asserting there is would fail on the
+        // approval rather than on a defect. Inverted to pin what is true
+        // now: every chapter opens and renders, and no gate survives
+        // anywhere in the course. The SOURCE checks above still hold the
+        // route itself, so it is waiting intact for the next gated book.
         clickIn(doc.getElementById('brand-home')); await sleep(500);
         clickIn(sideItem('Library')); await sleep(450);
         clickIn(doc.querySelector('[data-tile="col:invention"]')); await sleep(550);
+        const shelfText = doc.querySelector('main')?.textContent ?? '';
         clickIn([...doc.querySelectorAll('button, a')]
           .find(b => b.textContent.includes('Where Arguments Come From'))); await sleep(600);
-        const gated = doc.getElementById('ac-open-review');
-        check('review: a gated Rhetoric chapter offers its review status',
-          !!gated && /Prepared draft/.test(doc.querySelector('main')?.textContent ?? ''),
-          h1Of() || '(nowhere)');
-        clickIn(gated); await sleep(700);
-        const rows = doc.querySelectorAll('.sp-inventory tbody tr').length;
-        const gatedCount = RHETORIC_LESSONS.filter(l => !speechPublished(l.id)).length;
-        check('review: every gated chapter is listed, and the count is derived',
-          rows === gatedCount && gatedCount > 0
-          && /awaiting rhetoric review/i.test(h1Of()),
-          `${rows} rows vs ${gatedCount} gated · ${h1Of()}`);
-        clickIn(doc.querySelector('[data-aopen="rh-find"]')); await sleep(700);
-        const draft = doc.querySelector('main')?.textContent ?? '';
-        check('review: the draft opens its prepared copy, with reviewer and gate stated',
-          /Where Arguments Come From/.test(draft)
-          && /The first canon is invention/.test(draft)
-          && /a knowledgeable rhetoric reader/.test(draft)
-          && /None recorded/.test(draft),
-          `${draft.split(/\s+/).length} words · ${h1Of()}`);
+        // NOT `opened` — the search test above already declares it in this
+        // same scope, and a duplicate const is a SyntaxError that stops the
+        // whole module parsing. The suite then sits on "Loading the app"
+        // forever, which looks exactly like a hung run and is not one.
+        const chapterText = doc.querySelector('main')?.textContent ?? '';
+        check('rhetoric: a module 3 chapter opens its body, with no draft gate left',
+          /Where Arguments Come From/.test(chapterText)
+          && /The first canon is invention/.test(chapterText)
+          && !doc.getElementById('ac-open-review')
+          && !/Prepared draft/.test(chapterText)
+          && !/Prepared draft/.test(shelfText),
+          `${chapterText.split(/\s+/).length} words`);
+        // Derived, so this keeps meaning whatever is published next.
+        check('rhetoric: nothing in the course is gated, and nothing claims a specialist',
+          RHETORIC_LESSONS.every(l => speechPublished(l.id))
+          && RHETORIC_LESSONS.every(l => awaitingSpecialist(l.id))
+          && RHETORIC_LESSONS.every(l => !speechApproved(l.id)),
+          `${RHETORIC_LESSONS.filter(l => speechPublished(l.id)).length}/${RHETORIC_LESSONS.length} published`);
         // Back to the shell, because the finally below needs the workspace
         // chip and a deep page does not have one.
         clickIn(doc.getElementById('brand-home')); await sleep(500);

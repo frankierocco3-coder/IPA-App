@@ -5668,7 +5668,7 @@ function renderActingReviewStatus(ws = 'acting') {
               <tr>
                 <th scope="row">${esc(it.title)}</th>
                 <td>${esc(it.collection)}</td>
-                <td><span class="sp-badge">${esc(ACTING_DRAFT_BADGE)}</span></td>
+                <td><span class="sp-badge">${esc(draftBadgeFor(it.record))}</span></td>
                 <td>Title and status visible; copy is review-only</td>
                 <td><button class="btn-lite" data-aopen="${esc(it.id)}" type="button">Open draft</button></td>
               </tr>`).join('')}
@@ -5713,7 +5713,7 @@ function renderActingDraft(itemId, ws = 'acting') {
     <main class="guide sp-draft">
       <p class="pane-note">${esc(item.collection)}</p>
       <h1 tabindex="-1" id="ac-h">${esc(item.title)}</h1>
-      <p><span class="sp-badge">${esc(ACTING_DRAFT_BADGE)}</span></p>
+      <p><span class="sp-badge">${esc(draftBadgeFor(item.record))}</span></p>
       <p class="pane-note">${esc(DRAFT_VISIBILITY_NOTE)}</p>
       <div class="guide-word"><span class="wii-who">Required reviewer</span><span class="guide-note">${esc(item.reviewer)}</span></div>
       <div class="guide-word"><span class="wii-who">Why review is required</span><span class="guide-note">${esc(item.why)}</span></div>
