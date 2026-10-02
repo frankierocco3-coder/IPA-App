@@ -4944,6 +4944,38 @@ export async function run({ navDoc = document } = {}) {
       && /shelf-section">\$\{esc\(FALLACY_GROUPS\[g\]\.label\)\}/.test(famSrc)
       && /shelf-section">\$\{fam\.icon\} \$\{fam\.n\}\. \$\{esc\(fam\.title\)\}/.test(famSrc));
 
+    // ── The owner review route reaches the BOOKS (2026-09-30) ──
+    // Rhetoric published module 1 and gated the other thirty, and there was
+    // NO WAY TO READ A GATED CHAPTER IN THE APP: the draft gate showed a
+    // title and a badge, #review was built from SPEECH_LESSONS only, and the
+    // "See its review status" button was hardcoded to the Acting book. The
+    // fix is parameterised over BOOKS rather than written for Rhetoric,
+    // because the hole was never Rhetoric's: Acting, Character and
+    // Shakespeare publish every record, so none of them had a gated draft
+    // to lose.
+    check('review: one generic builder serves every book, not a per-course copy',
+      /function bookReviewCategories\(B\)/.test(famSrc)
+      && /const awaiting = pathLessons\(B\)\.filter\(l => !B\.visible\(l\)\)/.test(famSrc)
+      // The reviewer is read off the records, never assumed from the course.
+      && /reviewer: bookReviewerPhrase\(B\)/.test(famSrc)
+      && /reviewer: reviewerPhraseOf\(l\)/.test(famSrc)
+      // All three books that had no route now have one.
+      && (famSrc.match(/reviewCats\(\) \{ return bookReviewCategories\(this\); \}/g) ?? []).length === 3
+      && !/reviewCats: \(\) => \(\{ total: 0 \}\)/.test(famSrc));
+    check('review: the draft gate leads somewhere for EVERY book, and the page takes one',
+      // The button used to render only when the lesson was an Acting one.
+      !/bookOf\(l\.id\) === BOOKS\.acting \? `/.test(famSrc)
+      && /renderActingReviewStatus\(bookOf\(l\.id\)\.ws\)/.test(famSrc)
+      && /function renderActingReviewStatus\(ws = 'acting'\)/.test(famSrc)
+      && /function renderActingDraft\(itemId, ws = 'acting'\)/.test(famSrc)
+      // A book lesson's prepared copy renders through the shared chapter
+      // renderer, so a draft reads exactly as the published chapter will.
+      && /\['acting-lesson', 'book-lesson'\]\.includes\(item\.kind\)/.test(famSrc)
+      // Filter state is per book: filtering one inventory must not silently
+      // filter another the next time it is opened.
+      && /const bookReviewFilter = \{\}/.test(famSrc)
+      && /bookReviewFilter\[B\.ws\] = b\.dataset\.afilter/.test(famSrc));
+
     // Driven: the shelves a reader actually meets. Both of them, because
     // "each fallacy is a card" is a claim about fifty-three cards, and no
     // amount of source reading tells a live card from a dead one.
@@ -5109,6 +5141,44 @@ export async function run({ navDoc = document } = {}) {
         clearBox.value = '';
         clearBox.dispatchEvent(new frame.contentWindow.Event('input', { bubbles: true }));
         await sleep(250);
+
+        // ── a gated chapter is READABLE, which it was not before ──
+        // Source pins cannot tell a route that exists from a route that
+        // works. This walks the path the owner took when he asked "where is
+        // the copy?", and follows it to the words.
+        //
+        // BRAND-HOME FIRST. This drive is standing on a SHELF, which is a
+        // deep page with no side nav, so sideItem() returns undefined and
+        // every click after it is a silent no-op. That is exactly how the
+        // first version of this failed, reporting "All Fallacies" as the
+        // page it had supposedly navigated away from.
+        clickIn(doc.getElementById('brand-home')); await sleep(500);
+        clickIn(sideItem('Library')); await sleep(450);
+        clickIn(doc.querySelector('[data-tile="col:invention"]')); await sleep(550);
+        clickIn([...doc.querySelectorAll('button, a')]
+          .find(b => b.textContent.includes('Where Arguments Come From'))); await sleep(600);
+        const gated = doc.getElementById('ac-open-review');
+        check('review: a gated Rhetoric chapter offers its review status',
+          !!gated && /Prepared draft/.test(doc.querySelector('main')?.textContent ?? ''),
+          h1Of() || '(nowhere)');
+        clickIn(gated); await sleep(700);
+        const rows = doc.querySelectorAll('.sp-inventory tbody tr').length;
+        const gatedCount = RHETORIC_LESSONS.filter(l => !speechPublished(l.id)).length;
+        check('review: every gated chapter is listed, and the count is derived',
+          rows === gatedCount && gatedCount > 0
+          && /awaiting rhetoric review/i.test(h1Of()),
+          `${rows} rows vs ${gatedCount} gated · ${h1Of()}`);
+        clickIn(doc.querySelector('[data-aopen="rh-find"]')); await sleep(700);
+        const draft = doc.querySelector('main')?.textContent ?? '';
+        check('review: the draft opens its prepared copy, with reviewer and gate stated',
+          /Where Arguments Come From/.test(draft)
+          && /The first canon is invention/.test(draft)
+          && /a knowledgeable rhetoric reader/.test(draft)
+          && /None recorded/.test(draft),
+          `${draft.split(/\s+/).length} words · ${h1Of()}`);
+        // Back to the shell, because the finally below needs the workspace
+        // chip and a deep page does not have one.
+        clickIn(doc.getElementById('brand-home')); await sleep(500);
       } catch (err) {
         bad('fallacy shelves drive', String(err));
       } finally {

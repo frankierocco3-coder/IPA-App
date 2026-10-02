@@ -2978,6 +2978,52 @@ function actingReviewCategories() {
   return { groups, total: groups.reduce((n, g) => n + g.count, 0) };
 }
 
+// Every GATED chapter in one of the books, presented for reading at its
+// own review page. Written generically over BOOKS rather than for one
+// course, because the gap it closes was never a Rhetoric gap: the review
+// area knew about Speech and about Acting, and Character and Shakespeare
+// simply had nothing gated to miss, because every record in them is
+// published. Rhetoric is the first course to publish PART of itself, and
+// that is what made the hole visible \u2014 thirty chapters a learner could
+// see the title of and nobody, the owner included, could read in the app.
+const BOOK_REVIEW_FILE = {
+  acting: 'js/data/acting/acting-course.js',
+  character: 'js/data/character/character-course.js',
+  shakespeare: 'js/data/shakespeare/shakespeare-course.js',
+  rhetoric: 'js/data/rhetoric/rhetoric-course.js',
+};
+const BOOK_REVIEW_CONCERNS = {
+  rhetoric: 'Claims about the classical tradition are made checkable and are unchecked. '
+    + 'No practitioner is named in a lesson body. Positions the course takes are stated as '
+    + 'the course\u2019s own rather than as fact, and two claims about how listeners behave '
+    + 'are real findings carried without a source.',
+};
+const BOOK_REVIEW_CONCERNS_DEFAULT =
+  'No single artistic interpretation implied; emotional states never taught as objectives; '
+  + 'no method-specific claim presented as universal; no protected exercise sequences reproduced.';
+
+function bookReviewCategories(B) {
+  const awaiting = pathLessons(B).filter(l => !B.visible(l));
+  if (!awaiting.length) return { groups: [], total: 0 };
+  const group = {
+    id: `book-${B.ws}`, label: `${B.title} chapters`, shortLabel: `${B.title} chapters`,
+    reviewer: bookReviewerPhrase(B), count: awaiting.length,
+    items: awaiting.map(l => {
+      const m = bookModuleFor(B, l);
+      return {
+        id: l.id, title: l.title, kind: 'book-lesson',
+        collection: m ? `Module ${m.n} \u00b7 ${m.title}` : B.libraryName,
+        reviewer: reviewerPhraseOf(l),
+        why: `Newly written instruction in ${B.title}. It stays out of the Library until `
+          + `${reviewerPhraseOf(l)} confirms the account is accurate and useful.`,
+        concerns: BOOK_REVIEW_CONCERNS[B.ws] ?? BOOK_REVIEW_CONCERNS_DEFAULT,
+        sources: [], file: BOOK_REVIEW_FILE[B.ws] ?? '', record: l,
+      };
+    }),
+  };
+  return { groups: [group], total: awaiting.length };
+}
+
 // THE SPECIALIST A DRAFT WAITS ON IS READ OFF THE RECORD, never assumed.
 // Every one of these surfaces said "acting-professional" and "a qualified
 // acting teacher or coach", which was true while Acting was the only course
@@ -3028,15 +3074,18 @@ const BOOKS = {
   character: { ws: 'character', icon: '🧍', title: 'Building a Character', libraryName: 'Character Library',
     principle: CHARACTER_PRINCIPLE, modules: CHARACTER_MODULES, lessons: CHARACTER_LESSONS,
     collections: CHARACTER_COLLECTIONS, visible: characterVisible,
-    moduleTone: () => 'is-terracotta', reviewCats: () => ({ total: 0 }) },
+    moduleTone: () => 'is-terracotta',
+    reviewCats() { return bookReviewCategories(this); } },
   shakespeare: { ws: 'shakespeare', icon: '🪶', title: 'Shakespeare', libraryName: 'Shakespeare Library',
     principle: SHAKESPEARE_PRINCIPLE, modules: SHAKESPEARE_MODULES, lessons: SHAKESPEARE_LESSONS,
     collections: SHAKESPEARE_COLLECTIONS, visible: shakespeareVisible,
-    moduleTone: () => 'is-terracotta', reviewCats: () => ({ total: 0 }) },
+    moduleTone: () => 'is-terracotta',
+    reviewCats() { return bookReviewCategories(this); } },
   rhetoric: { ws: 'rhetoric', icon: '🏛️', title: 'Rhetoric', libraryName: 'Rhetoric Library',
     principle: RHETORIC_PRINCIPLE, modules: RHETORIC_MODULES, lessons: RHETORIC_LESSONS,
     collections: RHETORIC_COLLECTIONS, visible: rhetoricVisible,
-    moduleTone: () => 'is-gold', reviewCats: () => ({ total: 0 }) },
+    moduleTone: () => 'is-gold',
+    reviewCats() { return bookReviewCategories(this); } },
 };
 const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
 const SHAKESPEARE_IDS = new Set(SHAKESPEARE_LESSONS.map(l => l.id));
@@ -3159,7 +3208,7 @@ function bookLearnPane(el, B) {
       <button class="linkish" id="ac-to-library-2" type="button">Browse everything in the ${esc(B.libraryName)}</button>
     </p>`;
 
-  el.querySelector('#ac-review-link')?.addEventListener('click', renderActingReviewStatus);
+  el.querySelector('#ac-review-link')?.addEventListener('click', () => renderActingReviewStatus(B.ws));
   el.querySelector('#ac-continue')?.addEventListener('click', () => renderActingLesson(next.id));
   el.querySelector('#ac-to-library')?.addEventListener('click', () => goSection('library'));
   el.querySelector('#ac-to-library-2').addEventListener('click', () => goSection('library'));
@@ -3331,15 +3380,15 @@ function actingDraftGate(l, where) {
       <p><span class="sp-badge">${esc(draftBadgeFor(l))}</span></p>
       <p class="guide-text">This lesson is fully written. It stays out of ${where} until ${esc(reviewerPhraseOf(l))} has reviewed it.</p>
       <p class="pane-note">${esc(DRAFT_VISIBILITY_NOTE)} ${esc(AI_DRAFT_NOTE)}</p>
-      ${bookOf(l.id) === BOOKS.acting ? `
-      <div class="practice-row"><button class="btn btn-lite" id="ac-open-review" type="button">See its review status</button></div>` : ''}
+      <div class="practice-row"><button class="btn btn-lite" id="ac-open-review" type="button">See its review status</button></div>
     </main>`;
   wireBrandHome();
   app.querySelector('#ac-h').focus();
   // The review-status page is ACTING's inventory. Offering it from a
   // Rhetoric chapter would send a reader to a page about somebody else's
   // drafts, so the door only appears for the book it belongs to.
-  document.getElementById('ac-open-review')?.addEventListener('click', renderActingReviewStatus);
+  document.getElementById('ac-open-review')?.addEventListener('click',
+    () => renderActingReviewStatus(bookOf(l.id).ws));
 }
 
 // ── Acting → Library chapter (reference, never a lesson) ──────
@@ -5582,26 +5631,30 @@ async function renderCharacterSheet(id) {
 }
 
 // ── Acting review status ──────────────────────────────────────
-let actingReviewFilter = 'all';
+// Per book, so filtering one course's inventory does not silently filter
+// another's the next time it is opened.
+const bookReviewFilter = {};
 
-function renderActingReviewStatus() {
-  record(renderActingReviewStatus);
+function renderActingReviewStatus(ws = 'acting') {
+  record(() => renderActingReviewStatus(ws));
   stopSpeech();
-  const cats = actingReviewCategories();
-  const groups = actingReviewFilter === 'all'
-    ? cats.groups : cats.groups.filter(g => g.id === actingReviewFilter);
+  const B = BOOKS[ws] ?? BOOKS.acting;
+  const filter = bookReviewFilter[B.ws] ?? 'all';
+  const cats = B.reviewCats();
+  const groups = filter === 'all'
+    ? cats.groups : cats.groups.filter(g => g.id === filter);
   app.innerHTML = `
-    ${pageTopbar('📝 Acting review status', '#8a6d3b')}
+    ${pageTopbar(`📝 ${esc(B.title)} review status`, '#8a6d3b')}
     <main class="guide sp-review">
-      <h1 tabindex="-1" id="ac-h">Prepared and awaiting acting-professional review</h1>
-      <p class="guide-text">${cats.total} acting draft(s) are fully written and waiting on a qualified acting teacher or coach. Nothing here is missing — every word can be opened and read.</p>
+      <h1 tabindex="-1" id="ac-h">Prepared and awaiting ${esc(bookReviewerKind(B))} review</h1>
+      <p class="guide-text">${cats.total} ${esc(B.title)} draft(s) are fully written and waiting on ${esc(bookReviewerPhrase(B))}. Nothing here is missing — every word can be opened and read.</p>
       <p class="pane-note">${esc(AI_DRAFT_NOTE)} Counts are computed from the content records. Speech drafts awaiting voice or speech-language review are counted separately, in the Speech workspace.</p>
       <div class="chip-row sp-review-filters" role="group" aria-label="Filter the review inventory">
-        <button class="chip-pick ${actingReviewFilter === 'all' ? 'on' : ''}" data-afilter="all" type="button"
-          aria-pressed="${actingReviewFilter === 'all'}">All (${cats.total})</button>
+        <button class="chip-pick ${filter === 'all' ? 'on' : ''}" data-afilter="all" type="button"
+          aria-pressed="${filter === 'all'}">All (${cats.total})</button>
         ${cats.groups.map(g => `
-          <button class="chip-pick ${actingReviewFilter === g.id ? 'on' : ''}" data-afilter="${g.id}" type="button"
-            aria-pressed="${actingReviewFilter === g.id}">${esc(g.label)} (${g.count})</button>`).join('')}
+          <button class="chip-pick ${filter === g.id ? 'on' : ''}" data-afilter="${g.id}" type="button"
+            aria-pressed="${filter === g.id}">${esc(g.label)} (${g.count})</button>`).join('')}
       </div>
       ${groups.map(g => `
         <h2 class="guide-heading">${esc(g.label)} — ${g.count}</h2>
@@ -5626,20 +5679,21 @@ function renderActingReviewStatus() {
   app.querySelector('#ac-h').focus();
   app.querySelectorAll('[data-afilter]').forEach(b =>
     b.addEventListener('click', () => {
-      actingReviewFilter = b.dataset.afilter;
+      bookReviewFilter[B.ws] = b.dataset.afilter;
       navStack.pop();
-      renderActingReviewStatus();
+      renderActingReviewStatus(B.ws);
     }));
   app.querySelectorAll('[data-aopen]').forEach(b =>
-    b.addEventListener('click', () => renderActingDraft(b.dataset.aopen)));
+    b.addEventListener('click', () => renderActingDraft(b.dataset.aopen, B.ws)));
 }
 
-function renderActingDraft(itemId) {
-  record(() => renderActingDraft(itemId));
+function renderActingDraft(itemId, ws = 'acting') {
+  record(() => renderActingDraft(itemId, ws));
   stopSpeech();
-  const item = actingReviewCategories().groups.flatMap(g => g.items).find(i => i.id === itemId);
-  if (!item) return renderActingReviewStatus();
-  const copy = item.kind === 'acting-lesson'
+  const B = BOOKS[ws] ?? BOOKS.acting;
+  const item = B.reviewCats().groups.flatMap(g => g.items).find(i => i.id === itemId);
+  if (!item) return renderActingReviewStatus(B.ws);
+  const copy = ['acting-lesson', 'book-lesson'].includes(item.kind)
     ? actingChapterBlocks(item.record)
     : (() => {
         const s = item.record.sections;
