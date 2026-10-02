@@ -35,7 +35,7 @@ import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable-actions.js';
-import { emptyProject, saveProject } from '../js/projects.js';
+import { emptyProject, saveProject, splitLines } from '../js/projects.js';
 import { phonemeVariantsFrom, hasPhonemeClip, hasWordClip, indexReady, audioUrl, AUDIO_BASE } from '../js/audio.js';
 import { store } from '../js/state.js';
 import { CAPABILITIES } from '../js/capabilities.js';
@@ -6151,6 +6151,128 @@ export async function run({ navDoc = document } = {}) {
       check('transitions: no two elements claim one transition name',
         names28.length === new Set(names28).size, `duplicates in: ${names28.join(',')}`);
     }
+  }
+
+  // ── 32. Safari: the app has to boot, and stay on screen ──────
+  // Three defects, found in the 2026-10-02 audit, that Chromium cannot
+  // show you. The browser here IS Chromium, so every check below reads a
+  // property of the SOURCE rather than watching behaviour — a source
+  // property is the only thing one engine can prove about another.
+  {
+    // (a) An unparseable regex LITERAL is a SyntaxError at module load, so
+    // no try/catch and no feature test can soften it: the module simply
+    // does not exist, and neither does anything that imported it.
+    // js/projects.js carried lookbehind, which WebKit gained only in
+    // Safari 16.4, and the shell imports projects.js — so iOS 15 and early
+    // 16 got a blank screen. Crawled from the real entry module, so a
+    // reintroduction anywhere in the graph fails this.
+    const seen = new Map();
+    let frontier = [new URL('../js/main.js', location.href).href];
+    while (frontier.length && seen.size < 300) {
+      const batch = frontier.filter(u => !seen.has(u));
+      frontier = [];
+      const texts = await Promise.all(batch.map(u =>
+        fetch(u).then(r => r.ok ? r.text() : '').catch(() => '')));
+      batch.forEach((u, i) => {
+        seen.set(u, texts[i]);
+        for (const m of texts[i].matchAll(/(?:from|import)\s*\(?\s*['"](\.[^'"]*\.js)['"]/g)) {
+          frontier.push(new URL(m[1], u).href);
+        }
+      });
+    }
+    const lookbehind = [...seen].filter(([, src]) =>
+      /\(\?<[=!]/.test(src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '')))
+      .map(([u]) => u.split('/js/')[1]);
+    // The floor matters: if the crawl regex ever breaks it reaches one
+    // module, finds nothing, and would otherwise report success. 84 modules
+    // today — the gap to the 95 on disk is the edition chunks, which are
+    // imported through a template literal and hold sonnet text, no code.
+    check('safari: the shipped module graph contains no lookbehind',
+      seen.size >= 70 && lookbehind.length === 0,
+      `reached ${seen.size} modules; lookbehind in: ${lookbehind.join(', ') || 'none'}`);
+
+    // The rewrite has to SPLIT THE SAME WAY, because `p.lines` indexes are
+    // a stored key space (occurrence overrides are keyed <lineIdx>:<wordIdx>)
+    // and a crash fix must not move a learner's saved marks. Every
+    // expectation below was read off the ORIGINAL lookbehind implementation,
+    // run side by side with this one over all 256,000 sentences in a
+    // 10-fragment alphabet: 0 divergences.
+    //
+    // So the title cases pin a BUG, on purpose. The four lookbehinds were
+    // meant to keep "Mr." with its sentence, but they sat after the full
+    // stop and tested "r." instead of "Mr", so they never fired once.
+    // Fixing that re-splits existing projects and needs a migration, which
+    // is the owner's decision — do not quietly "correct" these two.
+    const cases = [
+      ['One. Two. Three.', ['One.', 'Two.', 'Three.']],
+      ['Mr. Smith left. He returned.', ['Mr.', 'Smith left.', 'He returned.']],
+      ['Dr. Who? Mrs. Hall waited.', ['Dr.', 'Who?', 'Mrs.', 'Hall waited.']],
+      ['Wait… Then go.', ['Wait…', 'Then go.']],
+      // A closing quote after the stop blocks the split, straight or curly:
+      // the pattern wants the punctuation immediately before the space.
+      ['He said "stop." Then "go."', ['He said "stop." Then "go."']],
+      ['a\nb\nc', ['a', 'b', 'c']],
+      ['', []],
+      ['no terminal punctuation here', ['no terminal punctuation here']],
+      ['He went. and then came back.', ['He went. and then came back.']],
+      ['“Stop.” He left.', ['“Stop.” He left.']],
+      ['[cue] A line. Another.', ['[cue] A line.', 'Another.']],
+      ['. A.', ['.', 'A.']],
+    ];
+    const wrong = cases.filter(([input, want]) =>
+      JSON.stringify(splitLines(input)) !== JSON.stringify(want))
+      .map(([input]) => JSON.stringify(input));
+    check('safari: splitLines splits exactly as the lookbehind version did',
+      wrong.length === 0, `differs on: ${wrong.join(' | ')}`);
+    // Called twice in a row, because the boundary pattern is a shared
+    // module-level literal and a stale lastIndex would resume mid-string.
+    check('safari: splitLines does not carry state between calls',
+      JSON.stringify(splitLines('One. Two.')) === JSON.stringify(splitLines('One. Two.')));
+
+    // (b) Reading localStorage can THROW, not merely return null: Safari
+    // refuses the property outright when the reader has blocked cookies.
+    // Two of these are on the boot path, so an unguarded read was a blank
+    // screen for the same reader; state.js's write aborted whatever called
+    // it. Every other localStorage call in the app was already guarded.
+    const guards = [
+      ['views/context.js', "c = localStorage.getItem('speechcraft-course')"],
+      ['main.js', "raw = localStorage.getItem('speechcraft-section')"],
+      ['notebook.js', "ws = localStorage.getItem('speechcraft-workspace')"],
+      ['notebook.js', "course = localStorage.getItem('speechcraft-course')"],
+      ['state.js', 'localStorage.setItem(KEY, JSON.stringify(state))'],
+    ];
+    const unguarded = [];
+    for (const [rel, stmt] of guards) {
+      const src = await fetch('../js/' + rel).then(r => r.ok ? r.text() : '').catch(() => '');
+      const lines = src.split('\n');
+      const at = lines.findIndex(l => l.includes(stmt));
+      // The statement is inside a try when one opens on its own line or in
+      // the three above it — the shape every guard in this repo uses.
+      const window3 = at < 0 ? '' : lines.slice(Math.max(0, at - 3), at + 1).join('\n');
+      if (at < 0 || !/\btry\s*\{/.test(window3)) unguarded.push(`${rel}: ${stmt}`);
+    }
+    check('safari: every storage read on the boot path is guarded',
+      unguarded.length === 0, unguarded.join(' | '));
+    const stateSrc = await fetch('../js/state.js').then(r => r.text()).catch(() => '');
+    check('safari: a refused progress write returns false and says so once',
+      stateSrc.includes('warnedStorage') && /return false;/.test(stateSrc)
+      && stateSrc.includes('console.warn'),
+      'state.js save() must report a refused write rather than throw');
+
+    // (c) On iOS `100vh` is the viewport with the toolbars HIDDEN, so a box
+    // sized in `vh` stands taller than what the reader can see. For the
+    // modals that means their own buttons end up off-screen. Every `vh`
+    // length is declared twice, `vh` then `dvh`, which is the fallback the
+    // notebook dock has used since it was built.
+    const cssSrc32 = (await fetch('../css/style.css').then(r => r.text()).catch(() => ''))
+      .replace(/\/\*[\s\S]*?\*\//g, '');
+    const bareVh = [...cssSrc32.matchAll(/([a-z-]+)\s*:\s*[^;{}]*?([\d.]+)vh\b/g)]
+      .filter(m => !new RegExp(`${m[1]}\\s*:\\s*[^;{}]*${m[2].replace('.', '\\.')}dvh\\b`)
+        .test(cssSrc32))
+      .map(m => `${m[1]}: ${m[2]}vh`);
+    check('safari: every vh length has a dvh companion',
+      cssSrc32.includes('dvh') && bareVh.length === 0,
+      `unpaired: ${bareVh.join(', ') || 'none'}`);
   }
 
   if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');

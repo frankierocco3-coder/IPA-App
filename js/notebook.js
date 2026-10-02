@@ -231,9 +231,14 @@ export async function mountNotebook() {
 
   fab.addEventListener('click', async () => {
     if (!dock.hidden) { await flush(); setMode('closed'); return; }
-    // Open on the notebook for wherever you are.
-    const ws = localStorage.getItem('speechcraft-workspace');
-    const course = localStorage.getItem('speechcraft-course');
+    // Open on the notebook for wherever you are. Guarded because a blocked
+    // -storage read throws, and the dock must still open: notebookForContext
+    // already answers with its default for an unknown workspace or course.
+    let ws = null, course = null;
+    try {
+      ws = localStorage.getItem('speechcraft-workspace');
+      course = localStorage.getItem('speechcraft-course');
+    } catch { /* fall through to the default notebook */ }
     await openTab(notebookForContext(ws, course));
     setMode('half');
   });

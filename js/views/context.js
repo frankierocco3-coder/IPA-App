@@ -63,8 +63,13 @@ export const visibleCourses = () => COURSES.filter(c => COCKNEY_LIVE || c.id !==
 // Every workspace carries the same six sections. Learn is an OPTIONAL
 // guided pathway over the Library's records — never a prerequisite for
 // reading them.
+// Reading storage can THROW, not merely return null: Safari refuses the
+// localStorage property itself when cookies are blocked. This runs on
+// nearly every render, so an unreadable course falls back exactly as an
+// absent one does. Same guard as activeWorkspace below.
 export const activeCourse = () => {
-  const c = localStorage.getItem('speechcraft-course');
+  let c = null;
+  try { c = localStorage.getItem('speechcraft-course'); } catch { /* fresh */ }
   return visibleCourses().some(x => x.id === c) ? c : 'nam';
 };
 // ── Workspaces ────────────────────────────────────────────────

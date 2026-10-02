@@ -266,7 +266,10 @@ const RHETORIC_LIVE = false;
 
 
 const activeSection = () => {
-  const raw = localStorage.getItem('speechcraft-section');
+  // Guarded like activeCourse: a blocked-storage read throws, and this is
+  // on the boot path, so an unreadable section resolves to the landing one.
+  let raw = null;
+  try { raw = localStorage.getItem('speechcraft-section'); } catch { /* fresh */ }
   const s = LEGACY_SECTIONS[raw] ?? raw;
   const ws = activeWorkspace();
   // A section the active workspace does not offer (a stored 'learn' in
@@ -3045,15 +3048,21 @@ const bookReviewerKind = B => {
   return kinds.length === 1 ? kinds[0] : 'specialist';
 };
 const bookReviewerPhrase = B => REVIEWER_PHRASE[bookReviewerKind(B)] ?? 'a qualified specialist';
-// The acting default, for the three surfaces that carry no lesson record to
-// read a reviewer off: Acting's own review inventory, its draft reader, and
-// The Four Lists, which is a page rather than a lesson.
+// The acting default, for the ONE surface that carries no lesson record to
+// read a reviewer off: The Four Lists, which is a page rather than a lesson.
 //
-// THIS CONSTANT WAS DELETED ON 2026-09-28 AND THREE USES WERE LEFT BEHIND.
-// The Four Lists page threw ReferenceError on render and could not be opened
-// at all, and it shipped: the check that would have caught it did not exist
-// until a shelf tile was added for that page the next day. Its value is
-// unchanged, so the three surfaces read exactly as they did before.
+// IT USED TO SERVE THREE. The review inventory and the draft reader also
+// used it, and both DO have a record — so on 2026-09-30, when Rhetoric
+// became the first course with gated chapters to list, all thirty rows
+// announced themselves as awaiting an ACTING professional directly beneath
+// a heading saying a rhetoric reader. Both read draftBadgeFor(record) now.
+// Reach for this constant only where there is genuinely no record; anywhere
+// else it is a wrong answer waiting for a second course to expose it.
+//
+// THE CONSTANT WAS ALSO DELETED ON 2026-09-28 AND THREE USES WERE LEFT
+// BEHIND. The Four Lists page threw ReferenceError on render and could not
+// be opened at all, and it shipped: the check that would have caught it did
+// not exist until a shelf tile was added for that page the next day.
 const ACTING_DRAFT_BADGE = draftBadgeFor(null);
 const approachPublished = a => speechPublished(a.id);
 

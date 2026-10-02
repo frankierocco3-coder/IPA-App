@@ -16,9 +16,34 @@ function load() {
 
 const SCHEMA_VERSION = 2;   // bump only with a matching migration in load()
 
+let warnedStorage = false;
+
+/**
+ * Write progress. Returns false if the device refused it.
+ *
+ * This used to throw. Safari refuses storage outright when the reader has
+ * blocked cookies, and a full device throws QuotaExceededError, so an
+ * unguarded write aborted whatever called it — finishing a lesson, claiming
+ * a quest, spending gems — part-way through. Best-effort is the house
+ * pattern for localStorage here (see quests.js, analytics.js, the stores).
+ *
+ * It fails SILENTLY to the reader, which is honest only as far as the
+ * console. Telling them their progress is not being kept is product copy
+ * and the owner's call.
+ */
 function save(state) {
   state.v = SCHEMA_VERSION;
-  localStorage.setItem(KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(KEY, JSON.stringify(state));
+    return true;
+  } catch {
+    if (!warnedStorage) {
+      warnedStorage = true;      // every later write would fail the same way
+      console.warn('Speechcraft: this device refused to store progress. '
+        + 'XP, streak and completed lessons will not survive a reload.');
+    }
+    return false;
+  }
 }
 
 function todayStr() {

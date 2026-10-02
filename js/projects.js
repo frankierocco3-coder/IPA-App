@@ -75,6 +75,32 @@ export function emptyProject(patch = {}) {
   };
 }
 
+// A sentence end: terminal punctuation, the space after it, and a capital,
+// quote or bracket opening the next one. LookAHEAD only, deliberately.
+//
+// This used to be ONE pattern ending in `(?<=[.!?…])\s+(?=[“"A-Z[])`, with
+// four lookbehinds in front of it. Lookbehind reached WebKit only in Safari
+// 16.4, and a regex LITERAL the engine cannot parse is a SyntaxError at
+// module load — which no try/catch can reach, because the module never
+// exists. The shell imports projects.js, so iOS 15 and early 16 got a blank
+// screen rather than a degraded feature. Rewritten 2026-10-02 to use the
+// lookahead only and walk the matches, which every engine can parse.
+//
+// THE REWRITE IS EXACTLY EQUIVALENT, verified over all 256,000 sentences in
+// a 10-fragment alphabet. That includes reproducing a bug: the four
+// lookbehinds `(?<!\bMr)(?<!\bMrs)(?<!\bDr)(?<!\bSt)` were MEANT to keep a
+// title with its sentence, but they sat AFTER the full stop, so each one
+// tested "r." or "rs." and never "Mr" — the guard never once fired, and
+// "Mr. Smith left." has always split into "Mr." and "Smith left.".
+//
+// That is a real defect and it is NOT fixed here. `p.lines` indexes are a
+// stored key space: occurrence pronunciation overrides are keyed
+// `<lineIdx>:<wordIdx>` (js/overrides.js), so re-splitting an existing
+// project moves its saved overrides onto different words. Fixing the titles
+// needs a migration, which is the owner's call — not a side effect of
+// making the app boot on an iPhone.
+const SENTENCE_END = /([.!?…])(\s+)(?=[“"A-Z[])/g;
+
 /**
  * Split pasted text into speakable lines.
  * Blank-line-separated or single-newline text keeps its own line breaks;
@@ -85,11 +111,17 @@ export function splitLines(text) {
   if (raw.length > 1) return raw;
   const one = raw[0] ?? '';
   if (!one) return [];
-  const parts = one
-    .split(/(?<!\bMr)(?<!\bMrs)(?<!\bDr)(?<!\bSt)(?<=[.!?…])\s+(?=[“"A-Z[])/)
-    .map(s => s.trim())
-    .filter(Boolean);
-  return parts.length ? parts : [one];
+  const parts = [];
+  let start = 0;
+  let m;
+  SENTENCE_END.lastIndex = 0;          // shared literal, so never resume mid-string
+  while ((m = SENTENCE_END.exec(one))) {
+    parts.push(one.slice(start, m.index + m[1].length));   // punctuation stays
+    start = m.index + m[0].length;                         // the space drops
+  }
+  if (start < one.length) parts.push(one.slice(start));
+  const out = parts.map(s => s.trim()).filter(Boolean);
+  return out.length ? out : [one];
 }
 
 export async function listProjects() {
