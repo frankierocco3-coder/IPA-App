@@ -6273,6 +6273,28 @@ export async function run({ navDoc = document } = {}) {
     check('safari: every vh length has a dvh companion',
       cssSrc32.includes('dvh') && bareVh.length === 0,
       `unpaired: ${bareVh.join(', ') || 'none'}`);
+
+    // (d) The build marker (2026-10-02). The owner opened the live site,
+    // saw three workspaces instead of six and reported a missing deploy;
+    // it was a worker serving JavaScript from before 23 September, and
+    // diagnosing it meant inferring the build from WHICH workspaces were
+    // absent. The stamp ships with the code it describes, so an old cached
+    // build carries an old date and cannot overstate its freshness.
+    const { BUILD } = await import('../js/build.js');
+    const mainSrc32 = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
+    check('build: the stamp is generated, shaped and frozen',
+      /^\d{4}-\d{2}-\d{2}$/.test(BUILD.date) && /^[0-9a-f]{7,40}$/.test(BUILD.commit)
+      && Object.isFrozen(BUILD), `date=${BUILD.date} commit=${BUILD.commit}`);
+    check('build: About renders the stamp',
+      mainSrc32.includes('Build ${esc(BUILD.date)}'),
+      'the marker stopped being rendered, so staleness is invisible again');
+    // The Shakespeare Dictionary shipped IMPORTED BY NOTHING once and was
+    // recorded as built while unreachable. A marker nobody can reach is
+    // the same defect in a smaller file, so reachability is pinned, not
+    // assumed: this asserts build.js is in the graph crawled above.
+    check('build: js/build.js is reachable from the entry module',
+      [...seen].some(([u]) => u.endsWith('/js/build.js')),
+      'build.js is not in the import graph — the stamp would never render');
   }
 
   if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');

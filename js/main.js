@@ -15,6 +15,7 @@ import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/f
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
+import { BUILD } from './build.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
 import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
          goHome, goSection, setSectionHandler, openModal, phonemeSlug,
@@ -6591,6 +6592,7 @@ function renderAbout() {
       <p class="guide-text">The preface — on what speech does, what it reveals, and what it can conceal. Read it again any time.</p>
       <p><button class="btn" id="about-threshold" type="button">Read it again</button></p>
       <p class="pane-note">Pronunciation targets are exactly that: targets. Real speakers vary by region, generation and situation. Anything you paste into the Studio stays private on this device — nothing is uploaded or shared.</p>
+      <p class="pane-note build-stamp">Build ${esc(BUILD.date)} · ${esc(BUILD.commit)}</p>
     </main>`;
   wireBrandHome();
   document.getElementById('about-threshold').addEventListener('click', () => renderThreshold(0, { replay: true }));

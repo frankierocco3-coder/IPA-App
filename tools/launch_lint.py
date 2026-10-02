@@ -30,6 +30,18 @@ def fail(msg):
     fails.append(msg)
 
 
+def _newest_commit_date(paths):
+    """Date of the newest commit touching any of `paths`, or None without git."""
+    import subprocess
+    try:
+        out = subprocess.run(
+            ["git", "log", "-1", "--date=short", "--format=%cd", "--"] + list(paths),
+            cwd=str(ROOT), stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, check=True)
+        return out.stdout.decode("utf-8", "replace").strip() or None
+    except (OSError, subprocess.CalledProcessError):
+        return None
+
+
 def main():
     # The view layer is no longer one file: js/main.js was split into
     # js/views/* (2026-09). Every pin below is about the shipped view
@@ -589,6 +601,30 @@ def main():
     if "deviceSpeak(text, { rate, lang });\n  return 'tts';" in audio_js \
        and "if (device) {" not in audio_js:
         fail("speak() appears to fall back to device TTS without an explicit device request")
+
+    # 7: the build marker on About must not be stale (2026-10-02).
+    # js/build.js ships with the code it describes, so a cached old build
+    # carries an old date and cannot overstate its freshness. The one way
+    # it CAN mislead is by falling behind — somebody edits js/ or css/ and
+    # forgets to re-stamp, and then a current build reports an older date
+    # and reads as stale. That is a false alarm rather than a false pass,
+    # but a marker nobody trusts is a marker nobody reads, so it fails here.
+    build_js = ROOT / "js" / "build.js"
+    if not build_js.exists():
+        fail("js/build.js is missing — run python3 tools/stamp_build.py")
+    else:
+        src = build_js.read_text(encoding="utf-8")
+        m = re.search(r"date:\s*'(\d{4}-\d{2}-\d{2})'", src)
+        if not m:
+            fail("js/build.js has no readable build date")
+        elif "BUILD" not in views_js:
+            fail("the build marker is no longer rendered on About")
+        else:
+            newest = _newest_commit_date(["js", "css"])
+            # No git (a plain source download) means no claim either way.
+            if newest and m.group(1) < newest:
+                fail("build stamp %s is behind the newest js/css commit (%s) — "
+                     "run python3 tools/stamp_build.py" % (m.group(1), newest))
 
     if fails:
         print("LAUNCH LINT FAILED — %d problem(s):" % len(fails))

@@ -1,0 +1,271 @@
+# Device test — iPhone
+
+Written 2026-10-02, after the Safari audit. **Frankie runs this. Nobody
+else can.**
+
+## Why this exists
+
+This machine has no Node and no Safari. Chromium is the only browser and
+the only JavaScript parser here, so every Safari claim in the audit was
+proved as a property of the source, never by watching the app run. That is
+the strongest thing one engine can say about another, and it is not the
+same as knowing.
+
+It is also the standing gap in the repo: *"Only tested in Chromium.
+Firefox and Safari untested."* This run closes the Safari half of it.
+
+**Time:** about 40 minutes, plus a seven-day wait at the end.
+**Bring:** the iPhone, and somewhere to type answers.
+
+---
+
+## Before you start — record these
+
+These decide what the run actually proves, so fill them in first.
+
+```
+Device:            (e.g. iPhone 13 mini)
+iOS version:       (Settings → General → About → Software Version)
+Last opened app:   (roughly how long since you last used Speechcraft)
+Installed?:        (is it already on your home screen, or Safari only)
+```
+
+---
+
+## Part 0 — make sure you are testing the new build (2 min)
+
+The service worker serves JavaScript and CSS **stale-while-revalidate**:
+the first load after a deploy runs the OLD code and downloads the new one
+in the background, and the SECOND load runs the new one. Nothing in the
+interface shows a version number, so two loads is the only guarantee.
+
+**0.1** Open <https://frankierocco3-coder.github.io/IPA-App/>
+
+**0.2** Force-quit Safari completely (swipe up from the bottom, flick the
+Safari card away). If the app is already on your home screen, force-quit
+that too.
+
+**0.3** Open it again.
+
+> Everything below is only valid after 0.3. If you skip this you will be
+> testing the build from before the fixes.
+
+---
+
+## Part 1 — does it work at all (5 min)
+
+**1.1 — the one that matters most.** The app opens.
+
+- **Expect:** the normal screen — course chip at the top, the Learn path,
+  a bottom bar with six items (Learn, Practice, Studio, Library, Progress,
+  More).
+- **A blank white screen is the failure this whole audit was about.**
+- Saw: `____________________`
+
+**1.2** Tap all six bottom-bar items in turn.
+
+- **Expect:** each one renders something. None blank, none frozen.
+- Saw: `____________________`
+
+**1.3** Your progress is intact.
+
+- **Expect:** your streak, gems, hearts and course are what you left them
+  as — not reset to zero, not back at the first-run walkthrough.
+- **If it is reset,** write down how long it had been since you last
+  opened it. That is Part 5 happening to you already.
+- Saw: `____________________`
+
+---
+
+## Part 2 — the three fixes from 2026-10-02 (10 min)
+
+**2.1 — modals fit on screen (S4).** Learn → tap a **locked** node further
+down the path.
+
+- **Expect:** the popover sits fully on screen, nothing cut off at the
+  bottom, and you can reach its close button without fighting it.
+- Saw: `____________________`
+
+**2.2 — overlays fit on screen (S4).** More → **Why Speech Matters**.
+Walk through the panels.
+
+- **Expect:** the Continue button is reachable on every panel, not hidden
+  under the Safari toolbar.
+- Saw: `____________________`
+
+**2.3 — the notebook dock (S4).** Tap the notebook button (bottom right,
+above the nav bar). Put it to half height, then full.
+
+- **Expect at full:** the dock fills the visible screen exactly.
+- **Known, already found, not fixed:** at HALF height the page behind it
+  does not actually shrink — a CSS rule that has never done anything. Tell
+  me how it looks and whether it bothers you. It is a one-line fix but it
+  changes how a shipped screen behaves, so it is your call.
+- Saw: `____________________`
+
+**2.4 — scroll behaviour. This is the one risk MY fix introduced.** Scroll
+the Learn path hard, up and down, several times.
+
+- **Expect:** smooth.
+- **Watch for:** the page height *jumping* or stuttering as the Safari
+  toolbar shrinks and grows. The fix changed `100vh` to `100dvh`, and
+  `dvh` follows the toolbar — which is correct for fitting, but it does
+  move during a scroll.
+- **If it jitters:** the remedy is one word, `svh` instead of `dvh` on the
+  two `min-height` rules, because `svh` never changes while you scroll.
+  Say so and I will change it the same day.
+- Saw: `____________________`
+
+**2.5 — blocked storage (S3). Optional, and reversible.** Settings →
+Safari → Advanced → **Block All Cookies** ON. Reload the app.
+
+- **Expect:** the app still opens. It may show no saved progress, which is
+  correct and expected — it cannot read storage. Before the fix, this was
+  a blank screen.
+- **Turn Block All Cookies back OFF afterwards.**
+- Saw: `____________________`
+
+---
+
+## Part 3 — things only a phone can show (15 min)
+
+**3.1 — the silent switch. Genuine unknown.** Flip the ring/silent switch
+on the side of the phone to **silent**. Then Library → IPA → open a sound
+page → **Hear the sound**. (Neutral American sounds are your own
+recordings, so you will know immediately whether it played.)
+
+- **The question:** does iOS mute it? iOS silences ordinary web audio when
+  that switch is on.
+- **Why it matters:** the app is strict about audio by design — a missing
+  clip is silence, never a substitute voice and never a message. So if the
+  switch mutes everything, a user with it flipped gets an app that appears
+  to have no audio at all and says nothing about why.
+- Then flip the switch off and play it again.
+- Saw, silent: `__________`  Saw, not silent: `__________`
+
+**3.2 — audio generally.** Library → Words & Expressions → a listen
+button. Then Twisters & Sentences → **Hear it** on a full line.
+
+- **Expect:** a real recorded voice.
+- Note the exact word or line if anything is silent.
+- Saw: `____________________`
+
+**3.3 — the bottom of the screen.** Look at the six-item nav bar against
+the home indicator.
+
+- **Expect:** all six comfortably tappable, nothing sitting under the
+  indicator bar.
+- Saw: `____________________`
+
+**3.4 — the keyboard.** Studio → open a project → edit its text.
+
+- **Expect:** you can see what you are typing, the `Saving… / Saved ✓`
+  status is visible, and the layout does not lurch when the keyboard
+  opens or closes.
+- Saw: `____________________`
+
+**3.5 — rotation.** Turn the phone landscape on the Learn path and on a
+lesson.
+
+- **Expect:** readable, nothing clipped.
+- Saw: `____________________`
+
+**3.6 — offline.** Airplane mode ON. Force-quit the app. Open it again.
+
+- **Expect:** it opens and pages work. Audio plays only for clips you have
+  already played on this device, which is the honest shape of it.
+- Airplane mode OFF afterwards.
+- Saw: `____________________`
+
+---
+
+## Part 4 — the backup path, and the big unknown (10 min)
+
+**4.1 — CRITICAL. Export actually works.** Studio → a project row →
+**Export**.
+
+- **Why this is critical:** export is the *only* backup path this app has.
+  There is no backend and no account. If export does not work on iPhone,
+  then there is no backup on iPhone, and the storage risk in Part 5 has no
+  remedy at all.
+- The app builds a file and triggers a download, which iOS Safari has
+  historically handled badly.
+- **Write down exactly what happens:** a share sheet? a file in Files?
+  the JSON opening as text in a new tab? nothing at all?
+- Saw: `____________________`
+
+**4.2** Library → Personal Dictionary → **Export**. Same question.
+
+- Saw: `____________________`
+
+**4.3 — CRITICAL, and the single most important unknown in this run.**
+Share → **Add to Home Screen**. Open the app from the new icon.
+
+- **The question:** is your progress there, or is it empty?
+- **Why it matters so much:** installing to the home screen is the *only*
+  defence against the seven-day storage wipe in Part 5 — it is the remedy
+  we would tell every iPhone user to apply. But iOS has historically given
+  home-screen web apps storage **separate from Safari**. If that is still
+  true, then following our own advice would show the user an empty app and
+  look exactly like losing everything.
+- If it IS empty: do not panic, your Safari copy is untouched. Say so and
+  the install instructions have to carry an export-and-import step.
+- Saw: `____________________`
+
+---
+
+## Part 5 — the seven-day test (set up now, check later)
+
+This is the one that decides whether we write the install prompt at all.
+
+WebKit deletes all script-writable storage after **seven days without
+interaction** for sites that are not installed to the home screen.
+Installed web apps are supposed to be exempt. Nobody here has watched it
+happen.
+
+**Set up today:**
+
+- **A — Safari copy.** Leave the app in a Safari tab. Do not open it again.
+- **B — installed copy.** The home-screen icon from 4.3. Do not open it
+  again either.
+- First, make sure both show real progress worth losing. Note the streak
+  and gem numbers here: `____________________`
+- **Date set up:** `____________`  **Check after:** `____________` (+8 days)
+
+**On the day, open A first, then B.**
+
+- **A — expect:** everything gone, back to a first run. That is S2, and
+  seeing it confirms the problem is real on your device and your iOS.
+- **B — expect:** progress intact. That confirms installing is a real
+  remedy and the prompt is worth writing.
+- A gone, B intact: `____________________`
+
+If A survives, the seven-day rule does not bite the way the documentation
+says, and we should not frighten users about it. If B *also* dies, then
+installing is not a remedy and export becomes the only honest answer.
+
+---
+
+## What this run does NOT prove
+
+Worth being straight about.
+
+- **If your iPhone runs iOS 17 or newer, step 1.1 does not prove the S1
+  fix.** That crash only ever hit iOS 15 and early 16. On a modern phone
+  1.1 proves no regression, which is worth having, but the fix itself is
+  only truly provable on an old device or in a simulator.
+- **No voice has ever been ear-checked** against the taught IPA. That is a
+  separate pass and this is not it.
+- **Android and Firefox are untouched.** Same gap, different engines.
+
+---
+
+## What to send back
+
+Paste the whole thing back with the `Saw:` lines filled in, plus the
+device block from the top. Anything that turns out to be a one-word fix
+(`svh`, a safe-area inset, a dock rule) I will do the same day.
+
+The three answers I most want: **4.3** (does the installed app keep your
+progress), **4.1** (does export work at all), and **3.1** (does the silent
+switch kill the audio).
