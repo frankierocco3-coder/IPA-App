@@ -626,6 +626,29 @@ def main():
                 fail("build stamp %s is behind the newest js/css commit (%s) — "
                      "run python3 tools/stamp_build.py" % (m.group(1), newest))
 
+    # 8: privacy.html must still be the policy the app shows (2026-10-03).
+    # The stores need the policy at a public URL; the app needs it on the
+    # Privacy & Data page. Writing it twice is how two privacy policies end
+    # up disagreeing about what an app stores, so one is generated from the
+    # other and this re-runs the generator to prove they have not parted.
+    try:
+        sys.path.insert(0, str(ROOT / "tools"))
+        import build_legal
+        want, legal_err = build_legal.render()
+        if legal_err:
+            fail("privacy.html cannot be generated: %s" % legal_err)
+        else:
+            privacy = ROOT / "privacy.html"
+            if not privacy.exists():
+                fail("privacy.html is missing — run python3 tools/build_legal.py")
+            elif privacy.read_text(encoding="utf-8") != want:
+                fail("privacy.html has drifted from the policy in js/main.js — "
+                     "run python3 tools/build_legal.py")
+            elif "<script" in privacy.read_text(encoding="utf-8").lower():
+                fail("privacy.html gained script — it must render with JavaScript off")
+    except ImportError:
+        fail("tools/build_legal.py is missing; privacy.html cannot be verified")
+
     if fails:
         print("LAUNCH LINT FAILED — %d problem(s):" % len(fails))
         for f_ in fails:

@@ -19,9 +19,9 @@ Run it before committing anything under js/ or css/:
 
     python3 tools/stamp_build.py
 
-It names the commit it was stamped AT, which is the commit before the one
-carrying the stamp. That is honest and it is what you want: it says what
-code this build was cut from.
+The DATE is the day you stamp. The HASH names the commit it was stamped
+at, which is the commit before the one carrying the stamp — honest, and
+what you want: it says what code this build was cut from.
 """
 import os
 import re
@@ -73,9 +73,15 @@ def current_stamp():
 
 
 def main():
-    date = git('log', '-1', '--date=short', '--format=%cd')
+    # The date is TODAY, not the last commit's date, and the difference
+    # matters. launch_lint requires the stamp to be at least as new as the
+    # newest commit touching js/ or css/ — and the commit you are about to
+    # make IS one of those. Stamping with the previous commit's date passes
+    # on the day you do it and fails the next morning, which is a gate that
+    # cries wolf. The hash still names the commit this build was cut FROM.
+    date = __import__('datetime').date.today().isoformat()
     commit = git('log', '-1', '--format=%h')
-    if not date or not commit:
+    if not commit:
         print('stamp_build: git is not available here; js/build.js left alone.')
         return 0
     before = current_stamp()

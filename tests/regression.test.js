@@ -6295,6 +6295,28 @@ export async function run({ navDoc = document } = {}) {
     check('build: js/build.js is reachable from the entry module',
       [...seen].some(([u]) => u.endsWith('/js/build.js')),
       'build.js is not in the import graph — the stamp would never render');
+
+    // (e) The privacy policy at a public URL (2026-10-03). Both stores
+    // require one, and routing here is function-based, so the policy
+    // existed with no link that opened it. privacy.html is GENERATED from
+    // the section in main.js — launch_lint proves they have not drifted,
+    // and this proves the page is actually servable and actually static.
+    const privacyHtml = await fetch('../privacy.html')
+      .then(r => r.ok ? r.text() : '').catch(() => '');
+    check('privacy: the policy is served as a page of its own',
+      privacyHtml.includes('id="privacy-policy"')
+      && privacyHtml.includes('Effective 22 September 2026'),
+      'privacy.html is missing or does not carry the policy');
+    // A store reviewer, a crawler, or anyone with scripting off has to be
+    // able to read it, so it carries no script at all.
+    check('privacy: the page needs no JavaScript to render',
+      privacyHtml !== '' && !/<script/i.test(privacyHtml),
+      'privacy.html gained a script tag');
+    // It is a separate document, so it needs its own CSP: the meta in
+    // index.html does not reach it.
+    check('privacy: the page carries its own CSP',
+      privacyHtml.includes("default-src 'self'") && privacyHtml.includes("object-src 'none'"),
+      'privacy.html lost the Content-Security-Policy meta');
   }
 
   if (workspaceBefore === null) localStorage.removeItem('speechcraft-workspace');

@@ -7365,7 +7365,7 @@ function renderPrivacy() {
         <p class="pane-note"><b>Cookies and storage:</b> Speechcraft sets no cookies. It uses your browser’s own storage (local storage, IndexedDB and an offline cache) only to run the app: your progress, your projects and offline use. None of it is used for tracking or advertising, which is why the app never asks for cookie consent.</p>
         <p class="pane-note"><b>Feedback:</b> reporting a problem takes you to GitHub Issues, a separate site with its own terms and privacy statement. Anything you post there is public.</p>
         <p class="pane-note"><b>Children:</b> Speechcraft collects no personal information from anyone, including children.</p>
-        <p class="pane-note"><b>Your rights:</b> because your data never reaches us, there is nothing on our side to access, correct or delete. You control all of it on this device, including deleting it below.</p>
+        <p class="pane-note"><b>Your rights:</b> because your data never reaches us, there is nothing on our side to access, correct or delete. You control all of it on this device, and you can delete any of it at any time.</p>
         <p class="pane-note"><b>Changes:</b> if this policy changes, the date above changes with it. Questions go through the Feedback page.</p>
       </section>
 
