@@ -24,7 +24,7 @@
 //   2  + dissections (new store only — nothing else touched)
 
 const DB_NAME = 'speechcraft';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 export const STORES = {
   projects: 'projects',
@@ -32,6 +32,7 @@ export const STORES = {
   blobs: 'blobs',
   meta: 'meta',
   dissections: 'dissections',
+  narration: 'narration',
 };
 
 let dbPromise = null;
@@ -62,7 +63,16 @@ export const SCHEMA_STEPS = {
     const dissections = db.createObjectStore(STORES.dissections, { keyPath: 'id' });
     dissections.createIndex('targetKey', 'targetKey');
   },
-  // Future: 3: (db) => { ... }
+  3: (db) => {
+    // Narration kept for offline: one record per LINE, keyed by the clip's
+    // own relative path ('sonnets/nam/18-0.mp3'), so a lookup needs no
+    // second index and a partial download is simply fewer rows. Indexed by
+    // the set it belongs to ('sonnet:18:nam') so a whole reading can be
+    // counted or removed in one pass.
+    const narration = db.createObjectStore(STORES.narration, { keyPath: 'id' });
+    narration.createIndex('setId', 'setId');
+  },
+  // Future: 4: (db) => { ... }
 };
 
 export function applySchema(db, from, to) {
@@ -122,7 +132,7 @@ export function openDB() {
 // lives in localStorage). Privacy's "delete local data" clears exactly this
 // list — a store missing from it would silently survive a full wipe.
 export const CONTENT_STORES = [STORES.blobs, STORES.recordings, STORES.dissections,
-  STORES.projects, STORES.meta];
+  STORES.narration, STORES.projects, STORES.meta];
 
 /** Run `fn(store)` in a transaction and resolve with its request result. */
 async function withStore(name, mode, fn) {

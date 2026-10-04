@@ -28,6 +28,8 @@ import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech,
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
+import { narrationComplete, narrationUrls, releaseNarrationUrls,
+         downloadNarration, removeNarration } from './narration.js';
 import { RECASTS, TRANSPOSITION_LABELS } from './data/recasts.js';
 import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from './data/editions/index.js';
@@ -143,6 +145,7 @@ let performCleanup = null;
 function teardownAV() {
   cancelRecording();                             // never leave the mic hot mid-navigation
   releaseAllUrls();
+  releaseNarrationUrls();                        // stored-reading blob URLs, same lifetime as takes
   try { performCleanup?.(); } catch { /* pane already gone */ }
   performCleanup = null;
 }
@@ -7353,6 +7356,7 @@ function renderPrivacy() {
         <div class="stat-row"><span class="stat-name">Notebooks</span><span class="stat-val">this device</span></div>
         ${characterOpen() ? '<div class="stat-row"><span class="stat-name">Characters you are building</span><span class="stat-val">this device</span></div>' : ''}
         <div class="stat-row"><span class="stat-name">Offline copy of app content (for use without a connection)</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Readings you chose to keep offline</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
       </section>
@@ -7382,7 +7386,7 @@ function renderPrivacy() {
       <div class="danger-zone">
         <h2 class="chart-h">Delete local data</h2>
         <p class="pane-note">This cannot be undone. Export anything you want to keep first.</p>
-        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics &amp; dictionary</button>
+        <button class="btn btn-lite btn-danger" id="wipe-content" type="button">Delete projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, kept readings, analytics &amp; dictionary</button>
         <button class="btn btn-lite btn-danger" id="wipe-all" type="button">Delete everything, including course progress</button>
         <p class="save-state" id="wipe-state" role="status" aria-live="polite"></p>
       </div>
@@ -9337,8 +9341,27 @@ async function renderSonnet(n) {
   const prev = SONNETS[idx - 1], next = SONNETS[idx + 1];
   // A dialect is offered as recorded ONLY when this sonnet's complete
   // line set exists for it (generated manifest — never a hardcoded claim).
-  const narrated = Object.keys(LONGFORM_COVERAGE.sonnets)
+  // A dialect counts as recorded when the BUILD says so, or when this
+  // DEVICE has the whole reading stored. The build-time manifest cannot
+  // learn — in a store bundle it is generated empty on purpose — so it is
+  // half the answer, not all of it. Nothing is offered that cannot play.
+  const built = Object.keys(LONGFORM_COVERAGE.sonnets)
     .filter(d => LONGFORM_COVERAGE.sonnets[d].includes(n));
+  const kept = [];
+  // The dialect list comes from the manifest's own keys, so a new
+  // narration dialect joins by existing rather than by being named twice.
+  for (const d of Object.keys(LONGFORM_COVERAGE.sonnets)) {
+    if (!built.includes(d) && await narrationComplete(n, d, s.lines.length)) kept.push(d);
+  }
+  const narrated = [...built, ...kept];
+  // Stored lines win over the network: offline they are the only copy, and
+  // online they save the fetch. Resolved once, before render, because the
+  // reader asks for each line's clip synchronously.
+  const localUrls = {};
+  for (const d of narrated) {
+    const u = await narrationUrls(n, d, s.lines.length);
+    if (u) localUrls[d] = u;
+  }
   // The learning edition, loaded lazily from its chunk (Build F). A load
   // failure means the sonnet simply renders without edition tabs — the
   // Original never depends on the catalog.
@@ -9354,10 +9377,15 @@ async function renderSonnet(n) {
   renderReader({
     label: `Sonnet ${n}`, lines: s.lines, accent: narrated[0] ?? 'rp',
     metre: metreOfSonnet(n),
-    clip: (i, acc) => narrated.includes(acc) ? audioUrl(`sonnets/${acc}/${n}-${i}.mp3`) : null,
+    clip: (i, acc) => {
+      if (!narrated.includes(acc)) return null;
+      return localUrls[acc]?.[i] ?? audioUrl(`sonnets/${acc}/${n}-${i}.mp3`);
+    },
     narrated,
     recast: ed && ed.plain && ed.plainStatus === 'approved' ? { plain: ed.plain } : null,
     today,
+    // Only sonnets have per-line readings, so only sonnets can keep one.
+    offline: { n, lineCount: s.lines.length, stored: [...kept] },
     scopeId: `sonnet:${n}`,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
@@ -9367,7 +9395,7 @@ async function renderSonnet(n) {
 
 
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
-function renderReader({ label, lines, accent, prev, next, clip, verse = true, metre = PENTAMETER, meta = null, narrated = [], recast = null, today = [], scopeId = null, projectId = null }) {
+function renderReader({ label, lines, accent, prev, next, clip, verse = true, metre = PENTAMETER, meta = null, narrated = [], recast = null, today = [], scopeId = null, projectId = null, offline = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
   const metaHtml = meta ? `
     <div class="piece-meta">
@@ -9387,6 +9415,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     <main class="guide sonnet-view">
       ${metaHtml}
       <p class="audio-avail" id="rd-audio"></p>
+      <p class="audio-avail" id="rd-offline"></p>
       <div class="reader-dialects" id="rd-dialects"></div>
       <div class="sonnet-tabs">
         <button class="son-tab on" data-mode="speak">🔊 Listen</button>
@@ -9412,7 +9441,10 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
   // availability is still stated and stated with more room.
   const dialectOptions = () => TEXT_DIALECTS.map(d => ({
     id: d.id, icon: d.flag, label: d.label,
-    note: narrated.includes(d.id) ? 'Recorded audio' : 'Audio soon',
+    // "Audio soon" until 2026-10-04. It was a promise about a recording
+    // nobody had scheduled, and it survived the coming-soon sweep only
+    // because it did not use those words. States a fact now.
+    note: narrated.includes(d.id) ? 'Recorded audio' : 'No recording',
     aria: narrated.includes(d.id)
       ? 'Recorded audio for this text'
       : 'No model recording for this text yet; the transcription and scansion views still work',
@@ -9427,6 +9459,45 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
       ? `🎙 Recorded audio in <b>${esc(dialectName(cur))}</b>.`
       : `🎙 No studio recording in <b>${esc(dialectName(cur))}</b> for this text yet — the reading below uses your device voice, clearly labelled. Scan and IPA work either way.`;
   };
+  // Keep a reading on this device, or give the space back. Only sonnets
+  // pass `offline`, and only for a dialect that HAS a recording: offering
+  // to download something that was never made is the same lie as "audio
+  // soon", one step further on.
+  const drawOffline = () => {
+    const el = document.getElementById('rd-offline');
+    if (!el) return;
+    if (!offline || !narrated.includes(cur)) { el.innerHTML = ''; return; }
+    const here = offline.stored.includes(cur);
+    el.innerHTML = here
+      ? `✓ Kept on this device. <button class="btn-link" id="rd-off-del" type="button">Remove the ${esc(dialectName(cur))} reading</button>`
+      : `<button class="btn-link" id="rd-off-get" type="button">⤓ Keep the ${esc(dialectName(cur))} reading on this device</button>`;
+
+    el.querySelector('#rd-off-get')?.addEventListener('click', async e => {
+      const b = e.currentTarget;
+      b.disabled = true;
+      const res = await downloadNarration(offline.n, cur, offline.lineCount,
+        f => { b.textContent = `⤓ Keeping the reading… ${Math.round(f * 100)}%`; });
+      if (res.ok) {
+        offline.stored.push(cur);
+        drawOffline();
+      } else {
+        // A partial copy is not playable and is not claimed to be. Say
+        // what happened rather than leave a button that appeared to work.
+        // Downloading again resumes: stored lines are skipped.
+        el.innerHTML = `Could not keep the whole reading — ${res.stored} of ${offline.lineCount} lines. `
+          + `Nothing plays from a partial copy. `
+          + `<button class="btn-link" id="rd-off-retry" type="button">Try again</button>`;
+        el.querySelector('#rd-off-retry')?.addEventListener('click', () => drawOffline());
+      }
+    });
+
+    el.querySelector('#rd-off-del')?.addEventListener('click', async () => {
+      await removeNarration(offline.n, cur, offline.lineCount);
+      offline.stored = offline.stored.filter(d => d !== cur);
+      drawOffline();
+    });
+  };
+
   const drawDialects = () => {
     const host = document.getElementById('rd-dialects');
     host.innerHTML = dialectSelectHtml({
@@ -9434,6 +9505,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     });
     wireDialectSelect(host, 'rd', id => { cur = id; drawDialects(); show(mode); });
     drawAudioLine();
+    drawOffline();
   };
   const show = m => {
     stopSpeech();

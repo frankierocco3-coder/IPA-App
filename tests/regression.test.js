@@ -478,7 +478,9 @@ export async function run({ navDoc = document } = {}) {
       // separately from the pause (which still migrates nothing). The take
       // checks around this line run against the migrated database, so they
       // are the live proof that recordings survive the upgrade untouched.
-      check('IndexedDB at v2 (Build B), takes intact across the migration', (await openDB()).version === 2);
+      // v2 → v3 added the narration store (2026-10-04), again additive.
+      check('IndexedDB at v3 (kept readings), takes intact across the migration',
+        (await openDB()).version === 3);
       await deleteTake(saved.id);
       check('seeded take deletable', (await listTakes({ projectId: pP.id })).length === 0);
     } finally {
@@ -1379,6 +1381,40 @@ export async function run({ navDoc = document } = {}) {
         && (await getAll(v2, STORES.meta))[0]?.value === 'kept meta'
         && v2.objectStoreNames.contains(STORES.dissections));
 
+      // And on to v3, which added the narration store. The point is not
+      // the new store — it is that the four older stores still hold
+      // exactly what they held at v1. Every schema step here is additive,
+      // and this is what makes that a fact rather than an intention.
+      //
+      // On its OWN database: the blocked-upgrade test below opens NAME at
+      // version 2 on purpose, and leaving NAME at 3 would turn that into a
+      // VersionError and quietly stop testing what it means to test.
+      {
+        const N3 = '__sc-upgrade-test-v3';
+        const nuke3 = () => new Promise(res => {
+          const r = indexedDB.deleteDatabase(N3);
+          r.onsuccess = r.onerror = r.onblocked = () => res();
+        });
+        await nuke3();
+        const a = await openRaw(N3, 1);
+        await put(a, STORES.projects, { id: 'p1', title: 'kept project' });
+        await put(a, STORES.recordings, { id: 'r1', projectId: 'p1', label: 'kept take' });
+        await put(a, STORES.blobs, { id: 'r1', blob: new Blob(['audio-bytes']) });
+        await put(a, STORES.meta, { key: 'k', value: 'kept meta' });
+        a.close();
+        const c = await openRaw(N3, 3);
+        check('upgrade: v1 reaches v3 with every older store intact, narration added',
+          c.version === 3
+          && (await getAll(c, STORES.projects))[0]?.title === 'kept project'
+          && (await getAll(c, STORES.recordings))[0]?.label === 'kept take'
+          && (await getAll(c, STORES.blobs)).length === 1
+          && (await getAll(c, STORES.meta))[0]?.value === 'kept meta'
+          && c.objectStoreNames.contains(STORES.dissections)
+          && c.objectStoreNames.contains(STORES.narration));
+        c.close();
+        await nuke3();
+      }
+
       // An older tab that never steps aside: the upgrade must reject fast
       // with the visible close-other-tabs instruction — never hang.
       const holder = await new Promise((res, rej) => {
@@ -2079,10 +2115,17 @@ export async function run({ navDoc = document } = {}) {
         doc.getElementById('rd-audio')?.textContent);
       clickIn(dchip()); await sleep(200);
       const rows = [...(dmenu()?.querySelectorAll('.course-row') ?? [])];
+      // Every row states its availability. This used to pin the literal
+      // "Audio soon", which was a promise about a recording nobody had
+      // scheduled — removed 2026-10-04 with the rest of them. The
+      // invariant was never the wording: it is that each row SAYS which
+      // it is, so the check now reads the states instead of one string.
       check('dialect: opening it offers every dialect, with the current one checked',
         dmenu().hidden === false && rows.length === 5
         && rows.filter(r => r.classList.contains('on')).length === 1
-        && rows.some(r => r.textContent.includes('Audio soon')));
+        && rows.every(r => /Recorded audio|No recording/.test(r.textContent))
+        && !/soon/i.test(dmenu().textContent),
+        rows.map(r => r.textContent.replace(/\s+/g, ' ').trim().slice(0, 40)).join(' | '));
       clickIn(rows.find(r => r.textContent.includes('Australian'))); await sleep(400);
       check('dialect: picking one closes the menu and switches the reader',
         dmenu().hidden === true
@@ -6316,6 +6359,61 @@ export async function run({ navDoc = document } = {}) {
     check('audio: an unplayable word renders as plain text, not a dead button',
       gone.includes('is-plain') && !gone.includes('<button')
       && !gone.includes('data-say') && !/soon/i.test(gone), gone.slice(0, 120));
+
+    // Narration kept on this device (2026-10-04). A store bundle ships
+    // without the 212.9MB of sonnet readings, so they have to be gettable
+    // afterwards — and the availability answer has to stop being a
+    // build-time constant, or a downloaded reading could never be offered.
+    {
+      const nar = await import('../js/narration.js');
+      const { STORES, idbAllBy, idbClear } = await import('../js/db.js');
+
+      // 1-BASED, because the files are: sonnets/nam/18-1.mp3 .. 18-14.mp3,
+      // with no 18-0, and every clip() call site passes `i + 1`. A 0-based
+      // loop fetched a 404 for line 0 and silently missed the last line,
+      // leaving a reading that reported itself downloaded and was short.
+      check('narration: clip paths are 1-based, matching the files and the reader',
+        nar.narrationPath(18, 'nam', 1).endsWith('/18-1.mp3')
+        && !nar.narrationPath(18, 'nam', 1).includes('18-0'),
+        nar.narrationPath(18, 'nam', 1));
+
+      // Round-trip against the REAL audio site and the REAL database, then
+      // clean up after itself — this store is the suite's own to clear
+      // because nothing else writes to it yet.
+      await idbClear(STORES.narration).catch(() => {});
+      const before = await nar.narrationComplete(18, 'nam', 14);
+      const got = await nar.downloadNarration(18, 'nam', 14, () => {});
+      const after = await nar.narrationComplete(18, 'nam', 14);
+      const rows = await idbAllBy(STORES.narration, 'setId', nar.narrationSetId(18, 'nam'))
+        .catch(() => []);
+      check('narration: a reading downloads whole and reports itself kept',
+        before === false && got.ok === true && got.stored === 14 && after === true
+        && rows.length === 14,
+        `stored=${got.stored} failed=${got.failed} rows=${rows.length}`);
+
+      const urls = await nar.narrationUrls(18, 'nam', 14);
+      check('narration: playback uses stored blobs, keyed the way clip() asks',
+        !!urls && Object.keys(urls).length === 14
+        && urls[1]?.startsWith('blob:') && urls[0] === undefined);
+
+      // THE HONESTY RULE: a partial copy is never offered. Removing one
+      // line must drop the whole reading out of "available".
+      await nar.removeNarration(18, 'nam', 1);
+      check('narration: a partial copy is never reported playable',
+        (await nar.narrationComplete(18, 'nam', 14)) === false
+        && (await nar.narrationUrls(18, 'nam', 14)) === null);
+
+      await idbClear(STORES.narration).catch(() => {});
+      nar.releaseNarrationUrls();
+      check('narration: the suite leaves nothing stored behind',
+        (await idbAllBy(STORES.narration, 'setId', nar.narrationSetId(18, 'nam'))
+          .catch(() => [])).length === 0);
+
+      // The wipe has to reach it, or "delete everything" would not.
+      const { CONTENT_STORES, STORES: S2 } = await import('../js/db.js');
+      check('narration: Privacy wipe covers kept readings',
+        CONTENT_STORES.includes(S2.narration));
+    }
 
     // Hardware back for the Android shell (2026-10-04). Driven in the live
     // app, because the whole question is what the REAL nav stack does.

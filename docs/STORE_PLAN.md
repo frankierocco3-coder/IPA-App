@@ -93,6 +93,48 @@ check fails loudly wherever a bundler runs it, which is where it matters.
 **Recommendation stands: bundle the 75.6MB of course audio, make the
 212.9MB of sonnet narration an optional in-app download.**
 
+### Narration on demand — built 2026-10-04, with one decision left
+
+`js/narration.js`. A reading is fetched line by line, stored in IndexedDB
+(schema v3, additive), and played from blob URLs released with the rest of
+the AV teardown. The reader offers **Keep the … reading on this device**
+and, once it is there, **Remove**.
+
+**The honesty half is the real work.** `audio-coverage.js` is generated at
+build time and was the ONLY answer to which readings exist. In a bundle it
+regenerates to zero, which is correct — but a build-time constant cannot
+learn, so nothing could ever become available again. A dialect is now
+offered when the build says so **or** this device has the whole reading.
+A partial copy is never offered: remove one line and the reading drops out
+of "available" and yields no URLs. Pinned by six checks.
+
+**THE DECISION, and it is a constraint change either way.** On the web
+every fetch goes through `audioUrl()`, so it is same-origin and nothing in
+the security model moves. A BUNDLED app has no same-origin narration to
+fetch, and getting it needs one of:
+
+- **(a) Amend hard constraint 3.** Let the app fetch a named remote
+  origin, and add it to `ALLOWED_ORIGINS` in `tools/security_audit.py` —
+  which is a deploy gate, so this is deliberate and visible. Also needs
+  `connect-src`/`media-src` opened in the CSP and, on Android, the
+  INTERNET permission the manifest currently and deliberately omits.
+  Simple, one implementation, and it weakens a rule that has survived
+  every change so far including going native.
+- **(b) Download natively.** The shell fetches over native HTTP, outside
+  the webview, and serves the bytes same-origin through its scheme handler
+  or asset path. **The webview's CSP never changes and constraint 3 holds
+  for the browser.** Costs: real logic in both shells rather than windows,
+  Android still needs INTERNET, and neither shell can be compiled here.
+
+**Not chosen.** (b) protects the stronger property, (a) is far less work
+and is testable today. It is a rule of the owner's, so it is his to amend.
+
+**One smaller piece is still missing under either branch:** a bundle needs
+to know what narration exists UPSTREAM, which the zeroed coverage file no
+longer says. `longform_coverage.py` run against the full tree already
+computes exactly that list — it would need emitting as a second manifest
+that the bundle carries.
+
 Why this is the right cut and not a compromise:
 
 - Course audio is what the product *is*. A dialect trainer that needs a

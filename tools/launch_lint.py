@@ -375,7 +375,10 @@ def main():
                    "Musical Theatre", "Vocal Performance"]:
         if banned.lower() in _strip_comments(views_js).lower():
             fail("a deferred feature grew a placeholder: %r" % banned)
-    for phrase in ["coming soon", "recording soon", "recordings soon"]:
+    # "audio soon" joined the list on 2026-10-04: it was a promise in
+    # different words, sitting on the reader's dialect menu, and it
+    # survived the first sweep precisely because it avoided them.
+    for phrase in ["coming soon", "recording soon", "recordings soon", "audio soon"]:
         if phrase in _strip_comments(views_js).lower():
             fail("a %r placeholder appeared on a learner surface" % phrase)
     # The Speech system is written-only: no capture/synthesis API anywhere in it.
