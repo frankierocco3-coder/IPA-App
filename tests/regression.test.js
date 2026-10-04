@@ -6317,6 +6317,56 @@ export async function run({ navDoc = document } = {}) {
       gone.includes('is-plain') && !gone.includes('<button')
       && !gone.includes('data-say') && !/soon/i.test(gone), gone.slice(0, 120));
 
+    // Hardware back for the Android shell (2026-10-04). Driven in the live
+    // app, because the whole question is what the REAL nav stack does.
+    // HOME IS NOT ON THE STACK: goBack() falls through to homeHandler()
+    // when it pops the last entry, so one entry is a real page. A first
+    // draft tested `> 1` and would have exited the app from every
+    // single-level page — invisible to any source-only check.
+    const frameB = document.querySelector('iframe');
+    if (frameB) {
+      frameB.contentWindow.location.reload();
+      await scSleep(1400);
+      const docB = frameB.contentDocument;
+      const winB = frameB.contentWindow;
+      const clickB = el => el && el.dispatchEvent(new winB.MouseEvent('click', { bubbles: true }));
+      const headB = () => docB.querySelector('h1')?.textContent ?? '(shell)';
+
+      check('shell back: the hook exists for the native shell to call',
+        typeof winB.__shellBack === 'function');
+      check('shell back: at home it answers false, so the shell exits',
+        winB.__shellBack() === false,
+        'returning true at the root makes the back button look dead');
+
+      clickB([...docB.querySelectorAll('.side-item, .bottom-item')]
+        .find(b => b.textContent.trim().startsWith('More')));
+      await scSleep(500);
+      clickB([...docB.querySelectorAll('button, .track-card, .hub-card')]
+        .find(b => b.textContent.includes('About Speechcraft')));
+      await scSleep(600);
+      const arrived = headB();
+      const handled = winB.__shellBack();
+      await scSleep(700);
+      check('shell back: one level deep it goes back rather than exiting',
+        arrived.includes('About') && handled === true && headB() !== arrived,
+        `on "${arrived}", handled=${handled}, landed "${headB()}"`);
+
+      // An open overlay is closed FIRST, and the page beneath is untouched.
+      const beneath = headB();
+      clickB(docB.getElementById('nb-fab'));
+      await scSleep(800);
+      const dockB = docB.getElementById('nb-dock');
+      if (dockB && !dockB.hidden) {
+        const dockHandled = winB.__shellBack();
+        await scSleep(600);
+        check('shell back: the notebook closes before the page stack moves',
+          dockHandled === true && dockB.hidden && headB() === beneath,
+          `handled=${dockHandled}, hidden=${dockB.hidden}, page "${headB()}"`);
+      }
+      clickB(docB.getElementById('brand-home'));
+      await scSleep(500);
+    }
+
     // (e) The privacy policy at a public URL (2026-10-03). Both stores
     // require one, and routing here is function-based, so the policy
     // existed with no link that opened it. privacy.html is GENERATED from

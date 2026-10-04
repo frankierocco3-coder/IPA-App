@@ -21,7 +21,7 @@ import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record,
          goHome, goSection, setSectionHandler, openModal, phonemeSlug,
          pageTopbar, wireBrandHome, EMBLEM, BRAND_BTN, courseProgressHtml,
          runStepSequence, tileHtml, itemTileHtml, reviewStripHtml,
-         groupStatus, workspacePage } from './ui.js';
+         groupStatus, workspacePage, shellBack } from './ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady, audioUrl } from './audio.js';
@@ -11236,4 +11236,12 @@ if (!framedHostile) {
     navigator.serviceWorker.register('./sw.js')
       .catch(err => console.warn('offline support unavailable:', err));
   }
+
+  // Hardware back, for the Android shell (shells/android/MainActivity.kt).
+  // Routing is function-based, so the system back button has no history to
+  // pop and would otherwise leave the app from any screen. The shell calls
+  // this and leaves only when it answers false. Harmless in a browser,
+  // where nothing calls it; exposed unconditionally so the same build runs
+  // in both places and the suite can exercise it.
+  window.__shellBack = shellBack;
 }

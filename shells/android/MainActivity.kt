@@ -26,6 +26,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
+import androidx.activity.OnBackPressedCallback
 import androidx.webkit.WebViewAssetLoader
 
 private const val DOMAIN = "appassets.androidplatform.net"
@@ -75,14 +76,35 @@ class MainActivity : ComponentActivity() {
 
         setContentView(webView)
         webView.loadUrl(START_URL)
+
+        onBackPressedDispatcher.addCallback(this, backHandler)
     }
 
-    // Routing in Speechcraft is function-based, not URL-based: the back
-    // stack is a JavaScript array of thunks and nothing is pushed to
-    // history. So there is nothing for the hardware back button to pop,
-    // and the honest behaviour is to leave the app rather than to appear
-    // to navigate. Giving it the in-app Back needs a hook the web layer
-    // does not currently expose — see shells/README.md, "The back button".
+    // Hardware back. Routing in Speechcraft is function-based, not
+    // URL-based: the back stack is a JavaScript array of thunks and
+    // nothing is pushed to history, so WebView.canGoBack() is always false
+    // and the system button would leave the app from any screen.
+    //
+    // The web layer exposes window.__shellBack() (js/ui.js), which closes
+    // an open dialog, then the notebook dock, then pops one page — and
+    // answers FALSE only when it is at the root with nothing left. That
+    // false is the cue to leave, which is the honest thing: a back button
+    // that appears to do nothing is worse than one that exits.
+    //
+    // evaluateJavascript is asynchronous and its result is JSON, so the
+    // decision happens in the callback and the string is "true"/"false".
+    // The guard covers the window before the page has booted, when the
+    // hook does not exist yet and the result is "null".
+    private val backHandler = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            webView.evaluateJavascript(
+                "(function(){return !!(window.__shellBack && window.__shellBack());})()"
+            ) { result ->
+                if (result != "true") finish()
+            }
+        }
+    }
+
     override fun onDestroy() {
         webView.destroy()
         super.onDestroy()

@@ -103,6 +103,40 @@ export function goBack() {
   }, 'back');
 }
 
+/**
+ * Hardware back, for a native shell. Returns TRUE if the app handled it.
+ *
+ * Routing here is function-based, not URL-based: navStack is an array of
+ * thunks and nothing is pushed to browser history, so Android's back
+ * button has nothing of its own to pop. The shell asks this instead, and
+ * a FALSE answer is its cue to leave the app — which is the honest thing
+ * when there is genuinely nowhere left to go.
+ *
+ * Innermost first. Each layer is closed through its OWN control rather
+ * than by synthesising an Escape key: both already close on Escape, but a
+ * single synthetic Escape reaches both listeners at once and would shut a
+ * dialog and the notebook together on one press.
+ */
+export function shellBack() {
+  const modal = document.querySelector('.modal-wrap');
+  if (modal) {
+    (modal.querySelector('[data-close]') ?? null)?.click();
+    return true;
+  }
+  const dock = document.getElementById('nb-dock');
+  if (dock && !dock.hidden) {
+    document.getElementById('nb-close')?.click();
+    return true;
+  }
+  // HOME IS NOT ON THE STACK — goBack() falls through to homeHandler()
+  // when it pops the last entry, so an empty stack means "already home".
+  // One entry is a real page with somewhere to return to, which is why
+  // this is > 0 and not > 1. (It was > 1 for one draft, and that exited
+  // the app from any single-level page instead of going back.)
+  if (navStack.length > 0) { goBack(); return true; }
+  return false;
+}
+
 // Standard header for a sub-page: back + brand (→ home) + centered title.
 // No XP chip (owner order 2026-09-03): sub-pages are reading and
 // reference surfaces where progress numbers are noise; XP lives on the

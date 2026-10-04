@@ -129,26 +129,43 @@ download, and say so in the listing.
 
 ## The back button
 
-The one real gap, and it needs a decision rather than a guess.
+**Done 2026-10-04** (option 2 of the three that were on the table; the
+owner chose the hook over pushing real history entries, which would have
+changed back behaviour on the web too).
 
 Routing in Speechcraft is **function-based, not URL-based**: the back
 stack is a JavaScript array of thunks in `js/ui.js` and nothing is pushed
-to browser history. So Android's hardware back button has nothing to pop.
-As written, it leaves the app.
+to browser history, so `WebView.canGoBack()` is always false and the
+system button would leave the app from any screen.
 
-Three honest options:
+`js/ui.js` exports **`shellBack()`**, exposed as `window.__shellBack`.
+It works innermost outwards and returns whether it handled the press:
 
-1. **Leave it.** Hardware back exits. Correct, and will feel wrong to
-   Android users, who expect back to navigate.
-2. **Expose a hook.** One small addition in the web layer — something
-   like `window.__shellBack = () => goBack()` — and the shell calls it,
-   falling through to exit when the stack is empty. Clean, and it is a
-   change to shipped app code, so it is the owner's call.
-3. **Push real history entries** as the app navigates. The largest
-   change, and it would alter back behaviour on the web too.
+1. an open dialog closes;
+2. otherwise the notebook dock closes;
+3. otherwise one page pops;
+4. otherwise it answers **false**, and the shell leaves the app.
 
-Nothing is implemented here. Option 2 is the cheapest honest answer, but
-it touches the app, so it waits.
+Each layer is closed through its own control rather than by synthesising
+an Escape key — both already close on Escape, but one synthetic Escape
+reaches both listeners and would shut a dialog and the notebook on a
+single press.
+
+`MainActivity` calls it through `evaluateJavascript` inside an
+`OnBackPressedCallback` and calls `finish()` on anything but `"true"`,
+which also covers the window before the page has booted, when the hook
+does not exist and the result is `"null"`.
+
+**The trap, recorded because a source-only check could not see it.** Home
+is NOT on the stack: `goBack()` falls through to `homeHandler()` when it
+pops the last entry, so **one** entry is already a real page with
+somewhere to return to. A first draft tested `navStack.length > 1` and
+would have exited the app from every single-level page. Driven checks in
+the suite now pin all four outcomes.
+
+iOS needs none of this: there is no system back button, and the
+edge-swipe gesture is disabled (`allowsBackForwardNavigationGestures =
+false`) because there is no history to swipe through.
 
 ---
 
