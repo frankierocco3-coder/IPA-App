@@ -1733,8 +1733,17 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   @keyframes intro-pop { from { transform: scale(0.96); opacity: 0; } }
 }
 
-/* Unavailable audio states: visibly not-playable, never a dead button. */
-.word-chip.is-off { opacity: 0.55; cursor: default; border-style: dashed; }
+/* A word or symbol with no recording. It is CONTENT, not a broken
+   control. The faded dashed `.is-off` chip it replaced read as a button
+   you could not press, and carried a "· recording soon" promise (owner
+   order 2026-10-04: nothing says coming soon).
+
+   The border goes TRANSPARENT rather than away, so a chips row keeps its
+   spacing and nothing shifts — but nothing reads as a control either. */
+.word-chip.is-plain {
+  cursor: default; background: none; border-color: transparent; box-shadow: none;
+}
+.guide-symbol.is-plain { cursor: default; }
 .sound-big.is-off { opacity: 0.55; cursor: default; display: grid; place-items: center; }
 
 /* Reader: truthful audio availability + Recast views */

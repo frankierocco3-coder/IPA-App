@@ -751,7 +751,7 @@ function renderGuidebook(unit, track) {
       <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(w)}"
               aria-label="Hear ${esc(ph)} in the word “${esc(w)}”"
               title="${esc(PHONEMES[ph].name)} — hear it in “${esc(w)}”">${shown}</button>` : `
-      <span class="word-chip is-off" aria-label="${esc(PHONEMES[ph].name)} — recordings coming soon">${shown}</span>`;
+      <span class="word-chip is-plain" aria-label="${esc(PHONEMES[ph].name)}">${shown}</span>`;
     }).join('');
     return `
       <section class="gb-lesson">
@@ -10627,7 +10627,11 @@ function guideStepHtml(lesson, s, st) {
           const w = p.examples.find(x => speakableWord(x, acc));
           return w ? `<button class="guide-symbol" data-say="${esc(w)}" type="button"
                 aria-label="Hear ${esc(s.ph)} in the word “${esc(w)}”">/${esc(s.ph)}/</button>`
-            : `<div class="guide-symbol is-off" aria-label="Recordings for ${esc(s.ph)} coming soon">/${esc(s.ph)}/</div>`;
+            // The <h1> above already announces the symbol and its name, so
+            // this is purely a control. With nothing to play it becomes a
+            // plain display, hidden from screen readers to avoid saying the
+            // symbol twice.
+            : `<div class="guide-symbol is-plain" aria-hidden="true">/${esc(s.ph)}/</div>`;
         })()}
         <div class="guide-info">
           <p>${esc(p.hint)}</p>

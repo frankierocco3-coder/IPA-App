@@ -292,11 +292,16 @@ name for the idiom section. Icons: Traditional RP 🎩, Standard British 🇬�
 Audio is UNIVERSALLY STRICT now (all courses): speak() plays a real clip
 or stays silent (returns 'clip'|'tts'|'silent'); resolveAudio() is the
 central resolver; device TTS ONLY behind explicit device:true (labelled
-readings). Generators filter to playable words; unavailable words render
-.is-off chips (nam strut/car are the two gaps — quarantined both voices).
+readings). Generators filter to playable words. NOTHING SAYS COMING SOON
+(owner order 2026-10-04): an unplayable word or symbol renders as PLAIN
+TEXT (.is-plain — transparent border, same metrics so rows do not shift),
+never a faded dashed control and never a "· recording soon" promise. The
+word is content and stays; the button was the option and goes. The four
+old .is-off chips are gone and launch_lint now bans "coming soon" and
+"recording soon" across the WHOLE view layer, not just the Speech system.
 Sound-detail hero: "Hear the sound" only with an approved phoneme clip,
-else a non-interactive "Isolated sound coming soon" (+optional syllable
-demo via slug_syllable approvals). Long-form audio claims come ONLY from
+else a plain non-interactive symbol (+optional syllable demo via
+slug_syllable approvals). Long-form audio claims come ONLY from
 generated js/data/audio-coverage.js (tools/longform_coverage.py — rerun
 after any narration batch): sonnets nam 154/154, rp 154/154, aus 59,
 ssbe 0; libraries 0. Reader shows recorded-audio badges + labelled device

@@ -362,16 +362,22 @@ def main():
         fail("Context Shift must exist in data as hidden (roadmap-approved, not shipped)")
     if "Context Shift" in _strip_comments(views_js):
         fail("Context Shift leaked onto a learner surface")
-    # No deferred-feature placeholders. Feature names are banned from all
-    # learner surfaces; 'coming soon' is banned inside the Speech system
-    # (the one pre-existing '— recordings coming soon' chip in the IPA
-    # guidebook predates this build and is governed by the audio contract).
+    # No deferred-feature placeholders, and NOTHING SAYS COMING SOON.
+    #
+    # The ban used to cover the Speech system only, with a carve-out for
+    # four chips in the IPA guidebook and What Is IPA that rendered an
+    # unplayable word as a faded dashed control reading "· recording soon".
+    # Owner order 2026-10-04 removed them: an option that is offered should
+    # be one you can take, so the word stays as plain text and the control
+    # goes. With the carve-out spent, the ban now covers the whole view
+    # layer, which is what it should always have been.
     for banned in ["Body Language pathway", "Build a Character",
                    "Musical Theatre", "Vocal Performance"]:
         if banned.lower() in _strip_comments(views_js).lower():
             fail("a deferred feature grew a placeholder: %r" % banned)
-    if "coming soon" in _strip_comments(sp_all).lower():
-        fail("a 'coming soon' placeholder appeared inside the Speech system")
+    for phrase in ["coming soon", "recording soon", "recordings soon"]:
+        if phrase in _strip_comments(views_js).lower():
+            fail("a %r placeholder appeared on a learner surface" % phrase)
     # The Speech system is written-only: no capture/synthesis API anywhere in it.
     for api in ["getUserMedia", "MediaRecorder", "speechSynthesis", "new Audio(",
                 "<audio", "<video", "youtube"]:

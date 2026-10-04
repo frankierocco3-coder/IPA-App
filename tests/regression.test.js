@@ -6296,6 +6296,27 @@ export async function run({ navDoc = document } = {}) {
       [...seen].some(([u]) => u.endsWith('/js/build.js')),
       'build.js is not in the import graph — the stamp would never render');
 
+    // Nothing says coming soon (owner order 2026-10-04). Four chips used
+    // to render an unplayable word as a faded dashed control reading
+    // "· recording soon". An option that is offered should be one you can
+    // take: the word stays as plain text, the control goes. Checked over
+    // the whole crawled graph, so it cannot creep back into a new view.
+    const soon = [...seen]
+      .filter(([u]) => u.includes('/js/'))
+      .map(([u, src]) => [u.split('/js/')[1],
+        src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '')])
+      .filter(([, src]) => /coming soon|recording[s]? soon/i.test(src))
+      .map(([rel]) => rel);
+    check('audio: nothing on a learner surface says coming soon',
+      soon.length === 0, `found in: ${soon.join(', ')}`);
+    // The replacement must be CONTENT, not a dead control: a span, never a
+    // button, and never carrying a data-say the player would act on.
+    const { wordChip } = await import('../js/views/reference.js');
+    const gone = wordChip('__no_such_clip_exists__', 'nam');
+    check('audio: an unplayable word renders as plain text, not a dead button',
+      gone.includes('is-plain') && !gone.includes('<button')
+      && !gone.includes('data-say') && !/soon/i.test(gone), gone.slice(0, 120));
+
     // (e) The privacy policy at a public URL (2026-10-03). Both stores
     // require one, and routing here is function-based, so the policy
     // existed with no link that opened it. privacy.html is GENERATED from

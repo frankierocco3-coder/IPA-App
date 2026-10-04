@@ -17,12 +17,20 @@ import { app, esc, goBack, goSection, navStack, navTo, pageTopbar, phonemeSlug, 
 import { COURSES, activeCourse, setCourse, setWorkspace } from './context.js';
 
 // A word control that is only playable when a real recording exists for
-// this course. Missing → visibly unavailable, never a dead button and
-// never device TTS. (Before the index loads, assume available.)
+// this course. Missing → the word stays, as plain text, with no control
+// and no promise. Never a dead button and never device TTS. (Before the
+// index loads, assume available.)
+//
+// It used to render a dashed, half-faded chip reading "· recording soon".
+// Owner order 2026-10-04: nothing says coming soon — an option that is
+// offered should be one you can take. The WORD is content and stays; the
+// button was the option and goes. Same rule as the sound-page hero, which
+// has rendered a plain symbol rather than a dead control since the launch
+// pass.
 export const speakableWord = (w, acc) => !clipIndexLoaded() || hasWordClip(w, acc);
 export const wordChip = (w, acc) => speakableWord(w, acc)
   ? `<button class="word-chip" data-say="${esc(w)}" type="button" aria-label="Hear the word “${esc(w)}”">🔊 ${esc(w)}</button>`
-  : `<span class="word-chip is-off" role="note" aria-label="“${esc(w)}” — recording coming soon">${esc(w)} <small>· recording soon</small></span>`;
+  : `<span class="word-chip is-plain">${esc(w)}</span>`;
 const WII_QUESTIONS = 5;   // ship-symbol + same-sound pair + 3 classifications
 export function whatIsIpaCard() {
   const w = store.whatIsIpa;
@@ -148,7 +156,7 @@ function wiiStepHtml(step, st) {
       <div class="guide-word">
         ${speakableWord('bar', 'nam')
           ? `<button class="word-chip" data-say="bar" data-lang="en-US" data-acc="nam" type="button">🔊 bar 🇺🇸</button>`
-          : `<span class="word-chip is-off">bar 🇺🇸 <small>· recording soon</small></span>`}
+          : `<span class="word-chip is-plain">bar 🇺🇸</span>`}
         <span class="guide-ipa">/bɑr/</span><span class="guide-note">Neutral American — the r is spoken</span>
       </div>
       <div class="guide-word">
