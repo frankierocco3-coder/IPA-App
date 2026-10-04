@@ -24,24 +24,26 @@ routes. Android is nearly free. iOS is where the work is.
 
 ## Measured
 
-| Thing | Size | Note |
-| --- | --- | --- |
-| App artifact (`build_artifact.py`) | **33 MB** | everything except audio |
-| Audio, all | **~305 MB** | 9,241 mp3 files |
-| → **sonnets** | **223 MB** | **73% of all audio** |
-| → ssbe | 26 MB | |
-| → rp | 15 MB | |
-| → nam | 14 MB | |
-| → aus | 14 MB | |
-| → cockney | 13 MB | |
-| → phonemes | 0.6 MB | Frankie's own 42 recordings |
-| **All five courses + phonemes** | **~82 MB** | the audio a learner needs |
-| chekhov, ibsen | 0 B | no narration exists |
-| `index.json` | 78 KB | the clip manifest |
+Exact per-file totals from `tools/split_audio.py` (2026-10-04). The
+folder-level `du` estimates this document first carried were high, because
+`du` counts block allocation rather than bytes.
 
-**App + all course audio ≈ 115 MB.** That matters: Apple's over-the-air
-limit is around 200MB, above which a first download is wifi-only. 115MB
-sits under it. 338MB does not.
+| Set | Files | Size | In a store build |
+| --- | --- | --- | --- |
+| App artifact (`build_artifact.py`) | | **33 MB** | bundled |
+| **COURSE** audio | **4,084** | **75.6 MB** | **bundled** |
+| **NARRATION** audio | **5,159** | **212.9 MB** | downloaded on demand |
+| Audio total | 9,243 | 288.5 MB | |
+
+COURSE is the five dialects, the 42 phoneme recordings and both indexes.
+NARRATION is per-line sonnet readings. The tool proves the two sets are
+disjoint, cover the tree, and that **every one of the 4,040 clips the app
+can ask for by name is in the course set** — so the bundle is sufficient
+offline, not merely plausible.
+
+**App + course audio ≈ 109 MB.** Apple's over-the-air limit is around
+200MB, above which a first download is wifi-only. 109MB sits under it with
+room to spare. Bundling everything would be 321MB and does not.
 
 Also measured:
 
@@ -55,8 +57,41 @@ Also measured:
 
 ## Decision 1 — the audio (the real one)
 
-**Recommendation: bundle the ~82MB of course audio, make the 223MB of
-sonnet narration an optional in-app download.**
+**DONE 2026-10-04, as far as it can go without a packager.**
+`tools/split_audio.py` partitions the tree, verifies the partition and can
+materialise either half. It moves nothing: IPA-Audio is a published Pages
+site that the live app resolves against with a relative URL, so physically
+restructuring it would break every clip for every existing user to serve a
+bundler that does not exist yet.
+
+```bash
+python3 tools/split_audio.py                                  # classify and verify
+python3 tools/split_audio.py --emit course --out build/audio  # the bundle set
+```
+
+Hard-links by default, so emitting a 200MB set costs no extra disk
+(`--copy` when the output crosses volumes or gets zipped).
+
+**THE ONE WAY TO SHIP A LIE, and it is now proven closed.**
+`js/data/audio-coverage.js` is generated from what is on disk and is the
+single truth source for which voices the reader presents as recorded. A
+bundle without narration that kept the existing coverage file would show
+recorded-audio badges for narration it does not have, and because playback
+is strict, tapping one would be silent. Regenerating against a course-only
+tree takes the claims to **nam 0, rp 0, aus 0, ssbe 0** — the reader then
+badges nothing and claims nothing. Verified end to end on 2026-10-04.
+
+```bash
+SPEECHCRAFT_AUDIO_DIR=<course tree> python3 tools/longform_coverage.py
+```
+
+**Not wired into the deploy gate, deliberately.** An unclassified folder is
+an error inside the tool, but failing the *web* deploy over a *packaging*
+classification is the wrong scope: the web build bundles nothing. The
+check fails loudly wherever a bundler runs it, which is where it matters.
+
+**Recommendation stands: bundle the 75.6MB of course audio, make the
+212.9MB of sonnet narration an optional in-app download.**
 
 Why this is the right cut and not a compromise:
 

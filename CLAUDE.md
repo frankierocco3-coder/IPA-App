@@ -298,7 +298,7 @@ Sound-detail hero: "Hear the sound" only with an approved phoneme clip,
 else a non-interactive "Isolated sound coming soon" (+optional syllable
 demo via slug_syllable approvals). Long-form audio claims come ONLY from
 generated js/data/audio-coverage.js (tools/longform_coverage.py — rerun
-after any narration batch): sonnets nam 151/154, rp 153/154, aus 59,
+after any narration batch): sonnets nam 154/154, rp 154/154, aus 59,
 ssbe 0; libraries 0. Reader shows recorded-audio badges + labelled device
 reading. Featured Texts = Recast pilot sonnets with verified nam+rp.
 Sonnets Recast (BETA, js/data/recasts.js): 18/29/73/116/130 × Original /
