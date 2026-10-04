@@ -26,8 +26,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # js/main.js. Both app stores require a privacy policy at a public URL, and
 # routing here is function-based, so without this file the policy exists but
 # cannot be linked to.
+#
+# CNAME is listed but does not exist yet (docs/CUSTOM_DOMAIN.md). A missing
+# allow-listed file is skipped, so this is inert today — and without the
+# line, a CNAME added later would sit in the repo and never reach the web
+# root, which looks exactly like a broken DNS setup.
 FILES = ['index.html', 'privacy.html', 'manifest.json', 'icon-180.png',
-         'icon-512.png', 'favicon.svg', 'sw.js']
+         'icon-512.png', 'favicon.svg', 'sw.js', 'CNAME']
 
 # Directories that ship, and the extensions allowed inside them.
 DIRS = {
