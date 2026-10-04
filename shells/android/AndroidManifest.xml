@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- No INTERNET permission is declared, and that is deliberate rather
+     than an omission. The payload is served from the APK through
+     WebViewAssetLoader, and Speechcraft makes no external requests by
+     design. An app that cannot reach the network cannot leak anything,
+     and it makes the Play privacy declaration simple and true.
+
+     Add <uses-permission android:name="android.permission.INTERNET" />
+     only when narration becomes a real download, and say so in the
+     listing when you do. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="Speechcraft"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Speechcraft">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:configChanges="orientation|screenSize|keyboardHidden|uiMode"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

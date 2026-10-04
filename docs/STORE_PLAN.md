@@ -132,16 +132,21 @@ it puts npm tooling in the repo.
 static files, each shell is genuinely small: a WKWebView on iOS loading
 bundled local files, a WebView on Android doing the same.
 
-**Recommendation: hand-written shells.** The constraint is worth keeping,
-and Capacitor's value is its plugin ecosystem, which this app barely
-touches — no camera, no push, no native storage. What it needs is a
-window. Writing that window directly costs less than maintaining a
-toolchain the app does not otherwise use.
+**DECIDED 2026-10-04: hand-written shells.** Hard constraint 1 survives
+going native — no Node, no npm, no `package.json`. The Android shell's
+entire dependency list is one line (`androidx.webkit`); the iOS shell has
+none.
 
-**This is still your call, because it is your rule.** If you would rather
-have Capacitor's conveniences — icon and splash generation, one project
-for both platforms — say so and the constraint gets amended deliberately
-rather than eroded.
+Written, in `shells/`, with `shells/README.md` carrying the build steps
+and the honest account of what is and is not verified. Both are windows
+onto the payload from `tools/build_shell_payload.py` and contain no
+product behaviour: anything about how Speechcraft works changes in the web
+layer, and both shells get it.
+
+**Neither has been compiled.** Xcode is not installed, and there is no
+Java, Gradle or Android SDK here either. The Swift parses
+(`swiftc -parse`); that is syntax, not types. Treat them as reviewed
+source, not tested software.
 
 ---
 
@@ -244,13 +249,25 @@ produce a file on iOS*, is now a gating question rather than a curiosity.
 
 Listed because guessing at these is how a plan becomes wrong.
 
-- **Does `AUDIO_BASE` resolve correctly inside a packaged bundle?** The
-  relative-URL design gives it a good chance. Unproven.
-- **Do service workers run in the iOS shell?** They work in Safari and in
-  Chrome-backed TWAs. In a plain WKWebView with bundled local files they
-  historically do not, and the app's offline audio caching lives in
-  `sw.js`. If they do not run, offline audio on iOS needs another
-  mechanism. **This is the biggest unknown in the plan.**
+- ~~**Does `AUDIO_BASE` resolve correctly inside a packaged bundle?**~~
+  **ANSWERED 2026-10-04: yes, with no app code change.** Built the payload,
+  served it at a root, and the app booted with `AUDIO_BASE` resolving to
+  `/IPA-Audio/`, a real clip at `200 audio/mpeg`, and narration both absent
+  and unclaimed. The relative URL written in 2026-09 for the sibling-site
+  move is exactly what a bundle needs.
+- ~~**Do service workers run in the iOS shell?**~~ **ANSWERED, and it
+  splits by platform.** Android serves over a real https origin through
+  `WebViewAssetLoader`, so `sw.js` registers and works as it does on Pages.
+  iOS uses a custom scheme — required, because ES modules from `file://`
+  are CORS-blocked and the app would not boot at all — and service workers
+  do not register on a non-http scheme. That is safe: registration is
+  inside a `.catch()` that only warns, and a bundled app has nothing to
+  cache. **The live consequence: a future narration download on iOS cannot
+  reuse `sw.js` and needs its own storage.**
+- **The hardware back button on Android** has nothing to pop, because
+  routing here is function-based and nothing is pushed to history. Three
+  options in `shells/README.md`; the cheapest touches app code, so it
+  waits on the owner.
 - **Apple Guideline 4.2.** Bundling assets locally is the accepted answer
   to "this is just a website", but review outcomes are not predictable.
 - **Does Export work on iOS at all** (device test 4.1).
