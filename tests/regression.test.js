@@ -6439,6 +6439,22 @@ export async function run({ navDoc = document } = {}) {
 
         // Cancelling is an answer. Downloading anyway would be the app
         // arguing with the person who just said no.
+        // THE REAL iOS CASE (observed 2026-10-05): the device refuses
+        // application/json outright, so canShare answers false and the
+        // first version fell straight back to the Quick Look screen it
+        // existed to avoid. The same bytes go out as text/plain under the
+        // SAME FILENAME, because import matches the name, not the MIME.
+        downloadedAs = null;
+        let sentAs = null, sentName = null;
+        setCan(d => d.files[0].type === 'text/plain');
+        setShare(async d => { sentAs = d.files[0].type; sentName = d.files[0].name; });
+        const rIos = await deliver(probe, 'x.speechcraft.json', { touch: true });
+        check('deliver: a type the device refuses is offered again as plain text',
+          rIos === 'shared' && sentAs === 'text/plain'
+          && sentName === 'x.speechcraft.json' && downloadedAs === null,
+          `${rIos} / as=${sentAs} / name=${sentName} / downloaded=${downloadedAs}`);
+
+        setCan(() => true);
         downloadedAs = null;
         setShare(async () => { const e = new Error('x'); e.name = 'AbortError'; throw e; });
         const r2 = await deliver(probe, 'c.json', { touch: true });

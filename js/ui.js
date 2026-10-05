@@ -133,17 +133,36 @@ export function goBack() {
 // running. Tests INJECT, they never mutate matchMedia.
 export async function deliverFile(blob, filename, { touch } = {}) {
   const coarse = touch ?? matchMedia?.('(pointer: coarse)')?.matches;
-  if (coarse) {
-    try {
-      const file = new File([blob], filename,
-        { type: blob.type || 'application/octet-stream' });
-      if (navigator.canShare?.({ files: [file] })) {
+  if (coarse && typeof navigator.canShare === 'function') {
+    // iOS SHARES ONLY CERTAIN TYPES, and application/json is not one of
+    // them: canShare() simply answers false and the first version of this
+    // fell straight back to the download, which is the Quick Look screen
+    // it was written to avoid. Observed on a real iPhone, 2026-10-05, with
+    // the current build confirmed running.
+    //
+    // So the same bytes are offered again as plain text. The FILENAME does
+    // not change, and import matches on the name, so a file saved this way
+    // still reads back as a Speechcraft export.
+    let offered = false;
+    for (const type of [...new Set([blob.type || 'application/octet-stream', 'text/plain'])]) {
+      let file;
+      try { file = new File([blob], filename, { type }); } catch { continue; }
+      if (!navigator.canShare({ files: [file] })) continue;
+      offered = true;
+      try {
         await navigator.share({ files: [file], title: filename });
         return 'shared';
+      } catch (err) {
+        if (err?.name === 'AbortError') return 'cancelled';
+        // share() needs a live user gesture and the caller may have
+        // awaited the database first. Named in the console so the reason
+        // is visible over Web Inspector instead of guessed at.
+        console.warn(`Speechcraft: sharing the file failed (${err?.name ?? err}). Downloading instead.`);
       }
-    } catch (err) {
-      if (err?.name === 'AbortError') return 'cancelled';
-      /* anything else — no activation, unsupported type — downloads below */
+      break;
+    }
+    if (!offered) {
+      console.warn('Speechcraft: this device declined to share this file type. Downloading instead.');
     }
   }
   const url = URL.createObjectURL(blob);
