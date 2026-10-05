@@ -623,15 +623,35 @@ export async function run({ navDoc = document } = {}) {
       clickIn(navDoc.querySelector('.sonnet-row[data-n="18"]'));
       await sleep(500);
       const tab18b = await waitTakesTab();
-      clickIn(tab18b); await sleep(500);
-      appWin.confirm = () => true;
-      clickIn([...navDoc.querySelectorAll('#sonnet-pane .take-actions button')].find(b => b.textContent.trim() === 'Delete'));
-      // WAIT FOR THE CONDITION, NOT A DURATION. deleteTake commits the
-      // metadata and the blob in ONE IndexedDB transaction, and a fixed
-      // 500ms sleep is a coin flip on a loaded machine: this check went
-      // red on 2026-10-05, passed on a re-run of IDENTICAL code, then went
-      // red again on the next change. Intermittent, and it cost two full
-      // ten-minute runs being mistaken for a regression.
+      clickIn(tab18b);
+
+      // WAIT FOR THE BUTTON, THEN FOR THE RESULT — never for a duration.
+      // This check failed three times on 2026-10-05 and passed once on
+      // identical code, and the first fix (polling AFTER the click) still
+      // failed with "1 take still listed after 8s". That detail is what
+      // gave it away: eight seconds is ample for a delete, so the delete
+      // was never starting. The pane simply had not rendered inside the
+      // fixed 500ms, the Delete button was not found, and clickIn(undefined)
+      // did nothing at all. Verified by hand in the live app, where the
+      // same delete works: confirm fires once, the take goes, no errors.
+      const btnBy = Date.now() + 8000;
+      let delBtn = null;
+      while (!delBtn && Date.now() < btnBy) {
+        delBtn = [...navDoc.querySelectorAll('#sonnet-pane .take-actions button')]
+          .find(b => b.textContent.trim() === 'Delete') ?? null;
+        if (!delBtn) await sleep(100);
+      }
+      check('reader Takes view offers a Delete control', !!delBtn,
+        'the Takes pane never rendered a Delete button');
+
+      // confirm() is set on the LIVE frame, not the window captured at the
+      // start of the run — that reference goes stale when a section
+      // reloads the iframe, and setting a handler on a dead window silently
+      // does nothing, which reads exactly like a delete that refused.
+      const liveWin = document.querySelector('iframe')?.contentWindow ?? appWin;
+      liveWin.confirm = () => true;
+      clickIn(delBtn);
+
       const deletedBy = Date.now() + 8000;
       let left = (await listTakes({ scopeId: 'sonnet:18' })).length;
       while (left > 0 && Date.now() < deletedBy) {
@@ -639,7 +659,7 @@ export async function run({ navDoc = document } = {}) {
         left = (await listTakes({ scopeId: 'sonnet:18' })).length;
       }
       check('reader take deletable through the Takes view',
-        left === 0, `${left} take(s) still listed after 8s`);
+        left === 0, `${left} take(s) still listed 8s after clicking Delete`);
       // Assert against the blob STORE directly — takeUrl caches object
       // URLs per-realm, and the UI delete ran in the app iframe's realm.
       check('deleted reader take blob removed from the store',
@@ -2710,12 +2730,12 @@ export async function run({ navDoc = document } = {}) {
         && ['textbook', 'texts', 'rhetoric', 'ipa']
           .every(k => !!doc.querySelector(`.tile-grid [data-tile="${k}"]`))
         && !!doc.getElementById('lib-search'));
-      // Hearts and streaks are gone app-wide now (2026-10-05), so the ❤️
-      // and 🔥 halves of this would pass by being impossible. Gems are the
-      // live assertion: they still exist elsewhere and must not show here.
-      check('speech: Free Play and gems are hidden here',
-        !doc.getElementById('freeplay')
-        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('💎'));
+      // Hearts, streaks AND gems are gone app-wide now (2026-10-05), so
+      // asserting their glyphs are absent here would pass by being
+      // impossible. Free Play is the live assertion: it still exists in
+      // the accent workspaces and must not appear in this one.
+      check('speech: Free Play is hidden here',
+        !doc.getElementById('freeplay'));
       check('speech: the rail offers a next step and never points at review work',
         (doc.getElementById('rail-quests')?.textContent ?? '').includes('Next step')
         && !!doc.querySelector('#rail-quests .rail-card button')
@@ -6481,6 +6501,43 @@ export async function run({ navDoc = document } = {}) {
           JSON.stringify([rawS.streak ?? null, rawS.lastPlayed ?? null, rawS.freezes ?? null])
           === JSON.stringify([aftS.streak ?? null, aftS.lastPlayed ?? null, aftS.freezes ?? null]),
           `${JSON.stringify([rawS.streak, rawS.lastPlayed, rawS.freezes])} -> ${JSON.stringify([aftS.streak, aftS.lastPlayed, aftS.freezes])}`);
+      }
+
+      // GEMS, THE SHOP AND THE XP BOOST ARE GONE (2026-10-05). The last
+      // of the economy. Gems were earned by lessons and quest claims, and
+      // the only thing left to spend them on was a 15-minute double-XP
+      // boost — so this took the Shop and the boost with it by arithmetic:
+      // a shop with no currency sells nothing.
+      {
+        const { store: st3 } = await import('../js/state.js');
+        const goneG = ['gems', 'addGems', 'spendGems', 'boostActive', 'boostUntil', 'startBoost']
+          .filter(k => k in st3);
+        check('gems: the whole API is gone, with the boost that spent it',
+          goneG.length === 0, `still present: ${goneG.join(', ')}`);
+
+        const mainG = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
+        const codeG = mainG.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+        check('gems: no shipped code or copy mentions gems, the Shop or a boost',
+          !/gems|💎|shopMain|boostActive|startBoost/i.test(codeG),
+          'economy copy survives in the view layer');
+        // The Shop was a real section; it must not be reachable either.
+        check('gems: the Shop section is gone, not merely hidden',
+          !/'shop'/.test(codeG), 'a shop route survives');
+
+        // XP survives the boost removal: the doubling lived INSIDE
+        // recordLesson and addXp, so taking it out could have broken both.
+        const xpG = st3.xp;
+        st3.addXp(3);
+        check('gems: removing the boost left XP itself working',
+          st3.xp === xpG + 3, `${xpG} -> ${st3.xp}`);
+
+        // Same promise as hearts and streaks: stop reading, never delete.
+        const rawG = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        st3.addXp(0);
+        const aftG = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        check('gems: stored gems and boostUntil survive untouched',
+          JSON.stringify([rawG.gems ?? null, rawG.boostUntil ?? null])
+          === JSON.stringify([aftG.gems ?? null, aftG.boostUntil ?? null]));
       }
 
       // HANDING A FILE TO THE READER (2026-10-05). On a real iPhone,

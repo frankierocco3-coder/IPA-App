@@ -24,7 +24,7 @@ let warnedStorage = false;
  * This used to throw. Safari refuses storage outright when the reader has
  * blocked cookies, and a full device throws QuotaExceededError, so an
  * unguarded write aborted whatever called it — finishing a lesson, claiming
- * a quest, spending gems — part-way through. Best-effort is the house
+ * a quest — part-way through. Best-effort is the house
  * pattern for localStorage here (see quests.js, analytics.js, the stores).
  *
  * It fails SILENTLY to the reader, which is honest only as far as the
@@ -49,6 +49,16 @@ function save(state) {
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
+
+// ── Gems, the Shop and the XP boost: REMOVED 2026-10-05 ──────
+// The last of the Duolingo economy, after hearts and streaks. Gems were
+// earned by finishing lessons and claiming quests, and the only thing
+// left to spend them on was a 15-minute double-XP boost — so removing
+// them took the Shop and the boost with them by arithmetic rather than by
+// choice: a shop with no currency sells nothing.
+//
+// `gems` and `boostUntil` STAY IN STORED DATA AND ARE DELIBERATELY NOT
+// READ, like hearts, streak, lastPlayed and freezes before them.
 
 // ── Streaks: REMOVED 2026-10-05, by the owner's decision ─────
 // A day counter that reset when you missed a day, with "streak freezes"
@@ -80,7 +90,6 @@ export const store = {
 
   recordLesson(lessonId, xpEarned) {
     const s = load();
-    if ((s.boostUntil ?? 0) > Date.now()) xpEarned *= 2;
     s.xp = (s.xp ?? 0) + xpEarned;
     s.completed = [...new Set([...(s.completed ?? []), lessonId])];
     save(s);
@@ -89,7 +98,6 @@ export const store = {
   // Practice sessions: XP, but no lesson gets marked complete.
   addXp(xpEarned) {
     const s = load();
-    if ((s.boostUntil ?? 0) > Date.now()) xpEarned *= 2;
     s.xp = (s.xp ?? 0) + xpEarned;
     save(s);
   },
@@ -98,22 +106,6 @@ export const store = {
   // Last text pasted into "Train Any Text" — { title, body, accent }.
   get customText() { return load().customText ?? null; },
   saveCustomText(v) { const s = load(); s.customText = v; save(s); },
-
-  // ── Gems: earned in lessons and quests, spent in the Shop ──
-  get gems() { return load().gems ?? 0; },
-  addGems(n) { const s = load(); s.gems = (s.gems ?? 0) + n; save(s); },
-  spendGems(n) {
-    const s = load();
-    if ((s.gems ?? 0) < n) return false;
-    s.gems -= n;
-    save(s);
-    return true;
-  },
-
-  // ── XP boost ────────────────────────────────────────────────
-  get boostActive() { return (load().boostUntil ?? 0) > Date.now(); },
-  get boostUntil() { return load().boostUntil ?? 0; },
-  startBoost(minutes = 15) { const s = load(); s.boostUntil = Date.now() + minutes * 60000; save(s); },
 
   // ── Onboarding / preferences ────────────────────────────────
   // { done, goal, accent, diagnostic } — `goal` is legacy (its picker is
@@ -128,7 +120,7 @@ export const store = {
     s.onboarding = { ...(s.onboarding ?? { done: false, goal: null, accent: null }), ...patch };
     save(s);
   },
-  // Gems and quests stay quiet until something is earned.
+  // Quests stay quiet until something is earned.
   get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
 
   // ── Free play ───────────────────────────────────────────────
@@ -178,7 +170,7 @@ export const store = {
   dismissThresholdInvite() { const s = load(); s.thresholdInviteSeen = true; save(s); },
 
   // ── "What Is IPA?" intro module ─────────────────────────────
-  // Completion badge only — deliberately no XP or gems, so "Progress
+  // Completion badge only — deliberately no XP, so "Progress
   // activates after your first lesson" stays true for fresh users.
   get whatIsIpa() { return load().whatIsIpa ?? { done: false, correct: 0 }; },
   markWhatIsIpa(correct) {

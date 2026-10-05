@@ -1,10 +1,13 @@
-// Daily quests: three small targets that reset each day, paying gems.
+// Daily quests: three small targets that reset each day.
+// They PAID GEMS until 2026-10-05; gems were removed with the rest of the
+// economy, so a quest is now a mark of what you did, not a transaction.
+// `reward` and the stored `claimed` list are LEFT IN PLACE and unread —
+// the same stop-reading-never-delete rule the other removals followed.
 //
 // Everything is derived from what the learner actually did — the hooks are
 // called from the existing lesson-results flow and never change scoring.
 // State lives in localStorage and is intentionally tiny.
 
-import { store } from './state.js';
 
 const KEY = 'speechcraft-quests-v1';
 
@@ -57,18 +60,5 @@ export function questRows() {
   });
 }
 
-/** Claim a completed quest's gems. Returns the reward, or 0. */
-export function claimQuest(id) {
-  const q = load();
-  const def = DAILY_QUESTS.find(d => d.id === id);
-  if (!def) return 0;
-  if (q.claimed.includes(id)) return 0;
-  if ((q.progress[def.metric] ?? 0) < def.target) return 0;
-  q.claimed.push(id);
-  save(q);
-  store.addGems(def.reward);
-  return def.reward;
-}
-
 export const questsCompleteCount = () => questRows().filter(r => r.complete).length;
-export const unclaimedCount = () => questRows().filter(r => r.complete && !r.claimed).length;
+// unclaimedCount retired with the reward it counted.

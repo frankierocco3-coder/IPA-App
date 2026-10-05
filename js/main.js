@@ -102,7 +102,7 @@ import { dbSupported, STORES, idbClear, CONTENT_STORES, dbErrorMessage } from '.
 import { QUICK_QUESTIONS, DISSECT_SECTIONS, dissectQuestions, ANSWER_STATUS, newDissection, dissectionFor, putDissection,
          saveAnswer, deleteDissection, deleteDissectionsFor, materialTypeFrom,
          coverageLine, createSaver, MAX_ANSWER_LEN, attachImportedDissection } from './dissect.js';
-import { questRows, claimQuest, onLessonFinished } from './quests.js';
+import { questRows, onLessonFinished } from './quests.js';
 import { PLAYABLE_ACTIONS, ACTION_VERBS, ACTION_VERB_FRAME, taughtActionFor,
          ACTION_PAIRS, ACTION_CATEGORIES, GOVERNING_QUESTION,
          ACTION_DISTINCTION, PAIR_LESSON, actionById, pairById, pairIndexOf,
@@ -257,8 +257,8 @@ const navIcon = s => NAV_ICONS[s.id] ?? s.icon;
 const cardGlyph = c => c.img
   ? `<div class="track-glyph has-img"><img src="${c.img}" alt="" width="46" height="46"></div>`
   : `<div class="track-glyph">${c.icon}</div>`;
-// Shop and Profile live under More but are still full shell sections.
-const OFF_NAV_SECTIONS = ['shop', 'profile'];
+// Profile lives under More but is still a full shell section.
+const OFF_NAV_SECTIONS = ['profile'];
 // Older saved states point at sections that have since moved.
 const LEGACY_SECTIONS = { textbook: 'library', texts: 'library', quests: 'progress' };
 
@@ -362,7 +362,6 @@ function renderShell(section) {
   else if (section === 'practice') practiceMain(main, course, ws);
   else if (section === 'library') libraryMain(main, course, ws);
   else if (section === 'progress') progressMain(main);
-  else if (section === 'shop') shopMain(main);
   else if (section === 'profile') profileMain(main);
   else moreMain(main);
   // The intro suppression is one landing render wide, whatever the section
@@ -370,16 +369,15 @@ function renderShell(section) {
   skipCourseIntroOnce = false;
 }
 
-// ── Stats bar: course chip + gems ────────────────────────────
+// ── Stats bar: course chip ───────────────────────────────────
 
 function drawStatsbar(course, section, ws = activeWorkspace()) {
   const bar = document.getElementById('statsbar');
   const wsDef = WORKSPACES.find(w => w.id === ws);
-  // Before anything is earned, the economy stays out of the way: just the
-  // workspace/context chips. The counters appear once a lesson pays out.
-  // Speech and Acting are not governed by the pronunciation-game
-  // economy: their counters and Free Play stay hidden there.
-  const earned = store.hasEarnedAnything && !ACCENTLESS_WORKSPACES.includes(ws);
+  // The stats bar carried the economy's counters — hearts, streak, gems,
+  // the boost chip. All four are gone (2026-10-05), so it is the workspace
+  // and context chips and nothing else. Free Play still hides in the
+  // workspaces that are not governed by the pronunciation game.
   // Header contract per workspace: Speech shows NO accent context at
   // all; IPA shows the fixed accent-neutral label; Accents & Dialects
   // keeps the full accent selector.
@@ -414,9 +412,6 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
         </button>`).join('')}
     </div>
     ${contextChip}
-    ${earned ? `
-    <span class="stat-chip" title="Gems"><span aria-hidden="true">💎</span> ${store.gems}<span class="sr-only"> gems</span></span>
-    ${store.boostActive ? '<span class="stat-chip chip-boost" title="Double XP active">⚡×2</span>' : ''}` : ''}
     ${ACCENTLESS_WORKSPACES.includes(ws) ? '' : `
     <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay" aria-pressed="${store.freePlay}"
             aria-label="Free play: unlock all lessons" title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>`}
@@ -546,7 +541,7 @@ function drawRail(section) {
             <div class="quest-bar"><div style="width:${Math.round(r.done / r.target * 100)}%"></div>
               <span class="quest-count">${r.done}/${r.target}</span></div>
           </div>
-          ${r.complete ? (r.claimed ? '<span class="quest-done">✓</span>' : '<span class="quest-chest">🎁</span>') : ''}
+          ${r.complete ? '<span class="quest-done">✓</span>' : ''}
         </div>`).join('')
     : '';
 
@@ -6139,7 +6134,7 @@ function progressMain(el) {
       </section>
       <h2 class="chart-h">What will appear here</h2>
       ${[
-        ['⚡', 'XP and gems', 'earned by lessons, games and quests'],
+        ['⚡', 'XP', 'earned by lessons, games and quests'],
         ['🏆', 'Daily quests', 'three small targets that reset at midnight'],
         ['📊', 'Weak sounds', 'the symbols that keep slipping, ranked from your real answers'],
         ['🎓', 'Achievements', 'long-run milestones'],
@@ -6175,11 +6170,9 @@ function progressMain(el) {
           <div class="quest-bar"><div style="width:${Math.round(r.done / r.target * 100)}%"></div>
             <span class="quest-count">${r.done}/${r.target}</span></div>
         </div>
-        ${r.claimed ? '<span class="quest-done" title="Claimed">✓</span>'
-          : r.complete ? `<button class="btn btn-primary quest-claim" data-q="${r.id}" type="button" aria-label="Claim ${r.reward} gems">🎁 +${r.reward}💎</button>`
-          : `<span class="quest-reward">💎 ${r.reward}</span>`}
+        ${r.complete ? '<span class="quest-done" title="Done">✓</span>' : ''}
       </div>`).join('')}
-    <p class="pane-note">Gems buy XP boosts in the Shop.</p>
+    <p class="pane-note">Three targets a day. They mark what you have done — nothing is awarded, and nothing is lost by ignoring them.</p>
     <h2 class="chart-h">Weak Sounds</h2>
     ${weak.length ? weak.map(r => `
       <div class="stat-row">
@@ -6192,7 +6185,6 @@ function progressMain(el) {
     <h2 class="chart-h">Statistics</h2>
     <div class="summary-row">
       <div class="summary-card"><span class="summary-n">⚡ ${store.xp}</span><span class="summary-l">total XP</span></div>
-      <div class="summary-card"><span class="summary-n">💎 ${store.gems}</span><span class="summary-l">gems</span></div>
     </div>
     <div class="summary-row">
       <div class="summary-card"><span class="summary-n">${store.completed.size}</span><span class="summary-l">lessons done</span></div>
@@ -6209,42 +6201,7 @@ function progressMain(el) {
             <span class="quest-count">${a.value}/${a.next} ${a.what}</span></div>
         </div>
       </div>`).join('')}`;
-  el.querySelectorAll('.quest-claim').forEach(b =>
-    b.addEventListener('click', () => {
-      claimQuest(b.dataset.q);
-      renderShell('progress');
-    }));
   el.querySelector('#prog-weak-full').addEventListener('click', renderWeakSounds);
-}
-
-// ── Shop ──────────────────────────────────────────────────────
-
-function shopMain(el) {
-  const boostActive = store.boostActive;
-  const boostMins = boostActive ? Math.ceil((store.boostUntil - Date.now()) / 60000) : 0;
-  const item = (icon, title, blurb, action) => `
-    <div class="shop-item">
-      <span class="shop-icon">${icon}</span>
-      <div class="shop-info"><h2>${title}</h2><p>${blurb}</p></div>
-      ${action}
-    </div>`;
-  el.innerHTML = `
-    <section class="quest-banner shop-banner">
-      <div><h1>Shop</h1><p>Everything costs gems earned by practising. Nothing here ever costs real money.</p></div>
-      <span class="quest-banner-emoji">💎 ${store.gems}</span>
-    </section>
-    <h2 class="chart-h">Power-ups</h2>
-    ${item('⚡', 'Double XP', boostActive ? `Active — ${boostMins} min left.` : 'Every lesson pays double XP for 15 minutes.',
-      boostActive ? '<span class="shop-price is-off">ACTIVE</span>'
-        : `<button class="btn btn-lite shop-buy" data-item="boost" type="button">💎 150</button>`)}`;
-  el.querySelectorAll('.shop-buy').forEach(b =>
-    b.addEventListener('click', () => {
-      const prices = { boost: 150 };
-      const it = b.dataset.item;
-      if (!store.spendGems(prices[it])) { alert(`Not enough gems — that costs ${prices[it]} 💎. Quests and lessons earn more.`); return; }
-      store.startBoost(15);
-      renderShell('shop');
-    }));
 }
 
 // ── Profile ───────────────────────────────────────────────────
@@ -6277,7 +6234,7 @@ function profileMain(el) {
 // ── "What Is IPA?": a 3-minute interactive introduction ───────
 // A standalone stepped module on the guide chrome. Never required — it is
 // reachable from Library → IPA, the Foundations path, and core lesson
-// guides. Completion is a badge in the store; deliberately no XP or gems.
+// guides. Completion is a badge in the store; deliberately no XP.
 
 
 
@@ -6620,7 +6577,7 @@ function renderTerms() {
         'Speechcraft teaches and helps you practise. It does not replace a qualified voice teacher, dialect coach, acting teacher, speech-language pathologist or doctor, and nothing in it is medical, therapeutic or professional advice.',
         'The voice, breath and body exercises are gentle, but you know your own body. Stop anything that causes pain, strain or discomfort, and if you have a voice or health condition, check with a qualified professional first.')}
       ${sec('Free, with nothing to buy',
-        'Speechcraft costs nothing and sells nothing. XP, gems and the items in the Shop are practice points earned inside the app. They have no cash value and cannot be bought, sold or exchanged for money.')}
+        'Speechcraft costs nothing and sells nothing. XP is a count of practice done inside the app. It has no cash value and cannot be bought, sold or exchanged for money.')}
       ${sec('Your work stays yours',
         'What you write, paste or record in Speechcraft stays on your device. We never see it, store it or claim any rights to it. If you work with a text you did not write, you are responsible for having the right to use it.')}
       ${sec('Our content',
@@ -6684,7 +6641,7 @@ function renderCredits() {
 function moreMain(el) {
   // Order (owner UI pass 2026-09-15): the user's own things first
   // (profile, settings, their data), then talking to us, then reading
-  // about the app, and the Shop last — bookkeeping never leads.
+  // about the app last — bookkeeping never leads.
   const cards = [
     { icon: '👤', img: 'img/ui/profile.png', title: 'Profile', blurb: 'Your name and avatar.', go: () => goSection('profile'), color: '#6f8657' },
     { icon: '⚙️', img: 'img/ui/preferences.png', title: 'Preferences', blurb: 'Your course and first-run choices.', go: renderPreferences, color: '#64748b' },
@@ -6696,7 +6653,6 @@ function moreMain(el) {
     { icon: '✨', img: 'img/ui/why-speech.png', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', img: 'img/ui/about.png', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '📚', img: 'img/ui/credits.png', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
-    { icon: '🛍️', img: 'img/ui/shop.png', title: 'Shop', blurb: 'XP boosts.', go: () => goSection('shop'), color: '#c99e58' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
@@ -11131,7 +11087,7 @@ function renderResults(s) {
       <main class="end-screen">
         <div class="end-emoji">${arcade ? s.lesson.mode.icon : '🎯'}</div>
         <h1>${perfect ? (arcade ? 'Flawless round!' : 'Flawless practice!') : (arcade ? 'Round complete!' : 'Practice complete!')}</h1>
-        <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''}</p>
+        <p class="end-xp">+${xp} XP</p>
         <div class="end-actions">
           <button class="btn btn-primary" id="again">${s.lesson.bridgeRoute ? 'Replay' : arcade ? 'Play again' : 'Practice again'}</button>
           <button class="btn" id="home">${s.lesson.bridgeRoute ? 'Return to Practice' : 'Done'}</button>
@@ -11145,8 +11101,6 @@ function renderResults(s) {
   }
   const xp = 10 + (perfect ? 5 : 0);
   store.recordLesson(s.lesson.id, xp);
-  const gems = perfect ? 15 : 10;
-  store.addGems(gems);
   try { onLessonFinished({ xp, perfect, isGame: false }); } catch { /* quests are best-effort */ }
   const { done, total } = trackProgress(s.lesson.track);
   const mastered = done === total;
@@ -11166,7 +11120,7 @@ function renderResults(s) {
       <div class="end-emoji">${mastered ? '🎓' : chk ? '🎲' : perfect ? '🏆' : '🎉'}</div>
       <h1>${mastered ? 'Course complete!' : chk ? 'Checkpoint cleared!' : perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
       ${mastered ? `<p>${esc(s.lesson.track.title)} — mastered, start to finish.</p>` : ''}
-      <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''} · +${gems} 💎${perfect ? ' (perfect bonus)' : ''}</p>
+      <p class="end-xp">+${xp} XP${perfect ? ' · perfect' : ''}</p>
       <div class="end-summary" role="status">
         <div class="end-block"><span class="end-block-l">Accuracy</span><span class="end-block-v">${accuracy}%</span></div>
         ${learned.length ? `<div class="end-block"><span class="end-block-l">Covered</span>

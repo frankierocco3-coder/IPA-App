@@ -180,8 +180,9 @@ tests/              security.test.js (browser-run)
 
 **Working:** Duolingo-style shell (Speechcraft skin): left sidebar
 **Learn / Practice / Studio / Library / Progress / More** (same six on
-the mobile bottom nav, both rendered from the ONE `SECTIONS` array; Shop
-and Profile live under More but are still shell sections;
+the mobile bottom nav, both rendered from the ONE `SECTIONS` array;
+Profile lives under More but is still a shell section (Shop was removed
+with gems, 2026-10-05);
 LEGACY_SECTIONS maps old saved 'textbook'/'quests' states). You are always
 "in" one course — 🇺🇸/🇬🇧/🇦🇺/ʃə Foundations — switched via the course chip.
 First run: the "BEFORE YOU SPEAK" THRESHOLD (Build 01, branch
@@ -272,10 +273,11 @@ tools/audit_audio.py also enforces course-bound voice keys.
 Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.
-Economy: gems (lessons +10/+15, quest claims) and a 15-min double-XP
-boost — all in js/state.js; daily quests in js/quests.js hook
-onLessonFinished() in renderResults. No leaderboards (no accounts —
-decided, not forgotten).
+THE ECONOMY IS GONE (owner decisions 2026-10-05, in three cuts:
+hearts, then streaks, then gems). What remains is XP as a count of
+practice done, and three daily quests in js/quests.js that mark what
+you did and award nothing. No leaderboards (no accounts — decided,
+not forgotten).
 HEARTS ARE REMOVED (owner decision 2026-10-05). Five hearts used to gate
 the Learn path: a wrong answer cost one, an empty pool ended the lesson,
 gems bought them back. It was the ONLY mechanic that could stop somebody
@@ -292,9 +294,18 @@ punished them for working; freezes went with it because a freeze
 protecting a streak that does not exist is a leftover. `streak`,
 `lastPlayed` and `freezes` STAY IN STORED DATA, DELIBERATELY UNREAD.
 touchStreak is gone from recordLesson and addXp — XP still increments,
-which is pinned. THE SHOP IS NOW ONE ITEM (Double XP); whether a Shop
-section still earns its place is the owner's open question. Gems, XP and
-quests stay for now.
+which is pinned.
+GEMS, THE SHOP AND THE XP BOOST ARE REMOVED TOO (owner decision
+2026-10-05). Gems were earned by lessons and quest claims and the
+only thing left to buy was a 15-minute double-XP boost, so this took
+the Shop section and the boost with it by arithmetic rather than by
+choice: a shop with no currency sells nothing. The boost doubled XP
+INSIDE recordLesson and addXp, so removing it could have broken XP —
+pinned that it did not. Quest rows keep their targets and their ✓ but
+have no claim and no reward; `reward` and the stored `claimed` list
+are left unread. `gems` and `boostUntil` STAY IN STORED DATA,
+DELIBERATELY UNREAD, like every removal before them. The stats bar is
+now the workspace and context chips and nothing else.
 A11y: global :focus-visible ring, reduced-motion support, aria-labels on
 icon-only controls (guidebook/speaker/freeplay), aria-live lesson feedback,
 #shell-main is a <main>, 48px bottom-nav targets.
