@@ -69,8 +69,11 @@ that too.
 
 **1.3** Your progress is intact.
 
-- **Expect:** your streak, gems, hearts and course are what you left them
-  as — not reset to zero, not back at the first-run walkthrough.
+- **Expect:** your course, your completed lessons and your Studio work are
+  what you left them as — not back at the first-run walkthrough.
+- The economy was removed on 2026-10-05, so there is no streak, no gems,
+  no hearts and no XP to compare any more. **Progress → Statistics** is the
+  place to look: *lessons done*, *days practised*, *answers given*.
 - **If it is reset,** write down how long it had been since you last
   opened it. That is Part 5 happening to you already.
 - Saw: `____________________`
@@ -214,9 +217,18 @@ Studio → **Import** → try to select the file you just exported.
 - Saw: `____________________`
 
 **4.3 — CRITICAL, and the single most important unknown in this run.**
-Share → **Add to Home Screen**. Open the app from the new icon.
 
-- **The question:** is your progress there, or is it empty?
+**Write these down from Safari FIRST**, or there is nothing to compare
+against. Progress → Statistics:
+
+```
+lessons done:    ____     days practised: ____     answers given: ____
+Studio projects: ____     (any notebooks or characters? ____)
+```
+
+Then Share → **Add to Home Screen**, and open the app from the new icon.
+
+- **The question:** are those same numbers there, or is it empty?
 - **Why it matters so much:** installing to the home screen is the *only*
   defence against the seven-day storage wipe in Part 5 — it is the remedy
   we would tell every iPhone user to apply. But iOS has historically given
@@ -243,8 +255,9 @@ happen.
 - **A — Safari copy.** Leave the app in a Safari tab. Do not open it again.
 - **B — installed copy.** The home-screen icon from 4.3. Do not open it
   again either.
-- First, make sure both show real progress worth losing. Note the streak
-  and gem numbers here: `____________________`
+- First, make sure both show real progress worth losing. Note the
+  *lessons done* and *answers given* figures here:
+  `____________________`
 - **Date set up:** `____________`  **Check after:** `____________` (+8 days)
 
 **On the day, open A first, then B.**
