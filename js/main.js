@@ -23,7 +23,7 @@ import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record,
          runStepSequence, tileHtml, itemTileHtml, reviewStripHtml,
          groupStatus, workspacePage, shellBack, deliverFile } from './ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
-import { store, HEART_MAX } from './state.js';
+import { store } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady, audioUrl } from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
@@ -370,11 +370,10 @@ function renderShell(section) {
   skipCourseIntroOnce = false;
 }
 
-// ── Stats bar: course chip + streak / gems / hearts ───────────
+// ── Stats bar: course chip + streak / gems ───────────────────
 
 function drawStatsbar(course, section, ws = activeWorkspace()) {
   const bar = document.getElementById('statsbar');
-  const hearts = store.hearts;
   const wsDef = WORKSPACES.find(w => w.id === ws);
   // Before anything is earned, the economy stays out of the way: just the
   // workspace/context chips. The counters appear once a lesson pays out.
@@ -418,7 +417,6 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
     ${earned ? `
     <span class="stat-chip" title="Streak"><span aria-hidden="true">🔥</span> ${store.displayStreak}<span class="sr-only"> day streak</span></span>
     <span class="stat-chip" title="Gems"><span aria-hidden="true">💎</span> ${store.gems}<span class="sr-only"> gems</span></span>
-    <span class="stat-chip ${hearts === 0 ? 'chip-empty' : ''}" title="Hearts"><span aria-hidden="true">❤️</span> ${hearts}<span class="sr-only"> hearts</span></span>
     ${store.boostActive ? '<span class="stat-chip chip-boost" title="Double XP active">⚡×2</span>' : ''}` : ''}
     ${ACCENTLESS_WORKSPACES.includes(ws) ? '' : `
     <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay" aria-pressed="${store.freePlay}"
@@ -608,7 +606,7 @@ function continueCard(track, course) {
         <div class="cc-info">
           <span class="cc-stage">${course.icon} ${esc(course.label)} · 🎓 mastered</span>
           <h2>Every lesson complete</h2>
-          <p class="cc-meta">Keep it sharp with mixed review — it can even earn hearts back.</p>
+          <p class="cc-meta">Keep it sharp with mixed review.</p>
         </div>
         <button class="btn btn-primary cc-go" id="cc-go" type="button">Practice</button>
       </section>`,
@@ -828,7 +826,7 @@ function ipaPracticePane(el, course) {
     <h2 class="chart-h">Quick Practice</h2>
     <section class="continue-card quick-card" aria-label="Quick practice">
       <div class="cc-info">
-        <span class="cc-stage">🎯 ${targeted ? 'Quick Practice' : 'Quick Practice · Mixed review'} · never costs hearts · earns ❤️ back</span>
+        <span class="cc-stage">🎯 ${targeted ? 'Quick Practice' : 'Quick Practice · Mixed review'}</span>
         <h2>${targeted ? 'Rehearse your weak sounds' : 'Mixed review'}</h2>
         <p class="cc-meta">${quickWhy} ~4 min.</p>
       </div>
@@ -839,7 +837,7 @@ function ipaPracticePane(el, course) {
       <button class="btn-lite" id="hub-mixed" type="button">Prefer the full spread? Full-course mixed review — everything ${esc(name)} has taught, not just weak sounds ›</button>
     </div>` : ''}
     ${dailyRehearsalCard()}
-    <p class="pane-note">Practice never costs hearts — mixed review and rehearsal even earn one back. Real lessons on the Learn path are where hearts are at stake.</p>
+    <p class="pane-note">Practice as often as you like. Nothing here is scored against you, and nothing is ever lost by getting something wrong.</p>
     ${PRACTICE_GROUPS.map(g => `
       <h2 class="chart-h">${esc(g.title)} <span>in ${esc(name)}</span></h2>
       <div class="mode-grid">
@@ -1917,7 +1915,7 @@ function renderSpeechChapter(id) {
 // here; only the objective and a short summary line appear.
 // ── LEARN: the guided Speech reading experience ───────────────
 // Speech chapters are read, never tested. No Check section, no answer
-// choices, no correctness, no XP, no hearts, no gate before continuing.
+// choices, no correctness, no XP, no gate before continuing.
 // One reusable renderer serves every chapter; the approved written
 // material is paginated, never rewritten. (SPEECH_LESSON_EXTRAS still
 // carries legacy `check` data — Speech simply stops rendering it. IPA
@@ -2070,7 +2068,7 @@ function renderSpeechLesson(id, screen = 0) {
   document.getElementById('sp-next-ch')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderSpeechLesson(nextCh.id); }));
   document.getElementById('sp-to-module')?.addEventListener('click', () => renderSpeechModule(m?.n ?? 1));
   document.getElementById('sp-done')?.addEventListener('click', () => {
-    // Reading progress only — no XP, no hearts, no correctness.
+    // Reading progress only — no XP, no correctness.
     markSpeechLessonDone(id);
     const btn = document.getElementById('sp-done');
     btn.textContent = 'Read ✓'; btn.disabled = true;
@@ -2263,7 +2261,7 @@ function renderGuidedPractice() {
     ${pageTopbar('🧭 Guided Practice', '#6f8657')}
     <main class="track-list">
       <h1 class="page-h">Guided Practice</h1>
-      <p class="track-blurb">${esc(PRACTICE_PRINCIPLE_SHORT)} Each subject isolates one element of speaking. Nothing here records you, scores you or costs hearts — this is exploration, and you are the only judge of it.</p>
+      <p class="track-blurb">${esc(PRACTICE_PRINCIPLE_SHORT)} Each subject isolates one element of speaking. Nothing here records you or scores you — this is exploration, and you are the only judge of it.</p>
       ${PRACTICE_SUBJECTS.map(s => `
         <button class="track-card" data-subject="${s.id}" type="button">
           <div class="track-glyph">${s.icon}</div>
@@ -3933,7 +3931,7 @@ function renderSpeakDrills(d) {
 // ── The Warmup: body and voice, in four movements ────────────
 // A chooser, then written guidance on the shared step runner. Any one
 // movement runs alone; "the whole thing" runs all four in order.
-// Completion pays the practice convention (+5 XP, no hearts); nothing
+// Completion pays the practice convention (+5 XP); nothing
 // here is scored and nothing listens. The comfort and safety lines
 // render verbatim on every run.
 function renderWarmup() {
@@ -4676,7 +4674,7 @@ function setRhetoricPreview(on) {
 // for tallying anything (interpretive work is completion-only everywhere
 // else, and nothing here asks a learner what a passage means).
 //
-// NOTHING IS SCORED BEYOND THE SESSION. No XP, no hearts, no storage, no
+// NOTHING IS SCORED BEYOND THE SESSION. No XP, no storage, no
 // analytics. The content is unreviewed, so the drill carries the same
 // awaiting-review line the shelves do: practising against material nobody
 // qualified has checked is fine as long as it never pretends otherwise.
@@ -6184,7 +6182,7 @@ function progressMain(el) {
           : r.complete ? `<button class="btn btn-primary quest-claim" data-q="${r.id}" type="button" aria-label="Claim ${r.reward} gems">🎁 +${r.reward}💎</button>`
           : `<span class="quest-reward">💎 ${r.reward}</span>`}
       </div>`).join('')}
-    <p class="pane-note">Gems buy heart refills, streak freezes and XP boosts in the Shop.</p>
+    <p class="pane-note">Gems buy streak freezes and XP boosts in the Shop.</p>
     <h2 class="chart-h">Weak Sounds</h2>
     ${weak.length ? weak.map(r => `
       <div class="stat-row">
@@ -6226,7 +6224,6 @@ function progressMain(el) {
 // ── Shop ──────────────────────────────────────────────────────
 
 function shopMain(el) {
-  const hearts = store.hearts;
   const freezes = store.freezes;
   const boostActive = store.boostActive;
   const boostMins = boostActive ? Math.ceil((store.boostUntil - Date.now()) / 60000) : 0;
@@ -6241,10 +6238,6 @@ function shopMain(el) {
       <div><h1>Shop</h1><p>Everything costs gems earned by practising. Nothing here ever costs real money.</p></div>
       <span class="quest-banner-emoji">💎 ${store.gems}</span>
     </section>
-    <h2 class="chart-h">Hearts</h2>
-    ${item('❤️', 'Refill Hearts', `Back to ${HEART_MAX} hearts instantly. One regenerates every 4 hours on its own, and mixed review earns one back.`,
-      hearts >= HEART_MAX ? '<span class="shop-price is-off">FULL</span>'
-        : `<button class="btn btn-lite shop-buy" data-item="refill" type="button">💎 350</button>`)}
     <h2 class="chart-h">Power-ups</h2>
     ${item('🧊', 'Streak Freeze', `Protects your streak for one missed day. Equipped: ${freezes}/2.`,
       freezes >= 2 ? '<span class="shop-price is-off">MAX</span>'
@@ -6254,11 +6247,10 @@ function shopMain(el) {
         : `<button class="btn btn-lite shop-buy" data-item="boost" type="button">💎 150</button>`)}`;
   el.querySelectorAll('.shop-buy').forEach(b =>
     b.addEventListener('click', () => {
-      const prices = { refill: 350, freeze: 200, boost: 150 };
+      const prices = { freeze: 200, boost: 150 };
       const it = b.dataset.item;
       if (!store.spendGems(prices[it])) { alert(`Not enough gems — that costs ${prices[it]} 💎. Quests and lessons earn more.`); return; }
-      if (it === 'refill') store.refillHearts();
-      else if (it === 'freeze') store.addFreeze();
+      if (it === 'freeze') store.addFreeze();
       else store.startBoost(15);
       renderShell('shop');
     }));
@@ -6548,7 +6540,7 @@ function renderPreferences() {
       <button class="btn" id="pref-rerun" type="button">Read the preface again</button>
 
       <h2 class="guide-heading">Quick diagnostic</h2>
-      <p class="pane-note">≈8 questions on the active course. It cannot cost hearts, and it seeds
+      <p class="pane-note">≈8 questions on the active course. Nothing is at stake, and it seeds
         your weak-sound tracking. Optional, and repeatable.</p>
       <button class="btn" id="pref-diag" type="button">Take the diagnostic</button>
     </main>`;
@@ -6634,7 +6626,7 @@ function renderTerms() {
         'Speechcraft teaches and helps you practise. It does not replace a qualified voice teacher, dialect coach, acting teacher, speech-language pathologist or doctor, and nothing in it is medical, therapeutic or professional advice.',
         'The voice, breath and body exercises are gentle, but you know your own body. Stop anything that causes pain, strain or discomfort, and if you have a voice or health condition, check with a qualified professional first.')}
       ${sec('Free, with nothing to buy',
-        'Speechcraft costs nothing and sells nothing. XP, gems, hearts, streaks and the items in the Shop are practice points earned inside the app. They have no cash value and cannot be bought, sold or exchanged for money.')}
+        'Speechcraft costs nothing and sells nothing. XP, gems, streaks and the items in the Shop are practice points earned inside the app. They have no cash value and cannot be bought, sold or exchanged for money.')}
       ${sec('Your work stays yours',
         'What you write, paste or record in Speechcraft stays on your device. We never see it, store it or claim any rights to it. If you work with a text you did not write, you are responsible for having the right to use it.')}
       ${sec('Our content',
@@ -6710,7 +6702,7 @@ function moreMain(el) {
     { icon: '✨', img: 'img/ui/why-speech.png', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', img: 'img/ui/about.png', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '📚', img: 'img/ui/credits.png', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
-    { icon: '🛍️', img: 'img/ui/shop.png', title: 'Shop', blurb: 'Hearts, streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
+    { icon: '🛍️', img: 'img/ui/shop.png', title: 'Shop', blurb: 'Streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
@@ -6829,7 +6821,7 @@ function hubIdiom(hub, d, track) {
     <p class="pane-note">${!hasPeriod
       ? `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. Everything here is present-day usage, like the course itself.`
       : `The vocabulary that carries the ${esc(name)} voice — the right vowel with the wrong word still breaks the illusion. <b>period</b> ≈ c.1890–1930; it means characteristic of the era, not dead.`}</p>
-    <div class="practice-row"><button class="btn btn-practice" id="idiom-drill" type="button">🗣 Drill these — no hearts lost</button></div>
+    <div class="practice-row"><button class="btn btn-practice" id="idiom-drill" type="button">🗣 Drill these</button></div>
     <input class="sonnet-search" id="idiom-q" type="search" aria-label="Search words and expressions" placeholder="Search term, meaning or example…" autocomplete="off">
     ${hasPeriod ? `<div class="dialect-picker"><span class="dialect-label">Era</span><div class="dialect-chips" id="idiom-era">
       ${chip('era', 'all', 'All', idiomFilters.era === 'all')}
@@ -7509,7 +7501,7 @@ function startDailyRehearsal() {
   startLesson({
     id: 'daily-rehearsal',
     title: 'Today’s Rehearsal',
-    practice: true,                 // no hearts lost, like other practice
+    practice: true,                 // practice convention, like the rest
     phonemes,
     types: ['soundToSymbol', 'symbolToWord', 'minimalPair', 'description', 'fillBlank'],
     count: 8,
@@ -10660,7 +10652,7 @@ function renderTrack(track) {
     ${pageTopbar(`${track.icon} ${esc(track.title)}`, track.color)}
     <main class="track-scroll">
       <div class="practice-row">
-        <button class="btn btn-practice" id="practice">🎯 Practice — mixed review, no hearts lost</button>
+        <button class="btn btn-practice" id="practice">🎯 Practice — mixed review</button>
       </div>
       ${path.html}
     </main>`;
@@ -10823,15 +10815,14 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
 // ── Lesson session ────────────────────────────────────────────
 
 function startLesson(lesson) {
-  const free = lesson.practice || lesson.challenge;
-  if (!free && store.hearts <= 0) return renderNoHearts(lesson);
+  // Hearts were removed 2026-10-05 (owner decision): nothing gates a
+  // lesson any more. A tool people may pay for should not lock the door.
   const session = {
     lesson,
     // A fixed queue (Accent Bridge) plays each entry exactly once —
     // never generated, padded or duplicated.
     queue: lesson.fixedQueue ? [...lesson.fixedQueue] : generateLesson(lesson),
     index: 0,
-    hearts: free ? Infinity : store.hearts,
     mistakes: 0,
     total: 0,
   };
@@ -10848,7 +10839,6 @@ function lessonChrome(s, body) {
     <header class="lesson-top">
       <button class="quit" id="quit">✕</button>
       <div class="progress"><div class="progress-fill" style="width:${progressPct(s)}%"></div></div>
-      <div class="hearts">${s.lesson.practice || s.lesson.challenge ? '♾️' : '❤️'.repeat(Math.max(0, Math.min(s.hearts, HEART_MAX))) + '🖤'.repeat(Math.max(0, HEART_MAX - s.hearts))}</div>
     </header>
     <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback" aria-live="polite"></footer>`;
@@ -10857,7 +10847,6 @@ function lessonChrome(s, body) {
 
 function renderExercise(s) {
   s.shownAt = Date.now();          // for analytics response time
-  if (s.hearts === 0) return renderFail(s);
   if (s.index >= s.queue.length) return renderResults(s);
   const ex = s.queue[s.index];
   if (ex.type === 'match') renderMatch(s, ex);
@@ -10909,7 +10898,6 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null 
     </div>
     <button class="btn continue ${ok ? '' : 'btn-red'}" id="continue">Continue</button>`;
   if (!ok) {
-    if (penalty && !s.lesson.practice && !s.lesson.challenge) { s.hearts--; store.loseHeart(); }
     s.mistakes++;
     // Remember which symbols this miss involved, for the results summary.
     try {
@@ -10921,7 +10909,7 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null 
         while ((m = re.exec(String(text ?? '')))) s.missedSyms.add(m[1]);
       }
     } catch { /* summary detail only */ }
-    if (requeue && !s.lesson.challenge && s.hearts > 0) s.queue.push({ ...ex });
+    if (requeue && !s.lesson.challenge) s.queue.push({ ...ex });
   }
   document.getElementById('continue').addEventListener('click', () => {
     s.index++;
@@ -11143,16 +11131,13 @@ function renderResults(s) {
   if (s.lesson.practice) {
     const xp = 5 + (perfect ? 2 : 0);
     store.addXp(xp);
-    const heartBefore = store.hearts;
-    const heartAfter = s.lesson.arcade ? heartBefore : store.gainHeart();  // mixed review earns a heart
     try { onLessonFinished({ xp, perfect, isGame: true }); } catch { /* quests are best-effort */ }
-    const earnedHeart = heartAfter > heartBefore;
     const arcade = s.lesson.arcade;
     app.innerHTML = `
       <main class="end-screen">
         <div class="end-emoji">${arcade ? s.lesson.mode.icon : '🎯'}</div>
         <h1>${perfect ? (arcade ? 'Flawless round!' : 'Flawless practice!') : (arcade ? 'Round complete!' : 'Practice complete!')}</h1>
-        <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''}${typeof earnedHeart !== 'undefined' && earnedHeart ? ' · +1 ❤️' : ''}</p>
+        <p class="end-xp">+${xp} XP${store.boostActive ? ' <span class="tag tag-skill">×2 boost</span>' : ''}</p>
         <div class="end-actions">
           <button class="btn btn-primary" id="again">${s.lesson.bridgeRoute ? 'Replay' : arcade ? 'Play again' : 'Practice again'}</button>
           <button class="btn" id="home">${s.lesson.bridgeRoute ? 'Return to Practice' : 'Done'}</button>
@@ -11205,32 +11190,6 @@ function renderResults(s) {
     next.checkpoint ? startLesson(next) : renderGuide(next));
   document.getElementById('end-practice')?.addEventListener('click', startDailyRehearsal);
   document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
-}
-
-function renderFail(s) {
-  renderNoHearts(s.lesson, { failed: true });
-}
-
-// Shown when a lesson ends (or can't start) because the heart pool is empty.
-function renderNoHearts(lesson, { failed = false } = {}) {
-  const next = store.nextHeartMs;
-  const mins = next ? Math.ceil(next / 60000) : 0;
-  const wait = next ? (mins >= 60 ? `${Math.ceil(mins / 60)} h` : `${mins} min`) : '';
-  app.innerHTML = `
-    <main class="end-screen">
-      <div class="end-emoji">💔</div>
-      <h1>${failed ? 'Out of hearts' : 'No hearts left'}</h1>
-      <p>${failed ? 'No XP this time — but the sounds are still there.' : ''}
-         Mixed review earns a heart back${wait ? `, or the next one regenerates in ~${wait}` : ''}.</p>
-      <div class="end-actions">
-        ${lesson.track ? '<button class="btn btn-primary" id="nh-practice">🎯 Practice for a heart</button>' : ''}
-        <button class="btn" id="nh-shop">💎 Shop</button>
-        <button class="btn" id="nh-home">Done</button>
-      </div>
-    </main>`;
-  document.getElementById('nh-practice')?.addEventListener('click', () => startLesson(practiceLesson(lesson.track)));
-  document.getElementById('nh-shop').addEventListener('click', () => goSection('shop'));
-  document.getElementById('nh-home').addEventListener('click', () => exitLesson(lesson));
 }
 
 // ── Defence in depth ──────────────────────────────────────────

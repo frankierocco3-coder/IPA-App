@@ -152,7 +152,7 @@ tests/              security.test.js (browser-run)
   `.son-tab`, `.pane-note`, `.btn`, `.tag`, `.stat-row`, `.input-text`).
 * **localStorage for small synchronous state; IndexedDB for anything large or
   binary.** Never put a blob in localStorage.
-* **Analytics only observes.** It must never change scoring, hearts or XP.
+* **Analytics only observes.** It must never change scoring or XP.
   Hook point is `showFeedback()` in `main.js`, wrapped in try/catch.
 * Use real `<button>` elements, labelled controls, visible focus, and
   `aria-live` for recording state.
@@ -215,7 +215,7 @@ above the winding path; desktop nodes carry side labels (title · type ·
 Practice = Quick Practice (weak-sound rehearsal when analytics has data,
 honest mixed review otherwise) + Today's Rehearsal + mixed review + games
 grouped Listening / Reading IPA / Transcription / Accent & Vocabulary, with
-~min and 🎧-audio badges. Practice never costs hearts.
+~min and 🎧-audio badges.
 Library = IPA (course inventory), Native Idioms (dialects only, dialect's
 flag, listen buttons per card; 224 entries, flagged hidden by default and
 NEVER drilled), Texts & Speeches, Your Instrument, The Vowel Map, Personal
@@ -270,11 +270,20 @@ tools/audit_audio.py also enforces course-bound voice keys.
 Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.
-Economy: gems (lessons +10/+15, quest claims), persistent 5 hearts (regen
-1/4h, mixed review earns one, gems refill), streak freezes (max 2), 15-min
-double-XP boost — all in js/state.js; daily quests in js/quests.js hook
-onLessonFinished() in renderResults. No leaderboards (no accounts — decided,
-not forgotten).
+Economy: gems (lessons +10/+15, quest claims), streak freezes (max 2),
+15-min double-XP boost — all in js/state.js; daily quests in js/quests.js
+hook onLessonFinished() in renderResults. No leaderboards (no accounts —
+decided, not forgotten).
+HEARTS ARE REMOVED (owner decision 2026-10-05). Five hearts used to gate
+the Learn path: a wrong answer cost one, an empty pool ended the lesson,
+gems bought them back. It was the ONLY mechanic that could stop somebody
+practising, which is the wrong thing for a tool people may pay for to do.
+The whole API is gone from state.js and no shipped copy mentions them.
+`heartsV2` IS STILL IN STORED DATA AND DELIBERATELY NOT READ — nothing
+migrated, nothing deleted, the same treatment the retired goal picker got,
+and the reason this was reversible rather than destructive. Suite pins the
+removal AND that the stored value survives. Gems, streak, XP and quests
+stay for now; the owner is weighing those separately.
 A11y: global :focus-visible ring, reduced-motion support, aria-labels on
 icon-only controls (guidebook/speaker/freeplay), aria-live lesson feedback,
 #shell-main is a <main>, 48px bottom-nav targets.
@@ -873,7 +882,7 @@ never duplicated) → renderBridgeRound (labelled Starting/Target clip
 buttons playing existing approved recordings ONLY — no synthesis, no
 fallback, no substitution; two-IPA choice; reveal = both IPAs + what
 changes + what stays + reviewed guidance; Continue focused) →
-practice-convention results (+5/+7 XP, no hearts, Replay / Return to
+practice-convention results (+5/+7 XP, Replay / Return to
 Practice). Gating: bridge.js playableComparisons/playableRoutesInto
 (injectable hasClip; app passes hasWordClip incl. quarantine).
 Currently playable: nam→rp ONLY (all 8 comparisons, f+m clips both
@@ -885,7 +894,7 @@ screen + per-round written reveals (route data intact). Old #hub-bridge
 original 23"). Tests: section 10 rewritten (replay = FULL variant, 3
 dots, attribution, no-Plato-on-panel-3), section 14 rewritten (playable
 gating data checks + full 8-round session drive w/ course switch,
-same-accent snap-back, XP/hearts proof, Replay/Return labels), new
+same-accent snap-back, XP proof, Replay/Return labels), new
 section 18 LAST (snapshots + clears the profile, drives the REAL
 first-run concise wall, restores). NOTE: tests/run-all.html does NOT
 seed a profile — the suite needs onboarding completed once in that
@@ -922,7 +931,7 @@ Context exists), Practice My Text. 22 original practice texts
 parsed only via strict NAME: lines (never guessed), character chosen
 manually. Reflection: 7 fixed private choices + optional note —
 self-observation, never evaluation. Scoring: objective recall games
-may tally; interpretive work is completion-only (+5 XP, no hearts
+may tally; interpretive work is completion-only (+5 XP
 ever, no percentages). Persistence: localStorage ONLY
 (speechcraft-speech-goal/-done/-history, capped 200; wipeSpeechData in
 the Privacy wipe + disclosure row) — NO IndexedDB change, so no

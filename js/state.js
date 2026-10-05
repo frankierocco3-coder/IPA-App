@@ -68,25 +68,15 @@ function touchStreak(s) {
   }
 }
 
-// ── Persistent hearts ─────────────────────────────────────────
-// Five hearts shared across lessons. One regenerates every four hours;
-// practice sessions and gems can restore them faster. Practice and Arcade
-// never cost hearts.
-export const HEART_MAX = 5;
-const HEART_REGEN_MS = 4 * 60 * 60 * 1000;
-
-function heartState(s) {
-  if (!s.heartsV2) s.heartsV2 = { n: HEART_MAX, at: Date.now() };
-  const h = s.heartsV2;
-  if (h.n < HEART_MAX) {
-    const regen = Math.floor((Date.now() - h.at) / HEART_REGEN_MS);
-    if (regen > 0) {
-      h.n = Math.min(HEART_MAX, h.n + regen);
-      h.at = h.n >= HEART_MAX ? Date.now() : h.at + regen * HEART_REGEN_MS;
-    }
-  }
-  return h;
-}
+// ── Hearts: REMOVED 2026-10-05, by the owner's decision ───────
+// Five hearts used to gate the Learn path — a wrong answer cost one, an
+// empty pool stopped the lesson, and gems bought them back. It was the
+// only mechanic in the app that could stop somebody practising, which is
+// the wrong thing for a tool people may pay for to do.
+//
+// `heartsV2` IS STILL IN STORED DATA AND IS DELIBERATELY NOT READ. Nothing
+// is migrated and nothing is deleted — the same treatment the retired goal
+// picker got, and the reason this was reversible rather than destructive.
 
 export const store = {
   get xp() { return load().xp ?? 0; },
@@ -137,25 +127,6 @@ export const store = {
     return true;
   },
 
-  // ── Hearts ─────────────────────────────────────────────────
-  get hearts() { const s = load(); const h = heartState(s); save(s); return h.n; },
-  // When the next heart arrives, in ms — null when full.
-  get nextHeartMs() {
-    const s = load(); const h = heartState(s);
-    return h.n >= HEART_MAX ? null : (h.at + HEART_REGEN_MS) - Date.now();
-  },
-  loseHeart() {
-    const s = load(); const h = heartState(s);
-    if (h.n > 0) { if (h.n === HEART_MAX) h.at = Date.now(); h.n -= 1; }
-    save(s); return h.n;
-  },
-  gainHeart() {
-    const s = load(); const h = heartState(s);
-    h.n = Math.min(HEART_MAX, h.n + 1);
-    save(s); return h.n;
-  },
-  refillHearts() { const s = load(); s.heartsV2 = { n: HEART_MAX, at: Date.now() }; save(s); },
-
   // ── Streak freezes (max 2 equipped, like the template) ─────
   get freezes() { return load().freezes ?? 0; },
   addFreeze() {
@@ -183,7 +154,7 @@ export const store = {
     s.onboarding = { ...(s.onboarding ?? { done: false, goal: null, accent: null }), ...patch };
     save(s);
   },
-  // Hearts, gems, streaks and quests stay quiet until something is earned.
+  // Gems, streaks and quests stay quiet until something is earned.
   get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
 
   // ── Free play ───────────────────────────────────────────────

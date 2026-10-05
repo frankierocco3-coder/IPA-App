@@ -1877,7 +1877,6 @@ export async function run({ navDoc = document } = {}) {
       // setup ids anywhere, and Practice state untouched. The full-session
       // drive (setup, 8 rounds, XP, Replay) is retired with the card; the
       // data checks above keep the un-withdrawal path tested.
-      const heartsBefore = store.hearts;
       const xpBefore14 = store.xp;
       await switchCourse('Traditional RP');
       clickIn(side('Practice')); await sleep(400);
@@ -1888,9 +1887,9 @@ export async function run({ navDoc = document } = {}) {
         !doc.body.textContent.includes('Accent Bridge')
         && !doc.getElementById('bridge-from') && !doc.getElementById('bridge-start')
         && !doc.querySelector('.br-reveal'));
-      check('bridge UI: withdrawal leaves Practice state untouched — XP and hearts unmoved',
-        store.xp === xpBefore14 && store.hearts === heartsBefore,
-        `xp ${xpBefore14}→${store.xp} hearts ${heartsBefore}→${store.hearts}`);
+      check('bridge UI: withdrawal leaves Practice state untouched — XP unmoved',
+        store.xp === xpBefore14,
+        `xp ${xpBefore14}→${store.xp}`);
       await switchCourse('Neutral American');
 
       // The review area: original 23 intact and identifiable, new bridge
@@ -2700,7 +2699,7 @@ export async function run({ navDoc = document } = {}) {
         && ['textbook', 'texts', 'rhetoric', 'ipa']
           .every(k => !!doc.querySelector(`.tile-grid [data-tile="${k}"]`))
         && !!doc.getElementById('lib-search'));
-      check('speech: Free Play, hearts, gems and streak are hidden here',
+      check('speech: Free Play, gems and streak are hidden here',
         !doc.getElementById('freeplay')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('❤️')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('💎')
@@ -2969,7 +2968,7 @@ export async function run({ navDoc = document } = {}) {
         !!doc.getElementById('sp-draft-note') && !doc.getElementById('sp-run'));
       clickIn([...doc.querySelectorAll('[data-mode-seg]')].find(b => b.dataset.modeSeg === 'train'));
       await sleep(300);
-      const xpB = store.xp; const heartsB = store.hearts;
+      const xpB = store.xp;
       // No working text yet: the exercise must ASK, never invent one.
       localStorage.removeItem('speechcraft-working-text');
       clickIn(doc.getElementById('sp-run')); await sleep(400);
@@ -3012,8 +3011,8 @@ export async function run({ navDoc = document } = {}) {
       if (noteEl) { noteEl.value = 'private note'; }
       clickIn(doc.getElementById('sp-refl-done')); await sleep(400);
       const hist = speechHistory();
-      check('speech: history records the practice, reflection and note — hearts untouched',
-        store.xp === xpB + 5 && store.hearts === heartsB
+      check('speech: history records the practice, reflection and note',
+        store.xp === xpB + 5
         && hist[hist.length - 1]?.ref === 'rt-emph-train'
         && String(hist[hist.length - 1]?.reflections) === 'noticed-effort'
         && hist[hist.length - 1]?.note === 'private note');
@@ -3854,7 +3853,7 @@ export async function run({ navDoc = document } = {}) {
         && !row24.querySelector('.badge.is-pending'));
       clickIn(row24); await sleep(380);
       clickIn(doc.getElementById('sp-study')); await sleep(400);
-      const xpBefore = store.xp, heartsBefore = store.hearts;
+      const xpBefore = store.xp;
       check('reading: the chapter opens as reading — central idea, screen count, no quiz',
         !!doc.querySelector('.sp-idea')
         && /^\d+ of \d+$/.test(doc.querySelector('.sp-count')?.textContent ?? '')
@@ -3878,8 +3877,8 @@ export async function run({ navDoc = document } = {}) {
         !!doc.getElementById('sp-done') && !!doc.getElementById('sp-next-ch')
         && !!doc.getElementById('sp-to-module'));
       clickIn(doc.getElementById('sp-done')); await sleep(260);
-      check('reading: marking as read costs nothing — no XP, no hearts, no correctness',
-        store.xp === xpBefore && store.hearts === heartsBefore
+      check('reading: marking as read costs nothing — no XP, no correctness',
+        store.xp === xpBefore
         && doc.getElementById('sp-done').disabled
         && !/correct|passed|failed|score/i.test(doc.getElementById('sp-done-note')?.textContent ?? ''));
       check('reading: reading progress is stored, so it survives a refresh',
@@ -6413,6 +6412,38 @@ export async function run({ navDoc = document } = {}) {
       const { CONTENT_STORES, STORES: S2 } = await import('../js/db.js');
       check('narration: Privacy wipe covers kept readings',
         CONTENT_STORES.includes(S2.narration));
+
+      // HEARTS ARE GONE (2026-10-05, owner's decision). They were the one
+      // mechanic that could stop somebody practising: a wrong answer cost
+      // one, an empty pool ended the lesson, and gems bought them back.
+      {
+        const { store: st } = await import('../js/state.js');
+        const gone = ['hearts', 'nextHeartMs', 'loseHeart', 'gainHeart', 'refillHearts']
+          .filter(k => k in st);
+        check('hearts: the whole API is gone from the store',
+          gone.length === 0, `still present: ${gone.join(', ')}`);
+
+        const mainH = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
+        const codeH = mainH.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+        check('hearts: nothing gates a lesson and nothing costs one',
+          !/renderNoHearts|renderFail|loseHeart|store\.hearts|s\.hearts/.test(codeH),
+          'a heart gate or penalty came back');
+        // The learner surface must not promise a mechanic that is gone.
+        check('hearts: no shipped copy still mentions them',
+          !/heart/i.test(codeH), 'heart copy survives in the view layer');
+
+        // AND THE STORED VALUE IS NOT TOUCHED. "Stop reading, do not
+        // delete" is what made this reversible instead of destructive —
+        // the same treatment the retired goal picker got. A migration that
+        // quietly dropped heartsV2 would be the kind of data loss this
+        // repository's fifth hard constraint exists to prevent.
+        const rawH = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        st.addXp(0);                       // force a save through the live writer
+        const afterH = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        check('hearts: the stored value survives untouched, so this stays reversible',
+          JSON.stringify(rawH.heartsV2 ?? null) === JSON.stringify(afterH.heartsV2 ?? null),
+          `${JSON.stringify(rawH.heartsV2)} -> ${JSON.stringify(afterH.heartsV2)}`);
+      }
 
       // HANDING A FILE TO THE READER (2026-10-05). On a real iPhone,
       // tapping Export opened the JSON in Quick Look instead of saving

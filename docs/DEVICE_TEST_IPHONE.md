@@ -285,16 +285,28 @@ The three answers I most want: **4.3** (does the installed app keep your
 progress), **4.1 + 4.1b** (does export AND import work — either alone
 proves nothing), and **3.1** (does the silent switch kill the audio).
 
-**Result so far — 4.1, 2026-10-05: produces a correct file, delivered
-iOS-style.** Tapping Export opens the JSON in **Quick Look** rather than
-saving it; the file is named right (`untitled-project.speechcraft.json`)
-and its contents are correct (`format`, `formatVersion: 1`, the projects
-array, `audioIncluded: false`). Saving needs the share button in that
-preview → Save to Files, so it is three taps and not obvious.
+## RESULTS — 2026-10-05
 
-Recorded as **usable, not clean**. The first note of "PASSED" was too
-generous and is corrected here. A one-tap path exists if wanted: the Web
-Share API with a file opens the share sheet directly on iOS and falls
-back to the current anchor everywhere else.
+**4.1 Export — PASS, after a fix.** The file was always correct; the
+delivery was not. Tapping Export opened the JSON in **Quick Look**: a
+screenful of raw text, and keeping it meant finding a share button in the
+preview. It now goes to the share sheet, with **Save to Files** first.
 
-**4.1b is still the gate** and is untested.
+**The finding worth keeping: iOS will not share `application/json`.**
+`navigator.canShare()` answers false for it, so the first attempt at this
+fell straight back to the download and changed nothing — the feature was
+correct and useless. Offering the same bytes as **`text/plain` under the
+same filename** works, and import still reads them because it matches on
+the name rather than the MIME.
+
+Diagnosed by elimination, not guesswork: the build marker confirmed the
+new code was running, which ruled out a stale cache and left the type.
+
+**4.1b Import — PASS.** The exported file can be selected and read back.
+**Export and import both work, so the migration path is real.** That one
+answer unblocked three things: carrying progress into a store build,
+surviving a move to a custom domain, and recovering from WebKit's
+seven-day eviction. All three depended on it.
+
+**Still open: 4.3** (does the installed home-screen app keep your
+progress) and **3.1** (does the silent switch kill the audio).
