@@ -709,7 +709,7 @@ function ipaLearnPane(el, course) {
   const path = buildTrackPath(track, { guidebook: true, labels: true });
   // One-time invitation for grandfathered users (verbatim copy — it must
   // not block), and the diagnostic offer, which retires only when the
-  // diagnostic has been taken or declined (never on mere XP). This offer
+  // diagnostic has been taken or declined. This offer
   // card is the diagnostic's ONLY doorway — the Practice-page shortcut
   // was removed by owner order 2026-08-12.
   // No optional offer cards (owner order, 2026-08-20). Learn opens on the
@@ -2344,9 +2344,8 @@ function runRoutine(routineId, text) {
       // Completion is recorded only when the learner finishes.
       recordSpeechPractice({ kind: 'routine', ref: r.id, title: r.title,
         textTitle: text?.title ?? null, skill: subject.title });
-      store.addXp(5);
       renderSpeechReflection({
-        heading: 'Practice complete · +5 XP',
+        heading: 'Practice complete',
         sub: 'Completion, not a grade — nothing here measures how you sounded.',
         compatible: !!text,
       });
@@ -2541,11 +2540,10 @@ function renderArcade() {
 function finishArcadeGame(game, text, tally) {
   recordSpeechPractice({ kind: 'game', ref: game.id, title: game.title,
     textTitle: text?.title ?? null, skill: ARCADE_GROUPS.find(g => g.id === game.group)?.title ?? '' });
-  store.addXp(5);
   renderSpeechReflection({
     heading: game.scoring === 'objective' && tally
-      ? `${game.title} — ${tally.right}/${tally.total} recalled · +5 XP`
-      : `${game.title} complete · +5 XP`,
+      ? `${game.title} — ${tally.right}/${tally.total} recalled`
+      : `${game.title} complete`,
     sub: game.scoring === 'objective'
       ? 'Recall has right answers; how you sounded is yours alone — nothing here judges that.'
       : 'Completion, not a grade — interpretive choices don’t have correct answers.',
@@ -3545,11 +3543,10 @@ function renderActingLesson(id) {
   wireChapterList(renderActingLesson);
   document.getElementById('ac-done').addEventListener('click', () => {
     if (!markSpeechLessonDone(id)) return;
-    store.addXp(5);
     const btn = document.getElementById('ac-done');
     btn.textContent = 'Completed ✓'; btn.disabled = true;
     btn.classList.replace('btn-primary', 'btn-lite');
-    document.getElementById('ac-done-note').textContent = 'Lesson complete · +5 XP.';
+    document.getElementById('ac-done-note').textContent = 'Lesson complete.';
   });
 }
 
@@ -3925,7 +3922,7 @@ function renderSpeakDrills(d) {
 // ── The Warmup: body and voice, in four movements ────────────
 // A chooser, then written guidance on the shared step runner. Any one
 // movement runs alone; "the whole thing" runs all four in order.
-// Completion pays the practice convention (+5 XP); nothing
+// Completion is recorded; nothing
 // here is scored and nothing listens. The comfort and safety lines
 // render verbatim on every run.
 function renderWarmup() {
@@ -3975,13 +3972,12 @@ function renderWarmupRun(id) {
     onFinish: () => {
       recordSpeechPractice({ kind: 'warmup', ref: `warmup-v2:${id}`,
         title: `Warmup · ${w.title}`, skill: 'Acting' });
-      store.addXp(5);
       const at = WARMUP_MOVEMENTS.findIndex(m => m.id === id);
       const next = at >= 0 ? WARMUP_MOVEMENTS[at + 1] : null;
       app.innerHTML = `
         ${pageTopbar('🔥 Warmup', '#6f8657')}
         <main class="guide">
-          <h1>Warm · +5 XP</h1>
+          <h1>Warm</h1>
           <p class="guide-text">Completion, not a grade — nothing here measures how you sounded.</p>
           <div class="practice-row">
             ${next ? `<button class="btn btn-primary" id="wu-next" type="button">Next: ${esc(next.title)}</button>` : ''}
@@ -4403,9 +4399,8 @@ function runActingGame(gameId, text, passage) {
   document.getElementById('ac-game-done').addEventListener('click', () => {
     recordSpeechPractice({ kind: 'acting-game', ref: game.id, title: game.title,
       textTitle: text?.title ?? null, skill: 'Acting' });
-    store.addXp(5);
     renderSpeechReflection({
-      heading: `${game.title} complete · +5 XP`,
+      heading: `${game.title} complete`,
       sub: 'Exploration, not a grade — interpretive work has no correct answer.',
       compatible: true,
     });
@@ -6043,7 +6038,6 @@ function renderIdioms(d) {
 function achievementRows() {
   const t = totals();
   return [
-    { icon: '🧙', name: 'Sage', what: 'XP earned', tiers: [100, 500, 2000], value: store.xp },
     { icon: '🎓', name: 'Scholar', what: 'lessons completed', tiers: [10, 30, 77], value: store.completed.size },
     { icon: '🗣', name: 'Wordsmith', what: 'days practised', tiers: [3, 10, 30], value: t.daysPractised },
   ].map(a => {
@@ -6134,7 +6128,6 @@ function progressMain(el) {
       </section>
       <h2 class="chart-h">What will appear here</h2>
       ${[
-        ['⚡', 'XP', 'earned by lessons, games and quests'],
         ['🏆', 'Daily quests', 'three small targets that reset at midnight'],
         ['📊', 'Weak sounds', 'the symbols that keep slipping, ranked from your real answers'],
         ['🎓', 'Achievements', 'long-run milestones'],
@@ -6184,7 +6177,6 @@ function progressMain(el) {
     <button class="btn-lite" id="prog-weak-full" type="button">Full weak-sounds report ›</button>
     <h2 class="chart-h">Statistics</h2>
     <div class="summary-row">
-      <div class="summary-card"><span class="summary-n">⚡ ${store.xp}</span><span class="summary-l">total XP</span></div>
     </div>
     <div class="summary-row">
       <div class="summary-card"><span class="summary-n">${store.completed.size}</span><span class="summary-l">lessons done</span></div>
@@ -6343,10 +6335,9 @@ function priorUseSignals() {
   try {
     if (store.onboarding.done) sig.push('onboarding');
     if (store.hasEarnedAnything) sig.push('progress');
-    // The streak signal is gone with the streak (2026-10-05). Nothing is
-    // lost: touchStreak only ever ran inside recordLesson and addXp, so
-    // anyone who had a streak also has XP, and hasEarnedAnything above
-    // already catches them.
+    // The streak and XP signals went with the mechanics they counted
+    // (2026-10-05). hasEarnedAnything above now means "has completed a
+    // lesson", and onboarding.done — the primary signal — is untouched.
     if (store.whatIsIpa.done) sig.push('what-is-ipa');
     if (Object.keys(store.introsSeen ?? {}).length) sig.push('course-intro');
     if (store.customText?.body) sig.push('custom-text');
@@ -6577,7 +6568,7 @@ function renderTerms() {
         'Speechcraft teaches and helps you practise. It does not replace a qualified voice teacher, dialect coach, acting teacher, speech-language pathologist or doctor, and nothing in it is medical, therapeutic or professional advice.',
         'The voice, breath and body exercises are gentle, but you know your own body. Stop anything that causes pain, strain or discomfort, and if you have a voice or health condition, check with a qualified professional first.')}
       ${sec('Free, with nothing to buy',
-        'Speechcraft costs nothing and sells nothing. XP is a count of practice done inside the app. It has no cash value and cannot be bought, sold or exchanged for money.')}
+        'Speechcraft costs nothing and sells nothing. There is no currency, no score and nothing to buy — the app records which lessons you have completed and nothing else of that kind.')}
       ${sec('Your work stays yours',
         'What you write, paste or record in Speechcraft stays on your device. We never see it, store it or claim any rights to it. If you work with a text you did not write, you are responsible for having the right to use it.')}
       ${sec('Our content',
@@ -7267,7 +7258,7 @@ async function fillRecordingManager() {
     ${estimate ? `<p class="pane-note">${esc(estimate)}</p>` : ''}
     <p class="pane-note">Individual takes are managed where they live — each project's Takes tab has play, download and delete per take.</p>
     ${takes.length ? '<button class="btn btn-danger" id="rec-delete-all" type="button">Delete ALL saved recordings</button>' : ''}
-    <p class="pane-note">Deleting recordings never touches course progress, XP, projects, dissections, notes or the personal dictionary — projects simply show no saved takes afterwards.</p>`;
+    <p class="pane-note">Deleting recordings never touches course progress, projects, dissections, notes or the personal dictionary — projects simply show no saved takes afterwards.</p>`;
   document.getElementById('rec-delete-all')?.addEventListener('click', async () => {
     if (!confirm(`Delete all ${takes.length} saved recordings?\n\nProjects, notes and progress are kept. This cannot be undone.`)) return;
     if (!confirm('Last check — really delete every saved take?')) return;
@@ -7300,7 +7291,7 @@ function renderPrivacy() {
         ${characterOpen() ? '<div class="stat-row"><span class="stat-name">Characters you are building</span><span class="stat-val">this device</span></div>' : ''}
         <div class="stat-row"><span class="stat-name">Offline copy of app content (for use without a connection)</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Readings you chose to keep offline</span><span class="stat-val">this device</span></div>
-        <div class="stat-row"><span class="stat-name">XP and lessons</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">Completed lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
       </section>
 
@@ -7344,9 +7335,9 @@ function renderPrivacy() {
     document.getElementById('wipe-state').textContent = `Deleted: ${done.join(', ')}.`;
   };
   document.getElementById('wipe-content').addEventListener('click', () =>
-    run(false, `Delete all projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics and personal dictionary entries?\n\nYour XP and completed lessons are KEPT.`));
+    run(false, `Delete all projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics and personal dictionary entries?\n\nYour completed lessons are KEPT.`));
   document.getElementById('wipe-all').addEventListener('click', () =>
-    run(true, 'Delete EVERYTHING, including your XP and completed lessons?'));
+    run(true, 'Delete EVERYTHING, including your completed lessons?'));
 }
 
 // ── Weak Sounds + Today's Rehearsal ───────────────────────────
@@ -7406,12 +7397,12 @@ function renderWeakSounds() {
 
         <div class="danger-zone">
           <button class="btn btn-lite btn-danger" id="an-reset" type="button">Reset practice analytics</button>
-          <p class="pane-note">Clears only this page's data. Your XP, completed lessons, projects and recordings are not affected.</p>
+          <p class="pane-note">Clears only this page's data. Your completed lessons, projects and recordings are not affected.</p>
         </div>`}
     </main>`;
   wireBrandHome();
   document.getElementById('an-reset')?.addEventListener('click', () => {
-    if (!confirm('Reset practice analytics?\n\nThis clears weak-sound tracking only. XP, lessons, projects and recordings are kept.')) return;
+    if (!confirm('Reset practice analytics?\n\nThis clears weak-sound tracking only. Lessons, projects and recordings are kept.')) return;
     resetAnalytics();
     renderWeakSounds();
   });
@@ -10506,7 +10497,7 @@ function showLockPop(btn, lesson, prev) {
   pop.innerHTML = `
     <div class="path-pop-head"><b>🔒 ${esc(lesson.title)}</b>
       <button class="path-pop-close" type="button" aria-label="Close">✕</button></div>
-    <span>${esc(lessonKindName(lesson))} · ~${estMinutes(lesson)} min · +10 XP</span>
+    <span>${esc(lessonKindName(lesson))} · ~${estMinutes(lesson)} min</span>
     ${teaches ? `<span>${esc(teaches)}${teaches.length === 110 ? '…' : ''}</span>` : ''}
     <span>Locked — finish “${esc(prev?.title ?? 'the lesson before')}” first.</span>`;
   btn.closest('.path-row').appendChild(pop);
@@ -10546,7 +10537,7 @@ function buildTrackPath(track, opts = {}) {
       // active node's side is taken by the mascot, so its label sits opposite.
       const labelSide = isActive ? (mascotSide === 1 ? 'l' : 'r') : (dx <= 0 ? 'r' : 'l');
       const meta = done ? `${esc(lessonKindName(l))} · ✓ done`
-        : `${esc(lessonKindName(l))} · ~${estMinutes(l)} min · +10 XP`;
+        : `${esc(lessonKindName(l))} · ~${estMinutes(l)} min`;
       const label = opts.labels ? `
         <div class="path-label side-${labelSide}" aria-hidden="true">
           <b>${esc(l.title)}</b><small>${meta}</small>
@@ -10713,7 +10704,7 @@ function guideStepHtml(lesson, s, st) {
     <h1>Ready to drill</h1>
     ${syms.length ? `<div class="chips">${syms.map(ph =>
       `<button class="word-chip" data-say="${esc(PHONEMES[ph].examples[0])}" type="button">/${esc(ph)}/</button>`).join('')}</div>` : ''}
-    <p class="pane-note">${esc(lessonKindName(lesson))} · ~${estMinutes(lesson)} min · +10 XP.
+    <p class="pane-note">${esc(lessonKindName(lesson))} · ~${estMinutes(lesson)} min.
       You can reopen this guide from the path any time.</p>`;
 }
 
@@ -11079,15 +11070,12 @@ function renderResults(s) {
   const perfect = s.mistakes === 0;
   if (s.lesson.challenge) { s.lesson.onResult(perfect); return; }
   if (s.lesson.practice) {
-    const xp = 5 + (perfect ? 2 : 0);
-    store.addXp(xp);
-    try { onLessonFinished({ xp, perfect, isGame: true }); } catch { /* quests are best-effort */ }
+    try { onLessonFinished({ perfect, isGame: true }); } catch { /* quests are best-effort */ }
     const arcade = s.lesson.arcade;
     app.innerHTML = `
       <main class="end-screen">
         <div class="end-emoji">${arcade ? s.lesson.mode.icon : '🎯'}</div>
         <h1>${perfect ? (arcade ? 'Flawless round!' : 'Flawless practice!') : (arcade ? 'Round complete!' : 'Practice complete!')}</h1>
-        <p class="end-xp">+${xp} XP</p>
         <div class="end-actions">
           <button class="btn btn-primary" id="again">${s.lesson.bridgeRoute ? 'Replay' : arcade ? 'Play again' : 'Practice again'}</button>
           <button class="btn" id="home">${s.lesson.bridgeRoute ? 'Return to Practice' : 'Done'}</button>
@@ -11099,9 +11087,8 @@ function renderResults(s) {
     document.getElementById('home').addEventListener('click', () => exitLesson(s.lesson));
     return;
   }
-  const xp = 10 + (perfect ? 5 : 0);
-  store.recordLesson(s.lesson.id, xp);
-  try { onLessonFinished({ xp, perfect, isGame: false }); } catch { /* quests are best-effort */ }
+  store.recordLesson(s.lesson.id);
+  try { onLessonFinished({ perfect, isGame: false }); } catch { /* quests are best-effort */ }
   const { done, total } = trackProgress(s.lesson.track);
   const mastered = done === total;
   const chk = s.lesson.checkpoint;
@@ -11120,7 +11107,7 @@ function renderResults(s) {
       <div class="end-emoji">${mastered ? '🎓' : chk ? '🎲' : perfect ? '🏆' : '🎉'}</div>
       <h1>${mastered ? 'Course complete!' : chk ? 'Checkpoint cleared!' : perfect ? 'Perfect lesson!' : 'Lesson complete!'}</h1>
       ${mastered ? `<p>${esc(s.lesson.track.title)} — mastered, start to finish.</p>` : ''}
-      <p class="end-xp">+${xp} XP${perfect ? ' · perfect' : ''}</p>
+      ${perfect ? '<p class="end-xp">Perfect round.</p>' : ''}
       <div class="end-summary" role="status">
         <div class="end-block"><span class="end-block-l">Accuracy</span><span class="end-block-v">${accuracy}%</span></div>
         ${learned.length ? `<div class="end-block"><span class="end-block-l">Covered</span>

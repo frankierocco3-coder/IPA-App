@@ -910,7 +910,6 @@ export async function run({ navDoc = document } = {}) {
       // Preface replay through the PERMANENT More card — full walk, Esc out,
       // and proof that nothing about the profile changed.
       const thBefore = store.threshold;
-      const xpBefore = store.xp;
       const obBefore = JSON.stringify(store.onboarding);
       const doneBefore = store.completed.size;
       clickIn(side('More')); await sleep(350);
@@ -972,8 +971,8 @@ export async function run({ navDoc = document } = {}) {
       check('preface: replay walk never rewrote the original record',
         thAfter.choice === thBefore.choice && thAfter.completedAt === thBefore.completedAt
         && thAfter.source === thBefore.source);
-      check('preface: replay resets nothing — XP, onboarding, lessons all unchanged',
-        store.xp === xpBefore && JSON.stringify(store.onboarding) === obBefore
+      check('preface: replay resets nothing — onboarding and lessons unchanged',
+        JSON.stringify(store.onboarding) === obBefore
         && store.completed.size === doneBefore);
     } catch (err) {
       bad('Build A drive', String(err?.stack ?? err).slice(0, 220));
@@ -1908,7 +1907,7 @@ export async function run({ navDoc = document } = {}) {
       // setup ids anywhere, and Practice state untouched. The full-session
       // drive (setup, 8 rounds, XP, Replay) is retired with the card; the
       // data checks above keep the un-withdrawal path tested.
-      const xpBefore14 = store.xp;
+      const completedBefore14 = store.completed.size;
       await switchCourse('Traditional RP');
       clickIn(side('Practice')); await sleep(400);
       check('bridge UI: withdrawn — no Accent Bridge card even on Traditional RP, both games intact',
@@ -1918,9 +1917,9 @@ export async function run({ navDoc = document } = {}) {
         !doc.body.textContent.includes('Accent Bridge')
         && !doc.getElementById('bridge-from') && !doc.getElementById('bridge-start')
         && !doc.querySelector('.br-reveal'));
-      check('bridge UI: withdrawal leaves Practice state untouched — XP unmoved',
-        store.xp === xpBefore14,
-        `xp ${xpBefore14}→${store.xp}`);
+      check('bridge UI: withdrawal leaves the completed-lesson set untouched',
+        store.completed.size === completedBefore14,
+        `completed ${completedBefore14}→${store.completed.size}`);
       await switchCourse('Neutral American');
 
       // The review area: original 23 intact and identifiable, new bridge
@@ -2833,12 +2832,15 @@ export async function run({ navDoc = document } = {}) {
         && w().history.length === histLen && w().location.hash === hashBefore);
       clickIn(doc.getElementById('nav-back')); await sleep(300);
 
-      // Completion: +5 XP once, never twice; then a gated Stage-1 page.
-      const xpA = store.xp;
+      // Completion is recorded once, never twice; then a gated Stage-1 page.
       clickIn(doc.getElementById('nav-back')); await sleep(300);
       clickIn(doc.getElementById('nav-back')); await sleep(300);
-      check('speech: reading a chapter never awards XP — the Library is not a course',
-        store.xp === xpA);
+      // Nothing awards anything anywhere now, so the live assertion is
+      // that reading does not mark a LESSON complete: the Library is a
+      // reference, not a course.
+      const doneBeforeRead = store.completed.size;
+      check('speech: reading a chapter never completes a lesson — the Library is not a course',
+        store.completed.size === doneBeforeRead);
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Library')); await sleep(350);
       clickIn(doc.querySelector('[data-tile="textbook"]')); await sleep(400);
@@ -3000,7 +3002,6 @@ export async function run({ navDoc = document } = {}) {
         !!doc.getElementById('sp-draft-note') && !doc.getElementById('sp-run'));
       clickIn([...doc.querySelectorAll('[data-mode-seg]')].find(b => b.dataset.modeSeg === 'train'));
       await sleep(300);
-      const xpB = store.xp;
       // No working text yet: the exercise must ASK, never invent one.
       localStorage.removeItem('speechcraft-working-text');
       clickIn(doc.getElementById('sp-run')); await sleep(400);
@@ -3035,7 +3036,7 @@ export async function run({ navDoc = document } = {}) {
       }
       await until(() => doc.querySelector('.sp-reflect'));
       check('speech: completion is completion — XP without any quality score',
-        doc.querySelector('.sp-reflect h1')?.textContent === 'Practice complete · +5 XP'
+        doc.querySelector('.sp-reflect h1')?.textContent === 'Practice complete'
         && !doc.body.textContent.includes('%')
         && doc.querySelectorAll('[data-refl]').length === 7);
       clickIn(doc.querySelector('[data-refl="noticed-effort"]'));
@@ -3044,8 +3045,7 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('sp-refl-done')); await sleep(400);
       const hist = speechHistory();
       check('speech: history records the practice, reflection and note',
-        store.xp === xpB + 5
-        && hist[hist.length - 1]?.ref === 'rt-emph-train'
+        hist[hist.length - 1]?.ref === 'rt-emph-train'
         && String(hist[hist.length - 1]?.reflections) === 'noticed-effort'
         && hist[hist.length - 1]?.note === 'private note');
       check('speech: reflection returns to Speech Practice',
@@ -3885,7 +3885,6 @@ export async function run({ navDoc = document } = {}) {
         && !row24.querySelector('.badge.is-pending'));
       clickIn(row24); await sleep(380);
       clickIn(doc.getElementById('sp-study')); await sleep(400);
-      const xpBefore = store.xp;
       check('reading: the chapter opens as reading — central idea, screen count, no quiz',
         !!doc.querySelector('.sp-idea')
         && /^\d+ of \d+$/.test(doc.querySelector('.sp-count')?.textContent ?? '')
@@ -3909,9 +3908,8 @@ export async function run({ navDoc = document } = {}) {
         !!doc.getElementById('sp-done') && !!doc.getElementById('sp-next-ch')
         && !!doc.getElementById('sp-to-module'));
       clickIn(doc.getElementById('sp-done')); await sleep(260);
-      check('reading: marking as read costs nothing — no XP, no correctness',
-        store.xp === xpBefore
-        && doc.getElementById('sp-done').disabled
+      check('reading: marking as read costs nothing and asserts no correctness',
+        doc.getElementById('sp-done').disabled
         && !/correct|passed|failed|score/i.test(doc.getElementById('sp-done-note')?.textContent ?? ''));
       check('reading: reading progress is stored, so it survives a refresh',
         JSON.parse(localStorage.getItem('speechcraft-speech-done') ?? '{}')[probe] > 0);
@@ -6470,7 +6468,11 @@ export async function run({ navDoc = document } = {}) {
         // quietly dropped heartsV2 would be the kind of data loss this
         // repository's fifth hard constraint exists to prevent.
         const rawH = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
-        st.addXp(0);                       // force a save through the live writer
+        // Force a write through the LIVE saver without changing anything.
+        // (This used to call addXp(0); XP was removed on 2026-10-05 and
+        // every one of these crashed the run until they were updated —
+        // removing an API means grepping the SUITE, not only the source.)
+        st.freePlay = st.freePlay;
         const afterH = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
         check('hearts: the stored value survives untouched, so this stays reversible',
           JSON.stringify(rawH.heartsV2 ?? null) === JSON.stringify(afterH.heartsV2 ?? null),
@@ -6495,7 +6497,11 @@ export async function run({ navDoc = document } = {}) {
 
         // Same promise as hearts: stop reading, never delete.
         const rawS = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
-        st2.addXp(0);
+        // Force a write through the LIVE saver without changing anything.
+        // (This used to call addXp(0); XP was removed on 2026-10-05 and
+        // every one of these crashed the run until they were updated —
+        // removing an API means grepping the SUITE, not only the source.)
+        st2.freePlay = st2.freePlay;
         const aftS = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
         check('streaks: stored streak, lastPlayed and freezes all survive untouched',
           JSON.stringify([rawS.streak ?? null, rawS.lastPlayed ?? null, rawS.freezes ?? null])
@@ -6524,20 +6530,66 @@ export async function run({ navDoc = document } = {}) {
         check('gems: the Shop section is gone, not merely hidden',
           !/'shop'/.test(codeG), 'a shop route survives');
 
-        // XP survives the boost removal: the doubling lived INSIDE
-        // recordLesson and addXp, so taking it out could have broken both.
-        const xpG = st3.xp;
-        st3.addXp(3);
-        check('gems: removing the boost left XP itself working',
-          st3.xp === xpG + 3, `${xpG} -> ${st3.xp}`);
-
         // Same promise as hearts and streaks: stop reading, never delete.
         const rawG = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
-        st3.addXp(0);
+        // Force a write through the LIVE saver without changing anything.
+        // (This used to call addXp(0); XP was removed on 2026-10-05 and
+        // every one of these crashed the run until they were updated —
+        // removing an API means grepping the SUITE, not only the source.)
+        st3.freePlay = st3.freePlay;
         const aftG = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
         check('gems: stored gems and boostUntil survive untouched',
           JSON.stringify([rawG.gems ?? null, rawG.boostUntil ?? null])
           === JSON.stringify([aftG.gems ?? null, aftG.boostUntil ?? null]));
+      }
+
+      // XP IS GONE (2026-10-05) — the fourth and last cut. It said
+      // nothing "lessons completed" and "answers given" did not already
+      // say more honestly, and it was the last thing that scored a person
+      // rather than describing what they had done.
+      {
+        const { store: st4 } = await import('../js/state.js');
+        check('xp: the API is gone from the store',
+          !('xp' in st4) && !('addXp' in st4));
+
+        // COMPLETION MUST SURVIVE. recordLesson did two jobs — it marked
+        // the lesson done AND paid the points — so this is the one thing
+        // the removal could have taken with it by accident.
+        const key = '__suite-xp-removal-probe__';
+        const had = st4.isCompleted(key);
+        st4.recordLesson(key);
+        const records = st4.isCompleted(key);
+        // put the profile back exactly as found
+        const rawC = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        if (!had) {
+          rawC.completed = (rawC.completed ?? []).filter(x => x !== key);
+          localStorage.setItem('ipa-trainer-v1', JSON.stringify(rawC));
+        }
+        check('xp: recordLesson still records completion, which is the point',
+          records === true && st4.isCompleted(key) === had);
+
+        const mainX = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
+        const codeX = mainX.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+        check('xp: no shipped code or copy still mentions it',
+          !/\bXP\b|addXp|store\.xp/.test(codeX), 'XP copy survives in the view layer');
+
+        // The quest that counted XP cannot outlive it.
+        const { DAILY_QUESTS } = await import('../js/quests.js');
+        check('xp: the quest that counted it is gone, two real targets left',
+          DAILY_QUESTS.length === 2 && !DAILY_QUESTS.some(q => q.metric === 'xp'),
+          DAILY_QUESTS.map(q => q.id).join(', '));
+
+        // Fourth removal, same promise: stop reading, never delete.
+        const rawX = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        st4.recordLesson(key);
+        const aftX = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        if (!had) {
+          aftX.completed = (aftX.completed ?? []).filter(x => x !== key);
+          localStorage.setItem('ipa-trainer-v1', JSON.stringify(aftX));
+        }
+        check('xp: the stored value survives untouched',
+          JSON.stringify(rawX.xp ?? null) === JSON.stringify(aftX.xp ?? null),
+          `${JSON.stringify(rawX.xp)} -> ${JSON.stringify(aftX.xp)}`);
       }
 
       // HANDING A FILE TO THE READER (2026-10-05). On a real iPhone,

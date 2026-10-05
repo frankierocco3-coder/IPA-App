@@ -11,10 +11,12 @@
 
 const KEY = 'speechcraft-quests-v1';
 
+// "Earn 30 XP" went with XP on 2026-10-05 — a target counting something
+// that no longer exists is not a target. Two left, and they describe what
+// you did rather than paying for it.
 export const DAILY_QUESTS = [
-  { id: 'xp30', icon: '⚡', title: 'Earn 30 XP', metric: 'xp', target: 30, reward: 20 },
-  { id: 'perfect', icon: '🎯', title: 'Score 100% in a lesson', metric: 'perfect', target: 1, reward: 25 },
-  { id: 'games2', icon: '🕹', title: 'Finish 2 practice rounds', metric: 'games', target: 2, reward: 25 },
+  { id: 'perfect', icon: '🎯', title: 'Score 100% in a lesson', metric: 'perfect', target: 1 },
+  { id: 'games2', icon: '🕹', title: 'Finish 2 practice rounds', metric: 'games', target: 2 },
 ];
 
 const todayStr = () => new Date().toISOString().slice(0, 10);
@@ -24,7 +26,7 @@ function load() {
     const raw = JSON.parse(localStorage.getItem(KEY));
     if (raw && raw.date === todayStr()) return raw;
   } catch { /* fall through to a fresh day */ }
-  return { date: todayStr(), progress: { xp: 0, perfect: 0, games: 0 }, claimed: [] };
+  return { date: todayStr(), progress: { perfect: 0, games: 0 }, claimed: [] };
 }
 
 function save(q) {
@@ -38,9 +40,8 @@ export function bumpQuest(metric, n = 1) {
 }
 
 /** Call once from the lesson-results screen. */
-export function onLessonFinished({ xp = 0, perfect = false, isGame = false } = {}) {
+export function onLessonFinished({ perfect = false, isGame = false } = {}) {
   const q = load();
-  q.progress.xp = (q.progress.xp ?? 0) + xp;
   if (perfect) q.progress.perfect = (q.progress.perfect ?? 0) + 1;
   if (isGame) q.progress.games = (q.progress.games ?? 0) + 1;
   save(q);

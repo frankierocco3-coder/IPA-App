@@ -114,7 +114,7 @@ js/views/           modules extracted from main.js (the 2026-09 split):
   action-piece.js     one Dialect in Action piece, for learner or reviewer
   admin.js            the owner-only #audit and #review pages
 js/engine.js        16 exercise generators
-js/state.js         localStorage progress (XP, lessons)
+js/state.js         localStorage progress (completed lessons)
 js/db.js            IndexedDB wrapper + schema/migrations
 js/projects.js      rehearsal project CRUD + legacy migration
 js/recordings.js    takes, blobs, object-URL lifecycle
@@ -152,7 +152,7 @@ tests/              security.test.js (browser-run)
   `.son-tab`, `.pane-note`, `.btn`, `.tag`, `.stat-row`, `.input-text`).
 * **localStorage for small synchronous state; IndexedDB for anything large or
   binary.** Never put a blob in localStorage.
-* **Analytics only observes.** It must never change scoring or XP.
+* **Analytics only observes.** It must never change scoring or progress.
   Hook point is `showFeedback()` in `main.js`, wrapped in try/catch.
 * Use real `<button>` elements, labelled controls, visible focus, and
   `aria-live` for recording state.
@@ -202,7 +202,7 @@ Preferences rerun, invite card) navigates without rewriting choice.
 Grandfathering: priorUseSignals() (onboarding.done primary — do not
 rename — plus xp/intros/dictionary/customText/nav keys; the streak
 signal went with the streak, and nothing is lost because anyone who had
-one also has XP) + a
+one also completed a lesson) + a
 150ms-bounded IndexedDB probe; grandfathered users get the one-time
 dismissible invite card in Learn (store.thresholdInviteSeen), NEVER the
 wall. skipCourseIntroOnce suppresses the ssbe intro modal for exactly
@@ -214,7 +214,7 @@ lesson pays out (store.hasEarnedAnything) the stats bar shows only the
 course chip and the rail hides quests.
 Learn = "Continue learning" card (next lesson, type, ~min, primary action)
 above the winding path; desktop nodes carry side labels (title · type ·
-~min · XP); tapping a locked node opens a popover naming the prerequisite.
+~min); tapping a locked node opens a popover naming the prerequisite.
 Practice = Quick Practice (weak-sound rehearsal when analytics has data,
 honest mixed review otherwise) + Today's Rehearsal + mixed review + games
 grouped Listening / Reading IPA / Transcription / Accent & Vocabulary, with
@@ -234,7 +234,7 @@ symbols, missed symbols (s.missedSyms), and a Next-lesson button.
 "What Is IPA?" (openWhatIsIpa, 7 steps + completion, 5 scored questions) is
 the beginner intro module — reachable from Library → IPA pages, the
 Foundations Learn view, and core lesson guides; NEVER a required step and
-deliberately pays no XP/gems (store.whatIsIpa badge only) so first-lesson
+deliberately pays nothing (store.whatIsIpa badge only) so first-lesson
 Progress activation stays true. Progress shows a purposeful starter state
 until store.hasEarnedAnything. Locked path nodes open a focus-managed
 dialog popover (what it teaches, why locked); mobile shows compact title
@@ -274,9 +274,9 @@ Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.
 THE ECONOMY IS GONE (owner decisions 2026-10-05, in three cuts:
-hearts, then streaks, then gems). What remains is XP as a count of
-practice done, and three daily quests in js/quests.js that mark what
-you did and award nothing. No leaderboards (no accounts — decided,
+hearts, then streaks, then gems, then XP). What remains is COMPLETED
+LESSONS and two daily targets in js/quests.js that mark what you did and
+award nothing. No leaderboards (no accounts — decided,
 not forgotten).
 HEARTS ARE REMOVED (owner decision 2026-10-05). Five hearts used to gate
 the Learn path: a wrong answer cost one, an empty pool ended the lesson,
@@ -293,8 +293,20 @@ one. It manufactured guilt, and for actors with irregular schedules it
 punished them for working; freezes went with it because a freeze
 protecting a streak that does not exist is a leftover. `streak`,
 `lastPlayed` and `freezes` STAY IN STORED DATA, DELIBERATELY UNREAD.
-touchStreak is gone from recordLesson and addXp — XP still increments,
-which is pinned.
+touchStreak is gone from recordLesson.
+XP IS REMOVED TOO (owner decision 2026-10-05), completing the sweep.
+It said nothing "lessons completed" and "answers given" did not say
+more honestly, and it was the last thing that scored a person rather
+than describing what they did. recordLesson DID TWO JOBS — marked the
+lesson done and paid the points — so it keeps the first and loses the
+second; completion surviving is pinned, because that is what the
+removal could have taken by accident. hasEarnedAnything now means
+"has completed a lesson". The Sage achievement, the total-XP card and
+the "Earn 30 XP" quest went with it. `xp` STAYS IN STORED DATA,
+DELIBERATELY UNREAD. SIX stored values across FOUR removals —
+heartsV2, streak, lastPlayed, freezes, gems, boostUntil, xp — and not
+one of them deleted.
+
 GEMS, THE SHOP AND THE XP BOOST ARE REMOVED TOO (owner decision
 2026-10-05). Gems were earned by lessons and quest claims and the
 only thing left to buy was a 15-minute double-XP boost, so this took

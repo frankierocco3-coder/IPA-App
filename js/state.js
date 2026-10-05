@@ -1,4 +1,4 @@
-// Progress persistence: XP and completed lessons. localStorage only.
+// Progress persistence: completed lessons. localStorage only.
 
 const KEY = 'ipa-trainer-v1';
 
@@ -40,7 +40,7 @@ function save(state) {
     if (!warnedStorage) {
       warnedStorage = true;      // every later write would fail the same way
       console.warn('Speechcraft: this device refused to store progress. '
-        + 'XP and completed lessons will not survive a reload.');
+        + 'Completed lessons will not survive a reload.');
     }
     return false;
   }
@@ -49,6 +49,16 @@ function save(state) {
 function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
+
+// ── XP: REMOVED 2026-10-05 ───────────────────────────────────
+// The last of it. XP was a points total that said nothing "lessons
+// completed" and "answers given" did not already say more honestly, and
+// it was the last thing in the app that scored a person rather than
+// describing what they had done.
+//
+// `xp` STAYS IN STORED DATA AND IS DELIBERATELY NOT READ, like hearts,
+// streak, lastPlayed, freezes, gems and boostUntil before it. Six values,
+// four removals, nothing deleted.
 
 // ── Gems, the Shop and the XP boost: REMOVED 2026-10-05 ──────
 // The last of the Duolingo economy, after hearts and streaks. Gems were
@@ -83,22 +93,15 @@ function todayStr() {
 // picker got, and the reason this was reversible rather than destructive.
 
 export const store = {
-  get xp() { return load().xp ?? 0; },
   get completed() { return new Set(load().completed ?? []); },
 
   isCompleted(lessonId) { return this.completed.has(lessonId); },
 
-  recordLesson(lessonId, xpEarned) {
+  // COMPLETION SURVIVES, the points do not. Finishing a lesson is a fact
+  // worth remembering; what it was "worth" was not.
+  recordLesson(lessonId) {
     const s = load();
-    s.xp = (s.xp ?? 0) + xpEarned;
     s.completed = [...new Set([...(s.completed ?? []), lessonId])];
-    save(s);
-  },
-
-  // Practice sessions: XP, but no lesson gets marked complete.
-  addXp(xpEarned) {
-    const s = load();
-    s.xp = (s.xp ?? 0) + xpEarned;
     save(s);
   },
 
@@ -121,7 +124,7 @@ export const store = {
     save(s);
   },
   // Quests stay quiet until something is earned.
-  get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
+  get hasEarnedAnything() { return (load().completed ?? []).length > 0; },
 
   // ── Free play ───────────────────────────────────────────────
   // Unlocks every lesson for browsing. Persistence restored (B04 bug #2:
@@ -170,7 +173,7 @@ export const store = {
   dismissThresholdInvite() { const s = load(); s.thresholdInviteSeen = true; save(s); },
 
   // ── "What Is IPA?" intro module ─────────────────────────────
-  // Completion badge only — deliberately no XP, so "Progress
+  // Completion badge only, so "Progress
   // activates after your first lesson" stays true for fresh users.
   get whatIsIpa() { return load().whatIsIpa ?? { done: false, correct: 0 }; },
   markWhatIsIpa(correct) {
