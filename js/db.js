@@ -2,7 +2,7 @@
 // localStorage: rehearsal projects, recorded takes, and the audio blobs
 // themselves. Everything stays on the device — there is no backend.
 //
-// localStorage keeps what it already kept (XP, streak, completed lessons,
+// localStorage keeps what it already kept (XP, completed lessons,
 // settings) so existing progress is never touched by anything in here.
 //
 // Stores

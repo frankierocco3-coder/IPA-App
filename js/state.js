@@ -1,4 +1,4 @@
-// Progress persistence: XP, streak, completed lessons. localStorage only.
+// Progress persistence: XP and completed lessons. localStorage only.
 
 const KEY = 'ipa-trainer-v1';
 
@@ -40,7 +40,7 @@ function save(state) {
     if (!warnedStorage) {
       warnedStorage = true;      // every later write would fail the same way
       console.warn('Speechcraft: this device refused to store progress. '
-        + 'XP, streak and completed lessons will not survive a reload.');
+        + 'XP and completed lessons will not survive a reload.');
     }
     return false;
   }
@@ -50,23 +50,17 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-function touchStreak(s) {
-  const today = todayStr();
-  if (s.lastPlayed !== today) {
-    const yesterday = new Date(Date.now() - 86400e3).toISOString().slice(0, 10);
-    const dayBefore = new Date(Date.now() - 2 * 86400e3).toISOString().slice(0, 10);
-    if (s.lastPlayed === yesterday) {
-      s.streak = (s.streak ?? 0) + 1;
-    } else if (s.lastPlayed === dayBefore && (s.freezes ?? 0) > 0) {
-      // A streak freeze bridges exactly one missed day.
-      s.freezes -= 1;
-      s.streak = (s.streak ?? 0) + 1;
-    } else {
-      s.streak = 1;
-    }
-    s.lastPlayed = today;
-  }
-}
+// ── Streaks: REMOVED 2026-10-05, by the owner's decision ─────
+// A day counter that reset when you missed a day, with "streak freezes"
+// sold in the Shop to bridge one missed day. It manufactured guilt, and
+// for actors with irregular schedules it punished you for working.
+//
+// Streak freezes went with it: a freeze protecting a streak that no longer
+// exists is not a product, it is a leftover.
+//
+// `streak`, `lastPlayed` and `freezes` ARE STILL IN STORED DATA AND ARE
+// DELIBERATELY NOT READ — nothing migrated, nothing deleted, the same
+// treatment hearts and the retired goal picker got.
 
 // ── Hearts: REMOVED 2026-10-05, by the owner's decision ───────
 // Five hearts used to gate the Learn path — a wrong answer cost one, an
@@ -80,7 +74,6 @@ function touchStreak(s) {
 
 export const store = {
   get xp() { return load().xp ?? 0; },
-  get streak() { return load().streak ?? 0; },
   get completed() { return new Set(load().completed ?? []); },
 
   isCompleted(lessonId) { return this.completed.has(lessonId); },
@@ -90,27 +83,17 @@ export const store = {
     if ((s.boostUntil ?? 0) > Date.now()) xpEarned *= 2;
     s.xp = (s.xp ?? 0) + xpEarned;
     s.completed = [...new Set([...(s.completed ?? []), lessonId])];
-    touchStreak(s);
     save(s);
   },
 
-  // Practice sessions: XP and streak, but no lesson gets marked complete.
+  // Practice sessions: XP, but no lesson gets marked complete.
   addXp(xpEarned) {
     const s = load();
     if ((s.boostUntil ?? 0) > Date.now()) xpEarned *= 2;
     s.xp = (s.xp ?? 0) + xpEarned;
-    touchStreak(s);
     save(s);
   },
 
-  // Streak shown on the home screen: 0 if the chain is broken.
-  get displayStreak() {
-    const s = load();
-    if (!s.lastPlayed) return 0;
-    const today = todayStr();
-    const yesterday = new Date(Date.now() - 86400e3).toISOString().slice(0, 10);
-    return (s.lastPlayed === today || s.lastPlayed === yesterday) ? (s.streak ?? 0) : 0;
-  },
 
   // Last text pasted into "Train Any Text" — { title, body, accent }.
   get customText() { return load().customText ?? null; },
@@ -125,15 +108,6 @@ export const store = {
     s.gems -= n;
     save(s);
     return true;
-  },
-
-  // ── Streak freezes (max 2 equipped, like the template) ─────
-  get freezes() { return load().freezes ?? 0; },
-  addFreeze() {
-    const s = load();
-    if ((s.freezes ?? 0) >= 2) return false;
-    s.freezes = (s.freezes ?? 0) + 1;
-    save(s); return true;
   },
 
   // ── XP boost ────────────────────────────────────────────────
@@ -154,7 +128,7 @@ export const store = {
     s.onboarding = { ...(s.onboarding ?? { done: false, goal: null, accent: null }), ...patch };
     save(s);
   },
-  // Gems, streaks and quests stay quiet until something is earned.
+  // Gems and quests stay quiet until something is earned.
   get hasEarnedAnything() { const s = load(); return (s.xp ?? 0) > 0 || (s.completed ?? []).length > 0; },
 
   // ── Free play ───────────────────────────────────────────────

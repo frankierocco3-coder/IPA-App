@@ -370,7 +370,7 @@ function renderShell(section) {
   skipCourseIntroOnce = false;
 }
 
-// ── Stats bar: course chip + streak / gems ───────────────────
+// ── Stats bar: course chip + gems ────────────────────────────
 
 function drawStatsbar(course, section, ws = activeWorkspace()) {
   const bar = document.getElementById('statsbar');
@@ -415,7 +415,6 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
     </div>
     ${contextChip}
     ${earned ? `
-    <span class="stat-chip" title="Streak"><span aria-hidden="true">🔥</span> ${store.displayStreak}<span class="sr-only"> day streak</span></span>
     <span class="stat-chip" title="Gems"><span aria-hidden="true">💎</span> ${store.gems}<span class="sr-only"> gems</span></span>
     ${store.boostActive ? '<span class="stat-chip chip-boost" title="Double XP active">⚡×2</span>' : ''}` : ''}
     ${ACCENTLESS_WORKSPACES.includes(ws) ? '' : `
@@ -6044,12 +6043,11 @@ function renderIdioms(d) {
   hubIdiom(document.getElementById('idiom-page'), d, trackFor(d));
 }
 
-// ── Progress: quests, streaks, weak sounds, achievements ─────
+// ── Progress: quests, weak sounds, achievements ──────────────
 
 function achievementRows() {
   const t = totals();
   return [
-    { icon: '🔥', name: 'Wildfire', what: 'day streak', tiers: [3, 7, 30], value: store.streak },
     { icon: '🧙', name: 'Sage', what: 'XP earned', tiers: [100, 500, 2000], value: store.xp },
     { icon: '🎓', name: 'Scholar', what: 'lessons completed', tiers: [10, 30, 77], value: store.completed.size },
     { icon: '🗣', name: 'Wordsmith', what: 'days practised', tiers: [3, 10, 30], value: t.daysPractised },
@@ -6141,7 +6139,6 @@ function progressMain(el) {
       </section>
       <h2 class="chart-h">What will appear here</h2>
       ${[
-        ['🔥', 'Streak', 'consecutive days of practice'],
         ['⚡', 'XP and gems', 'earned by lessons, games and quests'],
         ['🏆', 'Daily quests', 'three small targets that reset at midnight'],
         ['📊', 'Weak sounds', 'the symbols that keep slipping, ranked from your real answers'],
@@ -6182,7 +6179,7 @@ function progressMain(el) {
           : r.complete ? `<button class="btn btn-primary quest-claim" data-q="${r.id}" type="button" aria-label="Claim ${r.reward} gems">🎁 +${r.reward}💎</button>`
           : `<span class="quest-reward">💎 ${r.reward}</span>`}
       </div>`).join('')}
-    <p class="pane-note">Gems buy streak freezes and XP boosts in the Shop.</p>
+    <p class="pane-note">Gems buy XP boosts in the Shop.</p>
     <h2 class="chart-h">Weak Sounds</h2>
     ${weak.length ? weak.map(r => `
       <div class="stat-row">
@@ -6194,7 +6191,6 @@ function progressMain(el) {
     <button class="btn-lite" id="prog-weak-full" type="button">Full weak-sounds report ›</button>
     <h2 class="chart-h">Statistics</h2>
     <div class="summary-row">
-      <div class="summary-card"><span class="summary-n">🔥 ${store.displayStreak}</span><span class="summary-l">day streak</span></div>
       <div class="summary-card"><span class="summary-n">⚡ ${store.xp}</span><span class="summary-l">total XP</span></div>
       <div class="summary-card"><span class="summary-n">💎 ${store.gems}</span><span class="summary-l">gems</span></div>
     </div>
@@ -6224,7 +6220,6 @@ function progressMain(el) {
 // ── Shop ──────────────────────────────────────────────────────
 
 function shopMain(el) {
-  const freezes = store.freezes;
   const boostActive = store.boostActive;
   const boostMins = boostActive ? Math.ceil((store.boostUntil - Date.now()) / 60000) : 0;
   const item = (icon, title, blurb, action) => `
@@ -6239,19 +6234,15 @@ function shopMain(el) {
       <span class="quest-banner-emoji">💎 ${store.gems}</span>
     </section>
     <h2 class="chart-h">Power-ups</h2>
-    ${item('🧊', 'Streak Freeze', `Protects your streak for one missed day. Equipped: ${freezes}/2.`,
-      freezes >= 2 ? '<span class="shop-price is-off">MAX</span>'
-        : `<button class="btn btn-lite shop-buy" data-item="freeze" type="button">💎 200</button>`)}
     ${item('⚡', 'Double XP', boostActive ? `Active — ${boostMins} min left.` : 'Every lesson pays double XP for 15 minutes.',
       boostActive ? '<span class="shop-price is-off">ACTIVE</span>'
         : `<button class="btn btn-lite shop-buy" data-item="boost" type="button">💎 150</button>`)}`;
   el.querySelectorAll('.shop-buy').forEach(b =>
     b.addEventListener('click', () => {
-      const prices = { freeze: 200, boost: 150 };
+      const prices = { boost: 150 };
       const it = b.dataset.item;
       if (!store.spendGems(prices[it])) { alert(`Not enough gems — that costs ${prices[it]} 💎. Quests and lessons earn more.`); return; }
-      if (it === 'freeze') store.addFreeze();
-      else store.startBoost(15);
+      store.startBoost(15);
       renderShell('shop');
     }));
 }
@@ -6395,7 +6386,10 @@ function priorUseSignals() {
   try {
     if (store.onboarding.done) sig.push('onboarding');
     if (store.hasEarnedAnything) sig.push('progress');
-    if (store.streak > 0) sig.push('streak');
+    // The streak signal is gone with the streak (2026-10-05). Nothing is
+    // lost: touchStreak only ever ran inside recordLesson and addXp, so
+    // anyone who had a streak also has XP, and hasEarnedAnything above
+    // already catches them.
     if (store.whatIsIpa.done) sig.push('what-is-ipa');
     if (Object.keys(store.introsSeen ?? {}).length) sig.push('course-intro');
     if (store.customText?.body) sig.push('custom-text');
@@ -6626,7 +6620,7 @@ function renderTerms() {
         'Speechcraft teaches and helps you practise. It does not replace a qualified voice teacher, dialect coach, acting teacher, speech-language pathologist or doctor, and nothing in it is medical, therapeutic or professional advice.',
         'The voice, breath and body exercises are gentle, but you know your own body. Stop anything that causes pain, strain or discomfort, and if you have a voice or health condition, check with a qualified professional first.')}
       ${sec('Free, with nothing to buy',
-        'Speechcraft costs nothing and sells nothing. XP, gems, streaks and the items in the Shop are practice points earned inside the app. They have no cash value and cannot be bought, sold or exchanged for money.')}
+        'Speechcraft costs nothing and sells nothing. XP, gems and the items in the Shop are practice points earned inside the app. They have no cash value and cannot be bought, sold or exchanged for money.')}
       ${sec('Your work stays yours',
         'What you write, paste or record in Speechcraft stays on your device. We never see it, store it or claim any rights to it. If you work with a text you did not write, you are responsible for having the right to use it.')}
       ${sec('Our content',
@@ -6702,7 +6696,7 @@ function moreMain(el) {
     { icon: '✨', img: 'img/ui/why-speech.png', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', img: 'img/ui/about.png', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '📚', img: 'img/ui/credits.png', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
-    { icon: '🛍️', img: 'img/ui/shop.png', title: 'Shop', blurb: 'Streak freezes and boosts.', go: () => goSection('shop'), color: '#c99e58' },
+    { icon: '🛍️', img: 'img/ui/shop.png', title: 'Shop', blurb: 'XP boosts.', go: () => goSection('shop'), color: '#c99e58' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">
@@ -7350,7 +7344,7 @@ function renderPrivacy() {
         ${characterOpen() ? '<div class="stat-row"><span class="stat-name">Characters you are building</span><span class="stat-val">this device</span></div>' : ''}
         <div class="stat-row"><span class="stat-name">Offline copy of app content (for use without a connection)</span><span class="stat-val">this device</span></div>
         <div class="stat-row"><span class="stat-name">Readings you chose to keep offline</span><span class="stat-val">this device</span></div>
-        <div class="stat-row"><span class="stat-name">XP, streak, lessons</span><span class="stat-val">this device</span></div>
+        <div class="stat-row"><span class="stat-name">XP and lessons</span><span class="stat-val">this device</span></div>
         <p class="pane-note pane-warn">Browser storage is <b>not encrypted</b>. Anyone who can use this device and browser profile — or open developer tools — can read or change it. Treat it like a notebook left on a desk, not a safe.</p>
       </section>
 
@@ -7394,9 +7388,9 @@ function renderPrivacy() {
     document.getElementById('wipe-state').textContent = `Deleted: ${done.join(', ')}.`;
   };
   document.getElementById('wipe-content').addEventListener('click', () =>
-    run(false, `Delete all projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics and personal dictionary entries?\n\nYour XP, streak and completed lessons are KEPT.`));
+    run(false, `Delete all projects, dissections, recordings, notebooks${characterOpen() ? ', characters' : ''}, analytics and personal dictionary entries?\n\nYour XP and completed lessons are KEPT.`));
   document.getElementById('wipe-all').addEventListener('click', () =>
-    run(true, 'Delete EVERYTHING, including your XP, streak and completed lessons?'));
+    run(true, 'Delete EVERYTHING, including your XP and completed lessons?'));
 }
 
 // ── Weak Sounds + Today's Rehearsal ───────────────────────────
@@ -7456,12 +7450,12 @@ function renderWeakSounds() {
 
         <div class="danger-zone">
           <button class="btn btn-lite btn-danger" id="an-reset" type="button">Reset practice analytics</button>
-          <p class="pane-note">Clears only this page's data. Your XP, streak, completed lessons, projects and recordings are not affected.</p>
+          <p class="pane-note">Clears only this page's data. Your XP, completed lessons, projects and recordings are not affected.</p>
         </div>`}
     </main>`;
   wireBrandHome();
   document.getElementById('an-reset')?.addEventListener('click', () => {
-    if (!confirm('Reset practice analytics?\n\nThis clears weak-sound tracking only. XP, streaks, lessons, projects and recordings are kept.')) return;
+    if (!confirm('Reset practice analytics?\n\nThis clears weak-sound tracking only. XP, lessons, projects and recordings are kept.')) return;
     resetAnalytics();
     renderWeakSounds();
   });

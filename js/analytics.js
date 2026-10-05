@@ -58,7 +58,7 @@ function save(a) {
 
 export const getAnalytics = load;
 
-/** Wipe practice analytics only. XP, streaks, lessons, projects, recordings all survive. */
+/** Wipe practice analytics only. XP, lessons, projects, recordings all survive. */
 export function resetAnalytics() {
   try { localStorage.removeItem(KEY); } catch { /* ignore */ }
 }

@@ -114,7 +114,7 @@ js/views/           modules extracted from main.js (the 2026-09 split):
   action-piece.js     one Dialect in Action piece, for learner or reviewer
   admin.js            the owner-only #audit and #review pages
 js/engine.js        16 exercise generators
-js/state.js         localStorage progress (XP, streak, lessons)
+js/state.js         localStorage progress (XP, lessons)
 js/db.js            IndexedDB wrapper + schema/migrations
 js/projects.js      rehearsal project CRUD + legacy migration
 js/recordings.js    takes, blobs, object-URL lifecycle
@@ -199,7 +199,9 @@ choice, source: first-run|grandfathered, lastReplayedAt, lastChoice};
 completeThreshold NEVER overwrites; replay (About Speechcraft,
 Preferences rerun, invite card) navigates without rewriting choice.
 Grandfathering: priorUseSignals() (onboarding.done primary — do not
-rename — plus xp/streak/intros/dictionary/customText/nav keys) + a
+rename — plus xp/intros/dictionary/customText/nav keys; the streak
+signal went with the streak, and nothing is lost because anyone who had
+one also has XP) + a
 150ms-bounded IndexedDB probe; grandfathered users get the one-time
 dismissible invite card in Learn (store.thresholdInviteSeen), NEVER the
 wall. skipCourseIntroOnce suppresses the ssbe intro modal for exactly
@@ -270,9 +272,9 @@ tools/audit_audio.py also enforces course-bound voice keys.
 Deep-page topbar titles stay short — long ones wrap beside the brand. The
 standalone Accent Shift Drills track stays removed (Frankie's call); Stage
 3 shift lessons and the two shift games remain.
-Economy: gems (lessons +10/+15, quest claims), streak freezes (max 2),
-15-min double-XP boost — all in js/state.js; daily quests in js/quests.js
-hook onLessonFinished() in renderResults. No leaderboards (no accounts —
+Economy: gems (lessons +10/+15, quest claims) and a 15-min double-XP
+boost — all in js/state.js; daily quests in js/quests.js hook
+onLessonFinished() in renderResults. No leaderboards (no accounts —
 decided, not forgotten).
 HEARTS ARE REMOVED (owner decision 2026-10-05). Five hearts used to gate
 the Learn path: a wrong answer cost one, an empty pool ended the lesson,
@@ -282,8 +284,17 @@ The whole API is gone from state.js and no shipped copy mentions them.
 `heartsV2` IS STILL IN STORED DATA AND DELIBERATELY NOT READ — nothing
 migrated, nothing deleted, the same treatment the retired goal picker got,
 and the reason this was reversible rather than destructive. Suite pins the
-removal AND that the stored value survives. Gems, streak, XP and quests
-stay for now; the owner is weighing those separately.
+removal AND that the stored value survives.
+STREAKS AND STREAK FREEZES ARE REMOVED TOO (owner decision 2026-10-05).
+A day counter that reset on a missed day, with freezes sold to bridge
+one. It manufactured guilt, and for actors with irregular schedules it
+punished them for working; freezes went with it because a freeze
+protecting a streak that does not exist is a leftover. `streak`,
+`lastPlayed` and `freezes` STAY IN STORED DATA, DELIBERATELY UNREAD.
+touchStreak is gone from recordLesson and addXp — XP still increments,
+which is pinned. THE SHOP IS NOW ONE ITEM (Double XP); whether a Shop
+section still earns its place is the owner's open question. Gems, XP and
+quests stay for now.
 A11y: global :focus-visible ring, reduced-motion support, aria-labels on
 icon-only controls (guidebook/speaker/freeplay), aria-live lesson feedback,
 #shell-main is a <main>, 48px bottom-nav targets.

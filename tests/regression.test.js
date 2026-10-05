@@ -626,9 +626,20 @@ export async function run({ navDoc = document } = {}) {
       clickIn(tab18b); await sleep(500);
       appWin.confirm = () => true;
       clickIn([...navDoc.querySelectorAll('#sonnet-pane .take-actions button')].find(b => b.textContent.trim() === 'Delete'));
-      await sleep(500);
+      // WAIT FOR THE CONDITION, NOT A DURATION. deleteTake commits the
+      // metadata and the blob in ONE IndexedDB transaction, and a fixed
+      // 500ms sleep is a coin flip on a loaded machine: this check went
+      // red on 2026-10-05, passed on a re-run of IDENTICAL code, then went
+      // red again on the next change. Intermittent, and it cost two full
+      // ten-minute runs being mistaken for a regression.
+      const deletedBy = Date.now() + 8000;
+      let left = (await listTakes({ scopeId: 'sonnet:18' })).length;
+      while (left > 0 && Date.now() < deletedBy) {
+        await sleep(100);
+        left = (await listTakes({ scopeId: 'sonnet:18' })).length;
+      }
       check('reader take deletable through the Takes view',
-        (await listTakes({ scopeId: 'sonnet:18' })).length === 0);
+        left === 0, `${left} take(s) still listed after 8s`);
       // Assert against the blob STORE directly — takeUrl caches object
       // URLs per-realm, and the UI delete ran in the app iframe's realm.
       check('deleted reader take blob removed from the store',
@@ -2699,11 +2710,12 @@ export async function run({ navDoc = document } = {}) {
         && ['textbook', 'texts', 'rhetoric', 'ipa']
           .every(k => !!doc.querySelector(`.tile-grid [data-tile="${k}"]`))
         && !!doc.getElementById('lib-search'));
-      check('speech: Free Play, gems and streak are hidden here',
+      // Hearts and streaks are gone app-wide now (2026-10-05), so the ❤️
+      // and 🔥 halves of this would pass by being impossible. Gems are the
+      // live assertion: they still exist elsewhere and must not show here.
+      check('speech: Free Play and gems are hidden here',
         !doc.getElementById('freeplay')
-        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('❤️')
-        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('💎')
-        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('🔥'));
+        && !(doc.getElementById('statsbar')?.textContent ?? '').includes('💎'));
       check('speech: the rail offers a next step and never points at review work',
         (doc.getElementById('rail-quests')?.textContent ?? '').includes('Next step')
         && !!doc.querySelector('#rail-quests .rail-card button')
@@ -6443,6 +6455,32 @@ export async function run({ navDoc = document } = {}) {
         check('hearts: the stored value survives untouched, so this stays reversible',
           JSON.stringify(rawH.heartsV2 ?? null) === JSON.stringify(afterH.heartsV2 ?? null),
           `${JSON.stringify(rawH.heartsV2)} -> ${JSON.stringify(afterH.heartsV2)}`);
+      }
+
+      // STREAKS ARE GONE TOO (2026-10-05, owner's decision). A day counter
+      // that reset when you missed a day, with "streak freezes" sold in the
+      // Shop to bridge one. It manufactured guilt, and for actors with
+      // irregular schedules it punished you for working. Freezes went with
+      // it: a freeze protecting a streak that does not exist is a leftover.
+      {
+        const { store: st2 } = await import('../js/state.js');
+        const goneS = ['streak', 'displayStreak', 'freezes', 'addFreeze'].filter(k => k in st2);
+        check('streaks: the whole API is gone from the store, freezes with it',
+          goneS.length === 0, `still present: ${goneS.join(', ')}`);
+
+        const mainS = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
+        const codeS = mainS.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+        check('streaks: no shipped code or copy still mentions them',
+          !/streak|freeze/i.test(codeS), 'streak copy survives in the view layer');
+
+        // Same promise as hearts: stop reading, never delete.
+        const rawS = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        st2.addXp(0);
+        const aftS = JSON.parse(localStorage.getItem('ipa-trainer-v1') ?? '{}');
+        check('streaks: stored streak, lastPlayed and freezes all survive untouched',
+          JSON.stringify([rawS.streak ?? null, rawS.lastPlayed ?? null, rawS.freezes ?? null])
+          === JSON.stringify([aftS.streak ?? null, aftS.lastPlayed ?? null, aftS.freezes ?? null]),
+          `${JSON.stringify([rawS.streak, rawS.lastPlayed, rawS.freezes])} -> ${JSON.stringify([aftS.streak, aftS.lastPlayed, aftS.freezes])}`);
       }
 
       // HANDING A FILE TO THE READER (2026-10-05). On a real iPhone,
