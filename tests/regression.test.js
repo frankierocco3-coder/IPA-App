@@ -6414,6 +6414,31 @@ export async function run({ navDoc = document } = {}) {
       check('narration: Privacy wipe covers kept readings',
         CONTENT_STORES.includes(S2.narration));
 
+      // THE UPSTREAM MANIFEST (2026-10-04). audio-coverage.js answers
+      // "what plays now" and zeroes out in a bundle, which is correct and
+      // leaves a hole: the reader would know what it HAS and not what it
+      // could ASK FOR, so it could never offer the download. These are two
+      // different questions and now there are two different files.
+      const { UPSTREAM_NARRATION } = await import('../js/data/audio-upstream.js');
+      const upCounts = Object.fromEntries(
+        Object.entries(UPSTREAM_NARRATION).map(([k, v]) => [k, v.length]));
+      check('upstream: the manifest says what the audio site holds',
+        (UPSTREAM_NARRATION.nam ?? []).includes(18)
+        && (upCounts.nam ?? 0) > 100 && (upCounts.rp ?? 0) > 100,
+        JSON.stringify(upCounts));
+      // On the WEB the two agree, because everything upstream is served.
+      // That equality is what makes the bundle case the only divergence.
+      const { LONGFORM_COVERAGE: COV } = await import('../js/data/audio-coverage.js');
+      const covNam = COV.sonnets.nam ?? [];
+      check('upstream: on the web it matches coverage, so nothing is offered twice',
+        covNam.length === (upCounts.nam ?? -1),
+        `coverage ${covNam.length} vs upstream ${upCounts.nam}`);
+      const mainForUp = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
+      check('upstream: the reader offers a download from it, not from coverage',
+        mainForUp.includes('offline.available.includes(cur)')
+        && mainForUp.includes('Available to download'),
+        'the offer must key off what EXISTS, or a bundle can never ask for anything');
+
       // HARD CONSTRAINT 3 WAS AMENDED FOR THIS (2026-10-04), and these
       // pin how far. The rule moved once, by the owner's decision, and the
       // whole value of a named exception is that it stays named.

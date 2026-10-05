@@ -28,6 +28,7 @@ import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech,
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
+import { UPSTREAM_NARRATION } from './data/audio-upstream.js';
 import { narrationComplete, narrationUrls, releaseNarrationUrls,
          downloadNarration, removeNarration } from './narration.js';
 import { RECASTS, TRANSPOSITION_LABELS } from './data/recasts.js';
@@ -9385,7 +9386,12 @@ async function renderSonnet(n) {
     recast: ed && ed.plain && ed.plainStatus === 'approved' ? { plain: ed.plain } : null,
     today,
     // Only sonnets have per-line readings, so only sonnets can keep one.
-    offline: { n, lineCount: s.lines.length, stored: [...kept] },
+    // `available` is what the AUDIO SITE has. In a bundle, coverage is
+    // zeroed and this is the only thing that knows a reading exists,
+    // which is what makes the download offer possible at all.
+    offline: { n, lineCount: s.lines.length, stored: [...kept],
+               available: Object.keys(UPSTREAM_NARRATION)
+                 .filter(d => (UPSTREAM_NARRATION[d] ?? []).includes(n)) },
     scopeId: `sonnet:${n}`,
     prev: prev ? { label: `‹ Sonnet ${prev.n}`, go: () => renderSonnet(prev.n) } : null,
     next: next ? { label: `Sonnet ${next.n} ›`, go: () => renderSonnet(next.n) } : null,
@@ -9436,18 +9442,30 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
 
   let cur = accent, mode = 'speak';
   const pane = document.getElementById('sonnet-pane');
+  // What the audio site holds for this text, when the caller knows.
+  // Only sonnets pass `offline`; everything else leaves this empty
+  // and keeps the two-state note it has always had.
+  const upstreamFor = offline?.available ?? [];
   // One dialect on screen, the rest a tap away. What each chip used to
   // spell out in its own label now lives in the row's subtitle, so the
   // availability is still stated and stated with more room.
   const dialectOptions = () => TEXT_DIALECTS.map(d => ({
     id: d.id, icon: d.flag, label: d.label,
-    // "Audio soon" until 2026-10-04. It was a promise about a recording
-    // nobody had scheduled, and it survived the coming-soon sweep only
-    // because it did not use those words. States a fact now.
-    note: narrated.includes(d.id) ? 'Recorded audio' : 'No recording',
+    // Three states, each a fact about NOW rather than a promise. "Audio
+    // soon" lived here until 2026-10-04 and said none of them.
+    //   Recorded audio       — plays this instant
+    //   Available to download— exists on the audio site, not on this
+    //                          device yet; the control below fetches it
+    //   No recording         — was never made
+    // The middle one only ever appears where a bundle has zeroed coverage;
+    // on the web everything upstream is already playable.
+    note: narrated.includes(d.id) ? 'Recorded audio'
+      : (upstreamFor?.includes(d.id) ? 'Available to download' : 'No recording'),
     aria: narrated.includes(d.id)
       ? 'Recorded audio for this text'
-      : 'No model recording for this text yet; the transcription and scansion views still work',
+      : upstreamFor.includes(d.id)
+        ? 'A recording exists for this text and can be downloaded to this device'
+        : 'No model recording for this text yet; the transcription and scansion views still work',
   }));
   // The availability line used to badge all five dialects at once, which
   // said the same thing the menu now says and said it three rows deep on
@@ -9455,9 +9473,15 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
   const drawAudioLine = () => {
     const el = document.getElementById('rd-audio');
     if (!el) return;
+    // Three states, matching the dialect menu. The middle one only occurs
+    // where a bundle has zeroed coverage: the recording exists, it is just
+    // not on this device. Saying "no recording yet" there would be both
+    // wrong and a promise.
     el.innerHTML = narrated.includes(cur)
       ? `🎙 Recorded audio in <b>${esc(dialectName(cur))}</b>.`
-      : `🎙 No studio recording in <b>${esc(dialectName(cur))}</b> for this text yet — the reading below uses your device voice, clearly labelled. Scan and IPA work either way.`;
+      : upstreamFor.includes(cur)
+        ? `🎙 The <b>${esc(dialectName(cur))}</b> recording is not on this device. Keep it below to listen, or read on with your device voice. Scan and IPA work either way.`
+        : `🎙 No studio recording in <b>${esc(dialectName(cur))}</b> for this text — the reading below uses your device voice, clearly labelled. Scan and IPA work either way.`;
   };
   // Keep a reading on this device, or give the space back. Only sonnets
   // pass `offline`, and only for a dialect that HAS a recording: offering
@@ -9466,7 +9490,10 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
   const drawOffline = () => {
     const el = document.getElementById('rd-offline');
     if (!el) return;
-    if (!offline || !narrated.includes(cur)) { el.innerHTML = ''; return; }
+    // Offer it when the audio site HAS it. On the web that is the same
+    // set as `narrated`; in a bundle, where coverage is zeroed, it is the
+    // only thing that knows a reading exists to be fetched.
+    if (!offline || !offline.available.includes(cur)) { el.innerHTML = ''; return; }
     const here = offline.stored.includes(cur);
     el.innerHTML = here
       ? `✓ Kept on this device. <button class="btn-link" id="rd-off-del" type="button">Remove the ${esc(dialectName(cur))} reading</button>`

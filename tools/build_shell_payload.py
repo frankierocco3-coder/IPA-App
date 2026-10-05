@@ -40,6 +40,11 @@ sys.path.insert(0, HERE)
 
 COVERAGE = os.path.join(ROOT, 'js', 'data', 'audio-coverage.js')
 MANIFEST = os.path.join(ROOT, 'docs', 'LONGFORM_RECORDING_MANIFEST.md')
+# Regenerating coverage against a course-only tree would zero this too,
+# and a bundle that does not know a reading EXISTS can never offer to
+# fetch it. Restored with the others, so the payload keeps the
+# full-tree values that build_artifact already copied in.
+UPSTREAM = os.path.join(ROOT, 'js', 'data', 'audio-upstream.js')
 
 
 def run(args, env=None):
@@ -99,7 +104,7 @@ def main():
     #    narration the bundle does not carry. The repository's own generated
     #    files are restored afterwards, including when this fails.
     saved = {}
-    for p in (COVERAGE, MANIFEST):
+    for p in (COVERAGE, MANIFEST, UPSTREAM):
         try:
             with open(p, 'rb') as fh:
                 saved[p] = fh.read()
