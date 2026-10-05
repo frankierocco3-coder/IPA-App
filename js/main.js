@@ -21,7 +21,7 @@ import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record,
          goHome, goSection, setSectionHandler, openModal, phonemeSlug,
          pageTopbar, wireBrandHome, EMBLEM, BRAND_BTN, courseProgressHtml,
          runStepSequence, tileHtml, itemTileHtml, reviewStripHtml,
-         groupStatus, workspacePage, shellBack } from './ui.js';
+         groupStatus, workspacePage, shellBack, deliverFile } from './ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store, HEART_MAX } from './state.js';
 import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady, audioUrl } from './audio.js';
@@ -8959,12 +8959,8 @@ async function exportProject(id) {
     }],
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase().slice(0, 60)}.speechcraft.json`;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const name = `${(p.title || 'project').replace(/[^\w-]+/g, '-').toLowerCase().slice(0, 60)}.speechcraft.json`;
+  await deliverFile(blob, name);
 }
 
 async function importProjectFile(file) {
@@ -10488,13 +10484,9 @@ function renderDictionary() {
   document.getElementById('dict-filter').value = dictFilter;
   document.getElementById('dict-search').addEventListener('input', e => { dictQuery = e.target.value; draw(); });
   document.getElementById('dict-filter').addEventListener('change', e => { dictFilter = e.target.value; draw(); });
-  document.getElementById('dict-export').addEventListener('click', () => {
+  document.getElementById('dict-export').addEventListener('click', async () => {
     const blob = new Blob([JSON.stringify(exportPersonal(), null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = 'speechcraft-dictionary.json';
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    await deliverFile(blob, 'speechcraft-dictionary.json');
   });
   const file = document.getElementById('dict-file');
   document.getElementById('dict-import').addEventListener('click', () => file.click());

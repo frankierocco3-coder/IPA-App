@@ -104,6 +104,60 @@ export function goBack() {
 }
 
 /**
+ * Hand a file to the reader, the way their device expects to receive one.
+ *
+ * The invisible-anchor-with-download trick is right on a desktop and
+ * wrong on a phone. iOS has no visible downloads folder, so it opens the
+ * blob in Quick Look instead: an export reads as a screenful of raw JSON,
+ * and actually keeping it takes three more taps through a share button
+ * most people never find. Confirmed on a real iPhone, 2026-10-05.
+ *
+ * On a touch device the share sheet IS the platform's save dialogue, and
+ * "Save to Files" is the first thing in it. A COARSE POINTER decides
+ * this, never a user-agent string: phones and tablets get the sheet,
+ * anything with a mouse keeps the download it expects — a desktop share
+ * sheet offers AirDrop and Mail, not a folder, which would be a step
+ * backwards there.
+ *
+ * EVERY FAILURE PATH FALLS BACK to the download, so this can only improve
+ * on what was there. That matters more than it looks: share() must run
+ * inside a live user gesture, and exportProject awaits the database three
+ * times first, so an expired activation is a real possibility rather than
+ * a theoretical one. A cancelled sheet is the one case that does NOT fall
+ * back — the reader said no, and dumping the file at them anyway would be
+ * the app arguing with them.
+ */
+// `touch` is injectable for the same reason CAPABILITIES is: the suite
+// runs at desktop width, where the pointer is fine and the share branch
+// would never execute, so a test of it would silently pass by never
+// running. Tests INJECT, they never mutate matchMedia.
+export async function deliverFile(blob, filename, { touch } = {}) {
+  const coarse = touch ?? matchMedia?.('(pointer: coarse)')?.matches;
+  if (coarse) {
+    try {
+      const file = new File([blob], filename,
+        { type: blob.type || 'application/octet-stream' });
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: filename });
+        return 'shared';
+      }
+    } catch (err) {
+      if (err?.name === 'AbortError') return 'cancelled';
+      /* anything else — no activation, unsupported type — downloads below */
+    }
+  }
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  return 'downloaded';
+}
+
+/**
  * Hardware back, for a native shell. Returns TRUE if the app handled it.
  *
  * Routing here is function-based, not URL-based: navStack is an array of

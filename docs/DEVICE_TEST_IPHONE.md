@@ -194,6 +194,21 @@ lesson.
   the JSON opening as text in a new tab? nothing at all?
 - Saw: `____________________`
 
+**4.1b — the other half of the bridge, and the half more likely to fail.**
+Studio → **Import** → try to select the file you just exported.
+
+- **Export alone is not a migration path.** A file you can produce and
+  cannot read back carries nothing. This step was missing from the first
+  version of this script, which was a real hole: 4.1 passed on
+  2026-10-04 and proved only half of what it was there to prove.
+- The importer uses a hidden `<input type="file" accept="application/json">`.
+  iOS maps MIME types to its own UTIs inconsistently, and the file has a
+  **double extension** (`.speechcraft.json`), so the picker may grey it
+  out. If it does, that is an `accept` problem and a small fix.
+- **Expect:** the file is selectable, imports, and the project appears in
+  the list with its text intact.
+- Saw: `____________________`
+
 **4.2** Library → Personal Dictionary → **Export**. Same question.
 
 - Saw: `____________________`
@@ -267,5 +282,19 @@ device block from the top. Anything that turns out to be a one-word fix
 (`svh`, a safe-area inset, a dock rule) I will do the same day.
 
 The three answers I most want: **4.3** (does the installed app keep your
-progress), **4.1** (does export work at all), and **3.1** (does the silent
-switch kill the audio).
+progress), **4.1 + 4.1b** (does export AND import work — either alone
+proves nothing), and **3.1** (does the silent switch kill the audio).
+
+**Result so far — 4.1, 2026-10-05: produces a correct file, delivered
+iOS-style.** Tapping Export opens the JSON in **Quick Look** rather than
+saving it; the file is named right (`untitled-project.speechcraft.json`)
+and its contents are correct (`format`, `formatVersion: 1`, the projects
+array, `audioIncluded: false`). Saving needs the share button in that
+preview → Save to Files, so it is three taps and not obvious.
+
+Recorded as **usable, not clean**. The first note of "PASSED" was too
+generous and is corrected here. A one-tap path exists if wanted: the Web
+Share API with a file opens the share sheet directly on iOS and falls
+back to the current anchor everywhere else.
+
+**4.1b is still the gate** and is untested.

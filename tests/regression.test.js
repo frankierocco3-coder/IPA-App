@@ -6414,6 +6414,77 @@ export async function run({ navDoc = document } = {}) {
       check('narration: Privacy wipe covers kept readings',
         CONTENT_STORES.includes(S2.narration));
 
+      // HANDING A FILE TO THE READER (2026-10-05). On a real iPhone,
+      // tapping Export opened the JSON in Quick Look instead of saving
+      // it: a screenful of raw text, and three more taps to keep it. On a
+      // touch device the share sheet IS the save dialogue, so that is
+      // what deliverFile reaches for — falling back to the download on
+      // every failure, so it can only improve on what was there.
+      const { deliverFile: deliver } = await import('../js/ui.js');
+      const probe = new Blob(['{"a":1}'], { type: 'application/json' });
+      const realClick = HTMLAnchorElement.prototype.click;
+      const realShare = navigator.share, realCan = navigator.canShare;
+      let downloadedAs = null;
+      HTMLAnchorElement.prototype.click = function () { downloadedAs = this.download; };
+      const setShare = fn => Object.defineProperty(navigator, 'share', { value: fn, configurable: true });
+      const setCan = fn => Object.defineProperty(navigator, 'canShare', { value: fn, configurable: true });
+      let shared = null;
+      try {
+        setCan(() => true);
+        setShare(async d => { shared = d.files?.[0]?.name; });
+        const r1 = await deliver(probe, 'b.json', { touch: true });
+        check('deliver: a shared file is not also downloaded at the reader',
+          r1 === 'shared' && shared === 'b.json' && downloadedAs === null,
+          `${r1} / shared=${shared} / downloaded=${downloadedAs}`);
+
+        // Cancelling is an answer. Downloading anyway would be the app
+        // arguing with the person who just said no.
+        downloadedAs = null;
+        setShare(async () => { const e = new Error('x'); e.name = 'AbortError'; throw e; });
+        const r2 = await deliver(probe, 'c.json', { touch: true });
+        check('deliver: a cancelled share does not force the file through',
+          r2 === 'cancelled' && downloadedAs === null, `${r2} / ${downloadedAs}`);
+
+        // share() needs a live user gesture and exportProject awaits the
+        // database three times first, so an expired activation is real.
+        downloadedAs = null;
+        setShare(async () => { const e = new Error('x'); e.name = 'NotAllowedError'; throw e; });
+        const r3 = await deliver(probe, 'd.json', { touch: true });
+        check('deliver: any other share failure falls back to the download',
+          r3 === 'downloaded' && downloadedAs === 'd.json', `${r3} / ${downloadedAs}`);
+      } finally {
+        HTMLAnchorElement.prototype.click = realClick;
+        setShare(realShare); setCan(realCan);
+      }
+      // A mouse keeps the download it expects, even when sharing is
+      // perfectly possible: a desktop share sheet offers AirDrop and
+      // Mail, not a folder.
+      {
+        const realClick2 = HTMLAnchorElement.prototype.click;
+        const realShare2 = navigator.share, realCan2 = navigator.canShare;
+        let got = null, sharedAnyway = false;
+        HTMLAnchorElement.prototype.click = function () { got = this.download; };
+        Object.defineProperty(navigator, 'canShare', { value: () => true, configurable: true });
+        Object.defineProperty(navigator, 'share', {
+          value: async () => { sharedAnyway = true; }, configurable: true });
+        const rFine = await deliver(probe, 'e.json', { touch: false });
+        HTMLAnchorElement.prototype.click = realClick2;
+        Object.defineProperty(navigator, 'share', { value: realShare2, configurable: true });
+        Object.defineProperty(navigator, 'canShare', { value: realCan2, configurable: true });
+        check('deliver: a mouse downloads, even where sharing is available',
+          rFine === 'downloaded' && got === 'e.json' && sharedAnyway === false,
+          `${rFine} / ${got} / shared=${sharedAnyway}`);
+      }
+      const uiSrcD = [...seen].find(([u]) => u.endsWith('/js/ui.js'))?.[1] ?? '';
+      // Comments stripped first: the file's own note says the behaviour was
+      // "confirmed on a real iPhone", and a check that reads prose as code
+      // fails on its own documentation.
+      const uiCode = uiSrcD.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+      check('deliver: the share sheet is for touch only, decided by pointer not user-agent',
+        uiCode.includes("matchMedia?.('(pointer: coarse)')")
+        && !/userAgent|iPhone|iPad/.test(uiCode),
+        'ui.js must not sniff the user-agent to decide this');
+
       // THE UPSTREAM MANIFEST (2026-10-04). audio-coverage.js answers
       // "what plays now" and zeroes out in a bundle, which is correct and
       // leaves a hole: the reader would know what it HAS and not what it
