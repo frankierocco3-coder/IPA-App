@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- No INTERNET permission is declared, and that is deliberate rather
-     than an omission. The payload is served from the APK through
-     WebViewAssetLoader, and Speechcraft makes no external requests by
-     design. An app that cannot reach the network cannot leak anything,
-     and it makes the Play privacy declaration simple and true.
+<!-- INTERNET is declared for ONE purpose: downloading sonnet narration
+     when the reader asks for it (js/narration.js). The bundle ships
+     without the 212.9MB of readings, so without this they could never be
+     fetched at all.
 
-     Add <uses-permission android:name="android.permission.INTERNET" />
-     only when narration becomes a real download, and say so in the
-     listing when you do. -->
+     Everything else is served from the APK through WebViewAssetLoader and
+     makes no network call. The app has no accounts, no analytics and no
+     telemetry, so the Play data-safety declaration stays simple and true:
+     nothing is collected, nothing is sent, and the only outbound request
+     is for audio the user explicitly asked to keep.
+
+     Hard constraint 3 was amended for this on 2026-10-04 by the owner's
+     explicit decision — see CLAUDE.md. -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"

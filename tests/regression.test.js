@@ -6413,6 +6413,37 @@ export async function run({ navDoc = document } = {}) {
       const { CONTENT_STORES, STORES: S2 } = await import('../js/db.js');
       check('narration: Privacy wipe covers kept readings',
         CONTENT_STORES.includes(S2.narration));
+
+      // HARD CONSTRAINT 3 WAS AMENDED FOR THIS (2026-10-04), and these
+      // pin how far. The rule moved once, by the owner's decision, and the
+      // whole value of a named exception is that it stays named.
+      const narSrc = [...seen].find(([u]) => u.endsWith('/js/narration.js'))?.[1] ?? '';
+      check('constraint 3: the narration origin is declared, once, where it belongs',
+        narSrc.includes('NARRATION_ORIGIN')
+        && (narSrc.match(/https:\/\/frankierocco3-coder\.github\.io/g) ?? []).length >= 1,
+        'js/narration.js must name the one allowed origin');
+      // Every OTHER shipped module must stay clean of it. security_audit
+      // fails the deploy on this too; the suite says so in the browser.
+      const leaked = [...seen]
+        .filter(([u]) => !u.endsWith('/js/narration.js'))
+        .filter(([, src]) => /https:\/\/frankierocco3-coder\.github\.io/.test(
+          src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '')))
+        .map(([u]) => u.split('/js/')[1]);
+      check('constraint 3: no other module names the narration origin',
+        leaked.length === 0, `leaked into: ${leaked.join(', ')}`);
+      // It buys connect-src and nothing else: readings play from blob:
+      // URLs, so a remote URL never reaches an <audio> element.
+      const indexSrc = await fetch('../index.html').then(r => r.text()).catch(() => '');
+      const csp = indexSrc.match(/Content-Security-Policy" content="([^"]+)"/)?.[1] ?? '';
+      check('constraint 3: the amendment widened connect-src only',
+        /connect-src 'self' https:\/\/frankierocco3-coder\.github\.io/.test(csp)
+        && /media-src 'self' blob:;/.test(csp)
+        && !/media-src[^;]*github\.io/.test(csp),
+        csp.slice(0, 160));
+      // Same-origin first, so the web never makes an external request.
+      check('constraint 3: the remote origin is a fallback, not the default',
+        narSrc.includes("method: 'HEAD'") && narSrc.includes('useRemote'),
+        'downloadNarration must probe same-origin before going outside');
     }
 
     // Hardware back for the Android shell (2026-10-04). Driven in the live

@@ -95,25 +95,60 @@ export async function narrationBytes(n, dialect) {
   return Object.values(have).reduce((t, b) => t + (b?.size ?? 0), 0);
 }
 
+// THE ONE EXTERNAL ORIGIN IN THIS APP, and the only file allowed to name
+// it (tools/security_audit.py enforces that, and fails if it appears
+// anywhere else). Hard constraint 3 was amended for this on 2026-10-04 by
+// the owner's explicit decision: a store bundle ships without the 212.9MB
+// of readings and has no same-origin copy to fetch, so narration — and
+// only narration — may come from the audio site.
+//
+// It buys `connect-src` and nothing more. The bytes are stored and played
+// from blob: URLs, so `media-src` stays at 'self' blob: and no remote URL
+// is ever handed to an <audio> element. If the audio moves to a custom
+// domain (docs/CUSTOM_DOMAIN.md), this moves with it.
+export const NARRATION_ORIGIN = 'https://frankierocco3-coder.github.io';
+const remoteNarrationUrl = rel => `${NARRATION_ORIGIN}/IPA-Audio/${rel}`;
+
 /**
  * Fetch and store one reading. Reports progress as a fraction, and
- * resolves { ok, stored, failed }. Already-stored lines are skipped, so
- * calling it again after a failure finishes the job rather than restarting.
+ * resolves { ok, stored, failed, source }. Already-stored lines are
+ * skipped, so calling it again after a failure finishes the job rather
+ * than restarting.
  *
- * Every request goes through audioUrl(), which resolves against the audio
- * site relative to this module — so on the web it is same-origin and no
- * external request is made. Where a BUNDLED app gets these bytes is an
- * open decision: see docs/STORE_PLAN.md, "Narration on demand".
+ * SAME-ORIGIN FIRST, ALWAYS. On the web audioUrl() already resolves to the
+ * audio site and nothing external happens. Only when that answers 404 —
+ * which is what a bundle looks like, because it carries course audio and
+ * no readings — does it fall back to the remote origin. The probe runs
+ * ONCE per download rather than per line, so the web path costs nothing.
  */
 export async function downloadNarration(n, dialect, lineCount, onProgress) {
-  if (!dbSupported()) return { ok: false, stored: 0, failed: lineCount };
+  if (!dbSupported()) return { ok: false, stored: 0, failed: lineCount, source: 'none' };
   const have = await storedSet(n, dialect);
   let stored = 0, failed = 0;
+
+  // One probe decides where the rest of this reading comes from.
+  let useRemote = false;
+  const firstMissing = (() => {
+    for (let i = 1; i <= lineCount; i++) {
+      if (!have[narrationPath(n, dialect, i)]) return narrationPath(n, dialect, i);
+    }
+    return null;
+  })();
+  if (firstMissing) {
+    try {
+      const probe = await fetch(audioUrl(firstMissing), { method: 'HEAD' });
+      useRemote = !probe.ok;
+    } catch {
+      useRemote = true;                           // no same-origin copy at all
+    }
+  }
+  const urlFor = path => (useRemote ? remoteNarrationUrl(path) : audioUrl(path));
+
   for (let i = 1; i <= lineCount; i++) {
     const path = narrationPath(n, dialect, i);
     if (have[path]) { stored++; onProgress?.(i / lineCount); continue; }
     try {
-      const res = await fetch(audioUrl(path));
+      const res = await fetch(urlFor(path));
       if (!res.ok) throw new Error(String(res.status));
       const blob = await res.blob();
       await idbPut(STORES.narration,
@@ -124,7 +159,8 @@ export async function downloadNarration(n, dialect, lineCount, onProgress) {
     }
     onProgress?.(i / lineCount);
   }
-  return { ok: failed === 0 && stored === lineCount, stored, failed };
+  return { ok: failed === 0 && stored === lineCount, stored, failed,
+           source: useRemote ? 'remote' : 'same-origin' };
 }
 
 /** Remove one reading from this device. */

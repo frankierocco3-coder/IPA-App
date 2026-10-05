@@ -26,9 +26,23 @@ Audience: working actors and, eventually, acting schools.
    one without being asked explicitly.
 2. **No backend, no accounts, no auth.** Everything is client-side and
    per-device. `serve.py` is a local dev server only, never deployed.
-3. **No external runtime requests.** No CDN, fonts, analytics, telemetry, or
-   third-party scripts. The app makes exactly two same-origin `fetch` calls.
-   CI fails if an external origin appears in shipped code.
+3. **No external runtime requests, with ONE named exception.** No CDN,
+   fonts, analytics, telemetry, or third-party scripts — ever. CI fails if
+   an external origin appears in shipped code.
+   **AMENDED 2026-10-04 by Frankie's explicit decision**, the first time
+   this rule has moved: `js/narration.js` may fetch sonnet readings from
+   the audio site. A store bundle ships without the 212.9MB of narration
+   and has no same-origin copy, so this is the only way it can ever be
+   offered. The exception is deliberately tiny and the gates hold it there:
+   * ONE origin, and `security_audit.py` allows it in **`js/narration.js`
+     alone** — naming it in any other shipped file fails the deploy;
+   * it buys **`connect-src` only**. Readings are stored and played from
+     `blob:` URLs, so `media-src` stays `'self' blob:` and no remote URL is
+     ever handed to an `<audio>` element;
+   * **same-origin is always tried first** (one HEAD probe per download);
+     on the web nothing external happens at all;
+   * it is for narration the learner asked to keep. Nothing is collected,
+     nothing is sent, and there is still no telemetry of any kind.
 4. **No credential ever reaches the browser.** The ElevenLabs key is used only
    by offline scripts in `tools/`. The deployed app has no API code path and
    runs fine with no key present. See `docs/CREDENTIAL_POLICY.md`.

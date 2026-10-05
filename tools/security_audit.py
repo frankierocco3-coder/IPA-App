@@ -88,18 +88,38 @@ for path in all_text_files():
 # ── 2. external origins in shipped code ───────────────────────
 EXTERNAL = re.compile(r'''(?:src|href)\s*=\s*["'](https?://[^"']+)''', re.I)
 FETCH_EXT = re.compile(r'''(?:fetch|XMLHttpRequest|importScripts)\s*\(\s*["'](https?://[^"']+)''', re.I)
-# This app is intentionally fully self-hosted. The single exception is a
-# NAVIGATION link (never a fetch): the Feedback page's GitHub Issues anchor,
-# added for launch (rel="noopener noreferrer", opens in a new tab). Anything
-# else external still fails the audit.
+# This app is intentionally fully self-hosted. The exceptions are named
+# one at a time, and each is tied to the FILE that is allowed to carry it,
+# so an exception granted for one purpose cannot quietly serve another.
+#
+#   1. A NAVIGATION link, never a fetch: the Feedback page's GitHub Issues
+#      anchor (rel="noopener noreferrer", opens in a new tab).
+#   2. The narration origin, 2026-10-04, by the owner's explicit amendment
+#      of hard constraint 3. A STORE BUNDLE ships without the 212.9MB of
+#      sonnet readings and has no same-origin copy to fetch, so narration
+#      — and ONLY narration — may be fetched from the audio site. It is
+#      confined to js/narration.js: no other shipped file may name it.
+#      Narrow on purpose. The bytes are stored and then played from blob:
+#      URLs, so this buys `connect-src` and nothing else; `media-src` stays
+#      at 'self' blob:. If the audio ever moves to a custom domain
+#      (docs/CUSTOM_DOMAIN.md), this origin moves with it.
 ALLOWED_ORIGINS = {'https://github.com/frankierocco3-coder/IPA-App/issues'}
+# origin -> the one shipped file permitted to name it
+SCOPED_ORIGINS = {'https://frankierocco3-coder.github.io': 'js/narration.js'}
 
 for path in shipped_files():
     body = read(path)
     for m in list(EXTERNAL.findall(body)) + list(FETCH_EXT.findall(body)):
         origin = re.match(r'https?://[^/]+', m).group(0)
         # allow-list entries may be a full URL (tightest) or an origin
-        if origin not in ALLOWED_ORIGINS and m not in ALLOWED_ORIGINS:
+        if origin in ALLOWED_ORIGINS or m in ALLOWED_ORIGINS:
+            continue
+        owner = SCOPED_ORIGINS.get(origin)
+        if owner and rel(path).replace(os.sep, '/') == owner:
+            continue
+        if owner:
+            errors.append(f'{origin} is allowed only in {owner}, not {rel(path)}')
+        else:
             errors.append(f'external origin in {rel(path)} -> {m[:80]}')
 
 # ── 3. unsafe JS constructs ───────────────────────────────────

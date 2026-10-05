@@ -126,8 +126,29 @@ fetch, and getting it needs one of:
   for the browser.** Costs: real logic in both shells rather than windows,
   Android still needs INTERNET, and neither shell can be compiled here.
 
-**Not chosen.** (b) protects the stronger property, (a) is far less work
-and is testable today. It is a rule of the owner's, so it is his to amend.
+**DECIDED 2026-10-04: (a), the owner amending his own rule.** Done, and
+deliberately made as small as a rule-change can be:
+
+- **One origin, one file.** `security_audit.py` now scopes it: naming
+  `https://frankierocco3-coder.github.io` in any shipped file other than
+  `js/narration.js` fails the deploy. Proven by naming it in `js/audio.js`
+  and watching the gate refuse.
+- **`connect-src` only.** Readings are stored and played from `blob:`
+  URLs, so `media-src` stays `'self' blob:` and no remote URL ever reaches
+  an `<audio>` element.
+- **Same-origin first**, decided by ONE `HEAD` probe per download. On the
+  web nothing external happens at all — verified: a local download
+  reported `source: 'same-origin'`.
+- **Android gains `INTERNET`** for this and nothing else. No accounts, no
+  analytics, no telemetry: the Play data-safety answer stays "nothing
+  collected, nothing sent".
+
+**The unknown that made it work, now checked.** GitHub Pages returns
+`access-control-allow-origin: *`, so a bundled app really can fetch these
+files cross-origin. Verified end to end from `http://localhost:4173`: the
+narration origin fetched 35,988 bytes, and `https://example.com` was still
+blocked by the CSP. Had Pages sent no CORS header, this branch would not
+have worked at all and (b) would have been the only route.
 
 **One smaller piece is still missing under either branch:** a bundle needs
 to know what narration exists UPSTREAM, which the zeroed coverage file no
