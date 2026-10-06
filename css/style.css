@@ -1146,7 +1146,11 @@ body.modal-open { overflow: hidden; }
    (2026-10-06). They used to sit behind a second chip, which is how four
    built courses became unfindable. Indented and hairlined so the nesting
    reads as "inside Accents & Dialects" rather than as six more peers. */
-.ws-sub { margin: 2px 0 6px 20px; border-left: 2px solid var(--line); padding-left: 6px; }
+/* NOT .ws-sub — that is the page-subtitle class, used in a dozen views, and
+   naming this the same put a 20px indent and a left border on every
+   workspace subtitle in the app. Caught by reading the live stylesheet, not
+   by the suite, which asserts nothing about those margins. */
+.ws-courses { margin: 2px 0 6px 20px; border-left: 2px solid var(--line); padding-left: 6px; }
 .course-row.is-nested { padding: 7px 10px; }
 .course-row.is-nested .course-row-info b { font-weight: 600; }
 /* Eleven rows is taller than a small phone. Cap it against the viewport and

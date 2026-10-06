@@ -443,7 +443,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
           <span class="course-row-info"><b>${esc(w.label)}</b><small>${esc(w.context)}</small></span>
           ${w.id === ws ? '<span class="course-check">✓</span>' : ''}
         </button>${w.id === 'accents' && ws === 'accents' ? `
-        <div class="ws-sub" id="course-menu">
+        <div class="ws-courses" id="course-menu">
           ${accentRows}
         </div>` : ''}`).join('')}
     </div>
