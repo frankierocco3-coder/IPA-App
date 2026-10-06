@@ -57,11 +57,29 @@ export const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<':
 
 // Speechcraft emblem — winged staff + open book, encircled. Brand mark.
 
-export function record(thunk) {
+export function record(thunk, key) {
   stopSpeech();                                  // leaving/entering a page stops any reading
   tearDownPage();                                // practice recordings + live capture die with the page
   if (navRestoring) { navRestoring = false; return; }
-  if (navStack[navStack.length - 1] === thunk) return; // ignore same-page re-render
+  const top = navStack[navStack.length - 1];
+  if (top === thunk) return;                     // ignore same-page re-render
+  // THE SAME GUARD, FOR PAGES RECORDED AS A FRESH CLOSURE (2026-10-05).
+  // The line above compares function identity, which works for
+  // `record(renderFoo)` and never fires for `record(() => renderFoo(x))`,
+  // because that arrow is a new object on every call. Most views are
+  // reached once and never notice. renderTrack did: the lesson guide is
+  // deliberately NOT recorded, and its ✕ calls renderTrack(track)
+  // directly rather than going back, so every lesson opened and quit
+  // pushed another identical entry. Back then popped one copy and
+  // rendered the next, which looks exactly like a back button that does
+  // nothing — and it compounded, one dead press per quit.
+  //
+  // `key` is opt-in: pass a stable string and a re-entry to the same page
+  // replaces nothing and pushes nothing. Callers that pass no key behave
+  // exactly as before, which is why this does not disturb the other 49
+  // closure-recorded views.
+  if (key !== undefined && top !== undefined && top.navKey === key) return;
+  if (key !== undefined) thunk.navKey = key;
   navStack.push(thunk);
 }
 

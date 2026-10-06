@@ -10587,7 +10587,9 @@ function buildTrackPath(track, opts = {}) {
 }
 
 function renderTrack(track) {
-  record(() => renderTrack(track));
+  // Keyed, because the guide's ✕ re-enters this page directly rather than
+  // going back, and an unkeyed closure stacks a duplicate every time.
+  record(() => renderTrack(track), `track:${track.id}`);
   const path = buildTrackPath(track);
   app.innerHTML = `
     ${pageTopbar(`${track.icon} ${esc(track.title)}`, track.color)}
