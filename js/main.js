@@ -389,16 +389,49 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
     </span>`
     : `
     <button class="stat-chip course-chip is-sub" id="course-chip" type="button"
-            aria-haspopup="menu" aria-expanded="false" title="Switch course"
-            aria-label="Change course. Current course: ${esc(course.label)}.">
+            aria-haspopup="menu" aria-expanded="false" title="Switch course or workspace"
+            aria-label="Change course or workspace. Current course: ${esc(course.label)}.">
       <span class="chip-prefix">Course</span>
       <span class="course-icon" aria-hidden="true">${course.icon}</span>
       <span class="course-name" aria-hidden="true">${esc(course.label)}</span> <span aria-hidden="true">▾</span>
     </button>`;
+
+  // ONE MENU, NOT TWO (owner decision 2026-10-06). The accent courses used
+  // to live behind a SECOND chip, so reaching Cockney meant finding one
+  // hidden control inside another. Eleven destinations sat behind two chips
+  // that do not read as menus, and the owner — who built all of it — could
+  // not find four of his own courses. A stranger will not look as long.
+  //
+  // The courses are now nested under the Accents & Dialects row of the one
+  // menu. Both chips open that same menu; the course chip stays because it is
+  // the only at-a-glance statement of which course you are in.
+  //
+  // THEY RENDER IN THE ACCENTS WORKSPACE ONLY, and that is a concession.
+  // Rendering them everywhere would put Cockney one tap from Acting, which
+  // is what I wanted — but the header contract says an accentless workspace
+  // shows NO accent context, and `#statsbar.textContent` is how the suite
+  // checks it, so a hidden menu still counts. Two checks pin that rule, for
+  // Acting and for IPA. It is a real rule about not implying you are in a
+  // course you are not, and it outranks saving a tap.
+  //
+  // `#course-menu` survives as the id of the nested group. That keeps the
+  // product rule it has always carried — the accent list offers the five
+  // accents and NEVER IPA Foundations, which is a course in another
+  // workspace — and keeps the checks that pin that rule honest.
+  const accentRows = visibleCourses().filter(c => c.id !== 'core').map(c => {
+    const { done, total } = trackProgress(trackFor(c.id));
+    const here = ws === 'accents' && c.id === course.id;
+    return `<button class="course-row is-nested ${here ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
+          <span class="course-icon">${c.icon}</span>
+          <span class="course-row-info"><b>${esc(c.label)}</b><small>${done}/${total} steps</small></span>
+          ${here ? '<span class="course-check">✓</span>' : ''}
+        </button>`;
+  }).join('');
+
   bar.innerHTML = `
     <button class="stat-chip ws-chip" id="ws-chip" type="button"
-            aria-haspopup="menu" aria-expanded="false" title="Switch workspace"
-            aria-label="Change workspace. Current workspace: ${esc(wsDef.label)}.">
+            aria-haspopup="menu" aria-expanded="false" title="Switch workspace or course"
+            aria-label="Change workspace or course. Current workspace: ${esc(wsDef.label)}.">
       <span class="course-icon" aria-hidden="true">${wsDef.icon}</span>
       <span class="course-name" aria-hidden="true">${esc(wsDef.label)}</span> <span aria-hidden="true">▾</span>
     </button>
@@ -409,36 +442,32 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
           <span class="course-icon">${w.icon}</span>
           <span class="course-row-info"><b>${esc(w.label)}</b><small>${esc(w.context)}</small></span>
           ${w.id === ws ? '<span class="course-check">✓</span>' : ''}
-        </button>`).join('')}
+        </button>${w.id === 'accents' && ws === 'accents' ? `
+        <div class="ws-sub" id="course-menu">
+          ${accentRows}
+        </div>` : ''}`).join('')}
     </div>
     ${contextChip}
     ${ACCENTLESS_WORKSPACES.includes(ws) ? '' : `
     <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay" aria-pressed="${store.freePlay}"
-            aria-label="Free play: unlock all lessons" title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>`}
-    ${ws === 'accents' ? `
-    <div class="course-menu" id="course-menu" role="menu" hidden>
-      <p class="course-menu-h">My accent courses</p>
-      ${visibleCourses().filter(c => c.id !== 'core').map(c => {
-        const t = trackFor(c.id);
-        const { done, total } = trackProgress(t);
-        return `<button class="course-row ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
-          <span class="course-icon">${c.icon}</span>
-          <span class="course-row-info"><b>${esc(c.label)}</b><small>${done}/${total} steps</small></span>
-          ${c.id === course.id ? '<span class="course-check">✓</span>' : ''}
-        </button>`;
-      }).join('')}
-      <p class="pane-note">IPA Foundations lives in the <b>Voice &amp; Speech</b> workspace — switch workspaces using the chip above to study it.</p>
-    </div>` : ''}`;
+            aria-label="Free play: unlock all lessons" title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>`}`;
 
-  // Workspace menu — available in every workspace, on every section.
+  // Both chips open the ONE menu. The course chip is no longer a second
+  // control with a second popup behind it; it is a label that happens to be
+  // clickable, so tapping either one shows the same eleven destinations.
   const wsChip = bar.querySelector('#ws-chip');
   const wsMenu = bar.querySelector('#ws-menu');
-  const wsClose = () => { wsMenu.hidden = true; wsChip.setAttribute('aria-expanded', 'false'); };
-  wsChip.addEventListener('click', e => {
-    e.stopPropagation();
-    wsMenu.hidden = !wsMenu.hidden;
-    wsChip.setAttribute('aria-expanded', String(!wsMenu.hidden));
-  });
+  const chip = bar.querySelector('#course-chip');
+  const setOpen = open => {
+    wsMenu.hidden = !open;
+    wsChip.setAttribute('aria-expanded', String(open));
+    chip?.setAttribute('aria-expanded', String(open));
+  };
+  const close = () => setOpen(false);
+  const toggle = e => { e.stopPropagation(); setOpen(wsMenu.hidden); };
+  wsChip.addEventListener('click', toggle);
+  chip?.addEventListener('click', toggle);
+
   wsMenu.querySelectorAll('[data-ws]').forEach(b =>
     b.addEventListener('click', () => {
       const target = b.dataset.ws;
@@ -449,23 +478,15 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
       goSection(SECTIONS.some(x => x.id === here) ? here : 'learn');
     }));
 
-  const chip = bar.querySelector('#course-chip');
-  const menu = bar.querySelector('#course-menu');
-  const close = () => {
-    wsClose();
-    if (menu) { menu.hidden = true; chip?.setAttribute('aria-expanded', 'false'); }
-  };
-  chip?.addEventListener('click', e => {
-    e.stopPropagation();
-    menu.hidden = !menu.hidden;
-    chip.setAttribute('aria-expanded', String(!menu.hidden));
-  });
+  // Course rows only exist in the accents workspace (see above), so this is
+  // the same switch it always was — it just lives in the one menu now.
+  wsMenu.querySelectorAll('[data-course]').forEach(b =>
+    b.addEventListener('click', () => { setCourse(b.dataset.course); renderShell(activeSection()); }));
+
   document.addEventListener('click', close, { once: true });
   document.addEventListener('keydown', function onKey(e) {
     if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onKey); }
   });
-  menu?.querySelectorAll('.course-row').forEach(b =>
-    b.addEventListener('click', () => { setCourse(b.dataset.course); renderShell(activeSection()); }));
   // Free play unlocks LESSON gating, which the Speech course does not
   // use — the control is hidden there rather than offering a no-op.
   bar.querySelector('#freeplay')?.addEventListener('click', () => {

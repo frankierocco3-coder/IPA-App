@@ -1142,6 +1142,19 @@ body.modal-open { overflow: hidden; }
 .course-row-info small { color: var(--muted); font-size: 11.5px; }
 .course-check { color: var(--green-dark); font-weight: 800; }
 
+/* The accent courses, nested under their workspace in the one menu
+   (2026-10-06). They used to sit behind a second chip, which is how four
+   built courses became unfindable. Indented and hairlined so the nesting
+   reads as "inside Accents & Dialects" rather than as six more peers. */
+.ws-sub { margin: 2px 0 6px 20px; border-left: 2px solid var(--line); padding-left: 6px; }
+.course-row.is-nested { padding: 7px 10px; }
+.course-row.is-nested .course-row-info b { font-weight: 600; }
+/* Eleven rows is taller than a small phone. Cap it against the viewport and
+   let it scroll rather than run under the bottom nav, which is what the
+   footnote here used to do before it was cut (the Voice & Speech row says
+   "IPA Foundations inside" already, so the note was repeating itself). */
+.ws-menu { max-height: calc(100dvh - 215px); overflow-y: auto; overscroll-behavior: contain; }
+
 /* Right rail */
 .right-rail { position: sticky; top: 0; align-self: start; padding-top: 18px; display: flex; flex-direction: column; gap: 14px; }
 .rail-card { background: var(--panel); border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; }
