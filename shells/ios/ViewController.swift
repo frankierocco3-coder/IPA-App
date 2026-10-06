@@ -42,10 +42,26 @@ final class ViewController: UIViewController, WKNavigationDelegate, WKUIDelegate
         // Matches --bg in css/style.css, so there is no white flash on launch.
         webView.backgroundColor = UIColor(red: 0.937, green: 0.925, blue: 0.882, alpha: 1)
 
+        // Matches the webView, so the strip behind the status bar is the
+        // app's own colour rather than a white band.
+        view.backgroundColor = UIColor(red: 0.937, green: 0.925, blue: 0.882, alpha: 1)
+
         webView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(webView)
         NSLayoutConstraint.activate([
-            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            // TOP IS INSET, the other three are not (2026-10-05, from the
+            // first build on a real screen). css/style.css reads
+            // env(safe-area-inset-BOTTOM) for the nav bar but never the top
+            // one, because in a browser Safari's own chrome provides that
+            // gap and the page never needs it. A full-screen WKWebView has
+            // no chrome, so the page drew under the clock: the workspace
+            // chip and the status bar occupied the same pixels.
+            //
+            // Fixed here rather than in the web layer. The page is right for
+            // a browser, and adding viewport-fit=cover to index.html would
+            // change the live site for every existing user to suit a shell
+            // that is not shipped yet.
+            webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             webView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),

@@ -427,7 +427,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
           ${c.id === course.id ? '<span class="course-check">✓</span>' : ''}
         </button>`;
       }).join('')}
-      <p class="pane-note">IPA Foundations lives in the IPA workspace — switch workspaces to study it.</p>
+      <p class="pane-note">IPA Foundations lives in the <b>Voice &amp; Speech</b> workspace — switch workspaces using the chip above to study it.</p>
     </div>` : ''}`;
 
   // Workspace menu — available in every workspace, on every section.
