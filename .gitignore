@@ -41,3 +41,11 @@ tools/voices.json
 # Audio lives in the IPA-Audio repository (checked out beside this one)
 # since 2026-09-21. Never re-add it here.
 /audio/
+
+# Native shell build output — tools/build_shell_payload.py writes the
+# payload here and a simulator build puts the .app beside it. Together
+# that is ~230MB, most of it a SECOND copy of the course audio, and this
+# repository is already near the Pages size limit. Added 2026-10-05, the
+# first time anything was actually built, when `git status` showed the
+# whole lot untracked and one `git add -A` from being committed.
+/build/

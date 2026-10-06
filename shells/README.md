@@ -28,16 +28,36 @@ Said plainly, because this is the part that is easy to overclaim.
   `nam 0, rp 0, aus 0, ssbe 0`, so the reader badges nothing it lacks.
 - The Swift sources **parse** (`swiftc -parse`, Swift 6.3.3).
 
-**NOT verified, because this machine cannot:**
+**Verified 2026-10-05, once Xcode 27 was installed:**
 
-- **Neither shell has been compiled or run.** Xcode is not installed
-  (Command Line Tools only), and there is no Java, Gradle, Android SDK or
-  Android Studio here. `swiftc -parse` checks syntax, not types, and
-  cannot resolve `UIKit` or `WebKit` against an iOS SDK.
-- No device or simulator has opened either one.
+- The iOS shell **type-checks** against the real iOS 27 Simulator SDK —
+  not just syntax this time, so `UIKit` and `WebKit` genuinely resolve.
+- It **compiles, installs, launches and renders** on an iPhone 17
+  simulator (iOS 27). The first-run wall draws in the right type and the
+  right colours, Continue advances, Back appears: routing, the nav stack
+  and the module graph all run over the custom scheme from the bundle.
+- The first build wanted exactly one correction, and it was a real one —
+  see below.
 
-Treat the shells as reviewed source, not as tested software. The first
-build will almost certainly want small corrections, and that is expected.
+**THE CORRECTION THE FIRST BUILD FORCED.** The shell built its `UIWindow`
+in `AppDelegate`, the pre-iOS-13 single-window shape. Against the iOS 27
+SDK that does not warn: the app **traps at launch** inside
+`__UIApplicationEvaluateRuntimeIssueForNoSceneLifecycleAdoption`, before
+one line of Speechcraft runs. On screen it was a blank white page —
+indistinguishable from the failure the Safari audit was about, and nothing
+to do with the web layer. `SceneDelegate.swift` now owns the window, the
+`UIApplicationSceneManifest` names it, and Apple requires submissions to
+be built against a recent SDK, so there was never a version of shipping
+that avoided this.
+
+**STILL NOT verified:**
+
+- **The Android shell has never been compiled.** There is no Java, Gradle,
+  Android SDK or Android Studio on this machine.
+- No physical device has opened either shell, and **audio has not been
+  heard** — `BundleSchemeHandler`'s `206` range support is exercised by
+  playback, which needs an ear, not a simulator.
+- Nothing is signed. Signing needs the Apple developer account.
 
 ---
 
@@ -73,14 +93,34 @@ sibling-Pages-site move and happens to be exactly what a bundle needs.
 
 ## iOS
 
-Files: `AppDelegate.swift`, `ViewController.swift`,
+Files: `AppDelegate.swift`, `SceneDelegate.swift`, `ViewController.swift`,
 `BundleSchemeHandler.swift`.
 
 In Xcode: new iOS App, Swift, **no storyboard** (delete
 `Main.storyboard` and the `UIKit Main Storyboard` key in Info.plist), add
-the three files, then drag `build/payload` in as a **folder reference**
+the four files, then drag `build/payload` in as a **folder reference**
 named `www` — blue folder, not yellow. A group flattens the tree and the
 app will not find `js/main.js`.
+
+Keep the template's `UIApplicationSceneManifest` and point its
+`UISceneDelegateClassName` at `SceneDelegate` (`$(PRODUCT_MODULE_NAME).SceneDelegate`).
+Without the manifest the app traps at launch on iOS 13 and later — see the
+correction note above.
+
+**A simulator build needs no developer account**, which is how this was
+first run. Without an Xcode project at all:
+
+```bash
+SDK=$(xcrun --sdk iphonesimulator --show-sdk-path)
+xcrun swiftc -sdk "$SDK" -target arm64-apple-ios15.0-simulator \
+  -module-name Speechcraft -o Speechcraft.app/Speechcraft shells/ios/*.swift
+cp -R build/payload Speechcraft.app/www       # plus a hand-written Info.plist
+xcrun simctl install booted Speechcraft.app && xcrun simctl launch booted com.frankierocco.speechcraft
+```
+
+Hand-writing the `Info.plist` means `$(PRODUCT_MODULE_NAME)` is not
+substituted: write the module name literally (`Speechcraft.SceneDelegate`)
+and pass `-module-name Speechcraft` so the two agree.
 
 **Why a custom scheme and not `loadFileURL`.** Speechcraft is vanilla ES
 modules. A module script fetched from `file://` is blocked by CORS,
