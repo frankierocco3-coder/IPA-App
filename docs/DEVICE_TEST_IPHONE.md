@@ -132,18 +132,39 @@ Safari → Advanced → **Block All Cookies** ON. Reload the app.
 
 ## Part 3 — things only a phone can show (15 min)
 
-**3.1 — the silent switch. Genuine unknown.** Flip the ring/silent switch
-on the side of the phone to **silent**. Then Library → IPA → open a sound
-page → **Hear the sound**. (Neutral American sounds are your own
-recordings, so you will know immediately whether it played.)
+**3.1 — the silent switch. ANSWERED FOR THE SHELL 2026-10-06, STILL OPEN FOR
+THE WEB.**
 
-- **The question:** does iOS mute it? iOS silences ordinary web audio when
-  that switch is on.
-- **Why it matters:** the app is strict about audio by design — a missing
-  clip is silence, never a substitute voice and never a message. So if the
-  switch mutes everything, a user with it flipped gets an app that appears
-  to have no audio at all and says nothing about why.
-- Then flip the switch off and play it again.
+**The shell half needed no test, only a read.** Neither shell configured an
+audio session, so both inherited `AVAudioSession`'s default `.soloAmbient` —
+which obeys the ring switch. The answer was therefore yes: a silenced phone
+gave a silent app. `shells/ios/AppDelegate.swift` now sets **`.playback`**,
+which overrides the switch, and the owner kept it.
+
+**The cost, recorded because it is a real trade and not a free win:**
+`.playback` without `.mixWithOthers` also stops whatever else was playing, so
+somebody studying over music loses the music. The alternative keeps their
+music and mixes two streams during close listening, which is the exercise
+itself. One line either way, in `configureAudioSession()`.
+
+Verified by type-check against the iOS 27 SDK, a rebuild, and a launch on an
+iPhone 18 Pro Max simulator: it renders, no crash, and the session's only
+failure path logs nothing. A failure there falls back to the old behaviour
+rather than refusing to start.
+
+**THE WEB HALF IS STILL YOURS AND STILL UNANSWERED.** Safari owns its own
+audio session; the shell fix does nothing for anyone using the site. So the
+original test stands for the web version only:
+
+Flip the ring/silent switch to **silent**. Then Library → IPA → open a sound
+page → **Hear the sound**. (Neutral American sounds are your own recordings,
+so you will know immediately whether it played.) Then flip it off and play
+again.
+
+- **Why it still matters:** the app is strict about audio by design — a
+  missing clip is silence, never a substitute voice and never a message. A
+  web user with that switch flipped would get an app that appears to have no
+  audio at all and says nothing about why.
 - Saw, silent: `__________`  Saw, not silent: `__________`
 
 **3.2 — audio generally.** Library → Words & Expressions → a listen
@@ -322,4 +343,34 @@ surviving a move to a custom domain, and recovering from WebKit's
 seven-day eviction. All three depended on it.
 
 **Still open: 4.3** (does the installed home-screen app keep your
-progress) and **3.1** (does the silent switch kill the audio).
+progress) and **3.1 for the web** (see below).
+
+## RESULTS — 2026-10-06
+
+**3.1 the silent switch — ANSWERED FOR THE SHELL, by reading rather than
+testing.** Neither shell configured an audio session, so both inherited
+`.soloAmbient`, which obeys the ring switch: a silenced phone gave a silent
+app. `shells/ios/AppDelegate.swift` now sets `.playback`. The trade is that
+it stops other audio; the owner kept it, because a tool whose whole subject
+is listening should play when the learner taps "Hear the sound". **Safari
+owns its own session, so this does nothing for the web version and 3.1
+remains open there.**
+
+**What the iOS simulator has now covered, and what it has not.** The shell
+was compiled and run on iOS 27 (iPhone 17 and iPhone 18 Pro Max): it boots,
+renders in the right type and colours, navigates, and the nav bar sits
+correctly after the safe-area fix. That is the substance of **1.1, 1.2 and
+3.3** on a current OS — but on a simulator, not your hardware, and it says
+nothing about a physical switch, a real keyboard, rotation in the hand, or
+whether any voice is right.
+
+**Two parts have lost their point since the store decision.** **4.3** and
+**Part 5** are about WebKit's seven-day eviction and whether installing to
+the Home Screen is a remedy. **A packaged store app is not subject to it at
+all** — its storage is not script-writable browser storage. Both still matter
+for people using the web version; neither gates the launch any more.
+
+**Still worth your hands:** **2.4** (does the `100dvh` fix make scrolling
+jitter — the one change that could have introduced a new problem, remedy is
+one word, `svh`), **3.2** and **3.6** (audio generally, and offline), and
+**3.1 for the web**.
