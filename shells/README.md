@@ -149,6 +149,24 @@ Files: `MainActivity.kt`, `AndroidManifest.xml`, `build.gradle`.
 Put the payload at `app/src/main/assets/` (so `assets/index.html` and
 `assets/IPA-Audio/...`).
 
+**The manifest expects two resources this directory does not contain:**
+`@mipmap/ic_launcher` and `@style/Theme.Speechcraft`. A new Android Studio
+project provides both, so create the project first and add these files to it;
+copying the three files into a bare module fails to build with a resource
+error that does not say why.
+
+**SYSTEM BARS ARE THE APP'S PROBLEM AT `targetSdk 35`.** Android 15 draws
+edge-to-edge by default at that target, so an unpadded WebView runs under the
+clock and the gesture bar. `MainActivity` applies the insets as padding and
+paints the WebView the app's background colour.
+
+This cannot be fixed in the web layer. `css/style.css` reads
+`env(safe-area-inset-bottom)` for the nav bar, but `env()` only reports real
+values when the viewport meta carries `viewport-fit=cover`, and `index.html`
+deliberately does not — adding it would change the live site for every
+browser user to suit a shell that is not shipped. iOS has the same correction
+for the same reason, in `ViewController.swift`.
+
 Android is the easier half. `WebViewAssetLoader` serves over a real
 **https** origin, so modules load, fetch is same-origin, **and service
 workers register** — `sw.js` works exactly as it does on Pages and the

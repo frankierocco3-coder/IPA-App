@@ -19,7 +19,6 @@ package com.speechcraft.app
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
@@ -27,6 +26,8 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.webkit.WebViewAssetLoader
 
 private const val DOMAIN = "appassets.androidplatform.net"
@@ -75,6 +76,32 @@ class MainActivity : ComponentActivity() {
         }
 
         setContentView(webView)
+
+        // THE SYSTEM BARS, which targetSdk 35 makes our problem (2026-10-06).
+        // Android 15 draws an app edge-to-edge by default at this target, so
+        // an unpadded WebView runs under the clock at the top and the gesture
+        // bar at the bottom. iOS had the identical bug for the identical
+        // reason, found by photographing the first build; this is the same
+        // fault caught by reading instead.
+        //
+        // The web layer cannot fix it. css/style.css reads
+        // env(safe-area-inset-bottom) for the nav, but env() only reports
+        // real values with viewport-fit=cover in the viewport meta, and
+        // index.html deliberately does not set it — that would change the
+        // live site for every browser user to suit a shell that is not
+        // shipped. So the shell insets itself, exactly as the iOS one does.
+        //
+        // Background matches --bg in css/style.css so the padded strip is the
+        // app's own colour rather than a white band.
+        webView.setBackgroundColor(0xFFEFECE1.toInt())
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { view, insets ->
+            val bars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            view.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            WindowInsetsCompat.CONSUMED
+        }
+
         webView.loadUrl(START_URL)
 
         onBackPressedDispatcher.addCallback(this, backHandler)
@@ -105,12 +132,22 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Audio is paused with the app rather than left playing over whatever the
+    // reader opened next. onPause/onResume on the WebView is the documented
+    // way; the web layer's own teardown only fires on pagehide, which a
+    // backgrounded Android app does not reach.
+    override fun onPause() {
+        webView.onPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        webView.onResume()
+    }
+
     override fun onDestroy() {
         webView.destroy()
         super.onDestroy()
-    }
-
-    private fun openExternally(uri: Uri) {
-        startActivity(Intent(Intent.ACTION_VIEW, uri))
     }
 }
