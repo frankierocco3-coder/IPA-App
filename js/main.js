@@ -12,6 +12,7 @@ import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.j
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
+import { STRATAGEMS, stratagemById } from './data/rhetoric/stratagems.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -4996,6 +4997,10 @@ const falCardHtml = f => `
 // source is never read as a quotation, and a page reached straight from a
 // card is precisely where a reader would otherwise never meet them.
 function renderFallacyPage(kind, id) {
+  // The stratagems leave before the two fallacy paths are touched, so both
+  // of those stay exactly as they were rather than being rewritten into a
+  // three-way branch. A move is reviewable as a move; this is an addition.
+  if (kind === 'stratagem') return renderStratagemPage(id);
   const thirteen = kind === 'thirteen';
   const f = thirteen ? fallacyById(id) : MODERN_FALLACIES.find(x => x.id === id);
   if (!f) return thirteen ? renderFallacyShelf() : renderFamilyShelf();
@@ -5162,6 +5167,116 @@ function renderFamilyShelf() {
   draw();
 }
 
+// ── The 38 Stratagems: Schopenhauer, flat and in his order ──────
+// Owner decision 2026-10-09. The fourth reference shelf, and the only one
+// that is not a taxonomy of mistakes: a fallacy is something a person
+// falls into, a stratagem is a thing somebody does to you on purpose.
+// That distinction is the shelf's whole reason to exist and the lead
+// paragraph states it.
+//
+// NO GROUPS, deliberately — he gives none, and the other three shelves
+// grouping is not a reason to invent eight families for him. Which is why
+// this draws ONE flat list and has no section headings to filter.
+//
+// Fourteen entries restate a move the fallacy shelves already define. Those
+// carry `alsoFallacy` and point at it instead of defining it twice,
+// exactly as `alsoAristotle` does between the other two.
+const STRATAGEM_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric reader. '
+  + 'The summaries, the questions and the unattributed examples are written for this app '
+  + 'and have not been checked by a qualified reader. Recognising a stratagem begins an '
+  + 'examination; it does not finish one, and nothing here is a way to win an argument '
+  + 'without having the better case.';
+
+const STRATAGEM_SOURCE_NOTE = 'From The Art of Controversy by Arthur Schopenhauer, translated '
+  + 'by T. Bailey Saunders. Project Gutenberg records that translation as public domain in '
+  + 'the United States; readers elsewhere should check the copyright law where they live. '
+  + 'An example with a source tag is his. One without was written for this course.';
+
+let stratQuery = '';
+
+// Numeral first, because the numbering is how the work is cited and is
+// the only structure he gives. The Latin tag rides in the name where he
+// supplies one, the way the thirteen carry their modern name in brackets.
+const stratagemLabel = s => `${s.n} · ${s.term}${s.latin ? ` (${s.latin})` : ''}`;
+
+function stratagemHtml(s) {
+  const a = s.alsoFallacy
+    ? (fallacyById(s.alsoFallacy) ?? MODERN_FALLACIES.find(x => x.id === s.alsoFallacy))
+    : null;
+  return `
+    ${a ? `<p class="pane-note">also on the fallacy shelves · ${esc(a.term)}</p>` : ''}
+    <p class="guide-text fal-def">${esc(s.what)}</p>
+    ${fallacyEgHtml(s)}
+    ${hidesAskHtml(s)}`;
+}
+
+function renderStratagemPage(id) {
+  const s = stratagemById(id);
+  if (!s) return renderStratagemShelf();
+  record(() => renderFallacyPage('stratagem', id));
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🗡 The 38 Stratagems', '#8a6d3b')}
+    <main class="guide">
+      <h1 id="fal-title" tabindex="-1">${esc(stratagemLabel(s))}</h1>
+      ${stratagemHtml(s)}
+      <p class="pane-note pane-caveat">${esc(STRATAGEM_REVIEW_NOTE)}</p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('fal-title')?.focus();
+}
+
+function renderStratagemShelf() {
+  record(renderStratagemShelf);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🗡 The 38 Stratagems', '#8a6d3b')}
+    <main class="guide">
+      <h1>The 38 Stratagems</h1>
+      <p class="guide-text">A fallacy is something a person falls into. A stratagem is something
+        somebody does to you on purpose, knowing their case is weak and meaning to win anyway.
+        That is why these are not on the fallacy shelves.</p>
+      <p class="guide-text">Thirty-eight of them, in his order and under his numbers, because the
+        list is closed and the numbering is how it is cited. He gives no grouping, so neither
+        does this shelf.</p>
+      <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
+      <p class="pane-note">${esc(STRATAGEM_SOURCE_NOTE)}</p>
+      <p class="pane-note pane-caveat">${esc(STRATAGEM_REVIEW_NOTE)}</p>
+      <input class="sonnet-search" id="st-search" type="search"
+        placeholder="Search stratagems, effects, examples…" aria-label="Search the stratagems"
+        value="${esc(stratQuery)}" autocomplete="off">
+      <div id="st-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('st-list');
+  const searchEl = document.getElementById('st-search');
+  const draw = () => {
+    const q = stratQuery.trim().toLowerCase();
+    const hits = q
+      ? STRATAGEMS.filter(s => [s.n, s.term, s.latin, s.what, s.overlook, s.ask,
+          ...s.examples.flatMap(x => [x.text, x.source])]
+          .some(v => String(v ?? '').toLowerCase().includes(q)))
+      : STRATAGEMS;
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(stratQuery)}”.</p>
+        <p><button class="btn-lite" id="st-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#st-clear').addEventListener('click', () => {
+        stratQuery = ''; searchEl.value = ''; draw();
+      });
+      return;
+    }
+    listEl.innerHTML = `<div class="fal-cards">${hits.map(s => `
+      <button class="fal-card" type="button" data-fal="${esc(s.id)}">
+        <span class="fal-card-name">${esc(stratagemLabel(s))}</span>
+        <span class="tile-chev" aria-hidden="true">›</span>
+      </button>`).join('')}</div>`;
+    wireFallacyCards(listEl, 'stratagem');
+  };
+  searchEl.addEventListener('input', () => { stratQuery = searchEl.value; draw(); });
+  draw();
+}
+
 function rhetoricStudioPane(el) {
   el.innerHTML = `
     <div class="ws-head"><h1 class="page-h">Studio</h1>
@@ -5257,6 +5372,14 @@ function rhetoricLibraryPane(el) {
       group: G2, count: MODERN_FALLACIES.length, unit: 'fallacy',
       keywords: 'straw man red herring ad hominem whataboutism cherry picking slippery slope modern families',
       go: renderFamilyShelf },
+    // Not a fourth fallacy shelf: these are tactics rather than errors,
+    // which is why the keywords lead on what somebody DOES rather than on
+    // what they got wrong.
+    { key: 'col:rh-stratagems', tone: 'is-blue', emoji: '🗡', title: 'The 38 Stratagems',
+      group: G2, count: STRATAGEMS.length, unit: 'stratagem',
+      keywords: 'schopenhauer art of controversy trick tactic dirty winning argument bad faith '
+        + 'extension homonymy diversion ad personam ad verecundiam retorsio turning the tables',
+      go: renderStratagemShelf },
   ];
   workspaceLibrary(el, { workspace: 'Rhetoric', cards, state: libState.rhetoric });
 }
@@ -6636,9 +6759,10 @@ function renderCredits() {
       <p class="guide-text">Stances, walks, centres of gravity and movement sequences in that course are <b>not</b> drawn from those sources. Very little about how commedia performers actually moved was written down. Those sections restate movement vocabulary reconstructed by twentieth-century teachers and in common use in commedia training today, or are Speechcraft’s own playable interpretation, and every character chapter says which is which.</p>` : ''}
       ${rhetoricOpen() ? `
       <h2 class="guide-heading">Rhetoric</h2>
-      <p class="guide-text">The thirteen fallacies are Aristotle’s <i>Sophistical Refutations</i> (<i>De Sophisticis Elenchis</i>), and the division into those depending on language and those not depending on it is his. The three appeals, the three occasions and the five canons come from his <i>Rhetoric</i>. Both are ancient works in the public domain, read in standard English translations; the definitions and every line of explanation in this app are <b>original Speechcraft educational content</b> rather than quotation, except where an example is explicitly cited to Aristotle.</p>
+      <p class="guide-text">The thirteen fallacies are Aristotle’s <i>Sophistical Refutations</i> (<i>De Sophisticis Elenchis</i>), and the division into those depending on language and those not depending on it is his. The three appeals, the three occasions and the five canons come from his <i>Rhetoric</i>. Both are ancient works in the public domain, read in standard English translations; the definitions and every line of explanation in this app are <b>original Speechcraft educational content</b> rather than quotation, except where an example carries an explicit source. One of those is not ancient: the amphiboly example is a line of Groucho Marx’s from <i>Animal Crackers</i> (1930), a film that entered the public domain <b>in the United States</b> on 1 January 2026. Readers elsewhere should check the copyright law where they live.</p>
       <p class="guide-text">The forty modern fallacies use names in general circulation, and no single source owns the list. Two are recent enough to date: <b>Gish gallop</b> was named in the 1990s for a debater who used it, and <b>motte-and-bailey</b> was named in 2005 after a form of Norman castle. Where the boundaries between named errors are argued about, the entry says so instead of presenting one account as settled.</p>
       <p class="guide-text">The figures quote Lincoln’s Gettysburg Address (1863), the King James Bible (Genesis 1, 1 Corinthians 15), words attributed to Julius Caesar by Plutarch and Suetonius, and lines from Shakespeare. All are public-domain texts, and every Shakespeare example is a verbatim line from a play or sonnet this app carries in full.</p>
+      <p class="guide-text">The thirty-eight stratagems are Arthur Schopenhauer’s <i>The Art of Controversy</i>, in the translation by T. Bailey Saunders. Project Gutenberg identifies that translation as public domain <b>in the United States</b>; readers elsewhere should check the copyright law where they live. The list, its order and its numbering are his. The summaries, the questions and every example not carrying a source tag are <b>original Speechcraft educational content</b>. Several of his own illustrations are not used, because they turn on the religious and political quarrels of the 1830s or on a pun in Latin; those entries carry written examples instead.</p>
       <p class="pane-note">Nothing in the Rhetoric course has been reviewed by a qualified rhetoric reader. Every shelf and every chapter says so where a reader will see it.</p>` : ''}
       <h2 class="guide-heading">Everything else</h2>
       <p class="guide-text">Design, course content, exercises, transcriptions and code are original to Speechcraft. General American pronunciation data derives from the Carnegie Mellon University Pronouncing Dictionary (CMUdict), used under its licence, which is reproduced below; the adaptations for the other accents are rule-derived and marked ≈.</p>

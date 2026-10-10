@@ -59,6 +59,7 @@ import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKES
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallaciesIn, fallacyById } from '../js/data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from '../js/data/rhetoric/families.js';
+import { STRATAGEMS, stratagemById } from '../js/data/rhetoric/stratagems.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -4722,11 +4723,23 @@ export async function run({ navDoc = document } = {}) {
     // example instead of teaching anything. `source` is now OPTIONAL and is
     // a TAG, so the pin is on its shape: short, and one of the two real
     // provenances this shelf has.
+    // FIVE since 2026-10-10, when amphiboly got a real example. The entry
+    // carried an ambiguous sentence and nothing else — nobody misreading
+    // it, nobody concluding anything — so it demonstrated a pun rather
+    // than the fallacy. The Groucho line works because its second sentence
+    // IS the misreading, performed out loud. Animal Crackers (1930) entered
+    // the US public domain on 1 January 2026, which is why it can be
+    // quoted here on the same footing as the Jowett.
+    //
+    // The SHAPE rule is unchanged and is the point of this check: a source
+    // is a short tag, never a remark about the example. The new string is
+    // 36 characters with no semicolon and no em dash, so it passes the
+    // rule rather than being excused from it.
     const faSources = FALLACIES.flatMap(f => f.examples).map(x => x.source).filter(Boolean);
     check('fallacies: a source is a short tag, never a remark about the example',
-      faSources.length === 4
+      faSources.length === 5
       && faSources.every(s => s.length <= 40 && !/[;—]/.test(s)
-        && /^(Aristotle, Sophistical Refutations|Traditional)$/.test(s)),
+        && /^(Aristotle, Sophistical Refutations|Traditional|Groucho Marx, Animal Crackers \(1930\))$/.test(s)),
       faSources.join(' | '));
     check('fallacies: they are a SEPARATE shelf from the figures, not folded in',
       RHETORIC.every(r => !FALLACIES.some(f => f.term === r.term)));
@@ -4887,10 +4900,12 @@ export async function run({ navDoc = document } = {}) {
     // figures had to know which section somebody had filed them under.
     // Everything you READ in this course is in one place now, and Practice
     // and Studio keep no second copy of the doors.
-    check('rhetoric: the Library holds the reading and all three references',
+    // FOUR references since 2026-10-09, when the stratagems joined them.
+    check('rhetoric: the Library holds the reading and all four references',
       /function rhetoricLibraryPane\(el\) \{[\s\S]{0,2200}col:rh-figures/.test(famSrc)
       && /col:rh-thirteen/.test(famSrc)
       && /col:rh-all/.test(famSrc)
+      && /col:rh-stratagems/.test(famSrc)
       && /workspaceLibrary\(el, \{ workspace: 'Rhetoric'/.test(famSrc));
     // Bound each pane at its OWN closing brace. Slicing "from this function
     // to the next named one" broke the moment the shelf renderers were moved
@@ -4909,8 +4924,8 @@ export async function run({ navDoc = document } = {}) {
       && !/\$\{c\.unit\}\$\{c\.count === 1 \? '' : 's'\}/.test(famSrc));
     check('rhetoric: Practice and Studio keep no second copy of the shelves',
       !!rhPractice && !!rhStudio
-      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf/.test(rhPractice)
-      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf/.test(rhStudio),
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf/.test(rhPractice)
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf/.test(rhStudio),
       `practice ${rhPractice.length}ch, studio ${rhStudio.length}ch`);
 
     // ── Both fallacy shelves are cards, and a card LEADS SOMEWHERE ──
@@ -4966,8 +4981,12 @@ export async function run({ navDoc = document } = {}) {
       && /value="\$\{esc\(famQuery\)\}"/.test(famSrc));
     // The same sentence on both shelves, from one constant, because two
     // shelves written to read alike drift the moment the copy is duplicated.
-    check('fallacies: one instruction sentence, used by both shelves',
-      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 2,
+    // THREE since 2026-10-09: the stratagems shelf reads like the other two
+    // and takes the same sentence from the same constant. The count is the
+    // pin, so a fourth shelf that writes its own copy of this instruction
+    // fails here rather than drifting quietly.
+    check('fallacies: one instruction sentence, used by all three card shelves',
+      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 3,
       String((famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length));
     // Owner order 2026-09-29. Both builders lay the entry out the same way,
     // and the ORDER is the instruction: the example sits between the
@@ -5006,6 +5025,123 @@ export async function run({ navDoc = document } = {}) {
       && !/Further breakdown/.test(famSrc)
       && !/breakdownHtml/.test(famSrc),
       `${[...FALLACIES, ...MODERN_FALLACIES].filter(f => f.note).length} notes left`);
+
+    // ── The thirty-eight stratagems ──────────────────────────
+    // Owner decision 2026-10-09. A fourth reference shelf, and the first
+    // that is NOT a taxonomy of errors. The pins below are about the three
+    // ways this specific shelf could rot: it could be quietly curated down
+    // from his closed list, it could start defining moves the fallacy
+    // shelves already own, or it could lose the public-domain scoping that
+    // makes quoting him lawful here.
+    //
+    // THE LIST IS CLOSED AND COMPLETE. An early draft proposed shipping
+    // about fifteen of the thirty-eight, the ones that seemed most useful.
+    // That is the failure this check exists to catch: a selection is
+    // somebody's taste wearing a historical name, and a reader cannot tell
+    // what was dropped. Thirty-eight, numbered I to XXXVIII with none
+    // missing and none repeated.
+    const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X',
+      'XI', 'XII', 'XIII', 'XIV', 'XV', 'XVI', 'XVII', 'XVIII', 'XIX', 'XX',
+      'XXI', 'XXII', 'XXIII', 'XXIV', 'XXV', 'XXVI', 'XXVII', 'XXVIII', 'XXIX',
+      'XXX', 'XXXI', 'XXXII', 'XXXIII', 'XXXIV', 'XXXV', 'XXXVI', 'XXXVII', 'XXXVIII'];
+    check('stratagems: all thirty-eight, in his order, none curated away',
+      STRATAGEMS.length === 38
+      && String(STRATAGEMS.map(s => s.n)) === String(ROMAN)
+      && new Set(STRATAGEMS.map(s => s.id)).size === 38
+      && STRATAGEMS.every(s => /^ST-\d{3}$/.test(s.id)),
+      `${STRATAGEMS.length} entries, ${new Set(STRATAGEMS.map(s => s.n)).size} distinct numerals`);
+    // The Gutenberg e-text heads stratagem 11 "XL.", which is forty. It is
+    // a slip in the transcription and copying it would put a 40 in the
+    // middle of a list of 38. Pinned because it is the kind of thing that
+    // gets "corrected" back in by somebody checking against the source.
+    check('stratagems: the eleventh is XI, not the e-text’s XL',
+      STRATAGEMS[10].n === 'XI' && !STRATAGEMS.some(s => s.n === 'XL'));
+    // Same three fields as both fallacy shelves, and NO fourth. He gives a
+    // counter-move for several and the temptation is to carry them; the
+    // owner removed `repair` from the modern shelf on 2026-09-28 because
+    // three fields was one more than the page could hold.
+    check('stratagems: what it is, what it hides, what to ask, and nothing more',
+      STRATAGEMS.every(s => s.term && s.what?.trim() && s.overlook?.trim()
+        && s.ask?.trim() && s.repair === undefined && s.note === undefined
+        && s.defence === undefined),
+      STRATAGEMS.filter(s => s.repair || s.note || s.defence).map(s => s.id).join(' '));
+    // One example each, like both shelves next door. A `source` is a
+    // provenance TAG and may name only Schopenhauer's own book: an
+    // unattributed bad argument must never read as a quotation from a real
+    // person, which is the rule both other shelves are pinned to.
+    check('stratagems: one example each, and a source tag names only the book',
+      STRATAGEMS.every(s => s.examples?.length === 1
+        && s.examples.every(x => x.text?.trim()
+          && (x.source === undefined
+            || /^(after )?Schopenhauer, The Art of Controversy$/.test(x.source)))),
+      STRATAGEMS.filter(s => s.examples?.length !== 1).map(s => s.id).join(' '));
+    check('stratagems: house style holds on our prose, examples exempt',
+      STRATAGEMS.flatMap(s => [s.what, s.overlook, s.ask])
+        .every(t2 => !/[—–"]/.test(t2)
+          && !/n’t\b|’(re|ll|ve|m|d)\b/.test(t2)),
+      STRATAGEMS.filter(s => [s.what, s.overlook, s.ask]
+        .some(t2 => /[—–"]/.test(t2) || /n’t\b|’(re|ll|ve|m|d)\b/.test(t2)))
+        .map(s => s.id).join(' '));
+    // THE OVERLAP IS THE LESSON, and it must POINT rather than redefine.
+    // Twelve of these restate a move the fallacy shelves already own. Each
+    // one carries the other shelf's id, and every id must resolve on one
+    // shelf or the other — a dangling pointer renders a card with no
+    // cross-reference and nobody would notice.
+    const stratPointers = STRATAGEMS.filter(s => s.alsoFallacy);
+    check('stratagems: every cross-pointer resolves to a real fallacy entry',
+      stratPointers.length >= 10
+      && stratPointers.every(s => fallacyById(s.alsoFallacy)
+        || MODERN_FALLACIES.some(x => x.id === s.alsoFallacy)),
+      `${stratPointers.length} pointers: ${stratPointers
+        .filter(s => !fallacyById(s.alsoFallacy)
+          && !MODERN_FALLACIES.some(x => x.id === s.alsoFallacy))
+        .map(s => `${s.id}->${s.alsoFallacy}`).join(' ') || 'all resolve'}`);
+    check('stratagems: lookup by id works and is exact',
+      stratagemById('ST-001')?.term === 'The Extension'
+      && stratagemById('ST-038')?.n === 'XXXVIII'
+      && stratagemById('ST-999') === null);
+    // THE SHELF IS REACHABLE AND IS A REFERENCE. The Shakespeare Dictionary
+    // shipped imported by nothing once, recorded as built while no reader
+    // could get to it. Same pins here: the card exists, the renderer exists,
+    // the card opens a page through the shared wiring, and nothing on it
+    // awards anything.
+    check('stratagems: the shelf is reachable, renders cards, and scores nothing',
+      /function renderStratagemShelf\(\)/.test(famSrc)
+      && /The 38 Stratagems/.test(famSrc)
+      && /wireFallacyCards\(listEl, 'stratagem'\)/.test(famSrc)
+      && /record\(\(\) => renderFallacyPage\('stratagem', id\)\)/.test(famSrc)
+      && !/renderStratagemShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/
+        .test(famSrc.slice(famSrc.indexOf('function renderStratagemShelf'))));
+    // Its search has to survive a trip to a card and back, for the reason
+    // both other shelves do: thirty-eight names searched, one opened, and
+    // Back landing on an unfiltered list is the bug.
+    check('stratagems: the shelf search survives a trip to a page and back',
+      !/stratQuery = '';\n\s+app\.innerHTML/.test(famSrc)
+      && /value="\$\{esc\(stratQuery\)\}"/.test(famSrc));
+    // NO GROUPING, deliberately: he gives none. The other three shelves
+    // group and this one must not start, because inventing families for him
+    // would be inventing scholarship. Pinned as the absence of the heading
+    // the other shelves use.
+    check('stratagems: one flat list, no invented groups',
+      !STRATAGEMS.some(s => s.group || s.family)
+      && !/STRATAGEM_GROUPS/.test(famSrc)
+      && !/renderStratagemShelf[\s\S]{0,1600}shelf-section/
+        .test(famSrc.slice(famSrc.indexOf('function renderStratagemShelf'))));
+    // THE PUBLIC DOMAIN CLAIM IS SCOPED TO THE UNITED STATES, as it is
+    // everywhere else in this app. launch_lint bans a worldwide claim and
+    // this pins the positive form on both the shelf and the credits page,
+    // because quoting him at all depends on it.
+    check('stratagems: the public-domain claim is US-scoped on the shelf and in the credits',
+      /public domain in the United States/.test(famSrc)
+      && /check the copyright law where they live/.test(famSrc)
+      && /T\. Bailey Saunders/.test(famSrc)
+      && !/public domain worldwide/i.test(famSrc),
+      `${(famSrc.match(/T\. Bailey Saunders/g) ?? []).length} translator credits`);
+    // Not a fourth fallacy shelf. The distinction between an error and a
+    // tactic is the shelf's reason to exist, and it is one sentence away
+    // from being lost if somebody tidies the lead paragraph.
+    check('stratagems: the shelf says why it is not a fallacy shelf',
+      /A fallacy is something a person falls into\. A stratagem is something/.test(famSrc));
     // The group line comes off the PAGE and the shelves KEEP their
     // headings, where the grouping still does navigational work. Both
     // halves are pinned: each is a one-line edit, and losing the second
@@ -6523,8 +6659,21 @@ export async function run({ navDoc = document } = {}) {
 
         const mainG = [...seen].find(([u]) => u.endsWith('/js/main.js'))?.[1] ?? '';
         const codeG = mainG.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^[ \t]*\/\/.*$/gm, '');
+        // WORD-BOUNDED SINCE 2026-10-09, and this is a guard rail being
+        // narrowed, so the reason is recorded rather than assumed. The
+        // pattern was a bare substring match on "gems", which the word
+        // STRATAGEMS contains — so the Schopenhauer shelf failed a check
+        // about a currency removed four days earlier. All seventeen hits
+        // were the new shelf's own name and not one was economy code.
+        //
+        // The replacement is NARROWER IN REACH AND NOT IN COVERAGE: it
+        // still catches a bare `gem` or `gems`, `store.gems`, the three
+        // API names, the emoji, the Shop and the boost. What it no longer
+        // catches is "gems" buried inside a longer word, which was never
+        // what this was for. Verified against every probe before the
+        // change: do not relax it further to make something else pass.
         check('gems: no shipped code or copy mentions gems, the Shop or a boost',
-          !/gems|💎|shopMain|boostActive|startBoost/i.test(codeG),
+          !/\bgems?\b|addGems|spendGems|💎|shopMain|boostActive|startBoost/i.test(codeG),
           'economy copy survives in the view layer');
         // The Shop was a real section; it must not be reachable either.
         check('gems: the Shop section is gone, not merely hidden',

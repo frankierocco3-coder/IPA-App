@@ -100,7 +100,8 @@ export const FALLACIES = [
     overlook: 'That the sentence has a second reading. The listener settles on one and never sees the other.',
     ask: 'Which reading do you need for that to follow?',
     examples: [
-      { text: 'The teacher told the student that he was confused.' },
+      { text: 'One morning I shot an elephant in my pajamas. How he got in my pajamas, I don’t know.',
+        source: 'Groucho Marx, Animal Crackers (1930)' },
     ] },
 
   { id: 'FA-003', term: 'Composition', group: 'language',
@@ -181,7 +182,7 @@ export const FALLACIES = [
     overlook: 'Which supposition actually did the work. The contradiction is real, so the blame feels earned.',
     ask: 'Take that supposition out. Does the impossibility still follow?',
     examples: [
-      { text: 'Three things are granted, the argument reaches an impossibility, and the third is blamed for it. The first two produced the impossibility on their own, and the third took no part in it.' },
+      { text: 'The budget was cut, the deadline moved, and we took on Marsh in week three. The thing failed. So much for hiring Marsh.' },
     ] },
 
   { id: 'FA-012', term: 'Consequent', group: 'matter',

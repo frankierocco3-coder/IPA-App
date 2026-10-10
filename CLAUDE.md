@@ -1460,6 +1460,54 @@ OWNER TRIM (2026-09-25). Five changes to live content:
   O'Neill and Wilde inside a Shakespeare course. renderScenesShelf gained
   an optional author-group filter; called with nothing it is unchanged.
 
+THE 38 STRATAGEMS (2026-10-09, owner order "do it"): a FOURTH reference
+shelf in the Rhetoric Library, js/data/rhetoric/stratagems.js, ids
+`ST-001`–`ST-038`. Schopenhauer's The Art of Controversy, translated by
+T. Bailey Saunders, Project Gutenberg #10731, **public domain in the
+United States** — the Jowett footing, and the worldwide claim is banned
+here as everywhere.
+WHY IT IS NOT A FOURTH FALLACY SHELF, which is the whole point and is one
+tidy-up away from being lost: the other three are taxonomies of BAD
+REASONING, and a fallacy is something a person falls into. These are
+tactics, chosen on purpose by somebody who knows their case is weak. The
+lead paragraph says so and the suite pins the sentence. It is also the
+reference module 6 (Honest Persuasion) was missing: that chapter asks
+where persuading somebody ends and working on them begins, and this is
+the catalogue of working on them.
+ALL THIRTY-EIGHT, NOT A SELECTION. A draft proposed keeping about fifteen,
+the ones that seemed most useful. That was wrong for the reason the
+thirteen are Aristotle's and nobody else's: a selection is Claude's taste
+wearing a historical name and a reader cannot tell what was dropped. The
+suite pins 38 and the numerals I–XXXVIII in his order.
+NO GROUPING, deliberately — he gives none, and inventing eight families
+for him would be inventing scholarship. One flat list; search carries
+findability. Pinned as the ABSENCE of the other shelves' section heading.
+FOURTEEN ENTRIES RESTATE A MOVE THE FALLACY SHELVES OWN. Each carries
+`alsoFallacy` with the FA-/MF- id and defines nothing twice — the
+`alsoAristotle` mechanism, reused. The overlap is the lesson: the moves
+did not change in two thousand years, only the names did.
+Same three fields as both fallacy shelves (what / overlook / ask) and NO
+fourth: he gives counter-moves and carrying them would re-add the
+`repair` field the owner removed on 2026-09-28. Where his defence is the
+best thing in an entry it went into `ask`.
+renderStratagemPage/renderStratagemShelf in main.js; renderFallacyPage
+RETURNS EARLY on kind 'stratagem' so both existing fallacy paths stay
+byte-identical rather than becoming a three-way branch.
+EXAMPLES: his where clean and tagged; written here otherwise. Six of his
+are deliberately NOT used and stratagems.js records each reason — III is
+Aristotle's Moor, XII and XXXII run on 1830s religious and political
+labels, XVI leads with "why don't you hang yourself?", XIII assumes a
+child owes obedience in all things, XXXVI quotes Faust in German, XXX
+turns on a Latin pun. Nothing was cut for being unflattering to him.
+TRANSCRIPTION NOTE: the Gutenberg e-text heads stratagem 11 "XL." (forty).
+That is a slip in the e-text; this file numbers it XI, and the suite pins
+it so a well-meaning check against the source cannot put 40 back.
+XXV and XXXIV are NOT dirty tricks — the single counter-instance and
+pressing an evasion are good practice, he simply lists them. Their `what`
+says so; do not rewrite them shabbier for a tidy shelf.
+NOT APPROVED: `requiredReviewer` rhetoric, like every record in this
+course. Credited in Sources & Credits.
+
 **Incomplete — do not present as finished:**
 * Australian sonnet audio ~39% (quota ran out). Other libraries have **no**
   narrated audio yet (~169k ElevenLabs credits needed); they use device voice.
