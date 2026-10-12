@@ -167,12 +167,12 @@ export const STRATAGEMS = [
     overlook: 'The shape of the argument, which the proper order would have shown you at once.',
     ask: 'Put those questions in the order your conclusion needs. Do they still work?',
     examples: [
-      { text: 'Four questions about staffing, one about the weather, two about last year, and then the conclusion, which needed only the second and the last.' },
+      { text: '“Quick ones. Was Hall still here in March? Terrible weather that week, was it not. Did the deposit clear? And remind me, when was the contract signed?”' },
     ] },
 
   { id: 'ST-010', n: 'X', term: 'Asking the converse',
     what: 'Somebody who is disagreeing out of habit is asked for the opposite of what the asker actually wants granted.',
-    overlook: 'That your contrariness has been turned into the mechanism. You are still refusing, and you are refusing to order.',
+    overlook: 'That your contrariness has been turned into the mechanism. You are still refusing, and the refusal is doing exactly what was wanted.',
     ask: 'Would I answer this the same way if somebody I agreed with had asked it?',
     examples: [
       { text: 'You will say no to anything I propose, so: I take it you would not want the review brought forward?' },
@@ -208,7 +208,7 @@ export const STRATAGEMS = [
     overlook: 'That no step was ever taken. Certainty is standing where the inference should be.',
     ask: 'Which of the things I granted gets you there?',
     examples: [
-      { text: 'Well, there we are. I think we can take it as settled.' },
+      { text: '“You have agreed the costs rose, and that two people left. Well then. I think we can take it as settled that the department should be closed.”' },
     ] },
 
   { id: 'ST-015', n: 'XV', term: 'The decoy proposition',
@@ -281,7 +281,7 @@ export const STRATAGEMS = [
     overlook: 'That you widened your own claim under pressure, and were beaten on the wider one you never meant.',
     ask: 'Am I still defending what I said, or what I was pushed into saying?',
     examples: [
-      { text: 'I said the policy has failed in three districts. By the fourth round of being told I was wrong I was saying it had failed everywhere, which is not true, and that is the version he refuted.' },
+      { text: '“The policy has failed in three districts.” “So you are saying the whole thing is a disaster.” “Fine. The whole thing is a disaster.” “It is working in forty. Next.”' },
     ] },
 
   { id: 'ST-024', n: 'XXIV', term: 'The false syllogism', alsoFallacy: 'MF-001',
@@ -293,8 +293,8 @@ export const STRATAGEMS = [
     ] },
 
   { id: 'ST-025', n: 'XXV', term: 'The single instance', latin: 'instantia',
-    what: 'One counterexample is produced against a general claim, which is enough to overthrow it, and which is honest work when the example is true, really falls under the claim, and really contradicts it.',
-    overlook: 'Whether all three of those hold. A case that is untrue, or outside what you meant, or not actually inconsistent, looks identical to one that lands.',
+    what: 'One counterexample is produced against a general claim, which is enough to overthrow it. Done honestly this is simply how a universal claim is tested.',
+    overlook: 'Whether the example is true, whether it really falls under the claim, and whether it really contradicts it. A case failing any of the three looks identical to one that lands.',
     ask: 'Is that case real, is it the kind of case I meant, and does it genuinely contradict me?',
     examples: [
       { text: 'All ruminants are horned — a proposition which may be upset by the single instance of the camel.',
@@ -306,7 +306,7 @@ export const STRATAGEMS = [
     overlook: 'Whether the reversal actually holds. It lands on the ear a good while before anybody examines it.',
     ask: 'Does my reason really support that, or does it only sound as though it might?',
     examples: [
-      { text: 'So-and-so is a child, you must make allowance for him. Just because he is a child, I must correct him; otherwise he will persist in his bad habits.',
+      { text: '“So-and-so is a child, you must make allowance for him.” “Just because he is a child, I must correct him; otherwise he will persist in his bad habits.”',
         source: 'Schopenhauer, The Art of Controversy' },
     ] },
 
@@ -323,7 +323,7 @@ export const STRATAGEMS = [
     overlook: 'That a real answer would take longer than the room will sit still for. The silence gets scored as a defeat.',
     ask: 'Could that objection be answered in one sentence? If not, has it been answered at all?',
     examples: [
-      { text: 'He says the rock was molten at some four hundred and eighty degrees, and covered by the sea. At that heat the sea would have boiled away long before. The room laughs, and the explanation about pressure would take a lecture.',
+      { text: '“He tells us the rock was molten at four hundred and eighty degrees, and under the sea. Water boils at two hundred and twelve. Either he cannot do arithmetic, or the sea was not there.”',
         source: 'after Schopenhauer, The Art of Controversy' },
     ] },
 
@@ -382,7 +382,7 @@ export const STRATAGEMS = [
     overlook: 'That your mind changed for a reason with no bearing whatever on whether the thing is true.',
     ask: 'Would I still believe this if it cost me nothing?',
     examples: [
-      { text: 'He is all for agricultural machinery, since one engine does the work of many men. Mention that carriages will shortly be worked by steam, and that his stud will be worth a fraction of what it is, and see what he says.',
+      { text: '“Machinery is the best thing that ever happened to farming. One engine does the work of twenty men.” “They will be putting steam into carriages next. Your horses will be worth nothing.” “Well. There are limits to how far a thing like that should be taken.”',
         source: 'after Schopenhauer, The Art of Controversy' },
     ] },
 
@@ -407,8 +407,7 @@ export const STRATAGEMS = [
     overlook: 'That the subject was dropped. The room remembers the insult and forgets the question it replaced.',
     ask: 'That has no bearing on the point in dispute. What about the point?',
     examples: [
-      { text: 'It is an appeal from the virtues of the intellect to the virtues of the body, or to mere animalism.',
-        source: 'Schopenhauer, The Art of Controversy' },
+      { text: '“Those are the figures. Check them yourself.” “You would know all about figures, would you not, after the year you have had.”' },
     ] },
 
 ];
