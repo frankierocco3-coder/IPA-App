@@ -15,6 +15,7 @@ import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/f
 import { STRATAGEMS, stratagemById } from './data/rhetoric/stratagems.js';
 import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from './data/rhetoric/thirty-six.js';
 import { FURTHER_READING } from './data/further-reading.js';
+import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_COUNT, socraticById } from './data/rhetoric/socratic.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -5004,6 +5005,7 @@ function renderFallacyPage(kind, id) {
   // three-way branch. A move is reviewable as a move; this is an addition.
   if (kind === 'stratagem') return renderStratagemPage(id);
   if (kind === 'ts36') return renderThirtySixPage(id);
+  if (kind === 'socratic') return renderSocraticPage(id);
   const thirteen = kind === 'thirteen';
   const f = thirteen ? fallacyById(id) : MODERN_FALLACIES.find(x => x.id === id);
   if (!f) return thirteen ? renderFallacyShelf() : renderFamilyShelf();
@@ -5399,6 +5401,102 @@ function renderThirtySixShelf() {
   draw();
 }
 
+// ── The Socratic Method: the honest one ─────────────────────────
+// Owner decision 2026-10-12. The Arguing group held four shelves and all
+// four were argument going wrong — two taxonomies of error, thirty-eight
+// tricks, thirty-six stratagems. This is the one classical procedure that
+// is trying to get somewhere true, and it is dialectic in its purest form.
+//
+// THE THIRD FIELD IS `misuse`, NOT `overlook`. Every other shelf says what
+// a trick HIDES. An honest method hides nothing, so each step says how it
+// gets weaponised instead — which is not a contrivance, because this
+// method is famously abused. hidesAskHtml is therefore not reused here.
+const SOCRATIC_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric reader. '
+  + 'The six moves, the questions and the modern examples are written for this app and '
+  + 'have not been checked by a qualified reader.';
+
+let socQuery = '';
+
+const socraticLabel = s => `${s.n} · ${s.term}`;
+
+// Two examples, like the Thirty-Six, and the second field is MISUSE.
+const socraticHtml = s => `
+  <p class="guide-text fal-def">${esc(s.what)}</p>
+  <h2 class="guide-heading">In the dialogue</h2>
+  <blockquote class="th-quote"><p>${egQuoted(s.examples[0])}</p>${
+    s.examples[0].source ? `<footer class="th-attrib">${esc(s.examples[0].source)}</footer>` : ''}</blockquote>
+  <h2 class="guide-heading">Where you would use it</h2>
+  <blockquote class="th-quote"><p>${egQuoted(s.examples[1])}</p></blockquote>
+  <h2 class="guide-heading">Misused as</h2>
+  <p class="guide-text">${esc(s.misuse)}</p>
+  <h2 class="guide-heading">Ask</h2>
+  <p class="guide-text">${esc(s.ask)}</p>`;
+
+function renderSocraticPage(id) {
+  const s = socraticById(id);
+  if (!s) return renderSocraticShelf();
+  record(() => renderFallacyPage('socratic', id));
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🏺 The Socratic Method', '#8a6d3b')}
+    <main class="guide">
+      <h1 id="fal-title" tabindex="-1">${esc(socraticLabel(s))}</h1>
+      ${socraticHtml(s)}
+      <p class="pane-note pane-caveat">${esc(SOCRATIC_REVIEW_NOTE)}</p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('fal-title')?.focus();
+}
+
+function renderSocraticShelf() {
+  record(renderSocraticShelf);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('🏺 The Socratic Method', '#8a6d3b')}
+    <main class="guide">
+      <h1>The Socratic Method</h1>
+      <p class="guide-text">Every other shelf in this group is argument going wrong. This is the
+        one procedure here that is trying to get somewhere true, and it is the oldest of them.</p>
+      <p class="guide-text">${esc(SOCRATIC_LEAD)}</p>
+      <p class="pane-note">${esc(SOCRATIC_COUNT)}</p>
+      <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
+      <p class="pane-note">${esc(SOCRATIC_NOTE)}</p>
+      <p class="pane-note pane-caveat">${esc(SOCRATIC_REVIEW_NOTE)}</p>
+      <input class="sonnet-search" id="soc-search" type="search"
+        placeholder="Search the moves…" aria-label="Search the Socratic method"
+        value="${esc(socQuery)}" autocomplete="off">
+      <div id="soc-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('soc-list');
+  const searchEl = document.getElementById('soc-search');
+  const draw = () => {
+    const q = socQuery.trim().toLowerCase();
+    const hits = q
+      ? SOCRATIC_STEPS.filter(s => [String(s.n), s.term, s.what, s.misuse, s.ask,
+          ...s.examples.map(x => x.text)]
+          .some(v => String(v ?? '').toLowerCase().includes(q)))
+      : SOCRATIC_STEPS;
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(socQuery)}”.</p>
+        <p><button class="btn-lite" id="soc-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#soc-clear').addEventListener('click', () => {
+        socQuery = ''; searchEl.value = ''; draw();
+      });
+      return;
+    }
+    listEl.innerHTML = `<div class="fal-cards">${hits.map(s => `
+      <button class="fal-card" type="button" data-fal="${esc(s.id)}">
+        <span class="fal-card-name">${esc(socraticLabel(s))}</span>
+        <span class="tile-chev" aria-hidden="true">›</span>
+      </button>`).join('')}</div>`;
+    wireFallacyCards(listEl, 'socratic');
+  };
+  searchEl.addEventListener('input', () => { socQuery = searchEl.value; draw(); });
+  draw();
+}
+
 function rhetoricStudioPane(el) {
   el.innerHTML = `
     <div class="ws-head"><h1 class="page-h">Studio</h1>
@@ -5464,7 +5562,16 @@ function characterLibraryPane(el) { return bookLibraryPane(el, BOOKS.character);
 // library is for. It uses the Acting Library's searchable card pane rather
 // than the plain book pane, because four shelves want a search box.
 function rhetoricLibraryPane(el) {
-  const G1 = 'The reading', G2 = 'The references';
+  // ARISTOTLE'S OWN SPLIT (owner decision 2026-10-12). The references
+  // used to sit under one heading, and four of the five were not about
+  // making a speech at all. He opens the Rhetoric by calling it the
+  // counterpart of DIALECTIC, and means two arts: one speaker working a
+  // room, against two people taking turns. The thirteen fallacies come
+  // from Sophistical Refutations, a dialectic text; Schopenhauer is
+  // explicitly two-party; the Thirty-Six is conflict. The heading now
+  // does that teaching for free, which is the same move the eight
+  // families make: a distinction beats a longer list.
+  const G1 = 'The reading', G2 = 'Speaking', G3 = 'Arguing';
   const written = RHETORIC_COLLECTIONS.length;
   const cards = [
     // First, and before the course: the condition on using any of it. This
@@ -5486,19 +5593,26 @@ function rhetoricLibraryPane(el) {
       group: G2, count: RHETORIC.length, unit: 'figure',
       keywords: 'antithesis anaphora chiasmus tricolon device shape of thought repetition',
       go: renderRhetoricShelf },
+    // Leads the Arguing group on purpose: the honest method before the
+    // four shelves of things going wrong.
+    { key: 'col:rh-socratic', tone: 'is-sage', emoji: '🏺', title: 'The Socratic Method',
+      group: G3, count: SOCRATIC_STEPS.length, unit: 'move',
+      keywords: 'socrates plato elenchus dialectic definition question aporia euthyphro meno '
+        + 'cross-examination honest argument',
+      go: renderSocraticShelf },
     { key: 'col:rh-thirteen', tone: 'is-lavender', emoji: '🧩', title: 'The 13 Fallacies',
-      group: G2, count: FALLACIES.length, unit: 'fallacy',
+      group: G3, count: FALLACIES.length, unit: 'fallacy',
       keywords: 'aristotle sophistical refutations equivocation amphiboly accident consequent classical',
       go: renderFallacyShelf },
     { key: 'col:rh-all', tone: 'is-gold', emoji: '🧭', title: 'All Fallacies',
-      group: G2, count: MODERN_FALLACIES.length, unit: 'fallacy',
+      group: G3, count: MODERN_FALLACIES.length, unit: 'fallacy',
       keywords: 'straw man red herring ad hominem whataboutism cherry picking slippery slope modern families',
       go: renderFamilyShelf },
     // Not a fourth fallacy shelf: these are tactics rather than errors,
     // which is why the keywords lead on what somebody DOES rather than on
     // what they got wrong.
     { key: 'col:rh-stratagems', tone: 'is-blue', emoji: '🗡', title: 'The Art of Controversy',
-      group: G2, count: STRATAGEMS.length, unit: 'stratagem',
+      group: G3, count: STRATAGEMS.length, unit: 'stratagem',
       keywords: 'schopenhauer art of controversy trick tactic dirty winning argument bad faith '
         + 'extension homonymy diversion ad personam ad verecundiam retorsio turning the tables',
       go: renderStratagemShelf },
@@ -5506,7 +5620,7 @@ function rhetoricLibraryPane(el) {
     // all. Owner decision 2026-10-12 to file it here rather than beside
     // Playable Actions, which is where its contents point.
     { key: 'col:rh-thirtysix', tone: 'is-sage', emoji: '☯', title: 'The Thirty-Six Stratagems',
-      group: G2, count: THIRTY_SIX.length, unit: 'stratagem',
+      group: G3, count: THIRTY_SIX.length, unit: 'stratagem',
       keywords: 'chinese military deception borrowed knife empty fort besiege wei tiger mountain '
         + 'burning house smile knife cicada shell retreat sun tzu strategy tactic',
       go: renderThirtySixShelf },

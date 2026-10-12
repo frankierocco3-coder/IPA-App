@@ -62,6 +62,7 @@ import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from
 import { STRATAGEMS, stratagemById } from '../js/data/rhetoric/stratagems.js';
 import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from '../js/data/rhetoric/thirty-six.js';
 import { FURTHER_READING } from '../js/data/further-reading.js';
+import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_COUNT, socraticById } from '../js/data/rhetoric/socratic.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -4955,12 +4956,16 @@ export async function run({ navDoc = document } = {}) {
     // Everything you READ in this course is in one place now, and Practice
     // and Studio keep no second copy of the doors.
     // FOUR references since 2026-10-09, when the stratagems joined them.
-    check('rhetoric: the Library holds the reading and all five references',
+    check('rhetoric: the Library holds the reading, Speaking and Arguing',
       /function rhetoricLibraryPane\(el\) \{[\s\S]{0,2200}col:rh-figures/.test(famSrc)
       && /col:rh-thirteen/.test(famSrc)
       && /col:rh-all/.test(famSrc)
       && /col:rh-stratagems/.test(famSrc)
       && /col:rh-thirtysix/.test(famSrc)
+      && /col:rh-socratic/.test(famSrc)
+      // ARISTOTLE'S SPLIT, pinned as a split. One heading over five
+      // shelves hid that four of them are dialectic, not rhetoric.
+      && /G2 = 'Speaking', G3 = 'Arguing'/.test(famSrc)
       && /workspaceLibrary\(el, \{ workspace: 'Rhetoric'/.test(famSrc));
     // Bound each pane at its OWN closing brace. Slicing "from this function
     // to the next named one" broke the moment the shelf renderers were moved
@@ -4979,8 +4984,8 @@ export async function run({ navDoc = document } = {}) {
       && !/\$\{c\.unit\}\$\{c\.count === 1 \? '' : 's'\}/.test(famSrc));
     check('rhetoric: Practice and Studio keep no second copy of the shelves',
       !!rhPractice && !!rhStudio
-      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf|renderThirtySixShelf/.test(rhPractice)
-      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf|renderThirtySixShelf/.test(rhStudio),
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf|renderThirtySixShelf|renderSocraticShelf/.test(rhPractice)
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf|renderThirtySixShelf|renderSocraticShelf/.test(rhStudio),
       `practice ${rhPractice.length}ch, studio ${rhStudio.length}ch`);
 
     // ── Both fallacy shelves are cards, and a card LEADS SOMEWHERE ──
@@ -5040,8 +5045,8 @@ export async function run({ navDoc = document } = {}) {
     // and takes the same sentence from the same constant. The count is the
     // pin, so a fourth shelf that writes its own copy of this instruction
     // fails here rather than drifting quietly.
-    check('fallacies: one instruction sentence, used by all four card shelves',
-      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 4,
+    check('fallacies: one instruction sentence, used by all five card shelves',
+      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 5,
       String((famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length));
     // Owner order 2026-09-29. Both builders lay the entry out the same way,
     // and the ORDER is the instruction: the example sits between the
@@ -5282,6 +5287,110 @@ export async function run({ navDoc = document } = {}) {
       stratagem36ById('TS-001')?.n === 1
       && stratagem36ById('TS-036')?.term === 'If all else fails, retreat'
       && stratagem36ById('TS-999') === null);
+    // ── The Socratic Method ──────────────────────────────────
+    // Owner decision 2026-10-12. The Arguing group held four shelves and
+    // every one was argument going wrong. This is the one procedure there
+    // that is trying to get somewhere true.
+    // IT IS A CYCLE, AND THE FIRST DRAFT WAS LINEAR. It stopped at the
+    // first contradiction; the text has Euthyphro revise three times.
+    // Move 6 is the RETURN and move 7 is the terminus. Pinned separately,
+    // because flattening them back is a tidy-looking edit that removes the
+    // thing that makes this a method rather than a gotcha.
+    check('socratic: seven moves, and the sixth is the return to the start',
+      SOCRATIC_STEPS.length === 7
+      && String(SOCRATIC_STEPS.map(s => s.n)) === '1,2,3,4,5,6,7'
+      && new Set(SOCRATIC_STEPS.map(s => s.id)).size === 7
+      && SOCRATIC_STEPS.every(s => /^SM-\d{3}$/.test(s.id))
+      && /Begin again/.test(socraticById('SM-006').term)
+      && /sixth returns to the first/.test(SOCRATIC_LEAD),
+      SOCRATIC_STEPS.map(s => s.n).join(','));
+    // The apophatic payoff: ending without an answer is a RESULT, not a
+    // failure, and move 7 has to say so or the whole method reads as an
+    // elaborate way to end with nothing.
+    check('socratic: the ending says what it is NOT, not merely that we failed',
+      /what it is not/i.test(socraticById('SM-007').term + ' ' + socraticById('SM-007').what)
+      && /real result/.test(socraticById('SM-007').what));
+    // Move 2 is REFLECTION, not steelmanning. The first draft said "take
+    // the answer at its strongest", which is a modern norm smuggled into a
+    // classical method — and its misuse line now bans both directions.
+    check('socratic: move 2 reflects and confirms rather than improving',
+      /Reflect it back/.test(socraticById('SM-002').term)
+      && /Was not that said/.test(socraticById('SM-002').examples[0].text)
+      && /restating it BETTER/i.test(socraticById('SM-002').misuse));
+    // THE "WE" IS THE BEST CRAFT NOTE ON THE SHELF and it is one word in a
+    // title, so it is the easiest thing here to lose to an edit.
+    check('socratic: move 5 keeps the joint "we" and says why',
+      /say .we./.test(socraticById('SM-005').term)
+      && /were wrong in our former assertion/.test(socraticById('SM-005').examples[0].text)
+      && /says we/.test(socraticById('SM-005').examples[0].text));
+    // JOWETT, VERBATIM, verified against Gutenberg #1642 on 2026-10-12.
+    // An outside account misquotes the key line as "either we ARE wrong in
+    // THE former assertion"; Jowett wrote "were wrong in OUR former
+    // assertion". Pinned so the misquotation cannot drift back in.
+    const socSourced = SOCRATIC_STEPS.filter(s => s.examples[0].source);
+    check('socratic: the dialogue quotations are Jowett and tagged as his',
+      socSourced.length >= 5
+      && socSourced.every(s => s.examples[0].source === 'Plato, Euthyphro, tr. Jowett')
+      && !/we are wrong in the former assertion/.test(
+        SOCRATIC_STEPS.map(s => s.examples[0].text).join(' ')),
+      `${socSourced.length} sourced`);
+    // US-scoped, never worldwide, as everywhere else in this app.
+    check('socratic: the Jowett public-domain claim is scoped to the US',
+      /public domain in the United States/.test(SOCRATIC_NOTE)
+      && /check\s+the copyright law where they live/.test(SOCRATIC_NOTE)
+      && !/public domain worldwide/i.test(SOCRATIC_NOTE));
+    // The step count is NOT canonical and the shelf says so. Other
+    // accounts give five or three, and those five-R mnemonics are a modern
+    // coaching framework rather than anything classical.
+    check('socratic: the shelf admits the step count is not settled',
+      /not settled/.test(SOCRATIC_COUNT)
+      && /esc\(SOCRATIC_COUNT\)/.test(famSrc));
+    // THE THIRD FIELD IS `misuse`, NOT `overlook`, AND THAT IS THE POINT.
+    // Every other shelf here says what a trick HIDES. An honest method
+    // hides nothing, so each step says how it gets weaponised. Pinned both
+    // ways: misuse present on every step, overlook absent from all of
+    // them, so nobody "fixes" this into consistency with its neighbours
+    // and quietly turns the honest shelf into another list of tricks.
+    check('socratic: every step says how it is misused, and none says what it hides',
+      SOCRATIC_STEPS.every(s => s.misuse?.trim() && s.overlook === undefined
+        && s.what?.trim() && s.ask?.trim() && s.examples?.length === 2),
+      SOCRATIC_STEPS.filter(s => s.overlook !== undefined).map(s => s.id).join(' ') || 'none');
+    check('socratic: house style holds on our prose, examples exempt',
+      SOCRATIC_STEPS.flatMap(s => [s.what, s.misuse, s.ask])
+        .every(t2 => !/[—–"]/.test(t2) && !/n’t\b|’(re|ll|ve|m|d)\b/.test(t2)));
+    // THE HEDGE STAYS. The early dialogues are literary works, not
+    // transcripts, and a dramatised procedure must not pass as a record.
+    check('socratic: the shelf says Plato wrote it and Socrates may not have said it',
+      /not the same question/.test(SOCRATIC_NOTE)
+      && /literary works/.test(SOCRATIC_NOTE)
+      && /esc\(SOCRATIC_NOTE\)/.test(famSrc));
+    // The two conditions are what separate an examination from a trap, and
+    // they live in the lead rather than in any one step, so they are the
+    // easiest thing on the shelf to lose.
+    check('socratic: the two honest conditions are on the shelf',
+      /must not already know the answer/.test(SOCRATIC_LEAD)
+      && /free to leave/.test(SOCRATIC_LEAD)
+      && /esc\(SOCRATIC_LEAD\)/.test(famSrc),
+      SOCRATIC_LEAD.slice(0, 60));
+    check('socratic: the shelf is reachable, renders cards, and scores nothing',
+      /function renderSocraticShelf\(\)/.test(famSrc)
+      && /The Socratic Method/.test(famSrc)
+      && /wireFallacyCards\(listEl, 'socratic'\)/.test(famSrc)
+      && /record\(\(\) => renderFallacyPage\('socratic', id\)\)/.test(famSrc)
+      && !/renderSocraticShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/
+        .test(famSrc.slice(famSrc.indexOf('function renderSocraticShelf'))));
+    // Its own headings, because hidesAskHtml would print "What it hides"
+    // on a shelf whose whole argument is that it has nothing to hide.
+    check('socratic: its own headings, not the what-it-hides pair',
+      /In the dialogue/.test(famSrc) && /Where you would use it/.test(famSrc)
+      && /Misused as/.test(famSrc)
+      && !/renderSocraticPage[\s\S]{0,500}hidesAskHtml/
+        .test(famSrc.slice(famSrc.indexOf('function renderSocraticPage'))));
+    check('socratic: lookup by id works and is exact',
+      socraticById('SM-001')?.n === 1
+      && /^End at not knowing/.test(socraticById('SM-007')?.term ?? '')
+      && socraticById('SM-999') === null);
+
     // ── Further Reading (More) ───────────────────────────────
     // Owner order 2026-10-12. The Shakespeare Dictionary shipped imported
     // by nothing once and was recorded as built while unreachable, so a
