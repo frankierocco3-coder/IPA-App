@@ -60,6 +60,8 @@ import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESS
 import { FALLACIES, FALLACY_GROUPS, fallaciesIn, fallacyById } from '../js/data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from '../js/data/rhetoric/families.js';
 import { STRATAGEMS, stratagemById } from '../js/data/rhetoric/stratagems.js';
+import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from '../js/data/rhetoric/thirty-six.js';
+import { FURTHER_READING } from '../js/data/further-reading.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -144,6 +146,46 @@ export async function run({ navDoc = document } = {}) {
   // there restores whatever the user had.
   const workspaceBefore = localStorage.getItem('speechcraft-workspace');
   try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+
+  // ── THE PIN ABOVE WAS A WISH, NOT A PIN (fixed 2026-10-12) ──
+  // Writing to localStorage does not move an app that has ALREADY BOOTED
+  // and read its workspace. The runner loads the app in an iframe before
+  // this line runs, so a browser profile sitting in any other workspace
+  // produced an app under test that was never in Accents at all, while
+  // the suite believed it had pinned it.
+  //
+  // What that looked like: three Free Play checks failing, because
+  // #freeplay genuinely is not rendered outside Accents, and the course
+  // chip the same drive clicks does not exist there either. It reads as a
+  // persistence regression and is nothing of the kind. It cost four runs
+  // on 2026-10-12 and would have cost more, because the failure names the
+  // wrong thing entirely.
+  //
+  // So: set it, then RELOAD the frame so the app actually re-reads it,
+  // and then ASSERT. A precondition that cannot be confirmed is reported
+  // here, loudly, as itself — rather than surfacing later as somebody
+  // else's broken feature.
+  if (navDoc !== document) {
+    const wsFrame = navDoc.defaultView?.frameElement;
+    if (wsFrame) {
+      let wsDoc = navDoc;
+      if (wsDoc.getElementById('freeplay') === null) {
+        wsFrame.contentWindow.location.reload();
+        for (let i = 0; i < 40; i++) {
+          await scSleep(150);
+          wsDoc = wsFrame.contentDocument;
+          if (wsDoc?.querySelector('.side-nav .side-item')) break;
+        }
+      }
+      const inAccents = !!wsDoc?.getElementById('freeplay');
+      check('precondition: the app under test is in the Accents workspace',
+        inAccents,
+        `stored="${localStorage.getItem('speechcraft-workspace')}" `
+        + `freeplay=${!!wsDoc?.getElementById('freeplay')} `
+        + `courseChip=${!!wsDoc?.querySelector('[aria-label^="Change course"]')} `
+        + '— sections 1 to 18 need Accents; every check below this is unreliable without it');
+    }
+  }
 
   // The Speech workspace is withdrawn behind SPEECH_LIVE (js/main.js).
   // The suite mirrors the app's own switch instead of rewriting the
@@ -836,6 +878,18 @@ export async function run({ navDoc = document } = {}) {
 
       // Free play through the real UI, across a real reload + course switch
       clickIn(navDoc.getElementById('brand-home')); await sleep(350);
+      // NORMALISE BEFORE TOGGLING (2026-10-12), and this one is worth
+      // reading. These three checks clicked the control ONCE and assumed
+      // free play started OFF. It is a toggle, and it PERSISTS — that is
+      // the whole thing being tested — so a run that failed here left it
+      // ON, and the next run's single click turned it OFF and failed in
+      // exactly the same way. One bad run became four, each of them
+      // looking like a persistence regression in the app while state.js
+      // was correct the entire time.
+      //
+      // The lesson generalises: a test that TOGGLES durable state cannot
+      // assume where that state starts. Set the precondition, then act.
+      if (store.freePlay) { clickIn(navDoc.getElementById('freeplay')); await sleep(250); }
       clickIn(navDoc.getElementById('freeplay')); await sleep(250);
       const onNow = store.freePlay === true;
       const frame = navDoc.defaultView.frameElement;
@@ -4901,11 +4955,12 @@ export async function run({ navDoc = document } = {}) {
     // Everything you READ in this course is in one place now, and Practice
     // and Studio keep no second copy of the doors.
     // FOUR references since 2026-10-09, when the stratagems joined them.
-    check('rhetoric: the Library holds the reading and all four references',
+    check('rhetoric: the Library holds the reading and all five references',
       /function rhetoricLibraryPane\(el\) \{[\s\S]{0,2200}col:rh-figures/.test(famSrc)
       && /col:rh-thirteen/.test(famSrc)
       && /col:rh-all/.test(famSrc)
       && /col:rh-stratagems/.test(famSrc)
+      && /col:rh-thirtysix/.test(famSrc)
       && /workspaceLibrary\(el, \{ workspace: 'Rhetoric'/.test(famSrc));
     // Bound each pane at its OWN closing brace. Slicing "from this function
     // to the next named one" broke the moment the shelf renderers were moved
@@ -4924,8 +4979,8 @@ export async function run({ navDoc = document } = {}) {
       && !/\$\{c\.unit\}\$\{c\.count === 1 \? '' : 's'\}/.test(famSrc));
     check('rhetoric: Practice and Studio keep no second copy of the shelves',
       !!rhPractice && !!rhStudio
-      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf/.test(rhPractice)
-      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf/.test(rhStudio),
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf|renderThirtySixShelf/.test(rhPractice)
+      && !/renderRhetoricShelf|renderFallacyShelf|renderFamilyShelf|renderStratagemShelf|renderThirtySixShelf/.test(rhStudio),
       `practice ${rhPractice.length}ch, studio ${rhStudio.length}ch`);
 
     // ── Both fallacy shelves are cards, and a card LEADS SOMEWHERE ──
@@ -4985,8 +5040,8 @@ export async function run({ navDoc = document } = {}) {
     // and takes the same sentence from the same constant. The count is the
     // pin, so a fourth shelf that writes its own copy of this instruction
     // fails here rather than drifting quietly.
-    check('fallacies: one instruction sentence, used by all three card shelves',
-      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 3,
+    check('fallacies: one instruction sentence, used by all four card shelves',
+      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 4,
       String((famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length));
     // Owner order 2026-09-29. Both builders lay the entry out the same way,
     // and the ORDER is the instruction: the example sits between the
@@ -5009,11 +5064,20 @@ export async function run({ navDoc = document } = {}) {
     // a quotation mark cannot be applied in one place and missed in the
     // other. egHtml takes a single argument, which is what stops the array
     // index reaching it from a bare `.map(egHtml)`.
-    check('examples: one quoting helper, two renderers, no second argument to trip on',
+    // THREE renderers since 2026-10-12, when the Thirty-Six shelf arrived
+    // needing two labelled examples per card instead of one. The rule this
+    // check exists for is unchanged and is the reason the count is pinned
+    // rather than the helper merely being present: every renderer quotes
+    // through egQuoted, so the fix for an example that already opens with
+    // a quotation mark cannot be applied in one place and missed in
+    // another. egHtml still takes a single argument, which is what stops
+    // the array index reaching it from a bare `.map(egHtml)`.
+    check('examples: one quoting helper, three renderers, no second argument to trip on',
       /const egQuoted = x =>/.test(famSrc)
       && /const egHtml = x => `/.test(famSrc)
       && /const fallacyEgHtml = f =>/.test(famSrc)
-      && (famSrc.match(/egQuoted\(x\)/g) ?? []).length === 2
+      && /const ts36EgHtml = s =>/.test(famSrc)
+      && (famSrc.match(/egQuoted\(x\)/g) ?? []).length === 3
       && /<blockquote class="th-quote">/.test(famSrc));
     // Owner order 2026-09-29: every note deleted, so a page is the
     // definition, the example, what it hides and the question. Pinned as
@@ -5107,7 +5171,8 @@ export async function run({ navDoc = document } = {}) {
     // awards anything.
     check('stratagems: the shelf is reachable, renders cards, and scores nothing',
       /function renderStratagemShelf\(\)/.test(famSrc)
-      && /The 38 Stratagems/.test(famSrc)
+      && /The Art of Controversy/.test(famSrc)
+      && !/The 38 Stratagems/.test(famSrc)
       && /wireFallacyCards\(listEl, 'stratagem'\)/.test(famSrc)
       && /record\(\(\) => renderFallacyPage\('stratagem', id\)\)/.test(famSrc)
       && !/renderStratagemShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/
@@ -5142,6 +5207,132 @@ export async function run({ navDoc = document } = {}) {
     // from being lost if somebody tidies the lead paragraph.
     check('stratagems: the shelf says why it is not a fallacy shelf',
       /A fallacy is something a person falls into\. A stratagem is something/.test(famSrc));
+
+    // ── The Thirty-Six Stratagems ────────────────────────────
+    // Owner decision 2026-10-12, and owner's call to file a book of
+    // MILITARY deception under Rhetoric rather than beside Playable
+    // Actions. The pins are about the four ways this shelf could rot: the
+    // closed list could be trimmed, the grouping could drift from the
+    // text's own, the two-example format could collapse back to one, or
+    // the hedges on the legendary stories could be tidied away.
+    const SIX = ['winning', 'enemy', 'offensive', 'chaos', 'combined', 'defeat'];
+    check('thirty-six: all thirty-six, numbered 1 to 36, six chapters of six',
+      THIRTY_SIX.length === 36
+      && String(THIRTY_SIX.map(s => s.n)) === String([...Array(36)].map((_, i) => i + 1))
+      && new Set(THIRTY_SIX.map(s => s.id)).size === 36
+      && THIRTY_SIX.every(s => /^TS-\d{3}$/.test(s.id))
+      && SIX.every(k => stratagemsIn(k).length === 6)
+      && THIRTY_SIX.every(s => CHAPTERS[s.chapter]),
+      SIX.map(k => `${k}:${stratagemsIn(k).length}`).join(' '));
+    // THE GROUPING IS THE TEXT'S, not ours. The Art of Controversy next
+    // door is flat because Schopenhauer gives no chapters; this one groups
+    // because the Chinese text does. Neither invents a structure, and the
+    // pair only teaches that if both keep their source's shape.
+    check('thirty-six: six chapters, each with its own lead and Chinese name',
+      Object.keys(CHAPTERS).length === 6
+      && String(Object.values(CHAPTERS).map(c => c.n)) === '1,2,3,4,5,6'
+      && Object.values(CHAPTERS).every(c => c.label && c.hanzi && c.lead?.trim()));
+    // TWO examples, and this is the ONLY shelf that carries two. Every
+    // other one is pinned at exactly one. If this ever collapses to one
+    // the format is gone, because the pairing IS the format.
+    check('thirty-six: every entry carries exactly two examples, history then now',
+      THIRTY_SIX.every(s => s.examples?.length === 2
+        && s.examples.every(x => x.text?.trim())),
+      THIRTY_SIX.filter(s => s.examples?.length !== 2).map(s => s.id).join(' ') || 'all two');
+    check('thirty-six: every entry has its Chinese name and the three fields',
+      THIRTY_SIX.every(s => s.term && s.hanzi && /[一-鿿]/.test(s.hanzi)
+        && s.what?.trim() && s.overlook?.trim() && s.ask?.trim()
+        && s.repair === undefined && s.note === undefined));
+    check('thirty-six: house style holds on our prose, examples exempt',
+      THIRTY_SIX.flatMap(s => [s.what, s.overlook, s.ask])
+        .every(t2 => !/[—–"]/.test(t2) && !/n’t\b|’(re|ll|ve|m|d)\b/.test(t2)),
+      THIRTY_SIX.filter(s => [s.what, s.overlook, s.ask]
+        .some(t2 => /[—–"]/.test(t2) || /n’t\b|’(re|ll|ve|m|d)\b/.test(t2)))
+        .map(s => s.id).join(' '));
+    // THE HEDGES STAY. The empty fort is from a fourteenth-century novel
+    // and the temple-wall poem is a story, not a record. Presenting either
+    // as attested history would be a claim this app cannot support, and
+    // the words that prevent it are one tidy-up away from deletion.
+    const tsHedged = THIRTY_SIX.filter(s => ['TS-002', 'TS-017', 'TS-032'].includes(s.id));
+    check('thirty-six: the legendary stories are still hedged, not stated as record',
+      tsHedged.length === 3
+      && tsHedged.every(s => /is said to have|The story goes/.test(s.examples[0].text))
+      && /from a novel rather than a chronicle/.test(stratagem36ById('TS-032').examples[0].text),
+      tsHedged.map(s => s.id).join(' '));
+    // Reachable, a reference rather than a lesson, and its own page.
+    check('thirty-six: the shelf is reachable, renders cards, and scores nothing',
+      /function renderThirtySixShelf\(\)/.test(famSrc)
+      && /The Thirty-Six Stratagems/.test(famSrc)
+      && /wireFallacyCards\(listEl, 'ts36'\)/.test(famSrc)
+      && /record\(\(\) => renderFallacyPage\('ts36', id\)\)/.test(famSrc)
+      && !/renderThirtySixShelf[\s\S]{0,1400}(addXp|awardXp|markDone)/
+        .test(famSrc.slice(famSrc.indexOf('function renderThirtySixShelf'))));
+    // The two examples get DIFFERENT headings. fallacyEgHtml prints
+    // "Example" per example, so reusing it here would put that heading on
+    // the card twice and read as a bug.
+    check('thirty-six: the two examples are labelled separately, not "Example" twice',
+      /In history/.test(famSrc) && /Where you meet it/.test(famSrc)
+      && /const ts36EgHtml = s =>/.test(famSrc)
+      && !/renderThirtySixPage[\s\S]{0,600}fallacyEgHtml/
+        .test(famSrc.slice(famSrc.indexOf('function renderThirtySixPage'))));
+    check('thirty-six: the shelf search survives a trip to a page and back',
+      !/ts36Query = '';\n\s+app\.innerHTML/.test(famSrc)
+      && /value="\$\{esc\(ts36Query\)\}"/.test(famSrc));
+    check('thirty-six: lookup by id works and is exact',
+      stratagem36ById('TS-001')?.n === 1
+      && stratagem36ById('TS-036')?.term === 'If all else fails, retreat'
+      && stratagem36ById('TS-999') === null);
+    // ── Further Reading (More) ───────────────────────────────
+    // Owner order 2026-10-12. The Shakespeare Dictionary shipped imported
+    // by nothing once and was recorded as built while unreachable, so a
+    // new page gets pinned the day it lands.
+    //
+    // THE POINT OF THIS PAGE IS THAT ACTING IS NOT COPIED INTO IT.
+    // approaches.js already holds four owner-approved bibliographies, and
+    // `sections.sources` was referenced in ONE place in the whole app --
+    // the #review inventory -- so they were invisible to every reader.
+    // The page reads them live. Duplicating them into further-reading.js
+    // would look tidier and would drift the first time one is edited.
+    check('further reading: the page is reachable from More and reads Acting live',
+      /function renderFurtherReading\(\)/.test(famSrc)
+      && /title: 'Further Reading'/.test(famSrc)
+      && /go: renderFurtherReading/.test(famSrc)
+      && /ACTING_APPROACHES\.map/.test(famSrc)
+      && /a\.sections\.sources/.test(famSrc)
+      // and NOT copied into the data file
+      && !FURTHER_READING.some(c => /Hapgood|Neighborhood Playhouse|MICHA/.test(
+        JSON.stringify(c))));
+    // The two empty courses are an honest statement, not an oversight, and
+    // filling them with a plausible generic list would be worse than the
+    // gap. Voice & Speech having no named source is the same fact as it
+    // being the course that most needs a specialist and has never had one.
+    const frEmpty = FURTHER_READING.filter(c => c.empty);
+    check('further reading: the courses with no named sources say so plainly',
+      frEmpty.length === 2
+      && frEmpty.every(c => !c.entries && c.empty.length > 80)
+      && frEmpty.some(c => c.id === 'FR-speech')
+      && frEmpty.some(c => c.id === 'FR-shakespeare'),
+      frEmpty.map(c => c.id).join(' '));
+    check('further reading: every listed entry says who, what and why',
+      FURTHER_READING.filter(c => c.entries).every(c =>
+        c.entries.length > 0 && c.entries.every(e => e.who && e.what && e.why?.trim())),
+      FURTHER_READING.filter(c => c.entries).map(c => `${c.id}:${c.entries.length}`).join(' '));
+    // It is NOT a second credits page. Accents points AT the thirteen
+    // citations already there rather than restating them, which is the
+    // duplication this page exists to avoid.
+    check('further reading: Accents points at the credits rather than repeating them',
+      FURTHER_READING.find(c => c.id === 'FR-accents')?.pointer?.section === 'credits'
+      && !FURTHER_READING.find(c => c.id === 'FR-accents')?.entries);
+
+    // THE COLLISION THAT FORCED A RENAME. Two shelves called The 38
+    // Stratagems and The 36 Stratagems, differing by a digit, covering
+    // unrelated subjects, in one Library. Pinned as resolved: the old name
+    // is gone from the view layer and both shelves still exist.
+    check('thirty-six: the shelf-name collision is resolved and stays resolved',
+      !/The 38 Stratagems/.test(famSrc)
+      && /The Art of Controversy/.test(famSrc)
+      && /The Thirty-Six Stratagems/.test(famSrc)
+      && STRATAGEMS.length === 38 && THIRTY_SIX.length === 36);
     // The group line comes off the PAGE and the shelves KEEP their
     // headings, where the grouping still does navigational work. Both
     // halves are pinned: each is a one-line edit, and losing the second
