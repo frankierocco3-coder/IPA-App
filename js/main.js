@@ -13,6 +13,8 @@ import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESS
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
 import { STRATAGEMS, stratagemById } from './data/rhetoric/stratagems.js';
+import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from './data/rhetoric/thirty-six.js';
+import { FURTHER_READING } from './data/further-reading.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -5001,6 +5003,7 @@ function renderFallacyPage(kind, id) {
   // of those stay exactly as they were rather than being rewritten into a
   // three-way branch. A move is reviewable as a move; this is an addition.
   if (kind === 'stratagem') return renderStratagemPage(id);
+  if (kind === 'ts36') return renderThirtySixPage(id);
   const thirteen = kind === 'thirteen';
   const f = thirteen ? fallacyById(id) : MODERN_FALLACIES.find(x => x.id === id);
   if (!f) return thirteen ? renderFallacyShelf() : renderFamilyShelf();
@@ -5167,7 +5170,7 @@ function renderFamilyShelf() {
   draw();
 }
 
-// ── The 38 Stratagems: Schopenhauer, flat and in his order ──────
+// ── The Art of Controversy: Schopenhauer, flat and in his order ─
 // Owner decision 2026-10-09. The fourth reference shelf, and the only one
 // that is not a taxonomy of mistakes: a fallacy is something a person
 // falls into, a stratagem is a thing somebody does to you on purpose.
@@ -5216,7 +5219,7 @@ function renderStratagemPage(id) {
   record(() => renderFallacyPage('stratagem', id));
   stopSpeech();
   app.innerHTML = `
-    ${pageTopbar('🗡 The 38 Stratagems', '#8a6d3b')}
+    ${pageTopbar('🗡 The Art of Controversy', '#8a6d3b')}
     <main class="guide">
       <h1 id="fal-title" tabindex="-1">${esc(stratagemLabel(s))}</h1>
       ${stratagemHtml(s)}
@@ -5230,9 +5233,9 @@ function renderStratagemShelf() {
   record(renderStratagemShelf);
   stopSpeech();
   app.innerHTML = `
-    ${pageTopbar('🗡 The 38 Stratagems', '#8a6d3b')}
+    ${pageTopbar('🗡 The Art of Controversy', '#8a6d3b')}
     <main class="guide">
-      <h1>The 38 Stratagems</h1>
+      <h1>The Art of Controversy</h1>
       <p class="guide-text">A fallacy is something a person falls into. A stratagem is something
         somebody does to you on purpose, knowing their case is weak and meaning to win anyway.
         That is why these are not on the fallacy shelves.</p>
@@ -5274,6 +5277,125 @@ function renderStratagemShelf() {
     wireFallacyCards(listEl, 'stratagem');
   };
   searchEl.addEventListener('input', () => { stratQuery = searchEl.value; draw(); });
+  draw();
+}
+
+// ── The Thirty-Six Stratagems: grouped, and the only shelf with two
+// examples per entry ────────────────────────────────────────────
+// Owner decision 2026-10-12. The second shelf of TACTICS rather than
+// errors, and the owner's call to file it under Rhetoric rather than
+// beside Playable Actions, which is where Claude argued it belonged.
+//
+// IT GROUPS and the Schopenhauer shelf does not, for the same reason in
+// both directions: this text supplies its own six chapters of six, and he
+// supplies no grouping at all. Neither shelf invents a structure.
+//
+// TWO EXAMPLES, which no other shelf has. The pairing is the whole format:
+// the historical case makes it memorable, the modern one makes it usable.
+// They get DIFFERENT headings, because fallacyEgHtml prints "Example" per
+// entry and two identical headings on one card would read as a mistake.
+const STRATAGEM36_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric reader. '
+  + 'The list, its order and its numbering are the traditional ones; every definition, '
+  + 'question and example here is written for this app and has not been checked by a '
+  + 'qualified reader. Several of the traditional stories come from romance rather than '
+  + 'record, and those say so.';
+
+const STRATAGEM36_SOURCE_NOTE = 'The Thirty-Six Stratagems is an anonymous Chinese text, '
+  + 'long out of copyright, and these English names are the standard renderings. '
+  + 'Recognising a stratagem begins an examination; it does not finish one, and nothing '
+  + 'here is a way to win an argument without having the better case.';
+
+let ts36Query = '';
+
+// Number first, because that is how the stratagems are cited, then the
+// Chinese, which is the actual name of the thing.
+const stratagem36Label = s => `${s.n} · ${s.term}`;
+
+const ts36EgHtml = s => (s.examples ?? []).map((x, i) => `
+  <h2 class="guide-heading">${i === 0 ? 'In history' : 'Where you meet it'}</h2>
+  <blockquote class="th-quote"><p>${egQuoted(x)}</p>${
+    x.source ? `<footer class="th-attrib">${esc(x.source)}</footer>` : ''}</blockquote>`).join('');
+
+function thirtySixHtml(s) {
+  return `
+    <p class="pane-note">${esc(s.hanzi)} · ${esc(CHAPTERS[s.chapter].label)}</p>
+    <p class="guide-text fal-def">${esc(s.what)}</p>
+    ${ts36EgHtml(s)}
+    ${hidesAskHtml(s)}`;
+}
+
+function renderThirtySixPage(id) {
+  const s = stratagem36ById(id);
+  if (!s) return renderThirtySixShelf();
+  record(() => renderFallacyPage('ts36', id));
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('☯ The Thirty-Six Stratagems', '#8a6d3b')}
+    <main class="guide">
+      <h1 id="fal-title" tabindex="-1">${esc(stratagem36Label(s))}</h1>
+      ${thirtySixHtml(s)}
+      <p class="pane-note pane-caveat">${esc(STRATAGEM36_REVIEW_NOTE)}</p>
+    </main>`;
+  wireBrandHome();
+  document.getElementById('fal-title')?.focus();
+}
+
+function renderThirtySixShelf() {
+  record(renderThirtySixShelf);
+  stopSpeech();
+  app.innerHTML = `
+    ${pageTopbar('☯ The Thirty-Six Stratagems', '#8a6d3b')}
+    <main class="guide">
+      <h1>The Thirty-Six Stratagems</h1>
+      <p class="guide-text">Not errors in reasoning and not figures of speech. These are moves
+        one side makes on another, and almost none of them is verbal: they come from a Chinese
+        military text and they are about deception, position and timing.</p>
+      <p class="guide-text">Thirty-six, in six chapters of six, in the order the text gives them.
+        Each one carries the case it is remembered for and the place you are most likely to meet
+        it now.</p>
+      <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
+      <p class="pane-note">${esc(STRATAGEM36_SOURCE_NOTE)}</p>
+      <p class="pane-note pane-caveat">${esc(STRATAGEM36_REVIEW_NOTE)}</p>
+      <input class="sonnet-search" id="ts-search" type="search"
+        placeholder="Search stratagems, effects, examples…" aria-label="Search the thirty-six"
+        value="${esc(ts36Query)}" autocomplete="off">
+      <div id="ts-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('ts-list');
+  const searchEl = document.getElementById('ts-search');
+  const draw = () => {
+    const q = ts36Query.trim().toLowerCase();
+    const hits = q
+      ? THIRTY_SIX.filter(s => [String(s.n), s.term, s.hanzi, s.what, s.overlook, s.ask,
+          ...s.examples.flatMap(x => [x.text, x.source])]
+          .some(v => String(v ?? '').toLowerCase().includes(q)))
+      : THIRTY_SIX;
+    if (!hits.length) {
+      listEl.innerHTML = `
+        <p class="pane-note">Nothing matches “${esc(ts36Query)}”.</p>
+        <p><button class="btn-lite" id="ts-clear" type="button">Clear search</button></p>`;
+      listEl.querySelector('#ts-clear').addEventListener('click', () => {
+        ts36Query = ''; searchEl.value = ''; draw();
+      });
+      return;
+    }
+    // A chapter heading appears only where the search leaves entries under
+    // it, the same rule the thirteen use.
+    listEl.innerHTML = Object.keys(CHAPTERS)
+      .map(k => [k, hits.filter(s => s.chapter === k)])
+      .filter(([, list]) => list.length)
+      .map(([k, list]) => `
+        <h2 class="shelf-section">${esc(CHAPTERS[k].label)}<span>${list.length}</span></h2>
+        <p class="guide-text">${esc(CHAPTERS[k].lead)}</p>
+        <div class="fal-cards">${list.map(s => `
+          <button class="fal-card" type="button" data-fal="${esc(s.id)}">
+            <span class="fal-card-name">${esc(stratagem36Label(s))}</span>
+            <span class="tile-chev" aria-hidden="true">›</span>
+          </button>`).join('')}</div>`).join('');
+    wireFallacyCards(listEl, 'ts36');
+  };
+  searchEl.addEventListener('input', () => { ts36Query = searchEl.value; draw(); });
   draw();
 }
 
@@ -5375,11 +5497,19 @@ function rhetoricLibraryPane(el) {
     // Not a fourth fallacy shelf: these are tactics rather than errors,
     // which is why the keywords lead on what somebody DOES rather than on
     // what they got wrong.
-    { key: 'col:rh-stratagems', tone: 'is-blue', emoji: '🗡', title: 'The 38 Stratagems',
+    { key: 'col:rh-stratagems', tone: 'is-blue', emoji: '🗡', title: 'The Art of Controversy',
       group: G2, count: STRATAGEMS.length, unit: 'stratagem',
       keywords: 'schopenhauer art of controversy trick tactic dirty winning argument bad faith '
         + 'extension homonymy diversion ad personam ad verecundiam retorsio turning the tables',
       go: renderStratagemShelf },
+    // The second tactics shelf, and the one that is not about argument at
+    // all. Owner decision 2026-10-12 to file it here rather than beside
+    // Playable Actions, which is where its contents point.
+    { key: 'col:rh-thirtysix', tone: 'is-sage', emoji: '☯', title: 'The Thirty-Six Stratagems',
+      group: G2, count: THIRTY_SIX.length, unit: 'stratagem',
+      keywords: 'chinese military deception borrowed knife empty fort besiege wei tiger mountain '
+        + 'burning house smile knife cicada shell retreat sun tzu strategy tactic',
+      go: renderThirtySixShelf },
   ];
   workspaceLibrary(el, { workspace: 'Rhetoric', cards, state: libState.rhetoric });
 }
@@ -6774,6 +6904,59 @@ function renderCredits() {
   wireBrandHome();
 }
 
+// ── Further Reading: the books and the people, per course ───────
+// Owner order 2026-10-12.
+//
+// ACTING IS READ FROM approaches.js AND NOT COPIED. That file already
+// carries a full bibliography for Stanislavski, Adler, Meisner and
+// Michael Chekhov, all four owner-approved and live — and `sections.sources`
+// was referenced in exactly ONE place in this app, the owner's #review
+// inventory. Four checked bibliographies sat in the data where no reader
+// could reach them. Linked, never duplicated: edit an approach and this
+// page changes with it.
+//
+// A bibliography is a fact about which books exist, so it does not need
+// the acting professional still owed on the PROSE of those introductions.
+// That is why this page can show them while the drafts stay gated.
+function renderFurtherReading() {
+  record(renderFurtherReading);
+  stopSpeech();
+  const entryHtml = e => `
+    <div class="fr-entry">
+      <p class="guide-text"><b>${esc(e.who)}</b> · ${esc(e.what)}</p>
+      <p class="pane-note">${esc(e.why)}</p>
+    </div>`;
+  const courseHtml = c => `
+    <h2 class="shelf-section">${esc(c.title)}</h2>
+    <p class="guide-text">${esc(c.lead)}</p>
+    ${c.empty ? `<p class="pane-note pane-caveat">${esc(c.empty)}</p>` : ''}
+    ${c.entries ? c.entries.map(entryHtml).join('') : ''}
+    ${c.pointer ? `<p><button class="btn-lite" data-fr-go="${esc(c.pointer.section)}" type="button">${
+      esc(c.pointer.label)} ›</button></p>` : ''}`;
+  app.innerHTML = `
+    ${pageTopbar('📖 Further Reading', '#6f8657')}
+    <main class="guide">
+      <h1>Further Reading</h1>
+      <p class="guide-text">Where each course comes from, and where to go if you want more than
+        this app can give you. Practitioners are kept out of the lessons on purpose; this is
+        where they are named.</p>
+      <p class="pane-note">This is not Sources &amp; Credits. That page says where a claim came
+        from. This one says what to read next, and why you would.</p>
+      <h2 class="shelf-section">Acting</h2>
+      <p class="guide-text">Four approaches the course is built on. Each has its own introduction
+        in the Acting Library; these are the books behind them.</p>
+      ${ACTING_APPROACHES.map(a => `
+        <div class="fr-entry">
+          <p class="guide-text"><b>${esc(a.name)}</b> · ${esc(a.era)}</p>
+          <p class="pane-note">${esc(a.sections.sources)}</p>
+        </div>`).join('')}
+      ${FURTHER_READING.map(courseHtml).join('')}
+      <p class="pane-note pane-caveat">${esc(APPROACH_DISCLAIMER)}</p>
+    </main>`;
+  wireBrandHome();
+  app.querySelector('[data-fr-go]')?.addEventListener('click', () => renderCredits());
+}
+
 function moreMain(el) {
   // Order (owner UI pass 2026-09-15): the user's own things first
   // (profile, settings, their data), then talking to us, then reading
@@ -6789,6 +6972,11 @@ function moreMain(el) {
     { icon: '✨', img: 'img/ui/why-speech.png', title: 'Why Speech Matters', blurb: 'The preface — what speech does, what it reveals, and who it’s for. Read it again any time.', go: () => renderThreshold(0, { replay: true }), color: '#6f8657' },
     { icon: 'ℹ️', img: 'img/ui/about.png', title: 'About Speechcraft', blurb: 'What this is, and what beta means.', go: renderAbout, color: '#6f8657' },
     { icon: '📚', img: 'img/ui/credits.png', title: 'Sources & Credits', blurb: 'Texts, translations, voices and licences.', go: renderCredits, color: '#64748b' },
+    // Owner order 2026-10-12. NOT a second credits page: that one answers
+    // where a claim came from, this one answers where to go next. It is
+    // also the page the no-practitioner-names rule always implied — the
+    // names stay out of the lessons and get credited properly here.
+    { icon: '📖', title: 'Further Reading', blurb: 'The books and the people behind each course.', go: renderFurtherReading, color: '#6f8657' },
   ];
   el.innerHTML = `<h1 class="page-h">More</h1>` + cards.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:${c.color}">

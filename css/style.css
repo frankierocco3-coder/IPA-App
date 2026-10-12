@@ -2376,3 +2376,14 @@ body.nb-full #app { display: none; }
 @media (max-width: 620px) {
   .shelf-section { font-size: 19px; margin-top: 30px; }
 }
+
+/* Further Reading (2026-10-12): one entry is a person, a way in and a
+   reason. The rule separates them without a card, because a reading list
+   that looks like a shelf of tiles invites tapping and these do not lead
+   anywhere. */
+.fr-entry {
+  border-left: 3px solid var(--line);
+  padding: 2px 0 2px 12px;
+  margin: 14px 0;
+}
+.fr-entry .guide-text { margin-bottom: 2px; }
