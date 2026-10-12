@@ -166,8 +166,6 @@ export const RHETORIC_LESSONS = [
       { h: 'Epideictic: about the present' },
       { p: 'Praise and blame. A eulogy, a toast, an award, a tribute, a denunciation. The tradition gives its end as honour: the question is what is admirable, and the standard is whether the audience leaves holding the values the speaker held up.' },
       { p: 'This is the one modern speakers underrate, because it looks like it is not doing anything. What it does is slower and harder to see: a community rehearses what it admires at funerals and prize-givings and retirements, and speech of this kind is where that happens out loud.' },
-      { h: 'Why an actor needs this' },
-      { p: 'Because a character making the wrong kind of speech for the situation is a whole characterisation, and playing it requires knowing which kind they are making. A man who answers a question about what to do next by relitigating the past is not merely unhelpful. He is refusing the occasion, and that refusal is playable.' },
     ] },
 
   { id: 'rh-canons', module: 'ground', order: 4,
@@ -255,9 +253,6 @@ export const RHETORIC_LESSONS = [
       { h: 'The overhearer' },
       { p: 'Much speech has an audience beyond the room: the minutes, the recording, the person who will be told about it afterwards, the version that gets repeated. Knowing they are there changes what can be said and often changes what should be.' },
       { p: 'It is worth being honest about the cost. Speaking for the record is how an exchange stops being an exchange. A conversation in which both people are performing for somebody absent has the shape of a discussion and none of the function, and everybody present can feel it.' },
-      { h: 'For an actor' },
-      { p: 'A character speaking to one person while aiming at another is among the most playable situations there is, and it is written into a great many scenes. Somebody answers the question their scene partner asked, and builds the answer for the person listening at the door. Nothing in the words announces it. Everything in where the line is aimed does.' },
-      { p: 'The doing is the acting, which is the same instruction the Acting course gives about objective. Playable Actions in the Acting Library is the shelf for naming what the line is doing, and to whom.' },
     ] },
 
   { id: 'rh-common', module: 'audience', order: 2,
@@ -277,8 +272,6 @@ export const RHETORIC_LESSONS = [
       { p: 'The second is refusing to stand on a belief you think is wrong. You can start from somebody’s premise and end somewhere they did not expect. That is what an argument is for. Refusing the starting point because you dislike it guarantees you never get anywhere near the conclusion.' },
       { h: 'When there is no common ground' },
       { p: 'Sometimes there genuinely is none, and the honest move is to say the disagreement is deeper than the subject in front of you. Manufacturing agreement you do not feel is worse than admitting the gap: it is visible, and it costs the one thing that was holding the exchange together, which module 1 calls ethos.' },
-      { h: 'For an actor' },
-      { p: 'Characters talk past each other because each is standing on ground the other does not hold, and neither has noticed. What is playable is the certainty. A person who thinks their premise is obvious does not argue for it; they repeat the conclusion louder, which is exactly what people do.' },
     ] },
 
   { id: 'rh-supply', module: 'audience', order: 3,
@@ -297,8 +290,6 @@ export const RHETORIC_LESSONS = [
       { h: 'The same move is the best way to smuggle' },
       { p: 'A premise that is never stated is a premise that is never examined. This is precisely the mechanism behind the family of errors All Fallacies groups under smuggling in assumptions, and the efficiency that makes the enthymeme good is what makes it dangerous.' },
       { p: 'The line is straightforward to state and requires honesty to hold. Leaving a step out because the listener already holds it is argument. Leaving it out because they would reject it if they heard it said aloud is not.' },
-      { h: 'For an actor and anybody who writes' },
-      { p: 'The audience finishing the thought is the engine of a good line. A line that explains itself has nothing left for anybody to do, and lands dead. The laugh, or the silence, happens in the half second where they get there first, and an actor who fills that half second has taken the moment away from the only person who could have had it.' },
     ] },
 
   { id: 'rh-resist', module: 'audience', order: 4,
@@ -341,8 +332,6 @@ export const RHETORIC_LESSONS = [
       { p: 'A good speaker builds receptiveness rather than hoping for it: naming an objection before it hardens into a position, asking for something smaller first, or separating a decision from the question of who was to blame for needing it.' },
       { h: 'The honest limit' },
       { p: 'Timing is also the most respectable excuse available. An argument permanently postponed until the moment is right is sometimes an argument the speaker is afraid to make, and the vocabulary of good judgement is what makes that comfortable. Worth asking which one is happening, because from the inside they feel identical.' },
-      { h: 'For an actor' },
-      { p: 'A scene turns on when a line arrives. The same sentence one beat earlier is a different event, and frequently a different play. That is the subject of Tempo-Rhythm in the Acting course, and this is the argument-side of it: a character who says the right thing at the wrong moment has not been clumsy, they have been early, and early is playable.' },
     ] },
 
   { id: 'rh-adjust', module: 'audience', order: 6,
@@ -363,8 +352,6 @@ export const RHETORIC_LESSONS = [
       { p: 'Do not change the claim. A speaker who revises what they are arguing for in response to resistance is heard as having no position, and the listener stops attending to the argument and starts watching the speaker manoeuvre. The claim is the one fixed thing; everything else was always negotiable.' },
       { h: 'Delivery is the next module' },
       { p: 'Voice, body, pause and the room are module 5, and they are half of whether any of this arrives. This lesson is about the argument rather than the speaking of it, and the separation is deliberate: a great many speakers try to fix a structural problem with delivery, which module 1 warns about in its account of the canons.' },
-      { h: 'For an actor' },
-      { p: 'This is listening, which is the live half of the job and the thing the Acting course spends a whole collection on in Listening and Responding. A character who adjusts is doing something visibly different from a character who delivers, and an audience usually knows which one it is watching, even when it could not say what the difference was.' },
     ] },
 
   // ── Module 3 · Finding the Argument ────────────────────────────
@@ -394,8 +381,6 @@ export const RHETORIC_LESSONS = [
       { h: 'Collect before you choose' },
       { p: 'Write down the arguments you do not intend to use. The weak ones are worth having on paper because they are what the other side will reach for, and because a case you can argue from both directions is one you actually understand.' },
       { p: 'This is also the honest test of whether you have a case at all. If the search produces one argument and it is the one you started with, you have a conviction rather than an argument, and the rest of this module will not help until that changes.' },
-      { h: 'For an actor' },
-      { p: 'Characters do this badly, visibly, and in ways worth playing. Somebody with one argument repeats it louder. Somebody with five is calm, because losing one costs them nothing. How much a person has in reserve is legible in how they behave when contradicted.' },
     ] },
 
   { id: 'rh-topics', module: 'invention', order: 2,
@@ -442,8 +427,6 @@ export const RHETORIC_LESSONS = [
       { p: 'You are in dispute at the FIRST point where you diverge, and everything after it is not yet in question. Two people arguing about how serious something is, who have not noticed they disagree about what it is, will not converge no matter how long they go on, because they are answering different questions and each can hear that the other is not making sense.' },
       { h: 'The honest part' },
       { p: 'People move between the four to avoid losing, and doing it deliberately is a tactic rather than an argument. Retreating from a strong claim to a modest one, or raising the standard once it has been met, both have names on All Fallacies. Naming the level out loud is usually enough to stop it.' },
-      { h: 'For an actor' },
-      { p: 'Two characters stuck at different levels is a scene that can run for pages without resolving, which is exactly why writers use it. Neither is being stupid. Each is answering the question they think is in front of them, and the audience can see both.' },
     ] },
 
   { id: 'rh-proof', module: 'invention', order: 4,
@@ -484,8 +467,6 @@ export const RHETORIC_LESSONS = [
       { p: 'What actually decides it is whether they will still be listening at the end. If attention is uncertain, lead. If you have the room, build.' },
       { h: 'The statement of facts is never neutral' },
       { p: 'A plain account of what happened is already an argument. What you include, what you leave out and the order you tell it in do most of the work, and they do it before anybody thinks to start disagreeing. In many cases it is the most powerful part of the speech and the part least defended against.' },
-      { h: 'For an actor' },
-      { p: 'The order a character puts things in shows their mind. Somebody who states the conclusion first and reasons backwards is not the same person as somebody who builds to it and cannot say it until the end. Neither is written in the words. Both are in the sequence.' },
     ] },
 
   { id: 'rh-objection', module: 'invention', order: 6,
@@ -506,8 +487,6 @@ export const RHETORIC_LESSONS = [
       { p: 'Concede what is true in it, then show precisely what it does not reach. An objection that is flatly denied stays alive in the listener, because they can see the part of it that was right and now they are watching you avoid it.' },
       { h: 'The one you cannot answer' },
       { p: 'Sometimes there is an objection you genuinely cannot meet. Saying so costs far less than concealing it. A case with an acknowledged weakness is still a case, and listeners will weigh it. A case caught hiding one is finished, and the weakness is no longer the issue.' },
-      { h: 'For an actor' },
-      { p: 'A character gives themselves away by which objection they will not name. Everything they are willing to argue about is a screen in front of the one thing they are not, and an audience feels the shape of the absence long before it is spoken.' },
     ] },
 
   // ── Module 4 · The Shapes of Language ──────────────────────────
@@ -585,9 +564,6 @@ export const RHETORIC_LESSONS = [
       { h: 'Height is spent, not held' },
       { p: 'The grand style draws on the audience’s willingness to be moved, and that account is finite. A speech at height throughout arrives nowhere, because there is no height left to arrive at, and an audience stops registering the elevation long before the end.' },
       { p: 'Which is why coming down is a technique rather than a failure of nerve. A plain sentence after a long ascent carries more weight than anything in the ascent, and it is among the most reliable ways in this subject to make one sentence land.' },
-      { h: 'For an actor' },
-      { p: 'Level is characterisation before it is style. A person who speaks in one register whatever the room is a specific person, usually one who is frightened of something; a person who moves between registers has a different kind of authority, and the movement is where it shows.' },
-      { p: 'And a character reaching for the grand style and not managing it is among the most exposed things available to play. Nothing in the words says the reach failed. Everything in the gap between the size of the sentence and the size of the speaker does.' },
     ] },
 
   { id: 'rh-figure', module: 'shape', order: 3,
@@ -613,8 +589,6 @@ export const RHETORIC_LESSONS = [
       { h: 'Naming is not the skill' },
       { p: 'Being able to say that a sentence is an antimetabole is worth having for reading and worth nothing for speaking. Almost nobody builds a sentence by selecting a figure from a list of seventeen.' },
       { p: 'What the shelf is for is noticing. Once you can see the shapes, you see them working on you, which is the defensive use module 1 takes to be the strongest reason to study any of this, and a few of them settle into your hand without being chosen.' },
-      { h: 'For an actor' },
-      { p: 'The shape is the route the thought took, so the shape is evidence about the thinking. A speech in balanced pairs is a mind weighing two things and not yet done. A speech in mounting repetitions is a mind that has stopped weighing and is now driving. Neither is stated anywhere in the words, and both are on the page in the pattern.' },
     ] },
 
   { id: 'rh-metaphor', module: 'shape', order: 4,
@@ -641,9 +615,6 @@ export const RHETORIC_LESSONS = [
       { p: 'THE LINE IS THE SAME ONE MODULE 2 DRAWS. A metaphor that makes a true relation graspable is teaching, and it is frequently the only way a difficult thing becomes holdable at all. A metaphor that imports conclusions the speaker could not defend if they were stated is smuggling, in one of the most efficient forms the language offers.' },
       { h: 'Following one too far' },
       { p: 'A metaphor extended past its use starts generating conclusions nobody meant. If the battle acquires a budget and a stakeholder, the figure has collapsed, and the audience has stopped following the argument and started watching the machinery. The repair is to stop earlier, not to build the comparison out further.' },
-      { h: 'For an actor' },
-      { p: 'A character’s metaphors are among the surest evidence there is of how they see. Somebody who speaks about their family in the language of business, or their work in the language of war, or their own body as something separate that has let them down, has told you what they believe they are inside, and they have not said a word about it.' },
-      { p: 'It is available to be played and it must never be announced. The moment the performance underlines the figure, the character becomes somebody making a comparison rather than somebody for whom that is simply what the thing is.' },
     ] },
 
   { id: 'rh-sentence', module: 'shape', order: 5,
@@ -668,9 +639,6 @@ export const RHETORIC_LESSONS = [
       { p: 'Two items read as a comparison, and the listener weighs them against each other. Four or more read as a list, and the listener stops attending to the members. Three reads as complete, which is why the series of three recurs so heavily in English public speech. It is on the shelf as tricolon, and the likeliest reason it works is arithmetic about attention rather than magic about the number.' },
       { h: 'This is the page, not the room' },
       { p: 'Breath, pause and pace are module 5, and they are half of whether a sentence arrives. They can support a shape or fight it, and they cannot rescue a sentence whose weight is in the wrong place. Composition first, because delivery has nothing to work with otherwise.' },
-      { h: 'For an actor' },
-      { p: 'The shape of a sentence is written instruction about the thought, and the suspended sentence is the clearest case. It cannot be played by somebody who knows how it ends, because the character does not: they are assembling it as they speak, the delay is the event, and an actor who has decided the destination in advance flattens the only thing happening.' },
-      { p: 'Verse makes the same demand with a metre instead of a clause, which is what the Verse and Prose module in the Shakespeare course is about. The instruction is identical: the shape tells you where the thought was still moving.' },
     ] },
 
   // ── Module 5 · Delivery ────────────────────────────────────────
@@ -693,10 +661,19 @@ export const RHETORIC_LESSONS = [
   // level a room can hold is module 4 (rh-levels). Memory is module 1 and
   // the Lines and Memory page. Named errors stay on the fallacy shelves.
   //
-  // EVERY CROSS-REFERENCE HERE WAS CHECKED AGAINST THE APP: Tempo-Rhythm,
-  // Two Rhythms at Once, Listening and Responding, Lines and Memory and
-  // the Warmup all exist under those names. A pointer to a shelf that is
-  // not there is worse than no pointer.
+  // STALE SINCE 2026-10-12, and corrected rather than deleted so the
+  // reason survives. This used to say every cross-reference had been
+  // checked against the app: Tempo-Rhythm, Two Rhythms at Once, Listening
+  // and Responding, Lines and Memory and the Warmup. Most of those
+  // pointers lived in the nineteen "For an actor" sections, and the owner
+  // removed all nineteen that day — rhetoric is a separate course and does
+  // not justify itself by what an actor gets from it.
+  //
+  // Two pointers to Lines and Memory survive, inside the teaching about
+  // memory as a canon rather than in a justification section. They are
+  // kept deliberately. The rule they were written under still holds: a
+  // pointer to a shelf that is not there is worse than no pointer, so
+  // check the name against the app before adding another.
 
   { id: 'rh-arrives', module: 'delivery', order: 1,
     title: 'The Half That Is Not on the Page',
@@ -742,9 +719,6 @@ export const RHETORIC_LESSONS = [
       { h: 'The dishonest version' },
       { p: 'Because stress asserts a contrast, it can assert one that was never argued. Emphasis can imply that somebody would disagree, that a finding is surprising, or that a source is doubtful, and none of it has been said, so none of it can be answered.' },
       { p: 'This is module 2’s smuggling performed with the voice, and it is the hardest form to call out, because the transcript exonerates you. The words on the page are exactly what you would have been willing to defend.' },
-      { h: 'For an actor' },
-      { p: 'Which word a character leans on is a choice about what they believe they are up against. Somebody answering an accusation nobody made is stressing against an imagined contrast, and the stress is the only evidence that the accusation exists in their head at all.' },
-      { p: 'That is playable, it is specific, and it is written nowhere in the line.' },
     ] },
 
   { id: 'rh-silence', module: 'delivery', order: 3,
@@ -792,9 +766,6 @@ export const RHETORIC_LESSONS = [
       { h: 'An honest limit' },
       { p: 'There is a large popular literature claiming that particular gestures reveal particular inner states, and much of it is not supported by anything. Nothing in this lesson says a body reveals the truth about a speaker.' },
       { p: 'It says something narrower and more useful: a body makes claims, listeners read those claims whether or not they are accurate, and a speaker who ignores this is not being authentic, only unaware. Before You Begin puts the harder version of it plainly, and it applies here more than anywhere else in the course: from the outside, at speed, the confident and the correct look the same.' },
-      { h: 'For an actor' },
-      { p: 'All of this is your subject already, and the Acting course goes further into it than this module will. What is added here is the argument frame: a character’s physical behaviour while they speak is a second case being made alongside the words, and it can support them, undercut them or contradict them outright.' },
-      { p: 'Two Rhythms at Once, in the Acting course, is the same observation from the inside. A person hiding something runs two rhythms, and the gap between them is what the audience is actually reading.' },
     ] },
 
   { id: 'rh-room', module: 'delivery', order: 5,
@@ -917,9 +888,6 @@ export const RHETORIC_LESSONS = [
       { h: 'The test' },
       { p: 'Ask what would change your mind, and whether anything could. Module 3 puts that question to your evidence. Here it goes to you.' },
       { p: 'A position that nothing could change is not a conclusion you reached. It is one you are defending, and you are entitled to hold it as a commitment. You are not entitled to present it as an argument.' },
-      { h: 'For an actor' },
-      { p: 'The most convincing people on a stage are frequently the most wrong, and playing certainty is not the same as playing knowledge. A character who knows and a character who is merely sure behave differently the moment they are contradicted: the first can examine, the second can only repeat, louder.' },
-      { p: 'That difference is this entire lesson, made visible, and it is one of the most useful things in the course to be able to play.' },
     ] },
 
   { id: 'rh-pressure', module: 'ethics', order: 3,
@@ -964,10 +932,6 @@ export const RHETORIC_LESSONS = [
       { p: 'The repair is one sentence and it costs almost nothing: say which of the two you are doing.' },
       { h: 'The harder version' },
       { p: 'Arguing a position well tends to shift what you believe about it in the direction you argued. That is worth knowing about yourself. The exercise is genuinely educational and it is simultaneously a mechanism for talking yourself into things, and the second one is invisible from inside while it is happening.' },
-      { h: 'For an actor' },
-      { p: 'This is your working condition, and it is a large part of why a rhetoric course belongs in an acting app. A character’s argument has to be made at full strength, by somebody who means it, and the performer need not agree with a word of it.' },
-      { p: 'What the performance owes is that the argument be a real one rather than a weak version built to lose, which is the same obligation module 2 describes when it says to state the other position in words they would accept. A play that defeats a straw man has not dramatised the disagreement, it has avoided it.' },
-      { p: 'Playable Actions, in the Acting Library, is the shelf for the other half: what the line is doing to the person opposite, which is a different question from what it asserts.' },
     ] },
 
   { id: 'rh-defence', module: 'ethics', order: 5,
@@ -1042,9 +1006,6 @@ export const RHETORIC_LESSONS = [
       { p: 'A listener who is admiring is not examining. That is the entire problem, and it is the condition this course was opened with: what distinguishes honest persuasion is what the listener is left able to do. A figure that dazzles and moves on quickly has taken the examining away, and it is the exact accusation module 6 has to answer.' },
       { h: 'The test on the page' },
       { p: 'Read the sentence and ask whether a person in that situation could plausibly have said it that way. A shape only a prepared speaker could have produced announces the preparation, and announcing the preparation is how a speech stops being addressed to anybody.' },
-      { h: 'For an actor' },
-      { p: 'A character using a figure is using it for a reason inside the scene, and the reason is not that the writer liked the shape. Somebody who has clearly prepared their sentences is a specific person in a specific state, and frequently one who is frightened of what happens if they improvise.' },
-      { p: 'The danger is presenting the figure. Presenting it tells the audience the speaker is performing rather than arguing, and if that is not true of the character, it is not the character showing. It is the actor.' },
     ] },
 
 ];

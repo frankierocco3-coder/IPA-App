@@ -5926,12 +5926,27 @@ export async function run({ navDoc = document } = {}) {
     // reader goes looking, does not find it, and concludes the app is
     // careless. Everything module 4 sends somebody to must be findable
     // under the name the lesson uses for it.
-    check('module 4: every shelf and module it names exists under that name',
-      shapeText.includes('the shapes of argument')
-      && shapeText.includes('all fallacies')
-      && shapeText.includes('verse and prose')
-      && revSrc.includes('The Shapes of Argument') && revSrc.includes('All Fallacies')
-      && SHAKESPEARE_MODULES.some(m => m.title === 'Verse and Prose'));
+    // CONDITIONAL SINCE 2026-10-12, and the change is deliberate. This used
+    // to REQUIRE module 4 to name Verse and Prose. That pointer lived in a
+    // "For an actor" section, and the owner removed all nineteen of those:
+    // rhetoric is a separate course and does not justify itself by what an
+    // actor gets from it. Demanding the pointer exist would pin a decision
+    // that has been reversed.
+    //
+    // The rule underneath is unchanged and is what this now asserts: a
+    // pointer to a shelf that does not exist is worse than no pointer, so
+    // ANY name the module uses must be findable under that name. Naming
+    // nothing passes. Naming something that is not there fails.
+    const shapeNames = [
+      ['the shapes of argument', () => revSrc.includes('The Shapes of Argument')],
+      ['all fallacies', () => revSrc.includes('All Fallacies')],
+      ['verse and prose', () => SHAKESPEARE_MODULES.some(m => m.title === 'Verse and Prose')],
+    ];
+    const shapeBroken = shapeNames.filter(([n, exists]) => shapeText.includes(n) && !exists());
+    check('module 4: anything it names exists under that name',
+      shapeBroken.length === 0,
+      shapeBroken.map(([n]) => n).join(' · ')
+        || `names ${shapeNames.filter(([n]) => shapeText.includes(n)).length} of 3`);
 
     // ── Module 5 · Delivery (written 2026-09-29) ──
     // Acting's Tempo-Rhythm already teaches the CRAFT of pace and pause,
@@ -5942,14 +5957,30 @@ export async function run({ navDoc = document } = {}) {
     const delivery = RHETORIC_LESSONS.filter(l => l.module === 'delivery');
     const delText = JSON.stringify(delivery.map(l => l.body));
     const namesAct = ['Tempo-Rhythm', 'Listening and Responding'];
-    check('module 5: every Acting module, chapter and page it names really exists',
+    // CONDITIONAL SINCE 2026-10-12, same reason as module 4. Two Rhythms at
+    // Once was named only inside a "For an actor" section and went with the
+    // other eighteen. What is asserted now is the invariant that was always
+    // the point: everything this module DOES name has to be real.
+    const delNames = [
+      ...namesAct.map(n => [n, () => ACTING_MODULES.some(m => m.title === n)]),
+      ['Two Rhythms at Once', () => ACTING_LESSONS.some(l => l.title === 'Two Rhythms at Once')],
+      ['Warmup', () => revSrc.includes('<h1>Warmup</h1>')],
+    ];
+    const delBroken = delNames.filter(([n, exists]) => delText.includes(n) && !exists());
+    check('module 5: anything it names really exists',
       delivery.length === 6
-      && namesAct.every(n => delText.includes(n) && ACTING_MODULES.some(m => m.title === n))
-      && delText.includes('Two Rhythms at Once')
-      && ACTING_LESSONS.some(l => l.title === 'Two Rhythms at Once')
-      && delText.includes('Warmup') && revSrc.includes('<h1>Warmup</h1>')
+      && delBroken.length === 0
       && delText.includes(RHETORIC_THRESHOLD.title),
-      namesAct.join(' · '));
+      delBroken.map(([n]) => n).join(' · ')
+        || `names ${delNames.filter(([n]) => delText.includes(n)).length} of ${delNames.length}`);
+    // THE OWNER'S DECISION, PINNED (2026-10-12). Nineteen sections headed
+    // "For an actor" or "Why an actor needs this" were removed from this
+    // course. Pinned as ABSENT so they cannot creep back one lesson at a
+    // time, which is exactly how they accumulated.
+    check('rhetoric: the course does not justify itself by what an actor gets',
+      !RHETORIC_LESSONS.some(l => (l.body ?? []).some(b => b.h && /\bactor\b/i.test(b.h))),
+      RHETORIC_LESSONS.flatMap(l => (l.body ?? []).filter(b => b.h && /\bactor\b/i.test(b.h)))
+        .map(b => b.h).join(' · ') || 'none');
     // The division of labour is the whole reason this module is six
     // lessons and not a voice course. If it ever starts teaching the two
     // dials or the rest, Tempo-Rhythm has been duplicated and one of the
