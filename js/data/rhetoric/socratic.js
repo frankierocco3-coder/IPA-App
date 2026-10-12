@@ -10,6 +10,19 @@
 // cheat and nothing on how to do it properly. This is the one classical
 // procedure for arguing that is trying to get somewhere TRUE.
 //
+// ── THE IRONY IS NOT DECORATION, IT IS THE OPEN QUESTION ──────
+// Added 2026-10-12 after two outside accounts leaned on Socratic irony
+// as a technique for handling people you consider beneath you.
+// SOCRATIC_LEAD states that the questioner must not already know the
+// answer. That is a POSITION, not a settled fact, and it is the oldest
+// argument there is about this method — so the shelf now says so beside
+// the claim instead of letting a reader take it as given.
+// Both quotations in SOCRATIC_IRONY are Jowett's Euthyphro, the same
+// source and the same scoping as every other quotation here, which is
+// why the footing in SOCRATIC_NOTE did not have to widen. The second one
+// is the strongest internal evidence AGAINST the lead's position and is
+// here for that reason: do not quietly drop it to make the shelf tidier.
+//
 // ── THE FIRST DRAFT WAS LINEAR AND THAT WAS WRONG ─────────────
 // It ran six moves and stopped at the first contradiction. Every outside
 // account makes the fifth step REPEAT, and the text settles it: Euthyphro
@@ -71,6 +84,18 @@ export const SOCRATIC_LEAD =
   + 'thing up: the questioner must not already know the answer, and the other person '
   + 'must be free to leave. Remove either and this stops being an examination and '
   + 'becomes a trap.';
+
+export const SOCRATIC_IRONY =
+  'The not knowing is a declared pose, and whether it is sincere is the oldest argument '
+  + 'about this method. Socrates tells Euthyphro “I think that I cannot do better than be '
+  + 'your disciple”, and he is on his way to his own trial at the time. Later in the same '
+  + 'dialogue he says “I think that you could have answered in much fewer words the chief '
+  + 'question which I asked, Euthyphro, if you had chosen”, which is not the remark of a man '
+  + 'with no idea where the answer lies. The Greek word behind this was an accusation rather '
+  + 'than a compliment, nearer to dissembling than to anything approving. The condition above '
+  + 'takes a side, and what hangs on it is practical: a questioner who already holds the answer '
+  + 'is either teaching by question or laying a trap, and the test between the two is whether '
+  + 'the other person is free to arrive somewhere unplanned.';
 
 export const SOCRATIC_COUNT =
   'The number of steps is not settled. Other accounts give five, or three. Seven is '

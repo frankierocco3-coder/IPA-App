@@ -62,7 +62,7 @@ import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from
 import { STRATAGEMS, stratagemById } from '../js/data/rhetoric/stratagems.js';
 import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from '../js/data/rhetoric/thirty-six.js';
 import { FURTHER_READING } from '../js/data/further-reading.js';
-import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_COUNT, socraticById } from '../js/data/rhetoric/socratic.js';
+import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_IRONY, SOCRATIC_COUNT, socraticById } from '../js/data/rhetoric/socratic.js';
 import { RHETORIC } from '../js/data/shakespeare/rhetoric.js';
 import { videoLookup } from '../js/data/media-videos.js';
 import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
@@ -5045,8 +5045,16 @@ export async function run({ navDoc = document } = {}) {
     // and takes the same sentence from the same constant. The count is the
     // pin, so a fourth shelf that writes its own copy of this instruction
     // fails here rather than drifting quietly.
-    check('fallacies: one instruction sentence, used by all five card shelves',
-      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 5,
+    // FOUR since 2026-10-12, and the one that left is the pin that matters.
+    // The Socratic shelf took SOCRATIC_CARD_NOTE instead, because the shared
+    // sentence promises "what the move hides" and that shelf's third field is
+    // `misuse` precisely because an honest method hides nothing. Both halves
+    // are pinned: four shelves still share one sentence, and the Socratic
+    // page must not say "hides" anywhere.
+    check('fallacies: one instruction sentence, used by all four trick shelves',
+      (famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length === 4
+      && /esc\(SOCRATIC_CARD_NOTE\)/.test(famSrc)
+      && /how it gets misused/.test(famSrc),
       String((famSrc.match(/esc\(OPEN_CARD_NOTE\)/g) ?? []).length));
     // Owner order 2026-09-29. Both builders lay the entry out the same way,
     // and the ORDER is the instruction: the example sits between the
@@ -5125,6 +5133,23 @@ export async function run({ navDoc = document } = {}) {
     // gets "corrected" back in by somebody checking against the source.
     check('stratagems: the eleventh is XI, not the e-text’s XL',
       STRATAGEMS[10].n === 'XI' && !STRATAGEMS.some(s => s.n === 'XL'));
+    // XXXI IS CONDITIONAL AND THE CONDITION IS THE WHOLE POINT. He allows
+    // it only against a room that already rates the speaker above their
+    // opponent ("a professor, for instance, may try it on a student"), and
+    // he classes it as a sub-case of XXX, the appeal to authority: it
+    // spends standing instead of giving a reason. Outside accounts sell
+    // this one as universally devastating, which is precisely how it reads
+    // with the condition left off. Pinned alongside it: Saunders wrote
+    // "I can’t understand it", and this shelf had de-contracted him, which
+    // house style forbids on examples. The printed 1896 text reads "than
+    // of your opponent" where the Gutenberg e-text reads "that".
+    const st31 = stratagemById('ST-031');
+    check('stratagems: XXXI keeps its audience condition, and Saunders keeps his contraction',
+      /rates that person above their opponent/.test(st31.what)
+      && /professor/.test(st31.what)
+      && /appeal to authority/.test(st31.overlook)
+      && /but I can’t understand it/.test(st31.examples[0].text),
+      st31.what.slice(0, 64));
     // Same three fields as both fallacy shelves, and NO fourth. He gives a
     // counter-move for several and the temptation is to carry them; the
     // owner removed `repair` from the modern shelf on 2026-09-28 because
@@ -5345,6 +5370,30 @@ export async function run({ navDoc = document } = {}) {
     check('socratic: the shelf admits the step count is not settled',
       /not settled/.test(SOCRATIC_COUNT)
       && /esc\(SOCRATIC_COUNT\)/.test(famSrc));
+    // THE IRONY IS THE OPEN QUESTION, NOT A FLOURISH. SOCRATIC_LEAD asserts
+    // that the questioner must not already know the answer. That is a
+    // POSITION, and the shelf now says so beside the claim rather than
+    // letting a reader take it as settled. Two outside accounts teach
+    // Socratic irony as a technique for handling people you consider
+    // beneath you, which is the reading this note exists to refuse. Both
+    // quotations are Jowett's Euthyphro, so the existing US-scoped footing
+    // in SOCRATIC_NOTE still covers them without widening. The second one
+    // is the strongest evidence AGAINST the lead's own position, which
+    // makes it the easiest line here to lose to a tidying edit.
+    // The review caveat said "the six moves" from the day the shelf shipped,
+    // a leftover from the linear draft that the move to seven did not catch.
+    // Nothing pinned the page's own count against the data, so it was wrong
+    // in front of readers. Pinned both directions now.
+    check('socratic: the review note counts the moves the shelf actually has',
+      SOCRATIC_STEPS.length === 7
+      && /seven moves/.test(famSrc)
+      && !/six moves/.test(famSrc));
+    check('socratic: the shelf admits the not-knowing may be a pose',
+      /oldest argument/.test(SOCRATIC_IRONY)
+      && /cannot do better than be your disciple/.test(SOCRATIC_IRONY)
+      && /answered in much fewer words/.test(SOCRATIC_IRONY)
+      && /laying a trap/.test(SOCRATIC_IRONY)
+      && /esc\(SOCRATIC_IRONY\)/.test(famSrc));
     // THE THIRD FIELD IS `misuse`, NOT `overlook`, AND THAT IS THE POINT.
     // Every other shelf here says what a trick HIDES. An honest method
     // hides nothing, so each step says how it gets weaponised. Pinned both

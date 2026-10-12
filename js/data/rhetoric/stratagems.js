@@ -78,9 +78,15 @@
 // Every one of those entries carries a written example instead. Nothing
 // was cut for being unflattering to Schopenhauer; only for being unusable.
 //
-// A TRANSCRIPTION NOTE. The Gutenberg e-text heads stratagem 11 "XL.",
-// which is forty. It is a slip in the e-text, not in Schopenhauer. This
-// file numbers it XI.
+// TWO TRANSCRIPTION NOTES, both places where the Gutenberg e-text and the
+// printed Saunders disagree and the e-text is the one that is wrong. Do
+// not "correct" either of them back against #10731.
+//   * It heads stratagem 11 "XL.", which is forty. A slip in the e-text,
+//     not in Schopenhauer. This file numbers it XI.
+//   * In XXXI it prints "the audience thinks much better of you that of
+//     your opponent". The printed 1896 text reads "than of your
+//     opponent", which is the reading used here and the only one that
+//     parses. Verified 2026-10-12 against the printed scan.
 //
 // XXV AND XXXIV ARE NOT DIRTY. He lists the single counter-instance and
 // pressing an evasion among the tricks, and both are simply good practice
@@ -344,11 +350,11 @@ export const STRATAGEMS = [
     ] },
 
   { id: 'ST-031', n: 'XXXI', term: 'Pleading incompetence',
-    what: 'Having no answer, a person declares the point to be beyond them, in a manner arranged so the room hears that it is nonsense.',
-    overlook: 'That no objection was made at all. A refusal to engage has been dressed up as modesty.',
+    what: 'Having no answer, a person declares the point to be beyond them, so the room hears that it is nonsense. He allows it only where the room already rates that person above their opponent, a professor trying it on a student.',
+    overlook: 'That no objection was made at all. Standing has been spent in place of a reason, which is why he files this with the appeal to authority rather than with modesty.',
     ask: 'Is that a criticism I can answer, or only a shrug?',
     examples: [
-      { text: 'What you now say passes my poor powers of comprehension; it may be all very true, but I cannot understand it, and I refrain from any expression of opinion on it.',
+      { text: 'What you now say passes my poor powers of comprehension; it may be all very true, but I can’t understand it, and I refrain from any expression of opinion on it.',
         source: 'Schopenhauer, The Art of Controversy' },
     ] },
 

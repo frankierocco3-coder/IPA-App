@@ -15,7 +15,7 @@ import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/f
 import { STRATAGEMS, stratagemById } from './data/rhetoric/stratagems.js';
 import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from './data/rhetoric/thirty-six.js';
 import { FURTHER_READING } from './data/further-reading.js';
-import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_COUNT, socraticById } from './data/rhetoric/socratic.js';
+import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_IRONY, SOCRATIC_COUNT, socraticById } from './data/rhetoric/socratic.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from './data/shakespeare/shakespeare-course.js';
 import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
@@ -5412,8 +5412,18 @@ function renderThirtySixShelf() {
 // gets weaponised instead — which is not a contrivance, because this
 // method is famously abused. hidesAskHtml is therefore not reused here.
 const SOCRATIC_REVIEW_NOTE = 'Awaiting review by a knowledgeable rhetoric reader. '
-  + 'The six moves, the questions and the modern examples are written for this app and '
+  + 'The seven moves, the questions and the modern examples are written for this app and '
   + 'have not been checked by a qualified reader.';
+
+// THIS SHELF DOES NOT GET THE SHARED SENTENCE, and that is the point rather
+// than an oversight. OPEN_CARD_NOTE promises "what the move hides", which is
+// true of the four shelves of tricks and false here: the third field is
+// `misuse`, because an honest method hides nothing. Saying "hides" on this
+// page contradicted the one design decision the shelf is built on, three
+// paragraphs above the cards that prove otherwise. The other four shelves
+// keep the shared constant byte for byte.
+const SOCRATIC_CARD_NOTE = 'Open a card for what the move is, how it gets misused, '
+  + 'the question that keeps you honest, and two examples.';
 
 let socQuery = '';
 
@@ -5458,8 +5468,9 @@ function renderSocraticShelf() {
       <p class="guide-text">Every other shelf in this group is argument going wrong. This is the
         one procedure here that is trying to get somewhere true, and it is the oldest of them.</p>
       <p class="guide-text">${esc(SOCRATIC_LEAD)}</p>
+      <p class="guide-text">${esc(SOCRATIC_IRONY)}</p>
       <p class="pane-note">${esc(SOCRATIC_COUNT)}</p>
-      <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
+      <p class="guide-text">${esc(SOCRATIC_CARD_NOTE)}</p>
       <p class="pane-note">${esc(SOCRATIC_NOTE)}</p>
       <p class="pane-note pane-caveat">${esc(SOCRATIC_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="soc-search" type="search"
