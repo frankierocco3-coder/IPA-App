@@ -96,8 +96,8 @@ export const FALLACIES = [
     ] },
 
   { id: 'FA-002', term: 'Amphiboly', group: 'language',
-    what: 'The grammar, rather than a single word, can be read two ways, and the argument uses both.',
-    overlook: 'That the sentence has a second reading. The listener settles on one and never sees the other.',
+    what: 'A sentence that can be read two ways because of how it is put together. The sentence is usually somebody else’s, and the error is taking the reading they did not mean and arguing from it.',
+    overlook: 'That the speaker meant the other reading. The conclusion answers a sentence that really was said and a claim that was never made.',
     ask: 'Which reading do you need for that to follow?',
     examples: [
       { text: 'One morning I shot an elephant in my pajamas. How he got in my pajamas, I don’t know.',
