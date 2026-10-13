@@ -1691,7 +1691,17 @@ const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '
 // known state rather than an oversight: the other five are commissioned and
 // this map is where they land. If they are not coming, remove this line
 // rather than leaving the shelf mixed.
-const SHELF_IMG = { commedia: 'img/ui/commedia.png' };
+const SHELF_IMG = {
+  commedia: 'img/ui/commedia.png',
+  physical: 'img/ui/physical.png',   // boots: the walk, and where the weight sits
+  vocal: 'img/ui/vocal.png',         // gramophone horn: a sound an object makes
+  // A SEESAW, NOT SCALES, AND NOT A CROWN. This module's own claim is that
+  // status is not who somebody is but what they do second by second, so any
+  // emblem of fixed rank would illustrate the opposite of the lesson. The
+  // seesaw is the module's own image — "The Seesaw" is one of its five
+  // chapters. Balance scales are also reserved for the Rhetoric shelf.
+  status: 'img/ui/status.png',
+};
 
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], img: SHELF_IMG[m.id], title: m.title,
