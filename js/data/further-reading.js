@@ -82,7 +82,7 @@ export const FURTHER_READING = [
     empty: 'This course names no practitioner. Its claims come from the plays and the sonnets themselves, which the app carries in full, and from the standard editorial apparatus rather than from any one teacher. That is a gap rather than a principle: a verse teacher or a Shakespeare scholar reviewing this course would almost certainly add to this page, and nobody has yet.' },
 
   { id: 'FR-rhetoric', title: 'Rhetoric',
-    lead: 'How speech changes what people think and do. Every text this course leans on is ancient, out of copyright, and in the app already.',
+    lead: 'How speech changes what people think and do. Nearly every text this course leans on is ancient, out of copyright, and in the app already. One exception is listed last, it is modern, it is in print, and it is here because of how often it is quoted backwards.',
     entries: [
       { who: 'Aristotle',
         what: 'Rhetoric, and Sophistical Refutations',
@@ -96,6 +96,9 @@ export const FURTHER_READING = [
       { who: 'Anonymous',
         what: 'The Thirty-Six Stratagems (三十六計)',
         why: 'A Chinese military text rather than a rhetorical one, and on the shelf here because deception does not change much between a battlefield and a meeting.' },
+      { who: 'David Robson',
+        what: 'The Intelligence Trap (2019). In print, and the only modern book on this page.',
+        why: 'It argues that intelligence, education and expertise make a person more prone to certain errors rather than less, and it says so to the reader rather than about the reader’s opponents. It is cited constantly as proof that other people are fools, which is the reverse of the book. Worth reading for the habits it names: being better at building a case for what you already believe, seeing everybody’s distortions except your own, and treating a qualification as permission to stop listening.' },
     ] },
 
   { id: 'FR-speech', title: 'Voice & Speech',

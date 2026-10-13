@@ -12,7 +12,7 @@ import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.j
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
-import { STRATAGEMS, stratagemById } from './data/rhetoric/stratagems.js';
+import { STRATAGEMS, STRATAGEM_PORCUPINE, stratagemById } from './data/rhetoric/stratagems.js';
 import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from './data/rhetoric/thirty-six.js';
 import { FURTHER_READING } from './data/further-reading.js';
 import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_IRONY, SOCRATIC_COUNT, socraticById } from './data/rhetoric/socratic.js';
@@ -5245,6 +5245,7 @@ function renderStratagemShelf() {
         list is closed and the numbering is how it is cited. He gives no grouping, so neither
         does this shelf.</p>
       <p class="guide-text">${esc(OPEN_CARD_NOTE)}</p>
+      <p class="guide-text">${esc(STRATAGEM_PORCUPINE)}</p>
       <p class="pane-note">${esc(STRATAGEM_SOURCE_NOTE)}</p>
       <p class="pane-note pane-caveat">${esc(STRATAGEM_REVIEW_NOTE)}</p>
       <input class="sonnet-search" id="st-search" type="search"

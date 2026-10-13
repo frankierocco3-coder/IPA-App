@@ -59,7 +59,7 @@ import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKES
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallaciesIn, fallacyById } from '../js/data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from '../js/data/rhetoric/families.js';
-import { STRATAGEMS, stratagemById } from '../js/data/rhetoric/stratagems.js';
+import { STRATAGEMS, STRATAGEM_PORCUPINE, stratagemById } from '../js/data/rhetoric/stratagems.js';
 import { CHAPTERS, THIRTY_SIX, stratagem36ById, stratagemsIn } from '../js/data/rhetoric/thirty-six.js';
 import { FURTHER_READING } from '../js/data/further-reading.js';
 import { SOCRATIC_STEPS, SOCRATIC_NOTE, SOCRATIC_LEAD, SOCRATIC_IRONY, SOCRATIC_COUNT, socraticById } from '../js/data/rhetoric/socratic.js';
@@ -5143,6 +5143,27 @@ export async function run({ navDoc = document } = {}) {
     // "I can’t understand it", and this shelf had de-contracted him, which
     // house style forbids on examples. The printed 1896 text reads "than
     // of your opponent" where the Gutenberg e-text reads "that".
+    // THE PORCUPINES ARE A CORRECTION, NOT A DECORATION. It is his most
+    // quoted passage and it almost always arrives with a moral about fools
+    // bolted onto it. Section 396 ends on politeness and good manners and
+    // says nothing about stupid people, so the note carries his actual
+    // conclusion and says the rest is added. Pinned three ways: the verbatim
+    // Saunders sentence, the refusal, and the US-scoped footing — this is
+    // a SECOND work (Studies in Pessimism, not The Art of Controversy) and
+    // needs its own provenance rather than borrowing the shelf's.
+    check('stratagems: the porcupines keep his conclusion and refuse the added one',
+      /code of politeness and fine manners/.test(STRATAGEM_PORCUPINE)
+      && /nothing in it about fools/.test(STRATAGEM_PORCUPINE)
+      && /Studies in Pessimism/.test(STRATAGEM_PORCUPINE)
+      && /public domain in the United States/.test(STRATAGEM_PORCUPINE)
+      && !/public domain worldwide/i.test(STRATAGEM_PORCUPINE)
+      && /esc\(STRATAGEM_PORCUPINE\)/.test(famSrc));
+    // It is NOT a thirty-ninth stratagem. The list is closed and the count
+    // check above would catch a card, but the parable arriving as an entry
+    // is the specific mistake worth naming.
+    check('stratagems: the porcupines are a note, not a thirty-ninth entry',
+      STRATAGEMS.length === 38
+      && !STRATAGEMS.some(s => /porcupine/i.test(JSON.stringify(s))));
     const st31 = stratagemById('ST-031');
     check('stratagems: XXXI keeps its audience condition, and Saunders keeps his contraction',
       /rates that person above their opponent/.test(st31.what)
@@ -5481,6 +5502,22 @@ export async function run({ navDoc = document } = {}) {
     check('further reading: Accents points at the credits rather than repeating them',
       FURTHER_READING.find(c => c.id === 'FR-accents')?.pointer?.section === 'credits'
       && !FURTHER_READING.find(c => c.id === 'FR-accents')?.entries);
+    // ROBSON IS THE ONE MODERN, IN-COPYRIGHT BOOK ON THIS PAGE, and the
+    // Rhetoric lead used to promise that every text was ancient, out of
+    // copyright and already in the app. Adding him made that sentence false,
+    // so the lead now names the exception instead of quietly breaking.
+    // He is here because the book is cited backwards so reliably: its thesis
+    // is that expertise amplifies certain errors, addressed TO the reader,
+    // and it gets quoted as proof that other people are fools.
+    const frRhet = FURTHER_READING.find(c => c.id === 'FR-rhetoric');
+    const robson = frRhet?.entries.find(e => e.who === 'David Robson');
+    check('further reading: the one modern book is flagged as the exception, not smuggled in',
+      !!robson
+      && /in print/i.test(robson.what)
+      && /more prone to certain errors/.test(robson.why)
+      && /Nearly every text/.test(frRhet.lead)
+      && !/^How speech changes what people think and do\. Every text/.test(frRhet.lead),
+      `${frRhet?.entries.length} rhetoric entries`);
 
     // THE COLLISION THAT FORCED A RENAME. Two shelves called The 38
     // Stratagems and The 36 Stratagems, differing by a digit, covering

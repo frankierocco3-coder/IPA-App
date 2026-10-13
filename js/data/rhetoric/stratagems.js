@@ -100,6 +100,45 @@
 export const STRATAGEM_SOURCE = 'Arthur Schopenhauer, The Art of Controversy, '
   + 'translated by T. Bailey Saunders';
 
+// THE PORCUPINES ARE NOT A STRATAGEM AND ARE NOT FROM THIS BOOK. Added
+// 2026-10-12 because it is his most quoted passage and the quotation
+// almost always arrives with a moral bolted on that he did not write.
+//
+// Verified 2026-10-12 against the German first edition (Parerga und
+// Paralipomena II, chapter 31, section 396, Berlin 1851) and against
+// Saunders in print (Studies in Pessimism, London 1893; also Project
+// Gutenberg #10732, which is the same translation). Public domain in the
+// United States on both counts, and scoped that way as everywhere else.
+//
+// WHAT HE ACTUALLY CONCLUDES is that the middle distance IS politeness and
+// good manners. There is nothing in section 396 about fools, about stupid
+// people, or about handling anybody you consider beneath you. Every
+// version that ends on that moral has had the ending added. That is the
+// reason this note exists on this shelf rather than the parable being
+// charming.
+//
+// TWO FIDELITY NOTES, neither of which touches the sentence quoted here:
+//   * They are porcupines. Schopenhauer wrote Stachelschweine. "The
+//     hedgehog's dilemma" is a later English nickname, spread largely
+//     through Freud quoting the passage, and Igel is not his word.
+//     Saunders has porcupines and is right.
+//   * Saunders is ABRIDGED. The German traces the need for society to
+//     "the emptiness and monotony of one's own inner self" and his
+//     English drops that clause entirely. Do not quote his "need of
+//     society" sentence as though it were complete. The sentence used
+//     below is the one he renders faithfully.
+export const STRATAGEM_PORCUPINE =
+  'His most quoted passage is not in this book, and it is usually repeated with an '
+  + 'ending he did not write. Porcupines huddle against the cold, prick one another, '
+  + 'scatter, and try again until they find the distance that works: “The moderate '
+  + 'distance which they at last discover to be the only tolerable condition of '
+  + 'intercourse, is the code of politeness and fine manners.” That is the whole of '
+  + 'his conclusion. It is about the room anybody leaves around anybody else, and '
+  + 'there is nothing in it about fools or about managing people you have decided are '
+  + 'beneath you. From Parerga und Paralipomena, in Studies in Pessimism, translated '
+  + 'by T. Bailey Saunders, public domain in the United States; readers elsewhere '
+  + 'should check the copyright law where they live.';
+
 export const STRATAGEMS = [
 
   { id: 'ST-001', n: 'I', term: 'The Extension', alsoFallacy: 'MF-001',
