@@ -4871,7 +4871,7 @@ function rhetoricPracticePane(el) {
     <p class="pane-note">One exercise so far. It drills the thing all three shelves are for: naming a move from an example, then reading what it does to whoever is listening. Nothing is scored beyond the page, and the material has not been checked by a qualified rhetoric reader.</p>
     ${Object.entries(RHET_DECKS).map(([id, d]) => `
       <button class="track-card hub-card" data-deck="${esc(id)}" type="button">
-        <div class="track-glyph">${d.icon}</div>
+        ${cardGlyph({ icon: d.icon, img: 'img/ui/name-the-move.png' })}
         <div class="track-info"><h2>Name the Move</h2><p>${esc(d.title)} · ${RHET_ROUNDS} rounds</p></div>
         <div class="track-arrow">›</div>
       </button>`).join('')}

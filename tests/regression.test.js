@@ -3587,7 +3587,7 @@ export async function run({ navDoc = document } = {}) {
         && !doc.querySelector('.hub-card .track-glyph:not(.has-img)'),
         actingArt.join(' '));
       const artFiles = ['rhythm', 'scripts', 'scenes', 'rhetoric', 'arcade', 'flash-cards', 'warmup',
-        'commedia', 'one-line', 'sonnets', 'shakespeare-scenes']
+        'commedia', 'one-line', 'sonnets', 'shakespeare-scenes', 'name-the-move']
         .map(n => `../img/ui/${n}.png`);
       const artHeads = await Promise.all(artFiles.map(u =>
         fetch(u).then(r => r.ok).catch(() => false)));
@@ -3626,7 +3626,14 @@ export async function run({ navDoc = document } = {}) {
         // Scenes shelf holds Chekhov, Ibsen, O'Neill and Wilde, and putting
         // a skull there would label ten authors as one of them.
         && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/shakespeare-scenes\.png' \}\)/.test(glyphSrc)
-        && (glyphSrc.match(/img\/ui\/scenes\.png/g) ?? []).length === 3);
+        && (glyphSrc.match(/img\/ui\/scenes\.png/g) ?? []).length === 3
+        // NAME THE MOVE IS ONE ICON ON THREE CARDS, BY DESIGN. The three
+        // Rhetoric decks — the thirteen fallacies, all forty, the stratagems
+        // — run the SAME exercise and carry the SAME title, so three glyphs
+        // would imply three different exercises. The cards are generated
+        // from RHET_DECKS, so the wiring passes each deck's own emoji
+        // through as the fallback rather than hard-coding one.
+        && /cardGlyph\(\{ icon: d\.icon, img: 'img\/ui\/name-the-move\.png' \}\)/.test(glyphSrc));
       // commedia.png serves TWO surfaces: the Character Library shelf tile at
       // 42px and the Mask Cards Practice card at 46px. The app already reuses
       // one file across surfaces (scripts.png is Monologues and Practice My
