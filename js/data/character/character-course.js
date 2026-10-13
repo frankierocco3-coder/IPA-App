@@ -42,7 +42,28 @@ export const CHARACTER_PRINCIPLE =
 // studying them teaches what any character is made of before the learner
 // builds their own. The numbers follow the outline's new order; only
 // written modules are listed.
-export const CHARACTER_MODULES = [
+// PLAYING THE ROLE IS WITHDRAWN, NOT DELETED (owner order 2026-10-13).
+// Flip ROLE_LIVE to true and the module, its four lessons and its Library
+// shelf all come back whole — nothing was thrown away, which is the whole
+// point of doing it this way on a LIVE course where people may be part way
+// through. Same mechanism as SPEECH_LIVE and CHARACTER_LIVE: a flag, not a
+// deletion.
+//
+// The four records (ch-ro-page, ch-ro-howfar, ch-ro-holding, ch-ro-bible)
+// stay in CHARACTER_LESSONS_ALL below, and their approvals stay in
+// js/data/speech/reviews.js. The approvals are DORMANT rather than removed:
+// deleting them would mean four lessons had to be re-approved before the
+// flag could ever be flipped back, which would make "comes back whole"
+// false. They point at nothing while the flag is off, which costs nothing —
+// nothing reads the ledger in the lesson-to-approval direction.
+//
+// IDS ARE NOT RETIRED, because the lessons are not gone. If this ever
+// becomes a real deletion, retire all four and never reuse them, the way
+// sh-speechaction, sh-shapes and sh-playfigure were retired when Rhetoric
+// left Shakespeare.
+export const ROLE_LIVE = false;
+
+export const CHARACTER_MODULES_ALL = [
   { n: 1, id: 'commedia', title: 'Commedia dell’Arte',
     blurb: 'The course starts here: complete, ready-made characters that show you what every character is made of. Learn each form, then find your own life inside it.' },
   { n: 3, id: 'physical', title: 'The Physical Character',
@@ -64,6 +85,12 @@ export const CHARACTER_MODULES = [
   { n: 9, id: 'role', title: 'Playing the Role',
     blurb: 'Where the whole course points: turning what the text found into choices a body can play, deciding how far to transform, holding it while you genuinely listen, and keeping one record of the person you can return to.' },
 ];
+
+// What the course actually shows. Everything downstream — the Learn path,
+// the Library shelves, the review census, the progress counts — reads this,
+// so the withdrawal happens in ONE place and cannot be half applied.
+export const CHARACTER_MODULES = CHARACTER_MODULES_ALL
+  .filter(m => ROLE_LIVE || m.id !== 'role');
 
 // ── The masks: ONE record per character ─────────────────────
 // Read by the chapters ({ mask } shows the sheet, { profile } the full
@@ -353,7 +380,7 @@ export const ONE_LINES = [
   'You look well.',
 ];
 
-export const CHARACTER_LESSONS = [
+export const CHARACTER_LESSONS_ALL = [
   { id: 'ch-cm-why', module: 'commedia', order: 1,
     title: 'Why We Start With Commedia',
     attribution: 'Speechcraft original',
@@ -1685,6 +1712,14 @@ export const CHARACTER_LESSONS = [
     ] },
 
 ];
+
+// The four Playing the Role records are still above, whole and unedited.
+// They leave the course HERE and nowhere else, so there is exactly one
+// place to undo it. Filtering by module rather than by a list of ids is
+// deliberate: a list would need maintaining if the module ever changed
+// shape, and this cannot drift out of step with CHARACTER_MODULES.
+export const CHARACTER_LESSONS = CHARACTER_LESSONS_ALL
+  .filter(l => ROLE_LIVE || l.module !== 'role');
 
 // One Library shelf per module, in path order.
 const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️', status: '⚖️', role: '🎬' };
