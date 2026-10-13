@@ -1680,8 +1680,21 @@ export const CHARACTER_LESSONS = [
 
 // One Library shelf per module, in path order.
 const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️', status: '⚖️', role: '🎬' };
+
+// Drawn icons, owner art, 2026-10-13. A shelf takes one when it has one and
+// keeps its emoji otherwise — tileHtml already treats `img` as outranking
+// `emoji` with the emoji as the fallback, so a missing entry degrades to
+// today's behaviour rather than to a blank.
+//
+// ONLY COMMEDIA HAS ART SO FAR, which leaves one drawn tile among six. That
+// is the half-finished look the Practice batch existed to fix, and it is a
+// known state rather than an oversight: the other five are commissioned and
+// this map is where they land. If they are not coming, remove this line
+// rather than leaving the shelf mixed.
+const SHELF_IMG = { commedia: 'img/ui/commedia.png' };
+
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
-  id: m.id, icon: SHELF_ICON[m.id], title: m.title,
+  id: m.id, icon: SHELF_ICON[m.id], img: SHELF_IMG[m.id], title: m.title,
   lessons: CHARACTER_LESSONS.filter(l => l.module === m.id && !l.reference)
     .sort((x, y) => x.order - y.order).map(l => l.id),
 }));

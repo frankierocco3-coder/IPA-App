@@ -3606,7 +3606,25 @@ export async function run({ navDoc = document } = {}) {
         // ("this is for all the arcade images"). The Speech one is behind
         // SPEECH_LIVE and invisible today; wiring it costs nothing and means
         // that pane is already right whenever the flag flips.
-        && (glyphSrc.match(/cardGlyph\(\{ icon: '🕹', img: 'img\/ui\/arcade\.png' \}\)/g) ?? []).length === 2);
+        && (glyphSrc.match(/cardGlyph\(\{ icon: '🕹', img: 'img\/ui\/arcade\.png' \}\)/g) ?? []).length === 2
+        // Character Practice: One Line takes the THREE masks, Mask Cards the
+        // single one. The three say "many", which is that card's whole idea;
+        // the single one says "commedia". Do not swap them — the three-mask
+        // image was measured at 42px and goes soft, which is why it is on a
+        // 46px card and not on the Library tile.
+        && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/one-line\.png' \}\)/.test(glyphSrc)
+        && /cardGlyph\(\{ icon: '🃏', img: 'img\/ui\/commedia\.png' \}\)/.test(glyphSrc));
+      // commedia.png serves TWO surfaces: the Character Library shelf tile at
+      // 42px and the Mask Cards Practice card at 46px. The app already reuses
+      // one file across surfaces (scripts.png is Monologues and Practice My
+      // Text), so this is the established pattern rather than a shortcut.
+      check('character: the Library shelf passes art through, emoji still the fallback',
+        /img: c\.img/.test(glyphSrc)
+        && CHARACTER_COLLECTIONS.find(c => c.id === 'commedia')?.img === 'img/ui/commedia.png'
+        && CHARACTER_COLLECTIONS.find(c => c.id === 'commedia')?.icon === '🃏'
+        // the other five have no art yet and must still render their emoji
+        && CHARACTER_COLLECTIONS.filter(c => !c.img).every(c => !!c.icon),
+        `${CHARACTER_COLLECTIONS.filter(c => c.img).length} of ${CHARACTER_COLLECTIONS.length} shelves have art`);
       // The Warmup: a chooser of four movements plus the whole thing,
       // then written steps on the shared runner, safety line verbatim,
       // no audio and no scoring apparatus.

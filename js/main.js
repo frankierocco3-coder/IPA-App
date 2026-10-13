@@ -5710,7 +5710,7 @@ function bookLibraryPane(el, B) {
       <p class="ws-sub">Every chapter is free to read in any order.</p>
     </div>
     <div class="tile-grid">
-      ${B.collections.map(c => tileHtml({ key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon,
+      ${B.collections.map(c => tileHtml({ key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon, img: c.img,
         title: moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }) })).join('')}
     </div>`;
   el.querySelectorAll('[data-tile]').forEach(b =>
@@ -5722,12 +5722,12 @@ function characterPracticePane(el) {
     <h1 class="page-h">Character Practice</h1>
     <p class="pane-note">Prompts to get on your feet with. Nothing here is scored.</p>
     <button class="track-card hub-card" id="chp-masks" type="button">
-      <div class="track-glyph">🃏</div>
+      ${cardGlyph({ icon: '🃏', img: 'img/ui/commedia.png' })}
       <div class="track-info"><h2>Mask Cards</h2></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="chp-oneline" type="button">
-      <div class="track-glyph">🎭</div>
+      ${cardGlyph({ icon: '🎭', img: 'img/ui/one-line.png' })}
       <div class="track-info"><h2>One Line, Many Masks</h2></div>
       <div class="track-arrow">›</div>
     </button>
