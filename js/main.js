@@ -5752,12 +5752,12 @@ function shakespearePracticePane(el) {
     <h1 class="page-h">Shakespeare Practice</h1>
     <p class="pane-note">No exercise has been built for this course yet. What is here is the text itself, with the tools the lessons point at. Nothing below is scored. The Shakespeare Dictionary is in the Library, which is where reading belongs.</p>
     <button class="track-card hub-card" id="shp-sonnets" type="button">
-      <div class="track-glyph">📜</div>
+      ${cardGlyph({ icon: '📜', img: 'img/ui/sonnets.png' })}
       <div class="track-info"><h2>The Sonnets</h2><p>Scan the metre, and read Side by Side where a voice is approved.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="shp-scenes" type="button">
-      ${cardGlyph({ icon: '🎭', img: 'img/ui/scenes.png' })}
+      ${cardGlyph({ icon: '🎭', img: 'img/ui/shakespeare-scenes.png' })}
       <div class="track-info"><h2>Shakespeare’s Scenes</h2><p>Eight two-handers. The Scan tab marks verse, prose and every crossing between them.</p></div>
       <div class="track-arrow">›</div>
     </button>`;

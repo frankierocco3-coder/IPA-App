@@ -3586,7 +3586,8 @@ export async function run({ navDoc = document } = {}) {
           .every(n => actingArt.includes(`img/ui/${n}.png`))
         && !doc.querySelector('.hub-card .track-glyph:not(.has-img)'),
         actingArt.join(' '));
-      const artFiles = ['rhythm', 'scripts', 'scenes', 'rhetoric', 'arcade', 'flash-cards', 'warmup']
+      const artFiles = ['rhythm', 'scripts', 'scenes', 'rhetoric', 'arcade', 'flash-cards', 'warmup',
+        'commedia', 'one-line', 'sonnets', 'shakespeare-scenes']
         .map(n => `../img/ui/${n}.png`);
       const artHeads = await Promise.all(artFiles.map(u =>
         fetch(u).then(r => r.ok).catch(() => false)));
@@ -3597,7 +3598,11 @@ export async function run({ navDoc = document } = {}) {
       check('acting: the wired cards keep their emoji as the fallback',
         /cardGlyph\(\{ icon: '🎼', img: 'img\/ui\/rhythm\.png' \}\)/.test(glyphSrc)
         && /cardGlyph\(\{ icon: '📄', img: 'img\/ui\/scripts\.png' \}\)/.test(glyphSrc)
-        && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/scenes\.png' \}\)/.test(glyphSrc)
+        // scenes.png IS NO LONGER ON A cardGlyph CALL. It was, on the
+        // Shakespeare Scenes card, until that card took its own skull icon
+        // on 2026-10-13. Its three remaining uses are object literals in
+        // tile data, so the count assertion at the end of this check is what
+        // guards them now — and it guards all three rather than one.
         && /cardGlyph\(\{ icon: '🏛️', img: 'img\/ui\/rhetoric\.png' \}\)/.test(glyphSrc)
         && /cardGlyph\(\{ icon: '🃏', img: 'img\/ui\/flash-cards\.png' \}\)/.test(glyphSrc)
         // Warmup appears in Acting AND Character Practice; one icon, both cards.
@@ -3613,7 +3618,15 @@ export async function run({ navDoc = document } = {}) {
         // image was measured at 42px and goes soft, which is why it is on a
         // 46px card and not on the Library tile.
         && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/one-line\.png' \}\)/.test(glyphSrc)
-        && /cardGlyph\(\{ icon: '🃏', img: 'img\/ui\/commedia\.png' \}\)/.test(glyphSrc));
+        && /cardGlyph\(\{ icon: '🃏', img: 'img\/ui\/commedia\.png' \}\)/.test(glyphSrc)
+        // Shakespeare Practice is only two cards, so these two finish it.
+        && /cardGlyph\(\{ icon: '📜', img: 'img\/ui\/sonnets\.png' \}\)/.test(glyphSrc)
+        // THE SHAKESPEARE SCENES CARD HAS ITS OWN ICON, and scenes.png must
+        // keep the other three surfaces. The skull is Hamlet; the general
+        // Scenes shelf holds Chekhov, Ibsen, O'Neill and Wilde, and putting
+        // a skull there would label ten authors as one of them.
+        && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/shakespeare-scenes\.png' \}\)/.test(glyphSrc)
+        && (glyphSrc.match(/img\/ui\/scenes\.png/g) ?? []).length === 3);
       // commedia.png serves TWO surfaces: the Character Library shelf tile at
       // 42px and the Mask Cards Practice card at 46px. The app already reuses
       // one file across surfaces (scripts.png is Monologues and Practice My
