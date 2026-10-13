@@ -2246,7 +2246,7 @@ function speechPracticePane(el) {
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="spp-arcade" type="button">
-      <div class="track-glyph">🕹</div>
+      ${cardGlyph({ icon: '🕹', img: 'img/ui/arcade.png' })}
       <div class="track-info"><h2>Speechcraft Arcade</h2></div>
       <div class="track-arrow">›</div>
     </button>
@@ -3956,7 +3956,7 @@ function renderWarmup() {
   const card = m => `
       <button class="track-card hub-card" data-wu="${m.id}" type="button">
         <div class="track-glyph">${m.emoji}</div>
-        <div class="track-info"><h2>${esc(m.title)}</h2><p>About ${m.minutes} minutes</p></div>
+        <div class="track-info"><h2>${esc(m.title)}</h2></div>
         <div class="track-arrow">›</div>
       </button>`;
   app.innerHTML = `
@@ -3983,7 +3983,7 @@ function renderWarmupRun(id) {
     ${pageTopbar('🔥 Warmup', '#6f8657')}
     <main class="guide sp-game">
       <h1>${esc(w.title)}</h1>
-      <p class="pane-note">About ${w.minutes} minutes. Quiet and gentle throughout: a warmup that feels like effort is being done wrong.</p>
+      <p class="pane-note">Quiet and gentle throughout: a warmup that feels like effort is being done wrong.</p>
       <p class="pane-note">${esc(SPEECH_COMFORT_LINE)}</p>
       <p class="pane-note pane-warn">${esc(SPEECH_SAFETY_LINE)}</p>
       <div id="wu-seq"></div>
@@ -4033,27 +4033,27 @@ function actingPracticePane(el) {
       <div class="track-arrow">›</div>
     </button>` : ''}
     <button class="track-card hub-card" id="acp-warmup" type="button">
-      <div class="track-glyph">🔥</div>
+      ${cardGlyph({ icon: '🔥', img: 'img/ui/warmup.png' })}
       <div class="track-info"><h2>Warmup</h2></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-arcade" type="button">
-      <div class="track-glyph">🕹</div>
+      ${cardGlyph({ icon: '🕹', img: 'img/ui/arcade.png' })}
       <div class="track-info"><h2>Acting Arcade</h2></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-cards" type="button">
-      <div class="track-glyph">🃏</div>
+      ${cardGlyph({ icon: '🃏', img: 'img/ui/flash-cards.png' })}
       <div class="track-info"><h2>Flash Cards</h2></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-rhythm" type="button">
-      <div class="track-glyph">🎼</div>
+      ${cardGlyph({ icon: '🎼', img: 'img/ui/rhythm.png' })}
       <div class="track-info"><h2>Rhythm Cards</h2></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-mytext" type="button">
-      <div class="track-glyph">📄</div>
+      ${cardGlyph({ icon: '📄', img: 'img/ui/scripts.png' })}
       <div class="track-info"><h2>Practice My Text</h2></div>
       <div class="track-arrow">›</div>
     </button>`;
@@ -4876,7 +4876,7 @@ function rhetoricPracticePane(el) {
         <div class="track-arrow">›</div>
       </button>`).join('')}
     <button class="track-card hub-card" id="rhp-library" type="button">
-      <div class="track-glyph">🏛️</div>
+      ${cardGlyph({ icon: '🏛️', img: 'img/ui/rhetoric.png' })}
       <div class="track-info"><h2>Rhetoric Library</h2><p>The reading, the figures, the thirteen fallacies and all forty, in one place.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
@@ -5732,7 +5732,7 @@ function characterPracticePane(el) {
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="chp-warmup" type="button">
-      <div class="track-glyph">🔥</div>
+      ${cardGlyph({ icon: '🔥', img: 'img/ui/warmup.png' })}
       <div class="track-info"><h2>Warmup</h2></div>
       <div class="track-arrow">›</div>
     </button>`;
@@ -5757,7 +5757,7 @@ function shakespearePracticePane(el) {
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="shp-scenes" type="button">
-      <div class="track-glyph">🎭</div>
+      ${cardGlyph({ icon: '🎭', img: 'img/ui/scenes.png' })}
       <div class="track-info"><h2>Shakespeare’s Scenes</h2><p>Eight two-handers. The Scan tab marks verse, prose and every crossing between them.</p></div>
       <div class="track-arrow">›</div>
     </button>`;

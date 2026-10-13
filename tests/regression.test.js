@@ -31,7 +31,7 @@ import { parseProvidedScene, sceneSpeeches, formTracker } from '../js/scene-pars
 import { SCRIPT_ANALYSIS } from '../js/data/script-analysis.js';
 import { SCRIPT_ANALYSIS_REVIEWS, scriptAnalysisApproved } from '../js/data/script-analysis-reviews.js';
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
-import { WARMUP_MOVEMENTS, warmupSteps } from '../js/data/warmup.js';
+import { WARMUP_MOVEMENTS, WARMUP_ALL, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable-actions.js';
@@ -3571,6 +3571,42 @@ export async function run({ navDoc = document } = {}) {
       check('acting: Practice holds the five categories, Scene Study withdrawn',
         String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
           === 'Warmup,Acting Arcade,Flash Cards,Rhythm Cards,Practice My Text');
+      // ART ON THE PRACTICE CARDS, 2026-10-13. Four cards across three
+      // Practice panes reuse icons the app already ships; the other eight
+      // are still emoji until the owner generates them, which is why this
+      // counts rather than demanding art everywhere. Two failure modes are
+      // pinned: a card wired to a file that does not exist renders an empty
+      // box, and a refactor that drops cardGlyph loses the emoji fallback
+      // that keeps an unarted card looking like today instead of blank.
+      const actingArt = [...doc.querySelectorAll('.hub-card .track-glyph.has-img img')]
+        .map(i => i.getAttribute('src'));
+      check('acting: every Acting Practice card carries art, no emoji left',
+        actingArt.length === 5
+        && ['warmup', 'arcade', 'flash-cards', 'rhythm', 'scripts']
+          .every(n => actingArt.includes(`img/ui/${n}.png`))
+        && !doc.querySelector('.hub-card .track-glyph:not(.has-img)'),
+        actingArt.join(' '));
+      const artFiles = ['rhythm', 'scripts', 'scenes', 'rhetoric', 'arcade', 'flash-cards', 'warmup']
+        .map(n => `../img/ui/${n}.png`);
+      const artHeads = await Promise.all(artFiles.map(u =>
+        fetch(u).then(r => r.ok).catch(() => false)));
+      check('acting: every Practice icon wired points at a file that ships',
+        artHeads.every(Boolean),
+        artFiles.filter((_, i) => !artHeads[i]).join(' ') || 'all four present');
+      const glyphSrc = await viewSource();
+      check('acting: the wired cards keep their emoji as the fallback',
+        /cardGlyph\(\{ icon: '🎼', img: 'img\/ui\/rhythm\.png' \}\)/.test(glyphSrc)
+        && /cardGlyph\(\{ icon: '📄', img: 'img\/ui\/scripts\.png' \}\)/.test(glyphSrc)
+        && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/scenes\.png' \}\)/.test(glyphSrc)
+        && /cardGlyph\(\{ icon: '🏛️', img: 'img\/ui\/rhetoric\.png' \}\)/.test(glyphSrc)
+        && /cardGlyph\(\{ icon: '🃏', img: 'img\/ui\/flash-cards\.png' \}\)/.test(glyphSrc)
+        // Warmup appears in Acting AND Character Practice; one icon, both cards.
+        && (glyphSrc.match(/cardGlyph\(\{ icon: '🔥', img: 'img\/ui\/warmup\.png' \}\)/g) ?? []).length === 2
+        // BOTH arcade cards take the one icon, owner decision 2026-10-13
+        // ("this is for all the arcade images"). The Speech one is behind
+        // SPEECH_LIVE and invisible today; wiring it costs nothing and means
+        // that pane is already right whenever the flag flips.
+        && (glyphSrc.match(/cardGlyph\(\{ icon: '🕹', img: 'img\/ui\/arcade\.png' \}\)/g) ?? []).length === 2);
       // The Warmup: a chooser of four movements plus the whole thing,
       // then written steps on the shared runner, safety line verbatim,
       // no audio and no scoring apparatus.
@@ -3579,6 +3615,20 @@ export async function run({ navDoc = document } = {}) {
         String([...doc.querySelectorAll('[data-wu]')].map(b => b.dataset.wu))
           === 'body,breath,voice,words,all'
         && !doc.getElementById('step-next'));
+      // NO DURATIONS ANYWHERE ON THE WARMUP, owner order 2026-10-13. The
+      // cards used to read "About 4 minutes" and the run page "About 12
+      // minutes". The numbers were invented rather than measured, and they
+      // turned a warmup into something a learner could be behind on. Pinned
+      // on the rendered page AND in the data, because deleting the copy
+      // while leaving a minutes field is an invitation to print it again.
+      // The steps keep their own in-copy timings ("about thirty seconds",
+      // "five breaths"), which are instructions rather than targets, so the
+      // check looks for the duration SENTENCES, not the word minutes.
+      check('acting: the warmup chooser claims no durations',
+        !/About \d+ minutes/.test(doc.body.textContent)
+        && WARMUP_MOVEMENTS.every(m => m.minutes === undefined)
+        && WARMUP_ALL.minutes === undefined,
+        doc.body.textContent.match(/About \d+ minutes/)?.[0] ?? 'none on the chooser');
       clickIn(doc.querySelector('[data-wu="all"]')); await sleep(400);
       check('acting: the whole warmup runs all twenty steps with the safety line, unscored',
         !!doc.getElementById('step-next')
