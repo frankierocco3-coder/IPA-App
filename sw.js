@@ -55,6 +55,18 @@
  * installed device re-downloads its audio clips. That is the price of the
  * next load being correct rather than the one after it.
  *
+ * sc-v26 BREAKS IT THE SAME WAY, AND FOR THE SAME REASON (2026-10-13). The
+ * Practice and Character icon batches changed no module graph, so by the
+ * rule above they needed no bump, and across three deploys the owner was
+ * told "reload once" instead. He then reported the Mask Cards and One Line
+ * icons missing: the files were live and byte-correct, and his copy was
+ * serving the cached main.js with the new one a revalidation away. That is
+ * the Lines & Memory shape exactly. A change the owner is actively looking
+ * at is not an ordinary content update, whatever the module graph did.
+ *
+ * THE RULE THAT ACTUALLY MATTERS is not "did the graph change" but "is
+ * somebody waiting to see this". If they are, bump it.
+ *
  * Every fetch here goes past the browser's own HTTP cache ('no-cache' /
  * 'reload'). GitHub Pages marks files max-age=600, so for ten minutes after
  * a visit a plain fetch() can be handed the OLD file without asking the
@@ -63,7 +75,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v25';                     // 2026-10-11: the module graph gained js/data/rhetoric/stratagems.js (The 38 Stratagems)
+const VERSION = 'sc-v26';                     // 2026-10-13: Practice and Character icons — owner was actively looking for them (see above)
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
