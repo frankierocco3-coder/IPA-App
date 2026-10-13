@@ -51,7 +51,15 @@ export const CHARACTER_MODULES = [
     blurb: 'The voice as a consequence of the body rather than a decision taken separately: how somebody thinks shows in how they phrase, what an accent can and cannot carry, and the words a person reaches for or refuses.' },
   { n: 5, id: 'status', title: 'Status',
     blurb: 'Status as behaviour rather than rank: what raises or lowers a person second by second, in the body, the voice and the room, and where in a scene it changes hands.' },
-  { n: 6, id: 'piece', title: 'From the inside out',
+  // Renamed 2026-10-13 by owner order, from "From the inside out" (itself a
+  // rename of "Build from your life", 2026-09-28). THE ID STAYS `piece`, so
+  // nothing stored moves and no progress is lost. Three reasons it changed:
+  // it was the only title in sentence case among five in Title Case; it was
+  // a prepositional phrase where the others name a thing; and "inside OUT"
+  // takes a side in the inside-out-versus-outside-in argument, which set it
+  // quarrelling with The Physical Character two shelves above. "From Within"
+  // keeps the meaning the owner wanted and drops the half that argued.
+  { n: 6, id: 'piece', title: 'From Within',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
   { n: 9, id: 'role', title: 'Playing the Role',
     blurb: 'Where the whole course points: turning what the text found into choices a body can play, deciding how far to transform, holding it while you genuinely listen, and keeping one record of the person you can return to.' },
@@ -1701,6 +1709,11 @@ const SHELF_IMG = {
   // seesaw is the module's own image — "The Seesaw" is one of its five
   // chapters. Balance scales are also reserved for the Rhetoric shelf.
   status: 'img/ui/status.png',
+  // The file is within.png, NOT piece.png, and that is deliberate: `piece`
+  // is a retained legacy key from the module's first name and no longer
+  // matches anything a reader sees. Naming new art after it would carry a
+  // stale word into a fresh file. This map is where id and file meet.
+  piece: 'img/ui/within.png',
 };
 
 export const CHARACTER_COLLECTIONS = CHARACTER_MODULES.map(m => ({
