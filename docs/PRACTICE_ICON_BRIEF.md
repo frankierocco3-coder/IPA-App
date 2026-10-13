@@ -44,17 +44,85 @@ Then add one line naming the object. The subjects are below.
 
 ---
 
+## WHAT THE FIRST THREE TAUGHT (2026-10-13) — read before generating
+
+Warmup, Acting Arcade and Flash Cards are installed. Getting them took six
+generations rather than three, and every wasted one is covered below.
+
+**1. ATTACH AN EXISTING `img/ui/` FILE AS A REFERENCE IMAGE.** This is the
+single highest-leverage thing on the page and it is not in the style block.
+Words cannot carry the finish; one attached icon does. Pick the shipped icon
+closest in STRUCTURE, not in subject:
+
+| Generating | Attach | Why |
+| --- | --- | --- |
+| an object with a base, stem and top | `rhythm.png` | the metronome is structurally a joystick |
+| anything made of paper or card | `scripts.png` | proves the house draws paper BLANK |
+| a person | `character.png` | see point 4 |
+| a head, mouth or voice | `instrument.png` | the house head treatment |
+
+**2. "ABOUT 70% OF THE FRAME" IS ASPIRATIONAL. The shipped set is the real
+spec.** Measured ink-box fill of icons already in `img/ui/`:
+
+```
+rhythm.png      68% wide   92% tall
+scripts.png     82%        85%
+scenes.png      91%        72%
+character.png   51%        92%
+```
+
+So anything from about 50% to 90% is in family. What actually matters is
+filling the frame in BOTH directions — say so explicitly in the prompt. A
+standing figure came back 22% wide and 89% tall and was a 10px smear at card
+size. The same subject as a side bend came back 57% wide and worked.
+
+**3. COMPACT OBJECTS AT A SLIGHT ANGLE SURVIVE 46px. FIGURES STRUGGLE.**
+Six of the eight subjects here are objects for this reason. An object with
+one bright accent against a muted body (the joystick's terracotta ball) has
+a focal point that survives the shrink. If a subject can be drawn as either
+a person or an object, draw the object.
+
+**4. THE HOUSE DRAWS PEOPLE AS MANNEQUINS, NOT AS PEOPLE.** `character.png`
+is a jointed wooden artist's mannequin with a blank egg head;
+`instrument.png` is a smooth featureless head. Neither has anatomy, hair or
+fabric folds. A realistic figure will not match the set.
+**EXCEPTION, OWNER DECISION 2026-10-13: `warmup.png` IS a realistic figure.**
+It was offered as a mannequin and the owner chose the realistic version after
+seeing both. Do not "correct" it toward `character.png`.
+
+**5. ALWAYS CHECK THE FILE, NEVER THE CHAT COPY.** Images pasted into chat
+are converted to lossy webp with the alpha flattened for display, so a
+transparent icon LOOKS like it has a white box. Judge from the file.
+
+**6. THE FOUR MEASUREMENTS THAT PREDICT SUCCESS.** Run these before
+installing anything; all four are cheap and each one caught a real reject:
+
+* **corner pixels** — all four must be `(0,0,0,0)`, checked again AFTER the
+  176px resize, not only before it;
+* **ink-box fill** — width and height as a percentage of the frame, against
+  the table in point 2;
+* **a 46px render, looked at** — this is the actual test and nothing else
+  substitutes for it;
+* **palette distance** — nearest house colour for each dominant band. The
+  flash cards landed within 16 of four house values; a rejected flame was 39
+  off on one channel and visibly hot. Anything past about 35 reads wrong.
+
+---
+
 # BATCH 1 — eight icons, every hub card in Practice
 
 These are the big cards, rendered at 46px in a tinted plate. Generating
 just these eight finishes every track-card in every live Practice pane.
 **Start here. If you stop after this batch, Practice is still coherent.**
 
+**THREE ARE DONE AND INSTALLED (2026-10-13, commit e4885c1). Acting Practice
+now has no emoji glyphs left — the first hub family to be whole.**
+
 | # | File | Card | Where | Draw |
 | --- | --- | --- | --- | --- |
-| 1 | `warmup.png` | Warmup | Acting **and** Character Practice | A small stylised flame with a soft gold-into-terracotta glow, rounded and friendly rather than fierce. Replaces 🔥. If a flame reads as a warning, the alternative is a figure mid-stretch, arms overhead. |
-| 2 | `arcade.png` | Acting Arcade | Acting Practice | A vintage arcade joystick: terracotta ball top, olive base, slight tilt. Reads instantly at coin size. Replaces 🕹. |
-| 3 | `flash-cards.png` | Flash Cards | Acting Practice | A small fanned stack of blank cards, the top one tilted and lifting. **Blank faces — the style block forbids letters.** Replaces 🃏. |
+| 1 | ✅ `warmup.png` | Warmup | Acting **and** Character Practice | **DONE.** A person in a standing side bend, arms curving overhead. NOT the flame this brief originally specified: a flame in a Duolingo-shaped app reads as a streak counter, and streaks were removed on purpose 2026-10-05. Realistic figure by owner decision — see point 4 above. |
+| 2 | ✅ `arcade.png` | Acting Arcade | Acting Arcade **and** Speechcraft Arcade | **DONE.** A vintage arcade joystick: terracotta ball top, sage base, gold ring, slight angle. One icon serves both arcade cards (owner: "this is for all the arcade images"); the Speech one is invisible behind SPEECH_LIVE but wired so that pane is already right when the flag flips. |
+| 3 | ✅ `flash-cards.png` | Flash Cards | Acting Practice | **DONE.** A fanned stack, blue/terracotta/sage/lavender edges behind a cream top card. The top card carries RULED LINES, which are rules rather than letters, and they do real work: they say index card rather than playing card, which is what a cue-line drill actually uses. Better than what this brief asked for. |
 | 4 | `mask-cards.png` | Mask Cards | Character Practice | One commedia half-mask in profile — the long-nosed leather kind, lavender or slate shading. Distinct from the generic theatre mask. Replaces 🃏. |
 | 5 | `one-line.png` | One Line, Many Masks | Character Practice | Three small commedia masks overlapping in a row, receding slightly, so the idea of one line passing through several characters is legible. Replaces 🎭. |
 | 6 | `sonnets.png` | The Sonnets | Shakespeare Practice | A small open book with a quill resting across it, gold nib. Must not be confused with `scripts.png`, which is already a script. Replaces 📜. |
@@ -65,16 +133,25 @@ just these eight finishes every track-card in every live Practice pane.
 
 ## Already covered — no art needed
 
-Five Practice cards can be wired from the set you already have. I will do
-these whatever you decide about new art.
+**ALL FOUR ARE WIRED (2026-10-13, commit e4885c1).** This needed no
+generation at all and had been sitting here unactioned.
 
 | Card | Where | Reuses |
 | --- | --- | --- |
-| Rhythm Cards | Acting Practice | `rhythm.png` |
-| Practice My Text | Acting Practice | `scripts.png` |
-| Shakespeare's Scenes | Shakespeare Practice | `scenes.png` |
-| Rhetoric Library | Rhetoric Practice | `rhetoric.png` |
-| Words & Expressions | Accents Practice | `words.png` |
+| Rhythm Cards | Acting Practice | ✅ `rhythm.png` |
+| Practice My Text | Acting Practice | ✅ `scripts.png` |
+| Shakespeare's Scenes | Shakespeare Practice | ✅ `scenes.png` |
+| Rhetoric Library | Rhetoric Practice | ✅ `rhetoric.png` |
+
+**A FIFTH ROW USED TO BE HERE AND IT WAS WRONG.** This brief listed Words &
+Expressions in Accents Practice as a ready reuse of `words.png`. It is not a
+`.track-card` at 46px — it is a **`.mode-card` rendering its icon at 26px**
+(js/main.js, inside `PRACTICE_GROUPS`), which is exactly the component batch
+2 below is held back on. Wiring it would have shipped the mush that deferral
+exists to avoid. It belongs with batch 2 and moves when the render size does.
+
+Check the COMPONENT before calling a card a free reuse: `.track-glyph` at
+46px takes art today, `.mode-icon` at 26px does not.
 
 ---
 
