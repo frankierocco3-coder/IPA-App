@@ -972,8 +972,31 @@ export const SHAKESPEARE_LESSONS = [
 // One Library shelf per module, in path order.
 const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
   metre: '🥁', folio: '📜', soliloquy: '🗣️' };
+
+// Drawn icons, owner art, 2026-10-13. Same mechanism as the Character
+// Library: tileHtml treats `img` as outranking `emoji`, with the emoji as
+// the fallback, so a shelf without art keeps today's behaviour rather than
+// rendering blank. bookLibraryPane already passes img through for every
+// book, so each new shelf costs one line here.
+//
+// ONLY SHAKESPEARE 101 HAS ART SO FAR, which leaves one drawn tile among
+// six — the same half-finished state the Character Library passed through
+// before its other five arrived. If the rest are not coming, remove this
+// line rather than leaving the shelf mixed.
+//
+// THE PORTRAIT HAS A FACE, AND THAT IS THE OWNER'S DECISION (2026-10-13),
+// not an oversight. The house draws people featureless — the mannequin in
+// character.png, the blank head in instrument.png, the skull-holder in
+// shakespeare-scenes.png. warmup.png was the first deliberate exception and
+// this is the second. Do not "correct" it toward the mannequins.
+//
+// The file is shakespeare.png rather than context.png: `context` is an
+// internal module id that names nothing a reader sees, and the Library
+// already has shakespeare-scenes.png beside it, so the pair reads clearly.
+const SHELF_IMG = { context: 'img/ui/shakespeare.png' };
+
 export const SHAKESPEARE_COLLECTIONS = SHAKESPEARE_MODULES.map(m => ({
-  id: m.id, icon: SHELF_ICON[m.id], title: m.title,
+  id: m.id, icon: SHELF_ICON[m.id], img: SHELF_IMG[m.id], title: m.title,
   lessons: SHAKESPEARE_LESSONS.filter(l => l.module === m.id && !l.reference)
     .sort((x, y) => x.order - y.order).map(l => l.id),
 }));

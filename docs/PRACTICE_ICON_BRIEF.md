@@ -143,10 +143,10 @@ carries drawn art. Four panes are whole — Acting, Character, Shakespeare and
 Rhetoric Practice — and the Character Library is five shelves of five.
 
 **IT WAS SEVEN ICONS, NOT EIGHT. `bridge.png` WAS MISFILED HERE** and has
-moved to batch 2 where it belongs. Accent Bridge is a `.mode-card` rendering
-at **26px** (js/main.js, `.mode-icon` in css/style.css), not a `.track-card`
-at 46px. That is the second time this brief filed a 26px mode-card as a 46px
-track card; Words & Expressions was the first, in the reuse table below.
+moved to batch 2 where it belongs. Accent Bridge is a `.mode-card`, not a
+`.track-card` at 46px — it rendered at 26px when this was found, and at 36px
+since. That is the second time this brief filed a mode-card as a track card;
+Words & Expressions was the first, in the reuse table below.
 The rule that catches it is already written there and is worth repeating
 here: **check the COMPONENT, not the card.**
 
@@ -184,43 +184,57 @@ generation at all and had been sitting here unactioned.
 
 **A FIFTH ROW USED TO BE HERE AND IT WAS WRONG.** This brief listed Words &
 Expressions in Accents Practice as a ready reuse of `words.png`. It is not a
-`.track-card` at 46px — it is a **`.mode-card` rendering its icon at 26px**
-(js/main.js, inside `PRACTICE_GROUPS`), which is exactly the component batch
-2 below is held back on. Wiring it would have shipped the mush that deferral
-exists to avoid. It belongs with batch 2 and moves when the render size does.
+`.track-card` at 46px — it is a **`.mode-card`**, which rendered its icon at
+26px at the time (js/main.js, inside `PRACTICE_GROUPS`) and was exactly the
+component batch 2 was held back on. Wiring it then would have shipped the
+mush that deferral existed to avoid. It belongs with batch 2.
 
-Check the COMPONENT before calling a card a free reuse: `.track-glyph` at
-46px takes art today, `.mode-icon` at 26px does not.
+Check the COMPONENT before calling a card a free reuse. The three that take
+art, with the size each renders at:
+
+```
+.track-glyph.has-img   46px   Practice hub cards
+.tile-img              42px   Library shelf tiles
+.mode-icon             36px   game tiles — since 2026-10-13, was 26px
+```
+
+They are not interchangeable. A file drawn for 46px is not automatically
+right at 36px, which is the whole reason batch 2 starts with one test tile.
 
 ---
 
 # BATCH 2 — SIXTEEN mode-card tiles, and the only work left
 
-**Read this before generating them.** These sit on `.mode-card`, a smaller
-component, and `.mode-icon` currently renders at **26px**
-(css/style.css:215). A richly shaded storybook plate at 26px turns to mush.
-If you want these, I will raise the rendered size to about 36px first and we
-check one before you make the rest.
+**THE SIZE BLOCKER IS CLEARED. `.mode-icon` IS NOW 36px** (owner decision
+2026-10-13, raised from 26px), and `.mode-icon img` is styled at 36x36 to
+match, mirroring `.track-glyph.has-img` at 46px and `.tile-img` at 42px. The
+plumbing is ready; these tiles can take art.
 
-So: generate **`listen.png` first, on its own**, and we look at it at real
-size. If it holds, the rest are worth doing. If it does not, these stay on
-emoji and batch 1 still stands on its own.
+Verified at both widths when it changed: no card overflows, no title clips,
+no horizontal scroll, and at 375px the cards are 168px wide, so a 36px icon
+sits comfortably. Until art arrives the emoji simply render larger, which is
+the intended intermediate state and is already an improvement.
 
-**THE SIZE DECISION IS THE BLOCKER AND IT IS THE OWNER'S.** Nothing here
-should be generated until 26px becomes ~36px, because the evidence is now
-measured rather than guessed: the seesaw reads at 42px and is already the
-lightest thing on its shelf, and the three overlapping masks stopped reading
-as masks at all at 42px. 26px is a third smaller again.
+**STILL GENERATE `listen.png` FIRST, ON ITS OWN**, and look at it at real
+size before committing to the other fifteen. 36px is still smaller than
+anything shipped so far — the Library tiles are 42px and the Practice cards
+46px — and the measured evidence is that richly shaded plates start to go
+soft right about there. The three-mask icon stopped reading as masks at
+42px; the seesaw reads at 42px but is the lightest thing on its shelf. If
+`listen.png` does not hold at 36px, these stay on emoji and batch 1 still
+stands on its own.
 
 **TWO TILES JOINED THIS BATCH FROM BATCH 1, BOTH MISFILED BY THIS BRIEF:**
 
 | Tile | Was listed as | Actually |
 | --- | --- | --- |
-| `bridge.png` — Accent Bridge | a batch 1 track card | `.mode-card` at 26px |
-| `words.png` — Words & Expressions | a free reuse, "no art needed" | `.mode-card` at 26px |
+| `bridge.png` — Accent Bridge | a batch 1 track card | `.mode-card`, 36px |
+| `words.png` — Words & Expressions | a free reuse, "no art needed" | `.mode-card`, 36px |
 
-Same mistake twice. **Check the COMPONENT, not the card:** `.track-glyph` at
-46px and `.tile-img` at 42px take art today; `.mode-icon` at 26px does not.
+Same mistake twice. **Check the COMPONENT, not the card.** All three take
+art now, at three different sizes — `.track-glyph` 46px, `.tile-img` 42px,
+`.mode-icon` 36px — and a file drawn for one is not automatically right at
+another.
 
 One quirk worth knowing for `bridge.png`: the Accent Bridge card only
 renders where a playable route exists, which today is Neutral American to

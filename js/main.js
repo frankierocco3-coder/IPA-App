@@ -5686,7 +5686,7 @@ function shakespeareLibraryPane(el) {
         // No count on a curricular tile (owner UI pass 2026-09-15: counts
         // belong on material shelves). The Dictionary below carries one
         // because 160 entries is the fact a reader wants before opening it.
-        key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon,
+        key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon, img: c.img,
         title: moduleTitle(B, m), group: G1,
         keywords: `${m.blurb ?? ''} shakespeare chapter lesson`,
         go: () => renderActingCollection(c.id),

@@ -212,7 +212,15 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   border-radius: 16px; padding: 14px; cursor: pointer;
 }
 .mode-card:active { transform: translateY(2px); border-bottom-width: 2px; }
-.mode-icon { font-size: 26px; }
+/* 36px since 2026-10-13, raised from 26px by owner decision so these tiles
+   can carry drawn icons like every other card family. The measured reason:
+   a richly shaded plate already goes soft at 42px — the three-mask icon
+   stopped reading as masks there, and the seesaw is the lightest thing on
+   its shelf — and 26px is a third smaller again. Until the art arrives the
+   emoji simply render larger, which is the intended intermediate state.
+   The img rule mirrors .track-glyph.has-img (46px) and .tile-img (42px). */
+.mode-icon { font-size: 36px; line-height: 1; }
+.mode-icon img { width: 36px; height: 36px; object-fit: contain; display: block; }
 .mode-title { font-weight: 800; font-size: 15px; }
 .mode-blurb { font-size: 12px; color: var(--muted); }
 
