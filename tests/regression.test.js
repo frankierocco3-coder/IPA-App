@@ -5405,10 +5405,28 @@ export async function run({ navDoc = document } = {}) {
     // a leftover from the linear draft that the move to seven did not catch.
     // Nothing pinned the page's own count against the data, so it was wrong
     // in front of readers. Pinned both directions now.
+    // MATCH THE SENTENCE, NOT THE WORDS. The first version of this banned
+    // the bare phrase "six moves" and then a comment in main.js explaining
+    // the very fix used that phrase, so the check failed on its own
+    // documentation. That is twice in one day: the further-reading import
+    // guard matched a filename written in a comment the same way. The rule
+    // is the same both times — pin the CONSTRUCT, never a word that honest
+    // prose about the construct will also contain.
     check('socratic: the review note counts the moves the shelf actually has',
       SOCRATIC_STEPS.length === 7
-      && /seven moves/.test(famSrc)
-      && !/six moves/.test(famSrc));
+      && /The seven moves, the questions/.test(famSrc)
+      && !/The six moves, the questions/.test(famSrc));
+    // THE CHART IS DERIVED, WHICH IS THE WHOLE REASON IT IS NOT A PICTURE.
+    // Owner asked for a chart of the steps; a drawn one is a second copy of
+    // the moves that goes stale silently. Pinned: it reads SOCRATIC_STEPS,
+    // the loop/terminus split is computed rather than numbered by hand, and
+    // the terms it shows are the terms on the cards. A chart that disagreed
+    // with the cards would be worse than no chart.
+    check('socratic: the chart is built from the steps, not drawn beside them',
+      /function socraticChartHtml\(\)/.test(famSrc)
+      && /SOCRATIC_STEPS\.slice\(0, -1\)/.test(famSrc)
+      && /\$\{socraticChartHtml\(\)\}/.test(famSrc)
+      && !/<img[^>]*socratic/i.test(famSrc));
     check('socratic: the shelf admits the not-knowing may be a pose',
       /oldest argument/.test(SOCRATIC_IRONY)
       && /cannot do better than be your disciple/.test(SOCRATIC_IRONY)

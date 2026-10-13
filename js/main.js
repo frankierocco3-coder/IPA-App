@@ -5430,6 +5430,36 @@ let socQuery = '';
 
 const socraticLabel = s => `${s.n} · ${s.term}`;
 
+// THE CHART IS BUILT FROM THE DATA AND IS NEVER A PICTURE. Owner asked for
+// a chart of the steps on 2026-10-13, after an outside infographic of the
+// method. A drawn one is a SECOND COPY of the moves: it goes stale the
+// moment a term is reworded, nobody notices because an image cannot be
+// grepped, and the lettering arrives unproofread. This reads
+// SOCRATIC_STEPS, so the chart and the cards below it cannot disagree.
+//
+// THE SPLIT IS DERIVED, NOT NUMBERED BY HAND. Everything except the last
+// move is the loop; the last move is where the loop lands. Hard-coding six
+// and seven here would silently lie the first time the shelf changed
+// length, which is exactly how the first draft of this shelf went wrong
+// (it ran six moves and stopped at the first contradiction).
+//
+// The numbers are aria-hidden because the <ol> already announces them;
+// without that a screen reader says "7, 7, End at not knowing".
+function socraticChartHtml() {
+  const loop = SOCRATIC_STEPS.slice(0, -1);
+  const end = SOCRATIC_STEPS[SOCRATIC_STEPS.length - 1];
+  const row = s => `<li><span class="soc-n" aria-hidden="true">${esc(String(s.n))}</span>`
+    + `<span class="soc-term">${esc(s.term)}</span></li>`;
+  return `
+    <figure class="soc-chart">
+      <ol class="soc-loop">${loop.map(row).join('')}</ol>
+      <p class="soc-return"><span aria-hidden="true">↻ </span>and begin again at ${esc(String(loop[0].n))}</p>
+      <ol class="soc-end" start="${esc(String(end.n))}">${row(end)}</ol>
+      <figcaption class="soc-chart-cap">The moves above go round. The last one is where the
+        going round stops, and it is a result rather than a failure.</figcaption>
+    </figure>`;
+}
+
 // Two examples, like the Thirty-Six, and the second field is MISUSE.
 const socraticHtml = s => `
   <p class="guide-text fal-def">${esc(s.what)}</p>
@@ -5469,6 +5499,7 @@ function renderSocraticShelf() {
       <p class="guide-text">Every other shelf in this group is argument going wrong. This is the
         one procedure here that is trying to get somewhere true, and it is the oldest of them.</p>
       <p class="guide-text">${esc(SOCRATIC_LEAD)}</p>
+      ${socraticChartHtml()}
       <p class="guide-text">${esc(SOCRATIC_IRONY)}</p>
       <p class="pane-note">${esc(SOCRATIC_COUNT)}</p>
       <p class="guide-text">${esc(SOCRATIC_CARD_NOTE)}</p>
