@@ -107,27 +107,66 @@ installing anything; all four are cheap and each one caught a real reject:
   flash cards landed within 16 of four house values; a rejected flame was 39
   off on one channel and visibly hot. Anything past about 35 reads wrong.
 
+**7. INK DENSITY — THE MEASUREMENT THAT FRAME FILL MISSES.** The share of an
+icon's bounding box that is actually drawn. It earned its place twice in one
+day: it explained a weak icon after the fact, then steered a strong one
+before the fact.
+
+```
+sonnets.png   69%   open book, solid mass
+within.png    67%   nesting doll
+status.png    29%   seesaw — a steep diagonal plank is mostly empty air
+```
+
+The seesaw measured 91% × 85% frame fill with a healthy 1.08 aspect, and it
+STILL sits visibly lighter on the shelf than its neighbours. Neither of the
+other measurements predicted that; density did.
+
+So every prompt since says **"keep the forms SOLID AND HEAVY: big masses
+filling their outlines, with the detail living in the shading rather than in
+fine pattern"**, and the three icons after it came back at 66–69%.
+
+Where a subject is inherently sparse — a balance scale has open air under
+its beam — put the mass where it counts instead. `name-the-move.png` is only
+37% dense but reads cleanly, because the prompt demanded big solid pans and
+thick straight hangers rather than fine chains. **It is not density for its
+own sake; it is mass in the parts that carry the idea.**
+
 ---
 
-# BATCH 1 — eight icons, every hub card in Practice
+# BATCH 1 — SEVEN icons, every hub card in Practice — ✅ COMPLETE
 
-These are the big cards, rendered at 46px in a tinted plate. Generating
-just these eight finishes every track-card in every live Practice pane.
-**Start here. If you stop after this batch, Practice is still coherent.**
+These are the big cards, rendered at 46px in a tinted plate.
 
-**THREE ARE DONE AND INSTALLED (2026-10-13, commit e4885c1). Acting Practice
-now has no emoji glyphs left — the first hub family to be whole.**
+**BATCH 1 IS DONE (2026-10-13).** Every hub card in every LIVE Practice pane
+carries drawn art. Four panes are whole — Acting, Character, Shakespeare and
+Rhetoric Practice — and the Character Library is five shelves of five.
+
+**IT WAS SEVEN ICONS, NOT EIGHT. `bridge.png` WAS MISFILED HERE** and has
+moved to batch 2 where it belongs. Accent Bridge is a `.mode-card` rendering
+at **26px** (js/main.js, `.mode-icon` in css/style.css), not a `.track-card`
+at 46px. That is the second time this brief filed a 26px mode-card as a 46px
+track card; Words & Expressions was the first, in the reuse table below.
+The rule that catches it is already written there and is worth repeating
+here: **check the COMPONENT, not the card.**
+
+An audit of every hub card in js/main.js confirms the completion. The only
+ones still on emoji are the withdrawn Speech workspace, withdrawn Scene
+Study, the warmup movement chooser inside the Warmup page, and Studio cards
+— none of which is a live Practice hub card. The Accents Practice pane has
+no hub cards at all; it is built entirely from mode-cards, which is why
+batch 2 is the whole of what remains there.
 
 | # | File | Card | Where | Draw |
 | --- | --- | --- | --- | --- |
 | 1 | ✅ `warmup.png` | Warmup | Acting **and** Character Practice | **DONE.** A person in a standing side bend, arms curving overhead. NOT the flame this brief originally specified: a flame in a Duolingo-shaped app reads as a streak counter, and streaks were removed on purpose 2026-10-05. Realistic figure by owner decision — see point 4 above. |
 | 2 | ✅ `arcade.png` | Acting Arcade | Acting Arcade **and** Speechcraft Arcade | **DONE.** A vintage arcade joystick: terracotta ball top, sage base, gold ring, slight angle. One icon serves both arcade cards (owner: "this is for all the arcade images"); the Speech one is invisible behind SPEECH_LIVE but wired so that pane is already right when the flag flips. |
 | 3 | ✅ `flash-cards.png` | Flash Cards | Acting Practice | **DONE.** A fanned stack, blue/terracotta/sage/lavender edges behind a cream top card. The top card carries RULED LINES, which are rules rather than letters, and they do real work: they say index card rather than playing card, which is what a cue-line drill actually uses. Better than what this brief asked for. |
-| 4 | `mask-cards.png` | Mask Cards | Character Practice | One commedia half-mask in profile — the long-nosed leather kind, lavender or slate shading. Distinct from the generic theatre mask. Replaces 🃏. |
-| 5 | `one-line.png` | One Line, Many Masks | Character Practice | Three small commedia masks overlapping in a row, receding slightly, so the idea of one line passing through several characters is legible. Replaces 🎭. |
-| 6 | `sonnets.png` | The Sonnets | Shakespeare Practice | A small open book with a quill resting across it, gold nib. Must not be confused with `scripts.png`, which is already a script. Replaces 📜. |
-| 7 | `name-the-move.png` | Name the Move | Rhetoric Practice, **all three decks** | A balance scale, slightly off level. One icon serves all three cards: they are the same exercise on different decks, and the titles are identical, so three different icons would imply three different things. Replaces 🧩 🧭 ⚖️. |
-| 8 | `bridge.png` | Accent Bridge | Accents & Dialects Practice | A small arched stone bridge in sage and muted sage, seen side-on. Replaces 🌉. |
+| 4 | ✅ `commedia.png` | Mask Cards | Character Practice **and** the Commedia Library shelf | **DONE**, and the file is `commedia.png` not `mask-cards.png` because it serves two surfaces. One lavender leather half-mask with gold ridge highlights, eye openings cut right through so the tinted plate shows behind them. The gold edges are what carry it at 42px. |
+| 5 | ✅ `one-line.png` | One Line, Many Masks | Character Practice | **DONE.** THREE masks overlapping, lavender/terracotta/sage. It was generated for the Commedia shelf, measured badly at the 42px that shelf renders, and swapped here — three heavily modelled overlapping objects is too much for 42px, but at 46px "several" still reads even when the mask shapes go soft. The three say *many*; the single mask says *commedia*. Do not swap them back. |
+| 6 | ✅ `sonnets.png` | The Sonnets | Shakespeare Practice | **DONE.** An open book lying flat, slate-blue cloth binding, a quill across it with a gold nib. Densest icon in the set at 69%. Pages blank — the instruction had to say so six ways, because a book is one of the strongest text priors a model has. |
+| 7 | ✅ `name-the-move.png` | Name the Move | Rhetoric Practice, **all three decks** | **DONE.** A brass balance scale on a slate-blue base. One icon on all three cards: same exercise, same title, three decks — three glyphs would imply three games. Wired through `RHET_DECKS` so each deck keeps its own emoji as the fallback. Slate blue because `rhetoric.png` below it is a terracotta lectern and this repeats three times in that column. |
+| + | ✅ `shakespeare-scenes.png` | Shakespeare's Scenes | Shakespeare Practice | **DONE, not in the original list.** A featureless mannequin in a terracotta doublet holding a skull. Owner order 2026-10-13. It needed its OWN file because `scenes.png` serves three other surfaces holding 27 scenes across ten authors — a skull there would label Chekhov, Ibsen, O'Neill and Wilde as Shakespeare. Known weakness: at 46px the bone skull and the wooden head read as two similar pale ovals; if respun, fix the contrast, not the composition. |
 
 ---
 
@@ -155,17 +194,39 @@ Check the COMPONENT before calling a card a free reuse: `.track-glyph` at
 
 ---
 
-# BATCH 2 — the fourteen accent game tiles
+# BATCH 2 — SIXTEEN mode-card tiles, and the only work left
 
 **Read this before generating them.** These sit on `.mode-card`, a smaller
 component, and `.mode-icon` currently renders at **26px**
 (css/style.css:215). A richly shaded storybook plate at 26px turns to mush.
 If you want these, I will raise the rendered size to about 36px first and we
-check one before you make the other thirteen.
+check one before you make the rest.
 
 So: generate **`listen.png` first, on its own**, and we look at it at real
-size. If it holds, the rest are worth doing. If it does not, these fourteen
-stay on emoji and batch 1 still stands on its own.
+size. If it holds, the rest are worth doing. If it does not, these stay on
+emoji and batch 1 still stands on its own.
+
+**THE SIZE DECISION IS THE BLOCKER AND IT IS THE OWNER'S.** Nothing here
+should be generated until 26px becomes ~36px, because the evidence is now
+measured rather than guessed: the seesaw reads at 42px and is already the
+lightest thing on its shelf, and the three overlapping masks stopped reading
+as masks at all at 42px. 26px is a third smaller again.
+
+**TWO TILES JOINED THIS BATCH FROM BATCH 1, BOTH MISFILED BY THIS BRIEF:**
+
+| Tile | Was listed as | Actually |
+| --- | --- | --- |
+| `bridge.png` — Accent Bridge | a batch 1 track card | `.mode-card` at 26px |
+| `words.png` — Words & Expressions | a free reuse, "no art needed" | `.mode-card` at 26px |
+
+Same mistake twice. **Check the COMPONENT, not the card:** `.track-glyph` at
+46px and `.tile-img` at 42px take art today; `.mode-icon` at 26px does not.
+
+One quirk worth knowing for `bridge.png`: the Accent Bridge card only
+renders where a playable route exists, which today is Neutral American to
+Traditional RP and nothing else. It is invisible on four of the five accent
+courses, so check it on Neutral American or you will think the install
+failed.
 
 | File | Game | Draw |
 | --- | --- | --- |
