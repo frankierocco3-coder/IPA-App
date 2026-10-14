@@ -84,11 +84,11 @@ export const activeCourse = () => {
 // Shakespeare, Voice & Speech, Accents & Dialects — the work first, the
 // instrument and the accents after it.
 export const WORKSPACES = [
-  { id: 'acting', icon: '🎭', label: 'Acting',
+  { id: 'acting', icon: '🎭', img: 'img/ui/scenes.png', label: 'Acting',
     context: 'Scene study, character, text and rehearsal' },
   { id: 'character', icon: '🧍', label: 'Building a Character',
     context: 'Inventing a person, building a cast role, and commedia dell’arte' },
-  { id: 'shakespeare', icon: '🪶', label: 'Shakespeare',
+  { id: 'shakespeare', icon: '🪶', img: 'img/ui/soliloquy.png', label: 'Shakespeare',
     context: 'The language, the verse, and text that is harder to read than it is to play' },
   // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
   // the conservatory class name. The internal id stays 'ipa' (stored
@@ -98,9 +98,9 @@ export const WORKSPACES = [
   // It sits after Shakespeare and before the instrument, which keeps the
   // owner's 2026-09-25 ordering intact: the work first, then the
   // instrument, then the accents.
-  { id: 'rhetoric', icon: '🏛️', label: 'Rhetoric',
+  { id: 'rhetoric', icon: '🏛️', img: 'img/ui/rhetoric.png', label: 'Rhetoric',
     context: 'How speech changes what people think and do, built on purpose rather than by luck' },
-  { id: 'ipa', icon: 'ʃə', label: 'Voice & Speech',
+  { id: 'ipa', icon: 'ʃə', img: 'img/ui/instrument.png', label: 'Voice & Speech',
     context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
   { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
     context: 'Accent and dialect courses' },

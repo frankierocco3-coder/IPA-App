@@ -376,6 +376,10 @@ function renderShell(section) {
 
 // ── Stats bar: course chip ───────────────────────────────────
 
+const wsRowIcon = w => (w.img
+  ? `<span class="course-icon ws-row-img"><img src="${esc(w.img)}" alt="" width="32" height="32"></span>`
+  : `<span class="course-icon">${w.icon}</span>`);
+
 function drawStatsbar(course, section, ws = activeWorkspace()) {
   const bar = document.getElementById('statsbar');
   const wsDef = WORKSPACES.find(w => w.id === ws);
@@ -433,6 +437,19 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
         </button>`;
   }).join('');
 
+  // THE MENU ROWS TAKE ART; THE CHIP DOES NOT, and the split is deliberate
+  // rather than unfinished. `.course-icon` is 17px, and 17px is emoji
+  // territory: rendered at that size the shipped plates are unreadable, worse
+  // than the 26px mush that held .mode-icon back until it was raised to 36px.
+  // A menu row is 51px tall and carries two lines of text, so a 32px picture
+  // sits in it comfortably. The chip is a 39px pill in the stats bar, and a
+  // 32px image inside it would leave two pixels of air and push the bar's
+  // height into every screen's header. So the switcher, where somebody is
+  // choosing a workspace and an icon earns its keep, gets the art; the chip,
+  // which is a label you glance at, keeps the emoji that is built for 17px.
+  //
+  // A workspace with no `img` renders its emoji here exactly as before, so
+  // the two still undrawn degrade to today's behaviour rather than to blanks.
   bar.innerHTML = `
     <button class="stat-chip ws-chip" id="ws-chip" type="button"
             aria-haspopup="menu" aria-expanded="false" title="Switch workspace or course"
@@ -444,7 +461,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
       <p class="course-menu-h">Workspaces</p>
       ${liveWorkspaces().map(w => `
         <button class="course-row ${w.id === ws ? 'on' : ''}" data-ws="${w.id}" role="menuitem" type="button">
-          <span class="course-icon">${w.icon}</span>
+          ${wsRowIcon(w)}
           <span class="course-row-info"><b>${esc(w.label)}</b><small>${esc(w.context)}</small></span>
           ${w.id === ws ? '<span class="course-check">✓</span>' : ''}
         </button>${w.id === 'accents' && ws === 'accents' ? `

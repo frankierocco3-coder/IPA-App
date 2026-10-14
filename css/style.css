@@ -1134,6 +1134,13 @@ body.modal-open { overflow: hidden; }
 .course-chip { font: inherit; cursor: pointer; font-weight: 800; }
 .course-chip:hover { background: var(--panel-2); }
 .course-icon { font-size: 17px; font-family: var(--serif); }
+/* Workspace switcher rows carry drawn art at 32px; the stats-bar chip keeps
+   its emoji at 17px, where a shaded plate is unreadable. A row is 51px tall
+   and holds two lines of text, so 32px sits in it without changing its
+   height. Scoped to .ws-row-img so the accent-course rows below, and the
+   chip above, are untouched. */
+.course-icon.ws-row-img { display: flex; align-items: center; }
+.course-icon.ws-row-img img { width: 32px; height: 32px; object-fit: contain; display: block; }
 .course-menu {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 260px;
   background: var(--bg); border: 2px solid var(--line); border-radius: 16px;
