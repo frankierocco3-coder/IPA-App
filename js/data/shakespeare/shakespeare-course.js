@@ -979,7 +979,7 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // rendering blank. bookLibraryPane already passes img through for every
 // book, so each new shelf costs one line here.
 //
-// TWO OF SIX SHELVES HAVE ART, the same half-finished state the Character
+// FOUR OF SIX SHELVES HAVE ART, the same half-finished state the Character
 // Library passed through before its other five arrived. If the rest are not
 // coming, remove these lines rather than leaving the shelf mixed.
 //
@@ -1009,9 +1009,30 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // dark, square-on and heavy with ink. Checked side by side at real size before
 // installing, because the resemblance is obvious in description and absent on
 // screen.
+// IAMBIC PENTAMETER IS A TABOR, the shallow drum Elizabethan players carried,
+// and not a metronome. rhythm.png is already a metronome on Acting Practice,
+// and the two shelves would have read as the same idea twice under different
+// owners. A period instrument also keeps the pulse where this module puts it:
+// in the playing, not in a device that measures it.
+//
+// Terracotta although the prompt asked for sage, and kept that way. The
+// colour was specified to avoid sitting beside verse-prose.png in the same
+// slate blue — those two tiles share a row — and terracotta solves that just
+// as well. Nothing else on this shelf is warm.
+// THE FOLIO LIES FLAT AND CARRIES BRASS, and both are what keep it off the
+// pile. This app already ships three books — textbook.png and dictionary.png
+// are closed volumes at a three-quarter angle, sonnets.png is open with a
+// quill, and verse-prose.png sits DIRECTLY ABOVE this tile in the grid. A
+// fourth book at the same angle in a new colour would have been the third
+// copy of one drawing. Lying flat, in dark leather, with corner bosses and a
+// clasp, it is the only metal-furnished object on any shelf and reads as four
+// hundred years older than its neighbours. Checked in its own column before
+// installing, not reasoned about.
 const SHELF_IMG = {
   context: 'img/ui/shakespeare.png',
   form: 'img/ui/verse-prose.png',
+  metre: 'img/ui/pentameter.png',
+  folio: 'img/ui/folio.png',
 };
 
 export const SHAKESPEARE_COLLECTIONS = SHAKESPEARE_MODULES.map(m => ({

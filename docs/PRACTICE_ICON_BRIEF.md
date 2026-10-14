@@ -105,7 +105,18 @@ installing anything; all four are cheap and each one caught a real reject:
   substitutes for it;
 * **palette distance** — nearest house colour for each dominant band. The
   flash cards landed within 16 of four house values; a rejected flame was 39
-  off on one channel and visibly hot. Anything past about 35 reads wrong.
+  off on one channel and visibly hot.
+  **DO NOT TURN THAT INTO A THRESHOLD. "Anything past about 35 reads wrong"
+  used to stand here and it is false** — it was measured on 2026-10-14
+  against the shipped set and EVERY icon fails it: `rhythm` 98, `commedia`
+  114, `name-the-move` 135, `status` 96, `dictionary` 67. A six-colour
+  quantisation returns shading and highlight bands, and the dark side of any
+  modelled object sits far from a flat palette swatch, so the number measures
+  how much dimensional shading an icon has rather than whether it is in
+  palette. Applied as a threshold it nearly rejected a good drum and it put a
+  false concern in the Verse and Prose commit message.
+  Use it to spot a HUE that is nowhere in the palette — the hot flame — by
+  looking at the band colours, not by comparing a distance to a line.
 
 **7. INK DENSITY — THE MEASUREMENT THAT FRAME FILL MISSES.** The share of an
 icon's bounding box that is actually drawn. It earned its place twice in one

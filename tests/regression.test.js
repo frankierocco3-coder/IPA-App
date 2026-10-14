@@ -3660,12 +3660,14 @@ export async function run({ navDoc = document } = {}) {
         && CHARACTER_COLLECTIONS.every(c => !!c.img && !!c.icon),
         `${CHARACTER_COLLECTIONS.filter(c => c.img).length} of ${CHARACTER_COLLECTIONS.length} shelves have art`);
       // The Shakespeare Library passes art through the same way, and is at the
-      // stage Character was: two of six drawn, four still on emoji. That mixed
+      // stage Character was: four of six drawn, two still on emoji. That mixed
       // state is deliberate and must stay legible rather than rendering blanks,
-      // so the fallback is pinned on the four that have no file yet.
+      // so the fallback is pinned on the two with no file yet.
       check('shakespeare: the Library shelf passes art through, emoji still the fallback',
         SHAKESPEARE_COLLECTIONS.find(c => c.id === 'context')?.img === 'img/ui/shakespeare.png'
         && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'form')?.img === 'img/ui/verse-prose.png'
+        && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'metre')?.img === 'img/ui/pentameter.png'
+        && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'folio')?.img === 'img/ui/folio.png'
         && SHAKESPEARE_COLLECTIONS.filter(c => !c.img).every(c => !!c.icon),
         `${SHAKESPEARE_COLLECTIONS.filter(c => c.img).length} of ${SHAKESPEARE_COLLECTIONS.length} shelves have art`);
       // The Warmup: a chooser of four movements plus the whole thing,
