@@ -987,9 +987,10 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // rendering blank. bookLibraryPane already passes img through for every
 // book, so each new shelf costs one line here.
 //
-// FIVE OF SIX SHELVES HAVE ART, the same half-finished state the Character
-// Library passed through before its other five arrived. If the rest are not
-// coming, remove these lines rather than leaving the shelf mixed.
+// ALL SIX SHELVES NOW HAVE ART, completed 2026-10-14. The emoji in
+// SHELF_ICON above are no longer rendered anywhere, and they STAY: tileHtml
+// treats img as outranking emoji with the emoji as the fallback, so deleting
+// a file degrades this shelf to today's behaviour rather than to blanks.
 //
 // THE PORTRAIT HAS A FACE, AND THAT IS THE OWNER'S DECISION (2026-10-13),
 // not an oversight. The house draws people featureless — the mannequin in
@@ -1047,8 +1048,30 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // The honest counterweight: it is the densest tile on the shelf at 99%, it
 // says "Shakespeare" and "book" instantly, and a learner reading module 5
 // is not being taught bookbinding.
+// THE LANGUAGE IS TWO SPEECH BUBBLES, AND IT IS THE EIGHTH IDEA TRIED. The
+// owner rejected a Globe, spectacles, thread, a wax-sealed letter, an
+// hourglass, a hornbook and a dictionary for this shelf. What those seven
+// share is that they are props from an old study: they say "this is old" and
+// say nothing about what the module argues, which is the opposite — that the
+// language looks impenetrable and mostly is not, that there is a plain
+// sentence underneath, and that the largest obstacle is not in the text.
+//
+// The bars inside the bubble are the same device verse-prose.png uses: text
+// drawn as solid bars, never letters, so the two tiles share one visual
+// grammar for "words on a surface".
+//
+// It is also the first shape on this shelf that is neither a book nor a
+// person. Before it the six tiles were two books, two figures and a drum,
+// and a Library that reads as a gallery of portraits is harder to scan.
+//
+// KNOWN, AND FOR BATCH 2 TO RESOLVE RATHER THAN THIS FILE: the icon brief
+// specs name-sound.png as a single rounded speech bubble for Name That Sound.
+// That would be a second bubble in the app. They live in different workspaces
+// and never appear together, which is why this ships, but batch 2 should pick
+// something else if it can.
 const SHELF_IMG = {
   context: 'img/ui/shakespeare.png',
+  language: 'img/ui/language.png',
   form: 'img/ui/verse-prose.png',
   metre: 'img/ui/pentameter.png',
   folio: 'img/ui/folio.png',

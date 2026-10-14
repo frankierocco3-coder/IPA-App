@@ -3694,7 +3694,7 @@ export async function run({ navDoc = document } = {}) {
         && CHARACTER_COLLECTIONS.every(c => !!c.img && !!c.icon),
         `${CHARACTER_COLLECTIONS.filter(c => c.img).length} of ${CHARACTER_COLLECTIONS.length} shelves have art`);
       // The Shakespeare Library passes art through the same way, and is at the
-      // stage Character was: five of six drawn, one still on emoji. That mixed
+      // Character reached: every shelf drawn, every emoji kept as fallback. That
       // state is deliberate and must stay legible rather than rendering blanks,
       // so the fallback is pinned on the two with no file yet.
       check('shakespeare: the Library shelf passes art through, emoji still the fallback',
@@ -3707,7 +3707,14 @@ export async function run({ navDoc = document } = {}) {
         // and pinning the shared name would have made that swap look like a
         // regression. The Practice card keeps shakespeare-scenes.png.
         && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'soliloquy')?.img === 'img/ui/soliloquy.png'
-        && SHAKESPEARE_COLLECTIONS.filter(c => !c.img).every(c => !!c.icon),
+        && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'language')?.img === 'img/ui/language.png'
+        // THE SHELF IS COMPLETE, so this flipped from "the ones without art
+        // keep their emoji" to "every shelf has both". The old form went
+        // vacuously true the moment the last file landed, which is exactly
+        // how the Character check rotted. Asserting both means a deleted file
+        // fails here rather than silently falling back to an emoji nobody
+        // has seen in months.
+        && SHAKESPEARE_COLLECTIONS.every(c => !!c.img && !!c.icon),
         `${SHAKESPEARE_COLLECTIONS.filter(c => c.img).length} of ${SHAKESPEARE_COLLECTIONS.length} shelves have art`);
       // The Warmup: a chooser of four movements plus the whole thing,
       // then written steps on the shared runner, safety line verbatim,
