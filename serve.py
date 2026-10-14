@@ -21,6 +21,27 @@ AUDIO_PREFIX = '/IPA-Audio/'
 
 
 class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
+    # HTTP/1.1, SO CONNECTIONS ARE REUSED. The default here is HTTP/1.0,
+    # which closes the socket after every single response. This app is a
+    # zero-build ES module graph: one page load fetches main.js plus well
+    # over a hundred modules, and the browser was opening, using and
+    # discarding a TCP connection for each one. Every discarded connection
+    # then sits in TIME_WAIT for tens of seconds. Across a browser session,
+    # and especially across a full tests/run-all.html run, that accumulates
+    # until the server stops answering and the app boots to a blank screen.
+    # Keep-alive collapses a hundred-odd connections into a handful.
+    #
+    # SimpleHTTPRequestHandler is safe under 1.1 because send_head always
+    # sets Content-Length for a file and send_error sets it for an error,
+    # so no response can leave the connection hanging for want of a length.
+    protocol_version = 'HTTP/1.1'
+    # Keep-alive pins one thread per open connection, so an idle browser tab
+    # holding six of them holds six threads indefinitely. This reaps them:
+    # a connection with nothing on it for half a minute is closed, and the
+    # browser simply opens another when it next needs one. Without it the
+    # 1.1 change above trades a socket leak for a thread leak.
+    timeout = 30
+
     def end_headers(self):
         self.send_header('Cache-Control', 'no-cache, no-store, must-revalidate')
         super().end_headers()
@@ -40,4 +61,14 @@ if not os.path.isdir(AUDIO_DIR):
     print('warning: no audio at %s — clips will 404. Clone IPA-Audio beside '
           'this repo, or set SPEECHCRAFT_AUDIO_DIR.' % AUDIO_DIR, file=sys.stderr)
 
-http.server.ThreadingHTTPServer(('', PORT), NoCacheHandler).serve_forever()
+class DevServer(http.server.ThreadingHTTPServer):
+    # A LISTEN BACKLOG OF FIVE IS THE OTHER HALF OF THE SAME BUG. That is
+    # socketserver's default, and it is the number of connections the kernel
+    # will hold while the server is busy accepting. A browser opening a
+    # module graph asks for far more than five at once, so under a burst the
+    # surplus connections are refused or dropped and the page half-loads or
+    # does not load at all. 128 costs nothing and removes the ceiling.
+    request_queue_size = 128
+
+
+DevServer(('', PORT), NoCacheHandler).serve_forever()

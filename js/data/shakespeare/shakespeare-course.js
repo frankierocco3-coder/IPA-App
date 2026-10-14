@@ -1027,15 +1027,26 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // colour was specified to avoid sitting beside verse-prose.png in the same
 // slate blue — those two tiles share a row — and terracotta solves that just
 // as well. Nothing else on this shelf is warm.
-// THE FOLIO LIES FLAT AND CARRIES BRASS, and both are what keep it off the
-// pile. This app already ships three books — textbook.png and dictionary.png
-// are closed volumes at a three-quarter angle, sonnets.png is open with a
-// quill, and verse-prose.png sits DIRECTLY ABOVE this tile in the grid. A
-// fourth book at the same angle in a new colour would have been the third
-// copy of one drawing. Lying flat, in dark leather, with corner bosses and a
-// clasp, it is the only metal-furnished object on any shelf and reads as four
-// hundred years older than its neighbours. Checked in its own column before
-// installing, not reasoned about.
+// THE FOLIO TILE IS A TITLED BOOK, BY OWNER DECISION (2026-10-14), replacing
+// a plain dark leather volume with brass corners. Three things were put to
+// the owner before the change and he chose this one anyway, so they are
+// recorded here rather than argued again:
+//
+//   1. IT CARRIES LETTERING, which docs/ICON_STYLE_BLOCK.md bans outright.
+//      At 42px "FIRST FOLIO" is in fact legible and "SHAKESPEARE'S" is a
+//      smear, so it degrades to texture rather than to nonsense.
+//   2. IT IS NOT WHAT A 1623 BUYER HELD. The Folio sold unbound at about
+//      fifteen shillings, or a pound in plain calf, and the Droeshout
+//      portrait is an engraving on the title page INSIDE. A green cloth case
+//      with a printed portrait panel is a modern reproduction's look. That
+//      matters more here than elsewhere because module 5 is the accuracy
+//      hazard and 5.3 turns on who really put what on the page.
+//   3. THE PORTRAIT REPEATS shakespeare.png, two rows above it on the same
+//      shelf — both tiles are a bearded man in a ruff.
+//
+// The honest counterweight: it is the densest tile on the shelf at 99%, it
+// says "Shakespeare" and "book" instantly, and a learner reading module 5
+// is not being taught bookbinding.
 const SHELF_IMG = {
   context: 'img/ui/shakespeare.png',
   form: 'img/ui/verse-prose.png',
