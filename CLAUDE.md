@@ -91,6 +91,31 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
+**RUN IT IN A REAL BROWSER, NOT IN AN AGENT'S EMBEDDED ONE** (owner-verified
+2026-10-14). The same clean tree gave **824 checks / 0 failures in Chrome**
+and 730–763 checks with 41–78 failures in the embedded browser Claude drives,
+across five attempts. The embedded failures are always the same shape: the
+`precondition: the app under test is in the Accents workspace` check reports
+`freeplay=false`, the nav checks come back empty, and sections 1–18 cascade.
+
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is 824. A
+run reporting 730 or 763 skipped sections and is not comparable even if its
+failure count looks small — a green run with a short count is not a green run.
+
+Underneath it is an intermittent boot failure that is worth fixing on its own:
+on some page loads every module fetches 200, `main.js` imports without
+throwing, the DB opens in 0ms, the window is top-level so the clickjacking
+guard is not involved — and `#app` stays empty with `readyState: complete`.
+Re-importing `main.js` in that same page renders the shell instantly. If that
+ever happens outside an embedded browser a user sees a blank screen with no
+error and no recovery but a reload.
+
+Six causes were proposed and refuted on 2026-10-14 — do not re-chase them:
+the Shakespeare preview flag, a wiped profile, a second tab blocking the IDB
+upgrade, a stale `speechcraft-workspace`, the dev server, and a stale `navDoc`
+after the precondition's frame reload (a detached document still returns its
+content, so it cannot produce the empty results seen).
+
 ## Layout
 
 ```
