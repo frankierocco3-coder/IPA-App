@@ -3694,7 +3694,7 @@ export async function run({ navDoc = document } = {}) {
         && CHARACTER_COLLECTIONS.every(c => !!c.img && !!c.icon),
         `${CHARACTER_COLLECTIONS.filter(c => c.img).length} of ${CHARACTER_COLLECTIONS.length} shelves have art`);
       // The Shakespeare Library passes art through the same way, and is at the
-      // stage Character was: four of six drawn, two still on emoji. That mixed
+      // stage Character was: five of six drawn, one still on emoji. That mixed
       // state is deliberate and must stay legible rather than rendering blanks,
       // so the fallback is pinned on the two with no file yet.
       check('shakespeare: the Library shelf passes art through, emoji still the fallback',
@@ -3702,6 +3702,11 @@ export async function run({ navDoc = document } = {}) {
         && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'form')?.img === 'img/ui/verse-prose.png'
         && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'metre')?.img === 'img/ui/pentameter.png'
         && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'folio')?.img === 'img/ui/folio.png'
+        // Soliloquies carries its OWN file although the bytes currently match
+        // shakespeare-scenes.png: a respin is commissioned for this tile only,
+        // and pinning the shared name would have made that swap look like a
+        // regression. The Practice card keeps shakespeare-scenes.png.
+        && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'soliloquy')?.img === 'img/ui/soliloquy.png'
         && SHAKESPEARE_COLLECTIONS.filter(c => !c.img).every(c => !!c.icon),
         `${SHAKESPEARE_COLLECTIONS.filter(c => c.img).length} of ${SHAKESPEARE_COLLECTIONS.length} shelves have art`);
       // The Warmup: a chooser of four movements plus the whole thing,

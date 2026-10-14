@@ -75,7 +75,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v36';                     // 2026-10-14: the Folio shelf tile changes — owner actively looking
+const VERSION = 'sc-v37';                     // 2026-10-14: Soliloquies shelf tile — owner actively looking
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

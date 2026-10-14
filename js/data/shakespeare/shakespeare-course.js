@@ -987,7 +987,7 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // rendering blank. bookLibraryPane already passes img through for every
 // book, so each new shelf costs one line here.
 //
-// FOUR OF SIX SHELVES HAVE ART, the same half-finished state the Character
+// FIVE OF SIX SHELVES HAVE ART, the same half-finished state the Character
 // Library passed through before its other five arrived. If the rest are not
 // coming, remove these lines rather than leaving the shelf mixed.
 //
@@ -1052,6 +1052,25 @@ const SHELF_IMG = {
   form: 'img/ui/verse-prose.png',
   metre: 'img/ui/pentameter.png',
   folio: 'img/ui/folio.png',
+  // SOLILOQUIES IS AN INTERIM AND ITS OWN FILE, ON PURPOSE. The bytes are
+  // today a copy of shakespeare-scenes.png, the mannequin holding a skull
+  // that serves the Shakespeare Practice card. It is copied rather than
+  // shared because a respin is commissioned for THIS tile only — a muted
+  // lavender doublet and a dark wooden head — and the Practice card should
+  // keep the red version, which suits its own neighbours. When the respin
+  // lands it overwrites soliloquy.png and nothing else moves.
+  //
+  // Two known weaknesses until then, both measured rather than guessed. The
+  // red doublet sits directly below the terracotta drum, so that column is
+  // two warm tiles stacked. And at 42px the bone skull and the pale wooden
+  // head read as two similar light ovals, which is the fault the respin's
+  // dark head exists to fix. It is still better than an emoji beside five
+  // drawn tiles, which is why it ships now.
+  //
+  // It also makes three of six tiles a human figure, two of them faces in
+  // ruffs once the Folio tile took a portrait. Worth revisiting if the shelf
+  // starts reading as a gallery.
+  soliloquy: 'img/ui/soliloquy.png',
 };
 
 export const SHAKESPEARE_COLLECTIONS = SHAKESPEARE_MODULES.map(m => ({
