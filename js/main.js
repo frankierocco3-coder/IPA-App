@@ -1511,13 +1511,13 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
     return `
         <h2 class="chart-h">Choose a provided text</h2>
         <button class="track-card" data-group="speeches" type="button">
-          <div class="track-glyph">📜</div>
+          ${cardGlyph({ icon: '📜', img: 'img/ui/scripts.png' })}
           <div class="track-info"><h2>Monologues &amp; Speeches</h2>
             <p>${count(c => c.key !== 'scene')} texts · sonnets, monologues and speeches</p></div>
           <div class="track-arrow">›</div>
         </button>
         <button class="track-card" data-group="scenes" type="button">
-          <div class="track-glyph">🎭</div>
+          ${cardGlyph({ icon: '🎭', img: 'img/ui/scenes.png' })}
           <div class="track-info"><h2>Scenes</h2>
             <p>${count(c => c.key === 'scene')} texts · two-hander scenes</p></div>
           <div class="track-arrow">›</div>
@@ -1611,7 +1611,7 @@ function renderArcadeTextPicker(onChosen, opts = {}) {
       const addBtn = () => {
         const b = document.createElement('button');
         b.className = 'track-card'; b.type = 'button';
-        b.innerHTML = `<div class="track-glyph">🎬</div>
+        b.innerHTML = `${cardGlyph({ icon: '🎬', img: 'img/ui/custom-work.png' })}
           <div class="track-info"><h2>Paste a new text</h2><p>Opens Custom Work in the Studio; it becomes a project you own.</p></div>
           <div class="track-arrow">›</div>`;
         b.addEventListener('click', renderCustomWork);
@@ -1680,13 +1680,13 @@ function renderWorkingTextPicker(onChosen) {
       <p class="track-blurb">Choose the text you want to work on. It stays with you across Speech lessons, practice and the Studio until you change it. Nothing is copied — Studio projects are read live from your own records.</p>
       <h2 class="chart-h">Choose from the Speechcraft collections</h2>
       <button class="track-card" id="wt-mono" type="button">
-        <div class="track-glyph">📜</div>
+        ${cardGlyph({ icon: '📜', img: 'img/ui/scripts.png' })}
         <div class="track-info"><h2>Monologues &amp; Speeches</h2>
           <p>Sonnets and the monologue collections — pick a piece and it becomes your working text.</p></div>
         <div class="track-arrow">›</div>
       </button>
       <button class="track-card" id="wt-scenes" type="button">
-        <div class="track-glyph">🎭</div>
+        ${cardGlyph({ icon: '🎭', img: 'img/ui/scenes.png' })}
         <div class="track-info"><h2>Scenes</h2>
           <p>Two-hander scenes — pick one and it becomes your working text.</p></div>
         <div class="track-arrow">›</div>
@@ -1695,7 +1695,7 @@ function renderWorkingTextPicker(onChosen) {
       <div id="wt-projects"><p class="pane-note">Loading…</p></div>
       <h2 class="chart-h">Paste or upload Custom Work</h2>
       <button class="track-card" id="wt-custom" type="button">
-        <div class="track-glyph">🎬</div>
+        ${cardGlyph({ icon: '🎬', img: 'img/ui/custom-work.png' })}
         <div class="track-info"><h2>Open Custom Work</h2>
           <p>Paste a new text in the Studio; it becomes a project you own, then pick it here.</p></div>
         <div class="track-arrow">›</div>
@@ -5583,7 +5583,7 @@ function rhetoricStudioPane(el) {
       <div class="track-arrow">›</div>
     </button>` : ''}
     <button class="track-card hub-card" id="rhs-custom" type="button">
-      <div class="track-glyph">🎬</div>
+      ${cardGlyph({ icon: '🎬', img: 'img/ui/custom-work.png' })}
       <div class="track-info"><h2>Custom Work</h2><p>Your texts, private to this device.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
@@ -5819,17 +5819,17 @@ function shakespearePracticePane(el) {
 // because it is the learner's own text, whatever they paste into it.
 function shakespeareStudioPane(el) {
   const cards = [
-    { icon: '📜', title: 'Shakespeare’s Sonnets', go: renderSonnetList },
+    { icon: '📜', img: 'img/ui/sonnets.png', title: 'Shakespeare’s Sonnets', go: renderSonnetList },
     // Rhetoric is gone from this workspace (owner order 2026-09-28). The
     // figures are The Shapes of Argument, in the Rhetoric Library.
-    { icon: '🎭', title: 'Shakespeare’s Scenes', go: () => renderScenesShelf('Shakespeare') },
-    { icon: '🎬', title: 'Custom Work', go: renderCustomWork },
+    { icon: '🎭', img: 'img/ui/shakespeare-scenes.png', title: 'Shakespeare’s Scenes', go: () => renderScenesShelf('Shakespeare') },
+    { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
   ];
   el.innerHTML = `
     <div class="ws-head"><h1 class="page-h">Studio</h1></div>
     ${cards.map((c, i) => `
       <button class="track-card hub-card" data-i="${i}" type="button">
-        <div class="track-glyph">${c.icon}</div>
+        ${cardGlyph(c)}
         <div class="track-info"><h2>${esc(c.title)}</h2></div>
         <div class="track-arrow">›</div>
       </button>`).join('')}`;
@@ -7393,16 +7393,16 @@ function textSpeechPane(pane) {
   // No Featured Texts shelf: every text is reachable through the
   // collections below, with nothing promoted or duplicated.
   const cards = [
-    { icon: '📜', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
-    { icon: '📖', title: 'The Shakespeare Dictionary', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
+    { icon: '📜', img: 'img/ui/sonnets.png', title: 'Shakespeare’s Sonnets', blurb: 'All 154 — speak them, scan the metre, study the sounds.', go: renderSonnetList },
+    { icon: '📖', img: 'img/ui/shakespeare-dictionary.png', title: 'The Shakespeare Dictionary', blurb: `${SHAKESPEARE_LEXICON.length} words and turns that stop an actor — what they mean here, and what changes when you play them right.`, go: renderShakespeareLexicon },
     ...libs,
-    { icon: '🎭', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
-    { icon: '🎬', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
+    { icon: '🎭', img: 'img/ui/scenes.png', title: 'Scenes', blurb: `${PROVIDED_SCENES.length} two-hander scenes · shown verbatim from their sources.`, go: renderScenesShelf },
+    { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', blurb: 'Monologues, scenes, speeches and lyrics you paste yourself — private to this device.', go: renderCustomWork },
   ];
   const shown = cards.filter(Boolean);
   pane.innerHTML = shown.map((c, i) => `
     <button class="track-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
-      <div class="track-glyph">${c.icon}</div>
+      ${cardGlyph(c)}
       <div class="track-info"><h2>${c.title}</h2><p>${c.blurb}</p></div>
       <div class="track-arrow">›</div>
     </button>`).join('');

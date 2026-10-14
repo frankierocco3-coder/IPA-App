@@ -97,7 +97,20 @@ export const WORKSPACES = [
   // in family with its neighbours. Same artwork, no regeneration.
   { id: 'character', icon: '🧍', img: 'img/ui/building-character.png', label: 'Building a Character',
     context: 'Inventing a person, building a cast role, and commedia dell’arte' },
-  { id: 'shakespeare', icon: '🪶', img: 'img/ui/soliloquy.png', label: 'Shakespeare',
+  // THE PORTRAIT, NOT THE SKULL-HOLDER (owner decision 2026-10-14). It
+  // pointed at soliloquy.png so that the commissioned lavender respin would
+  // improve the chip and the shelf tile together; the owner chose the face
+  // instead, and it is also the better icon at this size. Rendered at 20, 24
+  // and 32px side by side, the portrait holds at every one — a pale face
+  // against dark hair and a cream ruff keeps a focal point — while the
+  // skull-holder is two similar pale ovals on red and goes soft by 20px.
+  //
+  // It does mean the bust now appears four times across this workspace: the
+  // chip, the Shakespeare 101 shelf, and the covers of folio.png and
+  // shakespeare-dictionary.png. That is the trade, and it buys a chip that is
+  // legible at phone size. soliloquy.png keeps the Soliloquies shelf, so the
+  // respin still has somewhere to land.
+  { id: 'shakespeare', icon: '🪶', img: 'img/ui/shakespeare.png', label: 'Shakespeare',
     context: 'The language, the verse, and text that is harder to read than it is to play' },
   // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
   // the conservatory class name. The internal id stays 'ipa' (stored
