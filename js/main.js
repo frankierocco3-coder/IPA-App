@@ -5698,7 +5698,21 @@ function shakespeareLibraryPane(el) {
         go: () => renderActingCollection(c.id),
       };
     }),
+    // THE FILE IS shakespeare-dictionary.png, NOT dictionary.png, and the
+    // distinction is load-bearing: dictionary.png is the terracotta volume on
+    // the PERSONAL Dictionary card, which is accent work and a different
+    // thing entirely. Same reasoning that gave Shakespeare's Scenes its own
+    // file rather than borrowing scenes.png.
+    //
+    // KNOWN AND ACCEPTED BY THE OWNER (2026-10-14): this is the third
+    // Shakespeare portrait in one Library, after the bust on Shakespeare 101
+    // and the Folio cover. It and folio.png are also structurally the same
+    // drawing, a standing book with a framed portrait panel, separated mainly
+    // by cover colour — lavender here, green there. They are the likeliest
+    // pair to be confused at 42px. Revisit together if the shelf is reworked;
+    // changing one alone would only make the other look odd.
     { key: 'col:sh-dictionary', tone: 'is-gold', emoji: '📖',
+      img: 'img/ui/shakespeare-dictionary.png',
       title: 'The Shakespeare Dictionary',
       group: G2, count: SHAKESPEARE_LEXICON.length, unit: 'entry',
       keywords: 'lexicon vocabulary false friends obsolete elision grammar words meaning glossary',
