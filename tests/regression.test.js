@@ -90,6 +90,7 @@ import { CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS, CHARACTER_
          COMMEDIA_MASKS, commediaMask, ONE_LINES, MASK_SITUATIONS, MASK_PROBLEMS } from '../js/data/character/character-course.js';
 import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible } from '../js/views/context.js';
 import { CHARACTER_FIGURES, characterFigure } from '../js/data/character/art.js';
+import { SHAKESPEARE_FIGURES, shakespeareFigure } from '../js/data/shakespeare/art.js';
 import { IPA_BOOKS, notebookForContext } from '../js/notebook.js';
 import { CHARACTER_SECTIONS, CHARACTER_KINDS, fieldsFor, createCharacter, getCharacter, saveFields,
          renameCharacter, deleteCharacter, listCharacters, MAX_FIELD_LEN } from '../js/characters.js';
@@ -3645,6 +3646,39 @@ export async function run({ navDoc = document } = {}) {
         // from RHET_DECKS, so the wiring passes each deck's own emoji
         // through as the fallback rather than hard-coding one.
         && /cardGlyph\(\{ icon: d\.icon, img: 'img\/ui\/name-the-move\.png' \}\)/.test(glyphSrc));
+      // THREE FIGURE REGISTRIES, ONE RESOLVER. actingFigureHtml tries acting,
+      // then character, then shakespeare, and returns the FIRST hit — so two
+      // registries sharing a key would silently show the wrong picture in one
+      // of the two lessons, with no error anywhere. The per-course prefixes
+      // (ac-, cm-, sh-) are what prevent it, and this pins that they hold.
+      // Written 2026-10-14 with the Shakespeare registry, because a comment in
+      // main.js claimed this check existed before it did.
+      const figRegistries = [['acting', ACTING_FIGURES], ['character', CHARACTER_FIGURES],
+        ['shakespeare', SHAKESPEARE_FIGURES]];
+      const figSeen = new Map();
+      const figClashes = [];
+      for (const [book, reg] of figRegistries) {
+        for (const k of Object.keys(reg)) {
+          if (figSeen.has(k)) figClashes.push(`${k} in ${figSeen.get(k)} and ${book}`);
+          figSeen.set(k, book);
+        }
+      }
+      check('figures: no key is claimed by two registries, so the resolver cannot pick wrong',
+        figClashes.length === 0 && figSeen.size > 0
+        // and each registry resolves only its OWN keys, which is what makes
+        // the fallback order irrelevant rather than merely lucky today
+        && Object.keys(SHAKESPEARE_FIGURES).every(k =>
+          !actingFigure(k) && !characterFigure(k) && !!shakespeareFigure(k)),
+        figClashes.join('; ') || `${figSeen.size} keys across ${figRegistries.length} registries`);
+      // Every figure must name a file that ships, for the same reason a wired
+      // icon must: a missing one renders a broken image inside a lesson body.
+      const figFiles = Object.values(SHAKESPEARE_FIGURES)
+        .map(f => `../img/lessons/shakespeare/${f.file}`);
+      const figHeads = await Promise.all(figFiles.map(u =>
+        fetch(u).then(r => r.ok).catch(() => false)));
+      check('figures: every Shakespeare figure points at a file that ships',
+        figHeads.every(Boolean),
+        figFiles.filter((_, i) => !figHeads[i]).join(' ') || `${figFiles.length} present`);
       // commedia.png serves TWO surfaces: the Character Library shelf tile at
       // 42px and the Mask Cards Practice card at 46px. The app already reuses
       // one file across surfaces (scripts.png is Monologues and Practice My

@@ -55,6 +55,7 @@ import { LINE_LESSON } from './data/acting/lines.js';
 import { voiceFigure, VOICE_ATLAS } from './data/voice-art.js';
 import { actingFigure } from './data/acting/art.js';
 import { characterFigure } from './data/character/art.js';
+import { shakespeareFigure } from './data/shakespeare/art.js';
 import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
 import { ARCADE_GROUPS, arcadeGamesFor, arcadeGameById, CIRCUMSTANCE_DECK,
@@ -3277,7 +3278,12 @@ function renderActingModule(n, ws = 'acting') {
 // A { fig } block names a figure in js/data/acting/art.js; an unknown key
 // renders nothing rather than a broken image.
 function actingFigureHtml(key) {
-  const f = actingFigure(key) ?? characterFigure(key);
+  // THREE registries now, one per illustrated book, searched in turn. The
+  // BOOKS layer already serves all three courses through this one renderer,
+  // so a Shakespeare figure joins by being resolvable here. Keys are prefixed
+  // per course (ac-, cm-, sh-) and the suite pins that they do not collide,
+  // so the order of these fallbacks cannot change which picture appears.
+  const f = actingFigure(key) ?? characterFigure(key) ?? shakespeareFigure(key);
   // Width and height reserve the space before the file lands. Most
   // drawings here are 1536x1024; a registry entry carrying its own w/h
   // (the commedia collection is 1536x864) is believed over the default,
