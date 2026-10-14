@@ -979,10 +979,9 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // rendering blank. bookLibraryPane already passes img through for every
 // book, so each new shelf costs one line here.
 //
-// ONLY SHAKESPEARE 101 HAS ART SO FAR, which leaves one drawn tile among
-// six — the same half-finished state the Character Library passed through
-// before its other five arrived. If the rest are not coming, remove this
-// line rather than leaving the shelf mixed.
+// TWO OF SIX SHELVES HAVE ART, the same half-finished state the Character
+// Library passed through before its other five arrived. If the rest are not
+// coming, remove these lines rather than leaving the shelf mixed.
 //
 // THE PORTRAIT HAS A FACE, AND THAT IS THE OWNER'S DECISION (2026-10-13),
 // not an oversight. The house draws people featureless — the mannequin in
@@ -993,7 +992,27 @@ const SHELF_ICON = { context: '🏛️', language: '🗝️', form: '📐',
 // The file is shakespeare.png rather than context.png: `context` is an
 // internal module id that names nothing a reader sees, and the Library
 // already has shakespeare-scenes.png beside it, so the pair reads clearly.
-const SHELF_IMG = { context: 'img/ui/shakespeare.png' };
+// VERSE AND PROSE IS THE MODULE'S OWN TEST, DRAWN. Its first lesson says you
+// can tell the two apart from across the room without reading anything: verse
+// leaves a ragged right margin, prose runs full and justified. So the icon is
+// an open book whose left page carries short uneven bars and whose right page
+// carries full-width ones. The bars are BARS — the house has drawn blank ruled
+// lines before, on flash-cards.png, and letters here would break the style
+// block's own rule as well as the lesson's point.
+//
+// It survives 42px, which was the open question: three overlapping masks did
+// not, and the two pages here still read as two different textures. It is also
+// the densest icon in the set at 93%, against sonnets.png at 69%.
+//
+// Not a collision with sonnets.png, which is also an open book on a
+// Shakespeare surface. That one is pale, angled and airy with a quill; this is
+// dark, square-on and heavy with ink. Checked side by side at real size before
+// installing, because the resemblance is obvious in description and absent on
+// screen.
+const SHELF_IMG = {
+  context: 'img/ui/shakespeare.png',
+  form: 'img/ui/verse-prose.png',
+};
 
 export const SHAKESPEARE_COLLECTIONS = SHAKESPEARE_MODULES.map(m => ({
   id: m.id, icon: SHELF_ICON[m.id], img: SHELF_IMG[m.id], title: m.title,

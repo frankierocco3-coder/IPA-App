@@ -3586,14 +3586,25 @@ export async function run({ navDoc = document } = {}) {
           .every(n => actingArt.includes(`img/ui/${n}.png`))
         && !doc.querySelector('.hub-card .track-glyph:not(.has-img)'),
         actingArt.join(' '));
-      const artFiles = ['rhythm', 'scripts', 'scenes', 'rhetoric', 'arcade', 'flash-cards', 'warmup',
-        'commedia', 'one-line', 'sonnets', 'shakespeare-scenes', 'name-the-move']
-        .map(n => `../img/ui/${n}.png`);
+      // The Practice cards' files are listed; EVERY Library shelf file is
+      // DERIVED from the two illustrated courses. Hardcoding the shelves is
+      // how five of them came to ship unpinned — shakespeare.png, and the four
+      // Character icons after commedia, were wired and reachable by nothing
+      // here, so deleting one would have rendered empty boxes with a green
+      // suite. Derived, a new shelf icon joins this check by existing.
+      const shelfArt = [...CHARACTER_COLLECTIONS, ...SHAKESPEARE_COLLECTIONS]
+        .map(c => c.img).filter(Boolean);
+      const artFiles = [...new Set([
+        ...['rhythm', 'scripts', 'scenes', 'rhetoric', 'arcade', 'flash-cards', 'warmup',
+          'commedia', 'one-line', 'sonnets', 'shakespeare-scenes', 'name-the-move']
+          .map(n => `img/ui/${n}.png`),
+        ...shelfArt])].map(p => `../${p}`);
       const artHeads = await Promise.all(artFiles.map(u =>
         fetch(u).then(r => r.ok).catch(() => false)));
-      check('acting: every Practice icon wired points at a file that ships',
-        artHeads.every(Boolean),
-        artFiles.filter((_, i) => !artHeads[i]).join(' ') || 'all four present');
+      check('acting: every Practice and shelf icon points at a file that ships',
+        artHeads.every(Boolean) && shelfArt.length >= 6,
+        artFiles.filter((_, i) => !artHeads[i]).join(' ')
+          || `all ${artFiles.length} present, ${shelfArt.length} of them shelves`);
       const glyphSrc = await viewSource();
       check('acting: the wired cards keep their emoji as the fallback',
         /cardGlyph\(\{ icon: '🎼', img: 'img\/ui\/rhythm\.png' \}\)/.test(glyphSrc)
@@ -3642,9 +3653,21 @@ export async function run({ navDoc = document } = {}) {
         /img: c\.img/.test(glyphSrc)
         && CHARACTER_COLLECTIONS.find(c => c.id === 'commedia')?.img === 'img/ui/commedia.png'
         && CHARACTER_COLLECTIONS.find(c => c.id === 'commedia')?.icon === '🃏'
-        // the other five have no art yet and must still render their emoji
-        && CHARACTER_COLLECTIONS.filter(c => !c.img).every(c => !!c.icon),
+        // EVERY LIVE CHARACTER SHELF NOW HAS ART — this read "the other five
+        // have no art yet" and asserted that any shelf without art kept its
+        // emoji, which went vacuously true the day the fifth file landed. The
+        // whole shelf being drawn is the thing worth holding now.
+        && CHARACTER_COLLECTIONS.every(c => !!c.img && !!c.icon),
         `${CHARACTER_COLLECTIONS.filter(c => c.img).length} of ${CHARACTER_COLLECTIONS.length} shelves have art`);
+      // The Shakespeare Library passes art through the same way, and is at the
+      // stage Character was: two of six drawn, four still on emoji. That mixed
+      // state is deliberate and must stay legible rather than rendering blanks,
+      // so the fallback is pinned on the four that have no file yet.
+      check('shakespeare: the Library shelf passes art through, emoji still the fallback',
+        SHAKESPEARE_COLLECTIONS.find(c => c.id === 'context')?.img === 'img/ui/shakespeare.png'
+        && SHAKESPEARE_COLLECTIONS.find(c => c.id === 'form')?.img === 'img/ui/verse-prose.png'
+        && SHAKESPEARE_COLLECTIONS.filter(c => !c.img).every(c => !!c.icon),
+        `${SHAKESPEARE_COLLECTIONS.filter(c => c.img).length} of ${SHAKESPEARE_COLLECTIONS.length} shelves have art`);
       // The Warmup: a chooser of four movements plus the whole thing,
       // then written steps on the shared runner, safety line verbatim,
       // no audio and no scoring apparatus.
