@@ -86,7 +86,16 @@ export const activeCourse = () => {
 export const WORKSPACES = [
   { id: 'acting', icon: '🎭', img: 'img/ui/scenes.png', label: 'Acting',
     context: 'Scene study, character, text and rehearsal' },
-  { id: 'character', icon: '🧍', label: 'Building a Character',
+  // CROPPED TO HEAD AND WAIST FROM A FULL-LENGTH DRAWING, and the crop is
+  // the point. The owner supplied a standing mannequin; at the 32px the
+  // switcher rows render, a full figure measured 42% wide against 96% tall,
+  // aspect 0.44 and 44% ink. A square icon box gives a tall thin figure
+  // nowhere to go, so it rendered at roughly half the visual weight of the
+  // masks and the head beside it. Head to waist keeps the blank mannequin
+  // head, the waistcoat, the sash and the hand on the hip — everything that
+  // says "a character being built" — and comes out aspect 0.79 and 51% ink,
+  // in family with its neighbours. Same artwork, no regeneration.
+  { id: 'character', icon: '🧍', img: 'img/ui/building-character.png', label: 'Building a Character',
     context: 'Inventing a person, building a cast role, and commedia dell’arte' },
   { id: 'shakespeare', icon: '🪶', img: 'img/ui/soliloquy.png', label: 'Shakespeare',
     context: 'The language, the verse, and text that is harder to read than it is to play' },
