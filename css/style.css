@@ -1141,6 +1141,8 @@ body.modal-open { overflow: hidden; }
    chip above, are untouched. */
 .course-icon.ws-row-img { display: flex; align-items: center; }
 .course-icon.ws-row-img img { width: 32px; height: 32px; object-fit: contain; display: block; }
+.course-icon.ws-chip-img { display: flex; align-items: center; }
+.course-icon.ws-chip-img img { width: 24px; height: 24px; object-fit: contain; display: block; }
 .course-menu {
   position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; min-width: 260px;
   background: var(--bg); border: 2px solid var(--line); border-radius: 16px;
@@ -1279,6 +1281,10 @@ body.modal-open { overflow: hidden; }
      pass 2026-09-15): a flag or emoji alone cannot identify "Standard
      British". Chips compact instead of amputating their labels. */
   .stat-chip { font-size: 12.5px; padding: 6px 9px; gap: 4px; }
+  /* The phone chip is tighter (12.5px text, 6px padding), so 24px would add
+     eight pixels to a sticky bar. 20px still reads for all six and keeps the
+     growth to about four. */
+  .course-icon.ws-chip-img img { width: 20px; height: 20px; }
   .course-name { white-space: normal; }
   .statsbar { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 10px 0; margin: 0 0 8px; }
   .guidebook-btn span { display: none; }

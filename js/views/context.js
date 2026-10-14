@@ -111,7 +111,24 @@ export const WORKSPACES = [
     context: 'How speech changes what people think and do, built on purpose rather than by luck' },
   { id: 'ipa', icon: 'ʃə', img: 'img/ui/instrument.png', label: 'Voice & Speech',
     context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
-  { id: 'accents', icon: '🌍', label: 'Accents & Dialects',
+  // NAMED globe.png, NOT accents.png, because it is meant to serve twice.
+  // docs/PRACTICE_ICON_BRIEF.md specs name-accent.png for the Name the Accent
+  // game as "a small globe on a stand"; the switcher row renders at 32px and
+  // that mode tile at 36px, close enough for one file, and this app already
+  // reuses a single drawing across surfaces where the subject is the same.
+  // An object name travels between two different labels; "accents" would not.
+  //
+  // Drawn as a sphere with NO STAND, deliberately. At 32px a stand is a
+  // spindly stick that wastes the square box and drags the aspect down, which
+  // is exactly what sank the full-length mannequin above.
+  //
+  // KNOWN: it is the least house-styled icon in the set — brighter and cooler
+  // than the muted sage and terracotta around it, with detailed coastlines
+  // rather than bold simple land, and no warm gold anywhere. Accepted by the
+  // owner 2026-10-14. It also happens to make Accents the one instantly
+  // findable row in the list, which is a navigational virtue rather than only
+  // a cost. Measures aspect 0.99 and 78% ink, the best of the six.
+  { id: 'accents', icon: '🌍', img: 'img/ui/globe.png', label: 'Accents & Dialects',
     context: 'Accent and dialect courses' },
   // Withdrawn behind SPEECH_LIVE and therefore never rendered, so its
   // position is moot until that flag flips. Kept last rather than

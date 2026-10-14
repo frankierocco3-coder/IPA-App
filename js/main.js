@@ -376,9 +376,16 @@ function renderShell(section) {
 
 // ── Stats bar: course chip ───────────────────────────────────
 
-const wsRowIcon = w => (w.img
-  ? `<span class="course-icon ws-row-img"><img src="${esc(w.img)}" alt="" width="32" height="32"></span>`
+// ONE HELPER, TWO SIZES, so the chip and the menu rows cannot drift apart.
+// The rows render at 32px and the chip at 24px (20px on phones, set in CSS).
+// 24 is the floor at which all six of these read: below it the figures turn
+// to mush, which is the same wall that held .mode-icon at 26px until it was
+// raised. The chip grows from 39px to 42px to carry it, which is three
+// pixels and does not move the stats bar in any way a reader notices.
+const wsIcon = (w, where) => (w.img
+  ? `<span class="course-icon ws-${where}-img"><img src="${esc(w.img)}" alt="" width="${where === 'row' ? 32 : 24}" height="${where === 'row' ? 32 : 24}"></span>`
   : `<span class="course-icon">${w.icon}</span>`);
+const wsRowIcon = w => wsIcon(w, 'row');
 
 function drawStatsbar(course, section, ws = activeWorkspace()) {
   const bar = document.getElementById('statsbar');
@@ -454,7 +461,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
     <button class="stat-chip ws-chip" id="ws-chip" type="button"
             aria-haspopup="menu" aria-expanded="false" title="Switch workspace or course"
             aria-label="Change workspace or course. Current workspace: ${esc(wsDef.label)}.">
-      <span class="course-icon" aria-hidden="true">${wsDef.icon}</span>
+      ${wsIcon(wsDef, 'chip')}
       <span class="course-name" aria-hidden="true">${esc(wsDef.label)}</span> <span aria-hidden="true">▾</span>
     </button>
     <div class="course-menu ws-menu" id="ws-menu" role="menu" hidden>
