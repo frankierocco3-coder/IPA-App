@@ -5742,7 +5742,12 @@ function shakespeareLibraryPane(el) {
     // rather than a blank.
     { key: 'col:sh-coinages', tone: 'is-gold', emoji: '🖋',
       title: 'Words First Recorded in Shakespeare',
-      group: G2, count: COINAGE_LIVES.length, unit: 'still in English',
+      // ONE grammar for counts, 'N unit', with any qualifier off the count —
+      // js/ui.js says so and this card broke it: unit 'still in English' made
+      // the pluraliser render '81 still in Englishs'. The card states the
+      // shelf's real size; that only 81 survive is the first thing the page
+      // itself says, which is where a qualifier belongs.
+      group: G2, count: SHAKESPEARE_COINAGES.length, unit: 'word',
       keywords: 'coinage coined invented first recorded neologism new words vocabulary wordlist',
       go: renderShakespeareCoinages },
     { key: 'col:sh-dictionary', tone: 'is-gold', emoji: '📖',
