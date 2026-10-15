@@ -9,6 +9,7 @@ import { scriptAnalysisById } from './data/script-analysis.js';
 import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
+import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
@@ -5735,6 +5736,15 @@ function shakespeareLibraryPane(el) {
     // by cover colour — lavender here, green there. They are the likeliest
     // pair to be confused at 42px. Revisit together if the shelf is reworked;
     // changing one alone would only make the other look odd.
+    // Second reference shelf, beside the Dictionary and on the same footing:
+    // original glosses, badged awaiting a scholar. It carries NO icon yet, so it
+    // renders its emoji — the deliberate half-finished state the shelves use
+    // rather than a blank.
+    { key: 'col:sh-coinages', tone: 'is-gold', emoji: '🖋',
+      title: 'Words First Recorded in Shakespeare',
+      group: G2, count: COINAGE_LIVES.length, unit: 'still in English',
+      keywords: 'coinage coined invented first recorded neologism new words vocabulary wordlist',
+      go: renderShakespeareCoinages },
     { key: 'col:sh-dictionary', tone: 'is-gold', emoji: '📖',
       img: 'img/ui/shakespeare-dictionary.png',
       title: 'The Shakespeare Dictionary',
@@ -7475,6 +7485,101 @@ const lexEntryHtml = e => `
     ${e.example ? `<p class="lex-eg">“${lexMarkedExample(e.term, e.example, esc)}”${
       e.source ? ` <span class="lex-src">${esc(e.source)}</span>` : ''}</p>` : ''}
   </article>`;
+
+// Words first recorded in Shakespeare. The TITLE is the claim and it is narrow
+// on purpose: a first citation is the earliest surviving printed use, not proof
+// of invention, and the OED's own Preface says so. launch_lint bans "invented"
+// on this shelf for that reason. The evidence is in
+// docs/SHAKESPEARE_COINAGE_CANDIDATES.md.
+//
+// THE DEFAULT VIEW IS "still in English", not all 594. Four hundred and fifty of
+// these words died on the page they were written on, and opening on them buries
+// the eighty a learner can use. The count on every filter says how many it holds,
+// so nothing is hidden — the long list is one tap away and labelled.
+const COINAGE_FILTERS = [
+  { id: 'lives', label: 'Still in English', test: c => c.life === 'lives' },
+  { id: 'sense', label: 'New meaning, old word', test: c => c.life === 'sense' },
+  { id: 'died', label: 'Died on the page', test: c => c.life === 'died' },
+  { id: 'disputed', label: 'Text or meaning disputed', test: c => c.life === 'disputed' },
+  { id: 'all', label: 'All', test: () => true },
+];
+const COINAGE_REVIEW_NOTE = 'Awaiting review by a Shakespeare scholar or verse teacher. '
+  + 'Each gloss was written for this app and then checked against Schmidt, Onions, Foster '
+  + 'and Crystal: 503 confirmed, 82 corrected, 6 unverifiable, 2 found not to be in the canon. '
+  + 'No part of the OED was reachable, so who used a word FIRST is unverified throughout.';
+let coinFilters = { q: '', kind: 'lives' };
+
+function coinageHits() {
+  const f = COINAGE_FILTERS.find(x => x.id === coinFilters.kind) ?? COINAGE_FILTERS[0];
+  const q = coinFilters.q.trim().toLowerCase();
+  return SHAKESPEARE_COINAGES.filter(c => f.test(c)
+    && (!q || c.word.toLowerCase().includes(q) || c.gloss.toLowerCase().includes(q)));
+}
+
+function renderShakespeareCoinages() {
+  record(renderShakespeareCoinages);
+  stopSpeech();
+  coinFilters = { q: '', kind: 'lives' };
+  const kindOptions = COINAGE_FILTERS.map(f => ({
+    id: f.id, label: f.label,
+    note: `${SHAKESPEARE_COINAGES.filter(f.test).length} words`,
+  }));
+  app.innerHTML = `
+    ${pageTopbar('\u{1F58B} Words First Recorded in Shakespeare', '#8a6d3b')}
+    <main class="guide">
+      <h1>Words First Recorded in Shakespeare</h1>
+      <p class="guide-text">Words whose earliest surviving printed use is a Shakespeare text.
+        That is not the same as words he invented, and this shelf does not say it is: a first
+        citation means only that nothing earlier has been found. Most of them died on the page.
+        The ones that did not are the ones worth your time.</p>
+      <p class="pane-note pane-caveat">${esc(COINAGE_REVIEW_NOTE)}</p>
+      <div id="coin-kind"></div>
+      <input class="sonnet-search" id="coin-search" type="search"
+        placeholder="Search words and meanings\u2026" aria-label="Search the word list"
+        autocomplete="off">
+      <div id="coin-list" aria-live="polite"></div>
+    </main>`;
+  wireBrandHome();
+  const listEl = document.getElementById('coin-list');
+  const searchEl = document.getElementById('coin-search');
+  const kindHost = document.getElementById('coin-kind');
+
+  const drawKind = () => {
+    kindHost.innerHTML = dialectSelectHtml({
+      id: 'coin', label: 'Show', current: coinFilters.kind, options: kindOptions,
+    });
+    wireDialectSelect(kindHost, 'coin', k => { coinFilters.kind = k; drawKind(); draw(); });
+  };
+
+  const draw = () => {
+    const hits = coinageHits();
+    if (!hits.length) {
+      listEl.innerHTML = `<p class="pane-note">Nothing matches \u201C${esc(coinFilters.q)}\u201D here.</p>`;
+      return;
+    }
+    listEl.innerHTML = hits.map(c => `
+      <article class="lex-entry">
+        <h2>${esc(c.word)}${c.life === 'struck'
+          ? ' <span class="tag">not in the canon</span>' : ''}</h2>
+        <p>${esc(c.gloss)}</p>
+        <p class="pane-note">${esc(COINAGE_LIFE_NOTE[c.life] ?? '')}${
+          c.checked === 'corrected' ? ' \u00B7 gloss corrected in audit'
+          : c.checked === 'unverifiable' ? ' \u00B7 no authority found either way' : ''}</p>
+      </article>`).join('');
+  };
+
+  searchEl.addEventListener('input', () => { coinFilters.q = searchEl.value; draw(); });
+  drawKind();
+  draw();
+}
+
+const COINAGE_LIFE_NOTE = {
+  lives: 'Still in ordinary English, though the sense may have shifted.',
+  sense: 'The word already existed. What is credited here is a new meaning.',
+  died: 'Used once or twice and gone.',
+  disputed: 'The text itself is corrupt, or the meaning is unknown.',
+  struck: 'This headword does not occur in Shakespeare at all. Kept visible rather than deleted, because the fault is in the source list.',
+};
 
 function renderShakespeareLexicon() {
   record(renderShakespeareLexicon);       // replays with the current filters
