@@ -2,10 +2,10 @@
 //
 // Owner order 2026-09-26: mark the slang itself. A lexicon row carries a
 // meaning, an actor's note and sometimes a metre line, and all of that
-// buried the one thing a reader is scanning 239 rows for, which is the
+// buried the one thing a reader is scanning 277 rows for, which is the
 // word. So the headword is highlighted on the page, and where an entry
-// carries a line the word is highlighted INSIDE the line too. 97 of the
-// 239 entries carry a line, and those are exactly the rows where a
+// carries a line the word is highlighted INSIDE the line too. 135 of the
+// 277 entries carry a line, and those are exactly the rows where a
 // reader had to hunt a quotation for the word being defined.
 //
 // This lives in its own module rather than inside the renderer because it

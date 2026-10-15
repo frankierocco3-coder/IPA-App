@@ -4702,14 +4702,14 @@ export async function run({ navDoc = document } = {}) {
   // content nothing can open is the worst state for anything to be in.
   {
     const ids = SHAKESPEARE_LEXICON.map(e => e.id);
-    check('lexicon: 239 entries, ids unique and in the stable SH-### form',
-      SHAKESPEARE_LEXICON.length === 239
-      && new Set(ids).size === 239
+    check('lexicon: 277 entries, ids unique and in the stable SH-### form',
+      SHAKESPEARE_LEXICON.length === 277
+      && new Set(ids).size === 277
       && ids.every(id => /^SH-\d{3}$/.test(id)),
       `${SHAKESPEARE_LEXICON.length} entries, ${new Set(ids).size} unique`);
     const byKind = k => SHAKESPEARE_LEXICON.filter(e => e.kind === k).length;
-    check('lexicon: the four kinds are 120 / 89 / 17 / 13, as the header claims',
-      byKind('false-friend') === 120 && byKind('obsolete') === 89
+    check('lexicon: the four kinds are 151 / 96 / 17 / 13, as the header claims',
+      byKind('false-friend') === 151 && byKind('obsolete') === 96
       && byKind('elision') === 17 && byKind('grammar') === 13
       && SHAKESPEARE_LEXICON.every(e => LEXICON_KINDS.includes(e.kind)),
       LEXICON_KINDS.map(k => `${k}:${byKind(k)}`).join(' '));
@@ -4772,7 +4772,7 @@ export async function run({ navDoc = document } = {}) {
 
     // ── The slang is marked (owner order 2026-09-26) ─────────────
     // The headword is marked on the page, and inside the quoted line the
-    // word is marked too. 97 of the 239 entries carry a line.
+    // word is marked too. 135 of the 277 entries carry a line.
     const withLine = SHAKESPEARE_LEXICON.filter(e => e.example);
     const marks = e => (lexMarkedExample(e.term, e.example, uiEsc)
       .match(/<mark class="lex-hit">([^<]*)<\/mark>/g) ?? [])
@@ -4798,13 +4798,15 @@ export async function run({ navDoc = document } = {}) {
     //          (barefac’d, compromis’d), which is a different written form.
     //   SH-229 fub appears only inflected as 'fubbed', and the doubled
     //          consonant is outside the ending list.
+    //   SH-267 unnerved is fused to its elided article in the text
+    //          (Th’unnerved), so the whole word run is not the headword.
     // Chasing any of these would mean guessing at a word, which the marker
     // refuses to do on purpose.
     const unmarked = withLine.filter(e => !marks(e).length).map(e => e.id);
     check('lexicon marks: every line carrying its headword lights it up',
-      withLine.length === 97
+      withLine.length === 135
       && [...unmarked].sort().join(' ')
-        === 'SH-155 SH-183 SH-187 SH-203 SH-222 SH-229',
+        === 'SH-155 SH-183 SH-187 SH-203 SH-222 SH-229 SH-267',
       `${withLine.length} with a line, unmarked: ${unmarked.join(' ') || 'none'}`);
     // The hyphen joined the word splitter on 2026-10-15 so compound headwords
     // can match at all. Pinned live, because the split is what makes it work.

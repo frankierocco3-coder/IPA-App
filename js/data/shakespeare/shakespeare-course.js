@@ -36,7 +36,7 @@
 // THREE THINGS THIS COURSE DELIBERATELY DOES NOT RE-TEACH, because
 // lessons that repeated them would be worse than the thing itself:
 //   * vocabulary, archaic words, elisions and changed meanings — the
-//     239-entry lexicon (js/data/shakespeare-lexicon.js) is the shelf,
+//     277-entry lexicon (js/data/shakespeare-lexicon.js) is the shelf,
 //     and lessons point AT it
 //   * syllable counting and scansion mechanics — the Scan tab already
 //     marks every syllable, counts it and flags what is not ten

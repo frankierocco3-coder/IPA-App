@@ -12,7 +12,7 @@ estimated. Nothing claims a capability the app does not have.
 | 4 further courses | Acting 41, Building a Character 47, Shakespeare 37, Rhetoric 36 records |
 | 62 sounds, 70 drawings | `dialect_lint`, `img/articulation/` |
 | 154 sonnets · 178 monologues · 27 scenes | `sonnets.js`, the Scripts shelf, `scenes.js` |
-| 239-word Shakespeare dictionary | `shakespeare-lexicon.js` |
+| 277-word Shakespeare dictionary | `shakespeare-lexicon.js` |
 | 9,241 recordings | `find ../IPA-Audio -name '*.mp3'` |
 
 ---
@@ -71,7 +71,7 @@ robot voice and call it an accent.
 TEXT YOU WILL ACTUALLY AUDITION WITH
 All 154 Shakespeare sonnets, with a plain-meaning reading and a line-by-line
 modern transposition beside the verse. 178 monologues from Chekhov, O'Neill,
-Wilde, Pirandello and Ibsen. 27 two-hander scenes. A 239-word dictionary of
+Wilde, Pirandello and Ibsen. 27 two-hander scenes. A 277-word dictionary of
 the Shakespeare words that send actors on stage playing the wrong thing.
 
 FOUR MORE COURSES

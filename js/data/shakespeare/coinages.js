@@ -25,7 +25,7 @@
 // against earlier writers is UNVERIFIED for every entry here. That is the gap
 // between this shelf and any claim about coinage, and it is why the shelf is
 // badged awaiting a Shakespeare scholar or verse teacher — the same footing as
-// the 239-entry Dictionary that already ships.
+// the 277-entry Dictionary that already ships.
 //
 // `life` is what became of the word, which is the actual lesson:
 //   lives    still in ordinary English, though often in a changed sense

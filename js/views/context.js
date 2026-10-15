@@ -178,7 +178,7 @@ export const characterOpen = () => CHARACTER_LIVE || characterPreview();
 // LAUNCHED 2026-09-27 on the owner's order, and it can stand alone: seven
 // modules and forty lessons, every one carrying its own publication entry
 // in js/data/speech/reviews.js, plus the eight scene analyses (all
-// approved), the 239-entry lexicon and the seventeen rhetorical figures.
+// approved), the 277-entry lexicon and the seventeen rhetorical figures.
 // Nothing renders as a locked shelf, which is the failure the Character
 // launch taught us to check for before flipping rather than after.
 //
