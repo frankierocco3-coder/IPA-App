@@ -34,7 +34,7 @@ Already built, and lessons that repeat them would be worse than the
 thing itself:
 
 * **Vocabulary, archaic words, thou and you, elisions, changed meanings,
-  inverted syntax.** The 160-entry lexicon covers all of it, with an
+  inverted syntax.** The 239-entry lexicon covers all of it, with an
   actor-facing note on every entry. It becomes a Library shelf here.
 * **Scansion, stressed and unstressed syllables, regular and irregular
   metre, feminine endings, extra and missing syllables.** The sonnets'
@@ -156,7 +156,7 @@ part of the app.
 
 ## Library shelves (not lessons)
 
-**The Shakespeare Dictionary** — the 160-entry lexicon. **BUILT AND LIVE
+**The Shakespeare Dictionary** — the 239-entry lexicon. **BUILT AND LIVE
 2026-09-25**, first shelved at Studio > Scripts & Speeches rather than
 waiting for the course, because it was written on 2026-09-24 and reachable
 from nowhere for a day. RENAMED and moved into the Shakespeare Library by

@@ -2,10 +2,10 @@
 //
 // Owner order 2026-09-26: mark the slang itself. A lexicon row carries a
 // meaning, an actor's note and sometimes a metre line, and all of that
-// buried the one thing a reader is scanning 160 rows for, which is the
+// buried the one thing a reader is scanning 239 rows for, which is the
 // word. So the headword is highlighted on the page, and where an entry
-// carries a line the word is highlighted INSIDE the line too. Twenty of
-// the 160 entries carry a line, and those are exactly the rows where a
+// carries a line the word is highlighted INSIDE the line too. 97 of the
+// 239 entries carry a line, and those are exactly the rows where a
 // reader had to hunt a quotation for the word being defined.
 //
 // This lives in its own module rather than inside the renderer because it
@@ -50,7 +50,17 @@ export function lexTermForms(term) {
 // can be exhaustive: every piece of the split goes through esc, marked or
 // not, so the output is the input escaped once with tags added only around
 // whole words this function chose.
-const LEX_WORD_SPLIT = /([A-Za-zÀ-ɏ’']+)/;
+//
+// THE HYPHEN IS PART OF A WORD (2026-10-15). Hyphenated headwords arrived
+// with the sense-shift batch (cold-blooded, new-fangled, skimble-skamble),
+// and without the hyphen here the split cut them in half, so the compound
+// could never match and the line never lit. Marking only 'new' or only
+// 'fangled' would be worse than marking nothing, which is why this is the
+// splitter's job rather than a looser rule in lexTermForms. No example in
+// the first 160 entries contains a hyphen, so this changes nothing that
+// already shipped, and a bare affix entry ('-èd', 'a- prefix') is still
+// dropped by lexTermForms before it can match anything at all.
+const LEX_WORD_SPLIT = /([A-Za-zÀ-ɏ’'-]+)/;
 
 /**
  * The example line as HTML, with the headword marked wherever it appears.

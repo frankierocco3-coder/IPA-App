@@ -37,7 +37,7 @@ one screen.
 Meaning, Side by Side, In Today's Voice, on a single row of tabs over
 Shakespeare. The tooling.
 
-**5. `5-text-library.png` — the material.** 154 sonnets, a 160-word
+**5. `5-text-library.png` — the material.** 154 sonnets, a 239-word
 Shakespeare dictionary, Chekhov, O'Neill, Wilde, Pirandello, Ibsen, each with
 its provenance and translator named.
 

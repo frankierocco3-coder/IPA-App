@@ -200,7 +200,7 @@ Meanings AS THE WORD IS USED IN SHAKESPEARE, which is not always what it came to
 mean later. Written 2026-10-14.
 
 **These are original definitions and nobody qualified has checked them.** They
-carry the status the 160-entry Shakespeare Dictionary carries: awaiting review by
+carry the status the 239-entry Shakespeare Dictionary carries: awaiting review by
 a Shakespeare scholar or verse teacher. A definition of Shakespeare's usage is a
 scholarly claim, and that belongs in plain sight rather than in a footnote.
 

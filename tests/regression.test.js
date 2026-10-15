@@ -4702,17 +4702,30 @@ export async function run({ navDoc = document } = {}) {
   // content nothing can open is the worst state for anything to be in.
   {
     const ids = SHAKESPEARE_LEXICON.map(e => e.id);
-    check('lexicon: 160 entries, ids unique and in the stable SH-### form',
-      SHAKESPEARE_LEXICON.length === 160
-      && new Set(ids).size === 160
+    check('lexicon: 239 entries, ids unique and in the stable SH-### form',
+      SHAKESPEARE_LEXICON.length === 239
+      && new Set(ids).size === 239
       && ids.every(id => /^SH-\d{3}$/.test(id)),
       `${SHAKESPEARE_LEXICON.length} entries, ${new Set(ids).size} unique`);
     const byKind = k => SHAKESPEARE_LEXICON.filter(e => e.kind === k).length;
-    check('lexicon: the four kinds are 70 / 60 / 17 / 13, as the header claims',
-      byKind('false-friend') === 70 && byKind('obsolete') === 60
+    check('lexicon: the four kinds are 120 / 89 / 17 / 13, as the header claims',
+      byKind('false-friend') === 120 && byKind('obsolete') === 89
       && byKind('elision') === 17 && byKind('grammar') === 13
       && SHAKESPEARE_LEXICON.every(e => LEXICON_KINDS.includes(e.kind)),
       LEXICON_KINDS.map(k => `${k}:${byKind(k)}`).join(' '));
+    // House style on OUR prose only. The quoted line is Shakespeare and keeps
+    // whatever he wrote, and the elision entries quote the apostrophised forms
+    // they exist to teach (in’t, is’t, do’t), which is subject matter rather
+    // than a contraction. This went unpinned until the 79 entries of 2026-10-15
+    // made it the largest body of unguarded copy in the app.
+    const lexProse = SHAKESPEARE_LEXICON
+      .filter(e => e.kind !== 'elision')
+      .flatMap(e => [e.modern, e.note]);
+    const lexBad = lexProse.filter(t2 => /[—–"]/.test(t2)
+      || /n’t\b|’(re|ll|ve|m|d)\b/.test(t2)
+      || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(t2));
+    check('lexicon: house style holds on our prose, quoted lines exempt',
+      lexBad.length === 0, lexBad.slice(0, 3).join(' | '));
     check('lexicon: every entry carries a meaning and an actor-facing note',
       SHAKESPEARE_LEXICON.every(e => e.modern?.trim() && e.note?.trim()));
     // metre is a scansion fact, so it belongs to elisions and nowhere else.
@@ -4759,7 +4772,7 @@ export async function run({ navDoc = document } = {}) {
 
     // ── The slang is marked (owner order 2026-09-26) ─────────────
     // The headword is marked on the page, and inside the quoted line the
-    // word is marked too. 20 of the 160 entries carry a line.
+    // word is marked too. 97 of the 239 entries carry a line.
     const withLine = SHAKESPEARE_LEXICON.filter(e => e.example);
     const marks = e => (lexMarkedExample(e.term, e.example, uiEsc)
       .match(/<mark class="lex-hit">([^<]*)<\/mark>/g) ?? [])
@@ -4775,13 +4788,29 @@ export async function run({ navDoc = document } = {}) {
       !/<img|<script/.test(lexMarkedExample('nice',
         '<img src=x onerror="alert(1)"> a nice \'trick\'', uiEsc))
       && lexMarkedExample('nice', 'a nice trick', uiEsc).includes('<mark class="lex-hit">nice</mark>'));
-    // Every line that carries its word gets it marked, inflected or not. The
-    // one that does not is SH-155, whose term names a construction rather
-    // than a word — no highlight is the honest answer there.
+    // Every line that carries its word gets it marked, inflected or not.
+    // SIX do not, and each one is a reason rather than an oversight, so they
+    // are named here instead of being hidden behind a count:
+    //   SH-155 names a construction, not a word, so no highlight is honest.
+    //   SH-183 skim-milk and SH-222 pibble-pabble are printed as TWO words in
+    //          the text, and a hyphenated headword cannot match across a space.
+    //   SH-187 barefaced and SH-203 compromise are ELIDED in the text
+    //          (barefac’d, compromis’d), which is a different written form.
+    //   SH-229 fub appears only inflected as 'fubbed', and the doubled
+    //          consonant is outside the ending list.
+    // Chasing any of these would mean guessing at a word, which the marker
+    // refuses to do on purpose.
     const unmarked = withLine.filter(e => !marks(e).length).map(e => e.id);
     check('lexicon marks: every line carrying its headword lights it up',
-      withLine.length === 20 && String(unmarked) === 'SH-155',
+      withLine.length === 97
+      && [...unmarked].sort().join(' ')
+        === 'SH-155 SH-183 SH-187 SH-203 SH-222 SH-229',
       `${withLine.length} with a line, unmarked: ${unmarked.join(' ') || 'none'}`);
+    // The hyphen joined the word splitter on 2026-10-15 so compound headwords
+    // can match at all. Pinned live, because the split is what makes it work.
+    check('lexicon marks: a hyphenated compound lights up whole',
+      lexMarkedExample('cold-blooded', 'Thou cold-blooded slave', uiEsc)
+        .includes('<mark class="lex-hit">cold-blooded</mark>'));
     // The inflected hits, named: these are the four the dictionary form misses.
     check('lexicon marks: inflections are found, not just the dictionary form',
       [['SH-004', 'owest'], ['SH-016', 'lets'], ['SH-020', 'rivals'], ['SH-090', 'tells'],
