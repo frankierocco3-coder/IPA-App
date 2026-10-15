@@ -1317,8 +1317,10 @@ blurs the meaning without reflowing. It appears wherever a recast has an
 approved `plain`, which today is the 25 owner-approved sonnets plus the
 5 pilots. It makes NO claim to align line for line, because the Plain
 Meaning is one prose paragraph and the alignment data does not exist.
-**The Shakespeare Dictionary** is the 160-entry lexicon
-(js/data/shakespeare-lexicon.js) on a reference page of its own.
+**The Shakespeare Dictionary** is the 277-entry lexicon
+(js/data/shakespeare-lexicon.js) on a reference page of its own. It was
+160 until 2026-10-15, when it took 117 entries in two passes and the
+coinage shelf came down. See THE ONE REFERENCE LIST below.
 Called Shakespeare's Language until 2026-09-28, when the owner renamed
 it and moved it INTO the Shakespeare Library: it is reading, and reading
 shelves. It is no longer on Shakespeare Practice or the Shakespeare
@@ -1336,6 +1338,49 @@ checked them. Written 2026-09-24 and imported by NOTHING until
 unreachable, which was wrong; launch_lint 6n and suite 21j now pin
 the shelf card, the page and the disclosure so it cannot silently
 unwire again.
+
+THE ONE REFERENCE LIST (owner decision 2026-10-15). The Shakespeare
+Library carried TWO reference cards for one day: the Dictionary, and
+"Words First Recorded in Shakespeare" (594 candidate coinages, shipped
+2026-10-14). They read as rival lookup tools while only one of them is
+one. A dictionary answers "what does this word mean here and what do I
+play". The coinage shelf answered "is it true he invented 1,700 words",
+which is an argument about a myth, not something anybody looks up twice.
+* **The Dictionary absorbed everything worth looking up**, in two passes
+  totalling 117 entries: 79 first (50 false friends from the famous-coinage
+  verification plus 29 obsolete words that stop a reader dead), then 38
+  more after reading the 107 `lives`/`sense` words the first pass had not.
+  **69 of those 107 were REJECTED and that is the point** — `dwindle`,
+  `droplet`, `gnarled` and `eventful` survived meaning exactly what they
+  look like, and an entry for them buries the ones that matter. A
+  dictionary is worth opening because of what is NOT in it.
+* **COINAGE_LIVE = false in js/main.js** withdraws the shelf. A flag, not
+  a deletion, the route Rhetoric and Speech took: renderShakespeareCoinages,
+  all 594 records and their filters stay whole, and the card carries
+  `live: COINAGE_LIVE` and is filtered out rather than removed.
+* **The claim did not vanish with the card.** It is a passage in
+  sh-earlymodern now, where a learner actually meets it, carrying the real
+  numbers: of 113 famous claimed coinages only 14 carry any priority mark,
+  3 are not in the canon at all, and 40 are not new words but new SENSES
+  for old ones. Suite 21j pins that copy, because if it is ever softened
+  into "he invented 1,700 words" the withdrawal will have cost the app the
+  correction it was made for.
+* **Nothing was lost by taking the shelf down.** The complete audited
+  record of all 594 lives in docs/SHAKESPEARE_COINAGE_CANDIDATES.md and in
+  git. THE EVIDENCE NEVER HAD TO SHIP TO EXIST, which is what made this
+  reversible rather than destructive, and it is the argument that changed
+  the decision: an earlier recommendation to keep both shelves rested on
+  "the counts are the argument" and did not survive the duplication the
+  move created (1 shared word before, 79 after).
+* **Quotations are verified MECHANICALLY, not by agent review.** Every
+  example added on 2026-10-15 was confirmed character by character against
+  a local copy of the Gutenberg complete works. That caught five defects
+  agent verification had passed: a line cited to The Tempest that is in
+  Merry Wives, commas where the text has exclamation marks, and three
+  quoted in forms the text does not print. It also found `swoltery`, on
+  the "died but they play" list, is in NO edition in any spelling, so it
+  was struck like `bandit` and `Tibert`. Do it this way again: "is this
+  quotation real" is a string search, not a judgment.
 **Script Analysis** is the per-text analysis, aimed at the EIGHT SCENES by
 owner decision (a sonnet is a thought, a scene is a transaction):
 js/data/script-analysis.js, 53 beats across the eight, ledger-gated in

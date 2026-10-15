@@ -56,6 +56,9 @@ import { lexMarkedExample, lexTermForms } from '../js/views/lexicon-mark.js';
 // against the function the app actually ships it with.
 import { esc as uiEsc } from '../js/ui.js';
 import { SHAKESPEARE_PRINCIPLE, SHAKESPEARE_MODULES, SHAKESPEARE_LESSONS, SHAKESPEARE_COLLECTIONS } from '../js/data/shakespeare/shakespeare-course.js';
+// Withdrawn from the Library 2026-10-15 but still imported here: the pin
+// that matters is that the records survived the withdrawal whole.
+import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from '../js/data/shakespeare/coinages.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from '../js/data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallaciesIn, fallacyById } from '../js/data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily, aristotleOverlaps } from '../js/data/rhetoric/families.js';
@@ -4834,6 +4837,34 @@ export async function run({ navDoc = document } = {}) {
       /<span class="lex-word">\$\{esc\(e\.term\)\}<\/span>/.test(lexRow)
       && /\.lex-word,\s*\.lex-hit\s*\{/.test(lexCss)
       && /--lex-mark:/.test(lexCss) && /--lex-mark-ink:/.test(lexCss));
+
+    // ── The coinage shelf is withdrawn (owner decision 2026-10-15) ──
+    // A flag, not a deletion, like Rhetoric and Speech before it. Three
+    // halves are pinned: the flag is off, the page and its data survive
+    // whole so flipping it restores everything, and the card is filtered
+    // rather than deleted. The shelf shipped on 2026-10-14 with no pin at
+    // all, which is how it could be withdrawn without a single test noticing.
+    check('coinages: the shelf is withdrawn behind a flag, not deleted',
+      /const COINAGE_LIVE = false;/.test(lexSrc)
+      && lexSrc.includes("key: 'col:sh-coinages', live: COINAGE_LIVE")
+      && /\.filter\(c => c\.live !== false\)/.test(lexSrc)
+      && lexSrc.includes('function renderShakespeareCoinages()'));
+    // 594 and 81, read off the live module rather than off a regex over the
+    // source: a parse of the data file said 593 and 82 and was wrong on both.
+    check('coinages: the records survive the withdrawal intact',
+      SHAKESPEARE_COINAGES.length === 594
+      && COINAGE_LIVES.length === 81,
+      `${SHAKESPEARE_COINAGES.length} records, ${COINAGE_LIVES.length} marked as surviving`);
+    // The claim did not vanish with the card. It moved into the lesson where
+    // a learner meets it, and it must keep the honest shape: a first citation
+    // is not an invention. If this copy is ever softened into "he invented
+    // 1,700 words", the withdrawal will have cost the app the correction.
+    const early = SHAKESPEARE_LESSONS.find(l => l.id === 'sh-earlymodern');
+    const earlyText = (early?.body ?? []).map(b => b.p ?? b.h ?? '').join(' ');
+    check('coinages: the myth correction survives in sh-earlymodern',
+      /did not invent 1,700 words/.test(earlyText)
+      && /nothing earlier has been found/.test(earlyText)
+      && /forty were not new words/.test(earlyText));
   }
 
   // ── 21m. Rhetoric: the sixth workspace, one module written ──

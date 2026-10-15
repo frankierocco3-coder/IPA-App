@@ -276,6 +276,33 @@ const LEGACY_SECTIONS = { textbook: 'library', texts: 'library', quests: 'progre
 const RHETORIC_LIVE = false;
 
 
+// Words First Recorded in Shakespeare is WITHDRAWN from the Shakespeare
+// Library (owner decision 2026-10-15) — a flag, not a deletion, the route
+// Rhetoric and Speech took. renderShakespeareCoinages, all 593 records and
+// their filters stay whole; flip this to bring the card back.
+//
+// WHY, because the reason matters more than the flag. It shipped on
+// 2026-10-14 as a second reference card beside the Dictionary, and the two
+// read as rival lookup tools while only one of them is one. A dictionary
+// answers "what does this word mean here and what do I play"; this shelf
+// answered "is it true he invented 1,700 words", which is an argument about
+// a myth and not something anybody looks up twice.
+//
+// Everything worth looking up was moved into the Dictionary first, over two
+// passes: 79 entries on 2026-10-15, then 38 more after reading the 107 the
+// first pass had not. 69 of those 107 were REJECTED, which is the part worth
+// keeping in mind if this is ever reopened — a word that survived meaning
+// what it looks like needs no entry, and listing it buries the ones that do.
+//
+// The claim itself did not vanish with the card. It is a paragraph in
+// sh-earlymodern now, where a learner actually meets it, carrying the real
+// numbers. The complete audited record of all 594 candidates lives in
+// docs/SHAKESPEARE_COINAGE_CANDIDATES.md and in git, so nothing was lost by
+// taking the shelf down: the evidence never had to ship to exist, which is
+// the thing that made this decision reversible rather than destructive.
+const COINAGE_LIVE = false;
+
+
 const activeSection = () => {
   // Guarded like activeCourse: a blocked-storage read throws, and this is
   // on the boot path, so an unreadable section resolves to the landing one.
@@ -5736,11 +5763,10 @@ function shakespeareLibraryPane(el) {
     // by cover colour — lavender here, green there. They are the likeliest
     // pair to be confused at 42px. Revisit together if the shelf is reworked;
     // changing one alone would only make the other look odd.
-    // Second reference shelf, beside the Dictionary and on the same footing:
-    // original glosses, badged awaiting a scholar. It carries NO icon yet, so it
-    // renders its emoji — the deliberate half-finished state the shelves use
-    // rather than a blank.
-    { key: 'col:sh-coinages', tone: 'is-gold', emoji: '🖋',
+    // WITHDRAWN behind COINAGE_LIVE (owner decision 2026-10-15; the reasoning
+    // is on the flag). The card and its page stay whole, filtered out below
+    // rather than deleted, so restoring the shelf is one boolean.
+    { key: 'col:sh-coinages', live: COINAGE_LIVE, tone: 'is-gold', emoji: '🖋',
       title: 'Words First Recorded in Shakespeare',
       // ONE grammar for counts, 'N unit', with any qualifier off the count —
       // js/ui.js says so and this card broke it: unit 'still in English' made
@@ -5756,7 +5782,7 @@ function shakespeareLibraryPane(el) {
       group: G2, count: SHAKESPEARE_LEXICON.length, unit: 'entry',
       keywords: 'lexicon vocabulary false friends obsolete elision grammar words meaning glossary',
       go: renderShakespeareLexicon },
-  ];
+  ].filter(c => c.live !== false);
   workspaceLibrary(el, { workspace: 'Shakespeare', subject: 'Shakespeare',
     cards, state: libState.shakespeare });
 }
