@@ -1232,14 +1232,20 @@ own chapter, reached from The Cast, so the page was a second copy).
 Character
 pictures are three `{ fig }` slots per mask (cm-<id>-mask/-stance/-walk,
 registry js/data/character/art.js, spec docs/COMMEDIA_IMAGE_SPEC.md); an
-empty slot renders nothing. The collection ARRIVED WHOLE 2026-09-22: 30
-owner-supplied pictures in img/lessons/commedia/, baseline JPEG q90 at
-1536x864 — NOT the usual 1536x1024, so a registry entry may carry its own
-w/h and actingFigureHtml believes it, keeping the reserved space equal to
-the file. The Lovers are two performers, so that chapter carries six
-(cm-innamorata-*, cm-innamorato-*) and cm-innamorati-* is retired. Walk
-sheets hold 3, 5 or 7 keyframes depending on the character, and alt text
-states the count actually drawn. Intake notes head the spec.
+empty slot renders nothing. THE COLLECTION WAS REPLACED WHOLE on 2026-10-19
+by a second owner intake: 33 pictures in img/lessons/commedia/, baseline
+JPEG q90 at 1536x1024 (the house shape — the first intake's 1536x864 is
+gone, and fig() carries 1024 now, so the reserved space still equals the
+file). Engraved-plate style matching the cast chart. ZANNI GAINED THE THREE
+SLOTS HE NEVER HAD, which is why it is 33 and not 30. EVERY WALK IS SIX
+KEYFRAMES now, uniformly, where the first intake held 3, 5 or 7 — alt text
+still states the count actually drawn, so all eleven were rewritten rather
+than carried over. The Lovers are two performers, so that chapter carries
+six (cm-innamorata-*, cm-innamorato-*) and cm-innamorati-* is retired.
+Tartaglia, Scaramuccia and Pasquariello have NO pictures and reserve no
+slots. Magnifico arrived in the zip and was not shipped: he is a chart
+figure that opens Pantalone, not a record with a chapter. The first
+intake's files are in git. Both intakes' notes head the spec.
 Commedia (18 lessons) is written; the other
 modules follow the outline. ACTING'S MODULE 4 HANDOVER IS DONE (2026-09-23).
 Acting no longer has a Building a Character module: it is FIVE modules

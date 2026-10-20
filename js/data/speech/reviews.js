@@ -568,6 +568,30 @@ export const SPEECH_REVIEWS = {
   'ch-cm-pedrolino': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-09-23', version: 1,
     notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  // The four masks written on 2026-10-19, approved the same day on the
+  // owner's explicit instruction after he read them on the page. Same
+  // editorial decision as the nine above and nothing stronger: each of
+  // these records makes claims about a performance tradition that no
+  // qualified acting teacher has checked, and awaitingSpecialist() stays
+  // true for all four.
+  //
+  // THEY WERE WRITTEN AND THEN LEFT UNPUBLISHED FOR A FEW HOURS, which is
+  // the thing to avoid repeating. The Cast page gained roster cards that
+  // link to every mask, so four of thirteen cards led to the draft gate,
+  // and it was invisible in development because the owner preview flag was
+  // on. Add the ledger entry in the same commit as the lesson.
+  'ch-cm-zanni': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-10-19', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-10-19. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. The record is explicit that the zanni walks and sequences are a playable interpretation drawn from contemporary training rather than documented sixteenth-century movement, and that no date earlier than the sixteenth century is established.' },
+  'ch-cm-tartaglia': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-10-19', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-10-19. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. The record states that the stammer was traditionally the joke and is not played that way now, which is a contemporary teaching position rather than a historical claim.' },
+  'ch-cm-scaramuccia': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-10-19', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-10-19. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. The record distinguishes him from Il Capitano rather than presenting a second name for the same mask.' },
+  'ch-cm-pasquariello': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-10-19', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-10-19. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. This is the thinnest record in the module and says so in its own copy: the attested evidence is a name under an old etching and an actor in Paris, and the breakdown is offered as a type being built rather than inherited.' },
   'ch-cm-lazzi': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-09-23', version: 1,
     notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },

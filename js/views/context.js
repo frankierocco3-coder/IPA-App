@@ -222,6 +222,24 @@ export const rhetoricPreview = () => {
   try { return localStorage.getItem(RHETORIC_PREVIEW_KEY) === 'on'; } catch { return false; }
 };
 export const rhetoricOpen = () => RHETORIC_COURSE_LIVE || rhetoricPreview();
+
+// THE LEARN SEQUENCE (owner request 2026-10-15), preview only for now.
+// The book courses render Learn as a grid of module tiles, which is the
+// same set the Library shelves and the same component, so the two pages
+// read as one page twice. The thing only Learn can show, where you are in
+// an order, was a single line of text under a progress bar.
+//
+// This flag swaps that grid for the lesson sequence itself. It is a ROUTE
+// AND NOT A GATE: nothing locks, nothing is a prerequisite, and three
+// places in the app promise in those words that every chapter is free to
+// read in any order. The winding path with locked nodes stays where it
+// belongs, on IPA and Accents, where lessons are drills that genuinely
+// build on each other. Putting gates on reading would walk straight back
+// into what the hearts removal took out on 2026-10-05.
+export const LEARN_SEQUENCE_PREVIEW_KEY = 'speechcraft-learn-sequence-preview';
+export const learnSequencePreview = () => {
+  try { return localStorage.getItem(LEARN_SEQUENCE_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
 export const liveWorkspaces = () => WORKSPACES.filter(w =>
   (SPEECH_LIVE || w.id !== 'speech')
   && (w.id !== 'character' || characterOpen())

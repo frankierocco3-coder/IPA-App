@@ -1,6 +1,35 @@
 # Commedia character images: spec for the owner
 
-## Intake: the collection arrived 2026-09-22
+## SECOND INTAKE 2026-10-19 — this replaced the whole collection
+
+`Speechcraft-Commedia-for-Claude.zip` arrived with 36 PNGs, three each for
+twelve characters, in the engraved-plate style of the cast chart. **All
+thirty pictures from the first intake were replaced**, and Zanni gained the
+three slots he had never had. Shipped as baseline JPEG q90, as always.
+
+What this changes in everything written below:
+
+* **Size is 1536 x 1024 again**, the house shape, so `fig()` carries those
+  dimensions for every entry instead of the 1536 x 864 the first intake
+  forced. The reserved box equals the file, so nothing jumps on load.
+* **Every walk is six keyframes.** Not three, five or seven, and not the
+  four this spec asks for. Uniform across all eleven, so every walk's alt
+  text was rewritten rather than carried across.
+* **The per-character keyframe plans below were not followed** by this
+  intake and are kept as the record of what the first one was made to.
+* **Il Dottore's mask study now matches the mask he wears**, which closes
+  the mismatch the first intake's note flagged.
+* **Three characters still have no pictures:** Tartaglia, Scaramuccia and
+  Pasquariello. They reserve no slots, so their chapters render without
+  figures rather than with gaps.
+* **Magnifico came in the zip and was not shipped.** He is a figure on the
+  cast chart that opens Pantalone, not a record with a chapter, so his
+  three pictures have nowhere to render. They stay in the intake folder.
+
+The first intake's files are in git. Reverting is a file swap plus the
+`fig()` dimensions and the walk counts in the alt text.
+
+## First intake: the collection arrived 2026-09-22
 
 Thirty pictures came in from the owner's character image reference and
 ship in `img/lessons/commedia/`, registered in `js/data/character/art.js`.
@@ -36,7 +65,8 @@ arrives. Send the files (any format) and they get converted, registered in
 `js/data/character/art.js` with the alt text below, and shipped.
 
 Generated pictures are **teaching interpretations, not historical evidence**.
-Every caption says so, and history stays in the chapter text.
+Every caption says so, and history stays in the chapter text — with one named
+exception, `cm-cast-tree`, which carries no caption at all (see Captions).
 
 ## The three images per character
 
@@ -189,3 +219,13 @@ keyframe plan and the draft alt text.
 
 Every caption ends with the same honesty line, in house style:
 "A teaching interpretation, not a historical record."
+
+**One exception, by owner order 2026-10-19:** `cm-cast-tree`, the clickable
+relationship chart on The Cast, has no caption. Its four explanatory
+sentences were cut first and the honesty line went with them.
+
+It is exempt **by key**, named in `tests/regression.test.js`, not by
+loosening the rule to "captions that exist must carry the line." Any other
+figure that ships without a caption still fails the suite, so a new picture
+cannot inherit this exemption by accident. Give `cm-cast-tree` a caption
+again and nothing else has to change.

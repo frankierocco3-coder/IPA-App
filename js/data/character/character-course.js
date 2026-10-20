@@ -11,9 +11,10 @@
 // which course a lesson id belongs to). Lesson ids are 'ch-…' and never
 // collide with Acting's 'ac-…'.
 //
-// `reference: true` marks a record that is NOT a step on the path: the nine
-// character chapters are reached from The Cast (and their cards), never
-// listed as lessons or shelved beside them (owner order 2026-09-22).
+// `reference: true` marks a record that is NOT a step on the path: the
+// thirteen character chapters are reached from The Cast, from its chart and
+// from its family cards, never listed as lessons or shelved beside them
+// (owner order 2026-09-22).
 //
 // HIDDEN: the workspace is behind CHARACTER_LIVE (js/views/context.js)
 // and an owner preview flag. When it launches, each lesson still needs a
@@ -345,7 +346,157 @@ export const COMMEDIA_MASKS = [
     line: 'Everyone else panicked. I was the only one prepared to do what had to be done.',
     play: 'Make yourself the hero of it.',
     note: 'The braggart soldier comes from Roman comedy; the Spanish style of many Capitanos reflects the years of Spanish rule in Italy. The movement detail is a playable interpretation.' },
+
+  // ── Four more, added 2026-10-19 ──────────────────────────────
+  // The owner's cast plate carries sixteen figures and this held nine, so
+  // several cards would have opened nothing. Written to the same 29 fields
+  // as the nine above, because a thinner record in the same grid reads as a
+  // character who matters less.
+  //
+  // SIX WERE DRAFTED AND TWO WERE DROPPED the same day, by owner decision.
+  // Scapino and Truffaldino are Brighella's and Arlecchino's jobs under
+  // other names, and giving them records contradicted this module's own
+  // position that serving two masters is a plot rather than a different
+  // person. Their figures still appear on the plate, and both the chart
+  // and 'The same jobs under other names' send a reader to the original.
+  //
+  // SCARAMUCCIA SURVIVED THAT CUT because he is not a rename: he is the
+  // Capitano crossed with the zanni, and his note says so, so a reader
+  // meeting him after Il Capitano is told the difference rather than left
+  // wondering whether it is a duplicate.
+  //
+  // ZANNI IS BOTH A CHARACTER AND A CLASS: it is already the family label on
+  // Arlecchino and Brighella and is also the oldest mask in its own right.
+  // Its note carries that double use.
+  //
+  // PASQUARIELLO IS THE THIN ONE and his note says so plainly rather than
+  // inflating a sparse record into a confident one.
+  { id: 'zanni',
+    name: 'Zanni',
+    family: 'Zanni, the servant the whole family is named after',
+    from: 'the poor valleys above Bergamo, and he came down to the city to find work',
+    fn: 'Carries the errands the plot runs on, and is the reason they go wrong. He is sent, he arrives late, hungry or at the wrong house, and the mistake he brings back is the next scene.',
+    status: 'The bottom of everything, and unlike the others he has no angle on it. He is not the household servant with a position to protect: he is the hired man who may not be hired tomorrow, and everyone on stage outranks him, the other servants included. He takes up almost no space, because space costs something and he has nothing, and he gives up what he has the instant anybody wants it. His one claim on a scene is that he is the only person in it who is actually hungry, and hunger does not care who is above him.',
+    maskLook: 'Traditionally a dark leather half mask with a low forehead, heavy brows and a long nose jutting straight out of the face, the lower part left open so he can speak. The nose is the thing to notice: the convention handed down is that the longer the nose, the more foolish the man behind it, and his is long.',
+    costume: 'Loose off-white peasant clothes: a long shirt or smock over wide trousers, gathered at the waist with a rope or a belt, a soft or peaked cap, and a wooden stick pushed through the belt. The cloth is traditionally said to be cut from flour sacks, and these are a porter’s clothes rather than a household servant’s: worn, patched and the same colour as everything else he owns.',
+    sense: 'Cold ash and wet wool, damp and never quite warm. The animal is a stray dog working a market: ribs showing, nose up, and gone the moment a hand moves.',
+    wants: 'Food. Then work, so that there is food tomorrow.',
+    fears: 'Hunger, the next beating, and being sent back.',
+    contradiction: 'The simplest man on the stage, and the only one with a real problem.',
+    centre: 'Low and hollow, in the empty stomach.',
+    leads: 'The nose, following a smell, with the stomach behind it and the feet following both.',
+    stance: ['Feet wide and turned out, flat to the floor.', 'Knees bent and sprung, never locked.', 'Pelvis dropped and tipped back, the weight slung low.', 'Spine hollowed forward, the chest caved around the empty stomach.', 'Head up and out past the shoulders, led by the nose.', 'Hands loose and open at hip height, ready to take food or to cover his head.', 'Attention on food first, then on whoever might hit him.'],
+    walk: 'Low and wide, the weight rolling from one bent leg to the other, the head arriving a beat ahead of the body. He travels in two speeds: a long patient plod, then a sudden scurry when something edible or dangerous appears, then the plod again. Nothing is saved for later, because he does not expect a later.',
+    principle: 'His stomach reaches every decision before he does.',
+    thinking: 'He thinks out loud, one thing at a time, and the thing is always the next hour. Ask him for a plan and he hands you an appetite. He is not slow, he is undistracted, and a man with one thought moves faster than a man with four.',
+    fearResponse: 'He drops smaller and lower, covers his head with both forearms, and apologises before anybody has accused him. If the danger stays, the legs go first and the rest of him catches up.',
+    desireResponse: 'The nose finds it, the stomach pulls, and he is halfway across the room before anything has been decided. He takes it with both hands and eats it where he stands, in case somebody takes it back.',
+    gestures: ['Both hands pressed flat against an empty stomach.', 'The nose lifted and turning, reading the air.', 'A flinch and a raised forearm at any sudden movement.', 'A bow so low it is nearly a crouch, held a beat too long.', 'Wiping a hand down his shirt before he reaches for food.'],
+    audience: 'He appeals to them as the only people who might feed him. He shows them the empty stomach, shows them the master who will not fill it, and takes the laugh as a kind of payment. He is the most direct of the servants because he has nothing to hide and no scheme to protect.',
+    signature: ['He is sent across the city with a message he must not forget.', 'He smells food on the way and stops.', 'He repeats the message out loud to keep hold of it.', 'He eats, and the message goes with the meal.', 'He arrives, delivers the half of it he still has, and waits proudly to be thanked.'],
+    recovery: 'He does not reflect on it. He takes the blow, gets up, and asks whether there is anything to eat, which is what he was asking before.',
+    voice: 'One playable interpretation: rough, open and loud, the breath high and short because a caved chest cannot hold much of it. He talks in bursts with the sound running ahead of the sense, slides into a whine when he wants something, and drops into a flat country plainness when he is telling the truth. The speech of the Bergamo valleys was part of the joke in the cities, so play him working class and from somewhere else, whatever that means in the room you are in.',
+    rhetoric: 'Language as appetite, used plainly because he has no other tactic. He says what he wants, says it again, and his only device is being pitiable out loud. Where Brighella chooses which part of the truth to tell, Zanni tells all of it and cannot work out why that keeps costing him.',
+    line: 'I will remember the message. I will remember it right after I have eaten.',
+    play: 'Let the stomach ask for it before you do.',
+    note: 'Two things are true of this word at once, and this course uses both. Zanni is the FAMILY name: every servant in the form is a zanni, which is why the other records here carry families like first zanni and second zanni. It is also a character in his own right, the plain hungry servant on this plate, and he is the one broken down above. Traditionally attested: the word as the general term for the servants, most often traced to a northern form of Giovanni, the common name among men who came from the Bergamo valleys to work in Venetian households; the dispossessed migrant worker; the constant hunger; the loose off-white peasant clothes, said to be cut from flour sacks; the long-nosed leather half mask; and service to Pantalone in the earliest literary evidence. English took the word zany from him, in use by the 1590s, and the sixteenth-century actor-manager Alberto Naselli carried the dialect form as his stage name, performing as Zan Ganassa and taking Italian comedy abroad. Thin or contested: the rule that a longer nose means a more foolish servant is a handed-down rule of thumb rather than a documented system; the derivation from Giovanni is the standard account and has been questioned in print; and any date earlier than the sixteenth century, including descent from the servant of Roman comedy, is theory rather than record. Do not call him the first or the original mask, because the record does not settle it. What is defensible is that the class is named after him, and that contemporary training builds the other servants out of his shape, which is a teaching order rather than a documented descent. The centre, stance, walk and sequences here are a playable interpretation drawn from contemporary training, where the zanni walks are taught as a named set; conventions vary by company, teacher, period and region.' },
+  { id: 'tartaglia',
+    name: 'Tartaglia',
+    family: 'Vecchio, a man with an office',
+    from: 'Naples, where the tradition usually places him, though one account sends him from Genoa instead',
+    fn: 'Obstructs with office. The plot needs his ruling, his signature or his prescription, and everything waits while he tries to deliver it.',
+    status: 'High by office and by nothing else. He holds the one thing nobody else on stage can grant, a ruling, a licence, a signature, and his whole claim to the room rests on being the man who says what the law is. The trouble is that an office has to be spoken: it exists only while the words keep arriving, and his desert him exactly when the room is watching. So he plays high until the first hard word, and spends the rest of the scene climbing back toward a rank he never technically lost.',
+    maskLook: 'Traditionally the spectacles are the mask: huge round glasses, green or blue in the oldest descriptions, wide enough to cover the whole upper face. Under them a bald head, a bare chin and heavy cheeks. Some accounts give him a small half mask behind the glasses and others leave the face bare and painted, so the plate you find depends on the account you are reading.',
+    costume: 'Traditionally green: a green suit and short cape striped in yellow, a wide white collar, a soft grey cap, white stockings and yellow shoes. Later versions dropped the stripes for plain green and added a white wig.',
+    sense: 'Dust, sealing wax and the inside of a drawer that has been shut too long. The animal is a tortoise with somewhere urgent to be.',
+    wants: 'To be obeyed, and to finish one sentence.',
+    fears: 'The word that will not come, and the silence after it.',
+    contradiction: 'His authority exists only while he is speaking, and speaking is the one thing he cannot count on.',
+    centre: 'High and locked, in the throat and the top of the chest.',
+    leads: 'The spectacles. The face arrives first, aimed and peering, and the body follows a step behind it.',
+    stance: ['Feet close together, weight back on the heels.', 'Knees locked straight.', 'Pelvis tucked, belly forward.', 'Spine stacked upright, shoulders lifted toward the ears.', 'Head pushed forward from the top of the spine, chin tucked, peering.', 'Hands busy at chest height, on the papers or the glasses.', 'Attention on his own next word before it arrives.'],
+    walk: 'Short, flat, deliberate steps, and he stops to speak rather than speaking while he moves. The route he takes is the official one, even when a shorter one is obvious. A sentence that goes wrong stops his feet with it, and he will not start them again until the word is out.',
+    principle: 'The body freezes wherever the word fails, and will not move again until it arrives.',
+    thinking: 'He thinks in the proper order, first clause to last, and refuses to skip to the end even when everyone has guessed it. The thought itself is quick, and usually right. What takes the time is the delivery, which is why the people who finish his sentences for him keep being wrong about what he was going to say.',
+    fearResponse: 'Everything tightens upward: shoulders to the ears, breath caught high, one hand going to the glasses while the sentence stalls where it stands.',
+    desireResponse: 'He states his authority. The papers come out, the title gets used, and the sentence grows longer and more official exactly as it becomes harder to finish.',
+    gestures: ['Pushing the spectacles up his nose with one finger.', 'Holding a paper at arm’s length, then far too close.', 'A flat palm raised to hold the room while he finishes.', 'Tapping a word out on the desk or the back of his own hand.', 'Straightening the collar to buy a moment.', 'Pointing at the document instead of naming what is in it.'],
+    audience: 'He appeals to them over the heads of the people cutting him off, and they are the only ones who let him finish. They get the look just before he goes at a hard word, and the small, triumphant nod when it lands.',
+    signature: ['He is asked for a ruling, and he is delighted to give it.', 'He arranges himself: the glasses, the papers, the room.', 'He begins grandly, and the one word that matters will not come.', 'Someone helpfully supplies the wrong word.', 'He refuses it flatly and starts the whole sentence again from the beginning.', 'He lands the word, and discovers that everyone has gone.'],
+    recovery: 'He recovers by procedure. He begins the sentence again from the top, in full, with the title attached, as though the collapse were a clerical error in the record rather than something that happened to him.',
+    voice: 'One playable interpretation: play the pressure, not the impediment. The breath sits high and gets held, the first sound of a hard word arrives before the rest of it is ready, and the block lands on the consonant he most needs. Pitch climbs as the sentence runs out of air, and he never abandons the sentence. Build it from the circumstances, a man who must be obeyed in the next ten seconds, and let the mouth lose to them. What is funny is the office failing, never the speaker.',
+    rhetoric: 'Speech as official language, used as armour and as a stall. Titles, clauses and formulas give him something to say while the difficult word is still coming, and the more trouble he is in the more legal the sentence becomes.',
+    line: 'Do not finish it for me. I am the one who signs it, so I am the one who says it.',
+    play: 'Make them wait for it.',
+    note: 'The name and the stammer are the best attested things about him: tartagliare means to stutter, and the stammer is the device the mask is built on. The spectacles and the green suit striped in yellow recur across the Italian and Neapolitan accounts, which also give him a bald head and no moustache; an English description of the same mask puts him in a felt hat, a cloak, boots and a long sword instead, so the plate is contested rather than settled. His trade moves from play to play: bailiff, notary, lawyer, chemist, magistrate, and in some scenarios a servant. So does his origin, usually Naples around 1610, in one account Genoa, in another later than either. He is counted among the vecchi and still turns up among the lovers in some scenarios. Beltrani da Verona and Ottavio Ferrarese are named among the first to play him, Carlo Merlino carried him in Naples, Agostino Fiorilli was the great eighteenth-century Tartaglia, and Carlo Gozzi made him a statesman, the chancellor in Turandot and the prince in The Love of Three Oranges, which is the shape he kept afterwards. The movement detail is a playable interpretation drawn from contemporary training; conventions vary by company, teacher, period and region. One thing needs saying plainly: the tradition made a speech difference into a joke, and that is not what is playable now. What is playable is an authority that has to be spoken out loud and a mouth that fails under its own pressure, which is why the voice note asks for the pressure and not an imitation.' },
+  { id: 'scaramuccia',
+    name: 'Scaramuccia',
+    family: 'Capitano crossed with the zanni',
+    from: 'Naples, dressed as a Spanish gentleman and borrowing the manners to match',
+    fn: 'Serves whoever is paying. He is hired muscle, a go-between, or the valet of a gentleman with no money left, and he moves the plot by promising far more than he will deliver and then leaving before the bill arrives.',
+    status: 'He claims the standing of a gentleman and holds the position of a servant, and the whole character lives in that gap. In black Spanish dress he outranks every other servant on the stage by bearing alone, and no master is fooled for a second. He plays high with his clothes, his music and his manners, and the moment somebody with real authority looks at him he becomes the most obliging servant in Naples. His status is a performance he gives extremely well, and he never once mistakes it for the thing itself, which is exactly what separates him from the Captain.',
+    maskLook: 'Traditionally played without a mask, or with a small black one covering little more than the eyes. The face is powdered white and the brows, the moustache and a short pointed beard are darkened, so that every grimace reads from the back of the house.',
+    costume: 'Black from the beret to the shoes, in the Spanish style: black breeches, a black jacket, a short black cloak and a soft black beret, with a white ruff at the throat as the only light on him. A guitar is often in his hands where the Captain would carry a sword.',
+    sense: 'Black pepper and candle smoke, warm and already moving. The animal is a magpie in a tailor’s window: handsome, noisy, and gone before the shopkeeper turns round.',
+    wants: 'Admiration, easy money, and a good exit.',
+    fears: 'A fair fight, and being seen without the costume.',
+    contradiction: 'Everything about him is genuine except the courage.',
+    centre: 'High and light in the sternum, with the weight carried off the heels.',
+    leads: 'The sternum and the lifted chin, with one shoulder turned slightly away so that he can go.',
+    stance: ['Feet turned out and close, the front one angled toward the door.', 'Knees soft and springy.', 'Pelvis easy, weight lifted off the heels.', 'Spine long, chest raised as if about to be introduced.', 'Head high, chin tilted, the face doing most of the work.', 'Hands light and busy: a cloak, a hat brim, a cuff, a string.', 'Attention split between whoever he is charming and whoever is behind him.'],
+    walk: 'He crosses the floor like a dancer who is being paid to be watched doing it, light on the toes, the cloak turning on every change of direction. The route is never direct, because a straight line past somebody dangerous is bad planning. When the room turns against him, those same light feet take him out of it without ever appearing to hurry.',
+    principle: 'He keeps his weight off his heels so that charm and escape are the same movement.',
+    thinking: 'He thinks in exits. Before the sentence he is speaking has finished he has chosen the door, the story and the person he will leave behind. None of it shows, because his face is occupied performing confidence while it happens.',
+    fearResponse: 'He does not collapse, he lightens. The chest stays up, the voice stays smooth, and the feet open negotiations with the exit while the rest of him keeps talking.',
+    desireResponse: 'He performs. He plays, sings, flatters and shows off his legs, and he collects payment for the display before delivering anything at all.',
+    gestures: ['A sweeping bow with the beret, deeper than anyone required.', 'A strummed chord over a question he does not want to answer.', 'Smoothing the moustache with one finger.', 'A hand laid on the heart in sworn sincerity.', 'A step backward, taken while still smiling.', 'Turning the cloak so that the exit is behind the gesture.'],
+    audience: 'He plays to the audience as a performer rather than a confidant. He accepts their admiration as a fee he has earned, asks for applause on the trick, and lets them see the fear only in the half second before he covers it.',
+    signature: ['He is hired to frighten a man, and takes the money first.', 'He describes the violence he is about to do, with music under it.', 'The man he was hired to frighten walks in.', 'He bows, compliments him, and offers him the same service against his employer.', 'Both of them turn on him.', 'He is through the door before the second one finishes turning.'],
+    recovery: 'He changes the subject with a tune or a compliment, and reappears two scenes later as though he had been expected, with a new employer and the same bow.',
+    voice: 'One playable interpretation: smooth, warm and musical, the breath high but unhurried, the phrasing nearer to singing than to speech. He borrows the Captain’s volume for the boast and drops into an intimate, flattering murmur the instant he is challenged, and the one thing his voice never does is break.',
+    rhetoric: 'Speech as performance. He does not argue and he does not choose which part of the truth to tell: he entertains until the question has passed, and offers a compliment in place of an answer.',
+    line: 'I would have killed him where he stood, but I had my good cloak on, and there is not another cloak like this one in Naples.',
+    play: 'Charm him while you find the door.',
+    note: 'The boasting and the cowardice are the Captain’s. Scaramuccia begins as a variation on the braggart soldier, which is why the two overlap so heavily, and the earliest form of the role was masked as the Captain is masked. Well attested: the black Spanish dress with its white ruff, the beret and the cloak, the burlesque of a Spanish gentleman, and the beating Arlecchino gives him for the boasting. The difference this course plays is competence. The Captain’s reputation is made only of words, so a small fright empties him in one beat, while Scaramuccia genuinely dances, fences and performs, so fear makes him lighter and faster rather than collapsing him. That reading leans on one performer. Tiberio Fiorilli, born in Naples in 1608 and working in Paris until his death in 1694, did not invent the role but made it famous: he dropped the mask in favour of a powdered face and enormous grimaces, moved the character down from officer to the valet of a gentleman with no money left, and was still performing acrobatic business in his eighties. Molière shared a theatre with him and learned from him. The guitar belongs to pictures of Fiorilli and to later French tradition rather than to the earliest record. The stance, the walk, the sequences and the voice here are a playable interpretation drawn from contemporary training, and conventions vary by company, teacher, period and region. Two later things carry his name and are not him: the puppet whose head Punch knocks off, and Rafael Sabatini’s 1921 novel Scaramouche, whose hero is a revolutionary hiding inside the costume.' },
+  { id: 'pasquariello',
+    name: 'Pasquariello',
+    family: 'Zanni of the Neapolitan tradition, bordering the Capitano',
+    from: 'Naples, on the evidence of a name under an old etching and an actor in Paris',
+    fn: 'Fills whichever servant slot the company needs filled. He takes the errand, announces himself at the door as though announcing an army, and can stop the scene to sing.',
+    status: 'A servant who dresses and carries himself like an officer. He plays high from the moment he enters, because the swagger is the performance and there is no rank underneath it at all. Nobody in the house is fooled, and that is not the joke: the joke is that he keeps it up anyway, in front of the people who pay his wages. He takes the space a soldier would take, surrenders it the instant somebody gives him an order, and reclaims it the moment they turn away.',
+    maskLook: 'No mask is firmly recorded as his, and the two pictures the evidence offers pull in opposite directions. The etched Neapolitan dancer wears a dark half mask with a hooked nose under a wide plumed hat. The Paris performer who carried the name worked in the neighbouring Neapolitan manner, face powdered and uncovered. A dark half mask with a strong nose and a high, surprised brow will serve, and so will no mask at all, as long as you commit to one.',
+    costume: 'Also unfixed. The etching gives him a short cloak, a wide feathered hat, hose, and a sword worn long. The Paris strand gives the black Spanish dress and white ruff of the Neapolitan line he worked in, with a guitar in his hands. Both read as a servant wearing more than a servant can afford, which is the usable part.',
+    sense: 'Gunpowder and orange peel, warm, with music somewhere behind it. The animal is a cockerel on a wall, certain the morning is its own doing.',
+    wants: 'An audience, a title, and to be taken for what he is dressed as.',
+    fears: 'Being asked to prove any of it.',
+    contradiction: 'He carries himself like an officer and answers the door.',
+    centre: 'High and forward in the chest, with the sword hand already arranged.',
+    leads: 'The chest, with the hat and its plume a moment ahead of it.',
+    stance: ['Feet apart and turned out, one forward as if awaiting an introduction.', 'Knees soft, ready to drop under an order.', 'Pelvis forward and loose, a dancer’s pelvis rather than a soldier’s.', 'Spine long, chest lifted and turned slightly toward the room.', 'Head high, chin carried as though wearing a hat whether he is or not.', 'One hand at the hilt, the other free to gesture or to strum.', 'Attention on whoever has just come in, and on whether they noticed him.'],
+    walk: 'A swagger with a rhythm under it: the steps keep a beat, the shoulders answer it, and he is never quite only walking. He takes the long way across a room if the long way holds more of the room. Under an order the swagger collapses into quick small steps, and he rebuilds it on the way out.',
+    principle: 'He arrives as an entrance, never as an errand.',
+    thinking: 'He thinks in announcements. The idea and the presentation of the idea arrive together, so he is selling it before he has tested it, and he goes on selling after it has failed. The one thing he cannot do is think quietly.',
+    fearResponse: 'The chest empties and the pitch climbs. The swagger breaks into busy small movements, and he explains himself at length while backing toward the door.',
+    desireResponse: 'He performs at it. Stance, hat, sword, song: whatever he wants, he puts on a display in front of it and waits to be rewarded for the display.',
+    gestures: ['A sweep of the hat that takes in more of the room than belongs to him.', 'A hand resting on the hilt while he talks about something else entirely.', 'Announcing himself with a flourish nobody asked for.', 'A quick drumming of the fingers on whatever is within reach.', 'A bow that turns into a dance step on the way back up.'],
+    audience: 'He plays to them before anyone on stage. They are the house he is performing for, and he will hold a pose until they have taken it in, then break it to tell them how it went.',
+    signature: ['He is sent to deliver a message.', 'He announces himself at the door as though announcing an army.', 'He delivers the message as a speech, with gestures.', 'He is told it was the wrong house.', 'He takes the correction as applause and bows himself out.'],
+    recovery: 'He turns it into the story. Whatever just happened to him becomes a performance of what just happened to him, and he is the hero of the telling.',
+    voice: 'One playable interpretation: full, forward and musical, the breath high in the chest and spent generously. He finds a tune at the end of a sentence and holds notes he has no business holding. Under pressure the tone thins and the pitch climbs while the volume stays exactly where it was.',
+    rhetoric: 'Speech as performance. The content matters less than the delivery, and he would rather be enjoyed than believed.',
+    line: 'You do not have to thank me. Just make sure they know it was me.',
+    play: 'Make the errand an entrance.',
+    note: 'This is the thinnest record in the module, and the honest shape of him is a name with two sightings and a gap in between. What is firmly attested is the name. Pasquariello Truonno stands under plate 20 of the Balli di Sfessania, the set of twenty-four etchings of masked Neapolitan dancers made around 1621, paired there with Meo Squaquara, both armed and mid-step. Sixty years later the Neapolitan actor Giuseppe Tortoriti performed in Paris under the name Pasquariel, joining the Italian company at the Hôtel de Bourgogne in 1685; a museum record of his portrait has him debuting in the role of the Capitano, he was also known as the younger Scaramouche, and an engraving shows him in that costume holding a guitar. After the company was expelled from Paris in 1697 he was permitted to tour a troupe at least thirty leagues from the city. That is close to the whole documented record. Whether the dancer of 1622 and the player of 1685 are one character or two men sharing one name is not established, and some accounts place a Pasquariello as a company’s senior servant, which would push Arlecchino into second, without evidence that settles it. Everything else here is a playable interpretation. No mask, costume, plot function or temperament is fixed for him the way Arlecchino’s and Pulcinella’s are; the swaggering soldier and the singer come from different pieces of evidence and no source joins them into one type; and the stance, walk and business are contemporary training convention built in the spirit of the tradition. Treat him as an invitation rather than an inheritance.' },
 ];
+  // TRUFFALDINO AND SCAPINO DELIBERATELY HAVE NO RECORD HERE (2026-10-19).
+  // Both were written and both removed the same day, because The Cast already
+  // argues the opposite and is right: Truffaldino is Arlecchino's job in The
+  // Servant of Two Masters and Scapino is Brighella's, and serving two masters
+  // is a plot rather than a different person. Their cards on the cast plate
+  // open Arlecchino and Brighella instead, which teaches the better lesson:
+  // the job matters more than the name. Do not add them back without changing
+  // that section of The Cast first.
+
 export const commediaMask = id => COMMEDIA_MASKS.find(m => m.id === id) ?? null;
 
 // ── Practice decks (Mask Cards, One Line) ──────────────────────
@@ -401,7 +552,7 @@ export const CHARACTER_LESSONS_ALL = [
         'Then you play them: find the stance, the walk and the signature business in your own body, and practise with Mask Cards and One Line, Many Masks.',
         'Then you build your own. In My Characters, the same breakdown becomes a worksheet: first for your own version of a mask, then for a person you invent, and for a role you are cast in.',
       ] },
-      { p: 'By the time you reach the later modules, inventing a person from scratch or building one from a script, you will already know what a character is made of, because you will have taken nine of them apart.' },
+      { p: 'By the time you reach the later modules, inventing a person from scratch or building one from a script, you will already know what a character is made of, because you will have taken thirteen of them apart.' },
     ] },
 
   { id: 'ch-cm-history', module: 'commedia', order: 2,
@@ -415,7 +566,7 @@ export const CHARACTER_LESSONS_ALL = [
       { p: 'Commedia dell’arte was professional popular theatre that grew up in Italy in the 1500s. Touring companies played recurring characters, most of them masked, and built each performance from a prepared plot outline, improvising much of the dialogue on the night. The word arte here means craft or trade, in the way a guild is a trade. A fair translation is “the comedy of the professionals”: it separated working actors, who lived by their skill, from the courtly amateurs who performed for pleasure.' },
       { p: 'Those amateurs had a comedy of their own, and it had a name: commedia erudita, the learned comedy. It was written down, it followed classical models closely enough that catching the references took an education, and it was staged indoors for invited guests at courts and academies, often performed by members of the court themselves. Even Machiavelli wrote one. It is also where the scenery revolution happened, with painted perspective sets that only resolved correctly from the centre of the room, where the ruler sat. That is what commedia dell’arte set itself against: one comedy written down and played indoors for people who had been invited, the other improvised in the open for anyone who paid.' },
       { p: 'Nobody invented it. It grew out of everything around it: the old Roman comedies of lovers, fathers and clever slaves, the masked Atellan farces of southern Italy, carnival and marketplace performers, jesters, acrobats and musicians, and the rivalries between Italy’s cities.' },
-      { p: 'Of all those ancestors, the Atellan farces are the ones scholars reach for most often, because they are the closest in kind. They were largely improvised, they used masks, and their cast was a set of fixed types: a foolish old man, a boastful chatterer, a greedy clown and a cunning schemer. Read that list beside the nine characters in this module and the resemblance is hard to miss. What nobody can show is the line between them. More than a thousand years separate the two, with very little evidence of what happened in between, so treat this as the leading theory about where commedia came from rather than a documented descent.' },
+      { p: 'Of all those ancestors, the Atellan farces are the ones scholars reach for most often, because they are the closest in kind. They were largely improvised, they used masks, and their cast was a set of fixed types: a foolish old man, a boastful chatterer, a greedy clown and a cunning schemer. Read that list beside the characters in this module and the resemblance is hard to miss. What nobody can show is the line between them. More than a thousand years separate the two, with very little evidence of what happened in between, so treat this as the leading theory about where commedia came from rather than a documented descent.' },
       { p: 'The earliest surviving contract for a professional acting company was signed in Padua in 1545, when eight men agreed to tour together, perform comedies and share the money. That date does not mark the beginning of commedia. It marks the moment actors began organising their work as a business. What made that worth doing was the world around it. Every other trade was organising into guilds with charters and recognised rights, while players, jugglers and acrobats were still treated by the Church as disreputable and pushed toward the margins of respectable life. What the Church objected to was real enough: the comedy was frankly bawdy, the playing was physical and close to the body, and from the 1560s there were women on stage doing both. Going to a notary put acting on the other side of that line: a trade with terms, obligations and a share of the takings, held in law, in the way that being a blacksmith was a trade.' },
       { p: 'For most of that first century there were no theatres to play in. Purpose-built houses barely existed, court performances went up inside palace walls on stages struck as soon as the evening ended, and a touring company worked in the open: a platform in a city square, a curtain behind it, and two painted wings an actor could walk through. That was the whole set, and everything else travelled with them. Only as the number of professional companies grew did small paying playhouses appear, with an impresario arranging which town and which room came next. A square is a hard room. Nothing dims, nothing quietens a crowd, and nobody has paid to stay. The size of commedia was built for exactly that.' },
       { p: 'Italy was not yet one country. It was a patchwork of city-states, duchies and kingdoms, each with its own dialect and its own reputation, and commedia turned that into character. Pantalone spoke Venetian and was a Venetian merchant. The Doctor came from Bologna, a university city. Many of the servants came from the hills around Bergamo. The lovers spoke polished literary Italian. An audience knew who a character was, where they came from and where they stood in the world before the plot had explained anything. The way a person spoke was part of their costume.' },
@@ -599,45 +750,60 @@ export const CHARACTER_LESSONS_ALL = [
     attribution: 'Commedia tradition',
     requiredReviewer: 'acting-professional',
     title: 'The Cast',
-    objective: 'Meet the whole company at once: four families, nine characters, and who deals with whom.',
+    objective: 'Meet the whole company at once: the chart, the lines between them, and the four families.',
     orientation: 'Before you take them apart one at a time, look at the company as a whole.',
-    reflection: 'Which of the nine do you already recognise from something you have watched this year?',
+    reflection: 'Which of them do you already recognise from something you have watched this year?',
     body: [
-      { p: 'Here is the whole company on one page. Four families, nine characters, and a set of relationships that has driven comedies for four hundred years. Every chapter after this one takes a single character apart. This is the map you will be filling in.' },
-      { fig: 'cm-cast-tree' },
+      // THE PAGE OPENS ON THIS (owner order 2026-10-19), and this heading
+      // and paragraph were under the chart until the same day. An opening
+      // paragraph and a 'The company, and the lines between them' heading
+      // stood above the chart and both went, because the chart's own
+      // figcaption already explains why opening Magnifico opens Pantalone.
+      // This moved up into the gap they left.
+      //
+      // IT HAS TO CARRY THE OPENING ALONE: `orientation` does NOT render on
+      // a reference chapter, which was checked on the page rather than
+      // assumed, so there is no other text above the picture.
+      { h: 'The four families' },
+      { p: 'The chart draws twelve of them and the lines between them, and any figure on it opens that character. Below, they are sorted into the four families as well, with a face to each name, including the three the chart has no room for. Open any card to meet that character properly.' },
+      { plate: true },
+      // The rosters were cut on 2026-10-19 and restored the same day
+      // carrying portraits. The cut was right while they were four more
+      // grids of the same names under a clickable chart; the portraits
+      // are the thing neither the chart nor a text row gives you, and
+      // three of these characters are not on the chart at all. See the
+      // note on maskRosterHtml in main.js.
+      //
+      // THE PAGE ENDS HERE (owner order 2026-10-19). Two sections followed
+      // the cards and both went:
+      //   'Who deals with whom' — six relationship bullets. Every one of
+      //   them is already on the relevant character's own page, because the
+      //   profile block renders each record's own relationships field, and
+      //   the chart's caption narrates the rest.
+      //   'The same jobs under other names' — Truffaldino, Scapino,
+      //   Scaramouche, Smeraldina, Franceschina, Balanzone. Truffaldino is
+      //   in Arlecchino's chapter, Balanzone in Il Dottore's, Scaramouche
+      //   in Il Capitano's and Scaramuccia's own note.
+      // THREE FACTS HAD NO OTHER HOME and were MOVED rather than dropped
+      // (owner order, same day): Scapino into Brighella's 'Where you can
+      // see him', which already named Scapin without saying he was the same
+      // job; Franceschina into Colombina's opening line, which already
+      // lists her other company names; Smeraldina into Colombina's 'Where
+      // you can see her', beside the other named parts. Each went where its
+      // chapter already had that kind of fact, so nothing new was invented
+      // to hold them.
       { h: 'The old masters, the vecchi' },
       { p: 'They own the money, the houses and the rules, and in most plots they are the obstacle.' },
-      { roster: ['pantalone', 'dottore'] },
+      { roster: ['pantalone', 'dottore', 'tartaglia'] },
       { h: 'The lovers, the innamorati' },
       { p: 'The reason the plot exists, and the people least able to do anything about it.' },
       { roster: ['innamorati'] },
       { h: 'The outsider, Il Capitano' },
       { p: 'He arrives from somewhere else, claims the highest status on stage, and has none.' },
-      { roster: ['capitano'] },
+      { roster: ['capitano', 'scaramuccia'] },
       { h: 'The servants, the zanni' },
       { p: 'The play runs on them. They carry the letters, invent the schemes, wreck the plans and eat whatever is left. They divide into two jobs: a first zanni who schemes and calculates, and a second zanni who blunders and follows his appetite. Brighella and Arlecchino are the classic pair, and their chapters take each job apart.' },
-      { roster: ['brighella', 'arlecchino', 'colombina', 'pulcinella', 'pedrolino'] },
-      { h: 'Who deals with whom' },
-      { list: [
-        'The masters employ the servants, underpay them, and depend on them completely.',
-        'The lovers are the masters’ children, and they need the servants for every letter, meeting and rescue.',
-        'Brighella makes the plans; Arlecchino carries them out and ruins them.',
-        'Colombina sees through everyone, and is courted by Arlecchino and loved by Pedrolino.',
-        'Il Capitano courts the young woman, bullies the servants, and folds the moment anyone tests him.',
-        'Pantalone and Il Dottore are old friends, rivals, and each other’s intended in-laws.',
-      ] },
-      { h: 'The same jobs under other names' },
-      { p: 'There is no single official list of commedia characters. Companies invented, renamed and combined them for four hundred years, and every region added its own: Meneghino in Milan, Gianduja in Turin, Stenterello in Florence, Rugantino in Rome, Peppe Nappa in Sicily, and dozens more. The nine above are the ones this course takes apart, because between them they cover every family and every job in a plot. Most of the other names you will meet are these same jobs wearing different labels, which is worth knowing when you open a play or read a museum card:' },
-      { list: [
-        'Truffaldino: Arlecchino’s job in Carlo Goldoni’s The Servant of Two Masters. Serving two masters is a plot, not a different person.',
-        'Scapino: Brighella’s job in Molière’s Scapin the Schemer, played more openly as a trickster and less as a threat.',
-        'Scaramuccia: a real difference. He carries the Captain’s swagger with actual skill and charm, so where Il Capitano collapses, he talks and fights his way out. He became the French Scaramouche.',
-        'Smeraldina: Colombina’s job in The Servant of Two Masters, plainer spoken and more earthy.',
-        'Franceschina: Colombina’s job again, in the companies that called their servetta by that name.',
-        'Balanzone: Il Dottore under his Bolognese name, the one you will see on a mask in a museum case.',
-        'Tartaglia: the other real difference, a job none of the nine do. A nervous official or lawyer whose speech sticks. Traditionally the stammer was the joke, and it is not played that way now: the comedy belongs to the bureaucratic hedging, the fear of committing to an answer, and the inability to say a plain thing inside a system.',
-      ] },
-      { p: 'Learn the families first. Individual names changed from company to company and city to city, but the families held, and so did the jobs they do in a plot.' },
+      { roster: ['zanni', 'brighella', 'arlecchino', 'colombina', 'pulcinella', 'pedrolino', 'pasquariello'] },
     ] },
 
   // ── One chapter per character (owner order 2026-09-22) ─────────
@@ -827,7 +993,7 @@ export const CHARACTER_LESSONS_ALL = [
       { p: 'Stay low and let the breath settle deep and slow, the breath of somebody who is never hurried because he already knows how this ends. Keep it even while you say “I am not asking you to lie. I am asking you to tell the part of the truth that helps us,” and say it warmly enough that it sounds like a favour. Nothing in the voice should rise. That is what makes it frightening.' },
       { h: 'Where you can see him' },
       { list: [
-        'Scapin in Molière’s Scapin the Schemer, a servant who runs rings around everyone.',
+        'Scapin in Molière’s Scapin the Schemer, a servant who runs rings around everyone. He is Brighella’s job under a French spelling of Scapino, played more openly as a trickster and less as a threat.',
         'Figaro in The Barber of Seville and The Marriage of Figaro, the fixer who is cleverer than his master.',
         'Iago in Othello, the same gift for framing, turned deadly.',
         'Saul Goodman in Better Call Saul, who always has an angle and a way out.',
@@ -900,7 +1066,7 @@ export const CHARACTER_LESSONS_ALL = [
     orientation: 'Colombina has no power at all, and she is the only person on stage nobody can fool.',
     reflection: 'Colombina’s status comes from attention, not rank. Who in your life holds a room that way?',
     body: [
-      { p: 'Colombina is the servetta, the maidservant, also called Columbina and in some companies Arlecchina. She is often in service to the young woman of the house, and sometimes to Pantalone himself. Where the lovers sigh and the old men bluster, she gets things done, and she is the character most likely to turn and tell the audience exactly what she thinks of them all. Play her with affection, not contempt: she likes these people. She just sees straight through them.' },
+      { p: 'Colombina is the servetta, the maidservant, also called Columbina, Franceschina in the companies that used that name for their servetta, and in some companies Arlecchina. She is often in service to the young woman of the house, and sometimes to Pantalone himself. Where the lovers sigh and the old men bluster, she gets things done, and she is the character most likely to turn and tell the audience exactly what she thinks of them all. Play her with affection, not contempt: she likes these people. She just sees straight through them.' },
       { fig: 'cm-colombina-mask' },
       { h: 'At a glance' },
       { mask: 'colombina' },
@@ -924,6 +1090,7 @@ export const CHARACTER_LESSONS_ALL = [
         'Dorine in Molière’s Tartuffe, on the Scenes shelf, who tells her master’s household the truth nobody else will.',
         'Maria in Twelfth Night, who runs the plot against Malvolio.',
         'Suzanne in The Marriage of Figaro, smarter than every man in the house.',
+        'Smeraldina in Carlo Goldoni’s The Servant of Two Masters, the same job played plainer spoken and more earthy.',
         'Columbine, her descendant in the English pantomime, forever pursued by Harlequin and Pierrot.',
       ] },
     ] },
@@ -1711,6 +1878,154 @@ export const CHARACTER_LESSONS_ALL = [
       { p: 'Then improvise again with the answers in your body. Whatever still feels vague after that is worth watching, because an audience finds vagueness before it finds anything else.' },
     ] },
 
+
+  // ── The four new masks, added 2026-10-19 ─────────────────────
+  // Reference chapters, not path lessons: they sit on The Cast and open from
+  // its family cards, exactly as the original nine do. Three of them are not
+  // on the relationship chart, so the cards are their only way in. NO LEDGER
+  // ENTRY is written for any of them, so each shows as awaiting review until
+  // the owner reads it.
+  { id: 'ch-cm-zanni', module: 'commedia', order: 110, reference: true,
+    title: 'Zanni',
+    attribution: 'Commedia tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Learn Zanni, the hungry migrant servant the whole servant family is named after, and how an empty stomach holds a stage.',
+    orientation: 'Zanni wants one thing, he has wanted it since this morning, and nothing else in the play is as real to him.',
+    reflection: 'Zanni has no scheme, no position and no protection, and audiences have been on his side for four hundred years. What is he giving them that the clever ones are not?',
+    body: [
+      { p: 'Zanni is the servant, plainly: the man hired to fetch, carry, run and wait. He came down from the poor valleys above Bergamo to a rich city looking for work, and the earliest written traces of him put him in Pantalone’s house, sent out on errands. He has no scheme like Brighella, no acrobatics like Arlecchino and no position to protect like Colombina. He has a job, and he is hungry.' },
+      { p: 'Picture the courier on the bike, tracking three deliveries across a city he could never afford to live in, paid by the drop and not by the hour. He is somebody else’s legs. Nobody asks his name, the work can stop coming tomorrow, and he has not eaten since the shift started although he has carried other people’s dinners all evening. That is Zanni. The hunger is not a character note, it is the job description, and everything funny about him comes out of a man trying to do a day of work on an empty stomach.' },
+      { p: 'One warning about the word. Zanni is also the name of the whole servant family, which is why the other records in this module say first zanni and second zanni: every servant in the form is a zanni, in the way that every sergeant is a soldier. He is the character and the class at once. The word is most often traced to a northern form of Giovanni, the commonest name among the men who came from those valleys to work in Venetian houses, so the servants were named the way a crowd gets named, after whoever answers to it. English kept him too. The word zany is his, in use by the 1590s, and it still means roughly what the audience thought of him.' },
+      { fig: 'cm-zanni-mask' },
+      { h: 'At a glance' },
+      { mask: 'zanni' },
+      { h: 'Relationships' },
+      { list: [
+        'Pantalone: the master of the earliest records, who hires him, feeds him badly and beats him for the errand he spoiled.',
+        'Brighella: a zanni who got on. He sends Zanni where the risk is and keeps the profit, and Zanni is grateful to be sent.',
+        'Arlecchino: the same stock with the talent added. Where Zanni is simply hungry, Arlecchino is hungry and quick, and the two of them are one man cut in half.',
+        'Colombina: she feeds him, which is more than anybody else does, and tells him plainly when he is being used.',
+        'The lovers: they barely see him. He carries their letters, waits in the rain while they declare themselves, and is paid in promises.',
+        'Il Capitano: the one man on stage who outranks him by nothing but noise. Zanni believes every word of it.'] },
+      { h: 'The physical breakdown' },
+      { profile: 'zanni' },
+      { fig: 'cm-zanni-stance' },
+      { fig: 'cm-zanni-walk' },
+      { h: 'Find it' },
+      { p: 'Stand with your feet wide and turned out, bend your knees, and let the weight drop until you can feel it in your thighs. Now hollow your chest and let your stomach pull in and back, so the spine curves and your head comes out in front of your shoulders. That is the shape: a body built around a space. Walk it slowly, rolling from one bent leg to the other, and let your nose get across the room before the rest of you does. Then put a loaf of bread somewhere in the room, go to it, and notice that you did not decide to.' },
+      { p: 'Stay in the shape and listen to the breath. A caved chest cannot take a deep one, so it comes in high and short, and that is most of the voice already. Let it be heard. Carry a message across the room while you are breathing like that, repeating it out loud so you do not lose it, and when the bread comes back into it let the message go. Then say “I will remember the message. I will remember it right after I have eaten,” and mean both halves of it completely. Work inside what your body allows today: the low stance is the whole character, and none of it should hurt.' },
+      { h: 'Where you can see him' },
+      { list: [
+        'Grumio in The Taming of the Shrew, sent ahead on the errand, soaked, starved and beaten for arriving.',
+        'Lucky in Waiting for Godot, a servant worn down to the carrying and nothing else.',
+        'The Tramp eating his own boot in Charlie Chaplin’s The Gold Rush, hunger played as the entire plot.',
+        'Baldrick in Blackadder, the dogsbody whose every great plan comes back to a turnip.',
+        'Ricky in Sorry We Missed You, the courier paid by the drop, running other people’s errands across a city that never looks at him.'] },
+    ] },
+  { id: 'ch-cm-tartaglia', module: 'commedia', order: 111, reference: true,
+    title: 'Tartaglia',
+    attribution: 'Commedia tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Learn Tartaglia, the official whose authority lives in his mouth, and how a man losing a sentence holds a stage.',
+    orientation: 'Tartaglia holds the only signature the plot needs, and the plot has to wait while he gets to the end of the sentence.',
+    reflection: 'The room keeps finishing Tartaglia’s sentences for him and keeps getting them wrong. What does it cost a person to be helped like that?',
+    body: [
+      { p: 'Tartaglia is the official. He arrives as the notary, the lawyer, the magistrate, the chemist or the man from the court, and his trade changes from play to play because his function does not: somebody in this story needs a document, a ruling or a licence, and he is the only one who can hand it over. He has the authority, the papers and the enormous spectacles. He also has a stammer that worsens the more the room is watching, and in the tradition that is the engine of the comedy. Nothing proceeds until he finishes the sentence, and the sentence is where he is weakest.' },
+      { p: 'The handle is the official reading a decision out at a meeting he called himself. Picture the man with the lanyard and the title longer than his name, who holds the only answer in the room and has no idea that everyone worked it out four minutes ago. Or the person behind a service counter who cannot help you until the whole policy has been read aloud, including the part that does not apply. The authority is genuine, the information matters, and the delivery is coming apart in front of people who could say the whole thing in six words. Tartaglia is that gap, played at full size.' },
+      { p: 'Play the office, not the impediment. His mind is quick and he is usually right; what fails is the delivery, under exactly the pressure his job puts on it. The comedy is a rank collapsing. The dignity is that he never abandons the sentence: he starts it again, in full, with the title attached. That is why an audience stays with him while the stage loses patience.' },
+      { h: 'At a glance' },
+      { mask: 'tartaglia' },
+      { h: 'Relationships' },
+      { list: [
+        'Pantalone: his client and his equal in rank, who hires him for the paperwork and then shouts at him to hurry it along.',
+        'Il Dottore: the other learned man, and the mask Tartaglia is sometimes said to come from. The Doctor cannot stop talking and Tartaglia cannot start, so put them in one scene and nothing is ever decided.',
+        'Brighella: the schemer who needs that signature and knows how to get it, which is to wait, agree with everything, and finish nothing for him.',
+        'Arlecchino: the one who helpfully supplies the wrong word, every time, with total confidence.',
+        'The lovers: the people whose marriage depends on a paper he is holding, who must stand there while he reads it out.',
+        'Colombina: the one person who waits without helping. She worked out long ago that he gets there faster when nobody is being kind at him.'] },
+      { h: 'The physical breakdown' },
+      { profile: 'tartaglia' },
+      { h: 'Find it' },
+      { p: 'Stand with your feet close and your weight back, lock your knees, and lift your shoulders toward your ears. Push your head forward from the top of your spine and peer at something on the far wall, then bring an imaginary paper up until it is much too close to read. Walk six flat steps, stop, and only then speak. Every time a sentence stops, stop your feet with it, and do not move again until the word is out.' },
+      { p: 'Let the breath sit high and get held, which is what happens to anybody who has to be believed in the next five seconds. Choose the hardest consonant in the sentence and put the pressure there, on the sound and not on yourself: hold the air, let the word arrive late, and keep the sentence alive the whole way. Then say “Do not finish it for me. I am the one who signs it, so I am the one who says it,” and give the end of it to the audience rather than to the room. You are playing an office failing, never a person’s speech. If you have a stammer yourself, you already know this pressure from the inside, and it is material, not an obstacle.' },
+      { h: 'Where you can see him' },
+      { list: [
+        'Dogberry in Much Ado About Nothing: a constable whose own sentences dismantle the authority he is claiming, word by word.',
+        'Mr Collins in Pride and Prejudice: all title and formula, with the point always two clauses further off than he thinks.',
+        'Mr Bumble in Oliver Twist: a parish officer whose dignity lives entirely in the office, the coat and the voice he does it in.',
+        'George VI in The King’s Speech: the same structure played straight, an office that exists only while it is speaking.',
+        'David Brent in The Office: the man who called the meeting and loses the room inside his own first sentence.'] },
+    ] },
+  { id: 'ch-cm-scaramuccia', module: 'commedia', order: 112, reference: true,
+    title: 'Scaramuccia',
+    attribution: 'Commedia tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Learn Scaramuccia, the elegant Neapolitan boaster in black, and how a charmer with no courage holds a stage.',
+    orientation: 'Scaramuccia can do everything the Captain only talks about, and he still has no intention of being hit.',
+    reflection: 'Scaramuccia is never caught without a way out. What does it cost a person to stay that ready to leave?',
+    body: [
+      { p: 'Scaramuccia comes out of the braggart soldier and ends up in service. He is hired muscle, a go-between, a bodyguard, or the valet of a gentleman whose money has gone, and the plot uses him as the man either side can buy. He takes the fee, describes the violence in loving detail, and is somewhere else when it arrives. His name means a little skirmisher, which is exactly the size of fight he is prepared to have.' },
+      { p: 'The handle is the session musician who has worked with everybody: black clothes, immaculate manners, a story about every famous name, and one professional eye on the clock and the car park. He really can play, which is what makes the stories land. He is also the first person out of the building when the promoter and the venue start shouting at each other, because he has been paid, he is not on the contract, and none of this is his fight.' },
+      { p: 'Put him beside Il Capitano and the difference is skill. The Captain’s reputation is made of words with nothing underneath, so a dog barking at his heels empties him in a single beat. Scaramuccia has the dancing, the fencing and the charm he claims, so fear does not flatten him: it makes him lighter, faster and more charming, and then he is gone.' },
+      { h: 'At a glance' },
+      { mask: 'scaramuccia' },
+      { h: 'Relationships' },
+      { list: [
+        'Arlecchino: the one who beats him. The boasting earns it, and he never learns a thing from it.',
+        'Il Capitano: the same family, and a standing comparison. Scaramuccia can do what the Captain only claims, which makes the Captain unbearable to him.',
+        'Brighella: a rival professional. Brighella plans and keeps the proceeds, Scaramuccia performs and spends them.',
+        'Pantalone: an employer who likes the look of a servant in Spanish black and never quite gets what he paid for.',
+        'The lovers: clients. He carries their letters or frightens a rival, and he serves whichever of them paid most recently.',
+        'Colombina: she enjoys the performance, applauds it, and believes none of it.'] },
+      { h: 'The physical breakdown' },
+      { profile: 'scaramuccia' },
+      { h: 'Find it' },
+      { p: 'Stand with your feet turned out and close together, your weight lifted off your heels, your chest raised as though you were about to be introduced to somebody important. Turn one shoulder slightly away from the room and let your front foot point at the nearest door. Now cross the floor on the balls of your feet, light and unhurried, changing direction three times on the way, and finish with a bow, as if a small amount of applause were owed to you. Keep the lift in the chest for the whole journey. The elegance is not decoration: it is the thing he sells.' },
+      { p: 'Put something in your hands, a book, a hat, a broom held like a guitar, and tell the room about a fight you won. Make it detailed and enjoy it. Then let an imagined door bang open behind you. Do not drop and do not shrink, because that is the Captain’s answer and not his: keep the chest up, keep the voice smooth, and let your feet start carrying you toward the exit while the sentence finishes beautifully. Run it until the fear lives entirely in your feet and nowhere in your face. That split is the character.' },
+      { h: 'Where you can see him' },
+      { list: [
+        'Autolycus in Shakespeare’s The Winter’s Tale: a singing pedlar and thief who charms everyone and is never there when the trouble lands.',
+        'Harry Flashman in George MacDonald Fraser’s novels: a coward with real ability who charms his way out and is decorated for it.',
+        'Lando Calrissian in The Empire Strikes Back: beautiful clothes, perfect manners, and whichever side is paying this week.',
+        'Puss in Boots in the Shrek films: the hat, the sword, the guitar, and a performance of courage with genuine skill behind it.',
+        'Jack Sparrow in Pirates of the Caribbean: every fight avoided with a flourish, and every escape arranged in advance.',
+        'Scaramouche in Punch and Judy: his own puppet descendant, who boasts and loses his head for it.'] },
+    ] },
+  { id: 'ch-cm-pasquariello', module: 'commedia', order: 115, reference: true,
+    title: 'Pasquariello',
+    attribution: 'Commedia tradition',
+    requiredReviewer: 'acting-professional',
+    objective: 'Learn Pasquariello, the Neapolitan servant with an officer’s swagger, and how a performer holds a stage when the record of him is thin.',
+    orientation: 'Pasquariello is the least documented mask in this module, and what survives of him is a swagger, a sword and a song.',
+    reflection: 'Pasquariello leaves you more room than the other masks, because less of him was written down. Does that freedom make him easier to play, or harder?',
+    body: [
+      { p: 'Pasquariello is a Neapolitan servant, and that is very nearly all anybody can tell you for certain. He takes the errands, answers the doors and carries the messages, and he does every bit of it dressed and carried like a man of rank. In some accounts he is the senior servant of a company, which pushes Arlecchino down to second. In others he is a soldier-servant with a sword he treats as part of the outfit. In others again he stops the plot to sing. The job underneath is the same in all of them: he is staff, and he refuses to look like staff.' },
+      { p: 'The handle is the doorman at a hotel he does not own. Braided coat, white gloves, a bearing borrowed from the military, a voice pitched for the whole lobby, and he will tell you about the city as though he runs it. He opens a car door for a living. He is magnificent while he does it, and if there is a piano in the bar he knows the words to everything. Nobody who works there is fooled by the uniform, and he wears it as if they are.' },
+      { p: 'He is also the honest edge of this module. The masks around him arrive with centuries of documented business attached to them. Pasquariello arrives with a name under an old etching, an actor in Paris who used it, and a gap in between, and the breakdown below says so plainly. That makes him the one character here you have to finish yourself, and the one place in this course where you can watch a type being built rather than inherited.' },
+      { h: 'At a glance' },
+      { mask: 'pasquariello' },
+      { h: 'Relationships' },
+      { list: [
+        'Pulcinella: his neighbour from the same city, and the reason he is hard to see at all. Where Pulcinella survives, Pasquariello performs, and Pulcinella has the better documented four hundred years.',
+        'Il Capitano: the role he borrows from, and the one he must not become. The Captain believes the rank; Pasquariello knows it is a costume and wears it anyway.',
+        'Arlecchino: the servant below him when a company casts it that way, and the servant above him when it does not. The hierarchy moves from play to play.',
+        'Brighella: the other senior servant, and the comparison that stings. Brighella takes a cut. Pasquariello takes a bow.',
+        'The masters: the people who pay him and are not impressed. He performs for them regardless, which is either loyalty or vanity, and playing it as both is better than choosing.',
+        'The audience: his real employer. He is the mask most likely to be caught playing to the house instead of the scene.'] },
+      { h: 'The physical breakdown' },
+      { profile: 'pasquariello' },
+      { h: 'Find it' },
+      { p: 'Stand with your chest lifted and your weight forward, put one hand where a sword hilt would be, and cross the room as though somebody has just said your name out loud. Keep a beat under the steps, so the walk is half a march and half a dance, and let your shoulders answer it. Now have an imaginary master give you an order. Drop the whole arrangement: knees soften, chest empties, steps turn small and quick. Carry out the order. Then rebuild the swagger on the way out, piece by piece, and take the longest possible route to the door.' },
+      { p: 'Let the breath ride high in the chest and spend it freely, the breath of somebody who expects to be heard across a square. Find the tune at the end of a sentence and hold the last word a beat longer than it needs. Say “You do not have to thank me. Just make sure they know it was me,” to the room rather than to the person, and enjoy saying it. Then say it again, straight after being told the message went to the wrong house, with nothing taken out of the voice. The swagger surviving the correction is the whole character.' },
+      { h: 'Where you can see him' },
+      { list: [
+        'Nick Bottom in A Midsummer Night’s Dream, who would play every part in the play and announce each one.',
+        'Leporello in Don Giovanni, the servant who sings his complaints magnificently and puts on his master’s cloak to swagger in it.',
+        'Captain Hook in Peter Pan, all plume and flourish, with the performance doing the work the authority cannot.',
+        'Gaston in Beauty and the Beast, a swagger that arrives with a song and a tavern arranged to admire it.',
+        'Monsieur Gustave in The Grand Budapest Hotel, hotel staff to his fingertips and grander than any guest in the building.',
+        'Jack Sparrow in Pirates of the Caribbean, a bearing maintained with no rank, ship or crew behind it.'] },
+    ] },
 ];
 
 // The four Playing the Role records are still above, whole and unedited.

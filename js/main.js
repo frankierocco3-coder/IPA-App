@@ -10,6 +10,8 @@ import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
+import { actingPathLabel, actingPathKind, ACTING_PATH_TITLE } from './data/acting/path-labels.js';
+import { ACTING_PATH_THEME } from './data/acting/path-theme.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
@@ -55,7 +57,7 @@ import { ACTING_APPROACHES, APPROACH_DISCLAIMER } from './data/acting/approaches
 import { LINE_LESSON } from './data/acting/lines.js';
 import { voiceFigure, VOICE_ATLAS } from './data/voice-art.js';
 import { actingFigure } from './data/acting/art.js';
-import { characterFigure } from './data/character/art.js';
+import { characterFigure, characterCard } from './data/character/art.js';
 import { shakespeareFigure } from './data/shakespeare/art.js';
 import { PRACTICE_SUBJECTS, ROUTINE_MODES, routinesFor, routineById,
          learnerRoutines, draftRoutines } from './data/speech/routines.js';
@@ -121,7 +123,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -3209,8 +3211,26 @@ const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // outside every module — without it they inflated the hero's progress
 // denominator (39 lessons shown as "of 47") and could be offered as the
 // next lesson after the last real one.
-const pathLessons = B => B.lessons.filter(l =>
-  !l.reference && B.modules.some(m => m.id === l.module));
+// SORTED, since 2026-10-15. This returned lessons in the order they happen
+// to sit in the data file, and three of Acting's five modules are written
+// out of order there: 'work' is [2,3,4,5,6,7,1], so Being Off Book is
+// lesson 1.1 and the seventh record in the file. Everything that asks this
+// for "the next lesson" was therefore answering with the first record
+// rather than the first lesson, which had two visible effects: Start course
+// skipped 1.1 and went to 1.2, and the Next lesson button at the foot of
+// 1.7 sent the reader back to 1.1 instead of on to module 2.
+//
+// Found by building the sequence view, which draws the order and so could
+// not hide a disagreement about it. The module pages were always right
+// because bookLessonsFor sorts; only the flat path was wrong.
+//
+// Sorting here fixes every caller at once. The ones that only count or
+// filter cannot tell the difference, and .filter() has already copied the
+// array, so B.lessons is not touched.
+const pathLessons = B => B.lessons
+  .filter(l => !l.reference && B.modules.some(m => m.id === l.module))
+  .sort((a, b) => (B.modules.findIndex(m => m.id === a.module)
+    - B.modules.findIndex(m => m.id === b.module)) || (a.order - b.order));
 const bookLessonsFor = (B, moduleId) =>
   pathLessons(B).filter(l => l.module === moduleId).sort((a, b) => a.order - b.order);
 const bookModuleFor = (B, l) => B.modules.find(m => m.id === l.module) ?? null;
@@ -3222,7 +3242,226 @@ function bookLessonNumber(B, l) {
 
 function actingLearnPane(el) { return bookLearnPane(el, BOOKS.acting); }
 
+// THE SEQUENCE VIEW (preview, owner request 2026-10-15). Learn's job is to
+// answer "what do I do next"; the Library already answers "what is there".
+// The module grid answered the second, with the same records and the same
+// tile component the Library uses, so the two pages were one page twice.
+//
+// This shows the lessons themselves, in order, with your position marked:
+// ✓ behind you, ▸ where you are, ○ ahead, ◌ not released yet. Modules become
+// headings rather than destinations, and only the one holding your next
+// lesson is open, so the shape of the course and your place in it fit on one
+// screen instead of behind five clicks.
+//
+// NOTHING LOCKS. Every row is clickable whatever its mark. The order is a
+// recommendation and the app says so out loud in three places.
+//
+// No badge is drawn for the ordinary state. Five tiles all reading "Not
+// started" is five times nothing, and it was most of why the old grid read
+// as decoration; a badge appears here only where it differs from the rest.
+// THE TREE (owner direction 2026-10-19). A module is a tree: the lessons
+// are ROOTS below ground, and the canopy above is the performance they
+// feed. The metaphor is the course's own argument, which is that behaviour
+// on stage is a product of work nobody in the audience ever sees.
+//
+// One tree per module, stacked, so the course is still ONE scroll rather
+// than five destinations. That decision has survived three designs now.
+//
+// DRAWN, NOT PHOTOGRAPHED. Roots, trunk and canopy are SVG computed from
+// the lesson count, so a module of six and a module of ten both get a tree
+// that fits them and nothing needs commissioning.
+//
+// ONE LAYOUT PASS. The pill positions are computed once and the roots are
+// drawn TO those numbers. The path view disagreed with itself twice by
+// computing a position in two places, and this is the fix for that made
+// into a habit.
+//
+// SCOPED DARK. Tokens live on .tr-view and nowhere else; the app has no
+// dark mode and this must not become one by accident.
+//
+// NOTHING LOCKS. Every root is a button, none disabled, and each tree says
+// so beside its count.
+const TR_SKY = 232;          // canopy band
+const TR_STEP = 84;          // vertical gap between roots
+const TR_TOP = 92;           // first root below the ground line, clear of the badge
+const TR_SIDE = [-1, 1];     // roots alternate, left then right
+
+// The detail card. A root is now SELECTED rather than opened, and the card
+// says what that lesson is before you commit to it: the objective is the
+// one line that answers "is this the thing I need right now".
+//
+// It is never empty. On arrival it shows the lesson this tree would hand
+// you next, so the card is a standing answer rather than a slot waiting
+// for a click.
+function treeCardLesson(B, lessons, nextId) {
+  return lessons.find(l => l.id === nextId)
+    ?? lessons.find(l => B.visible(l) && !speechLessonDone(l.id))
+    ?? lessons.find(l => B.visible(l))
+    ?? lessons[0];
+}
+
+function treeCardHtml(B, lessons, nextId) {
+  const l = treeCardLesson(B, lessons, nextId);
+  if (!l) return '';
+  const open = B.visible(l);
+  return `
+      <div class="tr-card" data-card>
+        <div class="tr-card-text">
+          <h3 class="tr-card-title" data-card-title>${esc(l.title)}</h3>
+          <p class="tr-card-aim" data-card-aim>${esc(l.objective ?? '')}</p>
+        </div>
+        <button class="btn btn-primary tr-card-go" data-card-go="${esc(l.id)}" type="button"
+          ${open ? '' : 'disabled'}>${open ? 'Open lesson' : 'In review'}</button>
+      </div>`;
+}
+
+function treeHtml(B, lessons, nextId) {
+  const n = lessons.length;
+  const W = 300;
+  const cx = W / 2;
+  const earthH = TR_TOP + Math.max(0, n - 1) * TR_STEP + 76;
+  // Pills alternate sides and drift outward as they descend, the way roots
+  // spread. x is the INNER edge of the pill, so the root meets the label.
+  const place = i => {
+    const side = TR_SIDE[i % 2];
+    const depth = Math.min(1, i / Math.max(1, n - 1));
+    // Roots spread as they descend. The cap is generous now only because
+    // the label grows INWARD from the bead: when it grew outward, anything
+    // past about 70 pushed words off the edge of the box.
+    const spread = 26 + depth * 84;
+    return { x: cx + side * spread, y: TR_TOP + i * TR_STEP, side };
+  };
+  const pts = lessons.map((_, i) => place(i));
+  // Each root leaves the trunk base and curves to its pill.
+  const roots = pts.map((p, i) => {
+    // Leave the trunk almost vertically, then swing out: a root that bends
+    // early reads as a wire, one that bends late reads as a root.
+    const midY = p.y / 2;
+    return `<path class="tr-root ${lessons[i].id === nextId ? 'is-live' : ''}"
+      d="M ${cx} 0 C ${cx + p.side * 4} ${midY * 0.55}, ${cx + p.side * (Math.abs(p.x - cx) * 0.35)} ${midY * 1.05}, ${p.x} ${p.y}" />`;
+  }).join('');
+  const pills = lessons.map((l, i) => {
+    const p = pts[i];
+    const visible = B.visible(l);
+    const isDone = speechLessonDone(l.id);
+    const isNext = l.id === nextId;
+    const state = !visible ? 'is-pending' : isDone ? 'is-done' : isNext ? 'is-current' : '';
+    const label = actingPathLabel(l.id, l.title);
+    return `
+      <button class="tr-root-pill ${state} ${p.side < 0 ? 'to-left' : 'to-right'}"
+              data-item="${esc(l.id)}" type="button"
+              style="--tr-x:${p.x}px; --tr-y:${p.y}px"
+              aria-label="${esc(l.title)}${isDone ? ', cultivated' : isNext ? ', current' : ''}${visible ? '' : ', awaiting review'}">
+        <span class="tr-bead" aria-hidden="true">${isDone ? '✓' : !visible ? '◌' : String(i + 1)}</span>
+        <span class="tr-label">${esc(label)}</span>
+      </button>`;
+  }).join('');
+  // Canopy: one leaf per lesson, so the crown grows with the module.
+  const leaves = lessons.map((l, i) => {
+    // A crown, not a cluster: leaves ride an arc across the sky rather than
+    // a circle around the centre, which bunched them all over the trunk.
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    const lx = cx + (t - 0.5) * (W * 0.86);
+    const ly = TR_SKY * 0.52 - Math.sin(t * Math.PI) * TR_SKY * 0.3 + ((i % 3) - 1) * 13;
+    const rad = 27 + (i % 4) * 8;
+    const lit = speechLessonDone(l.id);
+    return `<circle class="tr-leaf ${lit ? 'is-lit' : ''}" cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad}" />`;
+  }).join('');
+  return `
+    <div class="tr-tree">
+      <div class="tr-sky" style="height:${TR_SKY}px">
+        <svg class="tr-canopy" viewBox="0 0 ${W} ${TR_SKY}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+          ${leaves}
+          <path class="tr-trunk" d="M ${cx - 9} ${TR_SKY} L ${cx - 5} ${TR_SKY * 0.42} L ${cx + 5} ${TR_SKY * 0.42} L ${cx + 9} ${TR_SKY} Z" />
+        </svg>
+        <p class="tr-seen">WHAT THE AUDIENCE SEES</p>
+      </div>
+      <div class="tr-earth" style="height:${earthH}px">
+        <p class="tr-cultivates">WHAT THE ACTOR CULTIVATES</p>
+        <svg class="tr-roots" viewBox="0 0 ${W} ${earthH}" width="${W}" height="${earthH}" aria-hidden="true">${roots}</svg>
+        ${pills}
+      </div>
+      ${treeCardHtml(B, lessons, nextId)}
+    </div>`;
+}
+
+function treeCourseHtml(B, nextId) {
+  return B.modules.map(m => {
+    const ls = bookLessonsFor(B, m.id);
+    if (!ls.length) return '';
+    const ready = ls.filter(B.visible);
+    const done = ready.filter(l => speechLessonDone(l.id)).length;
+    return `
+      <section class="tr-module" aria-label="${esc(moduleTitle(B, m))}">
+        <header class="tr-head">
+          <p class="tr-mod">MODULE ${m.n} · ${esc(moduleTitle(B, m).toUpperCase())}</p>
+          <p class="tr-count">${done} of ${ready.length} cultivated
+            <span class="tr-open">Every lesson is open</span></p>
+        </header>
+        ${treeHtml(B, ls, nextId)}
+      </section>`;
+  }).join('');
+}
+
+function bookLearnSequence(el, B) {
+  const cats = B.reviewCats();
+  const lessons = pathLessons(B);
+  const avail = lessons.filter(B.visible);
+  const done = avail.filter(l => speechLessonDone(l.id)).length;
+  const next = avail.find(l => !speechLessonDone(l.id)) ?? null;
+
+  el.innerHTML = `
+    <div class="tr-view">
+    <div class="tr-top">
+      <p class="lp-course">${esc(B.title.toUpperCase())}</p>
+      <h1 class="tr-title">The Work Beneath the Work</h1>
+      <p class="tr-sub">${done} of ${avail.length} cultivated across ${B.modules.length} modules.</p>
+      <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>
+    </div>
+    ${treeCourseHtml(B, next?.id ?? null)}
+    ${cats.total ? reviewStripHtml('ac-review-link', cats.total,
+      `${esc(B.title)} drafts awaiting ${bookReviewerKind(B)} review`) : ''}
+    </div>`;
+
+  el.querySelector('#ac-review-link')?.addEventListener('click', () => renderActingReviewStatus(B.ws));
+  // A root selects; the card opens. Two taps to a lesson is deliberate:
+  // the objective on the card is what tells you whether this is the one
+  // you want, and it cannot do that job after you have already left.
+  el.querySelectorAll('.tr-root-pill').forEach(btn => btn.addEventListener('click', () => {
+    const mod = btn.closest('.tr-module');
+    const l = bookLessonById(B, btn.dataset.item);
+    if (!mod || !l) return;
+    mod.querySelectorAll('.tr-root-pill.is-picked').forEach(x => x.classList.remove('is-picked'));
+    btn.classList.add('is-picked');
+    const open = B.visible(l);
+    mod.querySelector('[data-card-title]').textContent = l.title;
+    mod.querySelector('[data-card-aim]').textContent = l.objective ?? '';
+    const go = mod.querySelector('[data-card-go]');
+    go.dataset.cardGo = l.id;
+    go.disabled = !open;
+    go.textContent = open ? 'Open lesson' : 'In review';
+  }));
+  el.querySelectorAll('[data-card-go]').forEach(btn => btn.addEventListener('click', () => {
+    if (!btn.disabled) renderActingLesson(btn.dataset.cardGo);
+  }));
+  // A path this long opens wherever you left off, not at the top. Without
+  // this a returning reader lands on lesson 1 and has to scroll past
+  // everything they have already done to find where they are.
+  // 'nearest' and not 'center': centring scrolled the page on arrival even
+  // when the current book was already on screen, which pushed the title and
+  // the shelf heading out of view the moment the page opened. This only
+  // moves when the book is actually off screen.
+  const cur = el.querySelector('.tr-root-pill.is-current');
+  if (cur) requestAnimationFrame(() => cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+}
+
 function bookLearnPane(el, B) {
+  // ACTING ONLY while this is being judged (owner decision 2026-10-15). The
+  // three books share this pane, so without the workspace check the flag
+  // would swap Shakespeare and Character too, and a preview with nothing
+  // left to compare against is worth less than one you can switch between.
+  // Widening it later is this condition and nothing else.
+  if (B.ws === 'acting' && learnSequencePreview()) return bookLearnSequence(el, B);
   const cats = B.reviewCats();
   const avail = pathLessons(B).filter(B.visible);
   const done = avail.filter(l => speechLessonDone(l.id)).length;
@@ -3298,6 +3537,142 @@ function bookLearnPane(el, B) {
     b.addEventListener('click', () => navTo(() => renderActingModule(+b.dataset.tile.slice(4), B.ws))));
 }
 
+// THE LEARN PATH (preview, owner direction 2026-10-15).
+//
+// A module is drawn as a winding route through its lessons: done behind you,
+// where you are, what is ahead. It replaces a grid of tiles with something
+// that shows the shape of the work and your place in it at a glance.
+//
+// TWO OWNER DECISIONS ARE BUILT IN AND SHOULD NOT DRIFT:
+//
+// NOTHING LOCKS. A node ahead of you is grey because you have not reached it,
+// never because you may not. Every node is a real button, no node is disabled,
+// and the page says so in words. The app promises in three places that every
+// chapter is free to read in any order, and gating reading would reintroduce
+// the shape of the hearts system removed on 2026-10-05, the one mechanic that
+// could stop somebody practising.
+//
+// THERE IS NO TREASURE CHEST. The design had one and the owner cut it. Hearts,
+// streaks, XP and gems were removed in four deliberate cuts, so a chest would
+// be a payout icon with no payout behind it, which is the "coming soon" shape
+// the launch lint bans across the whole view layer. A path here is a map, not
+// a board game.
+//
+// The winding is drawn from ONE array of offsets, so the curve and the node
+// positions cannot disagree: the SVG reads the same numbers the nodes do.
+const LP_OFFSETS = [0, 34, 58, 34, 0, -34, -58, -34];
+const LP_STEP = 94;
+// The pill hangs off the right of its dot, so a node pushed right carries
+// its label further right again and ran off a phone screen: the page scrolled
+// sideways, which the app does not allow anywhere else. The spread is
+// narrowed instead of the curve being redrawn, and BOTH the nodes and the
+// svg read it, so the two cannot come apart the way they did before.
+// Measured once per render; a rotation needs a re-render to re-measure,
+// which is acceptable while this is a preview and is noted here rather
+// than hidden.
+const lpSpread = () => (window.innerWidth < 430 ? 0.5 : 1);
+const lpX = (i, s) => Math.round(LP_OFFSETS[i % LP_OFFSETS.length] * s);
+
+// ONE PATH THROUGH THE WHOLE COURSE (owner direction 2026-10-15).
+//
+// The first build drew a path per module, which put a menu between the reader
+// and the route and made a module a destination again, the very thing the
+// module grid was doing wrong. There is one route now, all 33 lessons of it,
+// and a module is a SIGN ALONG THE WAY rather than a door: it marks where you
+// are without interrupting the line, which stays unbroken from lesson 1 to
+// the end.
+//
+// Numbering runs 1..33 across the whole course for the same reason. Restarting
+// at each module would say the modules are separate journeys.
+const LP_GAP = 34;        // extra air before a module sign
+const LP_SIGN = 46;       // the height the sign itself occupies
+
+// The node marks. Seven line glyphs on a 24-unit grid, drawn with
+// currentColor so each node state colours its own icon. Inline rather than
+// files: they are a dozen path commands each, they have to recolour with
+// the node they sit in, and an <img> could not.
+const LP_ICONS = {
+  read: '<path d="M3 5.5h6a3 3 0 0 1 3 3v10a2.5 2.5 0 0 0-2.5-2.5H3zM21 5.5h-6a3 3 0 0 0-3 3v10a2.5 2.5 0 0 1 2.5-2.5H21z"/>',
+  decide: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/><path d="M12 1.6v3.2M12 19.2v3.2M1.6 12h3.2M19.2 12h3.2"/>',
+  mark: '<path d="M4 20l1-4.2L16.1 4.7a2 2 0 0 1 2.8 0l.4.4a2 2 0 0 1 0 2.8L8.2 19 4 20z"/><path d="M14.6 6.2l3.2 3.2"/>',
+  partner: '<circle cx="8.2" cy="8.4" r="3"/><circle cx="16.4" cy="9.4" r="2.4"/><path d="M2.8 19.4c0-3 2.4-5 5.4-5s5.4 2 5.4 5"/><path d="M16 14.6c2.6.2 4.4 2.1 4.4 4.8"/>',
+  time: '<path d="M10 3.2h4l4.4 17.6H5.6z"/><path d="M6.6 15.4h10.8"/><path d="M12 15.4V7.6"/>',
+  drill: '<path d="M20 11.2a8 8 0 1 0-.9 4.6"/><path d="M20.6 5.6v5.6H15"/>',
+  perform: '<rect x="9" y="2.8" width="6" height="10.4" rx="3"/><path d="M5.4 11.4a6.6 6.6 0 0 0 13.2 0"/><path d="M12 18v3.2M8.6 21.2h6.8"/>',
+};
+const lpIconSvg = kind => (LP_ICONS[kind]
+  ? `<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">${LP_ICONS[kind]}</svg>`
+  : '');
+
+function learnPathHtml(B, lessons, nextId) {
+  const spread = lpSpread();
+  const cx = i => 150 + lpX(i, spread);
+  // ONE LAYOUT PASS, so the signs, the nodes and the curve all read the same
+  // y values. Anything that computes a position twice eventually disagrees
+  // with itself, which this view has already proved twice.
+  const items = [];
+  let y = 0;
+  let lastMod = null;
+  lessons.forEach((l, i) => {
+    const m = bookModuleFor(B, l);
+    if (m && m.id !== lastMod) {
+      if (lastMod !== null) y += LP_GAP;
+      items.push({ kind: 'sign', m, y });
+      y += LP_SIGN;
+      lastMod = m.id;
+    }
+    items.push({ kind: 'node', l, i, y });
+    y += LP_STEP;
+  });
+  const nodesOnly = items.filter(it => it.kind === 'node');
+  const H = Math.max(1, y);
+  const SVG_H = Math.max(1, nodesOnly[nodesOnly.length - 1]?.y ?? 1);
+  // One unbroken line through every node centre, straight across the signs.
+  const d = nodesOnly.map((it, k) => {
+    if (!k) return `M ${cx(it.i)} ${it.y}`;
+    const prev = nodesOnly[k - 1];
+    const my = (prev.y + it.y) / 2;
+    return `C ${cx(prev.i)} ${my}, ${cx(it.i)} ${my}, ${cx(it.i)} ${it.y}`;
+  }).join(' ');
+  const html = items.map(it => {
+    if (it.kind === 'sign') {
+      return `<p class="lp-sign" style="--lp-y:${it.y}px">
+                <span class="lp-sign-n">${it.m.n}</span>${esc(moduleTitle(B, it.m))}</p>`;
+    }
+    const { l, i } = it;
+    const visible = B.visible(l);
+    const isDone = speechLessonDone(l.id);
+    const isNext = l.id === nextId;
+    const state = !visible ? 'is-pending' : isDone ? 'is-done' : isNext ? 'is-current' : 'is-ahead';
+    // Done always shows the tick. Everything else shows what KIND of work
+    // it is, and falls back to its number when no kind is recorded.
+    const kind = actingPathKind(l.id);
+    const mark = isDone ? '✓' : (lpIconSvg(kind) || String(i + 1));
+    const label = actingPathLabel(l.id, l.title);
+    // The accessible name is the real title; the pill is the short label.
+    return `
+      <button class="lp-node ${state}${lpX(i, spread) > 0 ? ' is-inward' : ''}" data-item="${esc(l.id)}" type="button"
+              style="--lp-x:${lpX(i, spread)}px; --lp-y:${it.y}px"
+              aria-label="${esc(l.title)}${isDone ? ', completed' : isNext ? ', up next' : ''}">
+        <span class="lp-dot" aria-hidden="true">${isDone || !kind ? esc(mark) : mark}</span>
+        <span class="lp-pill">${esc(label)}</span>
+      </button>`;
+  }).join('');
+  // The scene sits behind the whole column, with a wash between it and the
+  // labels. With no art the tint carries the theme on its own.
+  const T = ACTING_PATH_THEME;
+  const stageStyle = T.art ? `--lp-art:url('${T.art}')` : '';
+  return `
+    <div class="lp-stage${T.art ? ' has-art' : ''}" style="${stageStyle}">
+    <div class="lp-path" style="--lp-h:${H}px">
+      <svg class="lp-line" viewBox="0 0 300 ${SVG_H}" width="300" height="${SVG_H}" aria-hidden="true">
+        <path d="${d}" />
+      </svg>
+      ${html}
+    </div>
+    </div>`;
+}
+
 function renderActingModule(n, ws = 'acting') {
   record(() => renderActingModule(n, ws));
   stopSpeech();
@@ -3354,6 +3729,7 @@ function actingChapterBlocks(l) {
     : b.fig ? actingFigureHtml(b.fig)
     : b.mask ? maskSheetHtml(b.mask)
     : b.profile ? maskProfileHtml(b.profile)
+    : b.plate ? castChartHtml()
     : b.roster ? maskRosterHtml(b.roster)
     // The complete reference, inside the lesson that explains why it
     // exists (owner order 2026-09-29). Both resolve from the one record
@@ -3423,10 +3799,22 @@ const MASK_PROFILE = [
   ['recovery', 'Recovery'], ['voice', 'Voice and breath'], ['rhetoric', 'What the words are doing'],
   ['note', 'History and variation'],
 ];
-// One family of masks as a row of cards, for the lesson that meets the
-// whole company: name, place, want and contradiction, from the ONE record.
-// Each name in a roster opens that character's own chapter, where the
+// One family of masks as a column of cards, for the lesson that meets the
+// whole company: portrait, name, place, want and contradiction, all from
+// the ONE record. Each card opens that character's own chapter, where the
 // full breakdown lives.
+//
+// REMOVED AND RESTORED ON THE SAME DAY (2026-10-19), which is worth
+// recording because the second decision is not a reversal of the first.
+// The rosters came out because four clickable text grids under a clickable
+// chart were the same list of names five times over. They came back
+// CARRYING PORTRAITS, and a face is the one thing neither the chart's
+// hotspots nor a text row gives you — the chart is a map of who is related
+// to whom, and this is who they are to look at. The two sections now
+// answer different questions, which is what the earlier cut was asking for.
+//
+// It also covers the gap the chart cannot: the chart draws twelve figures
+// and Tartaglia, Scaramuccia and Pasquariello are not among them.
 const maskChapterId = id => CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === id))?.id ?? null;
 function wireMaskLinks() {
   app.querySelectorAll('[data-mask]').forEach(b => b.addEventListener('click', () => {
@@ -3440,14 +3828,87 @@ function maskRosterHtml(ids) {
   if (!rows.length) return '';
   const card = k => {
     const to = maskChapterId(k.id);
+    const art = characterCard(k.id);
+    // No loading="lazy" here, deliberately. A grid of portraits left
+    // unloaded while it sits in full view is a bug this page has already
+    // had once; the thirteen together are about 600KB and they are the
+    // point of the section rather than decoration further down it.
+    const pic = art
+      ? `<img class="mask-card-pic" src="${art.src}" alt="${esc(art.alt)}"
+           width="${art.w}" height="${art.h}" decoding="async">`
+      : '';
     const body = `<span class="mask-card-name">${esc(k.name)}</span>
       <span class="mask-card-note"><b>${esc(k.family)}</b>, from ${esc(k.from)}. Wants ${esc(k.wants.charAt(0).toLowerCase() + k.wants.slice(1))}
         <b>Contradiction:</b> ${esc(k.contradiction.charAt(0).toLowerCase() + k.contradiction.slice(1))}</span>`;
     return to
-      ? `<button class="mask-card" data-mask="${esc(k.id)}" type="button"><span class="mask-card-body">${body}</span><span class="tile-chev" aria-hidden="true">›</span></button>`
-      : `<div class="mask-card is-plain"><span class="mask-card-body">${body}</span></div>`;
+      ? `<button class="mask-card" data-mask="${esc(k.id)}" type="button">${pic}<span class="mask-card-body">${body}</span><span class="tile-chev" aria-hidden="true">›</span></button>`
+      : `<div class="mask-card is-plain">${pic}<span class="mask-card-body">${body}</span></div>`;
   };
   return `<div class="mask-cards">${rows.map(card).join('')}</div>`;
+}
+
+// ── The clickable relationship chart (owner direction 2026-10-19) ──
+// The company drawn as a map, with the lines between them, and every figure
+// a button that opens that character's chapter.
+//
+// IT REPLACED A SIXTEEN-CARD PLATE the same day it arrived. The plate showed
+// more characters and taught no connections; this shows the connections,
+// which is the one thing nothing else in the course draws. Keeping both would
+// have been two clickable grids of the same people on one page, which is the
+// redundancy the rosters were cut for an hour earlier.
+//
+// THREE MASKS ARE NOT ON IT: Tartaglia, Scaramuccia and Pasquariello. It was
+// five until the art was redrawn on 2026-10-19 to add Pulcinella and
+// Pedrolino, who are two of the original nine and the ancestors of Punch and
+// Pierrot; leaving them off a page called The Cast was the real gap, and the
+// caption had been describing a branching the picture did not draw.
+//
+// MAGNIFICO OPENS PANTALONE. The figure's own caption already argues it:
+// Magnifico is the older figure of pure authority that Pantalone descends
+// from. Same move as Scapino opening Brighella.
+//
+// COORDINATES ARE PERCENTAGES so the hotspots ride the image at any width.
+// Pixel offsets would drift the moment the column changed size, which is the
+// mistake the learn path made twice.
+const CAST_CHART = [
+  { mask: 'pantalone', label: 'Magnifico', as: 'opens Pantalone', x: 50.5, y: 14.5 },
+  { mask: 'innamorati', label: 'Innamorata', x: 32, y: 25 },
+  { mask: 'innamorati', label: 'Innamorato', x: 71, y: 25 },
+  { mask: 'pantalone', label: 'Pantalone', x: 17.5, y: 43 },
+  { mask: 'colombina', label: 'Colombina', x: 51, y: 43 },
+  { mask: 'dottore', label: 'Il Dottore', x: 84.5, y: 43 },
+  { mask: 'brighella', label: 'Brighella', x: 26, y: 60.5 },
+  { mask: 'arlecchino', label: 'Arlecchino', x: 73, y: 60.5 },
+  { mask: 'capitano', label: 'Il Capitano', x: 51, y: 70 },
+  { mask: 'pulcinella', label: 'Pulcinella', x: 16.5, y: 81 },
+  { mask: 'pedrolino', label: 'Pedrolino', x: 84.5, y: 81 },
+  { mask: 'zanni', label: 'Zanni', x: 50, y: 91.5 },
+];
+
+function castChartHtml() {
+  // Same three-registry lookup actingFigureHtml uses. Reaching for
+  // actingFigure alone returned nothing, because cm- keys live in the
+  // CHARACTER registry, and the chart silently rendered as an empty string.
+  const art = actingFigure('cm-cast-tree') ?? characterFigure('cm-cast-tree')
+    ?? shakespeareFigure('cm-cast-tree');
+  if (!art) return '';
+  const spots = CAST_CHART.map(c => {
+    const to = maskChapterId(c.mask);
+    const name = `${c.label}${c.as ? ', ' + c.as : ''}`;
+    return to
+      ? `<button class="chart-spot" data-mask="${esc(c.mask)}" type="button"
+           style="--sx:${c.x}%; --sy:${c.y}%" aria-label="${esc(name)}">
+           <span class="chart-spot-name">${esc(c.label)}</span></button>`
+      : '';
+  }).join('');
+  return `
+    <figure class="sp-fig cast-chart">
+      <div class="chart-wrap">
+        <img src="${art.src}" alt="${esc(art.alt)}" width="${art.w ?? 1536}" height="${art.h ?? 1024}">
+        ${spots}
+      </div>
+      ${art.caption ? `<figcaption class="sp-figcap">${esc(art.caption)}</figcaption>` : ''}
+    </figure>`;
 }
 
 function maskProfileHtml(id) {
@@ -3506,8 +3967,7 @@ function renderActingChapter(id) {
       ${l.partnerWork ? `<p class="pane-note">This chapter is partner work. Try it on a two-hander from the
         <button class="linkish" id="ac-scenes-door" type="button">Scenes shelf</button> — public-domain scenes, shown verbatim.</p>` : ''}
       ${l.reflection ? `<h2 class="guide-heading">Reflection</h2>
-      <p class="guide-text">${esc(l.reflection)}</p>
-      <p class="pane-note">A question to sit with — there is no answer to submit and nothing here is scored.</p>` : ''}
+      <p class="guide-text">${esc(l.reflection)}</p>` : ''}
       ${glossaryChips(l.glossary)}
       ${bookModuleFor(B, l) && !l.reference ? `<p class="pane-note"><button class="linkish" id="ac-study" type="button">Study this in Learn</button></p>`
         : ''}
@@ -3577,6 +4037,58 @@ function renderActingLesson(id) {
   const nxt = at >= 0 && at < seq.length - 1 ? seq[at + 1] : null;
   const isDone = speechLessonDone(id);
 
+  const crumb = `Module ${m?.n} · ${esc(m ? moduleTitle(B, m) : '')}${l.reference ? '' : ` · Lesson ${esc(bookLessonNumber(B, l))}`}`;
+  const picker = m ? (() => {
+    const mods = bookLessonsFor(B, m.id).filter(B.visible);
+    return chapterListHtml(mods, mods.findIndex(x => x.id === l.id), 'Lesson');
+  })() : '';
+  const extras = `
+        ${l.sharedFrom ? `<p class="pane-note">${esc(l.sharedNote ?? '')}
+          <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
+        ${l.doorway ? `<p class="pane-note">${esc(l.doorway.note ?? '')}
+          <button class="linkish" data-shared="${esc(l.doorway.id)}" data-shared-ws="acting" type="button">Open ${esc(l.doorway.label)}</button></p>` : ''}`;
+  const footer = `
+        <div class="practice-row">
+          <button class="btn ${isDone ? 'btn-lite' : 'btn-primary'}" id="ac-done" type="button" ${isDone ? 'disabled' : ''}>${isDone ? 'Completed ✓' : 'Mark lesson complete'}</button>
+          ${nxt ? `<button class="btn" id="ac-next-lesson" type="button">Next: ${esc(nxt.title)} ›</button>` : ''}
+        </div>
+        <p class="pane-note" id="ac-done-note" aria-live="polite">${isDone ? 'Completed. Revisit the chapter any time — nothing resets.' : ''}</p>`;
+
+  // THE READING LAYOUT (preview, owner request 2026-10-16). Same record,
+  // same fields, same wiring: every id, data hook and helper below is the
+  // one the standard layout uses, so this is a restyle and not a fork.
+  //
+  // WHAT CHANGES AND WHY:
+  //  * The field names come off the page. 'Objective', 'Orientation' and
+  //    'Reflection' are the data model, not language a learner needs, and
+  //    on a lesson actually called Objective the heading read as a stutter.
+  //  * The orientation becomes the LEAD. It is the thesis line, written in
+  //    one or two sentences, and it was sitting as body text under a grey
+  //    label at the same weight as everything else.
+  //  * The objective drops to a quiet line underneath, because what you
+  //    will be able to do matters less on arrival than what the idea is.
+  //  * The reflection becomes ONE card with its own note inside it, rather
+  //    than a heading, a paragraph and a disclaimer stacked as three things.
+  if (B.ws === 'acting' && learnSequencePreview()) {
+    app.innerHTML = `
+      ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
+      <main class="guide sp-lesson lx">
+        <p class="pane-note lx-crumb">${crumb}</p>
+        ${picker}
+        <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
+        ${l.orientation ? `<p class="lx-lead">${esc(l.orientation)}</p>` : ''}
+        ${l.objective ? `<p class="lx-aim">${esc(l.objective)}</p>` : ''}
+        <section class="sp-chapter lx-body" aria-label="The chapter">
+          ${actingChapterBlocks(l)}
+          ${extras}
+        </section>
+        ${l.reflection ? `
+        <aside class="lx-reflect" aria-label="Reflection">
+          <p class="lx-q">${esc(l.reflection)}</p>
+        </aside>` : ''}
+        <section class="lx-foot" aria-label="Complete and continue">${footer}</section>
+      </main>`;
+  } else {
   app.innerHTML = `
     ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
     <main class="guide sp-lesson">
@@ -3604,7 +4116,6 @@ function renderActingLesson(id) {
       <section class="sp-step" aria-label="Reflection">
         <h2 class="guide-heading">Reflection</h2>
         <p class="guide-text">${esc(l.reflection ?? '')}</p>
-        <p class="pane-note">A question to sit with — there is no answer to submit and nothing here is scored.</p>
       </section>
       <section class="sp-step" aria-label="Complete and continue">
         <h2 class="guide-heading">Complete and continue</h2>
@@ -3615,6 +4126,7 @@ function renderActingLesson(id) {
         <p class="pane-note" id="ac-done-note" aria-live="polite">${isDone ? 'Completed. Revisit the chapter any time — nothing resets.' : ''}</p>
       </section>
     </main>`;
+  }
   wireBrandHome();
   wireMaskLinks();
   app.querySelector('#ac-h').focus();
@@ -4716,6 +5228,18 @@ function setShakespearePreview(on) {
     else localStorage.removeItem(SHAKESPEARE_PREVIEW_KEY);
   } catch {}
   setWorkspace(on ? 'shakespeare' : 'acting');
+}
+
+// The Learn sequence preview. Unlike the two above it opens no course and
+// changes no workspace: it only swaps how Learn draws itself, so it lands
+// the owner on Learn to look at the thing that changed.
+const LEARN_SEQUENCE_HASHES = ['#learn-sequence', '#learn-sequence-off'];
+function setLearnSequencePreview(on) {
+  try {
+    if (on) localStorage.setItem(LEARN_SEQUENCE_PREVIEW_KEY, 'on');
+    else localStorage.removeItem(LEARN_SEQUENCE_PREVIEW_KEY);
+  } catch {}
+  goSection('learn');
 }
 
 // The same door again for the hidden Rhetoric course (owner decision
@@ -11859,6 +12383,7 @@ if (!framedHostile) {
   // the owner (and #character-preview-off closes it again).
   if (CHARACTER_PREVIEW_HASHES.includes(location.hash)) setCharacterPreview(location.hash === '#character-preview');
   if (SHAKESPEARE_PREVIEW_HASHES.includes(location.hash)) setShakespearePreview(location.hash === '#shakespeare-preview');
+  if (LEARN_SEQUENCE_HASHES.includes(location.hash)) setLearnSequencePreview(location.hash === '#learn-sequence');
   if (RHETORIC_PREVIEW_HASHES.includes(location.hash)) setRhetoricPreview(location.hash === '#rhetoric-preview');
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool

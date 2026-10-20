@@ -6876,17 +6876,33 @@ export async function run({ navDoc = document } = {}) {
     const figs = Object.entries(CHARACTER_FIGURES);
     const figFiles = await Promise.all(figs.map(([, f]) =>
       fetch('../img/lessons/commedia/' + f.file, { method: 'HEAD' }).then(r => r.ok).catch(() => false)));
+    // ONE figure is exempt from the caption rule, BY KEY: the owner took
+    // the caption off the cast chart on 2026-10-19. Naming it here rather
+    // than softening the test to 'captions that exist must say it' is the
+    // whole point — a new figure that ships without a caption still fails,
+    // so the exemption cannot spread by accident.
+    const NO_CAPTION = ['cm-cast-tree'];
     check('character: every picture that ships has its file, alt text and an interpretation caption',
-      figs.every(([, f], i) => figFiles[i] && f.alt && /interpretation/i.test(f.caption ?? '')),
-      `${figs.length} picture(s) registered`);
+      figs.every(([k, f], i) => figFiles[i] && f.alt
+        && (NO_CAPTION.includes(k) ? !f.caption : /interpretation/i.test(f.caption ?? ''))),
+      `${figs.length} picture(s) registered, ${NO_CAPTION.length} exempt by name`);
     // The commedia collection landed whole (2026-09-22), so every slot the
     // chapters reserve now resolves. A new slot without art would fail
     // here rather than render an invisible gap nobody notices.
-    // 30 character slots (three for each of nine masks, six for the two
-    // Lovers) plus the company family tree on The Cast.
+    // 33 { fig } slots: three each for the nine masks and for Zanni, six for
+    // the two Lovers. Zanni's three arrived with the second art intake on
+    // 2026-10-19; Tartaglia, Scaramuccia and Pasquariello still have no
+    // pictures and reserve no slots, which is why this is 33 and not 42.
+    //
+    // IT WAS 31 AND THAT NUMBER WENT STALE ON 2026-10-19, before this. The
+    // Cast used to carry BOTH { fig: 'cm-cast-tree' } and the plate; the
+    // clickable chart replaced the plate and the { fig } went with it, so
+    // the count fell to 30 and this check had been failing since. The chart
+    // renders through { plate: true } and is not a { fig } slot, so it is
+    // registered in art.js but deliberately absent from this tally.
     const figKeys = CHARACTER_LESSONS.flatMap(l => (l.body ?? []).filter(b => b.fig).map(b => b.fig));
     check('character: every { fig } slot names a registered picture with real alt text',
-      figKeys.length === 31
+      figKeys.length === 33
       && figKeys.every(k => { const f = characterFigure(k); return !!f && f.alt.length > 40 && !!f.caption; }),
       `${figKeys.length} slot(s)`);
     check('character: the Lovers chapter carries both performers, face then stance then walk',

@@ -1452,10 +1452,23 @@ body.modal-open { overflow: hidden; }
 }
 .mask-card.is-plain { cursor: default; }
 button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--green); background: var(--accent-tint); }
-.mask-card-body { flex: 1 1 auto; }
+.mask-card-body { flex: 1 1 auto; align-self: center; }
 .mask-card-name { font-family: var(--serif); font-size: 18px; font-weight: 700; display: block; margin-bottom: 2px; }
 .mask-card-note { display: block; font-size: 14px; line-height: 1.45; color: var(--muted); }
-.mask-card .tile-chev { flex: 0 0 auto; color: var(--muted); }
+.mask-card .tile-chev { flex: 0 0 auto; color: var(--muted); align-self: center; }
+/* The portrait is cut from the engraved plate, so it carries its own cream
+   paper to its edges. It gets a hairline rather than a panel-coloured
+   surround, which would read as a second, wrong-coloured margin around the
+   first. The 340x440 attributes hold the space before it loads. */
+.mask-card-pic {
+  flex: 0 0 auto; width: 92px; height: 119px; object-fit: cover;
+  border: 1px solid var(--line); border-radius: 8px; display: block;
+}
+@media (max-width: 560px) {
+  .mask-card { gap: 12px; padding: 10px; }
+  .mask-card-pic { width: 72px; height: 93px; }
+  .mask-card-name { font-size: 17px; }
+}
 
 /* My Characters (the Building a Character Studio). */
 .field[hidden] { display: none; }
@@ -1871,6 +1884,317 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .chapter-row.is-pending { background: var(--panel-2); }
 .ch-mark { color: var(--green-dark); font-size: 14px; width: 1.1em; text-align: center; }
 .ch-title { font-size: 15px; font-weight: 600; }
+
+/* ── The Learn sequence (preview, 2026-10-15) ──────────────────
+   A sequence has to read top to bottom, so is-seq undoes the two
+   columns .chapter-rows takes on wide screens: order is the whole
+   point of this view and two columns destroy it. */
+.chapter-rows.is-seq { grid-template-columns: 1fr; }
+@media (min-width: 900px) { .chapter-rows.is-seq { grid-template-columns: 1fr; } }
+.chapter-row.has-num { grid-template-columns: auto auto 1fr auto auto; }
+.ch-num { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums;
+  min-width: 2.2em; }
+.chapter-row.is-current .ch-num { color: var(--green-dark); }
+
+/* ── The Learn path (preview, 2026-10-15) ──────────────────────
+   A module drawn as a route. Four node states and NOT ONE OF THEM
+   IS DISABLED: 'is-ahead' is grey because you have not reached it,
+   never because you may not. Nothing here may become a lock. */
+.lp-head { text-align: center; margin: 0 0 18px; }
+.lp-course { font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 4px; }
+.lp-title { font-family: var(--serif, Georgia, serif); font-size: 27px; margin: 0 0 12px; }
+.lp-bar { display: flex; gap: 5px; justify-content: center; margin: 0 0 9px; }
+.lp-bar i { width: 26px; height: 6px; border-radius: 3px; background: var(--line); }
+.lp-bar i.is-on { background: var(--green); }
+.lp-note { font-size: 13.5px; color: var(--muted); margin: 0; }
+
+/* ── The clickable relationship chart (2026-10-19) ─────────────
+   The company as a map with every figure a button. Hotspots are
+   PERCENTAGES of the image box, so they ride the art at any width;
+   pixel offsets drift the moment the column resizes, which is the
+   mistake the learn path made twice before this. */
+.cast-chart { margin: 0 0 20px; }
+.chart-wrap { position: relative; display: block; line-height: 0; }
+.chart-wrap img { width: 100%; height: auto; display: block; border-radius: 6px; }
+.chart-spot { position: absolute; left: var(--sx); top: var(--sy);
+  transform: translate(-50%, -50%);
+  width: 17%; height: 15%; min-width: 48px; min-height: 48px;
+  background: transparent; border: 2px solid transparent; border-radius: 10px;
+  cursor: pointer; padding: 0; display: grid; place-items: end center;
+  transition: background .13s ease, border-color .13s ease; }
+.chart-spot:hover, .chart-spot:focus-visible {
+  background: rgba(111,134,87,.16); border-color: var(--green); outline: none; }
+/* The name only appears on hover or focus: the art already labels every
+   figure, so showing it again by default would print each name twice. */
+.chart-spot-name { font-size: 11.5px; font-weight: 700; letter-spacing: .04em;
+  text-transform: uppercase; color: #fff; background: var(--green-dark);
+  padding: 3px 8px; border-radius: 999px; opacity: 0; transform: translateY(6px);
+  transition: opacity .13s ease, transform .13s ease; white-space: nowrap; }
+.chart-spot:hover .chart-spot-name, .chart-spot:focus-visible .chart-spot-name {
+  opacity: 1; transform: translateY(0); }
+/* Touch has no hover, so the targets stay large and the names stay hidden;
+   the art is the label there. */
+@media (prefers-reduced-motion: reduce) {
+  .chart-spot, .chart-spot-name { transition: none; }
+}
+
+/* ── The tree (preview, 2026-10-19) ────────────────────────────
+   A module is a tree. The lessons are roots below ground and the
+   canopy above is the performance they feed, which is the course's
+   own argument about where behaviour comes from.
+
+   SCOPED DARK, NOT A DARK MODE. These tokens live on .tr-view and
+   nowhere else. The app has no dark theme and this must not quietly
+   become one. */
+.tr-view { --tr-sky: #2b3a2c; --tr-soil: #4a3327; --tr-soil-2: #3a271e;
+  --tr-bark: #c9a287; --tr-ink: #f2ece0; --tr-dim: #c0b4a2;
+  --tr-gold: #e3bb5e; --tr-leaf: #7f9e6d;
+  background: #1d1a17; color: var(--tr-ink);
+  border-radius: 16px; padding: 20px 12px 24px; }
+.tr-top { margin: 0 0 20px; }
+.tr-view .lp-course { color: #d98f72; letter-spacing: .14em; }
+.tr-title { font-family: var(--serif, Georgia, serif); font-size: 29px; line-height: 1.12;
+  color: var(--tr-ink); margin: 0 0 8px; }
+.tr-sub { color: var(--tr-dim); font-size: 14px; margin: 0 0 12px; }
+.tr-view .tr-warn { background: rgba(227,187,94,.1); border-left-color: var(--tr-gold);
+  color: #ecdcb8; }
+.tr-view code { background: rgba(255,255,255,.08); color: #ecdcb8; }
+
+.tr-module { margin: 0 0 26px; }
+.tr-head { margin: 0 0 10px; }
+.tr-mod { color: #d98f72; font-size: 11.5px; font-weight: 700; letter-spacing: .13em; margin: 0 0 3px; }
+.tr-count { color: var(--tr-dim); font-size: 13.5px; margin: 0;
+  display: flex; flex-wrap: wrap; gap: 3px 14px; align-items: baseline; }
+.tr-open { color: #9bbd92; font-weight: 600; }
+
+.tr-tree { border-radius: 12px; overflow: hidden; }
+/* Above ground */
+.tr-sky { position: relative; background: linear-gradient(180deg, #2f4030, #253326); }
+.tr-canopy { display: block; width: 100%; height: 100%; }
+.tr-leaf { fill: var(--tr-leaf); opacity: .36; }
+.tr-leaf.is-lit { opacity: .78; }
+.tr-trunk { fill: var(--tr-bark); }
+.tr-seen { position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+  margin: 0; font-size: 10.5px; font-weight: 700; letter-spacing: .13em;
+  color: #cfe0c4; background: rgba(0,0,0,.3); padding: 5px 11px; border-radius: 999px; }
+/* Below ground */
+.tr-earth { position: relative; background: linear-gradient(180deg, var(--tr-soil), var(--tr-soil-2));
+  border-top: 3px solid #7f9e6d; }
+.tr-cultivates { position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+  margin: 0; font-size: 10.5px; font-weight: 700; letter-spacing: .13em; z-index: 2;
+  color: #e8d4bf; background: rgba(0,0,0,.26); padding: 5px 11px; border-radius: 999px; }
+.tr-roots { position: absolute; left: 50%; top: 0; transform: translateX(-50%);
+  overflow: visible; pointer-events: none; }
+.tr-root { fill: none; stroke: var(--tr-bark); stroke-width: 5; stroke-linecap: round;
+  opacity: .52; }
+.tr-root.is-live { stroke: var(--tr-gold); opacity: 1; stroke-width: 6; }
+
+/* A root ends in its label. The pill is anchored by the end of the root,
+   so the two cannot drift apart when a word gets longer. */
+/* THE LABEL GROWS INWARD, toward the trunk, never outward. Growing out
+   from the root end pushed the outermost pills off both edges of the box
+   and cut the words in half. The BEAD stays on the root end either way,
+   so the root still meets its label exactly. */
+.tr-root-pill { position: absolute; left: 50%; top: var(--tr-y);
+  margin-left: calc(var(--tr-x) - 150px - 15px);
+  transform: translateY(-50%);
+  display: flex; align-items: center; gap: 9px; white-space: nowrap;
+  background: rgba(0,0,0,.3); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 999px; padding: 6px 14px 6px 6px; cursor: pointer;
+  font: inherit; color: var(--tr-ink); }
+/* Right-hand roots: the pill hangs back to the left, bead still on the end. */
+.tr-root-pill.to-right { flex-direction: row-reverse; padding: 6px 6px 6px 14px;
+  margin-left: calc(var(--tr-x) - 150px + 15px);
+  transform: translate(-100%, -50%); }
+.tr-root-pill:hover { border-color: var(--tr-gold); }
+.tr-root-pill:focus-visible { outline: 2px solid var(--tr-gold); outline-offset: 2px; }
+.tr-bead { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
+  background: rgba(255,255,255,.1); color: var(--tr-dim); font-size: 13px; font-weight: 700;
+  flex: 0 0 auto; }
+.tr-label { font-size: 14.5px; font-weight: 600; }
+.tr-root-pill.is-done .tr-bead { background: #7f9e6d; color: #1d2a18; }
+.tr-root-pill.is-current { background: var(--tr-gold); border-color: var(--tr-gold);
+  box-shadow: 0 0 22px rgba(227,187,94,.4); }
+.tr-root-pill.is-current .tr-label { color: #2b2118; font-weight: 700; }
+.tr-root-pill.is-current .tr-bead { background: #3a2c17; color: var(--tr-gold); }
+.tr-root-pill.is-pending { opacity: .55; }
+/* Picked is not the same as current. Current means "the next one you have
+   not done"; picked means "the one you are looking at", and both can be on
+   screen at once, so they must not look alike. */
+.tr-root-pill.is-picked { border-color: var(--tr-ink); background: rgba(255,255,255,.14); }
+.tr-root-pill.is-current.is-picked { border-color: #fff; }
+
+/* The detail card: what this root is, before you commit to opening it. */
+.tr-card { display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+  background: #241f1a; border-top: 1px solid rgba(255,255,255,.08);
+  padding: 15px 16px; }
+.tr-card-text { flex: 1 1 190px; min-width: 0; }
+.tr-card-title { font-family: var(--serif, Georgia, serif); font-size: 19px;
+  color: var(--tr-ink); margin: 0 0 4px; }
+.tr-card-aim { font-size: 14px; line-height: 1.45; color: var(--tr-dim); margin: 0; }
+.tr-card-go { flex: 0 0 auto; min-height: 44px; }
+.tr-card-go[disabled] { opacity: .5; cursor: default; }
+@media (max-width: 400px) { .tr-label { font-size: 13.5px; } }
+
+/* THE STAGE: the course's own scene behind the path, plus the tint that
+   carries the theme where a single image cannot reach. The wash between
+   the art and the labels is not decoration: photographic backgrounds are
+   where text contrast dies, and this app darkened its muted grey for
+   WCAG AA rather than let that slide. */
+/* WITHOUT ART THE STAGE PAINTS NOTHING (owner decision 2026-10-15). It
+   carried a warm tint for about an hour and the tint was a mistake twice
+   over: a faint wash behind no picture reads as an image that failed to
+   load rather than as a choice, and it was sized for a one-screen panel
+   while the stage is ten screens tall, so it faded out around 2,035px of
+   3,508 and left the bottom third plain anyway.
+   So this is an empty hook until the scene exists, which is the same rule
+   the figure registries follow. Everything below .has-art is ready for the
+   day the file lands and does nothing until then. */
+.lp-stage { position: relative; width: 100%; }
+.lp-stage.has-art { padding: 14px 10px 26px; border-radius: 14px; overflow: hidden;
+  background-image: var(--lp-art);
+  background-size: cover; background-position: top center; background-repeat: no-repeat; }
+/* The wash. Sits above the art and below everything that must be read. */
+.lp-stage.has-art::before { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg,
+    color-mix(in srgb, var(--bg) 62%, transparent) 0%,
+    color-mix(in srgb, var(--bg) 46%, transparent) 42%,
+    color-mix(in srgb, var(--bg) 62%, transparent) 100%); }
+.lp-stage > * { position: relative; z-index: 1; }
+/* Over art the pills stop being quiet and start being readable. */
+.lp-stage.has-art .lp-pill { background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border-color: color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow: 0 1px 6px rgba(0,0,0,.16); }
+.lp-stage.has-art .lp-sign { color: var(--ink);
+  text-shadow: 0 1px 10px color-mix(in srgb, var(--bg) 85%, transparent); }
+.lp-stage.has-art .lp-line path { stroke: color-mix(in srgb, var(--ink) 34%, transparent); }
+@media (prefers-reduced-transparency: reduce) {
+  .lp-stage.has-art::before { background: color-mix(in srgb, var(--bg) 80%, transparent); }
+}
+
+/* ONE COORDINATE SYSTEM. The curve is drawn in a 300-unit box that is NOT
+   stretched: the svg is exactly 300px wide and centred, so one svg unit is
+   one pixel and x = 150 + offset is the same place the node puts its dot.
+   Stretching it to the container width (preserveAspectRatio none) silently
+   pulled the line off the nodes, which is why it looked absent. */
+.lp-path { position: relative; height: var(--lp-h); width: 300px; margin: 0 auto;
+  padding: 0 0 14px; --lp-dot: 54px; }
+.lp-line { position: absolute; left: 50%; top: calc(var(--lp-dot) / 2);
+  transform: translateX(-50%); width: 300px; pointer-events: none; overflow: visible; }
+.lp-line path { fill: none; stroke: var(--line); stroke-width: 6; stroke-linecap: round;
+  stroke-dasharray: 2 14; }
+/* THE NODE IS A ZERO-SIZE ANCHOR ON THE CURVE, and the dot and pill hang
+   off it. Laying the button out as a row instead moved every dot by half
+   its own label, so the longer the word the further the node drifted off
+   the line it was supposed to sit on.
+   The pill hangs TOWARD THE MIDDLE: on the right half of the curve it sits
+   to the left of its dot, and the other way round. Always hanging outward
+   pushed the longest label off the screen on a narrow pane, which made the
+   page scroll sideways, and nothing else in the app does that. */
+.lp-node { position: absolute; left: 50%; top: 0; width: 0; height: 0;
+  transform: translate(var(--lp-x), var(--lp-y));
+  background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; }
+.lp-node .lp-dot { position: absolute; left: calc(var(--lp-dot) / -2); top: 0; }
+.lp-node .lp-pill { position: absolute; top: calc(var(--lp-dot) / 2);
+  left: calc(var(--lp-dot) / 2 + 10px); transform: translateY(-50%); }
+.lp-node.is-inward .lp-pill { left: auto; right: calc(var(--lp-dot) / 2 + 10px); }
+/* The nodes sit up off the page, which is what makes a path read as a
+   row of things to press rather than a diagram. The flat 1px shadow does
+   the lifting; the soft one underneath keeps it from looking cut out. */
+.lp-dot { display: grid; place-items: center;
+  width: var(--lp-dot); height: var(--lp-dot); border-radius: 50%;
+  font-size: 18px; font-weight: 700; flex: 0 0 auto;
+  background: #fff; color: var(--muted);
+  border: 3px solid var(--line);
+  box-shadow: 0 4px 0 var(--line), 0 6px 12px rgba(47,58,46,.13);
+  transition: transform .12s ease, box-shadow .12s ease; }
+/* The glyph takes the node's own colour, so one rule serves all four
+   states and a state change never leaves the icon behind. */
+.lp-ico { width: 25px; height: 25px; fill: none; stroke: currentColor;
+  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+@media (max-width: 420px) { .lp-ico { width: 22px; height: 22px; } }
+.lp-pill { white-space: nowrap; font-size: 14.5px; font-weight: 600;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 7px 15px; box-shadow: 0 2px 5px rgba(47,58,46,.09); }
+/* Pressed, not hovered: the node should feel like it takes the weight. */
+.lp-node:active .lp-dot { transform: translateY(3px);
+  box-shadow: 0 1px 0 var(--line), 0 2px 5px rgba(47,58,46,.13); }
+@media (prefers-reduced-motion: reduce) {
+  .lp-dot { transition: none; }
+  .lp-node:active .lp-dot { transform: none; }
+}
+.lp-node.is-done .lp-dot { background: var(--green); color: #fff; border-color: var(--green);
+  box-shadow: 0 4px 0 var(--green-dark), 0 6px 12px rgba(47,58,46,.16); }
+/* The current node is the one thing on the page that should catch the eye,
+   so it gets the halo as well as the lift. */
+.lp-node.is-current .lp-dot { background: var(--lavender); color: #fff;
+  border-color: var(--lavender);
+  box-shadow: 0 4px 0 #8c7cab, 0 6px 14px rgba(47,58,46,.18),
+    0 0 0 7px color-mix(in srgb, var(--lavender) 26%, transparent); }
+.lp-node.is-current .lp-pill { border-color: var(--lavender); font-weight: 700;
+  box-shadow: 0 2px 7px color-mix(in srgb, var(--lavender) 30%, transparent); }
+.lp-node.is-pending .lp-dot { background: var(--panel-2); border-style: dashed;
+  box-shadow: none; }
+.lp-node:hover .lp-dot { border-color: var(--green); }
+.lp-node:focus-visible { outline: none; }
+.lp-node:focus-visible .lp-dot { outline: 2px solid var(--green); outline-offset: 3px; }
+@media (prefers-reduced-motion: no-preference) {
+  .lp-node.is-current .lp-dot { animation: lp-pulse 2.4s ease-in-out infinite; }
+  /* The animation REPLACES box-shadow outright, so each frame has to
+     repeat the lift as well as the halo. Animating the halo alone wiped
+     the raised edge off the one node that most needs to look pressable. */
+  @keyframes lp-pulse {
+    0%, 100% { box-shadow: 0 4px 0 #8c7cab, 0 6px 14px rgba(47,58,46,.18),
+      0 0 0 7px color-mix(in srgb, var(--lavender) 26%, transparent); }
+    50% { box-shadow: 0 4px 0 #8c7cab, 0 6px 14px rgba(47,58,46,.18),
+      0 0 0 13px color-mix(in srgb, var(--lavender) 12%, transparent); }
+  }
+}
+/* ── The reading lesson layout (preview, 2026-10-16) ───────────
+   The field names came off the page, so the shape has to carry the
+   structure instead: a thesis line that looks like one, a quiet aim
+   under it, the chapter, and the question as a single object. */
+.lx .lx-crumb { margin-bottom: 10px; }
+.lx h1 { margin-bottom: 14px; }
+/* The lead IS the lesson in one or two sentences. It was body text under
+   a grey label, at the same weight as every other paragraph. */
+.lx-lead { font-family: var(--serif, Georgia, serif); font-size: 21px; line-height: 1.45;
+  color: var(--ink); margin: 0 0 12px; }
+@media (min-width: 700px) { .lx-lead { font-size: 23px; } }
+/* What you will be able to do. True, useful, and not the first thing a
+   reader needs, so it sits quiet under the lead. */
+.lx-aim { font-size: 14.5px; line-height: 1.5; color: var(--muted); margin: 0 0 26px;
+  padding-left: 13px; border-left: 2px solid var(--line); }
+.lx-body { margin-bottom: 30px; }
+/* One object: the question, and nothing explaining the question. The
+   disclaimer under it went on 2026-10-19 by owner order, and .lx-qnote
+   went with it rather than sitting here with no consumer. */
+.lx-reflect { background: var(--panel); border: 1px solid var(--line); border-radius: 13px;
+  padding: 17px 18px; margin: 0 0 26px; }
+.lx-q { font-family: var(--serif, Georgia, serif); font-size: 18px; line-height: 1.5;
+  color: var(--ink); margin: 0; }
+.lx-foot { border-top: 1px solid var(--line); padding-top: 18px; }
+
+/* A module is a SIGN ALONG THE PATH, not a door. It names where you are
+   without breaking the line, which runs straight past it unbroken. */
+.lp-sign { position: absolute; left: 0; right: 0; top: 0; transform: translateY(var(--lp-y));
+  display: flex; align-items: center; justify-content: center; gap: 9px;
+  margin: 0; height: 46px; font-family: var(--serif, Georgia, serif); font-size: 15px;
+  font-weight: 600; color: var(--muted); pointer-events: none; }
+.lp-sign-n { display: inline-grid; place-items: center; width: 21px; height: 21px;
+  border-radius: 50%; background: var(--accent-tint); color: var(--green-dark);
+  font-family: inherit; font-size: 12px; font-weight: 700; }
+
+@media (max-width: 420px) {
+  .lp-path { --lp-dot: 48px; }
+  .lp-pill { font-size: 13px; padding: 4px 11px; }
+  .lp-sign { font-size: 14px; }
+}
+
+/* The module-row landing and the per-module path were both removed on
+   2026-10-15 when the course became ONE path: a module is a sign along the
+   way now, styled as .lp-sign above, and there is no module page to open. */
 
 /* ── Speech guided reading: calm, editorial, one idea per screen ── */
 .sp-read { max-width: 660px; }
