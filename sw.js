@@ -67,6 +67,25 @@
  * THE RULE THAT ACTUALLY MATTERS is not "did the graph change" but "is
  * somebody waiting to see this". If they are, bump it.
  *
+ * sc-v48 IS THE THIRD TIME AND THE WORST SHAPE OF IT (2026-10-20). The
+ * whole commedia collection was replaced — 33 images, every one written to
+ * the SAME PATH as the picture it replaced — and VERSION was not bumped,
+ * because the rule at the top of this file says ordinary content updates
+ * do not need one. The owner opened The Cast and saw the OLD chart, with
+ * the new caption above it saying the chart draws twelve figures while the
+ * cached picture showed ten.
+ *
+ * THAT RULE IS FALSE FOR MEDIA AND THIS IS WHY. Scripts and styles go
+ * through staleWhileRevalidate, which refreshes them on the next load —
+ * that is the "one revalidation away" both notes above describe. Images,
+ * audio and fonts go through cacheFirst, which returns a hit and NEVER
+ * asks the network again. A replaced image at a stable URL is therefore
+ * not one revalidation away; it is stuck until the cache is dropped. The
+ * file was byte-correct on the server the whole time.
+ *
+ * So: REPLACING ANY FILE UNDER img/ AT ITS EXISTING PATH REQUIRES A BUMP.
+ * Adding a new image at a new path does not — nothing has it cached.
+ *
  * Every fetch here goes past the browser's own HTTP cache ('no-cache' /
  * 'reload'). GitHub Pages marks files max-age=600, so for ten minutes after
  * a visit a plain fetch() can be handed the OLD file without asking the
@@ -75,7 +94,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v47';                     // 2026-10-15: one reference list, the coinage shelf withdrawn
+const VERSION = 'sc-v48';                     // 2026-10-20: 33 commedia images replaced in place — cacheFirst never revalidates them
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
