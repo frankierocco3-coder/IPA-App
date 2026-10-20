@@ -12,6 +12,7 @@ import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.j
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
 import { actingPathLabel, actingPathKind, ACTING_PATH_TITLE } from './data/acting/path-labels.js';
 import { ACTING_PATH_THEME } from './data/acting/path-theme.js';
+import { learnScene, scenePaletteStyle } from './data/learn-scenes.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
@@ -3356,33 +3357,98 @@ function treeHtml(B, lessons, nextId) {
         <span class="tr-label">${esc(label)}</span>
       </button>`;
   }).join('');
-  // Canopy: one leaf per lesson, so the crown grows with the module.
-  const leaves = lessons.map((l, i) => {
-    // A crown, not a cluster: leaves ride an arc across the sky rather than
-    // a circle around the centre, which bunched them all over the trunk.
-    const t = n === 1 ? 0.5 : i / (n - 1);
-    const lx = cx + (t - 0.5) * (W * 0.86);
-    const ly = TR_SKY * 0.52 - Math.sin(t * Math.PI) * TR_SKY * 0.3 + ((i % 3) - 1) * 13;
-    const rad = 27 + (i % 4) * 8;
-    const lit = speechLessonDone(l.id);
-    return `<circle class="tr-leaf ${lit ? 'is-lit' : ''}" cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="${rad}" />`;
-  }).join('');
+  const scene = learnScene(B.ws) ?? learnScene('acting');
+  const lit = lessons.map(l => speechLessonDone(l.id));
   return `
     <div class="tr-tree">
       <div class="tr-sky" style="height:${TR_SKY}px">
+        ${scene.art ? `
+        <img class="tr-art" src="${esc(scene.art)}" alt="" aria-hidden="true">
+        <span class="tr-art-wash" aria-hidden="true"></span>`
+        : `
         <svg class="tr-canopy" viewBox="0 0 ${W} ${TR_SKY}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          ${leaves}
-          <path class="tr-trunk" d="M ${cx - 9} ${TR_SKY} L ${cx - 5} ${TR_SKY * 0.42} L ${cx + 5} ${TR_SKY * 0.42} L ${cx + 9} ${TR_SKY} Z" />
-        </svg>
-        <p class="tr-seen">WHAT THE AUDIENCE SEES</p>
+          ${sceneUpperHtml(W, TR_SKY, cx, lit)}
+        </svg>`}
+        <p class="tr-seen">${esc(scene.above)}</p>
       </div>
       <div class="tr-earth" style="height:${earthH}px">
-        <p class="tr-cultivates">WHAT THE ACTOR CULTIVATES</p>
+        <p class="tr-cultivates">${esc(scene.below)}</p>
         <svg class="tr-roots" viewBox="0 0 ${W} ${earthH}" width="${W}" height="${earthH}" aria-hidden="true">${roots}</svg>
         ${pills}
       </div>
       ${treeCardHtml(B, lessons, nextId)}
     </div>`;
+}
+
+// ── The upper band: an actor on a stage ───────────────────────
+// Owner direction 2026-10-20, and it REPLACED FOUR SEPARATE METAPHORS — a
+// canopy, a playhouse, an assembling figure and a colonnade, one per
+// course. Four drawings said four different things; this says the one
+// thing that is true of every course in the app, which is that all of it
+// is in service of somebody standing up in front of people. Acting,
+// Shakespeare, Building a Character and Rhetoric all end in the same place.
+//
+// So the DRAWING is shared and the COURSE is in the palette, the title and
+// the words. That is a real difference rather than a tint, because the
+// vocabulary moves with it: a lesson is cultivated in Acting, set in
+// Shakespeare, built in Character and raised in Rhetoric.
+//
+// THE FOOTLIGHTS CARRY THE PROGRESS, NOT THE ACTOR. The actor is always
+// drawn whole, because the figure is the point of the page and a
+// half-drawn one reads as a rendering fault; what grows is how well lit
+// they are. One lamp per lesson, lit in order, and the throw of light
+// behind them comes up as the first one lands.
+//
+// It is a pure function of the lesson count and which are done, so the
+// scene grows with its module and needs no art file.
+function sceneUpperHtml(W, H, cx, lit) {
+  const n = lit.length;
+  const floorY = H * 0.84;
+  const f = v => v.toFixed(1);
+
+  // Wings, set back, so the figure reads as standing ON something rather
+  // than floating in a coloured box.
+  const wing = s => `<path class="tr-wing" d="
+    M ${f(cx + s * W * 0.5)} 0 L ${f(cx + s * W * 0.5)} ${f(floorY)}
+    L ${f(cx + s * W * 0.33)} ${f(floorY)}
+    C ${f(cx + s * W * 0.36)} ${f(H * 0.5)},
+      ${f(cx + s * W * 0.40)} ${f(H * 0.22)},
+      ${f(cx + s * W * 0.37)} 0 Z" />`;
+
+  const boards = `<rect class="tr-stage" x="0" y="${f(floorY)}"
+      width="${W}" height="${f(H - floorY)}" />
+    <rect class="tr-stage-lip" x="0" y="${f(floorY)}" width="${W}" height="3" />`;
+
+  // One lamp per lesson along the front edge of the stage.
+  const lamps = lit.map((on, i) => {
+    const t = n === 1 ? 0.5 : i / (n - 1);
+    return `<circle class="tr-lamp ${on ? 'is-lit' : ''}"
+      cx="${f(cx + (t - 0.5) * (W * 0.78))}" cy="${f(H - 7)}" r="3.4" />`;
+  }).join('');
+
+  // The actor. Small enough that the band stays a stage rather than
+  // becoming a portrait, and standing square on the boards.
+  const headR = 13;
+  const headY = floorY - 96;
+  const chest = headY + headR + 12;
+  const hip = floorY - 38;
+  const actor = `
+    <g class="tr-actor">
+      <circle cx="${cx}" cy="${f(headY)}" r="${headR}" />
+      <path d="M ${cx} ${f(headY + headR)} L ${cx} ${f(hip)}" />
+      <path d="M ${cx} ${f(chest)} L ${f(cx - 26)} ${f(floorY - 46)}" />
+      <path d="M ${cx} ${f(chest)} L ${f(cx + 26)} ${f(floorY - 52)}" />
+      <path d="M ${cx} ${f(hip)} L ${f(cx - 15)} ${f(floorY)}" />
+      <path d="M ${cx} ${f(hip)} L ${f(cx + 15)} ${f(floorY)}" />
+    </g>`;
+
+  // The throw from the footlights, widening upward behind the figure.
+  const throwLit = lit.some(Boolean) ? 'is-lit' : '';
+  const wash = `<path class="tr-throw ${throwLit}" d="
+    M ${f(cx - W * 0.1)} ${H} L ${f(cx + W * 0.1)} ${H}
+    L ${f(cx + W * 0.30)} ${f(H * 0.12)} L ${f(cx - W * 0.30)} ${f(H * 0.12)} Z" />`;
+
+  return wash + wing(-1) + wing(1) + boards + actor + lamps;
 }
 
 function treeCourseHtml(B, nextId) {
@@ -3395,7 +3461,7 @@ function treeCourseHtml(B, nextId) {
       <section class="tr-module" aria-label="${esc(moduleTitle(B, m))}">
         <header class="tr-head">
           <p class="tr-mod">MODULE ${m.n} · ${esc(moduleTitle(B, m).toUpperCase())}</p>
-          <p class="tr-count">${done} of ${ready.length} cultivated
+          <p class="tr-count">${done} of ${ready.length} ${esc((learnScene(B.ws) ?? learnScene('acting')).done)}
             <span class="tr-open">Every lesson is open</span></p>
         </header>
         ${treeHtml(B, ls, nextId)}
@@ -3410,12 +3476,17 @@ function bookLearnSequence(el, B) {
   const done = avail.filter(l => speechLessonDone(l.id)).length;
   const next = avail.find(l => !speechLessonDone(l.id)) ?? null;
 
+  // The scene is the course's own: its drawing, its palette and its words.
+  // A course with no scene never reaches here, because bookLearnPane only
+  // routes the ones that have one.
+  const scene = learnScene(B.ws) ?? learnScene('acting');
+
   el.innerHTML = `
-    <div class="tr-view">
+    <div class="tr-view sc-${esc(B.ws)}" style="${scenePaletteStyle(scene)}">
     <div class="tr-top">
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
-      <h1 class="tr-title">The Work Beneath the Work</h1>
-      <p class="tr-sub">${done} of ${avail.length} cultivated across ${B.modules.length} modules.</p>
+      <h1 class="tr-title">${esc(scene.title)}</h1>
+      <p class="tr-sub">${done} of ${avail.length} ${esc(scene.done)} across ${B.modules.length} modules.</p>
       <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>
     </div>
     ${treeCourseHtml(B, next?.id ?? null)}
@@ -3456,12 +3527,16 @@ function bookLearnSequence(el, B) {
 }
 
 function bookLearnPane(el, B) {
-  // ACTING ONLY while this is being judged (owner decision 2026-10-15). The
-  // three books share this pane, so without the workspace check the flag
-  // would swap Shakespeare and Character too, and a preview with nothing
-  // left to compare against is worth less than one you can switch between.
-  // Widening it later is this condition and nothing else.
-  if (B.ws === 'acting' && learnSequencePreview()) return bookLearnSequence(el, B);
+  // WIDENED FROM ACTING TO EVERY COURSE WITH A SCENE (owner order
+  // 2026-10-20). It was acting-only while the idea was being judged, so
+  // there was something to switch back to and compare against; now each
+  // course has its own drawing, palette and vocabulary, and comparing them
+  // IS the thing being judged.
+  //
+  // The condition is `has a scene`, not a list of workspaces, so a course
+  // without one keeps the module grid rather than borrowing somebody
+  // else's metaphor. See js/data/learn-scenes.js.
+  if (learnScene(B.ws) && learnSequencePreview()) return bookLearnSequence(el, B);
   const cats = B.reviewCats();
   const avail = pathLessons(B).filter(B.visible);
   const done = avail.filter(l => speechLessonDone(l.id)).length;
@@ -4069,7 +4144,10 @@ function renderActingLesson(id) {
   //    will be able to do matters less on arrival than what the idea is.
   //  * The reflection becomes ONE card with its own note inside it, rather
   //    than a heading, a paragraph and a disclaimer stacked as three things.
-  if (B.ws === 'acting' && learnSequencePreview()) {
+  // Widened with the Learn pane on 2026-10-20, and for the same reason:
+  // a reader who gets the scene on Learn and the old layout the moment
+  // they open a lesson has been shown two different apps.
+  if (learnScene(B.ws) && learnSequencePreview()) {
     app.innerHTML = `
       ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
       <main class="guide sp-lesson lx">
