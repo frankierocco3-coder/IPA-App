@@ -663,6 +663,32 @@ def main():
     except ImportError:
         fail("tools/build_legal.py is missing; the legal pages cannot be verified")
 
+    # CLAUDE.md's generated facts block must match the code it describes.
+    #
+    # WHY THIS IS A DEPLOY GATE (2026-10-20). An audit found 127 wrong claims
+    # in that file, 56 of which would send a session down a wrong path, and
+    # every one of them got there the same way: the app changed and the file
+    # did not, with nothing to notice. Counts and flag states are now
+    # generated, and this check is what makes the next drift a build failure
+    # instead of an archaeology exercise four months later.
+    #
+    # The fix is one command and the failure message prints it, so this costs
+    # a few seconds when it fires and saves a session reasoning from a false
+    # premise when it does not.
+    try:
+        sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+        import project_facts
+        have, _src, m = project_facts.block_in_claude_md()
+        if m is None:
+            fail("CLAUDE.md has lost its <!-- facts:begin --> block — "
+                 "run python3 tools/project_facts.py --write")
+        elif have != project_facts.rendered():
+            fail("CLAUDE.md's generated facts block is stale (the app moved "
+                 "and the file did not) — run "
+                 "python3 tools/project_facts.py --write")
+    except ImportError:
+        fail("tools/project_facts.py is missing; CLAUDE.md cannot be verified")
+
     if fails:
         print("LAUNCH LINT FAILED — %d problem(s):" % len(fails))
         for f_ in fails:
