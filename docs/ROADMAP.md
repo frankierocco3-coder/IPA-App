@@ -74,6 +74,32 @@ head-on with the no-backend constraint. A decision, not a feature.
 
 ## Smaller, known
 
+- **A lesson refuting the iambic-heartbeat myth.** Audited 2026-10-19 from five angles
+  (cardiology, metrics scholarship, early modern sources, linguistics, origin-tracing);
+  all five came back *undermines*, high confidence. The course is ALREADY RIGHT and needs
+  no correction: 4.1 grounds the iamb in English being stress-timed, 4.2 calls the line a
+  unit of thought and breath, and the module blurb says "the pulse under the line" with no
+  anatomy anywhere. The open question is only whether to NAME and refute the claim, since
+  actors arrive having been taught it. The material if we do:
+  * The heartbeat is a TROCHEE, not an iamb. S1 is the longer, lower sound and comes
+    first. Which beat is louder depends on where the stethoscope sits (S1 at the apex, S2
+    at the base), so "da-DUM" is a choice of listening position, not a fact about hearts.
+  * The pulse you FEEL is one beat per cycle. A palpable two-peaked pulse is pathological.
+    So the persuasive version, that it matches the rhythm inside you, is backwards.
+  * Harvey's *De Motu Cordis* is 1628, twelve years after Shakespeare died. S1 and S2 had
+    not been distinguished by anyone, so "that is why Shakespeare used it" is anachronism.
+  * Nothing in the heart groups into five. Pentameter is the half the heart cannot supply
+    and the half nobody checks.
+  * ORIGIN: traceable to an 1875 essay by Oliver Wendell Holmes Sr, which was about
+    BREATHING rather than the heart and named iambic TETRAMETER. The claim has drifted
+    from its own source in both the organ and the line length.
+  * Against us, fairly: Cysarz et al. 2004 found verse recitation really does synchronise
+    heart rate and respiration. The body-rhythm intuition is not empty. It is just breath
+    driving heart, not heart driving metre.
+  * The practical damage, and the reason it may be worth refuting: teach someone it is a
+    heartbeat and they start thumping the stress, which is exactly what 4.1 tells them not
+    to do.
+
 - **`CLAUDE.md` has drifted.** It describes "Text & Delivery"; the shipped nav is LEARN ·
   PRACTICE · TEXT BOOK · QUESTS · SHOP · PROFILE · MORE. Quests, Shop and the gem economy
   aren't in its Current State section. Every session that reads it starts misled.
