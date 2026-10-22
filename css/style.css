@@ -2220,10 +2220,151 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   border-radius: 50%; background: var(--accent-tint); color: var(--green-dark);
   font-family: inherit; font-size: 12px; font-weight: 700; }
 
+/* ── The path inside a course scene ──────────────────────────
+   The base styles above are for a LIGHT page, which is where this path
+   was first built. Inside .tr-view it runs on the scene's dark ground, so
+   every colour is re-read from the scene's own custom properties.
+
+   This replaces a .lp-stage wrapper that used to do the same job by
+   laying the art behind the whole scrolling column. The art is a header
+   now and that wrapper is gone, which is what left the pills white on
+   white for one render: the dark treatment went with the wrapper. */
+.tr-view .lp-pill { background: rgba(0,0,0,.34); border-color: rgba(255,255,255,.12);
+  color: var(--tr-ink); box-shadow: none; }
+.tr-view .lp-dot { background: rgba(0,0,0,.42); color: var(--tr-dim);
+  border-color: rgba(255,255,255,.14); box-shadow: 0 3px 0 rgba(0,0,0,.3); }
+.tr-view .lp-line path { stroke: var(--tr-bark); opacity: .55; }
+.tr-view .lp-sign { color: var(--tr-dim); }
+.tr-view .lp-sign-n { background: var(--tr-bark); color: var(--tr-ink); }
+.tr-view .lp-node.is-done .lp-dot { background: var(--tr-leaf); color: #1d2a18;
+  border-color: var(--tr-leaf); }
+/* The current node takes the scene's gold, not the app's lavender: a
+   purple dot on a green stage belonged to a different page. */
+.tr-view .lp-node.is-current .lp-dot { background: var(--tr-gold); color: #2b2118;
+  border-color: var(--tr-gold); }
+.tr-view .lp-node.is-current .lp-pill { border-color: var(--tr-gold); color: var(--tr-ink); }
+.tr-view .lp-node.is-pending .lp-dot { background: rgba(0,0,0,.25);
+  border-style: dashed; border-color: rgba(255,255,255,.18); }
+.tr-view .lp-node:hover .lp-dot,
+.tr-view .lp-node:focus-visible .lp-dot { border-color: var(--tr-gold); }
+.tr-view .lp-node.is-picked .lp-pill { border-color: #fff; }
+/* ── The ground the path runs through ───────────────────────
+   Cropped from the owner's painted path and tiled, so 3,000px of scroll
+   is earth rather than flat colour. The tile is pre-darkened in the file
+   itself, not by an overlay, because an overlay would also dim the nodes
+   sitting on it. */
+/* The ground repeats in BOTH directions now. The tile is a side slice of
+   the owner's painting, taken clear of its central trunk: the painting
+   carries its own column of lights down the middle, and tiling that put a
+   second set of orbs behind every real node. The path owns the centre. */
+.tr-view .lp-path.has-earth { background-repeat: repeat; background-size: 202px auto;
+  background-position: top center;
+  width: 100%; max-width: 420px; border-radius: 0 0 12px 12px; }
+
+/* ACTING'S PAINTED JOURNEY. Five module-sized windows sample one continuous
+   feature-cel painting, while the real lesson controls remain above it.
+   The art never owns progress: it supplies the world, and the live lamps,
+   labels and route supply state. */
+.tr-view.sc-acting { background: #120f0c; border: 2px solid #2d1b12;
+  box-shadow: inset 0 0 0 1px rgba(211,148,58,.16); }
+.tr-view.sc-acting .tr-top { position: relative; z-index: 5; }
+.tr-view.sc-acting .lp-head { border: 2px solid #2a180f; border-bottom-color: #b9772f;
+  box-shadow: 0 7px 0 #1b100b, 0 10px 18px rgba(0,0,0,.34); }
+.tr-view .lp-path.has-journey { width: 100%; max-width: 430px;
+  border-radius: 0 0 14px 14px; overflow: hidden;
+  background: #091824; isolation: isolate; }
+.tr-view.sc-acting .lp-path.has-journey { background: #14100c; }
+.tr-view.sc-acting .tr-seen { color: #f0d59a; background: rgba(20,14,10,.76);
+  border: 1px solid #9d612b; }
+.lp-scene-band { position: absolute; z-index: 0; left: 0; right: 0;
+  top: var(--lp-band-y); height: var(--lp-band-h);
+  background-repeat: no-repeat; background-size: 185% auto;
+  background-position: center var(--lp-focus); filter: saturate(.82) sepia(.08) contrast(1.06); }
+.lp-scene-band::before { content: ''; position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(16,11,8,.48), rgba(16,11,8,.08) 30%,
+      rgba(16,11,8,.06) 70%, rgba(16,11,8,.46)),
+    linear-gradient(180deg, rgba(16,10,7,.18), transparent 16%, transparent 82%, rgba(16,10,7,.44)); }
+.lp-scene-band + .lp-scene-band { border-top: 3px solid rgba(185,112,42,.7); }
+.lp-scene-band::after { content: ''; position: absolute; inset: 0; opacity: .18;
+  pointer-events: none;
+  background: repeating-linear-gradient(107deg, transparent 0 14px,
+    rgba(255,236,194,.045) 15px 16px); mix-blend-mode: soft-light; }
+
+/* Parchment labels and footlight nodes belong to the same animated world
+   as the painting. They stay deliberately opaque enough to read over a
+   face, costume or lamp without dimming the whole scene. */
+.tr-view.sc-acting .lp-pill { color: #1b120d; background: #dbad60;
+  border: 3px solid #21140e; box-shadow: 0 3px 0 #0e0906, 0 6px 10px rgba(0,0,0,.26);
+  text-shadow: 0 1px rgba(255,232,174,.32); }
+.tr-view.sc-acting .lp-node.is-current .lp-pill,
+.tr-view.sc-acting .lp-node.is-picked .lp-pill { color: #160f0a;
+  border-color: #f0c76e; background: #e7bd6c; }
+.tr-view.sc-acting .lp-sign { z-index: 3; width: max-content; max-width: calc(100% - 28px);
+  height: 36px; left: 50%; right: auto; padding: 0 14px 0 8px;
+  transform: translate(-50%, calc(var(--lp-y) + 5px));
+  color: #f0d59a; background: rgba(22,16,12,.94); border: 2px solid #a9652c;
+  border-radius: 999px; box-shadow: 0 3px 0 #0d0805, 0 5px 9px rgba(0,0,0,.3); }
+.tr-view.sc-acting .lp-sign-n { background: #d09a43;
+  color: #24150c; border: 2px solid #24150c; box-shadow: none; }
+.tr-view.sc-acting .lp-line { z-index: 1; }
+.tr-view.sc-acting .lp-line path { stroke: #d8a044; opacity: .95; stroke-width: 8;
+  filter: drop-shadow(0 2px 0 #21120a); }
+.tr-view.sc-acting .lp-node { z-index: 4; }
+.tr-view.sc-acting .lp-dot { border-color: #d39a46; }
+.tr-view.sc-acting .lp-node.is-ahead .lp-dot,
+.tr-view.sc-acting .lp-node.is-pending .lp-dot { background: #28201a;
+  color: #d7ad63; border-color: #9a602d;
+  box-shadow: inset 0 0 0 2px #15100d, 0 4px 0 #130c08, 0 7px 10px rgba(0,0,0,.28); }
+.tr-view.sc-acting .lp-node.is-done .lp-dot { background: #d09a43; color: #1c120b;
+  border-color: #21140e; box-shadow: 0 4px 0 #160d08, 0 7px 10px rgba(0,0,0,.3); }
+.tr-view.sc-acting .lp-node.is-current .lp-dot { background: #edc56d; color: #17100b;
+  border-color: #2a190f; box-shadow: 0 4px 0 #160d08, 0 0 0 6px rgba(225,170,76,.28),
+    0 8px 11px rgba(0,0,0,.32); animation: none; }
+.tr-view.sc-acting .tr-card { position: relative; z-index: 6; background: #171a1d;
+  border: 1px solid #67452c; border-top-color: #d89c47; }
+
+/* The lesson node as a lamp in the earth, after the owner's painting: a
+   warm disc that is LIT when the lesson is done and banked when it is
+   not. The painting carried its glow in the paint and could not show
+   progress; this carries it in CSS and can. */
+.tr-view .lp-dot { position: relative; }
+.tr-view .lp-node.is-done .lp-dot {
+  background: radial-gradient(circle at 50% 42%, #ffe6a8 0%, #f0b95c 46%, #b9762c 100%);
+  color: #4a2f10; border-color: #c08a3e;
+  box-shadow: 0 0 16px 3px rgba(240,185,92,.45), 0 3px 0 rgba(0,0,0,.35); }
+.tr-view .lp-node.is-current .lp-dot {
+  background: radial-gradient(circle at 50% 42%, #fff3cf 0%, var(--tr-gold) 48%, #a9741f 100%);
+  color: #3a2b0d; border-color: #fff;
+  box-shadow: 0 0 22px 6px rgba(227,187,94,.6), 0 3px 0 rgba(0,0,0,.35); }
+/* A BANKED LAMP MUST STILL READ AS A LAMP. The first version was a dark
+   disc with a 14%-white rim and it measured 1.10:1 against the earth
+   behind it — a whole module of unreached lessons simply vanished, and a
+   mid-scroll screenshot came back black. The rim is warm and solid now,
+   and the glass is lighter than the ground it sits on. */
+.tr-view .lp-node.is-ahead .lp-dot,
+.tr-view .lp-node.is-pending .lp-dot {
+  background: radial-gradient(circle at 50% 38%, #6b5a45 0%, #3a3027 72%);
+  color: #e4d5bb; border-color: #c08a3e;
+  box-shadow: inset 0 2px 7px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.4),
+    0 3px 0 rgba(0,0,0,.32); }
+.tr-view .lp-node.is-pending .lp-dot { border-style: dashed; }
+/* The line between them is a root, not a dotted rule. */
+.tr-view .lp-line path { stroke: #8a6336; opacity: .85; stroke-width: 7; }
+@media (prefers-reduced-motion: reduce) { .tr-view .lp-dot { transition: none; } }
+
+
+/* The stage header sits above the path and owns the art. */
+.tr-view .lp-head { border-radius: 12px 12px 0 0; overflow: hidden; margin: 0 0 6px; }
+
 @media (max-width: 420px) {
   .lp-path { --lp-dot: 48px; }
   .lp-pill { font-size: 13px; padding: 4px 11px; }
   .lp-sign { font-size: 14px; }
+  .tr-view .lp-path.has-journey { max-width: 100%; }
+  .lp-scene-band { background-size: 205% auto; }
+  .tr-view.sc-acting .lp-pill { max-width: 132px; white-space: normal;
+    line-height: 1.15; text-align: center; }
 }
 
 /* The module-row landing and the per-module path were both removed on

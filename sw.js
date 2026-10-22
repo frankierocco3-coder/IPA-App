@@ -94,7 +94,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v48';                     // 2026-10-20: 33 commedia images replaced in place — cacheFirst never revalidates them
+const VERSION = 'sc-v50';                     // 2026-10-20: ship the selected ink-and-sepia Acting art direction immediately
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

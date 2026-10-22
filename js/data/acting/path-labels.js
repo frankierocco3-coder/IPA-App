@@ -14,13 +14,16 @@
 //
 // They are verbs and nouns an actor would say out loud, not summaries. The
 // path is read at a glance while moving; the title is read when choosing.
-// The path's own name, as the design has it. The course is called Acting &
-// Scene Work everywhere else and keeps that name; this is what the route
-// through it is called, which is a different thing and reads as one.
-export const ACTING_PATH_TITLE = 'The Actor’s Journey';
+//
+// The ROUTE's name is not here. ACTING_PATH_TITLE lived in this file until
+// 2026-10-21, when every course got its own Learn scene and the heading
+// started coming from `scene.title`. The export stayed behind, still
+// imported by main.js and read by nothing — so editing it changed no
+// pixel. The name is now in js/data/learn-scenes.js under `acting:`,
+// which is the file that draws the page.
 
 export const ACTING_PATH_LABELS = {
-  // 1 · The Situation at Hand
+  // 1 · Where Behavior Comes From
   'ac-offbook': 'Off Book',
   'ac-behavior': 'Behavior',
   'ac-circumstances': 'Circumstances',
@@ -28,6 +31,7 @@ export const ACTING_PATH_LABELS = {
   'ac-obstacle': 'Obstacle',
   'ac-stakes': 'Stakes',
   'ac-urgency': 'Urgency',
+  'ac-physicalscore': 'Physical Score',
   // 2 · Script Analysis
   'ac-fourlists': 'Four Lists',
   'ac-analysis': 'Through-Line',
@@ -98,6 +102,7 @@ export const ACTING_PATH_KINDS = {
   'ac-dials': 'time', 'ac-feeling': 'time', 'ac-tworhythms': 'time',
   'ac-harmony': 'time', 'ac-rests': 'time', 'ac-speeds': 'time',
   // drill: repeat it until it runs unsupervised
+  'ac-physicalscore': 'drill',
   'ac-repetition': 'drill', 'ac-rehearsal': 'drill',
   'ac-integrating': 'drill', 'ac-applying': 'drill',
   // perform: it meets an audience

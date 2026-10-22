@@ -10,8 +10,7 @@ import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
-import { actingPathLabel, actingPathKind, ACTING_PATH_TITLE } from './data/acting/path-labels.js';
-import { ACTING_PATH_THEME } from './data/acting/path-theme.js';
+import { actingPathLabel, actingPathKind } from './data/acting/path-labels.js';
 import { learnScene, scenePaletteStyle } from './data/learn-scenes.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
@@ -3243,7 +3242,7 @@ function bookLessonNumber(B, l) {
 
 function actingLearnPane(el) { return bookLearnPane(el, BOOKS.acting); }
 
-// THE SEQUENCE VIEW (preview, owner request 2026-10-15). Learn's job is to
+// THE SEQUENCE VIEW (owner request 2026-10-15). Learn's job is to
 // answer "what do I do next"; the Library already answers "what is there".
 // The module grid answered the second, with the same records and the same
 // tile component the Library uses, so the two pages were one page twice.
@@ -3283,9 +3282,6 @@ function actingLearnPane(el) { return bookLearnPane(el, BOOKS.acting); }
 // NOTHING LOCKS. Every root is a button, none disabled, and each tree says
 // so beside its count.
 const TR_SKY = 232;          // canopy band
-const TR_STEP = 84;          // vertical gap between roots
-const TR_TOP = 92;           // first root below the ground line, clear of the badge
-const TR_SIDE = [-1, 1];     // roots alternate, left then right
 
 // The detail card. A root is now SELECTED rather than opened, and the card
 // says what that lesson is before you commit to it: the objective is the
@@ -3299,6 +3295,37 @@ function treeCardLesson(B, lessons, nextId) {
     ?? lessons.find(l => B.visible(l) && !speechLessonDone(l.id))
     ?? lessons.find(l => B.visible(l))
     ?? lessons[0];
+}
+
+// The stage, once, at the top of the course — and the path descends from
+// it (owner direction 2026-10-20: "like the IPA course, it keeps going
+// down from the actor on stage").
+//
+// IT IS A HEADER, NOT A BACKGROUND. An earlier pass laid the art behind
+// the whole scrolling column, which stretched one picture over three
+// thousand pixels and put a lit stage behind lesson thirty. The actor
+// belongs at the top, where the path leaves them.
+//
+// ONE STAGE PER COURSE, NOT ONE PER MODULE. The tree drew a scene for
+// every module, so a reader passed five stages on the way down; the path
+// is one continuous route, so there is one stage and everything below it
+// is the work.
+
+
+
+function sceneStageHtml(scene, lessons) {
+  const lit = lessons.map(l => speechLessonDone(l.id));
+  return `
+    <div class="tr-sky lp-head" style="height:${TR_SKY}px">
+      ${scene.art ? `
+      <img class="tr-art" src="${esc(scene.art)}" alt="" aria-hidden="true">
+      <span class="tr-art-wash" aria-hidden="true"></span>`
+      : `
+      <svg class="tr-canopy" viewBox="0 0 300 ${TR_SKY}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+        ${sceneUpperHtml(300, TR_SKY, 150, lit)}
+      </svg>`}
+      <p class="tr-seen">${esc(scene.above)}</p>
+    </div>`;
 }
 
 function treeCardHtml(B, lessons, nextId) {
@@ -3316,69 +3343,6 @@ function treeCardHtml(B, lessons, nextId) {
       </div>`;
 }
 
-function treeHtml(B, lessons, nextId) {
-  const n = lessons.length;
-  const W = 300;
-  const cx = W / 2;
-  const earthH = TR_TOP + Math.max(0, n - 1) * TR_STEP + 76;
-  // Pills alternate sides and drift outward as they descend, the way roots
-  // spread. x is the INNER edge of the pill, so the root meets the label.
-  const place = i => {
-    const side = TR_SIDE[i % 2];
-    const depth = Math.min(1, i / Math.max(1, n - 1));
-    // Roots spread as they descend. The cap is generous now only because
-    // the label grows INWARD from the bead: when it grew outward, anything
-    // past about 70 pushed words off the edge of the box.
-    const spread = 26 + depth * 84;
-    return { x: cx + side * spread, y: TR_TOP + i * TR_STEP, side };
-  };
-  const pts = lessons.map((_, i) => place(i));
-  // Each root leaves the trunk base and curves to its pill.
-  const roots = pts.map((p, i) => {
-    // Leave the trunk almost vertically, then swing out: a root that bends
-    // early reads as a wire, one that bends late reads as a root.
-    const midY = p.y / 2;
-    return `<path class="tr-root ${lessons[i].id === nextId ? 'is-live' : ''}"
-      d="M ${cx} 0 C ${cx + p.side * 4} ${midY * 0.55}, ${cx + p.side * (Math.abs(p.x - cx) * 0.35)} ${midY * 1.05}, ${p.x} ${p.y}" />`;
-  }).join('');
-  const pills = lessons.map((l, i) => {
-    const p = pts[i];
-    const visible = B.visible(l);
-    const isDone = speechLessonDone(l.id);
-    const isNext = l.id === nextId;
-    const state = !visible ? 'is-pending' : isDone ? 'is-done' : isNext ? 'is-current' : '';
-    const label = actingPathLabel(l.id, l.title);
-    return `
-      <button class="tr-root-pill ${state} ${p.side < 0 ? 'to-left' : 'to-right'}"
-              data-item="${esc(l.id)}" type="button"
-              style="--tr-x:${p.x}px; --tr-y:${p.y}px"
-              aria-label="${esc(l.title)}${isDone ? ', cultivated' : isNext ? ', current' : ''}${visible ? '' : ', awaiting review'}">
-        <span class="tr-bead" aria-hidden="true">${isDone ? '✓' : !visible ? '◌' : String(i + 1)}</span>
-        <span class="tr-label">${esc(label)}</span>
-      </button>`;
-  }).join('');
-  const scene = learnScene(B.ws) ?? learnScene('acting');
-  const lit = lessons.map(l => speechLessonDone(l.id));
-  return `
-    <div class="tr-tree">
-      <div class="tr-sky" style="height:${TR_SKY}px">
-        ${scene.art ? `
-        <img class="tr-art" src="${esc(scene.art)}" alt="" aria-hidden="true">
-        <span class="tr-art-wash" aria-hidden="true"></span>`
-        : `
-        <svg class="tr-canopy" viewBox="0 0 ${W} ${TR_SKY}" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
-          ${sceneUpperHtml(W, TR_SKY, cx, lit)}
-        </svg>`}
-        <p class="tr-seen">${esc(scene.above)}</p>
-      </div>
-      <div class="tr-earth" style="height:${earthH}px">
-        <p class="tr-cultivates">${esc(scene.below)}</p>
-        <svg class="tr-roots" viewBox="0 0 ${W} ${earthH}" width="${W}" height="${earthH}" aria-hidden="true">${roots}</svg>
-        ${pills}
-      </div>
-      ${treeCardHtml(B, lessons, nextId)}
-    </div>`;
-}
 
 // ── The upper band: an actor on a stage ───────────────────────
 // Owner direction 2026-10-20, and it REPLACED FOUR SEPARATE METAPHORS — a
@@ -3451,23 +3415,6 @@ function sceneUpperHtml(W, H, cx, lit) {
   return wash + wing(-1) + wing(1) + boards + actor + lamps;
 }
 
-function treeCourseHtml(B, nextId) {
-  return B.modules.map(m => {
-    const ls = bookLessonsFor(B, m.id);
-    if (!ls.length) return '';
-    const ready = ls.filter(B.visible);
-    const done = ready.filter(l => speechLessonDone(l.id)).length;
-    return `
-      <section class="tr-module" aria-label="${esc(moduleTitle(B, m))}">
-        <header class="tr-head">
-          <p class="tr-mod">MODULE ${m.n} · ${esc(moduleTitle(B, m).toUpperCase())}</p>
-          <p class="tr-count">${done} of ${ready.length} ${esc((learnScene(B.ws) ?? learnScene('acting')).done)}
-            <span class="tr-open">Every lesson is open</span></p>
-        </header>
-        ${treeHtml(B, ls, nextId)}
-      </section>`;
-  }).join('');
-}
 
 function bookLearnSequence(el, B) {
   const cats = B.reviewCats();
@@ -3487,9 +3434,12 @@ function bookLearnSequence(el, B) {
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
       <h1 class="tr-title">${esc(scene.title)}</h1>
       <p class="tr-sub">${done} of ${avail.length} ${esc(scene.done)} across ${B.modules.length} modules.</p>
-      <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>
+      ${B.ws === 'acting' ? '' : `
+      <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>`}
     </div>
-    ${treeCourseHtml(B, next?.id ?? null)}
+    ${sceneStageHtml(scene, lessons)}
+    ${learnPathHtml(B, lessons, next?.id ?? null)}
+    ${treeCardHtml(B, lessons, next?.id ?? null)}
     ${cats.total ? reviewStripHtml('ac-review-link', cats.total,
       `${esc(B.title)} drafts awaiting ${bookReviewerKind(B)} review`) : ''}
     </div>`;
@@ -3498,11 +3448,11 @@ function bookLearnSequence(el, B) {
   // A root selects; the card opens. Two taps to a lesson is deliberate:
   // the objective on the card is what tells you whether this is the one
   // you want, and it cannot do that job after you have already left.
-  el.querySelectorAll('.tr-root-pill').forEach(btn => btn.addEventListener('click', () => {
-    const mod = btn.closest('.tr-module');
+  el.querySelectorAll('.lp-node').forEach(btn => btn.addEventListener('click', () => {
+    const mod = el;
     const l = bookLessonById(B, btn.dataset.item);
     if (!mod || !l) return;
-    mod.querySelectorAll('.tr-root-pill.is-picked').forEach(x => x.classList.remove('is-picked'));
+    el.querySelectorAll('.lp-node.is-picked').forEach(x => x.classList.remove('is-picked'));
     btn.classList.add('is-picked');
     const open = B.visible(l);
     mod.querySelector('[data-card-title]').textContent = l.title;
@@ -3522,21 +3472,21 @@ function bookLearnSequence(el, B) {
   // when the current book was already on screen, which pushed the title and
   // the shelf heading out of view the moment the page opened. This only
   // moves when the book is actually off screen.
-  const cur = el.querySelector('.tr-root-pill.is-current');
+  const cur = el.querySelector('.lp-node.is-current');
   if (cur) requestAnimationFrame(() => cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
 }
 
 function bookLearnPane(el, B) {
-  // WIDENED FROM ACTING TO EVERY COURSE WITH A SCENE (owner order
-  // 2026-10-20). It was acting-only while the idea was being judged, so
-  // there was something to switch back to and compare against; now each
-  // course has its own drawing, palette and vocabulary, and comparing them
-  // IS the thing being judged.
+  // Acting's journey is now its real Learn page, not a hidden mockup. The
+  // other scenic courses remain behind the owner preview while their own
+  // illustrations and vocabulary are still being judged.
   //
   // The condition is `has a scene`, not a list of workspaces, so a course
   // without one keeps the module grid rather than borrowing somebody
   // else's metaphor. See js/data/learn-scenes.js.
-  if (learnScene(B.ws) && learnSequencePreview()) return bookLearnSequence(el, B);
+  if (learnScene(B.ws) && (B.ws === 'acting' || learnSequencePreview())) {
+    return bookLearnSequence(el, B);
+  }
   const cats = B.reviewCats();
   const avail = pathLessons(B).filter(B.visible);
   const done = avail.filter(l => speechLessonDone(l.id)).length;
@@ -3733,18 +3683,34 @@ function learnPathHtml(B, lessons, nextId) {
         <span class="lp-pill">${esc(label)}</span>
       </button>`;
   }).join('');
-  // The scene sits behind the whole column, with a wash between it and the
-  // labels. With no art the tint carries the theme on its own.
-  const T = ACTING_PATH_THEME;
-  const stageStyle = T.art ? `--lp-art:url('${T.art}')` : '';
+  // The stage remains the promise at the top; the five painted chapters
+  // beneath it show the work that makes that promise possible. They are
+  // absolute background bands inside ONE path, so the route and numbering
+  // never restart at a module boundary.
+  const scene = learnScene(B.ws) ?? {};
+  const signs = items.filter(it => it.kind === 'sign');
+  const journeyBands = scene.journeyArt ? signs.map((it, index) => {
+    const nextY = signs[index + 1]?.y ?? H;
+    const focus = scene.journeyFocus?.[index] ?? 50;
+    return `<span class="lp-scene-band lp-scene-band-${index + 1}"
+      style="--lp-band-y:${it.y}px;--lp-band-h:${Math.max(1, nextY - it.y)}px;
+        --lp-focus:${focus}%;background-image:url('${esc(scene.journeyArt)}')"
+      aria-hidden="true"></span>`;
+  }).join('') : '';
+  // A plain ground remains available for another course. The url() goes
+  // directly into the style attribute because a relative url() stored in a
+  // custom property resolves against the stylesheet instead of the page.
+  const ground = !scene.journeyArt && scene.earth
+    ? `background-image:url('${scene.earth}')`
+    : '';
+  const artClass = scene.journeyArt ? ' has-journey' : scene.earth ? ' has-earth' : '';
   return `
-    <div class="lp-stage${T.art ? ' has-art' : ''}" style="${stageStyle}">
-    <div class="lp-path" style="--lp-h:${H}px">
+    <div class="lp-path${artClass}" style="--lp-h:${H}px;${ground}">
+      ${journeyBands}
       <svg class="lp-line" viewBox="0 0 300 ${SVG_H}" width="300" height="${SVG_H}" aria-hidden="true">
         <path d="${d}" />
       </svg>
       ${html}
-    </div>
     </div>`;
 }
 

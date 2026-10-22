@@ -29,10 +29,11 @@
 //
 // THE PALETTE IS PART OF THE SCENE, NOT A TINT. An earlier pass tried a
 // per-course wash over the shared layout and it read as a page that had
-// failed to load its background rather than as a design; the note in
-// js/data/acting/path-theme.js records why that was dropped. A colour only
-// works here because it is the colour OF something — soil, timber, marble,
-// ink.
+// failed to load its background rather than as a design. A colour only
+// works here because it is the colour OF something — the dark of a house,
+// the warm of a stage light. (js/data/acting/path-theme.js held that
+// reasoning and the art-file rules; it was deleted on 2026-10-20 once this
+// file carried both, and it is in git if the long version is wanted.)
 //
 // WORDS CHANGE WITH THE PICTURE. 'Cultivated' belongs to a tree and would be
 // nonsense under a printing press, so each scene carries its own verb for a
@@ -76,15 +77,28 @@ export const LEARN_SCENES = {
   // "Behavior and dialogue arise from the situation." What the audience
   // sees is the canopy; the situation, the want and the obstacle are roots.
   acting: {
-    title: 'The Work Beneath the Work',
-    art: 'img/ui/stage-acting.jpg',
+    // The ROUTE's name, not the course's. The course is called Acting &
+    // Scene Work everywhere else and keeps that name; this is what the
+    // walk through it is called, which is a different thing and reads as
+    // one. This is the only home for that string — it lived in
+    // js/data/acting/path-labels.js as ACTING_PATH_TITLE until 2026-10-21,
+    // which left two sources of truth and one of them unread.
+    title: 'The Actor’s Journey',
+    art: 'img/ui/acting-stage-vintage-cel-v1.jpg',
+    // One painted story world, sampled differently behind each module. The
+    // node path stays live HTML on top of it, so progress can change without
+    // asking the illustration to pretend it knows which lesson is current.
+    // The five focus points follow the five acts in the painting: situation,
+    // script, partner, rhythm, and the walk back toward performance.
+    journeyArt: 'img/ui/acting-journey-vintage-cel-v1.jpg',
+    journeyFocus: [10, 30, 50, 70, 90],
     done: 'cultivated',
     above: 'WHAT THE AUDIENCE SEES',
     below: 'WHAT THE ACTOR CULTIVATES',
     palette: {
-      '--tr-sky': '#2b3a2c', '--tr-soil': '#4a3327', '--tr-soil-2': '#3a271e',
-      '--tr-leaf': '#86a96f', '--tr-bark': '#8a6a4b', '--tr-gold': '#e3bb5e',
-      '--tr-dim': '#bda98f', '--tr-accent': '#d98f72',
+      '--tr-sky': '#17120e', '--tr-soil': '#21170f', '--tr-soil-2': '#0f0c09',
+      '--tr-leaf': '#d2a04b', '--tr-bark': '#754a29', '--tr-gold': '#e1aa4c',
+      '--tr-dim': '#c6a16b', '--tr-accent': '#bc6738',
     },
   },
 
