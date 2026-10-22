@@ -280,7 +280,7 @@ script instead and paste its block.
 - Building a Character          47 records  (4 more in the withdrawn role module, behind ROLE_LIVE)
 - Shakespeare                   37 records
 - Rhetoric                      36 records
-- Voice & Speech                 0 records  WORKSPACE WITHDRAWN
+- Speech                        25 records  <- 13 UNPUBLISHED: sp-start-parts, sp-start-fluency, sp-start-alphabet, sp-start-offbook, sp-m-pace, sp-m-emphasis  WORKSPACE WITHDRAWN
 
 An unpublished lesson in a live course renders as a draft gate to
 every learner. Ship its js/data/speech/reviews.js entry in the same commit.

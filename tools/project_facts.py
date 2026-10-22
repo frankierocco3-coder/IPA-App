@@ -85,7 +85,20 @@ def lessons():
          r"\n  \{ id: '(?:ch|ac)-[a-z-]+', module:", ('role', 'ROLE_LIVE')),
         ('Shakespeare', 'js/data/shakespeare/shakespeare-course.js', r"\n  \{ id: 'sh-", None),
         ('Rhetoric', 'js/data/rhetoric/rhetoric-course.js', r"\n  \{ id: 'rh-", None),
-        ('Voice & Speech', 'js/data/speech/speech-course.js', r"\n  \{ id: 'sp-", None),
+        # THE COURSE IS CALLED 'Speech', NOT 'Voice & Speech'. The workspace
+        # labelled Voice & Speech has id 'ipa' and is LIVE; the withdrawn
+        # workspace is id 'speech', labelled Speech. This row said
+        # 'Voice & Speech' until 2026-10-21 and so printed
+        # "Voice & Speech ... WORKSPACE WITHDRAWN" into CLAUDE.md's generated
+        # block — the exact confusion CLAUDE.md calls the single easiest
+        # mistake in the file, emitted by the tool built to prevent it.
+        #
+        # The regex also has to differ: EVERY OTHER COURSE writes a record as
+        # "\n  { id: 'xx-...", but speech-course.js puts the brace on its own
+        # line and the id on the next. The old r"\n  \{ id: 'sp-" therefore
+        # matched ZERO and reported a 25-record course as 0 records.
+        ('Speech', 'js/data/speech/speech-course.js',
+         r"\n  \{\s*\n\s+id: '(?:sp-|wsm)", None),
     ]
 
 
@@ -134,9 +147,12 @@ def facts():
                 hidden = len(re.findall(r"module: '%s'" % mod, src))
                 n -= hidden
                 note = '(%d more in the withdrawn %s module, behind %s)' % (hidden, mod, flag)
-        if not flagmap.get({'Voice & Speech': 'SPEECH_LIVE'}.get(name, '_'), True):
+        if not flagmap.get({'Speech': 'SPEECH_LIVE'}.get(name, '_'), True):
             note = (note + ' WORKSPACE WITHDRAWN').strip()
-        allids = re.findall(r"\n  \{ id: '([a-z0-9-]+)'", src)
+        # Tolerate the brace-on-its-own-line style too (speech-course.js), or
+        # an unpublished Speech lesson is invisible to the draft-gate warning
+        # below — which is the one thing this report exists to catch.
+        allids = re.findall(r"\n  \{\s*\n?\s*id: '([a-z0-9-]+)'", src)
         unpub = [x for x in allids if x not in pub and re.match(r'^(ac|ch|sh|rh|sp)-', x)]
         books.append((name, n, len(unpub), unpub[:6], note))
 
