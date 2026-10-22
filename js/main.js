@@ -10,7 +10,7 @@ import { scriptAnalysisApproved } from './data/script-analysis-reviews.js';
 import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
-import { actingPathLabel, actingPathKind } from './data/acting/path-labels.js';
+import { actingPathLabel, actingPathKind, ACTING_LESSON_ICONS } from './data/acting/path-labels.js';
 import { learnScene, scenePaletteStyle } from './data/learn-scenes.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
@@ -507,7 +507,15 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
         </div>` : ''}`).join('')}
     </div>
     ${contextChip}
-    ${ACCENTLESS_WORKSPACES.includes(ws) ? '' : `
+    ${/* THE PADLOCK FOLLOWS THE LOCK CHAIN, not the accent/book split.
+          It was hidden on every ACCENTLESS workspace, which was right
+          while only the accent tracks locked anything. The Learn path
+          chains the book courses too (2026-10-22, "it should function
+          like Duolingo"), so hiding it here would leave a learner
+          locked out of their own course with no control that says so.
+          Speech is withdrawn behind SPEECH_LIVE and has no path to
+          walk, so it is the one workspace that still goes without. */
+      ws === 'speech' ? '' : `
     <button class="freeplay ${store.freePlay ? 'on' : ''}" id="freeplay" aria-pressed="${store.freePlay}"
             aria-label="Free play: unlock all lessons" title="Free play: unlock all lessons">${store.freePlay ? '🔓' : '🔒'}</button>`}`;
 
@@ -3630,6 +3638,12 @@ const lpIconSvg = kind => (LP_ICONS[kind]
   ? `<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">${LP_ICONS[kind]}</svg>`
   : '');
 
+// The lesson's own glyph, wrapped the same way, so a node can prefer its
+// own drawing and fall through to its kind without either side knowing.
+const actingLessonIcon = id => (ACTING_LESSON_ICONS[id]
+  ? `<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">${ACTING_LESSON_ICONS[id]}</svg>`
+  : '');
+
 // THE LEARN PATH, as the owner's 2026-10-22 mockups have it: one scroll,
 // but each module is its own illustrated band and each lesson is a CARD
 // carrying its own objective, not a pill carrying two words.
@@ -3657,8 +3671,38 @@ const lpIconSvg = kind => (LP_ICONS[kind]
 // video anywhere — and all 42 lessons carry the identical shape, so
 // there is no format difference to report. A VIDEO badge over prose is
 // the promise this app refuses to make.
+// THE CHAIN (owner direction 2026-10-22: "it should function like
+// Duolingo"). A lesson opens when the one before it is finished, so the
+// path is a route you walk rather than a menu you pick from.
+//
+// TWO RULES KEEP IT FROM TRAPPING ANYONE:
+//
+//   * AN UNPUBLISHED LESSON NEVER BLOCKS THE CHAIN. The Physical Score
+//     sits at module 2 order 8 with no ledger entry, so it cannot be
+//     completed by anybody. Counting it would have locked modules 3, 4
+//     and 5 permanently, behind a card that renders as a draft notice —
+//     the course would simply end at lesson 15 with no way on.
+//   * COMPLETED IS ALWAYS REPLAYABLE, matching isUnlocked() for the
+//     accent tracks. Finishing something must never take it away.
+//
+// Free play unlocks everything, as it does everywhere else. The padlock
+// that toggles it is suppressed on this workspace today and is turned
+// back on below, because a lock with no visible escape is a trap.
+function learnLockMap(B, lessons) {
+  const locked = new Map();
+  let prevDone = true;                 // nothing precedes the first lesson
+  lessons.forEach(l => {
+    if (!B.visible(l)) { locked.set(l.id, false); return; }   // gated, not locked
+    const done = speechLessonDone(l.id);
+    locked.set(l.id, !(store.freePlay || done || prevDone));
+    prevDone = done;
+  });
+  return locked;
+}
+
 function learnPathHtml(B, lessons, nextId) {
   const scene = learnScene(B.ws) ?? {};
+  const locked = learnLockMap(B, lessons);
   // Group in ONE pass, preserving the order the caller sorted.
   const groups = [];
   lessons.forEach(l => {
@@ -3668,11 +3712,11 @@ function learnPathHtml(B, lessons, nextId) {
     else last.ls.push(l);
   });
   return `<div class="lm-path">
-    ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene)).join('')}
+    ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
   </div>`;
 }
 
-function learnModuleBandHtml(B, g, gi, nextId, scene) {
+function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // A module with no painting renders as a plain band. A missing picture
   // must never become a broken one — the same rule figures follow.
   //
@@ -3695,38 +3739,68 @@ function learnModuleBandHtml(B, g, gi, nextId, scene) {
     <section class="lm-mod${art ? ' has-art' : ''}"${artStyle ? ` style="${artStyle}"` : ''}>
       ${head}
       <ol class="lm-list">
-        ${g.ls.map((l, i) => learnLessonCardHtml(B, l, i, nextId)).join('')}
+        ${g.ls.map((l, i) => learnLessonCardHtml(B, l, i, nextId, locked)).join('')}
       </ol>
     </section>`;
 }
 
-function learnLessonCardHtml(B, l, i, nextId) {
+function learnLessonCardHtml(B, l, i, nextId, locked) {
   const visible = B.visible(l);
   const isDone = speechLessonDone(l.id);
-  const isNext = l.id === nextId;
-  const state = !visible ? 'is-pending' : isDone ? 'is-done' : isNext ? 'is-current' : 'is-ahead';
+  const isLocked = locked?.get(l.id) === true;
+  const isNext = l.id === nextId && !isLocked;
+  const state = !visible ? 'is-pending'
+    : isDone ? 'is-done' : isLocked ? 'is-locked' : isNext ? 'is-current' : 'is-ahead';
   const kind = actingPathKind(l.id);
   const label = actingPathLabel(l.id, l.title);
   // An unpublished lesson says so where the objective would go, rather
-  // than advertising work a learner cannot open.
+  // than advertising work a learner cannot open. A LOCKED one keeps its
+  // objective: knowing what is coming is the reason to walk toward it,
+  // and hiding it would make the path a row of blanks.
   const desc = visible ? (l.objective || '') : draftBadgeFor(l);
+  // The glyph is the lesson's OWN, not its kind's — the owner's mockups
+  // draw a different picture on every node, and seven shared marks across
+  // thirty-four lessons put the same one on six in a row. The kind glyph
+  // is still the fallback, and the number behind that, so a lesson with
+  // no drawing of its own is plain rather than empty.
+  // A LOCKED NODE KEEPS ITS OWN DRAWING and takes a small padlock pip in
+  // the corner. Swapping the glyph out for a padlock turned twenty-eight
+  // of thirty-four nodes into the same picture, which is exactly what
+  // giving every lesson its own drawing was for: the path stopped being
+  // readable at the very moment it was mostly ahead of you. Done still
+  // takes the tick — that is a state you want to see at a glance, and
+  // there are never many of them in a row early on.
+  const ico = isDone ? LM_TICK_SVG
+    : (actingLessonIcon(l.id) || lpIconSvg(kind) || '');
+  const says = isDone ? ', completed'
+    : isLocked ? ', locked until you finish the lesson before it'
+    : isNext ? ', up next' : '';
+  const tag = isLocked || !visible ? 'div' : 'button';
   return `
     <li class="lm-row ${state}">
       <span class="lm-node" aria-hidden="true">
-        <span class="lm-num">${isDone ? '✓' : i + 1}</span>
-        ${isDone ? '' : lpIconSvg(kind)}
+        <span class="lm-num">${i + 1}</span>
+        <span class="lm-glyph">${ico}</span>
+        ${isLocked ? `<span class="lm-pip">${LM_LOCK_SVG}</span>` : ''}
       </span>
-      <button class="lm-card" data-item="${esc(l.id)}" type="button"
-              aria-label="${esc(l.title)}${isDone ? ', completed' : isNext ? ', up next' : ''}">
+      <${tag} class="lm-card"${tag === 'button'
+        ? ` data-item="${esc(l.id)}" type="button"` : ''}
+              aria-label="${esc(l.title)}${says}">
         <span class="lm-card-top">
           <span class="lm-card-title">${esc(label)}</span>
           ${kind && visible ? `<span class="lm-kind k-${esc(kind)}">${esc(kind)}</span>` : ''}
         </span>
         ${desc ? `<span class="lm-desc">${esc(desc)}</span>` : ''}
         <span class="lm-chev" aria-hidden="true">›</span>
-      </button>
+      </${tag}>
     </li>`;
 }
+
+const LM_TICK_SVG = '<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<path d="M4.6 12.8l4.8 4.8L19.6 7.2"/></svg>';
+const LM_LOCK_SVG = '<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<rect x="4.6" y="10.4" width="14.8" height="10.2" rx="2.4"/>'
+  + '<path d="M8.2 10.4V7.6a3.8 3.8 0 0 1 7.6 0v2.8"/></svg>';
 
 function renderActingModule(n, ws = 'acting') {
   record(() => renderActingModule(n, ws));

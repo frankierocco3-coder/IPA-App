@@ -2179,8 +2179,8 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   border-left-color: var(--gold, #c7a252); color: var(--ink); }
 .tr-view.is-light code { background: var(--panel-2); color: var(--ink); }
 
-.lm-path { --lm-node: 54px; --lm-gap: 14px; --lm-art: 104px;
-  max-width: 760px; margin: 0 auto; }
+.lm-path { --lm-node: 60px; --lm-gap: 16px; --lm-art: 104px;
+  --lm-rail: #4a5c3b; max-width: 760px; margin: 0 auto; }
 .lm-mod { position: relative; padding: 4px 0 10px; }
 /* THE PAINTED MARGINS. Two strips pinned to opposite edges, the cards on
    the paper between them.
@@ -2200,12 +2200,18 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   background-position: left top, right top;
   background-size: var(--lm-art) auto, var(--lm-art) auto; }
 .lm-mod.has-art > * { position: relative; z-index: 1; }
-/* THE RAIL. Full band height so it meets the next band's rail exactly. */
+/* THE RAIL — BEADED, as the mockups draw it. Full band height so it meets
+   the next band's rail exactly and the route reads as one walk. A solid
+   line said "diagram"; a row of beads says "steps", which is the whole
+   point of the shape. */
 .lm-mod::before { content: ''; position: absolute; z-index: 1;
-  left: calc(var(--lm-node) / 2); top: 0; bottom: 0; width: 2px;
-  transform: translateX(-1px); background: var(--line); }
-.lm-mod:first-child::before { top: 86px; }
-.lm-mod:last-child::before { bottom: 34px; }
+  left: calc(var(--lm-node) / 2); top: 0; bottom: 0; width: 7px;
+  transform: translateX(-3.5px);
+  background-image: radial-gradient(circle at 50% 50%,
+    var(--lm-rail) 2.3px, transparent 2.7px);
+  background-size: 7px 13px; background-repeat: repeat-y; }
+.lm-mod:first-child::before { top: 92px; }
+.lm-mod:last-child::before { bottom: 30px; }
 
 .lm-head { padding: 26px 0 16px 0; }
 .lm-eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .14em;
@@ -2223,23 +2229,46 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-list { list-style: none; margin: 0; padding: 0; }
 .lm-row { display: grid; grid-template-columns: var(--lm-node) 1fr;
   gap: var(--lm-gap); align-items: start; margin: 0 0 13px; }
-/* The node sits ON the rail, which is why it carries an opaque background:
-   the rail passes behind it and must not show through the glyph. */
-.lm-node { position: relative; z-index: 2; display: grid; place-items: center;
-  width: var(--lm-node); height: var(--lm-node); border-radius: 50%;
-  background: #fff; border: 3px solid var(--line); color: var(--muted);
-  box-shadow: 0 3px 0 var(--line), 0 5px 11px rgba(47,58,46,.12); }
-.lm-num { font-size: 15px; font-weight: 700; line-height: 1; }
-.lm-node .lp-ico { width: 19px; height: 19px; margin-top: 1px; }
-.lm-row.is-done .lm-node { background: var(--green); color: #fff; border-color: var(--green);
-  box-shadow: 0 3px 0 var(--green-dark), 0 5px 11px rgba(47,58,46,.16); }
-.lm-row.is-done .lm-num { font-size: 21px; }
+/* THE NODE IS A DOUBLE RING carrying its number and its own drawing, as
+   the mockups have it: a ring, a gap of page, then the circle. It sits ON
+   the rail, which is why the fill is opaque — the beads pass behind it
+   and must not show through the glyph. */
+.lm-node { position: relative; z-index: 2;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 1px; width: var(--lm-node); height: var(--lm-node); border-radius: 50%;
+  background: #fff; border: 2px solid var(--lm-rail); color: var(--lm-rail);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4.5px var(--lm-rail),
+    0 4px 10px rgba(47,58,46,.13); }
+.lm-num { font-size: 12px; font-weight: 700; line-height: 1; opacity: .85; }
+.lm-node .lp-glyph-wrap, .lm-glyph { display: block; line-height: 0; }
+.lm-node .lp-ico { width: 23px; height: 23px; }
+@media (max-width: 420px) { .lm-node .lp-ico { width: 19px; height: 19px; } }
+/* Done fills in. The number stays — it is the lesson's place in the
+   module, and losing it when you finish would make a completed stretch
+   of the path unreadable. */
+.lm-row.is-done .lm-node { background: var(--green); color: #fff;
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4.5px var(--green),
+    0 4px 10px rgba(47,58,46,.17); }
 .lm-row.is-current .lm-node { background: var(--lavender); color: #fff;
   border-color: var(--lavender);
-  box-shadow: 0 3px 0 #8c7cab, 0 5px 12px rgba(47,58,46,.18),
-    0 0 0 6px color-mix(in srgb, var(--lavender) 24%, transparent); }
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4.5px var(--lavender),
+    0 4px 12px rgba(47,58,46,.18),
+    0 0 0 10px color-mix(in srgb, var(--lavender) 20%, transparent); }
+/* Locked is QUIET, not broken: no lift, no colour, the lesson's own
+   drawing still showing, and a padlock pip on the rim. */
+.lm-row.is-locked .lm-node { background: var(--panel-2);
+  border-color: var(--line); color: var(--muted);
+  box-shadow: 0 0 0 3px var(--bg), 0 0 0 4.5px var(--line); }
+.lm-row.is-locked .lm-glyph { opacity: .5; }
+.lm-pip { position: absolute; right: -3px; bottom: -3px;
+  display: grid; place-items: center; width: 21px; height: 21px;
+  border-radius: 50%; background: var(--bg); color: var(--muted);
+  box-shadow: 0 0 0 1.5px var(--line); }
+.lm-pip .lp-ico { width: 12px; height: 12px; }
 .lm-row.is-pending .lm-node { background: var(--panel-2); border-style: dashed;
-  box-shadow: none; }
+  border-color: var(--line); color: var(--muted);
+  box-shadow: 0 0 0 3px var(--bg); }
 
 .lm-card { position: relative; display: block; width: 100%; text-align: left;
   font: inherit; color: inherit; cursor: pointer;
@@ -2254,6 +2283,15 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   box-shadow: 0 2px 9px color-mix(in srgb, var(--lavender) 26%, transparent); }
 .lm-row.is-pending .lm-card { background: var(--panel-2); border-style: dashed;
   cursor: default; box-shadow: none; }
+/* A locked card still READS — the objective is why you would walk toward
+   it — but it does not pretend to be pressable: no hover, no lift, no
+   chevron, and it is a div rather than a button so the keyboard does not
+   stop on it either. */
+.lm-row.is-locked .lm-card { background: transparent; border-style: dashed;
+  cursor: default; box-shadow: none; opacity: .72; }
+.lm-row.is-locked .lm-card:hover { border-color: var(--line); }
+.lm-row.is-locked .lm-card-title { color: var(--muted); }
+.lm-row.is-locked .lm-chev { display: none; }
 .lm-card-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
 .lm-card-title { font-family: var(--serif, Georgia, serif); font-size: 20px;
   font-weight: 700; color: var(--ink); line-height: 1.2; }
