@@ -2189,8 +2189,27 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    round. Sizing by height instead would scale the strip's width with the
    number of lessons in the module — a nine-lesson band would push its own
    artwork out under the cards — and stretching to `100%` would distort
-   the faces in it. A short band crops the bottom of the strip and a tall
-   one simply runs out of painting, which is what a margin should do.
+   the faces in it.
+
+   THE STRIPS DO NOT REPEAT, AND MIRROR-TILING WAS TRIED AND REJECTED
+   (2026-10-22). Baking [art, flipped art] into each file makes a
+   seamless repeat — every join becomes a pair of identical rows — and
+   on stone and ivy the seam really is invisible. It fails on the
+   artwork this page actually has: the margins carry HANDWRITTEN NOTES
+   ("Take the work into the room"), and the flipped copy prints them
+   upside down and back to front, which is unmistakably a bug.
+
+   Repetition cannot be avoided by drawing taller art either. Band height
+   grows as cards wrap, so at a 600px window module 5 needs a 1:17.2
+   margin against art that is 1:9.4. No single drawing covers every
+   width.
+
+   So the strip ends and DISSOLVES INTO --bg over its last fifth, baked
+   into the JPEG. The honest cost is paper below the art on the tallest
+   bands at the narrowest widths. The fix is in the artwork, not here:
+   a quiet, featureless bottom band — wall, floor, plain ivy, no text and
+   no props — can be extended downward to any height without smearing or
+   repeating. See docs/LEARN_BAND_IMAGE_SPEC.md.
 
    Art is optional and absent art is not a failure: a band with no
    painting is a plain band. A missing picture must never render as a
