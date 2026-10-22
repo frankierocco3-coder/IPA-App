@@ -55,7 +55,7 @@ export const ACTING_MODULES = [
     // and no lesson teaches it — the blurb was promising a fifth thing
     // the module does not deliver. Put it back only alongside a lesson
     // that earns it.
-    blurb: 'What a scene actually gives you — facts, relationship, turns, action — and how to get it onto the page.' },
+    blurb: 'Discover what the scene gives you before deciding how to play it.' },
   // Being Off Book opens this module (owner order, 2026-08-20). It used
   // to close it, which was backwards: none of the rest can be worked
   // while an actor is still holding the script. Now that analysis comes
@@ -83,14 +83,14 @@ export const ACTING_MODULES = [
     // it was reworded to stop the card saying the same thing twice.
     blurb: 'Securing the text first, then the five things it comes from: circumstances, objective, obstacle, stakes, urgency.' },
   { n: 3, id: 'listening', title: 'Listening and Responding',
-    blurb: 'The scene-partner work: the live half of acting, receiving the other person before you answer them.' },
+    blurb: 'Receive the other person before deciding how to answer.' },
   // Tempo-Rhythm was inserted here (owner order, 2026-08-26); Building a
   // Character sat beside it until 2026-09-23, when the whole module moved
   // to the Building a Character course. Its lessons kept their ids, so
   // nothing stored on a device broke. Preparing the Performance has moved
   // 4 -> 6 -> 5 across those two changes, again without touching ids.
   { n: 4, id: 'rhythm', title: 'Tempo-Rhythm',
-    blurb: 'How a character moves through time, in speech and in silence.' },
+    blurb: 'Learn how a character moves through time — in speech, action and silence.' },
   { n: 5, id: 'performance', title: 'Preparing the Performance',
     blurb: 'The rehearsal-and-production course: monologue and scene work, and carrying it all into the room.' },
 ];

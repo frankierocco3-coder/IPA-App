@@ -84,14 +84,51 @@ export const LEARN_SCENES = {
     // js/data/acting/path-labels.js as ACTING_PATH_TITLE until 2026-10-21,
     // which left two sources of truth and one of them unread.
     title: 'The Actor’s Journey',
-    art: 'img/ui/acting-stage-vintage-cel-v1.jpg',
-    // One painted story world, sampled differently behind each module. The
-    // node path stays live HTML on top of it, so progress can change without
-    // asking the illustration to pretend it knows which lesson is current.
-    // The five focus points follow the five acts in the painting: situation,
-    // script, partner, rhythm, and the walk back toward performance.
-    journeyArt: 'img/ui/acting-journey-vintage-cel-v1.jpg',
-    journeyFocus: [10, 30, 50, 70, 90],
+    art: 'img/ui/acting-stage-house.jpg',
+    // The full house, 841x872. Nearly square, so the band takes its height
+    // from this ratio rather than the default fixed strip — see
+    // sceneStageHtml. Cover-cropping it into the old 232px band cut the
+    // ceiling and the stage floor off and left two actors from the
+    // shoulders to the knees.
+    artRatio: '841 / 872',
+    // SUPERSEDED 2026-10-22. `journeyArt` was one tall painted world sampled
+    // at five focus points behind a single winding path, and `journeyFocus`
+    // chose the five samples. The owner's module artwork replaced it: each
+    // band now carries its own pair of painted margins (see `moduleArt`),
+    // which is a better fit for a course whose modules hold anywhere from
+    // five to nine lessons — a sampled band stretched or squashed with the
+    // count, and the margins do not. Both fields and the 692KB painting
+    // went with the renderer that read them.
+    // LIGHT PAGE (owner mockups, 2026-10-22). The Learn view is a scoped
+    // dark surface by default — it was built when this course's page WAS a
+    // night scene end to end. The mockups put the theatre back where it
+    // belongs, inside its own picture, and set the page itself on warm
+    // parchment with the module bands illustrated in ink and leaf.
+    //
+    // Opt-in rather than a change to .tr-view, because Character,
+    // Shakespeare and Rhetoric still use the dark surface and have no
+    // mockups of their own yet. They keep it until they get one.
+    light: true,
+    // THE MODULE MARGINS (owner artwork, 2026-10-22). Each band is framed
+    // by two painted strips and the lesson cards run down the paper
+    // between them.
+    //
+    // They are STRIPS, not full-width plates, and that is deliberate. The
+    // owner's artwork arrived as finished page mockups with the cards and
+    // the node rail painted into the middle of them. Painting over that
+    // channel to reuse the whole picture smeared the card edges into
+    // horizontal streaks; cutting the channel out instead leaves the real
+    // page background showing between the strips, which is what the
+    // mockups show anyway and costs 452KB rather than three full plates.
+    //
+    // `work` (module 2) and `performance` (module 5) have no artwork yet.
+    // A module with no entry renders as a plain band — never a broken
+    // image, the same rule figures follow.
+    moduleArt: {
+      text:      { l: 'img/ui/acting-mod-text-l.jpg',      r: 'img/ui/acting-mod-text-r.jpg' },
+      listening: { l: 'img/ui/acting-mod-listening-l.jpg', r: 'img/ui/acting-mod-listening-r.jpg' },
+      rhythm:    { l: 'img/ui/acting-mod-rhythm-l.jpg',    r: 'img/ui/acting-mod-rhythm-r.jpg' },
+    },
     done: 'cultivated',
     above: 'WHAT THE AUDIENCE SEES',
     below: 'WHAT THE ACTOR CULTIVATES',

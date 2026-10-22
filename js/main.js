@@ -3313,10 +3313,20 @@ function treeCardLesson(B, lessons, nextId) {
 
 
 
+// A SCENE MAY DECLARE ITS PICTURE'S SHAPE. The band was a fixed TR_SKY
+// pixels high with the art cover-cropped into it, which suits a wide
+// plate and ruins a tall one: the first full-house theatre dropped in
+// here lost its ceiling and its stage floor at once and showed two
+// actors from the shoulders to the knees. `artRatio` makes the band take
+// its height from its own width instead, so the picture is never cropped
+// and the band stays responsive. Without it nothing changes.
 function sceneStageHtml(scene, lessons) {
   const lit = lessons.map(l => speechLessonDone(l.id));
+  const box = scene.artRatio && scene.art
+    ? `aspect-ratio:${esc(scene.artRatio)}`
+    : `height:${TR_SKY}px`;
   return `
-    <div class="tr-sky lp-head" style="height:${TR_SKY}px">
+    <div class="tr-sky lp-head" style="${box}">
       ${scene.art ? `
       <img class="tr-art" src="${esc(scene.art)}" alt="" aria-hidden="true">
       <span class="tr-art-wash" aria-hidden="true"></span>`
@@ -3429,7 +3439,7 @@ function bookLearnSequence(el, B) {
   const scene = learnScene(B.ws) ?? learnScene('acting');
 
   el.innerHTML = `
-    <div class="tr-view sc-${esc(B.ws)}" style="${scenePaletteStyle(scene)}">
+    <div class="tr-view sc-${esc(B.ws)}${scene.light ? ' is-light' : ''}" style="${scenePaletteStyle(scene)}">
     <div class="tr-top">
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
       <h1 class="tr-title">${esc(scene.title)}</h1>
@@ -3583,34 +3593,25 @@ function bookLearnPane(el, B) {
 // the launch lint bans across the whole view layer. A path here is a map, not
 // a board game.
 //
-// The winding is drawn from ONE array of offsets, so the curve and the node
-// positions cannot disagree: the SVG reads the same numbers the nodes do.
-const LP_OFFSETS = [0, 34, 58, 34, 0, -34, -58, -34];
-const LP_STEP = 94;
-// The pill hangs off the right of its dot, so a node pushed right carries
-// its label further right again and ran off a phone screen: the page scrolled
-// sideways, which the app does not allow anywhere else. The spread is
-// narrowed instead of the curve being redrawn, and BOTH the nodes and the
-// svg read it, so the two cannot come apart the way they did before.
-// Measured once per render; a rotation needs a re-render to re-measure,
-// which is acceptable while this is a preview and is noted here rather
-// than hidden.
-const lpSpread = () => (window.innerWidth < 430 ? 0.5 : 1);
-const lpX = (i, s) => Math.round(LP_OFFSETS[i % LP_OFFSETS.length] * s);
-
-// ONE PATH THROUGH THE WHOLE COURSE (owner direction 2026-10-15).
+// ONE SCROLL, FIVE ILLUSTRATED BANDS (owner mockups, 2026-10-22).
 //
-// The first build drew a path per module, which put a menu between the reader
-// and the route and made a module a destination again, the very thing the
-// module grid was doing wrong. There is one route now, all 33 lessons of it,
-// and a module is a SIGN ALONG THE WAY rather than a door: it marks where you
-// are without interrupting the line, which stays unbroken from lesson 1 to
-// the end.
+// Still one route, not five destinations: the rail runs the full height of
+// every band, so consecutive modules draw a single unbroken line and a
+// module remains a place you pass through rather than a door you open.
+// That part of the 2026-10-15 direction is unchanged and is why the bands
+// are sections of one page instead of pages of their own.
 //
-// Numbering runs 1..33 across the whole course for the same reason. Restarting
-// at each module would say the modules are separate journeys.
-const LP_GAP = 34;        // extra air before a module sign
-const LP_SIGN = 46;       // the height the sign itself occupies
+// WHAT DID CHANGE IS THE NUMBERING. It ran 1..33 across the whole course,
+// on the reasoning that restarting would say the modules were separate
+// journeys. The mockups restart it — 1-5, then 1-6, then 1-6 — so a number
+// now means "where this sits in its module", and the module heading
+// carries the course-level position instead. Recorded because the comment
+// that used to stand here argued the opposite case, and the next reader
+// would otherwise think the restart was a bug.
+//
+// LP_OFFSETS, LP_STEP, lpSpread, lpX, LP_GAP and LP_SIGN went with the
+// scattered-pill layout they positioned. The rail is a flow layout now:
+// the browser owns the geometry, so nothing computes a y twice.
 
 // The node marks. Seven line glyphs on a 24-unit grid, drawn with
 // currentColor so each node state colours its own icon. Inline rather than
@@ -3629,89 +3630,102 @@ const lpIconSvg = kind => (LP_ICONS[kind]
   ? `<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">${LP_ICONS[kind]}</svg>`
   : '');
 
+// THE LEARN PATH, as the owner's 2026-10-22 mockups have it: one scroll,
+// but each module is its own illustrated band and each lesson is a CARD
+// carrying its own objective, not a pill carrying two words.
+//
+// What changed from the scattered-pill layout it replaces, and why:
+//
+//   * A LESSON IS A CARD. The pill held a short label because a pill holds
+//     about two words; the card holds the lesson's real `objective`, which
+//     is already written for all 42 records and is the sentence that tells
+//     a learner whether to tap. Nothing new had to be authored.
+//   * THE RAIL IS A FLOW LAYOUT, not absolute positions. The old view
+//     computed y twice and disagreed with itself twice, which its own
+//     comment recorded. A list with a rail drawn behind it cannot: the
+//     browser owns the geometry and it is responsive for free.
+//   * NUMBERING RESTARTS PER MODULE (owner mockups). The replaced code
+//     deliberately ran one sequence across the course; the mockups show
+//     1-5, then 1-6, then 1-6, so position is now read inside the module
+//     it belongs to. The circle carries the number AND the kind icon.
+//
+// THE BADGE SAYS WHAT THE LESSON ASKS OF YOU — read, decide, mark,
+// partner, time, drill, perform. The mockups badge format instead
+// (READ / EXERCISE / PRACTICE / VIDEO) and that cannot ship: this course
+// is declared WRITTEN AND TEXT-BASED ONLY at the top of
+// js/data/acting/acting-course.js — no audio, recording, playback or
+// video anywhere — and all 42 lessons carry the identical shape, so
+// there is no format difference to report. A VIDEO badge over prose is
+// the promise this app refuses to make.
 function learnPathHtml(B, lessons, nextId) {
-  const spread = lpSpread();
-  const cx = i => 150 + lpX(i, spread);
-  // ONE LAYOUT PASS, so the signs, the nodes and the curve all read the same
-  // y values. Anything that computes a position twice eventually disagrees
-  // with itself, which this view has already proved twice.
-  const items = [];
-  let y = 0;
-  let lastMod = null;
-  lessons.forEach((l, i) => {
-    const m = bookModuleFor(B, l);
-    if (m && m.id !== lastMod) {
-      if (lastMod !== null) y += LP_GAP;
-      items.push({ kind: 'sign', m, y });
-      y += LP_SIGN;
-      lastMod = m.id;
-    }
-    items.push({ kind: 'node', l, i, y });
-    y += LP_STEP;
-  });
-  const nodesOnly = items.filter(it => it.kind === 'node');
-  const H = Math.max(1, y);
-  const SVG_H = Math.max(1, nodesOnly[nodesOnly.length - 1]?.y ?? 1);
-  // One unbroken line through every node centre, straight across the signs.
-  const d = nodesOnly.map((it, k) => {
-    if (!k) return `M ${cx(it.i)} ${it.y}`;
-    const prev = nodesOnly[k - 1];
-    const my = (prev.y + it.y) / 2;
-    return `C ${cx(prev.i)} ${my}, ${cx(it.i)} ${my}, ${cx(it.i)} ${it.y}`;
-  }).join(' ');
-  const html = items.map(it => {
-    if (it.kind === 'sign') {
-      return `<p class="lp-sign" style="--lp-y:${it.y}px">
-                <span class="lp-sign-n">${it.m.n}</span>${esc(moduleTitle(B, it.m))}</p>`;
-    }
-    const { l, i } = it;
-    const visible = B.visible(l);
-    const isDone = speechLessonDone(l.id);
-    const isNext = l.id === nextId;
-    const state = !visible ? 'is-pending' : isDone ? 'is-done' : isNext ? 'is-current' : 'is-ahead';
-    // Done always shows the tick. Everything else shows what KIND of work
-    // it is, and falls back to its number when no kind is recorded.
-    const kind = actingPathKind(l.id);
-    const mark = isDone ? '✓' : (lpIconSvg(kind) || String(i + 1));
-    const label = actingPathLabel(l.id, l.title);
-    // The accessible name is the real title; the pill is the short label.
-    return `
-      <button class="lp-node ${state}${lpX(i, spread) > 0 ? ' is-inward' : ''}" data-item="${esc(l.id)}" type="button"
-              style="--lp-x:${lpX(i, spread)}px; --lp-y:${it.y}px"
-              aria-label="${esc(l.title)}${isDone ? ', completed' : isNext ? ', up next' : ''}">
-        <span class="lp-dot" aria-hidden="true">${isDone || !kind ? esc(mark) : mark}</span>
-        <span class="lp-pill">${esc(label)}</span>
-      </button>`;
-  }).join('');
-  // The stage remains the promise at the top; the five painted chapters
-  // beneath it show the work that makes that promise possible. They are
-  // absolute background bands inside ONE path, so the route and numbering
-  // never restart at a module boundary.
   const scene = learnScene(B.ws) ?? {};
-  const signs = items.filter(it => it.kind === 'sign');
-  const journeyBands = scene.journeyArt ? signs.map((it, index) => {
-    const nextY = signs[index + 1]?.y ?? H;
-    const focus = scene.journeyFocus?.[index] ?? 50;
-    return `<span class="lp-scene-band lp-scene-band-${index + 1}"
-      style="--lp-band-y:${it.y}px;--lp-band-h:${Math.max(1, nextY - it.y)}px;
-        --lp-focus:${focus}%;background-image:url('${esc(scene.journeyArt)}')"
-      aria-hidden="true"></span>`;
-  }).join('') : '';
-  // A plain ground remains available for another course. The url() goes
-  // directly into the style attribute because a relative url() stored in a
-  // custom property resolves against the stylesheet instead of the page.
-  const ground = !scene.journeyArt && scene.earth
-    ? `background-image:url('${scene.earth}')`
+  // Group in ONE pass, preserving the order the caller sorted.
+  const groups = [];
+  lessons.forEach(l => {
+    const m = bookModuleFor(B, l);
+    const last = groups[groups.length - 1];
+    if (!last || last.m?.id !== m?.id) groups.push({ m, ls: [l] });
+    else last.ls.push(l);
+  });
+  return `<div class="lm-path">
+    ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene)).join('')}
+  </div>`;
+}
+
+function learnModuleBandHtml(B, g, gi, nextId, scene) {
+  // A module with no painting renders as a plain band. A missing picture
+  // must never become a broken one — the same rule figures follow.
+  //
+  // Two layers, pinned to opposite edges and sized by HEIGHT so the paper
+  // never stretches: the cards run down the page between them. The url()
+  // goes straight into the style attribute because a relative url() stored
+  // in a custom property resolves against the stylesheet, not the page —
+  // which cost this view an afternoon once already.
+  const art = scene.moduleArt?.[g.m?.id];
+  const artStyle = art
+    ? `background-image:url('${esc(art.l)}'),url('${esc(art.r)}')`
     : '';
-  const artClass = scene.journeyArt ? ' has-journey' : scene.earth ? ' has-earth' : '';
+  const head = g.m ? `
+    <header class="lm-head">
+      <p class="lm-eyebrow">${esc(B.title)}</p>
+      <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}</h2>
+      ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
+    </header>` : '';
   return `
-    <div class="lp-path${artClass}" style="--lp-h:${H}px;${ground}">
-      ${journeyBands}
-      <svg class="lp-line" viewBox="0 0 300 ${SVG_H}" width="300" height="${SVG_H}" aria-hidden="true">
-        <path d="${d}" />
-      </svg>
-      ${html}
-    </div>`;
+    <section class="lm-mod${art ? ' has-art' : ''}"${artStyle ? ` style="${artStyle}"` : ''}>
+      ${head}
+      <ol class="lm-list">
+        ${g.ls.map((l, i) => learnLessonCardHtml(B, l, i, nextId)).join('')}
+      </ol>
+    </section>`;
+}
+
+function learnLessonCardHtml(B, l, i, nextId) {
+  const visible = B.visible(l);
+  const isDone = speechLessonDone(l.id);
+  const isNext = l.id === nextId;
+  const state = !visible ? 'is-pending' : isDone ? 'is-done' : isNext ? 'is-current' : 'is-ahead';
+  const kind = actingPathKind(l.id);
+  const label = actingPathLabel(l.id, l.title);
+  // An unpublished lesson says so where the objective would go, rather
+  // than advertising work a learner cannot open.
+  const desc = visible ? (l.objective || '') : draftBadgeFor(l);
+  return `
+    <li class="lm-row ${state}">
+      <span class="lm-node" aria-hidden="true">
+        <span class="lm-num">${isDone ? '✓' : i + 1}</span>
+        ${isDone ? '' : lpIconSvg(kind)}
+      </span>
+      <button class="lm-card" data-item="${esc(l.id)}" type="button"
+              aria-label="${esc(l.title)}${isDone ? ', completed' : isNext ? ', up next' : ''}">
+        <span class="lm-card-top">
+          <span class="lm-card-title">${esc(label)}</span>
+          ${kind && visible ? `<span class="lm-kind k-${esc(kind)}">${esc(kind)}</span>` : ''}
+        </span>
+        ${desc ? `<span class="lm-desc">${esc(desc)}</span>` : ''}
+        <span class="lm-chev" aria-hidden="true">›</span>
+      </button>
+    </li>`;
 }
 
 function renderActingModule(n, ws = 'acting') {
