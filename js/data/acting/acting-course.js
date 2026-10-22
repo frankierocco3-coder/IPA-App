@@ -32,24 +32,56 @@ export const ACTING_PRINCIPLE =
   'A character’s behavior and dialogue arise from the situation they are in, what they want within that situation, and how each situation serves the larger movement of the story.';
 
 export const ACTING_MODULES = [
-  // Being Off Book opens Module 1 (owner order, 2026-08-20). It used to
-  // close it, which was backwards: none of the rest can be worked while
-  // an actor is still holding the script.
-  // Renamed from The Actor’s Work (owner order, 2026-09-26). The old name
-  // described the whole course rather than this module: every one of the
-  // five is the actor’s work. What this module actually teaches is the
-  // situation a character is in and what it does to them, which is what
-  // the blurb has said since it was written. The id stays 'work' — ids are
-  // never renamed here, which is what keeps stored progress intact.
-  { n: 1, id: 'work', title: 'The Situation at Hand',
-    blurb: 'Securing the text first, then where behavior comes from: circumstances, objective, obstacle, stakes.' },
+  // SCRIPT ANALYSIS COMES FIRST (owner order, 2026-10-21), on the way it
+  // is actually taught: table work before anybody is on their feet, and
+  // only once beats, objectives and a physical score exist does a scene
+  // arrive. The modules swapped places; NEITHER ID MOVED, so every
+  // completed lesson survived the reorder.
+  //
+  // The code agreed with the owner before he said it. Script Analysis
+  // uses this course's situation vocabulary exactly once in five lessons
+  // and defines its own terms, so it stands alone; Where Behavior Comes
+  // From leans on reading the text in five of its seven. The dependency
+  // only ever ran one way, and it ran against the old order.
+  //
   // Renamed from Investigating the Text (owner order, 2026-09-24): the
   // blurb had called it "the script-analysis course" since it was
   // written, and the module now also teaches how to RECORD the analysis
   // on the page, not only how to do it. The id stays 'text' — ids are
   // never renamed here, which is what keeps stored progress intact.
-  { n: 2, id: 'text', title: 'Script Analysis',
-    blurb: 'What a scene actually gives you — facts, relationship, turns, subtext, action — and how to get it onto the page.' },
+  { n: 1, id: 'text', title: 'Script Analysis',
+    // 'subtext' was dropped from this list on 2026-10-21. It appeared
+    // once in the whole module, inside another lesson's list of tools,
+    // and no lesson teaches it — the blurb was promising a fifth thing
+    // the module does not deliver. Put it back only alongside a lesson
+    // that earns it.
+    blurb: 'What a scene actually gives you — facts, relationship, turns, action — and how to get it onto the page.' },
+  // Being Off Book opens this module (owner order, 2026-08-20). It used
+  // to close it, which was backwards: none of the rest can be worked
+  // while an actor is still holding the script. Now that analysis comes
+  // first, it also sits where rehearsal actually puts it — you read and
+  // mark a script before you learn it.
+  //
+  // RENAMED TWICE. The Actor’s Work -> The Situation at Hand (owner
+  // order, 2026-09-26) -> Where Behavior Comes From (owner order,
+  // 2026-10-21). The id stays 'work' through both — ids are never renamed
+  // here, which is what keeps stored progress intact across a rename.
+  //
+  // The first rename fixed a name that described the whole course: every
+  // one of the five modules is the actor's work. The second fixed a name
+  // that covered about three of seven chapters. Circumstances are the
+  // situation; objective, obstacle, stakes and urgency are the pursuit
+  // inside it, and the path icons split the module on exactly that seam —
+  // three 'read' lessons, then four 'decide'. The new name is the one
+  // thing all seven have in common, and it is what the course's governing
+  // principle says in its first clause.
+  { n: 2, id: 'work', title: 'Where Behavior Comes From',
+    // The list named four elements and the module teaches five; urgency
+    // added 2026-10-21. It was the one thing a learner reading the module
+    // card could not see was coming. The blurb used to open "then where
+    // behavior comes from", which is now the title directly above it, so
+    // it was reworded to stop the card saying the same thing twice.
+    blurb: 'Securing the text first, then the five things it comes from: circumstances, objective, obstacle, stakes, urgency.' },
   { n: 3, id: 'listening', title: 'Listening and Responding',
     blurb: 'The scene-partner work: the live half of acting, receiving the other person before you answer them.' },
   // Tempo-Rhythm was inserted here (owner order, 2026-08-26); Building a
@@ -65,7 +97,7 @@ export const ACTING_MODULES = [
 
 export const ACTING_LESSONS = [
 
-  // ── Module 1 · The Situation at Hand ──────────────────────────
+  // ── Module 1 · Where Behavior Comes From ──────────────────────
   { id: 'ac-behavior', module: 'work', order: 2,
     title: 'Behavior Comes From the Situation',
     requiredReviewer: 'acting-professional',
@@ -178,6 +210,50 @@ export const ACTING_LESSONS = [
       ] },
     ] },
 
+  // THE PHYSICAL SCORE (owner order, 2026-10-21). Added at the end of
+  // this module on purpose: it is the test of everything the module has
+  // just named. Circumstances, objective, obstacle, stakes and urgency
+  // are all claims until a body has to carry them with the words taken
+  // away, and this is the exercise that takes them away.
+  //
+  // It sits here rather than in Preparing the Performance because the
+  // owner's own training order puts it before a scene arrives, not
+  // inside scene work, and because module 5 already holds nine lessons
+  // doing two jobs.
+  //
+  // NOT PUBLISHED. There is no entry for this id in
+  // js/data/speech/reviews.js, so it renders as a draft gate to every
+  // learner until the owner approves it. That is deliberate: it is new
+  // writing, and nothing here approves its own copy.
+  { id: 'ac-physicalscore', module: 'work', order: 8,
+    title: 'The Physical Score',
+    requiredReviewer: 'acting-professional',
+    objective: 'Play the scene with the words taken away, and find out which of your choices was real.',
+    orientation: 'Words will carry an intention you have not actually made. A body will not.',
+    reflection: 'Which moment went vague the second you could not speak?',
+    body: [
+      { p: 'A physical score is the scene played silently: no lines, no mouthing, nothing but what the character physically does. You still pursue the objective, you still meet the obstacle, you still take in whatever the other person gives you. You simply cannot say any of it.' },
+      { p: 'It is a test rather than a performance. Speech is generous, and it will cover for a choice you have not really made: an actor who has not decided what they want can still say the line convincingly enough to get through a rehearsal. Take the line away and there is nothing left to hide behind. Either you are doing something to the other person or you are standing there.' },
+      { h: 'Running it' },
+      { steps: [
+        'Know the scene well enough that you are not trying to remember it. This is work for a secure text.',
+        'Decide, before you start, what you want and what is in the way. Write both down in a sentence each.',
+        'Play the scene through in silence, at the real length, taking the time the lines would have taken.',
+        'Do whatever the character would do: cross the room, take the chair, pick the thing up, put it down, turn away, wait.',
+        'Where you find yourself inventing business to fill a gap, stop and mark the moment. That gap is a choice you have not made.',
+        'Run it a second time and keep only what was doing something. Decoration falls away fast on the second pass.',
+        'Then put the words back and notice what survived.',
+      ] },
+      { h: 'What it tells you' },
+      { list: [
+        'Where the objective is real, because something visibly changes when you pursue it.',
+        'Where the obstacle is real, because you can see it cost you something.',
+        'Which moments were carried entirely by the writing and not by you.',
+        'Where you were waiting for your cue rather than listening.',
+      ] },
+      { p: 'Work gently and inside what your body allows today. None of this needs falls, lifts or anything strenuous to be useful, and a physical score done sitting in a chair still answers the question it is asking.' },
+    ] },
+
   { id: 'ac-offbook', module: 'work', order: 1,
     title: 'Being Off Book',
     requiredReviewer: 'acting-professional',
@@ -214,7 +290,7 @@ export const ACTING_LESSONS = [
       // rendered from FOUR_LISTS_SECTIONS so the lesson and the page
       // cannot drift apart.
       { fourLists: true },
-      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything, next, is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Script Analysis shelf: they save with that project.' },
+      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Script Analysis shelf: they save with that project.' },
     ],
     reflection: 'Which of your four lists came out shortest? What does that absence tell you?' },
   { id: 'ac-question', module: 'text', order: 4,
@@ -309,7 +385,7 @@ export const ACTING_LESSONS = [
       { p: 'This course takes no position on which of the many approaches to emotional life an actor should adopt; the Approaches to Acting introductions in the Library describe several. What it does insist on is that “be sad” is not a playable instruction, while “get her to stay” is.' },
     ] },
 
-  // ── Module 4 · Preparing the Performance ──────────────────────
+  // ── Module 5 · Preparing the Performance ──────────────────────
   // Playable Actions left Script Analysis on 2026-09-25 with the eight
   // lessons retired around it, but it was ALSO on the Actions &
   // Rehearsal shelf, so retiring it would have emptied a shelf the
@@ -386,7 +462,13 @@ export const ACTING_LESSONS = [
     body: [
       { p: 'Text security, a first reading of the circumstances, an objective you are willing to test, questions you cannot answer alone: that is a well-prepared arrival. Rehearsal then spends its time on what actually requires the room.' },
       { p: 'Keep rehearsal notes as questions rather than verdicts where you can. “Why does she stay after that line?” travels better into the next rehearsal than “play this colder”.' },
-      { p: 'The Actor’s Studio holds Rehearsal Notes alongside your scene study, so the questions and the work live with the text.' },
+      // A third paragraph here sent the reader to "Rehearsal Notes
+      // alongside your scene study" in the Actor's Studio. Removed
+      // 2026-10-21: neither is reachable. 'Rehearsal Notes' appears
+      // nowhere in the view layer — it was never built, not withdrawn —
+      // and scene study sits behind SCENE_STUDY_LIVE, which is false.
+      // The lesson's own advice to keep notes as questions survives in
+      // the paragraph above, which needs no feature to act on.
     ] },
 
   { id: 'ac-integrating', module: 'performance', order: 5,
@@ -463,18 +545,34 @@ export const ACTING_LESSONS = [
       { p: 'Nothing in Speechcraft evaluates a performance. This course prepares the work; what happens in the room belongs to you and the people you make it with.' },
     ] },
 
-  // ── Module 4 · Building a Character ─────────────
+  // ── Module 2 · Script Analysis, continued ─────────────────────
+  // It said "Module 4 · Building a Character" until 2026-10-21. That
+  // module left this course on 2026-09-23 and these three records are
+  // module 2, so the header named a module that no longer exists, above
+  // lessons belonging to a different one. The records are deliberately
+  // NOT reordered: the path sorts by `order`, so moving them would churn
+  // the file without changing anything a learner sees.
   { id: 'ac-analysis', module: 'text', order: 1,
     title: 'Through Analysis',
     requiredReviewer: 'acting-professional',
     objective: 'Build a character from what the text gives you: the world, the facts, and what everyone says.',
-    orientation: 'This road starts at the desk. You read your way to the person.',
+    orientation: 'This work starts at the desk. You read your way to the person.',
     reflection: 'Take a character you know. What is the single fact of their world that shaped them most before the play began?',
     body: [
-      { p: 'The analysis road works like detective work. You read the whole play, more than once, and you collect what it actually states: the world this person lives in, what they do for a living, who they answer to, what they want out loud and what they seem to want underneath. You gather what they say about themselves, what they say about everyone else, and what everyone else says about them. Then you look for the places where those accounts disagree, because the disagreements are where the person is hiding.' },
-      { p: 'You already own the tools for this road. Script Analysis is the module that does exactly this work: facts, relationships, beats, subtext, playable actions. The Four Lists in the Library turns the reading into four concrete inventories on your own script. This lesson is not here to repeat them. It is here to point them at a new target.' },
+      { p: 'Analysis works like detective work. You read the whole play, more than once, and you collect what it actually states: the world this person lives in, what they do for a living, who they answer to, what they want out loud and what they seem to want underneath. You gather what they say about themselves, what they say about everyone else, and what everyone else says about them. Then you look for the places where those accounts disagree, because the disagreements are where the person is hiding.' },
+      { p: 'You already own the tools. This module does exactly this work: facts, relationships, beats, subtext, playable actions. The Four Lists in the Library turns the reading into four concrete inventories on your own script. This lesson is not here to repeat them. It is here to point them at a new target.' },
       { p: 'Because here is the shift: those tools are usually aimed at understanding a scene. Aim them at building a person instead. The world of the play tells you what shaped this character before page one. The facts tell you what they cannot escape. The gap between what they claim and what others report tells you what they are hiding, and a person is mostly made of what they are hiding. Analysis done this way does not end in notes. It ends in somebody.' },
-      { p: 'And when it does, do not stop there. Take that somebody to the other road. Carry everything the desk gave you into an empty room and let the person improvise, and watch the research turn into behavior. Or if you came here from the feeling road, run your discovered character through these tools and find out whether they can survive the facts of the play. Either order works. No right answers. The character is finished where the two roads meet.' },
+      // The paragraph that stood here was removed on 2026-10-21. It sent
+      // the reader to 'the other road' and 'the feeling road' — the two-
+      // roads structure that left this course for Building a Character on
+      // 2026-09-23. It had been pointing at nothing for a month. The
+      // lesson now ends on 'It ends in somebody', which was always the
+      // line the paragraph was walking away from.
+      //
+      // THE DEEPER QUESTION IS STILL OPEN: this record teaches building a
+      // character from a text, which is Building a Character's subject,
+      // and it reads as the ninth sibling of the eight lessons handed over
+      // in September. Moving it is an owner decision, not a correction.
     ] },
 
   { id: 'ac-markup', module: 'text', order: 2,
@@ -773,12 +871,26 @@ export function actingLessonNumber(l) {
 export const ACTING_COLLECTIONS = [
   // Same order the Learn module teaches: Being Off Book first. The shelf
   // and the pathway must not disagree about what comes first.
-  { id: 'principles', icon: '🎯', title: 'Acting Principles',
+  // EVERY SHELF CARRIES ITS MODULE'S NAME (owner order 2026-10-21). Each
+  // of these five holds exactly one Learn module's lessons, in the same
+  // order — verified, not assumed — so a shelf with a different name meant
+  // the same seven lessons answered to two names depending on which page
+  // you were on, and a reader finishing the shelf had no way to know they
+  // had finished module 1.
+  //
+  // 'Acting Principles' also had the exact flaw module 1 was renamed to
+  // escape on 2026-09-26: it described the whole course rather than this
+  // module. The module was fixed that day and its shelf was not.
+  //
+  // THE IDS DO NOT MOVE — 'principles', 'listening', 'scene', 'rhythm',
+  // 'rehearsal' are storage, and renaming one would strand saved state.
+  { id: 'principles', icon: '🎯', title: 'Where Behavior Comes From',
     lessons: ['ac-offbook', 'ac-behavior', 'ac-circumstances', 'ac-objective',
-              'ac-obstacle', 'ac-stakes', 'ac-urgency'] },
+              'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-physicalscore'] },
   // Module 3 gets its own shelf (owner order, 2026-09-17): every
   // collection now mirrors one Learn module.
-  { id: 'listening', icon: '👂', title: 'Listening & Responding',
+  // 'and', not '&', to match the module exactly: the house writes it out.
+  { id: 'listening', icon: '👂', title: 'Listening and Responding',
     lessons: ['ac-attention', 'ac-receiving', 'ac-moment', 'ac-newinfo',
               'ac-repetition', 'ac-playing'] },
   // TRIMMED TO SIX (owner order 2026-09-25): Lines & Memory, The Four
@@ -793,7 +905,10 @@ export const ACTING_COLLECTIONS = [
   // Monologue Work and Scene Work shelve here, matching their Learn
   // module (Preparing the Performance) — the shelf and the path must
   // not disagree about what these chapters are (owner fix, 2026-09-16).
-  { id: 'rehearsal', icon: '🎬', title: 'Actions & Rehearsal',
+  // Named for its module. If module 5 is ever split — it holds nine
+  // lessons doing two jobs — this shelf splits with it and both halves
+  // get named together rather than separately.
+  { id: 'rehearsal', icon: '🎬', title: 'Preparing the Performance',
     lessons: ['ac-actions', 'ac-monologue', 'ac-scene', 'ac-twohander',
               'ac-rehearsal', 'ac-integrating', 'ac-applying', 'ac-fourthwall',
               'ac-performance'] },

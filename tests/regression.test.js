@@ -3295,19 +3295,25 @@ export async function run({ navDoc = document } = {}) {
     // owner trimmed Script Analysis to six. EIGHT lessons were retired as
     // redundant, since they asked what The Four Lists and Question
     // Everything already ask. Playable Actions was NOT retired: it was
-    // also on the Actions & Rehearsal shelf, so it moved to that module
+    // also on the shelf that mirrors module 5 (called Actions & Rehearsal
+    // then, Preparing the Performance since the shelves were renamed to
+    // match their modules on 2026-10-21), so it moved to that module
     // rather than being deleted out from under a shelf nobody asked about.
-    check('acting: five modules hold the 33 path lessons; 8 Professional chapters shelve outside the path',
+    check('acting: five modules hold the 34 path lessons; 8 Professional chapters shelve outside the path',
       ACTING_MODULES.length === 5
       && String(ACTING_MODULES.map(m => m.title))
-        === 'The Situation at Hand,Script Analysis,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
-      // The ids are the part that must never move: two modules have been
-      // renamed by owner order and stored progress survived both because
-      // the renames never touched an id.
-      && ACTING_MODULES.find(m => m.n === 1).id === 'work'
-      && ACTING_MODULES.find(m => m.n === 2).id === 'text'
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 33
-      && ACTING_LESSONS.length === 41
+        === 'Script Analysis,Where Behavior Comes From,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
+      // The ids are the part that must never move. Two modules have been
+      // renamed and two have swapped places by owner order, and stored
+      // progress survived all of it because neither a rename nor a
+      // reorder ever touched an id. 'text' is module 1 since 2026-10-21,
+      // when Script Analysis moved ahead of Where Behavior Comes From.
+      && ACTING_MODULES.find(m => m.n === 1).id === 'text'
+      && ACTING_MODULES.find(m => m.n === 2).id === 'work'
+      // 33 -> 34 path lessons and 41 -> 42 records on 2026-10-21: The
+      // Physical Score was added at the end of Where Behavior Comes From.
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 34
+      && ACTING_LESSONS.length === 42
       && !actingLessonById('ac-character')
       && actingLessonById('ac-analysis')?.module === 'text'
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
