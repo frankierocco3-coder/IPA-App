@@ -121,13 +121,15 @@ export const LEARN_SCENES = {
     // page background showing between the strips, which is what the
     // mockups show anyway and costs 452KB rather than three full plates.
     //
-    // `work` (module 2) and `performance` (module 5) have no artwork yet.
-    // A module with no entry renders as a plain band — never a broken
-    // image, the same rule figures follow.
+    // All five modules are painted (owner artwork completed 2026-10-22).
+    // A module with no entry would render as a plain band — never a broken
+    // image, the same rule figures follow — but none is missing now.
     moduleArt: {
-      text:      { l: 'img/ui/acting-mod-text-l.jpg',      r: 'img/ui/acting-mod-text-r.jpg' },
-      listening: { l: 'img/ui/acting-mod-listening-l.jpg', r: 'img/ui/acting-mod-listening-r.jpg' },
-      rhythm:    { l: 'img/ui/acting-mod-rhythm-l.jpg',    r: 'img/ui/acting-mod-rhythm-r.jpg' },
+      text:        { l: 'img/ui/acting-mod-text-l.jpg',        r: 'img/ui/acting-mod-text-r.jpg' },
+      work:        { l: 'img/ui/acting-mod-work-l.jpg',        r: 'img/ui/acting-mod-work-r.jpg' },
+      listening:   { l: 'img/ui/acting-mod-listening-l.jpg',   r: 'img/ui/acting-mod-listening-r.jpg' },
+      rhythm:      { l: 'img/ui/acting-mod-rhythm-l.jpg',      r: 'img/ui/acting-mod-rhythm-r.jpg' },
+      performance: { l: 'img/ui/acting-mod-performance-l.jpg', r: 'img/ui/acting-mod-performance-r.jpg' },
     },
     done: 'cultivated',
     above: 'WHAT THE AUDIENCE SEES',

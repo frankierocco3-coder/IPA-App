@@ -81,7 +81,7 @@ export const ACTING_MODULES = [
     // card could not see was coming. The blurb used to open "then where
     // behavior comes from", which is now the title directly above it, so
     // it was reworded to stop the card saying the same thing twice.
-    blurb: 'Securing the text first, then the five things it comes from: circumstances, objective, obstacle, stakes, urgency.' },
+    blurb: 'Behavior grows from circumstance, pursuit and resistance — not a decision about mood.' },
   { n: 3, id: 'listening', title: 'Listening and Responding',
     blurb: 'Receive the other person before deciding how to answer.' },
   // Tempo-Rhythm was inserted here (owner order, 2026-08-26); Building a
