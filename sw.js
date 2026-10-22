@@ -86,6 +86,22 @@
  * So: REPLACING ANY FILE UNDER img/ AT ITS EXISTING PATH REQUIRES A BUMP.
  * Adding a new image at a new path does not — nothing has it cached.
  *
+ * sc-v51 IS THE FIRST ONE BUMPED BEFORE ANYBODY REPORTED ANYTHING
+ * (2026-10-22). The Learn path was rebuilt — new renderer in main.js, new
+ * rules in style.css, all new artwork at NEW paths. By the letter of the
+ * rules above no bump was needed: the images were new, so nothing had them
+ * cached, and scripts and styles revalidate by themselves.
+ *
+ * It got one anyway, because the owner had just asked for the work and was
+ * about to open the site. staleWhileRevalidate would have served him the
+ * PREVIOUS main.js and style.css on that first load — the new artwork
+ * fetching correctly behind a renderer that does not know what to do with
+ * it — and the new page would have appeared on the load after. That is the
+ * Lines & Memory shape, the commedia icons shape and the cast chart shape,
+ * all three of which were diagnosed only after he reported seeing the old
+ * thing. The rule those three wrote down is "is somebody waiting to see
+ * this", and the answer here was yes before the deploy went out.
+ *
  * Every fetch here goes past the browser's own HTTP cache ('no-cache' /
  * 'reload'). GitHub Pages marks files max-age=600, so for ten minutes after
  * a visit a plain fetch() can be handed the OLD file without asking the
@@ -94,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v50';                     // 2026-10-20: ship the selected ink-and-sepia Acting art direction immediately
+const VERSION = 'sc-v51';                     // 2026-10-22: the Learn path rebuild — owner is waiting to look at it
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
