@@ -3463,34 +3463,33 @@ function bookLearnSequence(el, B) {
     </div>`;
 
   el.querySelector('#ac-review-link')?.addEventListener('click', () => renderActingReviewStatus(B.ws));
-  // A root selects; the card opens. Two taps to a lesson is deliberate:
-  // the objective on the card is what tells you whether this is the one
-  // you want, and it cannot do that job after you have already left.
-  el.querySelectorAll('.lp-node').forEach(btn => btn.addEventListener('click', () => {
-    const mod = el;
-    const l = bookLessonById(B, btn.dataset.item);
-    if (!mod || !l) return;
-    el.querySelectorAll('.lp-node.is-picked').forEach(x => x.classList.remove('is-picked'));
-    btn.classList.add('is-picked');
-    const open = B.visible(l);
-    mod.querySelector('[data-card-title]').textContent = l.title;
-    mod.querySelector('[data-card-aim]').textContent = l.objective ?? '';
-    const go = mod.querySelector('[data-card-go]');
-    go.dataset.cardGo = l.id;
-    go.disabled = !open;
-    go.textContent = open ? 'Open lesson' : 'In review';
-  }));
+
+  // THE CARDS OPEN THE LESSONS. This bound '.lp-node' until 2026-10-23 —
+  // a class the band rebuild had already deleted — so every one of the
+  // 34 lessons was unreachable from the page built to reach them, and
+  // the only working door was the detail panel's single button. The
+  // [data-item] wiring that would have caught these lives in
+  // renderActingModule(), which is a different view.
+  //
+  // Locked and draft rows render as <div>, not <button>, and carry no
+  // data-item, so they are simply not in this list: the chain is
+  // enforced by what the markup does and does not make pressable.
+  el.querySelectorAll('.lm-card[data-item]').forEach(btn =>
+    btn.addEventListener('click', () => renderActingLesson(btn.dataset.item)));
+
   el.querySelectorAll('[data-card-go]').forEach(btn => btn.addEventListener('click', () => {
     if (!btn.disabled) renderActingLesson(btn.dataset.cardGo);
   }));
   // A path this long opens wherever you left off, not at the top. Without
   // this a returning reader lands on lesson 1 and has to scroll past
-  // everything they have already done to find where they are.
+  // everything they have already done to find where they are — 6,300px of
+  // it on a phone.
   // 'nearest' and not 'center': centring scrolled the page on arrival even
-  // when the current book was already on screen, which pushed the title and
-  // the shelf heading out of view the moment the page opened. This only
-  // moves when the book is actually off screen.
-  const cur = el.querySelector('.lp-node.is-current');
+  // when the current card was already on screen, which pushed the title
+  // out of view the moment the page opened.
+  // This read '.lp-node.is-current' until 2026-10-23, the same deleted
+  // class, so it silently did nothing at all.
+  const cur = el.querySelector('.lm-row.is-current');
   if (cur) requestAnimationFrame(() => cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
 }
 
@@ -3721,13 +3720,25 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // must never become a broken one — the same rule figures follow.
   //
   // Two layers, pinned to opposite edges and sized by HEIGHT so the paper
-  // never stretches: the cards run down the page between them. The url()
-  // goes straight into the style attribute because a relative url() stored
-  // in a custom property resolves against the stylesheet, not the page —
-  // which cost this view an afternoon once already.
+  // never stretches: the cards run down the page between them.
+  //
+  // THE URLS GO IN CUSTOM PROPERTIES, AND THE '../' IS LOAD-BEARING.
+  // Setting `background-image` inline here looked simpler and made the
+  // art impossible to switch off: an inline style cannot be overridden by
+  // a stylesheet, so the `background-image: none` in the phone media
+  // query below 560px never applied. The padding went to zero as
+  // intended, the paintings stayed, and the module heading and the cards
+  // ended up printed on top of the ivy.
+  //
+  // A relative url() in a custom property resolves against the STYLESHEET,
+  // not the page — a scar this view already carries. css/style.css is one
+  // directory down, so '../img/ui/x.jpg' is what lands on /img/ui/x.jpg,
+  // and it stays correct under the /IPA-App/ prefix on Pages because it is
+  // still relative. Do not "fix" it to 'img/ui/...'; that resolves to
+  // /css/img/ui/... and 404s.
   const art = scene.moduleArt?.[g.m?.id];
   const artStyle = art
-    ? `background-image:url('${esc(art.l)}'),url('${esc(art.r)}')`
+    ? `--lm-l:url('../${esc(art.l)}');--lm-r:url('../${esc(art.r)}')`
     : '';
   const head = g.m ? `
     <header class="lm-head">
@@ -4201,7 +4212,14 @@ function renderActingLesson(id) {
   // Widened with the Learn pane on 2026-10-20, and for the same reason:
   // a reader who gets the scene on Learn and the old layout the moment
   // they open a lesson has been shown two different apps.
-  if (learnScene(B.ws) && learnSequencePreview()) {
+  // THIS GATE HAS TO MATCH bookLearnPane's, and did not until 2026-10-23.
+  // The Learn pane opened to every Acting learner the day the illustrated
+  // bands went live; this one still demanded the owner preview key, which
+  // nobody but the owner has ever set. So a real learner walked the new
+  // page, opened a lesson, and landed on the pre-rebuild layout — the
+  // exact failure the note above describes, shipped. It was invisible in
+  // development because the owner's own profile has the key set.
+  if (learnScene(B.ws) && (B.ws === 'acting' || learnSequencePreview())) {
     app.innerHTML = `
       ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
       <main class="guide sp-lesson lx">

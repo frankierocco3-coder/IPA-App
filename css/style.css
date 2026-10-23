@@ -2214,7 +2214,13 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    Art is optional and absent art is not a failure: a band with no
    painting is a plain band. A missing picture must never render as a
    broken one. */
+/* The two urls arrive as custom properties from the renderer, which is
+   what makes the phone rule at the bottom of this block able to switch
+   them off. An inline `background-image` cannot be overridden by any
+   stylesheet rule, and that is precisely how the art ended up printed
+   under the heading at phone widths. */
 .lm-mod.has-art { padding-left: var(--lm-art); padding-right: var(--lm-art);
+  background-image: var(--lm-l), var(--lm-r);
   background-repeat: no-repeat, no-repeat;
   background-position: left top, right top;
   background-size: var(--lm-art) auto, var(--lm-art) auto; }
@@ -2229,6 +2235,14 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   background-image: radial-gradient(circle at 50% 50%,
     var(--lm-rail) 2.3px, transparent 2.7px);
   background-size: 7px 13px; background-repeat: repeat-y; }
+/* THE RAIL HAS TO CLEAR THE PAINTED MARGIN. ::before is absolutely
+   positioned, so its `left` is measured from the PADDING box and knows
+   nothing about the padding-left that has-art adds — the beads were
+   drawn 104px to the left of every node, straight down the middle of the
+   artwork, touching none of the circles they connect. It self-corrected
+   below 560px where that padding is dropped, which is exactly why
+   checking on a phone never showed it. */
+.lm-mod.has-art::before { left: calc(var(--lm-art) + var(--lm-node) / 2); }
 .lm-mod:first-child::before { top: 92px; }
 .lm-mod:last-child::before { bottom: 30px; }
 
@@ -2345,8 +2359,15 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    and then go entirely: a 56px sliver of ivy is decoration competing with
    the reading column, and the column wins. */
 @media (max-width: 700px) { .lm-path { --lm-art: 78px; } }
+/* THE MARGINS GO ON A PHONE so the cards get the full width, and the
+   rail comes back to the content edge with them. This rule was already
+   here and did half its job: the padding went, but `background-image:
+   none` could not touch an inline style, so the paintings stayed and the
+   heading and cards were printed on top of them. The urls are custom
+   properties now, set in the stylesheet, so this works. */
 @media (max-width: 560px) {
   .lm-mod.has-art { padding-left: 0; padding-right: 0; background-image: none; }
+  .lm-mod.has-art::before { left: calc(var(--lm-node) / 2); }
 }
 @media (max-width: 420px) {
   .lm-path { --lm-node: 46px; --lm-gap: 11px; }
