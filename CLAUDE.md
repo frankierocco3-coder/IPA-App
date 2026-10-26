@@ -294,7 +294,7 @@ script instead and paste its block.
 
 ### Lessons, and whether they publish
 
-- Acting & Scene Work           34 records  <- 1 UNPUBLISHED: ac-physicalscore  (8 more in the withdrawn performance module, behind PERFORMANCE_LIVE)
+- Acting & Scene Work           34 records  (8 more in the withdrawn performance module, behind PERFORMANCE_LIVE)
 - Building a Character          47 records  (4 more in the withdrawn role module, behind ROLE_LIVE)
 - Shakespeare                   37 records
 - Rhetoric                      36 records
@@ -336,7 +336,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Review
 
-- 181 ledger entries, 0 with specialist sign-off.
+- 182 ledger entries, 0 with specialist sign-off.
   Every published lesson rests on the owner editorial verdict alone.
   The awaiting-review badges say so; do not describe them as reviewed.
 <!-- facts:end -->

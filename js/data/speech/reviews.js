@@ -239,6 +239,16 @@ export const SPEECH_REVIEWS = {
   'ac-urgency': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-17', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-17. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+  // LIVE AND GATED FOR FIVE DAYS. The Physical Score shipped into a live
+  // course on 2026-10-21 without this entry, so every learner who opened it
+  // got 'Prepared draft — awaiting review' instead of the chapter. Invisible
+  // in development because the owner profile has a preview key set — the
+  // same way four commedia chapters shipped gated on 2026-10-19. The rule
+  // the file already states is the one that was broken: ship the ledger
+  // entry in the SAME commit as the lesson.
+  'ac-physicalscore': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-10-26', version: 1,
+    notes: 'Editorially approved by the product owner for learner-facing publication on 2026-10-26. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named. This is the only Acting chapter that asks the reader to work physically, and it sets its own limits in the text: gently, inside what the body allows that day, with no falls or lifts, and a score done sitting in a chair still answers the question it is asking. No movement teacher or physical-theatre practitioner has read that framing, and it is the first thing a reviewer should test.' },
   'ac-offbook': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-08-17', version: 1,
     notes: 'Editorially approved by the product owner for preview publication on 2026-08-17. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
