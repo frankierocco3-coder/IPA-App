@@ -147,13 +147,34 @@ BUG.** Measured over four consecutive runs on one clean tree, 2026-10-26:
 | 8 | 835 | 1 |
 | 9 | 793 | 73 |
 
-In the bad runs the app DID boot — no warning, the frame was present, the
-regression suite ran — and then driven navigation died partway with a crop of
-`Cannot read properties of null`. A `skipTransition()` bail-out was tried on
-the theory that later navigations were also starving for frames; runs 8 and 9
-are with it, and it did not help, so it was reverted rather than shipped on a
-falsified hypothesis. **The cause is not known. Do not assume it is the boot
-bug wearing a different hat.**
+In the bad runs the app DID boot and driven navigation died partway with a
+crop of `Cannot read properties of null`. It is deterministic within a browser
+profile — 777/68 twice running, the same 68 — which looks like state and is
+not, see below.
+
+**THE CAUSE IS NOT KNOWN.** Three explanations were tried and all three are
+refuted — do not re-chase them:
+
+* **The boot bug wearing a different hat.** No. The app boots, the runner's
+  own boot guard stays quiet, and the regression suite genuinely runs.
+* **Later navigations starving for frames, like the first paint did.** A
+  `skipTransition()` bail-out at 400ms was added to js/ui.js on that theory.
+  Runs 8 and 9 are with it and it did not help, so it was reverted rather
+  than shipped on a falsified hypothesis. (If anyone retries this: the
+  driven checks sleep 300–500ms, so a 400ms bail may simply fire after the
+  check has already measured. Untested.)
+* **The stored workspace.** The suite never SET the workspace, it inherited
+  one and detected it, so a profile left in 'acting' looked like the obvious
+  culprit. It is not: tests/run-all.js now seeds 'accents' and the
+  precondition passes — ✅, measured — and the same 68 checks still fail.
+
+What the hunt did turn up, and what is fixed, is a real latent bug in the
+precondition itself: it identified Accents by the presence of `#freeplay`,
+which stopped meaning anything on 2026-10-22 when the padlock moved to every
+workspace but 'speech'. It could pass in the wrong workspace, and its recovery
+reload was keyed on the same thing, so it skipped the reload that would have
+corrected it. It reads `#course-chip` now — true in Accents, false in Acting,
+measured both ways. That was worth fixing and it is NOT the cascade.
 
 So: Chrome remains the reference run, and a short count still means the run is
 not comparable. The difference since 2026-10-25 is that a full 835 is now
@@ -336,7 +357,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - RHETORIC_LIVE            false  js/main.js:278
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:219
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:9482
+- SCENE_STUDY_LIVE         false  js/main.js:9503
 - SHAKESPEARE_LIVE         true   js/views/context.js:193
 - SPEECH_LIVE              false  js/views/context.js:159
 
@@ -351,7 +372,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                12606 lines
+- js/main.js                12627 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  842
 

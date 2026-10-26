@@ -173,8 +173,25 @@ export async function run({ navDoc = document } = {}) {
   if (navDoc !== document) {
     const wsFrame = navDoc.defaultView?.frameElement;
     if (wsFrame) {
+      // THE DETECTOR IS THE COURSE CHIP, NOT THE PADLOCK. This read
+      // `#freeplay` until 2026-10-26, and that stopped identifying Accents on
+      // 2026-10-22, when the padlock moved out of the accent workspaces to
+      // every workspace but 'speech' (js/main.js, the statsbar button). After
+      // that it was true in Acting, Character, Shakespeare, Rhetoric, Voice &
+      // Speech AND Accents — so the precondition PASSED in the wrong
+      // workspace, and the recovery below it, keyed on the same thing, saw no
+      // problem and skipped the reload that would have fixed it. Sections 1
+      // to 18 then ran against the wrong course and cascaded, which is the
+      // long-blamed "embedded browser" flake: deterministic per profile, 68
+      // identical failures every run on a browser whose stored workspace was
+      // 'acting', and zero on one left in 'accents'.
+      //
+      // The course chip is only ever rendered by the accent workspaces —
+      // measured in both directions, Acting false / Accents true — because
+      // ACCENTLESS_WORKSPACES is exactly the set that has no accent to name.
+      const inAccentsNow = doc => !!doc?.getElementById('course-chip');
       let wsDoc = navDoc;
-      if (wsDoc.getElementById('freeplay') === null) {
+      if (!inAccentsNow(wsDoc)) {
         wsFrame.contentWindow.location.reload();
         for (let i = 0; i < 40; i++) {
           await scSleep(150);
@@ -182,12 +199,12 @@ export async function run({ navDoc = document } = {}) {
           if (wsDoc?.querySelector('.side-nav .side-item')) break;
         }
       }
-      const inAccents = !!wsDoc?.getElementById('freeplay');
+      const inAccents = inAccentsNow(wsDoc);
       check('precondition: the app under test is in the Accents workspace',
         inAccents,
         `stored="${localStorage.getItem('speechcraft-workspace')}" `
-        + `freeplay=${!!wsDoc?.getElementById('freeplay')} `
-        + `courseChip=${!!wsDoc?.querySelector('[aria-label^="Change course"]')} `
+        + `courseChip=${inAccents} `
+        + `freeplay=${!!wsDoc?.getElementById('freeplay')} (no longer a workspace tell) `
         + '— sections 1 to 18 need Accents; every check below this is unreliable without it');
     }
   }

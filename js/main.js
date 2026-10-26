@@ -3261,8 +3261,10 @@ function actingLearnPane(el) { return bookLearnPane(el, BOOKS.acting); }
 // lesson is open, so the shape of the course and your place in it fit on one
 // screen instead of behind five clicks.
 //
-// NOTHING LOCKS. Every row is clickable whatever its mark. The order is a
-// recommendation and the app says so out loud in three places.
+// NOTHING LOCKS — TRUE OF THIS VIEW, NOT OF THE LEARN PATH. Every row here
+// is clickable whatever its mark, and the Library still says so out loud.
+// The path chains its lessons since 2026-10-22; see THE LEARN PATH below
+// for what changed and why reading is still never gated.
 //
 // No badge is drawn for the ordinary state. Five tiles all reading "Not
 // started" is five times nothing, and it was most of why the old grid read
@@ -3287,8 +3289,11 @@ function actingLearnPane(el) { return bookLearnPane(el, BOOKS.acting); }
 // SCOPED DARK. Tokens live on .tr-view and nowhere else; the app has no
 // dark mode and this must not become one by accident.
 //
-// NOTHING LOCKS. Every root is a button, none disabled, and each tree says
-// so beside its count.
+// NOTHING LOCKS — AS THE TREE WAS DRAWN. Every root was a button, none
+// disabled, and each tree said so beside its count. Kept for the reasoning,
+// not as a description of today: the tree gave way to the shared stage, and
+// the path that replaced it chains its lessons (2026-10-22). THE LEARN PATH
+// below carries the current rule.
 const TR_SKY = 232;          // canopy band
 
 // The detail card. A root is now SELECTED rather than opened, and the card
@@ -3587,12 +3592,28 @@ function bookLearnPane(el, B) {
 //
 // TWO OWNER DECISIONS ARE BUILT IN AND SHOULD NOT DRIFT:
 //
-// NOTHING LOCKS. A node ahead of you is grey because you have not reached it,
-// never because you may not. Every node is a real button, no node is disabled,
-// and the page says so in words. The app promises in three places that every
-// chapter is free to read in any order, and gating reading would reintroduce
-// the shape of the hearts system removed on 2026-10-05, the one mechanic that
-// could stop somebody practising.
+// THE PATH IS SEQUENCED; THE LIBRARY IS NOT. Superseded 2026-10-22 (owner,
+// "it should function like Duolingo"). This block used to open "NOTHING
+// LOCKS. Every node is a real button, no node is disabled" and that has been
+// false since: learnLockMap below chains the lessons, and a node you have not
+// reached renders as a non-pressable row with a padlock pip, not a button.
+//
+// WHAT THE OLD RULE PROTECTED IS STILL PROTECTED, BY ANOTHER ROUTE. Its
+// reasoning was that gating READING would reintroduce the shape of the hearts
+// system removed on 2026-10-05 — the one mechanic that could stop somebody
+// practising. That reasoning still holds, so reading is not gated. Every
+// chapter stays open in the Library in any order, which is where the app
+// makes that promise in words and where it is true: the Library landing
+// (bookLibraryPane), a collection page, and the Browse-the-Library card.
+// Checked rather than assumed — a lesson locked on the path opens in full
+// from its Library shelf, no lock copy anywhere on it.
+//
+// AND THE ESCAPE IS ALWAYS ON SCREEN. Free play unlocks the whole path in one
+// tap, and the padlock moved OUT of the accent workspaces to every workspace
+// but 'speech' on the same day for exactly this reason — see the comment on
+// the statsbar button. A learner is never stopped; they are offered an order
+// and can step out of it. If that button ever goes, this becomes a gate and
+// the 2026-10-05 removal is undone by the back door.
 //
 // THERE IS NO TREASURE CHEST. The design had one and the owner cut it. Hearts,
 // streaks, XP and gems were removed in four deliberate cuts, so a chest would

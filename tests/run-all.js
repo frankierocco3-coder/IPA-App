@@ -21,6 +21,20 @@ function seedOnboarding() {
   } catch { /* storage unavailable — the nav checks will say so */ }
 }
 
+// AND START IT IN ACCENTS. Sections 1-18 are accent-course checks and the
+// suite says so in its own precondition, but nothing ever SET the workspace —
+// it inherited whatever the last session left in localStorage and then tried
+// to detect where it had landed. That is why the cascade was deterministic
+// per profile rather than random: a browser whose stored workspace was
+// 'acting' failed the same 68 checks every single run, and one left in
+// 'accents' passed every time.
+//
+// Setting it is the fix; the detector below it is the backstop. Nothing else
+// is touched — this is the one key, and progress is never written.
+function seedWorkspace() {
+  try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* as above */ }
+}
+
 // IF THE SHELL NEVER RENDERS, SAY SO — DO NOT RUN THE SUITE ANYWAY.
 //
 // This wait used to give up silently after ~5s and resolve the frame
@@ -81,6 +95,7 @@ async function shedServiceWorker() {
 (async () => {
   await shedServiceWorker();
   seedOnboarding();
+  seedWorkspace();
   const { frame, booted } = await appFrame();
   const suites = [];
   try { suites.push(['Security', await runSecurity()]); }

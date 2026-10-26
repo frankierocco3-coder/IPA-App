@@ -229,13 +229,20 @@ export const rhetoricOpen = () => RHETORIC_COURSE_LIVE || rhetoricPreview();
 // read as one page twice. The thing only Learn can show, where you are in
 // an order, was a single line of text under a progress bar.
 //
-// This flag swaps that grid for the lesson sequence itself. It is a ROUTE
-// AND NOT A GATE: nothing locks, nothing is a prerequisite, and three
-// places in the app promise in those words that every chapter is free to
-// read in any order. The winding path with locked nodes stays where it
-// belongs, on IPA and Accents, where lessons are drills that genuinely
-// build on each other. Putting gates on reading would walk straight back
-// into what the hearts removal took out on 2026-10-05.
+// This flag swaps that grid for the lesson sequence itself.
+//
+// IT IS A ROUTE AND A GATE NOW, AND THIS PARAGRAPH USED TO DENY IT. Until
+// 2026-10-22 it read "nothing locks, nothing is a prerequisite… the winding
+// path with locked nodes stays where it belongs, on IPA and Accents". The
+// owner's order that day ("it should function like Duolingo") chained the
+// book courses too, so locked nodes are no longer an accent-only thing.
+//
+// The promise it cites is still kept, and still in those words, but it
+// belongs to the LIBRARY: every chapter is free to read there in any order,
+// and a lesson locked on the path opens in full from its shelf. Gating
+// READING would walk straight back into what the hearts removal took out on
+// 2026-10-05; sequencing a route past an always-visible free-play switch
+// does not. The switch is the load-bearing half — see the statsbar padlock.
 export const LEARN_SEQUENCE_PREVIEW_KEY = 'speechcraft-learn-sequence-preview';
 export const learnSequencePreview = () => {
   try { return localStorage.getItem(LEARN_SEQUENCE_PREVIEW_KEY) === 'on'; } catch { return false; }
