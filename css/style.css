@@ -2179,52 +2179,33 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   border-left-color: var(--gold, #c7a252); color: var(--ink); }
 .tr-view.is-light code { background: var(--panel-2); color: var(--ink); }
 
-.lm-path { --lm-node: 60px; --lm-gap: 16px; --lm-art: 104px;
+.lm-path { --lm-node: 60px; --lm-gap: 16px; --lm-card: 132px;
   --lm-rail: #4a5c3b; max-width: 760px; margin: 0 auto; }
 .lm-mod { position: relative; padding: 4px 0 10px; }
-/* THE PAINTED MARGINS. Two strips pinned to opposite edges, the cards on
-   the paper between them.
+/* THE PAINTED MARGINS ARE GONE (owner artwork, 2026-10-25). Two strips
+   flanking each band were replaced by ONE title card per module: the
+   artwork on the left, the module's own words on the right. The owner's
+   handoff asks for exactly that, and it retires a long list of problems
+   the margins had and the card does not have.
 
-   Width is FIXED and height is natural (`<w> auto`), never the other way
-   round. Sizing by height instead would scale the strip's width with the
-   number of lessons in the module — a nine-lesson band would push its own
-   artwork out under the cards — and stretching to `100%` would distort
-   the faces in it.
+   The margins were sized by WIDTH with natural height, because sizing by
+   height scaled the strip with the lesson count and a nine-lesson band
+   pushed its own artwork out under the cards. Band height grows as cards
+   wrap, so no single drawing covered every width: the strip had to
+   dissolve into --bg over its last fifth, baked into the JPEG, and still
+   left bare paper under the tallest bands at the narrowest widths.
+   Mirror-tiling was tried and rejected the same week — it makes a
+   seamless repeat on stone and ivy, and prints the margins' handwritten
+   notes upside down and back to front.
 
-   THE STRIPS DO NOT REPEAT, AND MIRROR-TILING WAS TRIED AND REJECTED
-   (2026-10-22). Baking [art, flipped art] into each file makes a
-   seamless repeat — every join becomes a pair of identical rows — and
-   on stone and ivy the seam really is invisible. It fails on the
-   artwork this page actually has: the margins carry HANDWRITTEN NOTES
-   ("Take the work into the room"), and the flipped copy prints them
-   upside down and back to front, which is unmistakably a bug.
+   A title card has a FIXED aspect ratio and a fixed height, so none of
+   that applies: it does not grow with the band, it never repeats, and it
+   needs no dissolve. docs/LEARN_BAND_IMAGE_SPEC.md describes the retired
+   margin format, not this one.
 
-   Repetition cannot be avoided by drawing taller art either. Band height
-   grows as cards wrap, so at a 600px window module 5 needs a 1:17.2
-   margin against art that is 1:9.4. No single drawing covers every
-   width.
-
-   So the strip ends and DISSOLVES INTO --bg over its last fifth, baked
-   into the JPEG. The honest cost is paper below the art on the tallest
-   bands at the narrowest widths. The fix is in the artwork, not here:
-   a quiet, featureless bottom band — wall, floor, plain ivy, no text and
-   no props — can be extended downward to any height without smearing or
-   repeating. See docs/LEARN_BAND_IMAGE_SPEC.md.
-
-   Art is optional and absent art is not a failure: a band with no
-   painting is a plain band. A missing picture must never render as a
-   broken one. */
-/* The two urls arrive as custom properties from the renderer, which is
-   what makes the phone rule at the bottom of this block able to switch
-   them off. An inline `background-image` cannot be overridden by any
-   stylesheet rule, and that is precisely how the art ended up printed
-   under the heading at phone widths. */
-.lm-mod.has-art { padding-left: var(--lm-art); padding-right: var(--lm-art);
-  background-image: var(--lm-l), var(--lm-r);
-  background-repeat: no-repeat, no-repeat;
-  background-position: left top, right top;
-  background-size: var(--lm-art) auto, var(--lm-art) auto; }
-.lm-mod.has-art > * { position: relative; z-index: 1; }
+   Art is still optional and absent art is still not a failure: a module
+   with no card renders as a plain heading, exactly as before. A missing
+   picture must never render as a broken one. */
 /* THE RAIL — BEADED, as the mockups draw it. Full band height so it meets
    the next band's rail exactly and the route reads as one walk. A solid
    line said "diagram"; a row of beads says "steps", which is the whole
@@ -2235,18 +2216,48 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   background-image: radial-gradient(circle at 50% 50%,
     var(--lm-rail) 2.3px, transparent 2.7px);
   background-size: 7px 13px; background-repeat: repeat-y; }
-/* THE RAIL HAS TO CLEAR THE PAINTED MARGIN. ::before is absolutely
-   positioned, so its `left` is measured from the PADDING box and knows
-   nothing about the padding-left that has-art adds — the beads were
+/* THE RAIL NEEDS NO OFFSET NOW. While the painted margins existed, the
+   band carried a 104px padding-left and this rule had to add it back by
+   hand: ::before is absolutely positioned, so its `left` is measured from
+   the PADDING box and knew nothing about that padding. The beads were
    drawn 104px to the left of every node, straight down the middle of the
-   artwork, touching none of the circles they connect. It self-corrected
-   below 560px where that padding is dropped, which is exactly why
-   checking on a phone never showed it. */
-.lm-mod.has-art::before { left: calc(var(--lm-art) + var(--lm-node) / 2); }
+   artwork, touching none of the circles they connect — and it
+   self-corrected below 560px where the padding was dropped, which is
+   exactly why checking on a phone never showed it. The title card adds no
+   side padding, so `left: calc(var(--lm-node) / 2)` above is now correct
+   at every width and the override is deleted rather than kept at zero. */
 .lm-mod:first-child::before { top: 92px; }
 .lm-mod:last-child::before { bottom: 30px; }
 
-.lm-head { padding: 26px 0 16px 0; }
+/* THE HEADING SITS ABOVE THE RAIL. `.lm-mod::before` is z-index 1, so
+   anything in the band without its own stacking context paints UNDER it —
+   and the title card's artwork did, with the beads drawn straight across
+   the picture. The retired `.lm-mod.has-art > *` rule used to lift every
+   child for exactly this reason and was deleted with the rest of that
+   block; this puts it back on the one element that needs it.
+   NOT on `.lm-list`: the rail is meant to run between the nodes, and each
+   `.lm-node` already covers it with its own opaque background. */
+.lm-head { padding: 26px 0 16px 0; position: relative; z-index: 1; }
+/* THE MODULE TITLE CARD (owner artwork + handoff, 2026-10-25): artwork
+   left, the module's own words right.
+
+   `align-items: start` and not `center`: the blurb runs to two or three
+   lines depending on the module, and centring made the artwork sit at a
+   different height in every band, which read as four misaligned cards
+   rather than one repeated shape. */
+.lm-head.has-card { display: grid; grid-template-columns: var(--lm-card) 1fr;
+  gap: 16px; align-items: start; }
+/* ASPECT-RATIO, NOT A FIXED HEIGHT, and object-fit: cover as the backstop.
+   The four supplied paintings are all 3:4 and cover crops nothing out of
+   them; a future card at another ratio is cropped from the edges rather
+   than stretched, because the owner's handoff asks that the art never be
+   distorted. width/height on the <img> give the box before it loads, so
+   the heading does not jump when four images arrive at once. */
+.lm-art { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4;
+  object-fit: cover; border-radius: 10px; border: 1px solid var(--line);
+  background: var(--panel-2);
+  box-shadow: 0 3px 10px rgba(45, 27, 18, .18); }
+.lm-head-text { min-width: 0; }
 .lm-eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .lm-title { display: flex; align-items: center; gap: 11px; margin: 0 0 8px;
@@ -2355,20 +2366,18 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   .lm-card { transition: none; }
   .lm-card:active { transform: none; }
 }
-/* The margins give way before the cards do. Below 560px the strips narrow
-   and then go entirely: a 56px sliver of ivy is decoration competing with
-   the reading column, and the column wins. */
-@media (max-width: 700px) { .lm-path { --lm-art: 78px; } }
-/* THE MARGINS GO ON A PHONE so the cards get the full width, and the
-   rail comes back to the content edge with them. This rule was already
-   here and did half its job: the padding went, but `background-image:
-   none` could not touch an inline style, so the paintings stayed and the
-   heading and cards were printed on top of them. The urls are custom
-   properties now, set in the stylesheet, so this works. */
-@media (max-width: 560px) {
-  .lm-mod.has-art { padding-left: 0; padding-right: 0; background-image: none; }
-  .lm-mod.has-art::before { left: calc(var(--lm-node) / 2); }
-}
+/* THE CARD NARROWS, IT NEVER LEAVES. The painted margins used to narrow at
+   700px and switch off entirely at 560px, because a 56px sliver of ivy was
+   decoration competing with the reading column. A title card is not
+   decoration — it is how you tell one module from the next at a glance —
+   so it shrinks with the column and stays.
+
+   Nothing here has to cancel padding or a background any more: the card is
+   a grid column, not a background on the band, so the band has no side
+   padding to undo and the rail needs no offset. That whole class of bug
+   went with the margins. */
+@media (max-width: 700px) { .lm-path { --lm-card: 112px; } }
+@media (max-width: 560px) { .lm-path { --lm-card: 92px; } }
 @media (max-width: 420px) {
   .lm-path { --lm-node: 46px; --lm-gap: 11px; }
   .lm-title { font-size: 25px; }

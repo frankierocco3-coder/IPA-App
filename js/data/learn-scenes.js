@@ -91,14 +91,19 @@ export const LEARN_SCENES = {
     // ceiling and the stage floor off and left two actors from the
     // shoulders to the knees.
     artRatio: '841 / 872',
-    // SUPERSEDED 2026-10-22. `journeyArt` was one tall painted world sampled
-    // at five focus points behind a single winding path, and `journeyFocus`
-    // chose the five samples. The owner's module artwork replaced it: each
-    // band now carries its own pair of painted margins (see `moduleArt`),
-    // which is a better fit for a course whose modules hold anywhere from
-    // five to nine lessons — a sampled band stretched or squashed with the
-    // count, and the margins do not. Both fields and the 692KB painting
-    // went with the renderer that read them.
+    // SUPERSEDED TWICE, and the reason held both times. `journeyArt` was one
+    // tall painted world sampled at five focus points behind a single winding
+    // path, with `journeyFocus` choosing the samples; both fields and the
+    // 692KB painting went on 2026-10-22 with the renderer that read them.
+    // What replaced it was a pair of painted margins per band (`moduleArt`),
+    // and what replaced THOSE on 2026-10-25 is one title card per module
+    // (`moduleCard`, below).
+    //
+    // The constant across both moves: art on this page must not be sized by
+    // the lesson count. Modules here hold five to nine lessons, so a sampled
+    // band stretched or squashed with the count, and a margin strip ran out
+    // of picture before the band ran out of height. A fixed-ratio card is
+    // the first version of this that does not care how long a module is.
     // LIGHT PAGE (owner mockups, 2026-10-22). The Learn view is a scoped
     // dark surface by default — it was built when this course's page WAS a
     // night scene end to end. The mockups put the theatre back where it
@@ -109,27 +114,45 @@ export const LEARN_SCENES = {
     // Shakespeare and Rhetoric still use the dark surface and have no
     // mockups of their own yet. They keep it until they get one.
     light: true,
-    // THE MODULE MARGINS (owner artwork, 2026-10-22). Each band is framed
-    // by two painted strips and the lesson cards run down the paper
-    // between them.
+    // THE MODULE TITLE CARDS (owner artwork + written handoff, 2026-10-25).
+    // One painting per module, shown as a thumbnail to the LEFT of the
+    // module's number, title and blurb. The owner's handoff asks for
+    // exactly that and is explicit about the rest: preserve the art, the
+    // characters, the colours and the natural proportions; do not stretch
+    // and do not regenerate; keep crops honest so faces and key
+    // storytelling details stay visible.
     //
-    // They are STRIPS, not full-width plates, and that is deliberate. The
-    // owner's artwork arrived as finished page mockups with the cards and
-    // the node rail painted into the middle of them. Painting over that
-    // channel to reuse the whole picture smeared the card edges into
-    // horizontal streaks; cutting the channel out instead leaves the real
-    // page background showing between the strips, which is what the
-    // mockups show anyway and costs 452KB rather than three full plates.
+    // SUPERSEDES `moduleArt`, the two painted margin strips that flanked
+    // each band from 2026-10-22. The margins were cut from finished page
+    // mockups because the cards and the node rail were painted into the
+    // middle of them, and they carried a list of problems a fixed-ratio
+    // card simply does not have — see the retired block in css/style.css.
+    // The ten acting-mod-*.jpg files they used (628KB) were deleted in the
+    // same commit, by owner order. They are in git if they are ever wanted.
     //
-    // All five modules are painted (owner artwork completed 2026-10-22).
-    // A module with no entry would render as a plain band — never a broken
-    // image, the same rule figures follow — but none is missing now.
-    moduleArt: {
-      text:        { l: 'img/ui/acting-mod-text-l.jpg',        r: 'img/ui/acting-mod-text-r.jpg' },
-      work:        { l: 'img/ui/acting-mod-work-l.jpg',        r: 'img/ui/acting-mod-work-r.jpg' },
-      listening:   { l: 'img/ui/acting-mod-listening-l.jpg',   r: 'img/ui/acting-mod-listening-r.jpg' },
-      rhythm:      { l: 'img/ui/acting-mod-rhythm-l.jpg',      r: 'img/ui/acting-mod-rhythm-r.jpg' },
-      performance: { l: 'img/ui/acting-mod-performance-l.jpg', r: 'img/ui/acting-mod-performance-r.jpg' },
+    // 3:4, AND THE RATIO IS LOAD-BEARING. All four paintings are 1086x1448
+    // and are shipped at 600x800. Tempo-Rhythm is the one that proves the
+    // rule: its two faces are in the upper third and its metronome — the
+    // detail the handoff names specifically — is in the lower half, so any
+    // crop tight enough to keep the faces loses the metronome. At the
+    // supplied ratio nothing has to be chosen. A card at another ratio is
+    // cover-cropped from the edges rather than stretched.
+    //
+    // ALT TEXT DESCRIBES THE PICTURE, which is this repo's rule for every
+    // figure: what is in it, not what the module wants you to conclude.
+    //
+    // A module with no entry renders as a plain heading — never a broken
+    // image, the same rule figures follow. 'performance' has no card and
+    // needs none: it is withdrawn behind PERFORMANCE_LIVE.
+    moduleCard: {
+      text: { src: 'img/ui/acting-card-text.jpg',
+        alt: 'A woman in a maroon shirt and an older man in an olive jacket sit side by side at a cluttered desk, each reading marked-up script pages. A plaster mask, stacked books and a window hung with ivy are behind them.' },
+      work: { src: 'img/ui/acting-card-work.jpg',
+        alt: 'In a vaulted library reading room, a young woman leans across a desk to whisper behind her hand to an older woman in a green cardigan, who raises her own hand to reply. An open book lies between them under a brass lamp.' },
+      listening: { src: 'img/ui/acting-card-listening.jpg',
+        alt: 'Two actors sit facing each other on wooden chairs in a sunlit rehearsal room, a stage lamp behind them. The older woman speaks with an open hand; the young man sits with his hands clasped, watching her.' },
+      rhythm: { src: 'img/ui/acting-card-rhythm.jpg',
+        alt: 'A large wooden metronome stands on a rehearsal-room table with its pendulum mid-swing. Behind it a woman holding script pages watches an older man who is gesturing with both hands as he speaks.' },
     },
     done: 'cultivated',
     above: 'WHAT THE AUDIENCE SEES',

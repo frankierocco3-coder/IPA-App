@@ -31,7 +31,34 @@
 export const ACTING_PRINCIPLE =
   'A character’s behavior and dialogue arise from the situation they are in, what they want within that situation, and how each situation serves the larger movement of the story.';
 
-export const ACTING_MODULES = [
+// PREPARING THE PERFORMANCE IS WITHDRAWN (owner order, 2026-10-25). The
+// course stops at how behavior works and no longer carries the
+// rehearsal-and-production half: monologue work, scene work, the
+// two-hander, rehearsal preparation and taking the work into the room.
+//
+// A FLAG, NOT A DELETION — the same mechanism as ROLE_LIVE, SPEECH_LIVE and
+// every other withdrawal in this repo. Flip this to true and the module,
+// its eight remaining lessons and its Library shelf all come back whole.
+//
+// THE EIGHT RECORDS STAY in ACTING_LESSONS_ALL below, and their approvals
+// stay in js/data/speech/reviews.js. The approvals are DORMANT rather than
+// removed: all eight carry the owner's own editorial verdict, and deleting
+// them would mean eight lessons had to be re-approved before the flag could
+// ever be flipped back, which would make "comes back whole" false. They
+// point at nothing while the flag is off, which costs nothing — nothing
+// reads the ledger in the lesson-to-approval direction.
+//
+// IDS ARE NOT RETIRED, because the lessons are not gone. If this ever
+// becomes a real deletion, retire all eight and never reuse them, the way
+// sh-speechaction, sh-shapes and sh-playfigure were retired when Rhetoric
+// left Shakespeare.
+//
+// 'ac-fourthwall' is the ONE lesson kept (owner order, same day). It did
+// not stay behind the flag — it moved to module 'work', keeping its id.
+// See the record itself for why it lands there.
+export const PERFORMANCE_LIVE = false;
+
+const ACTING_MODULES_ALL = [
   // SCRIPT ANALYSIS COMES FIRST (owner order, 2026-10-21), on the way it
   // is actually taught: table work before anybody is on their feet, and
   // only once beats, objectives and a physical score exist does a scene
@@ -91,11 +118,14 @@ export const ACTING_MODULES = [
   // 4 -> 6 -> 5 across those two changes, again without touching ids.
   { n: 4, id: 'rhythm', title: 'Tempo-Rhythm',
     blurb: 'Learn how a character moves through time — in speech, action and silence.' },
+  // WITHDRAWN behind PERFORMANCE_LIVE (owner order, 2026-10-25). The record
+  // stays so the module can return with its title and blurb intact; the
+  // filter below is what removes it from the course.
   { n: 5, id: 'performance', title: 'Preparing the Performance',
     blurb: 'The rehearsal-and-production course: monologue and scene work, and carrying it all into the room.' },
 ];
 
-export const ACTING_LESSONS = [
+const ACTING_LESSONS_ALL = [
 
   // ── Module 1 · Where Behavior Comes From ──────────────────────
   { id: 'ac-behavior', module: 'work', order: 2,
@@ -276,6 +306,55 @@ export const ACTING_LESSONS = [
       { p: 'One warning before you trust a clean run: feeling fluent and knowing the lines are two different measurements, and the first one lies. The Library’s Lines & Memory lesson shows why, and how to test which one you actually have.' },
     ],
     doorway: { id: 'lines-memory', label: 'Lines & Memory' } },
+
+  // RE-HOMED 2026-10-25 (owner order): moved out of Preparing the
+  // Performance, which is withdrawn behind PERFORMANCE_LIVE above, into
+  // Where Behavior Comes From. THE ID DID NOT MOVE, so every learner who
+  // had completed it still has it.
+  //
+  // It lands last in this module, straight after the physical score,
+  // because that is the order the work happens in: you build the body,
+  // then you build the room the body is standing in. The fourth wall is a
+  // given circumstance the set does not supply, which is this module's
+  // subject, not a rehearsal-and-production task.
+  //
+  // Its KIND stays 'perform' in path-labels.js. The kinds are not
+  // module-locked — ac-physicalscore is 'drill' inside this same module —
+  // and 'it meets an audience' is literally why a fourth wall exists.
+  { id: 'ac-fourthwall', module: 'work', order: 9,
+    title: 'Using the Fourth Wall',
+    requiredReviewer: 'acting-professional',
+    objective: 'Treat the open side of the stage as part of the character’s world, with real places to look and real distances to focus.',
+    orientation: 'The fourth wall is not there to be broken. On most nights it is there to be used.',
+    reflection: 'Take a scene you know that happens indoors. What is on the fourth wall, exactly where, and how far away?',
+    body: [
+      { p: 'A realistic set has three walls. The fourth one, the one that would complete the room, is missing, and the audience sits where it belongs. The convention says: for the character, the wall is still there. The room is whole. The character can lean near it, glance at it, stare out of a window in it, and never once notice the several hundred people breathing where the wallpaper should be.' },
+      { fig: 'fourth-wall-theatre' },
+      { fig: 'fourth-wall-house' },
+      { p: 'This chapter is not about breaking that wall. Direct address, the aside, the confidant speech to the house: those are real tools, and some plays are built on them, but they are a different subject. This is the ordinary night in a realistic play, where the wall stays up and the actor has to live behind it. Used well, the fourth wall is not a limitation to be coped with. It is a quarter of the character’s world that happens to be invisible, and it is yours to furnish.' },
+      { h: 'Build the wall before you need it' },
+      { p: 'A wall you have not built is a wall you cannot use, and the failure is visible. Eyes with nowhere to land drift across the house, focus on nothing, or lock politely into the middle distance, and every one of those reads from the back row. So build it in rehearsal, as deliberately as the designer built the other three. Decide what is on it and where. Then keep it there, every run, every night.' },
+      { list: [
+        'A window, and, more important, what the character sees through it.',
+        'Something at eye level with a history: a mirror, a photograph, a clock the character has looked at ten thousand times.',
+        'Something small and specific: a stain, a crack, a nail where a picture used to hang.',
+        'The agreed geography: if there is a window, everyone in the company looks through it in the same place.',
+      ] },
+      { p: 'Specificity is the whole trick. “The wall” gives your attention nothing to do. “The damp patch above the light switch that has been spreading all winter” gives it a job, and attention with a job is what an audience reads as belief.' },
+      { h: 'The eyes give it away' },
+      { p: 'The difference between a real fourth wall and a faked one is focus. Eyes focused twenty feet out, on actual faces in the fifth row, look like exactly what they are. A view through a window is focused far beyond the back wall of the theatre. A mirror is focused at roughly twice your distance from the glass, because that is where the reflection lives. A clock is focused at ten feet. Give every object on your wall its distance, and let your eyes do what eyes do at that distance. Get this right and the audience believes the object without being told. Let your focus land on the house instead, and the wall comes down without a word being spoken.' },
+      { h: 'Private in public' },
+      { p: 'What the wall finally buys is privacy. A character alone on stage is supposed to be genuinely alone: thinking, deciding, doing the unguarded things people only do when nobody is watching, while several hundred people watch. That is only possible when your attention has somewhere to live inside the world of the play. The window, the mirror, the photograph: these are not decoration, they are where a private person’s attention actually goes. The moment some part of you checks the audience instead, the privacy is gone, and the audience feels the difference before they could name it.' },
+      { h: 'What using it buys you' },
+      { list: [
+        'Cheating out stops being a stage direction and starts having a reason: the interesting thing is out there.',
+        'Blocking opens up, because the downstage quarter of the room is playable space instead of a cliff edge.',
+        'Solo scenes have somewhere to happen: business at the mirror, a watch kept at the window, a letter read in the best light in the room.',
+        'The beginner tells disappear: the dead middle-distance stare, the eyes scanning the exit signs, the guilty flick down to the front row.',
+      ] },
+      { p: 'One classic rehearsal problem makes a useful private drill: do something real in an imaginary mirror hanging in the middle of the audience. Fix your hair. Check your collar. Practice until your focus sits at the reflection’s distance and the task is genuinely absorbing. An observer should be able to tell where the mirror hangs, and they should never once catch your eye.' },
+      { p: 'None of this seals you off from the house. The audience still gets your voice, your face and most of your body precisely because the missing wall is missing. The convention is a trade: the theatre removes a wall so they can see in, and you rebuild it in imagination so there is something worth seeing.' },
+    ] },
 
   // ── Module 2 · Script Analysis ────────────────────────────────
   { id: 'ac-fourlists', module: 'text', order: 0,
@@ -496,41 +575,6 @@ export const ACTING_LESSONS = [
     body: [
       { p: 'An actor consciously managing breath, pace and beat structure while playing a scene has no attention left for the person opposite. Trust the preparation: what practice made reliable will be there unsupervised.' },
       { p: 'When something wobbles, note it and finish the scene with your attention where it belongs. The wobble is tomorrow’s practice, not tonight’s emergency.' },
-    ] },
-
-  { id: 'ac-fourthwall', module: 'performance', order: 7,
-    title: 'Using the Fourth Wall',
-    requiredReviewer: 'acting-professional',
-    objective: 'Treat the open side of the stage as part of the character’s world, with real places to look and real distances to focus.',
-    orientation: 'The fourth wall is not there to be broken. On most nights it is there to be used.',
-    reflection: 'Take a scene you know that happens indoors. What is on the fourth wall, exactly where, and how far away?',
-    body: [
-      { p: 'A realistic set has three walls. The fourth one, the one that would complete the room, is missing, and the audience sits where it belongs. The convention says: for the character, the wall is still there. The room is whole. The character can lean near it, glance at it, stare out of a window in it, and never once notice the several hundred people breathing where the wallpaper should be.' },
-      { fig: 'fourth-wall-theatre' },
-      { fig: 'fourth-wall-house' },
-      { p: 'This chapter is not about breaking that wall. Direct address, the aside, the confidant speech to the house: those are real tools, and some plays are built on them, but they are a different subject. This is the ordinary night in a realistic play, where the wall stays up and the actor has to live behind it. Used well, the fourth wall is not a limitation to be coped with. It is a quarter of the character’s world that happens to be invisible, and it is yours to furnish.' },
-      { h: 'Build the wall before you need it' },
-      { p: 'A wall you have not built is a wall you cannot use, and the failure is visible. Eyes with nowhere to land drift across the house, focus on nothing, or lock politely into the middle distance, and every one of those reads from the back row. So build it in rehearsal, as deliberately as the designer built the other three. Decide what is on it and where. Then keep it there, every run, every night.' },
-      { list: [
-        'A window, and, more important, what the character sees through it.',
-        'Something at eye level with a history: a mirror, a photograph, a clock the character has looked at ten thousand times.',
-        'Something small and specific: a stain, a crack, a nail where a picture used to hang.',
-        'The agreed geography: if there is a window, everyone in the company looks through it in the same place.',
-      ] },
-      { p: 'Specificity is the whole trick. “The wall” gives your attention nothing to do. “The damp patch above the light switch that has been spreading all winter” gives it a job, and attention with a job is what an audience reads as belief.' },
-      { h: 'The eyes give it away' },
-      { p: 'The difference between a real fourth wall and a faked one is focus. Eyes focused twenty feet out, on actual faces in the fifth row, look like exactly what they are. A view through a window is focused far beyond the back wall of the theatre. A mirror is focused at roughly twice your distance from the glass, because that is where the reflection lives. A clock is focused at ten feet. Give every object on your wall its distance, and let your eyes do what eyes do at that distance. Get this right and the audience believes the object without being told. Let your focus land on the house instead, and the wall comes down without a word being spoken.' },
-      { h: 'Private in public' },
-      { p: 'What the wall finally buys is privacy. A character alone on stage is supposed to be genuinely alone: thinking, deciding, doing the unguarded things people only do when nobody is watching, while several hundred people watch. That is only possible when your attention has somewhere to live inside the world of the play. The window, the mirror, the photograph: these are not decoration, they are where a private person’s attention actually goes. The moment some part of you checks the audience instead, the privacy is gone, and the audience feels the difference before they could name it.' },
-      { h: 'What using it buys you' },
-      { list: [
-        'Cheating out stops being a stage direction and starts having a reason: the interesting thing is out there.',
-        'Blocking opens up, because the downstage quarter of the room is playable space instead of a cliff edge.',
-        'Solo scenes have somewhere to happen: business at the mirror, a watch kept at the window, a letter read in the best light in the room.',
-        'The beginner tells disappear: the dead middle-distance stare, the eyes scanning the exit signs, the guilty flick down to the front row.',
-      ] },
-      { p: 'One classic rehearsal problem makes a useful private drill: do something real in an imaginary mirror hanging in the middle of the audience. Fix your hair. Check your collar. Practice until your focus sits at the reflection’s distance and the task is genuinely absorbing. An observer should be able to tell where the mirror hangs, and they should never once catch your eye.' },
-      { p: 'None of this seals you off from the house. The audience still gets your voice, your face and most of your body precisely because the missing wall is missing. The convention is a trade: the theatre removes a wall so they can see in, and you rebuild it in imagination so there is something worth seeing.' },
     ] },
 
   { id: 'ac-performance', module: 'performance', order: 8,
@@ -851,6 +895,28 @@ export const ACTING_LESSONS = [
     ] },
 ];
 
+// THE WITHDRAWAL, in two of its three filters (owner order, 2026-10-25).
+// Same shape as Building a Character's ROLE_LIVE, deliberately: a reader who
+// knows one knows both.
+//
+// Everything downstream imports these names and not the _ALL arrays, so the
+// module and its eight lessons are absent from the course rather than hidden
+// by each consumer. Nothing had to learn about the flag.
+//
+// 'ac-fourthwall' is NOT filtered — it carries module: 'work' now, so it
+// passes the lesson filter on its own and needs no exception here.
+//
+// THESE SIT ABOVE THE HELPERS ON PURPOSE. The three accessors below read
+// ACTING_LESSONS and ACTING_MODULES, and while an arrow body would not
+// evaluate them until call time, a `const` read above its own declaration is
+// a temporal-dead-zone throw waiting for the first module-evaluation-time
+// caller. There is no Node on this machine to catch that, so the order is
+// the proof.
+export const ACTING_MODULES = ACTING_MODULES_ALL
+  .filter(m => PERFORMANCE_LIVE || m.id !== 'performance');
+export const ACTING_LESSONS = ACTING_LESSONS_ALL
+  .filter(l => PERFORMANCE_LIVE || l.module !== 'performance');
+
 export const actingLessonsFor = moduleId =>
   ACTING_LESSONS.filter(l => l.module === moduleId).sort((a, b) => a.order - b.order);
 
@@ -868,7 +934,7 @@ export function actingLessonNumber(l) {
 // ── Acting Library collections ────────────────────────────────
 // The same lesson records, shelved for browsing. Approaches to Acting
 // is listed separately because it is drafted in its own record file.
-export const ACTING_COLLECTIONS = [
+const ACTING_COLLECTIONS_ALL = [
   // Same order the Learn module teaches: Being Off Book first. The shelf
   // and the pathway must not disagree about what comes first.
   // EVERY SHELF CARRIES ITS MODULE'S NAME (owner order 2026-10-21). Each
@@ -884,9 +950,15 @@ export const ACTING_COLLECTIONS = [
   //
   // THE IDS DO NOT MOVE — 'principles', 'listening', 'scene', 'rhythm',
   // 'rehearsal' are storage, and renaming one would strand saved state.
+  // 'ac-fourthwall' joined this shelf on 2026-10-25, the same day it joined
+  // the module. Every collection mirrors one Learn module, so a lesson that
+  // moves module has to move shelf or the shelf and the path disagree about
+  // what the chapter is — the fix made here on 2026-09-16, the other way
+  // round.
   { id: 'principles', icon: '🎯', title: 'Where Behavior Comes From',
     lessons: ['ac-offbook', 'ac-behavior', 'ac-circumstances', 'ac-objective',
-              'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-physicalscore'] },
+              'ac-obstacle', 'ac-stakes', 'ac-urgency', 'ac-physicalscore',
+              'ac-fourthwall'] },
   // Module 3 gets its own shelf (owner order, 2026-09-17): every
   // collection now mirrors one Learn module.
   // 'and', not '&', to match the module exactly: the house writes it out.
@@ -905,12 +977,18 @@ export const ACTING_COLLECTIONS = [
   // Monologue Work and Scene Work shelve here, matching their Learn
   // module (Preparing the Performance) — the shelf and the path must
   // not disagree about what these chapters are (owner fix, 2026-09-16).
-  // Named for its module. If module 5 is ever split — it holds nine
-  // lessons doing two jobs — this shelf splits with it and both halves
-  // get named together rather than separately.
+  //
+  // WITHDRAWN WITH ITS MODULE behind PERFORMANCE_LIVE (owner order,
+  // 2026-10-25). The id 'rehearsal' is storage, so the record stays and the
+  // filter below removes it; renaming or deleting it would strand saved
+  // state. 'ac-fourthwall' left this list the same day — it is the one
+  // lesson kept, and it shelves with module 'work' now.
+  //
+  // The note that used to sit here said: if module 5 is ever split, it holds
+  // nine lessons doing two jobs. It was withdrawn rather than split.
   { id: 'rehearsal', icon: '🎬', title: 'Preparing the Performance',
     lessons: ['ac-actions', 'ac-monologue', 'ac-scene', 'ac-twohander',
-              'ac-rehearsal', 'ac-integrating', 'ac-applying', 'ac-fourthwall',
+              'ac-rehearsal', 'ac-integrating', 'ac-applying',
               'ac-performance'] },
   { id: 'professional', icon: '💼', title: 'The Professional Actor',
     lessons: ['ac-pro-audition', 'ac-pro-offbook', 'ac-pro-choices', 'ac-pro-notes',
@@ -919,6 +997,12 @@ export const ACTING_COLLECTIONS = [
     lessons: ['ac-dials', 'ac-feeling', 'ac-tworhythms', 'ac-harmony', 'ac-rests',
               'ac-speeds'] },
 ];
+
+// The third filter. The Library shelf goes with its module, the way
+// Character's role card goes with ROLE_LIVE; the id 'rehearsal' is storage,
+// so the record stays and this removes it.
+export const ACTING_COLLECTIONS = ACTING_COLLECTIONS_ALL
+  .filter(c => PERFORMANCE_LIVE || c.id !== 'rehearsal');
 
 // ── Acting glossary ───────────────────────────────────────────
 // Terms specific to the acting work. Shared terms (objective, beat,

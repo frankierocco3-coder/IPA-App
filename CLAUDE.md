@@ -276,7 +276,7 @@ script instead and paste its block.
 
 ### Lessons, and whether they publish
 
-- Acting & Scene Work           42 records  <- 1 UNPUBLISHED: ac-physicalscore
+- Acting & Scene Work           34 records  <- 1 UNPUBLISHED: ac-physicalscore  (8 more in the withdrawn performance module, behind PERFORMANCE_LIVE)
 - Building a Character          47 records  (4 more in the withdrawn role module, behind ROLE_LIVE)
 - Shakespeare                   37 records
 - Rhetoric                      36 records
@@ -292,11 +292,12 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - COCKNEY_LIVE             true   js/views/context.js:53
 - COINAGE_LIVE             false  js/main.js:305
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
+- PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
 - RHETORIC_COURSE_LIVE     true   js/views/context.js:207
 - RHETORIC_LIVE            false  js/main.js:278
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:219
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:9468
+- SCENE_STUDY_LIVE         false  js/main.js:9482
 - SHAKESPEARE_LIVE         true   js/views/context.js:193
 - SPEECH_LIVE              false  js/views/context.js:159
 
@@ -311,9 +312,9 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                12580 lines
+- js/main.js                12594 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  839
+- regression check() sites  840
 
 ### Review
 
@@ -324,21 +325,27 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### What is switched off, and why that matters
 
-Seven features are built, shipped and WITHDRAWN behind a flag. They are not
+NINE features are built, shipped and WITHDRAWN behind a flag. They are not
 unfinished and not broken — a flag is this project's reversible withdrawal,
 used instead of deleting, every time. **Do not describe any of them as
 working, and do not "fix" one by flipping its flag.**
 
 | Flag | Withdraws |
 |---|---|
-| `SPEECH_LIVE` | the whole Voice & Speech workspace (content too thin, 2026-08-19) |
+| `SPEECH_LIVE` | the whole **Speech** workspace, id `speech` (content too thin, 2026-08-19) |
 | `BRIDGE_LIVE` | Accent Bridge — nothing is playable on any course |
 | `DIALECT_ACTION_LIVE` | the Dialect in Action card, everywhere it appeared |
 | `ROLE_LIVE` | Building a Character's `role` module (4 lessons) |
+| `PERFORMANCE_LIVE` | Acting's `performance` module, Preparing the Performance (8 lessons + its Library shelf, 2026-10-25) |
 | `SCENE_STUDY_LIVE` | scene study |
 | `COINAGE_LIVE` | the Words First Recorded in Shakespeare shelf |
 | `RHETORIC_LIVE` | the old Rhetoric & Oratory card in the ACCENT library |
 | `RHETORIC_WORKSHEET_LIVE` | the Rhetoric worksheet |
+
+This table said `SPEECH_LIVE` withdrew "the whole Voice & Speech workspace"
+until 2026-10-25. It does not: Voice & Speech is id `ipa` and is LIVE. That
+is the confusion the top of this file calls the single easiest mistake in the
+project, sitting inside the table meant to prevent it.
 
 `RHETORIC_LIVE` and `RHETORIC_COURSE_LIVE` are DIFFERENT FLAGS with
 opposite values. The first is the retired shelf (false); the second is the

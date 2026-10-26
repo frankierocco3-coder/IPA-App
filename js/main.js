@@ -3716,38 +3716,40 @@ function learnPathHtml(B, lessons, nextId) {
 }
 
 function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
-  // A module with no painting renders as a plain band. A missing picture
-  // must never become a broken one — the same rule figures follow.
+  // THE MODULE TITLE CARD: the module's painting on the left, its number,
+  // title and blurb on the right. A module with no card renders as a plain
+  // heading — a missing picture must never become a broken one, the same
+  // rule figures follow.
   //
-  // Two layers, pinned to opposite edges and sized by HEIGHT so the paper
-  // never stretches: the cards run down the page between them.
+  // THE SRC IS PAGE-RELATIVE, with no '../'. This is an <img> in the
+  // document, so it resolves against the PAGE, exactly like scene.art
+  // does above. The '../' prefix belongs to the other context in this
+  // file — a url() inside a CSS custom property, which resolves against
+  // css/style.css instead. The two look alike and are not: the retired
+  // painted margins needed the prefix, this does not, and adding one here
+  // would resolve above the site root.
   //
-  // THE URLS GO IN CUSTOM PROPERTIES, AND THE '../' IS LOAD-BEARING.
-  // Setting `background-image` inline here looked simpler and made the
-  // art impossible to switch off: an inline style cannot be overridden by
-  // a stylesheet, so the `background-image: none` in the phone media
-  // query below 560px never applied. The padding went to zero as
-  // intended, the paintings stayed, and the module heading and the cards
-  // ended up printed on top of the ivy.
+  // width/height are the INTRINSIC size, so the browser reserves the box
+  // before the file arrives and the heading does not jump when four
+  // images land at once. The displayed size comes from CSS.
   //
-  // A relative url() in a custom property resolves against the STYLESHEET,
-  // not the page — a scar this view already carries. css/style.css is one
-  // directory down, so '../img/ui/x.jpg' is what lands on /img/ui/x.jpg,
-  // and it stays correct under the /IPA-App/ prefix on Pages because it is
-  // still relative. Do not "fix" it to 'img/ui/...'; that resolves to
-  // /css/img/ui/... and 404s.
-  const art = scene.moduleArt?.[g.m?.id];
-  const artStyle = art
-    ? `--lm-l:url('../${esc(art.l)}');--lm-r:url('../${esc(art.r)}')`
-    : '';
+  // THE ART IS NOT A LINK AND NOT A BUTTON. It sits inside the heading,
+  // and the only pressable things in a band stay the lesson cards.
+  const card = scene.moduleCard?.[g.m?.id];
+  const art = card ? `
+      <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
+           width="600" height="800" loading="lazy" decoding="async">` : '';
   const head = g.m ? `
-    <header class="lm-head">
-      <p class="lm-eyebrow">${esc(B.title)}</p>
-      <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}</h2>
-      ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
+    <header class="lm-head${card ? ' has-card' : ''}">
+      ${art}
+      <div class="lm-head-text">
+        <p class="lm-eyebrow">${esc(B.title)}</p>
+        <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}</h2>
+        ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
+      </div>
     </header>` : '';
   return `
-    <section class="lm-mod${art ? ' has-art' : ''}"${artStyle ? ` style="${artStyle}"` : ''}>
+    <section class="lm-mod">
       ${head}
       <ol class="lm-list">
         ${g.ls.map((l, i) => learnLessonCardHtml(B, l, i, nextId, locked)).join('')}
@@ -4335,7 +4337,17 @@ function actingLibraryPane(el) {
       + 'obstacle tactics text investigation questions',
   };
   const colTile = id => {
+    // A WITHDRAWN COLLECTION HAS NO RECORD, so this returns null and the
+    // caller drops the tile. 'rehearsal' went behind PERFORMANCE_LIVE on
+    // 2026-10-25 and this function read `c.id` straight off the lookup,
+    // which threw and took the WHOLE Acting Library page down with it —
+    // the Learn page was fine, so nothing in the change looked wrong.
+    //
+    // Returning null rather than deleting the call site is what keeps
+    // "comes back whole" true: flip the flag and the shelf reappears in
+    // its own place in the reading order, with no second edit here.
     const c = ACTING_COLLECTIONS.find(x => x.id === id);
+    if (!c) return null;
     return {
       key: `col:${c.id}`, tone: ACTING_COLLECTION_TONE[c.id],
       emoji: ACTING_COLLECTION_EMOJI[c.id], img: COL_ART[c.id], title: c.title,
@@ -4414,7 +4426,9 @@ function actingLibraryPane(el) {
       group: G4, badge: { cls: '', label: 'Shared' },
       keywords: 'speech breath voice articulation fluency pace principles instrument meaning presence textbook',
       go: renderTextbook },
-  ];
+    // `{ ...null }` spreads to `{}`, so a withdrawn colTile leaves a tile
+    // with a group and no key. Dropping on `key` removes exactly those.
+  ].filter(c => c.key);
   workspaceLibrary(el, { workspace: 'Acting', cards, state: libState.acting });
 }
 

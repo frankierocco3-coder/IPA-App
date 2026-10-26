@@ -3299,10 +3299,14 @@ export async function run({ navDoc = document } = {}) {
     // then, Preparing the Performance since the shelves were renamed to
     // match their modules on 2026-10-21), so it moved to that module
     // rather than being deleted out from under a shelf nobody asked about.
-    check('acting: five modules hold the 34 path lessons; 8 Professional chapters shelve outside the path',
-      ACTING_MODULES.length === 5
+    // FOUR MODULES SINCE 2026-10-25 (owner order): Preparing the Performance
+    // is withdrawn behind PERFORMANCE_LIVE, taking 8 of its 9 lessons and its
+    // Library shelf with it. The ninth, Using the Fourth Wall, moved to
+    // module 'work' keeping its id, which is why the path lost 8 and not 9.
+    check('acting: four modules hold the 26 path lessons; 8 Professional chapters shelve outside the path',
+      ACTING_MODULES.length === 4
       && String(ACTING_MODULES.map(m => m.title))
-        === 'Script Analysis,Where Behavior Comes From,Listening and Responding,Tempo-Rhythm,Preparing the Performance'
+        === 'Script Analysis,Where Behavior Comes From,Listening and Responding,Tempo-Rhythm'
       // The ids are the part that must never move. Two modules have been
       // renamed and two have swapped places by owner order, and stored
       // progress survived all of it because neither a rename nor a
@@ -3312,8 +3316,14 @@ export async function run({ navDoc = document } = {}) {
       && ACTING_MODULES.find(m => m.n === 2).id === 'work'
       // 33 -> 34 path lessons and 41 -> 42 records on 2026-10-21: The
       // Physical Score was added at the end of Where Behavior Comes From.
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 34
-      && ACTING_LESSONS.length === 42
+      // 34 -> 26 path lessons and 42 -> 34 records on 2026-10-25, when
+      // Preparing the Performance was withdrawn. The 8 withdrawn records
+      // are still in ACTING_LESSONS_ALL and come back with the flag.
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 26
+      && ACTING_LESSONS.length === 34
+      // The fourth wall landed last in 'work', after the physical score.
+      && actingLessonById('ac-fourthwall')?.module === 'work'
+      && actingLessonNumber(actingLessonById('ac-fourthwall')) === '2.9'
       && !actingLessonById('ac-character')
       && actingLessonById('ac-analysis')?.module === 'text'
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
@@ -3355,12 +3365,26 @@ export async function run({ navDoc = document } = {}) {
     check('acting: the eight retired lessons are gone from records and ledger alike',
       ['ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
        'ac-objective-text', 'ac-beats', 'ac-subtext']
-        .every(id => !actingLessonById(id) && !speechPublished(id))
-      // Playable Actions survived the trim by moving shelf, not by luck.
-      && actingLessonById('ac-actions')?.module === 'performance'
-      && speechPublished('ac-actions'));
+        .every(id => !actingLessonById(id) && !speechPublished(id)));
+    // WITHDRAWN IS NOT RETIRED, and this is the check that tells them apart.
+    // A retired lesson is gone from the records AND the ledger (above). A
+    // withdrawn one is gone from the records and KEEPS its ledger entry, so
+    // flipping PERFORMANCE_LIVE back brings eight published lessons rather
+    // than eight draft gates. Playable Actions is the case worth naming: it
+    // survived the 2026-09-25 trim by moving shelf, and went behind the flag
+    // on 2026-10-25 with the rest of its module.
+    check('acting: the withdrawn module keeps its approvals, so it can come back whole',
+      ['ac-actions', 'ac-monologue', 'ac-scene', 'ac-twohander', 'ac-rehearsal',
+       'ac-integrating', 'ac-applying', 'ac-performance']
+        .every(id => !actingLessonById(id) && speechPublished(id))
+      // Its Library shelf went with it; the id stays reserved, never reused.
+      && !ACTING_COLLECTIONS.some(c => c.id === 'rehearsal')
+      // The one lesson kept is in the course, not behind the flag.
+      && !!actingLessonById('ac-fourthwall')
+      && speechPublished('ac-fourthwall'));
     check('acting: the Library collections cover the lessons without duplication',
-      ACTING_COLLECTIONS.length === 6
+      // 6 -> 5 on 2026-10-25: the 'rehearsal' shelf went with its module.
+      ACTING_COLLECTIONS.length === 5
       && !ACTING_COLLECTIONS.some(c => c.id === 'character')
       && (() => {
         const listed = ACTING_COLLECTIONS.flatMap(c => c.lessons);
@@ -3559,7 +3583,10 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       // A chapter with figures: both render with their alt text and
       // captions, from same-origin files, lazily.
-      clickIn(doc.querySelector('[data-tile="col:rehearsal"]')); await sleep(400);
+      // Reached through 'principles' since 2026-10-25, not 'rehearsal': the
+      // fourth wall moved to module 'work' when Preparing the Performance was
+      // withdrawn, and its shelf went with its module.
+      clickIn(doc.querySelector('[data-tile="col:principles"]')); await sleep(400);
       clickIn(doc.querySelector('[data-item="ac-fourthwall"]')); await sleep(450);
       const figs = [...doc.querySelectorAll('main figure.sp-fig')];
       check('acting: the fourth wall chapter shows both figures, described and captioned',

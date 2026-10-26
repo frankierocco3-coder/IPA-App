@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v51';                     // 2026-10-22: the Learn path rebuild — owner is waiting to look at it
+const VERSION = 'sc-v52';                     // 2026-10-25: module title cards + Preparing the Performance withdrawn — owner is waiting to look at it
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

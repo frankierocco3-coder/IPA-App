@@ -80,7 +80,8 @@ def lessons():
     CHARACTER_LESSONS_ALL.filter(l => ROLE_LIVE || l.module !== 'role'), so
     counting the array overstates the course by the size of 'role'."""
     return [
-        ('Acting & Scene Work', 'js/data/acting/acting-course.js', r"\n  \{ id: 'ac-", None),
+        ('Acting & Scene Work', 'js/data/acting/acting-course.js', r"\n  \{ id: 'ac-",
+         ('performance', 'PERFORMANCE_LIVE')),
         ('Building a Character', 'js/data/character/character-course.js',
          r"\n  \{ id: '(?:ch|ac)-[a-z-]+', module:", ('role', 'ROLE_LIVE')),
         ('Shakespeare', 'js/data/shakespeare/shakespeare-course.js', r"\n  \{ id: 'sh-", None),
