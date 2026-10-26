@@ -116,28 +116,49 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
-**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **834**
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **835**
 (824 before 2026-10-25). A short run skipped sections and is not comparable
 even if its failure count looks small — a green run with a short count is not
 a green run.
 
-**THE EMBEDDED-BROWSER FLAKE IS FIXED (2026-10-25), AND IT WAS A REAL APP
-BUG.** From 2026-10-14 the rule here was to run only in Chrome: the same clean
-tree gave 824/0 in Chrome and 730–763 checks with 41–78 failures in the
-embedded browser, always the same shape — the Accents precondition reporting
-`freeplay=false`, nav checks empty, sections 1–18 cascading.
+**ONE CAUSE OF THE EMBEDDED-BROWSER FLAKE IS FIXED (2026-10-25), AND IT WAS A
+REAL APP BUG. IT IS NOT THE ONLY CAUSE — STILL RUN IN CHROME.** From
+2026-10-14 the rule was to run only in Chrome: the same clean tree gave 824/0
+in Chrome and 730–763 checks with 41–78 failures in the embedded browser,
+always the same shape — the Accents precondition reporting `freeplay=false`,
+nav checks empty, sections cascading.
 
-The cause was not the browser. **The app never booted inside this runner's own
-iframe.** `tests/run-all.html` hosts it at `width:1px; height:1px; opacity:0`,
-which is composited in some browsers and not others; where it is not, the page
-gets no rendering opportunity, and the first render was handed to
-`document.startViewTransition`, which defers its update callback to exactly
-that. The suite was driving an app that had never rendered. See the comment on
-`navTo` in js/ui.js for the mechanism and the measurements.
+Part of that was not the browser. **The app never booted inside this runner's
+own iframe.** `tests/run-all.html` hosted it at `width:1px; height:1px;
+opacity:0`, which is composited in some browsers and not others; where it is
+not, the page gets no rendering opportunity, and the first render was handed
+to `document.startViewTransition`, which defers its update callback to exactly
+that. The suite was driving an app that had never rendered. See the `navTo`
+comment in js/ui.js. The frame is now a real 390x720 and the runner REFUSES to
+run the regression suite against a frame that did not boot (tests/run-all.js).
 
-Both suites now complete in the embedded browser (834 checks, twice). Chrome
-remains the reference run, but a short count is now a defect to investigate
-rather than a known limitation.
+**A SHORT-COUNT CASCADE STILL HAPPENS ABOUT HALF THE TIME, AND IT IS NOT THAT
+BUG.** Measured over four consecutive runs on one clean tree, 2026-10-26:
+
+| run | checks | failures |
+|---|---|---|
+| 6 | 835 | 0 |
+| 7 | 777 | 68 |
+| 8 | 835 | 1 |
+| 9 | 793 | 73 |
+
+In the bad runs the app DID boot — no warning, the frame was present, the
+regression suite ran — and then driven navigation died partway with a crop of
+`Cannot read properties of null`. A `skipTransition()` bail-out was tried on
+the theory that later navigations were also starving for frames; runs 8 and 9
+are with it, and it did not help, so it was reverted rather than shipped on a
+falsified hypothesis. **The cause is not known. Do not assume it is the boot
+bug wearing a different hat.**
+
+So: Chrome remains the reference run, and a short count still means the run is
+not comparable. The difference since 2026-10-25 is that a full 835 is now
+achievable outside Chrome, so a short one is worth investigating rather than
+shrugging at.
 
 **THE BLANK SCREEN ON BOOT IS THE SAME BUG, AND IT IS FIXED.** It presented as:
 every module fetches 200, `main.js` imports without throwing, the window is

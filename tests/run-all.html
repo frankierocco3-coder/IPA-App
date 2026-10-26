@@ -17,7 +17,36 @@
     table { border-collapse: collapse; margin-top: 16px; width: 100%; }
     td, th { text-align: left; padding: 5px 10px; border-bottom: 1px solid #ddd; }
     .detail { color: #7a1f1f; font-size: 13px; }
-    iframe { width: 1px; height: 1px; opacity: 0; position: absolute; }
+    .warn { background: #fdf0d8; border-left: 4px solid #c7912a; color: #6b4a10;
+      padding: 10px 14px; border-radius: 6px; margin: 12px 0; font-weight: 600; }
+
+    /* THE APP FRAME IS REAL, SIZED AND ON SCREEN, and that is deliberate.
+       It was `width:1px; height:1px; opacity:0` until 2026-10-26.
+
+       A frame that small and that transparent is not guaranteed to be
+       composited, and a document that is never composited gets no rendering
+       opportunity. The app's first paint went through
+       document.startViewTransition, whose update callback is deferred to
+       exactly that — so in this runner the app NEVER BOOTED, and the suite
+       spent ten days driving a blank document and reporting a short run that
+       was read as "the embedded browser is flaky". See js/ui.js navTo.
+
+       The app bug is fixed, so a 1px frame would work again today. It is
+       still wrong: a suite whose job includes catching rendering regressions
+       should render the app the way a reader sees it, at a width somebody
+       actually uses, where a human running the page can watch it being
+       driven. Keeping it invisible is how the last one hid.
+
+       Fixed-position so resizing it (several checks do) never reflows the
+       results, and static below them when the window is too narrow to put
+       it beside them. */
+    #appframe { position: fixed; right: 14px; top: 14px;
+      width: 390px; height: 720px; background: #fff;
+      border: 1px solid #c9c9c9; border-radius: 8px;
+      box-shadow: 0 2px 16px rgba(0, 0, 0, .14); }
+    @media (max-width: 1220px) {
+      #appframe { position: static; display: block; margin: 20px 0 0; }
+    }
   </style>
 </head>
 <body>

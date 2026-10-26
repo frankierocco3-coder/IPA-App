@@ -21,19 +21,33 @@ function seedOnboarding() {
   } catch { /* storage unavailable — the nav checks will say so */ }
 }
 
+// IF THE SHELL NEVER RENDERS, SAY SO — DO NOT RUN THE SUITE ANYWAY.
+//
+// This wait used to give up silently after ~5s and resolve the frame
+// regardless. That is how a dead app went unnoticed for ten days: the
+// regression suite ran all 800-odd checks against a BLANK document,
+// reported a short count with a scatter of failures, and the short count
+// was read as "the embedded browser is unreliable" rather than "the app
+// under test never started". A harness that fails quietly teaches you to
+// ignore it.
+//
+// So the boot result is returned, not assumed, and the caller refuses to
+// publish a regression number it cannot stand behind.
 function appFrame() {
   return new Promise(resolve => {
     const f = document.createElement('iframe');
+    f.id = 'appframe';
     // Same-origin framing is explicitly allowed by the app's clickjacking
     // guard (an attacker cannot serve from this origin), so the runner can
     // host it plainly — no sandbox tricks needed.
     f.src = '../index.html';
     f.addEventListener('load', async () => {
+      let booted = false;
       for (let i = 0; i < 50; i++) {                       // up to ~5s for the shell
-        if (f.contentDocument?.querySelector('.side-nav .side-item')) break;
+        if (f.contentDocument?.querySelector('.side-nav .side-item')) { booted = true; break; }
         await new Promise(r => setTimeout(r, 100));
       }
-      resolve(f);
+      resolve({ frame: f, booted });
     });
     document.body.appendChild(f);
   });
@@ -67,14 +81,29 @@ async function shedServiceWorker() {
 (async () => {
   await shedServiceWorker();
   seedOnboarding();
-  const frame = await appFrame();
+  const { frame, booted } = await appFrame();
   const suites = [];
   try { suites.push(['Security', await runSecurity()]); }
   catch (e) { suites.push(['Security', { total: 1, failed: 1, results: [{ name: 'suite crashed', pass: false, detail: String(e) }] }]); }
   try { suites.push(['Audio contract', await runAudio()]); }
   catch (e) { suites.push(['Audio contract', { total: 1, failed: 1, results: [{ name: 'suite crashed', pass: false, detail: String(e) }] }]); }
-  try { suites.push(['Launch regression', await runRegression({ navDoc: frame.contentDocument })]); }
-  catch (e) { suites.push(['Launch regression', { total: 1, failed: 1, results: [{ name: 'suite crashed', pass: false, detail: String(e) }] }]); }
+  // The regression suite is the only one that drives the app, so it is the
+  // only one a dead frame invalidates. Security and Audio stand on their own
+  // and still run. Refusing to run it is the point: a number produced
+  // against a blank document is worse than no number, because it looks like
+  // one.
+  if (!booted) {
+    suites.push(['Launch regression', { total: 1, failed: 1, results: [{
+      name: 'DID NOT RUN — the app never rendered in the runner frame',
+      pass: false,
+      detail: 'No .side-nav .side-item appeared within 5s. Every DOM-driven check '
+        + 'would have run against a blank document and reported a short, meaningless '
+        + 'count. Open ../index.html directly and look at the console before trusting '
+        + 'anything else on this page.' }] }]);
+  } else {
+    try { suites.push(['Launch regression', await runRegression({ navDoc: frame.contentDocument })]); }
+    catch (e) { suites.push(['Launch regression', { total: 1, failed: 1, results: [{ name: 'suite crashed', pass: false, detail: String(e) }] }]); }
+  }
 
   const total = suites.reduce((n, [, o]) => n + o.total, 0);
   const failed = suites.reduce((n, [, o]) => n + o.failed, 0);
@@ -83,5 +112,17 @@ async function shedServiceWorker() {
   verdictEl.hidden = false;
   verdictEl.textContent = failed === 0 ? 'PASSED' : 'FAILED';
   verdictEl.className = failed === 0 ? 'pass' : 'fail';
-  frame.remove();
+
+  // THE CHECK COUNT IS THE TELL, so say it on the page rather than leaving
+  // it to be remembered. A run that did not boot cannot be compared to one
+  // that did, and the difference is easy to miss when both end in a number.
+  if (!booted) {
+    const warn = document.createElement('p');
+    warn.className = 'warn';
+    warn.textContent = 'The app never rendered in the frame, so the regression suite did not run. '
+      + 'This count is NOT comparable to a normal run. The frame is left in place below so you can see what it is showing.';
+    statusEl.after(warn);
+  }
+  // Left in place after a failed boot: an empty frame is the evidence.
+  if (booted) frame.remove();
 })();

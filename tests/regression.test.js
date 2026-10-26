@@ -3435,15 +3435,26 @@ export async function run({ navDoc = document } = {}) {
         [...doc.querySelectorAll('[data-ws]')].map(b => b.querySelector('b')?.textContent).join());
       clickIn(doc.querySelector('[data-ws="acting"]')); await sleep(400);
       clickIn(side('Learn')); await sleep(400);
-      // THE COURSE HERO MUST NOT SHRED ITS OWN TITLE. The Start button keeps
-      // its width by design, so in a narrow column the title was what gave
-      // way: "Why He Still Matters to Actors" came out over FIVE lines when
+      // THE COURSE HERO MUST NOT SHRED ITS OWN TITLE. The button keeps its
+      // width by design, so in a narrow column the title was what gave way:
+      // "Why He Still Matters to Actors" came out over FIVE lines when
       // Shakespeare launched. Chapter titles here are sentences, so that is
       // the common case. Measured, not grepped — a CSS source pin would miss
       // this regressing from some other rule.
+      //
+      // READS .tr-card-title SINCE 2026-10-26, not '.continue-card h2'. The
+      // Acting Learn page was rebuilt into the illustrated path on
+      // 2026-10-22/23 and js/main.js:3504 now returns early for Acting, so
+      // the module grid that owned .continue-card never renders here. The
+      // check went on measuring an element that could not exist, returned
+      // null for both widths, and failed — silently, because the suite was
+      // not completing at all (see js/ui.js navTo).
+      //
+      // The invariant is unchanged and so is its value: .tr-card is the same
+      // shape, a chapter title beside a fixed-width button ('Open lesson').
       {
         const cardLines = () => {
-          const h2 = doc.querySelector('.continue-card h2');
+          const h2 = doc.querySelector('.tr-card .tr-card-title');
           if (!h2) return null;
           const r = doc.createRange(); r.selectNodeContents(h2);
           return r.getClientRects().length;
@@ -3458,13 +3469,37 @@ export async function run({ navDoc = document } = {}) {
           wide !== null && wide <= 2 && narrow !== null && narrow <= 3,
           `718px=${wide} lines, 375px=${narrow} lines`);
       }
+      // SCOPED TO THE SCENE, not a bare heading, since 2026-10-26. `.page-h`
+      // belongs to the module grid, which Acting stopped rendering when the
+      // illustrated journey shipped (js/main.js:3504 routes Acting straight
+      // to bookLearnSequence) — so this measured an element that could not
+      // exist. But `.page-h` was also the WEAKER assertion: it is present on
+      // the Library and Practice pages too, so it could not tell a landed
+      // navigation from a wandering one. `.tr-view.sc-acting .tr-title` can.
+      //
+      // The Library clause is new. The check has been named for it all along
+      // and asserted nothing about it.
       check('acting: the workspace keeps its guided course and its Library',
-        !!doc.querySelector('.page-h')
-        && [...doc.querySelectorAll('.side-nav .side-label')].some(e => e.textContent.trim() === 'Learn'));
-      check('acting: no accent context and no Free Play in the Acting workspace',
+        !!doc.querySelector('.tr-view.sc-acting .tr-title')
+        && [...doc.querySelectorAll('.side-nav .side-label')].some(e => e.textContent.trim() === 'Learn')
+        && [...doc.querySelectorAll('.side-nav .side-label')].some(e => e.textContent.trim() === 'Library'),
+        doc.querySelector('#shell-main')?.firstElementChild?.className);
+      // THE PADLOCK IS SUPPOSED TO BE HERE NOW, and this check used to deny
+      // it. It asserted !#freeplay in Acting, which was right while only the
+      // accent tracks locked anything. The Learn path chains the book courses
+      // too (owner, 2026-10-22, "it should function like Duolingo"), so the
+      // control moved to every workspace but 'speech' — js/main.js:509-520
+      // records the reasoning: hiding it would leave a learner locked out of
+      // their own course with no control that says so.
+      //
+      // So the clause is not deleted, it is INVERTED to pin the behaviour
+      // that replaced it. Dropping it would have left the padlock untested in
+      // the one workspace whose chain it exists for. The accent-context half
+      // is untouched and still true.
+      check('acting: no accent context, but the padlock the lock chain needs',
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
-        && !doc.getElementById('freeplay'));
+        && !!doc.getElementById('freeplay'));
       check('acting: all 38 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
@@ -3683,7 +3718,17 @@ export async function run({ navDoc = document } = {}) {
         // Scenes shelf holds Chekhov, Ibsen, O'Neill and Wilde, and putting
         // a skull there would label ten authors as one of them.
         && /cardGlyph\(\{ icon: '🎭', img: 'img\/ui\/shakespeare-scenes\.png' \}\)/.test(glyphSrc)
-        && (glyphSrc.match(/img\/ui\/scenes\.png/g) ?? []).length === 3
+        // EVERY USE CARRIES AN EMOJI — the actual invariant this check is
+        // named for. It used to be a bare count of scenes.png set to 3, and
+        // the comment above it claimed none of those were cardGlyph calls
+        // any more. Both went stale: there are six uses now and two of them
+        // ARE cardGlyph calls. A count tells you a number changed; it never
+        // told you whether the fallback was there, which is the thing that
+        // breaks a card. Keyed on `icon` OR `emoji` because tile data uses
+        // one and cardGlyph the other, and this cannot go stale when a
+        // seventh shelf appears.
+        && (glyphSrc.match(/(?:icon|emoji): '[^']+', img: 'img\/ui\/scenes\.png'/g) ?? []).length
+           === (glyphSrc.match(/img\/ui\/scenes\.png/g) ?? []).length
         // NAME THE MOVE IS ONE ICON ON THREE CARDS, BY DESIGN. The three
         // Rhetoric decks — the thirteen fallacies, all forty, the stratagems
         // — run the SAME exercise and carry the SAME title, so three glyphs
@@ -4581,15 +4626,23 @@ export async function run({ navDoc = document } = {}) {
     // REASON generalises, so every such choice goes through the one shared
     // control — including Shakespeare's Language, whose five kind filters
     // would otherwise wrap exactly the way the original screenshot did.
-    // One definition plus four call sites each, and the regex sees the
-    // `function` line too, which is why both counts are five.
+    // One definition plus the call sites, and the regex sees the `function`
+    // line too, which is why the counts are one more than the call sites.
+    //
+    // 5 -> 6 on 2026-10-26: a FIFTH call site, id 'coin', had adopted the
+    // shared control and the pin still said four. That is the check working
+    // — a new one-of-many choice went through the one control exactly as the
+    // owner's 2026-09-24 order asks — so the id is listed here rather than
+    // the number simply being raised. A bare count that nobody anchors to a
+    // name goes stale the next time somebody does the right thing.
     check('single-select: every one-of-many choice uses the one shared select',
-      (sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length === 5
-      && (sbsSrc.match(/wireDialectSelect\(/g) ?? []).length === 5
+      (sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length === 6
+      && (sbsSrc.match(/wireDialectSelect\(/g) ?? []).length === 6
       && sbsSrc.includes("id: 'rd', label: 'Dialect'")
       && sbsSrc.includes("id: 'np', label: 'Dialect'")
       && sbsSrc.includes("id: 'today', label: 'Version'")
-      && sbsSrc.includes("id: 'lex', label: 'Show'"),
+      && sbsSrc.includes("id: 'lex', label: 'Show'")
+      && sbsSrc.includes("id: 'coin'"),
       `html:${(sbsSrc.match(/dialectSelectHtml\(\{/g) ?? []).length} wire:${(sbsSrc.match(/wireDialectSelect\(/g) ?? []).length}`);
     check('dialect: the control is reachable by keyboard and says what it is',
       sbsSrc.includes('aria-haspopup="menu" aria-expanded="false"')
@@ -6894,14 +6947,42 @@ export async function run({ navDoc = document } = {}) {
     check('character: each character chapter is a reference page, off the path and off the shelves',
       COMMEDIA_MASKS.every(k => chapterOf(k.id)?.reference === true)
       && CHARACTER_COLLECTIONS.every(c => !c.lessons.some(id => CHARACTER_LESSONS.find(l => l.id === id)?.reference)));
-    // Every mask's chapter carries a mask, a stance and a walk. The Lovers
-    // are two performers, so that one chapter carries both sets (the
-    // 2026-09-22 picture intake); cm-innamorati-* is retired.
+    // Every mask has its own chapter, and every mask that HAS breakdown art
+    // reserves all three slots for it. The Lovers are two performers, so that
+    // one chapter carries both sets (the 2026-09-22 picture intake);
+    // cm-innamorati-* is retired.
+    //
+    // THREE MASKS ARE EXEMPT FROM THE SLOTS, BY ID, and this clause is why
+    // the tally below is 33 and not 42. Tartaglia, Scaramuccia and
+    // Pasquariello were published in 5ba4fab (2026-10-19) with chapters, a
+    // ledger entry and a cast-card portrait, and no breakdown art was drawn
+    // for them; a { fig } with no registry entry renders NOTHING, so they
+    // reserve no slots. That commit widened COMMEDIA_MASKS from ten to
+    // thirteen and updated the 31 -> 33 tally below, but left this check
+    // still demanding three slots from all thirteen, so the two have
+    // contradicted each other ever since.
+    //
+    // Naming them rather than softening the test is the whole point, and it
+    // is spelled the way NO_CAPTION is further down. The exemption cannot
+    // spread: a new mask still has to carry all three slots, and the moment
+    // any of these three HAS a registered picture the first branch applies
+    // and fails until the chapter reserves its slots.
     const performers = id => id === 'innamorati' ? ['innamorata', 'innamorato'] : [id];
+    const NO_BREAKDOWN = ['tartaglia', 'scaramuccia', 'pasquariello'];
+    const slotsFor = k => performers(k.id)
+      .flatMap(who => ['mask', 'stance', 'walk'].map(slot => `cm-${who}-${slot}`));
+    const slotGaps = COMMEDIA_MASKS.flatMap(k => {
+      const c = chapterOf(k.id);
+      if (!c) return [k.id + ': no chapter'];
+      const want = slotsFor(k);
+      if (!NO_BREAKDOWN.includes(k.id)) return want.filter(key => !c.body.some(b => b.fig === key));
+      return [...want.filter(key => !!characterFigure(key)).map(key => key + ': art ships, no slot'),
+        ...c.body.filter(b => b.fig).map(b => b.fig + ': slot on an exempt chapter')];
+    });
     check('character: every mask has its own chapter with the breakdown and its picture slots',
-      COMMEDIA_MASKS.every(k => { const c = chapterOf(k.id); return c && performers(k.id)
-        .every(who => ['mask', 'stance', 'walk']
-          .every(slot => c.body.some(b => b.fig === `cm-${who}-${slot}`))); }));
+      slotGaps.length === 0,
+      slotGaps.slice(0, 4).join(', ')
+        || `${NO_BREAKDOWN.length} mask(s) exempt by name, none with breakdown art`);
     // The two servant jobs live in their own characters' chapters, and the
     // frightened run with the second zanni (owner order 2026-09-22).
     const chapter = id => CHARACTER_LESSONS.find(l => l.id === id);
