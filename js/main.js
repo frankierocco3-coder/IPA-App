@@ -12551,7 +12551,19 @@ if (!framedHostile) {
   if (RHETORIC_PREVIEW_HASHES.includes(location.hash)) setRhetoricPreview(location.hash === '#rhetoric-preview');
   if (location.hash === '#audit') renderAudioAudit();        // owner ear-check tool
   else if (location.hash === '#review') renderContentReview(); // owner writing-review tool
-  else gateThreshold();   // threshold for fresh users; grandfathers everyone else
+  // THE SECOND WAY THE SCREEN COULD STAY BLANK, closed alongside the view
+  // transition fix in js/ui.js. gateThreshold is `async` and was called
+  // bare: nothing awaited it and nothing caught it, so anything that threw
+  // inside it — or inside renderHome/renderThreshold beneath it — became an
+  // unhandled rejection and left the page empty with the app still "loaded".
+  //
+  // The catch renders the first screen the direct way rather than
+  // re-entering the path that just failed. A reader gets the app; the
+  // console gets the reason.
+  else gateThreshold().catch(err => {
+    console.error('boot: first render failed, falling back', err);
+    try { renderShell(activeSection()); } catch { renderThreshold(); }
+  });
 
   // Typing #audit/#review into the address bar mid-session works too — a
   // bare hash change doesn't reload the page, so the boot check alone

@@ -97,7 +97,65 @@ export function record(thunk, key) {
 let navSeq = 0;
 export function navTo(render, dir = 'forward') {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  if (reduced || typeof document.startViewTransition !== 'function') { render(); return; }
+  // THE FIRST PAINT NEVER TRANSITIONS, AND THIS IS THE BLANK-SCREEN FIX.
+  //
+  // startViewTransition does NOT run its update callback synchronously: it
+  // defers it to the next RENDERING OPPORTUNITY. Measured in a browser —
+  // the callback had not run when the call returned, and had run a frame
+  // later. A document that never gets a rendering opportunity therefore
+  // never runs the callback, so `app.innerHTML` never happens.
+  //
+  // That is the whole bug. Boot ends at gateThreshold -> renderHome (
+  // js/main.js:12554, :7574) -> navTo -> startViewTransition, so on a load
+  // with no frame the shell is simply never written: #app stays empty,
+  // readyState goes to 'complete', every module fetched 200 and nothing
+  // threw. It is silent because the only rejection handler that reports
+  // anything, updateCallbackDone, can only reject if the callback RUNS and
+  // throws; a callback that never runs rejects nothing, and `ready` is
+  // swallowed deliberately two lines below.
+  //
+  // THE CONDITION IS NARROWER THAN "HIDDEN", AND GETTING THAT WRONG WOULD
+  // GET THIS FIX DISMISSED. A document that is hidden when the call is made
+  // skips its transition immediately and STILL RUNS the callback — measured
+  // at 1-4ms, with `ready` rejecting InvalidStateError. So a background tab,
+  // a restored session and a minimised window all render fine. Test one of
+  // those, see it work, and you would conclude there was nothing here.
+  //
+  // What blanks is a document that is VISIBLE by visibilityState and still
+  // gets no rendering opportunity: an offscreen or render-throttled iframe,
+  // an automation browser pane that is not being composited, or a window in
+  // the window between the OS giving up drawing it and visibilityState
+  // flipping. Reproduced in six frame configurations — #app length 0,
+  // readyState 'complete', rAF never firing, both transition promises still
+  // UNSETTLED after 1.5s, and no error anywhere.
+  //
+  // One of those six is this repo's own tests/run-all.html, which hosts the
+  // app at `width:1px; height:1px; opacity:0`. That is almost certainly the
+  // long-standing suite flake: a run that reports ~730-763 checks instead of
+  // 824, with the Accents precondition reading freeplay=false and the nav
+  // checks coming back empty, is a run where the app under test never booted.
+  //
+  // Only RETURNING users could hit it: a first-run visitor goes to
+  // renderThreshold (js/main.js:7580), which writes app.innerHTML directly
+  // and never touches this function. That is also why "a wiped profile" was
+  // correctly refuted in 2026-10-14 — wiping moves you onto the one path
+  // that cannot blank. A reader with prefers-reduced-motion could never hit
+  // it either; the first clause above short-circuits them past it.
+  //
+  // The "re-importing main.js fixes it" clue was a red herring, and worth
+  // recording as one: importing an already-evaluated module URL re-executes
+  // NOTHING. What rendered the shell was the first rendering opportunity
+  // arriving — focusing the window, opening DevTools, or an agent taking a
+  // screenshot right after the call — which flushed the callback that had
+  // been pending all along. That is why it looked instant.
+  //
+  // The guard is `!app.firstChild` rather than a boot flag because it is
+  // the honest condition: a view transition cross-fades an old paint
+  // against a new one, and when #app is empty there is no old paint to
+  // animate from. Nothing is lost by rendering straight through, and the
+  // first screen stops depending on a frame that may never come.
+  if (reduced || typeof document.startViewTransition !== 'function'
+      || !app.firstChild) { render(); return; }
   const root = document.documentElement;
   const mine = ++navSeq;
   root.dataset.nav = dir;

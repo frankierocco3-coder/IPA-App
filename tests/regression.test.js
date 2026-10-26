@@ -3465,7 +3465,7 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !doc.getElementById('freeplay'));
-      check('acting: all 45 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 38 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
           // item carries the owner's editorial verdict, none claims a
@@ -3476,8 +3476,16 @@ export async function run({ navDoc = document } = {}) {
           // Marking Up the Script and Finding Your Own Marks. A lesson
           // added to a LIVE course without its ledger entry lands here.
           // 53 -> 45 on 2026-09-25 when eight redundant lessons retired.
+          // 45 -> 38 on 2026-10-25: Preparing the Performance withdrew 8
+          // lessons behind PERFORMANCE_LIVE (34 lessons + 4 approaches).
+          //
+          // THIS PIN WAS ALREADY STALE BEFORE THAT, and nobody could see it:
+          // ac-physicalscore landed on 2026-10-21 and took the total to 46
+          // against a pin of 45, but the suite has not completed a run in a
+          // non-Chrome browser since, because the app never booted inside
+          // this runner's own iframe. See js/ui.js navTo.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 45
+          return items.length === 38
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -3502,7 +3510,8 @@ export async function run({ navDoc = document } = {}) {
         && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
           // Both cards are back (owner, 2026-09-29). Removing them was my
           // misreading of an order that was about what the LESSON carries.
-          === 'col:scene,col:lists,col:question,col:principles,col:listening,col:rehearsal,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
+          // col:rehearsal left this list on 2026-10-25 with its module.
+          === 'col:scene,col:lists,col:question,col:principles,col:listening,col:rhythm,col:actions,col:monologues,col:scenes,col:approaches,col:professional,col:textbook'
         && !!doc.querySelector('main')
         && !doc.querySelector('main').textContent.includes('Behavior Comes From the Situation')
         && !doc.querySelector('.review-strip'));
@@ -7036,6 +7045,20 @@ export async function run({ navDoc = document } = {}) {
       && uiSrc28.includes('{ render(); return; }'));
     check('transitions: a superseded transition is never an unhandled rejection',
       uiSrc28.includes('t.ready.catch(') && uiSrc28.includes('t.finished.catch('));
+    // THE BLANK-SCREEN REGRESSION. startViewTransition defers its update
+    // callback to the next RENDERING OPPORTUNITY, so a document that never
+    // gets one never runs it. Boot ended at renderHome -> navTo, so a load
+    // in a background tab, a restored session or an occluded window wrote
+    // the shell NEVER: #app empty, readyState 'complete', no error, because
+    // a callback that does not run rejects nothing. Returning users only —
+    // a first run goes to renderThreshold, which writes app.innerHTML
+    // directly. Both halves of the fix are pinned because both failed
+    // silently and neither is visible in a window somebody is watching.
+    check('transitions: the FIRST paint renders straight through, never via a frame',
+      uiSrc28.includes('!app.firstChild'));
+    check('boot: the first render can never fail silently',
+      mainSrc28.includes('gateThreshold().catch(')
+      && /boot: first render failed/.test(mainSrc28));
     check('transitions: Back travels the opposite way to Forward',
       uiSrc28.includes("}, 'back');")
       && cssSrc28.includes(':root[data-nav="back"]::view-transition-old(root)')
