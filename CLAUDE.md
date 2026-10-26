@@ -116,30 +116,48 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
-**RUN IT IN A REAL BROWSER, NOT IN AN AGENT'S EMBEDDED ONE** (owner-verified
-2026-10-14). The same clean tree gave **824 checks / 0 failures in Chrome**
-and 730–763 checks with 41–78 failures in the embedded browser Claude drives,
-across five attempts. The embedded failures are always the same shape: the
-`precondition: the app under test is in the Accents workspace` check reports
-`freeplay=false`, the nav checks come back empty, and sections 1–18 cascade.
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **834**
+(824 before 2026-10-25). A short run skipped sections and is not comparable
+even if its failure count looks small — a green run with a short count is not
+a green run.
 
-**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is 824. A
-run reporting 730 or 763 skipped sections and is not comparable even if its
-failure count looks small — a green run with a short count is not a green run.
+**THE EMBEDDED-BROWSER FLAKE IS FIXED (2026-10-25), AND IT WAS A REAL APP
+BUG.** From 2026-10-14 the rule here was to run only in Chrome: the same clean
+tree gave 824/0 in Chrome and 730–763 checks with 41–78 failures in the
+embedded browser, always the same shape — the Accents precondition reporting
+`freeplay=false`, nav checks empty, sections 1–18 cascading.
 
-Underneath it is an intermittent boot failure that is worth fixing on its own:
-on some page loads every module fetches 200, `main.js` imports without
-throwing, the DB opens in 0ms, the window is top-level so the clickjacking
-guard is not involved — and `#app` stays empty with `readyState: complete`.
-Re-importing `main.js` in that same page renders the shell instantly. If that
-ever happens outside an embedded browser a user sees a blank screen with no
-error and no recovery but a reload.
+The cause was not the browser. **The app never booted inside this runner's own
+iframe.** `tests/run-all.html` hosts it at `width:1px; height:1px; opacity:0`,
+which is composited in some browsers and not others; where it is not, the page
+gets no rendering opportunity, and the first render was handed to
+`document.startViewTransition`, which defers its update callback to exactly
+that. The suite was driving an app that had never rendered. See the comment on
+`navTo` in js/ui.js for the mechanism and the measurements.
 
-Six causes were proposed and refuted on 2026-10-14 — do not re-chase them:
-the Shakespeare preview flag, a wiped profile, a second tab blocking the IDB
-upgrade, a stale `speechcraft-workspace`, the dev server, and a stale `navDoc`
-after the precondition's frame reload (a detached document still returns its
-content, so it cannot produce the empty results seen).
+Both suites now complete in the embedded browser (834 checks, twice). Chrome
+remains the reference run, but a short count is now a defect to investigate
+rather than a known limitation.
+
+**THE BLANK SCREEN ON BOOT IS THE SAME BUG, AND IT IS FIXED.** It presented as:
+every module fetches 200, `main.js` imports without throwing, the window is
+top-level so the clickjacking guard is not involved, `#app` stays empty with
+`readyState: complete`, and no error anywhere. Six causes were proposed and
+refuted on 2026-10-14 — the Shakespeare preview flag, a wiped profile, a second
+tab blocking the IDB upgrade, a stale `speechcraft-workspace`, the dev server,
+and a stale `navDoc`. All six were correctly refuted; the cause was the
+deferred view-transition callback above.
+
+Two details worth keeping, because both misled the hunt for ten days:
+* **"A wiped profile" was refuted for the right reason and the wrong one.**
+  Only RETURNING users could hit it. A first run goes to `renderThreshold`,
+  which writes `app.innerHTML` directly and never touches `navTo` — so wiping
+  a profile moves you onto the one path that cannot blank.
+* **"Re-importing main.js fixes it" was a red herring.** Importing an
+  already-evaluated module URL re-executes nothing. What rendered the shell was
+  the first rendering opportunity arriving — focusing the window, opening
+  DevTools, taking a screenshot — flushing a callback that had been pending all
+  along. That is why it looked instant.
 
 ## Layout
 
