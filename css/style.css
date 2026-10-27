@@ -2206,38 +2206,53 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    Art is still optional and absent art is still not a failure: a module
    with no card renders as a plain heading, exactly as before. A missing
    picture must never render as a broken one. */
-/* THE RAIL — BEADED, as the mockups draw it. Full band height so it meets
-   the next band's rail exactly and the route reads as one walk. A solid
-   line said "diagram"; a row of beads says "steps", which is the whole
-   point of the shape. */
-.lm-mod::before { content: ''; position: absolute; z-index: 1;
+/* THE RAIL — BEADED, as the mockups draw it. A solid line said "diagram";
+   a row of beads says "steps", which is the whole point of the shape.
+
+   IT BELONGS TO THE LESSON LIST, NOT THE BAND. It spanned the whole
+   .lm-mod until 2026-10-27, from the top of the title card to the bottom
+   of the section, and the card does not cover it: the only opaque thing
+   in there is the artwork, which starts 30px below the card's top (4px
+   section padding + 26px card padding) and ends 16px before the list
+   begins. So every open module leaked about two beads above the picture
+   and one below it, and every CLOSED one leaked a tail underneath.
+
+   Scoping it to .lm-list ends all three at once, and it is the honest
+   definition anyway: the rail threads the lesson nodes together, so it
+   should start at the first node and stop at the last. A closed module's
+   list is inside a shut <details> and is not rendered, so it draws no
+   rail without anything having to say so.
+
+   `left` still measures from this box's padding edge, and .lm-list has no
+   padding and the same left edge as the section, so the value is
+   unchanged — see the 104px scar recorded below. */
+.lm-list { position: relative; }
+.lm-list::before { content: ''; position: absolute; z-index: 1;
   left: calc(var(--lm-node) / 2); top: 0; bottom: 0; width: 7px;
   transform: translateX(-3.5px);
   background-image: radial-gradient(circle at 50% 50%,
     var(--lm-rail) 2.3px, transparent 2.7px);
   background-size: 7px 13px; background-repeat: repeat-y; }
-/* THE RAIL NEEDS NO OFFSET NOW. While the painted margins existed, the
-   band carried a 104px padding-left and this rule had to add it back by
-   hand: ::before is absolutely positioned, so its `left` is measured from
+/* THE RAIL NEEDS NO OFFSET. While the painted margins existed, the band
+   carried a 104px padding-left and a second rule had to add it back by
+   hand: the rail is absolutely positioned, so its `left` is measured from
    the PADDING box and knew nothing about that padding. The beads were
    drawn 104px to the left of every node, straight down the middle of the
    artwork, touching none of the circles they connect — and it
    self-corrected below 560px where the padding was dropped, which is
-   exactly why checking on a phone never showed it. The title card adds no
-   side padding, so `left: calc(var(--lm-node) / 2)` above is now correct
-   at every width and the override is deleted rather than kept at zero. */
-.lm-mod:first-child::before { top: 92px; }
-.lm-mod:last-child::before { bottom: 30px; }
+   exactly why checking on a phone never showed it.
 
-/* THE HEADING SITS ABOVE THE RAIL. `.lm-mod::before` is z-index 1, so
-   anything in the band without its own stacking context paints UNDER it —
-   and the title card's artwork did, with the beads drawn straight across
-   the picture. The retired `.lm-mod.has-art > *` rule used to lift every
-   child for exactly this reason and was deleted with the rest of that
-   block; this puts it back on the one element that needs it.
-   NOT on `.lm-list`: the rail is meant to run between the nodes, and each
-   `.lm-node` already covers it with its own opaque background. */
-.lm-head { padding: 26px 0 16px 0; position: relative; z-index: 1; }
+   Three more overrides went on 2026-10-27 with the move to .lm-list: a
+   92px top inset on the first band, a 30px bottom inset on the last, and
+   a `content: none` that had to switch the whole thing off for a closed
+   module. All three existed to trim a rail that was spanning the wrong
+   box. None is needed now. */
+
+/* No stacking games here any more. This carried `position: relative;
+   z-index: 1` from 2026-10-26, to lift the title card above a rail that
+   ran underneath it and printed beads across the artwork. The rail stops
+   at the lesson list now, so there is nothing to lift it above. */
+.lm-head { padding: 26px 0 16px 0; }
 /* THE MODULE TITLE CARD (owner artwork + handoff, 2026-10-25): artwork
    left, the module's own words right.
 
@@ -2285,19 +2300,11 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   transition: transform .18s ease; }
 .lm-fold[open] > summary .lm-fold-arrow { transform: rotate(-135deg); }
 @media (prefers-reduced-motion: reduce) { .lm-fold-arrow { transition: none; } }
-/* NO RAIL ON A CLOSED MODULE. The rail exists to thread the lesson nodes
-   together, and a closed module has none on screen, so there is nothing for
-   it to connect.
-   Pulling it in to `bottom: 18px` was not enough and the geometry says why:
-   the only opaque thing covering the rail is the ARTWORK, which is 132px
-   wide at 3:4 and therefore 176px tall, while the card is 218px — its height
-   is set by the text column beside it. So the rail ran behind the picture,
-   came out of the bottom of it into the empty gutter, and left ~28px of
-   beads hanging under every closed card.
-   Making the art fill the card would cover it and would also crop the
-   paintings, which the owner's art handoff rules out. Not drawing it is the
-   honest fix: the route is where the lessons are. */
-.lm-mod:has(.lm-fold:not([open]))::before { content: none; }
+/* A closed module draws no rail, and needs no rule to say so: its list is
+   inside a shut <details> and is never rendered, so the rail that lives on
+   the list is never drawn. This was `.lm-mod:has(.lm-fold:not([open]))
+   ::before { content: none }` for one day, when the rail still spanned the
+   whole band and had to be switched off by hand. */
 .lm-eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .lm-title { display: flex; align-items: center; gap: 11px; margin: 0 0 8px;

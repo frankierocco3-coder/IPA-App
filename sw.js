@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v57';                     // 2026-10-27: Learn opens on your place again — the scroll-to-current-row no longer waits for a frame that may never come
+const VERSION = 'sc-v58';                     // 2026-10-27: the rail moved to the lesson list — visible on every Learn band, and css is staleWhileRevalidate
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
