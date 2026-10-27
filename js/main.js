@@ -3494,8 +3494,26 @@ function bookLearnSequence(el, B) {
   // out of view the moment the page opened.
   // This read '.lp-node.is-current' until 2026-10-23, the same deleted
   // class, so it silently did nothing at all.
+  //
+  // NO requestAnimationFrame. It was wrapped in one until 2026-10-27, and
+  // that is the third thing in this view to have been quietly broken by
+  // depending on a frame: rAF does not fire in a document the browser is
+  // not rendering, so in an uncomposited tab the page simply opened at the
+  // top. Measured, in a pane where the app was booted and interactive:
+  // rAF never fired, while this exact scrollIntoView call moved the page
+  // 0 -> 600 when invoked directly.
+  //
+  // The frame bought nothing anyway. scrollIntoView and
+  // getBoundingClientRect both force layout on demand, so the position is
+  // correct the moment the markup is in the DOM — which it is, two lines
+  // above. Same lesson as the first paint in js/ui.js navTo: if a thing
+  // must happen, do not hand it to a frame that may never come.
+  //
+  // It matters more now that the modules fold. Finishing a module collapses
+  // it and opens the next, so the lesson you are being sent to is further
+  // down a page that just changed shape under you.
   const cur = el.querySelector('.lm-row.is-current');
-  if (cur) requestAnimationFrame(() => cur.scrollIntoView({ block: 'nearest', inline: 'nearest' }));
+  if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
 }
 
 function bookLearnPane(el, B) {

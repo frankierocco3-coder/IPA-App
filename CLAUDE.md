@@ -160,9 +160,18 @@ refuted — do not re-chase them:
 * **Later navigations starving for frames, like the first paint did.** A
   `skipTransition()` bail-out at 400ms was added to js/ui.js on that theory.
   Runs 8 and 9 are with it and it did not help, so it was reverted rather
-  than shipped on a falsified hypothesis. (If anyone retries this: the
-  driven checks sleep 300–500ms, so a 400ms bail may simply fire after the
-  check has already measured. Untested.)
+  than shipped on a falsified hypothesis. **PARTLY REHABILITATED 2026-10-27,
+  and it is the best lead there is.** `requestAnimationFrame` was MEASURED
+  not firing at all in an agent browser pane where the app was booted,
+  visible and interactive (`rafFired: false`, while the same scrollIntoView
+  call moved the page 0 → 600 when invoked directly). That is the
+  "visible but never composited" condition the boot bug needed, caught
+  directly instead of inferred, and it would make every driven
+  `click → navTo → startViewTransition` silently not happen — which is the
+  cascade's exact shape. It still does not explain everything, because runs
+  6, 8 and 10 were green and rAF must therefore sometimes fire. If anyone
+  retries the bail: the driven checks sleep 300–500ms, so a 400ms bail may
+  simply have fired after the check had already measured. Try 100ms.
 * **The stored workspace.** The suite never SET the workspace, it inherited
   one and detected it, so a profile left in 'acting' looked like the obvious
   culprit. It is not: tests/run-all.js now seeds 'accents' and the
@@ -357,7 +366,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - RHETORIC_LIVE            false  js/main.js:278
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:219
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:9522
+- SCENE_STUDY_LIVE         false  js/main.js:9540
 - SHAKESPEARE_LIVE         true   js/views/context.js:193
 - SPEECH_LIVE              false  js/views/context.js:159
 
@@ -372,7 +381,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                12646 lines
+- js/main.js                12664 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  842
 
