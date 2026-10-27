@@ -3760,21 +3760,40 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   const art = card ? `
       <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
            width="600" height="800" loading="lazy" decoding="async">` : '';
+  // FOLDED, AND ONLY THE MODULE YOU ARE IN IS OPEN. Four modules of five to
+  // nine lessons is a very long scroll, and the shape of the course — which
+  // is the thing this page exists to show — was the first casualty of it.
+  //
+  // <details>/<summary> rather than a button and a class: the open state,
+  // the keyboard handling, the focus ring and the aria-expanded semantics
+  // are all native, and a module stays reachable with no JS at all.
+  //
+  // WHICH ONE IS OPEN IS NOT A PREFERENCE, it is where you are. The module
+  // holding the next lesson opens; the rest start closed. A course with
+  // nothing left to do has no next lesson, so nothing would open — the
+  // last module opens instead, because finishing should show you the end
+  // of the path and not a wall of shut doors.
+  const holdsNext = g.ls.some(l => l.id === nextId);
+  const openThis = nextId ? holdsNext : gi === (g.lastIndex ?? gi);
+  const done = g.ls.filter(l => speechLessonDone(l.id)).length;
   const head = g.m ? `
-    <header class="lm-head${card ? ' has-card' : ''}">
+    <summary class="lm-head${card ? ' has-card' : ''}">
       ${art}
       <div class="lm-head-text">
         <p class="lm-eyebrow">${esc(B.title)}</p>
         <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}</h2>
         ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
+        <p class="lm-count">${done} of ${g.ls.length} done<span class="lm-fold-arrow" aria-hidden="true"></span></p>
       </div>
-    </header>` : '';
+    </summary>` : '';
   return `
     <section class="lm-mod">
-      ${head}
-      <ol class="lm-list">
-        ${g.ls.map((l, i) => learnLessonCardHtml(B, l, i, nextId, locked)).join('')}
-      </ol>
+      <details class="lm-fold"${openThis ? ' open' : ''}>
+        ${head}
+        <ol class="lm-list">
+          ${g.ls.map((l, i) => learnLessonCardHtml(B, l, i, nextId, locked)).join('')}
+        </ol>
+      </details>
     </section>`;
 }
 

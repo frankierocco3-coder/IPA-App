@@ -2258,6 +2258,36 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   background: var(--panel-2);
   box-shadow: 0 3px 10px rgba(45, 27, 18, .18); }
 .lm-head-text { min-width: 0; }
+
+/* THE FOLD. The title card is the control, so the whole card is the hit
+   target rather than a separate chevron button nobody would aim at.
+   <details>/<summary> gives the open state, the keyboard handling and the
+   expanded semantics natively; the only work here is removing the default
+   marker, which three selectors are needed to do across engines. */
+.lm-fold > summary { cursor: pointer; list-style: none; }
+.lm-fold > summary::-webkit-details-marker { display: none; }
+.lm-fold > summary::marker { content: ''; }
+.lm-fold > summary:focus-visible { outline: 2px solid var(--gold, #c7a252);
+  outline-offset: 3px; border-radius: 12px; }
+/* A closed module still has to say where you are in it, because the rows
+   that said so are the ones that just went away. */
+.lm-count { display: flex; align-items: center; gap: 8px; margin: 9px 0 0;
+  font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase;
+  font-weight: 700; color: var(--muted); }
+/* NOT `.lm-chev` — that name is taken by the chevron on every lesson row
+   (position:absolute, right:15px, further down this file), and borrowing it
+   both threw this arrow to the card's right edge and put a border on all 26
+   row chevrons. Caught by measuring: the arrow sat at x806 while its own
+   flex line started at x218. */
+.lm-fold-arrow { width: 8px; height: 8px; flex: 0 0 auto;
+  border-right: 2px solid currentColor; border-bottom: 2px solid currentColor;
+  transform: rotate(45deg); transform-origin: 60% 60%;
+  transition: transform .18s ease; }
+.lm-fold[open] > summary .lm-fold-arrow { transform: rotate(-135deg); }
+@media (prefers-reduced-motion: reduce) { .lm-fold-arrow { transition: none; } }
+/* Closed, the band is just its card, so the beaded rail would run past the
+   bottom of it into the next module's heading. Pull it in to the card. */
+.lm-mod:has(.lm-fold:not([open]))::before { bottom: 18px; }
 .lm-eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .lm-title { display: flex; align-items: center; gap: 11px; margin: 0 0 8px;
