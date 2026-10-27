@@ -2285,9 +2285,19 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   transition: transform .18s ease; }
 .lm-fold[open] > summary .lm-fold-arrow { transform: rotate(-135deg); }
 @media (prefers-reduced-motion: reduce) { .lm-fold-arrow { transition: none; } }
-/* Closed, the band is just its card, so the beaded rail would run past the
-   bottom of it into the next module's heading. Pull it in to the card. */
-.lm-mod:has(.lm-fold:not([open]))::before { bottom: 18px; }
+/* NO RAIL ON A CLOSED MODULE. The rail exists to thread the lesson nodes
+   together, and a closed module has none on screen, so there is nothing for
+   it to connect.
+   Pulling it in to `bottom: 18px` was not enough and the geometry says why:
+   the only opaque thing covering the rail is the ARTWORK, which is 132px
+   wide at 3:4 and therefore 176px tall, while the card is 218px — its height
+   is set by the text column beside it. So the rail ran behind the picture,
+   came out of the bottom of it into the empty gutter, and left ~28px of
+   beads hanging under every closed card.
+   Making the art fill the card would cover it and would also crop the
+   paintings, which the owner's art handoff rules out. Not drawing it is the
+   honest fix: the route is where the lessons are. */
+.lm-mod:has(.lm-fold:not([open]))::before { content: none; }
 .lm-eyebrow { margin: 0 0 4px; font-size: 12px; letter-spacing: .14em;
   text-transform: uppercase; color: var(--muted); font-weight: 600; }
 .lm-title { display: flex; align-items: center; gap: 11px; margin: 0 0 8px;
