@@ -170,6 +170,12 @@ export const LEARN_SCENES = {
   character: {
     title: 'The Person You Build',
     art: null,
+    // LIGHT, like Acting. The dark surface was never Character's own
+    // decision — it is what .tr-view does by default, and the note above
+    // said the other scenic courses keep it "until they get mockups of
+    // their own". This is that, one step at a time: the page is on warm
+    // parchment now, and the module paintings land when they are drawn.
+    light: true,
     done: 'built',
     above: 'WHO STANDS UP',
     below: 'WHAT YOU BUILD',
