@@ -481,6 +481,22 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   box-shadow: 0 2px 6px rgba(59, 64, 52, 0.06);
 }
 .display-card.small { font-size: 18px; font-weight: 600; max-width: 380px; text-align: center; }
+/* THE SYMBOL IS THE CONTROL (owner order, 2026-10-28). It has to read as
+   the display it replaced, not as a button bolted into the card — so it
+   inherits everything and carries no chrome of its own until you reach
+   for it. The underline is the only standing hint that it does anything,
+   because a learner needs to know which symbols will speak: forty-two of
+   the sixty-two have a recording and the rest are plain text. */
+.display-say { font: inherit; color: inherit; background: none; border: 0;
+  padding: 0; cursor: pointer; letter-spacing: inherit;
+  text-decoration: underline; text-decoration-style: dotted;
+  text-underline-offset: 6px; text-decoration-thickness: 2px;
+  text-decoration-color: var(--line); }
+.display-say:hover { text-decoration-color: var(--gold); }
+.display-say:active { transform: translateY(1px); }
+.display-say:focus-visible { outline: 2px solid var(--gold);
+  outline-offset: 4px; border-radius: 6px; }
+@media (prefers-reduced-motion: reduce) { .display-say:active { transform: none; } }
 .display-card.audio-only { font-size: 16px; }
 .listen-hint { color: var(--muted); font-weight: 600; }
 .speaker {

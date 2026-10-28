@@ -824,18 +824,33 @@ function ipaLearnPane(el, course) {
 // Per-unit guidebook: what the unit teaches, in one readable page.
 function renderGuidebook(unit, track) {
   record(() => renderGuidebook(unit, track));
+  // One accent for the whole page — the chips, their labels and the click
+  // handler all have to agree about which voice this guidebook speaks in.
+  const gbAcc = TRACK_ACCENT[track?.id] ?? null;
   const sections = unit.lessons.map(l => {
-    const gbAcc = TRACK_ACCENT[track?.id] ?? null;
     const chips = (l.phonemes ?? []).map(ph => {
       if (!PHONEMES[ph]) return '';
       // Realizations wear [brackets]; phonemes wear /slashes/.
       const shown = PHONEMES[ph].allophone ? `[${esc(ph)}]` : `/${esc(ph)}/`;
       const w = PHONEMES[ph].examples.find(x => speakableWord(x, gbAcc));
-      return w ? `
-      <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(w)}"
-              aria-label="Hear ${esc(ph)} in the word “${esc(w)}”"
-              title="${esc(PHONEMES[ph].name)} — hear it in “${esc(w)}”">${shown}</button>` : `
+      // "Tap a symbol to hear it" promises the SOUND, and until now every chip
+      // played a word containing it. The owner's recording is the honest
+      // reading of that sentence; the example word is the fallback for the
+      // twenty sounds he has not recorded. A chip with neither stays plain.
+      //
+      // The resolved slug rides on the element. Recomputing it in the click
+      // handler would let the label and the audio disagree if either rule
+      // ever moved; this way there is one decision per chip.
+      const clip = phonemeClip(ph, gbAcc);
+      if (!clip && !w) return `
       <span class="word-chip is-plain" aria-label="${esc(PHONEMES[ph].name)}">${shown}</span>`;
+      const label = clip ? clipLabel(clip, ph) : `Hear ${ph} in the word “${w}”`;
+      const how = clip ? clipTitle(clip).toLowerCase() : `hear it in “${w}”`;
+      return `
+      <button class="word-chip" data-sym="${esc(ph)}" data-say="${esc(w ?? '')}"
+              ${clip ? `data-clip="${esc(clip.slug)}"` : ''}
+              aria-label="${esc(label)}"
+              title="${esc(`${PHONEMES[ph].name} — ${how}`)}">${shown}</button>`;
     }).join('');
     return `
       <section class="gb-lesson">
@@ -852,9 +867,15 @@ function renderGuidebook(unit, track) {
     </main>`;
   wireBrandHome();
   // Speak in the course's own voices — a NAM guidebook must never sound RP.
-  const lang = ACCENT_LANG[TRACK_ACCENT[track?.id]] ?? 'en-GB';
+  const lang = ACCENT_LANG[gbAcc] ?? 'en-GB';
   app.querySelectorAll('.word-chip[data-sym]').forEach(b => {
-    b.addEventListener('click', () => speak(b.dataset.say, { lang, accent: TRACK_ACCENT[track?.id] ?? null }));
+    b.addEventListener('click', () => {
+      // The slug was resolved at render time, alongside the label that
+      // promises it. No clip means no recording, which is exactly when the
+      // example word is the right thing to say.
+      if (b.dataset.clip && playPhoneme(b.dataset.clip, 'nam')) return;
+      speak(b.dataset.say, { lang, accent: gbAcc });
+    });
   });
 }
 
@@ -12221,6 +12242,10 @@ function lessonChrome(s, body) {
     <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback" aria-live="polite"></footer>`;
   document.getElementById('quit').addEventListener('click', () => exitLesson(s.lesson));
+  // Wired here rather than in each renderer: this is the one place
+  // every exercise's markup lands, and the slug rides on the element.
+  app.querySelector('.display-say')?.addEventListener('click', e =>
+    playPhoneme(e.currentTarget.dataset.phoneme, 'nam'));
 }
 
 function renderExercise(s) {
@@ -12239,6 +12264,86 @@ function audioButton(ex) {
   return ex.audioText
     ? `<button class="speaker" id="speaker" type="button" aria-label="Play audio" title="Play audio">🔊</button>`
     : '';
+}
+
+// ── Tap the symbol to hear it (owner order, 2026-10-28) ──────────────
+// The forty-two isolated phonemes the owner recorded were reachable only
+// from the IPA chart and the sound pages. A learner walking the actual
+// course — Short Vowels, Long Vowels, Diphthongs, Consonants — never heard
+// one, and js/main.js had been importing playPhoneme without ever calling
+// it. This is that import finally doing its job.
+//
+// ONLY THE DISPLAY, NEVER A CHOICE. A choice is already a button that
+// answers the question, and on "Listen. Which of these sounds is in
+// happy?" the choices ARE the symbols — making those audible would both
+// fight the click and hand over the answer. The display is the thing the
+// exercise is about, so it is the only safe one to voice.
+//
+// TWO SURFACES CARRY THIS, not one. The exercise display is here; the
+// guidebook chips are in renderGuidebook, which had been promising "tap a
+// symbol to hear it" while playing an example WORD through speak(). Both
+// go through phonemeClipOk() below so they cannot disagree about which
+// accents a Neutral American recording may speak for.
+//
+// ONLY WHERE A RECORDING EXISTS. Forty-two of the app's sixty-two sounds
+// have one. The rest render as plain text with no control at all, which is
+// this repo's rule everywhere: a thing that cannot play is never a faded
+// button and never a promise that audio is coming.
+//
+// NEUTRAL SURFACES AND nam ONLY, the same line the sound pages draw at
+// js/views/reference.js — handing an RP learner a General American vowel
+// would teach the wrong sound.
+// The owner recorded the isolated phonemes in Neutral American, so a clip is
+// only honest where the material is NAM or accent-neutral (IPA Foundations).
+// An ALLOWLIST, not a blocklist of the other four accents: a sixth accent
+// added later then stays silent until somebody records it, instead of
+// quietly teaching an American vowel under a British heading.
+// Shared by the exercise display below and the guidebook chips above.
+const phonemeClipOk = accent => accent == null || accent === 'nam';
+
+// TEN OF THE FORTY-TWO RECORDINGS ARE SYLLABLES, and resolving only the
+// isolated name silently loses every one of them. /p/ is stored as
+// `p_syllable`, not `p`, because a plosive cannot be spoken alone — and
+// that is true of exactly p b t d k g tʃ dʒ w j. Matching only the plain
+// slug reaches 32 of the 42 and drops the ten the owner recorded BECAUSE
+// they are the hard ones.
+//
+// A SYLLABLE DEMO IS NEVER PRESENTED AS THE ISOLATED SOUND. The sound page
+// has said so in its own hero label since it was built, and the callers
+// below carry the same sentence. Resolving and labelling in one place is
+// what keeps the two from drifting apart.
+function phonemeClip(sym, accent) {
+  if (!phonemeClipOk(accent)) return null;
+  // Inventory members only. `phonemeSlug` reads PHONEMES[sym].name, and a
+  // key like __proto__ finds Object.prototype, whose .name is undefined —
+  // a throw inside a template literal, which in this app is a blank page.
+  const p = PHONEMES[sym];
+  if (!p || typeof p.name !== 'string') return null;
+  const slug = phonemeSlug(sym);
+  if (!slug) return null;
+  if (hasPhonemeClip(slug, 'nam')) return { slug, syllable: false };
+  const syl = `${slug}_syllable`;
+  return hasPhonemeClip(syl, 'nam') ? { slug: syl, syllable: true } : null;
+}
+
+/** How to announce a clip, in the sound page's own words. */
+const clipLabel = (clip, shown) => clip.syllable
+  ? `Hear ${shown} inside a syllable — a syllable demonstration, since this sound cannot be spoken alone`
+  : `Play the sound ${shown}`;
+const clipTitle = clip => clip.syllable ? 'Hear it in a syllable' : 'Play the sound';
+
+function displayClip(s, ex) {
+  const m = /^\/(.+)\/$/.exec(String(ex.display ?? '').trim());
+  return m ? phonemeClip(m[1], exAccent(s, ex)) : null;
+}
+
+/** The display itself: a button when we can play it, plain text when not. */
+function displayHtml(s, ex) {
+  const clip = displayClip(s, ex);
+  return clip
+    ? `<button class="display-say" type="button" data-phoneme="${esc(clip.slug)}"
+         aria-label="${esc(clipLabel(clip, ex.display))}" title="${clipTitle(clip)}">${esc(ex.display)}</button>`
+    : `<span>${esc(ex.display)}</span>`;
 }
 
 function exLang(s, ex) {
@@ -12298,7 +12403,7 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null 
 function renderChoice(s, ex) {
   const gated = !!ex.hideUntilPlayed && !!ex.audioText;
   const displayCard = ex.display
-    ? `<div class="display-card ${ex.smallDisplay ? 'small' : ''}">${audioButton(ex)}<span>${esc(ex.display)}</span></div>`
+    ? `<div class="display-card ${ex.smallDisplay ? 'small' : ''}">${audioButton(ex)}${displayHtml(s, ex)}</div>`
     : (ex.audioText ? `<div class="display-card audio-only">${audioButton(ex)}<span class="listen-hint">tap to listen</span></div>` : '');
   lessonChrome(s, `
     <h1 class="prompt">${esc(ex.prompt)}</h1>
@@ -12379,7 +12484,7 @@ function renderMatch(s, ex) {
 function renderBuild(s, ex) {
   lessonChrome(s, `
     <h1 class="prompt">${esc(ex.prompt)}</h1>
-    <div class="display-card">${audioButton(ex)}<span>${esc(ex.display)}</span></div>
+    <div class="display-card">${audioButton(ex)}${displayHtml(s, ex)}</div>
     <div class="answer-row" id="answer"><span class="slash">/</span><span class="slash">/</span></div>
     <div class="tile-bank" id="bank">
       ${ex.tiles.map((t, i) => `<button class="btn tile" data-t="${esc(t)}" data-i="${i}">${esc(t)}</button>`).join('')}
@@ -12425,7 +12530,7 @@ function renderBuild(s, ex) {
 function renderTypein(s, ex) {
   lessonChrome(s, `
     <h1 class="prompt">${esc(ex.prompt)}</h1>
-    <div class="display-card">${audioButton(ex)}<span>${esc(ex.display)}</span></div>
+    <div class="display-card">${audioButton(ex)}${displayHtml(s, ex)}</div>
     <input class="type-input" id="answer-input" type="text" autocomplete="off"
            autocapitalize="none" spellcheck="false" placeholder="type the word…" />
     <button class="btn btn-primary" id="check" disabled>Check</button>`);
@@ -12455,7 +12560,7 @@ function renderGapBuild(s, ex) {
   ).join('');
   lessonChrome(s, `
     <h1 class="prompt">${esc(ex.prompt)}</h1>
-    <div class="display-card">${audioButton(ex)}<span>${esc(ex.display)}</span></div>
+    <div class="display-card">${audioButton(ex)}${displayHtml(s, ex)}</div>
     <div class="answer-row gap-row" id="answer"><span class="slash">/</span>${slotRow}<span class="slash">/</span></div>
     <div class="tile-bank" id="bank">
       ${ex.tiles.map((t, i) => `<button class="btn tile" data-t="${esc(t)}" data-i="${i}">${esc(t)}</button>`).join('')}

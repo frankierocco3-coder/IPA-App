@@ -238,6 +238,27 @@ export const LEARN_SCENES = {
   shakespeare: {
     title: 'From the Page to the House',
     art: null,
+    // LIGHT, the third course to come off the default dark ground. Still
+    // owner-preview only — `live` is not set — so this changes nothing a
+    // learner sees until the six module paintings land.
+    light: true,
+    // THE MODULE TITLE CARDS, arriving one at a time (owner artwork, first
+    // on 2026-10-28). Five of the six are still missing, which renders as a
+    // plain heading — the same rule every art registry here follows.
+    //
+    // THIS COURSE'S SUBJECTS ARE TEXTUAL, so the props move toward the page
+    // and the playhouse where Acting's and Character's stay on bodies in a
+    // room. Same company, same light, same palette; different evidence on
+    // the table.
+    moduleCard: {
+      // The chalk portrait is the FOLIO ENGRAVING, drawn on a board by the
+      // teacher — one of only two likenesses with a real claim, and the
+      // subject of module 5. A framed authoritative portrait would quarrel
+      // with this module's own argument about how little is documented; a
+      // teaching aid does not.
+      context: { src: 'img/ui/shakespeare-card-context.jpg',
+        alt: 'A teacher in an olive cardigan stands at a blackboard in a rehearsal room, one hand open as she explains and the other holding a ruler against a large chalk drawing of Shakespeare in a high collar. Flight cases, a stage lamp, wooden chairs and a stack of books are around her, with ivy at a sunlit window.' },
+    },
     done: 'set',
     above: 'WHAT HAPPENS IN THE HOUSE',
     below: 'WHAT IS SET ON THE PAGE',
