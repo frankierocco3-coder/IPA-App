@@ -3334,6 +3334,25 @@ function treeCardLesson(B, lessons, nextId) {
 // its height from its own width instead, so the picture is never cropped
 // and the band stays responsive. Without it nothing changes.
 function sceneStageHtml(scene, lessons) {
+  // NO BAND ON A LIGHT PAGE THAT HAS NO PAINTING YET.
+  //
+  // The drawn stage below is a DARK-GROUND ARTEFACT. Its colours come from
+  // the scene palette and it was built when this page was a night theatre
+  // end to end; on warm parchment it is a dark box across the top, and it
+  // was the one thing left making Character's page look unfinished beside
+  // Acting's.
+  //
+  // Three states, and only this one is new. A scene with `art` shows the
+  // painting, light or dark. A dark scene with none keeps the drawn stage,
+  // which is what Shakespeare and Rhetoric still get and what it was
+  // designed for. A LIGHT scene with none shows nothing at all, because a
+  // wrong picture is worse than no picture — which is the same rule
+  // `art: null` already follows everywhere else in this repo.
+  //
+  // `scene.above` is the band's label and goes unread while this holds.
+  // That is deliberate, not drift: the label names the picture, so it has
+  // nothing to name. It comes back with the painting.
+  if (scene.light && !scene.art) return '';
   const lit = lessons.map(l => speechLessonDone(l.id));
   const box = scene.artRatio && scene.art
     ? `aspect-ratio:${esc(scene.artRatio)}`
