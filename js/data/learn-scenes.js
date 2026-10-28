@@ -176,6 +176,47 @@ export const LEARN_SCENES = {
     // their own". This is that, one step at a time: the page is on warm
     // parchment now, and the module paintings land when they are drawn.
     light: true,
+    // THE MODULE TITLE CARDS, arriving one at a time (owner artwork, first
+    // on 2026-10-27). The brief is docs/CHARACTER_CARD_ART_BRIEF.md.
+    //
+    // FOUR OF THE FIVE ARE STILL MISSING AND THAT IS A REAL STATE, not a
+    // gap to be papered over: a module with no entry renders as a plain
+    // heading, the same rule every art registry here follows. Nothing in
+    // the UI says a picture is coming, because launch_lint bans that
+    // across the whole view layer.
+    //
+    // 'role' will never have one. It is withdrawn behind ROLE_LIVE, and
+    // leaving it without art is part of what lets it come back whole.
+    moduleCard: {
+      commedia: { src: 'img/ui/character-card-commedia.jpg',
+        alt: 'Three commedia dell’arte players rehearsing in a sunlit room: a stooped Pantalone in a red cap leaning on a stick, a harlequin in a diamond-patterned costume caught mid-step with both arms wide, and a captain in red with a plumed hat and a sword. All three wear leather half-masks with long curved noses.' },
+      physical: { src: 'img/ui/character-card-physical.jpg',
+        alt: 'A rehearsal room with a patterned rug and a stage lamp. One actor in a rust cardigan and olive corduroy trousers walks slowly across the floor in a transformed physicality: hunched forward, weight low in the hips, one hand reaching down. A second actor sits on a wooden chair a few feet away watching her closely, chin resting on his hand.' },
+      vocal: { src: 'img/ui/character-card-vocal.jpg',
+        alt: 'Two actors standing close and facing each other in a rehearsal room. One, in a maroon t-shirt and olive trousers, speaks with her mouth open and her chin lifted, one hand laid flat on her breastbone and the other on her belly, feeling where the sound is coming from. The other, in a teal cardigan, leans in to listen with his head tilted and one hand half-raised.' },
+      // THE SECOND ATTEMPT AT THIS ONE, and the reason is worth keeping.
+      // The first came back with a gold crown, a carved throne and the
+      // other actor kneeling with his hands clasped — a picture of RANK,
+      // sitting directly above a blurb that reads "Status as behaviour
+      // rather than rank". It would have taught the opposite of its own
+      // chapter. The re-run keeps the height difference, which is what
+      // made the first one read, and strips every badge of office.
+      status: { src: 'img/ui/character-card-status.jpg',
+        alt: 'A status exercise in a rehearsal room. One actor sprawls back in a worn teal armchair with one arm along its back and her legs crossed, chin level, looking down with mild amusement and filling the whole chair. Another kneels on the rug beside her, shoulders rounded, elbows in, hands fidgeting in his lap, chin tipped up to meet her eyes. A third actor watches from behind with a notebook on her knee.' },
+      // THE ONLY ONE WITH A DEVICE IN IT, and the only one with nobody
+      // else in the room. Both earn their place: this is the chapter about
+      // where invented people come from, so the picture shows the
+      // invention itself rather than somebody rehearsing it. The thought
+      // bubble is also the one place in this app a crown belongs — it is
+      // explicitly imagination, which is the opposite of the rank the
+      // Status card had to be re-run to get rid of.
+      //
+      // Owner choice, 2026-10-28, over a first version of an actor talking
+      // to an empty chair at sunset. That one never shipped and is in the
+      // intake folder if it is ever wanted.
+      piece: { src: 'img/ui/character-card-piece.jpg',
+        alt: 'An actor sprawls in a wooden chair in a rehearsal room, in a maroon t-shirt and olive trousers, one hand raised as she imagines. Above her, in a thought bubble, the same woman appears as a queen in a jewelled gown and fur-trimmed robe, seated on a gilded throne in a great hall.' },
+    },
     done: 'built',
     above: 'WHO STANDS UP',
     below: 'WHAT YOU BUILD',
