@@ -152,8 +152,38 @@ crop of `Cannot read properties of null`. It is deterministic within a browser
 profile — 777/68 twice running, the same 68 — which looks like state and is
 not, see below.
 
-**THE CAUSE IS NOT KNOWN.** Three explanations were tried and all three are
-refuted — do not re-chase them:
+**THE CAUSE IS KNOWN (2026-10-28): THE SUITE POLLUTES ITS OWN PROFILE. RUN
+IT IN A FRESH BROWSER PROFILE, ONCE.** Measured four runs on one clean tree
+within a few minutes:
+
+| profile | run | result |
+|---|---|---|
+| brand-new tab | 1st | **835 / 0** |
+| same tab | 2nd | 777 / 68 |
+| another brand-new tab | 1st | **835 / 0** |
+| a tab used for manual testing | 1st and 2nd | 777 / 68 |
+
+The first run on a fresh profile passes; every run after it in the same
+browser cascades. The suite creates takes, projects and completed lessons
+as it drives the app — there is a `__regression dissect drive (safe to
+delete)` project in there — and `seedOnboarding()` / `seedWorkspace()` in
+tests/run-all.js set two keys and reset nothing, so run two starts on run
+one's leftovers.
+
+This explains the whole history of the flake. The "~50% of the time" was
+alternating between fresh and reused browsers. "Deterministic per profile"
+was right about the symptom and wrong about the cause. And it is almost
+certainly what produced the 2026-10-14 verdict that the embedded browser
+lies — the same browser, run twice.
+
+**A green run means a FIRST run.** A second run in the same browser is not
+a failing tree, it is a dirty profile. The runner does not clean up after
+itself yet; doing so needs care, because wiping storage is destructive to
+anyone who also uses the app in that browser (progress here is per-device
+and irreplaceable).
+
+Three explanations were tried before this and all three are refuted — do
+not re-chase them:
 
 * **The boot bug wearing a different hat.** No. The app boots, the runner's
   own boot guard stays quiet, and the regression suite genuinely runs.
