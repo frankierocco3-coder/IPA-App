@@ -11,7 +11,7 @@ import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
 import { actingPathLabel, actingPathKind, ACTING_LESSON_ICONS } from './data/acting/path-labels.js';
-import { learnScene, scenePaletteStyle } from './data/learn-scenes.js';
+import { learnScene, learnSceneLive, scenePaletteStyle } from './data/learn-scenes.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
@@ -3476,7 +3476,7 @@ function bookLearnSequence(el, B) {
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
       <h1 class="tr-title">${esc(scene.title)}</h1>
       <p class="tr-sub">${done} of ${avail.length} ${esc(scene.done)} across ${B.modules.length} modules.</p>
-      ${B.ws === 'acting' ? '' : `
+      ${learnScene(B.ws)?.live ? '' : `
       <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>`}
     </div>
     ${sceneStageHtml(scene, lessons)}
@@ -3543,7 +3543,7 @@ function bookLearnPane(el, B) {
   // The condition is `has a scene`, not a list of workspaces, so a course
   // without one keeps the module grid rather than borrowing somebody
   // else's metaphor. See js/data/learn-scenes.js.
-  if (learnScene(B.ws) && (B.ws === 'acting' || learnSequencePreview())) {
+  if (learnSceneLive(B.ws, learnSequencePreview())) {
     return bookLearnSequence(el, B);
   }
   const cats = B.reviewCats();
@@ -4298,7 +4298,7 @@ function renderActingLesson(id) {
   // page, opened a lesson, and landed on the pre-rebuild layout — the
   // exact failure the note above describes, shipped. It was invisible in
   // development because the owner's own profile has the key set.
-  if (learnScene(B.ws) && (B.ws === 'acting' || learnSequencePreview())) {
+  if (learnSceneLive(B.ws, learnSequencePreview())) {
     app.innerHTML = `
       ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
       <main class="guide sp-lesson lx">

@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v58';                     // 2026-10-27: the rail moved to the lesson list — visible on every Learn band, and css is staleWhileRevalidate
+const VERSION = 'sc-v59';                     // 2026-10-28: Building a Character's illustrated Learn page goes live — the first thing this release changes that a learner can actually see
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

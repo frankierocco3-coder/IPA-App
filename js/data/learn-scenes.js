@@ -84,6 +84,8 @@ export const LEARN_SCENES = {
     // js/data/acting/path-labels.js as ACTING_PATH_TITLE until 2026-10-21,
     // which left two sources of truth and one of them unread.
     title: 'The Actor’s Journey',
+    // LIVE since 2026-10-22, the first course to get this page.
+    live: true,
     art: 'img/ui/acting-stage-house.jpg',
     // The full house, 841x872. Nearly square, so the band takes its height
     // from this ratio rather than the default fixed strip — see
@@ -169,6 +171,9 @@ export const LEARN_SCENES = {
   // above assembles as the parts below are made.
   character: {
     title: 'The Person You Build',
+    // LIVE 2026-10-28, once all five module paintings were in and
+    // the stage band stopped drawing a dark box on parchment.
+    live: true,
     art: null,
     // LIGHT, like Acting. The dark surface was never Character's own
     // decision — it is what .tr-view does by default, and the note above
@@ -265,6 +270,27 @@ export const LEARN_SCENES = {
  *  rather than falling back to Acting's tree: a printing house drawn in
  *  soil and leaves would be worse than no scene at all. */
 export const learnScene = ws => LEARN_SCENES[ws] ?? null;
+
+/** Does this course's scened Learn page go to LEARNERS, or only to the
+ *  owner behind the preview key?
+ *
+ *  ONE PREDICATE, THREE CALL SITES, AND THAT IS THE WHOLE POINT. This was
+ *  `learnScene(B.ws) && (B.ws === 'acting' || learnSequencePreview())`
+ *  written out twice, plus a third test of `B.ws === 'acting'` deciding the
+ *  preview banner. They have to agree and they did not: on 2026-10-23 the
+ *  Learn pane and the lesson layout disagreed and shipped real learners the
+ *  new path with the old lesson page. Hard-coding a workspace id in three
+ *  places is what made that possible, so a course now declares `live` on
+ *  its own scene record and nothing in the renderer names a course at all.
+ *
+ *  `preview` is PASSED IN rather than read here. The flag it comes from
+ *  lives in js/views/context.js, and nothing under js/data imports from
+ *  js/views — all 73 files in there import only each other. Taking it as
+ *  an argument keeps that true. */
+export const learnSceneLive = (ws, preview = false) => {
+  const s = learnScene(ws);
+  return !!s && (s.live === true || preview);
+};
 
 /** The CSS custom properties a scene sets, as an inline style string. */
 export const scenePaletteStyle = scene => (scene
