@@ -258,6 +258,16 @@ export const LEARN_SCENES = {
       // teaching aid does not.
       context: { src: 'img/ui/shakespeare-card-context.jpg',
         alt: 'A teacher in an olive cardigan stands at a blackboard in a rehearsal room, one hand open as she explains and the other holding a ruler against a large chalk drawing of Shakespeare in a high collar. Flight cases, a stage lamp, wooden chairs and a stack of books are around her, with ivy at a sunlit window.' },
+      // TYPOGRAPHIC, and the only card in any course that is. The alt text
+      // has to READ the words, because for a screen reader the words are
+      // the whole picture — there is nothing else in it to describe.
+      //
+      // GROUND MATCHED TO --bg (#efe9dc) ON PURPOSE. It arrived on white,
+      // which among nine full-bleed paintings read as a hole where an
+      // image had failed rather than as a card. Multiplied onto the page's
+      // own parchment it sits in the set; the lettering is untouched.
+      language: { src: 'img/ui/shakespeare-card-language.jpg',
+        alt: 'The words “prithee wherefore” hand-lettered in tall ornate gold serif capitals with fine engraved hatching, on a plain parchment ground.' },
     },
     done: 'set',
     above: 'WHAT HAPPENS IN THE HOUSE',
