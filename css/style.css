@@ -2419,8 +2419,18 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 /* The tile stacks: emblem on top, words beneath. The path's side-by-side
    card is wrong at a third of the width. */
 .is-shelf .lm-head.has-card { display: block; }
-.is-shelf .lm-art { width: 100%; max-width: 150px; margin: 0 auto 12px;
-  box-shadow: none; }
+/* FULL-BLEED, NOT A CENTRED THUMBNAIL. The shelf was built for 3:4
+   emblems and floated them at 150px with the tile's padding around
+   them. The painted scenes are 2.06:1 and want the whole width, so the
+   plate runs edge to edge across the top of the tile and the padding
+   starts below it. */
+.is-shelf .lm-head { padding: 0 0 16px; }
+.is-shelf .lm-plate { width: auto; margin: 0 0 14px;
+  aspect-ratio: var(--art-aspect, 3 / 4); }
+.is-shelf .lm-art { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: var(--art-focus, center center);
+  max-width: none; margin: 0; border: 0; border-radius: 0; box-shadow: none; }
+.is-shelf .lm-head-text { padding: 0 14px; }
 .is-shelf .lm-eyebrow { display: none; }
 .is-shelf .lm-title { font-size: 21px; gap: 9px; margin-bottom: 7px; }
 .is-shelf .lm-n { width: 29px; height: 29px; font-size: 15px; }

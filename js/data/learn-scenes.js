@@ -306,26 +306,29 @@ export const LEARN_SCENES = {
     // photograph would not. Checked at the real 92x123 and at 1.7x before
     // being accepted. If any of them is ever re-generated at full size,
     // these are the ones to replace.
+    // SIX PAINTED SCENES, from the owner's second Shakespeare mockup
+    // (2026-10-30). They replace the engraved emblems cut from the first
+    // one, and the upgrade is in the source: those were 146px line art
+    // pushed 2.9x, these are 391px paintings pushed 2x, which is inside
+    // what a painting survives.
+    //
+    // LANDSCAPE, which is why --art-aspect exists. The shelf used to
+    // centre a 3:4 portrait above the words; these are 2.06:1 and run
+    // the full width of the card, so the card leads with its picture.
+    artAspect: '2.06 / 1',
     moduleCard: {
-      context: { src: 'img/ui/shakespeare-emblem-context.jpg',
-        alt: 'An engraved portrait of Shakespeare in a high ruffed collar, in sepia line work on parchment.' },
-      language: { src: 'img/ui/shakespeare-emblem-language.jpg',
-        alt: 'An engraved quill pen standing in an inkwell, framed by a sprig of leaves, in sepia line work on parchment.' },
-      form: { src: 'img/ui/shakespeare-emblem-form.jpg',
-        alt: 'An engraved open book lying flat with both pages of close-set text visible, in sepia line work on parchment.' },
-      metre: { src: 'img/ui/shakespeare-emblem-metre.jpg',
-        alt: 'An engraved hourglass with the sand part run through, in sepia line work on parchment.' },
-      // THE ONLY ONE WITH LETTERING, and it keeps it. This is the First
-      // Folio's title page, which without its words is just a book — and
-      // module 3 already has a book. The word SHAKESPEARE is correctly
-      // spelled; the lines beneath it are texture at any size the card
-      // renders. Its background was keyed from dark green to parchment
-      // because it was the highlighted card in the mockup, so its edges
-      // are rougher than the other five at close range.
-      folio: { src: 'img/ui/shakespeare-emblem-folio.jpg',
-        alt: 'An engraved copy of the First Folio lying open at its title page, the word SHAKESPEARE legible across it, in sepia on parchment.' },
-      soliloquy: { src: 'img/ui/shakespeare-emblem-soliloquy.jpg',
-        alt: 'An engraved human skull resting among leaves, in sepia line work on parchment.' },
+      context: { src: 'img/ui/shakespeare-scene-context.jpg',
+        alt: 'A painted portrait of Shakespeare in a lace collar, with ivy, a green drape and a stack of old books around him.' },
+      language: { src: 'img/ui/shakespeare-scene-language.jpg',
+        alt: 'A painted still life of a quill resting in an inkwell on a written page, with books and ivy in warm light.' },
+      form: { src: 'img/ui/shakespeare-scene-form.jpg',
+        alt: 'A painted open book lying flat with both pages of text visible, a lit candle beside it and a red drape behind.' },
+      metre: { src: 'img/ui/shakespeare-scene-metre.jpg',
+        alt: 'A painted hourglass with the sand part run through, standing on books beside a red drape and ivy.' },
+      folio: { src: 'img/ui/shakespeare-scene-folio.jpg',
+        alt: 'A painted leather-bound First Folio, its cover tooled in gold, resting on loose pages against a red drape.' },
+      soliloquy: { src: 'img/ui/shakespeare-scene-soliloquy.jpg',
+        alt: 'A painted skull wreathed in ivy, resting on old books beside a red drape.' },
     },
     done: 'set',
     above: 'WHAT HAPPENS IN THE HOUSE',

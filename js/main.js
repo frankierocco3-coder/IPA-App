@@ -3885,7 +3885,11 @@ function learnPathHtml(B, lessons, nextId) {
   // one. Shakespeare's shelf and Character's gallery today.
   const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery', 'path-cards': ' is-pathcards' };
   const shelf = LAYOUTS[scene.layout] ?? '';
-  return `<div class="lm-path${shelf}">
+  // The art's shape is the COURSE'S fact, not the layout's: Shakespeare's
+  // scenes are 2.06:1 paintings, the other courses' cards are 3:4. One
+  // declaration on the path, inherited by every plate under it.
+  const asp = /^[0-9. /]{1,12}$/.test(String(scene.artAspect ?? '')) ? scene.artAspect : null;
+  return `<div class="lm-path${shelf}"${asp ? ` style="--art-aspect:${asp}"` : ''}>
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
   </div>`;
 }
@@ -3924,7 +3928,7 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // strict pattern first: it lands in a style attribute, so anything
   // that is not a plain CSS position is dropped rather than escaped.
   const focus = /^[a-z0-9 .%]{1,24}$/.test(String(card?.focus ?? '')) ? card.focus : null;
-  const art = card ? (scene.layout === 'path-cards' ? `
+  const art = card ? (scene.layout === 'path-cards' || scene.layout === 'shelf' ? `
       <span class="lm-plate">
         <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
              ${focus ? `style="--art-focus:${focus}"` : ''}
