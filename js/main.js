@@ -666,6 +666,42 @@ function drawRail(section) {
         note: 'Every chapter is free to read in any order.',
         actions: [['Open the Library', () => goSection('library'), true]] });
     }
+  } else if (ws === 'rhetoric' && section === 'learn') {
+    // THE ETHICAL CHECK (owner's mockup, 2026-10-30), built from the
+    // ethics module rather than from the mockup's labels.
+    //
+    // IT DREW FOUR CHECKS CALLED Truthful, Relevant, Transparent and
+    // Freely answerable. They are good words and they are not this
+    // course's: "Transparent" and "answerable" appear ZERO times in
+    // js/data/rhetoric, so a panel headed with them would be teaching
+    // four principles the course never states and cannot open.
+    //
+    // What IS real is the thing the panel is for. RHETORIC_PRINCIPLE
+    // says ethical persuasion "makes your reasons available while
+    // leaving them able to examine those reasons, question them and
+    // refuse them", and the ethics module spends six lessons on exactly
+    // that. So the panel is those six, each with the course's own
+    // one-line framing, each opening the lesson it names.
+    const ethics = RHETORIC_LESSONS
+      .filter(l => l.module === 'ethics')
+      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+    // The clause, taken from the principle at runtime so the panel cannot
+    // drift from the sentence the course opens with.
+    const clause = (RHETORIC_PRINCIPLE.split('. ')[1] ?? '').split(', and the same')[0];
+    if (ethics.length) {
+      cards.push({ h: 'Ethical check',
+        title: 'What the person is left able to do',
+        note: clause ? clause.charAt(0).toUpperCase() + clause.slice(1) + '.' : '',
+        body: `<ol class="rail-checks">${ethics.map(l => `
+          <li><button class="rail-row" id="eth-${esc(l.id)}" type="button">
+            <span class="rail-row-text"><b>${esc(l.title)}</b><i>${esc(l.orientation ?? l.objective ?? '')}</i></span>
+            <span class="rail-chev" aria-hidden="true">›</span>
+          </button></li>`).join('')}</ol>`,
+        actions: [],
+        wire: root => ethics.forEach(l =>
+          root.querySelector(`#eth-${CSS.escape(l.id)}`)
+            ?.addEventListener('click', () => renderActingLesson(l.id))) });
+    }
   } else if (section !== 'learn') {
     // On Learn itself the path IS the next step — an "Open Learn" card
     // beside it was a door to the room you are standing in (owner UI

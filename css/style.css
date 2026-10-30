@@ -2546,6 +2546,17 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 /* The practice rows: icon, name, one line of what it is, chevron. Real
    buttons, because each one goes somewhere — the same three destinations
    the Practice pane opens. */
+/* The ethical check is the same row, numbered — it is an ordered module,
+   not a menu, so the list says so. No icon column: these are lessons,
+   and six emoji beside six sentences would be decoration. */
+.rail-checks { list-style: none; counter-reset: e; margin: 10px 0 2px;
+  padding: 0; display: flex; flex-direction: column; gap: 7px; }
+.rail-checks li { counter-increment: e; }
+.rail-checks .rail-row { grid-template-columns: 22px 1fr 12px; }
+.rail-checks .rail-row::before { content: counter(e); display: grid;
+  place-items: center; width: 21px; height: 21px; border-radius: 50%;
+  border: 1px solid var(--line); font-size: 11px; font-weight: 700;
+  color: var(--muted); }
 .rail-rows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 2px; }
 .rail-row { display: grid; grid-template-columns: 34px 1fr 12px;
   align-items: center; gap: 10px; width: 100%; text-align: left;
