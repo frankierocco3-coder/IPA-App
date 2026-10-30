@@ -238,6 +238,10 @@ export const LEARN_SCENES = {
   shakespeare: {
     title: 'From the Page to the House',
     art: null,
+    // LIVE (owner, 2026-10-29). The illustrated Learn page is the one
+    // every learner gets now, and the preview banner is gone with it.
+    // All six module emblems are in place, which was the condition.
+    live: true,
     // THE SHELF LAYOUT (owner's mockup, 2026-10-29). The other three
     // courses walk a vertical path of folds; this one lays its six
     // modules out as cards standing on shelves, because the course is
