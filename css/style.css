@@ -1118,6 +1118,25 @@ body.modal-open { overflow: hidden; }
   display: grid; grid-template-columns: 216px minmax(0, 620px) 330px;
   gap: 28px; justify-content: center; padding: 0 16px 40px; width: 100%;
 }
+/* THE GRID LAYOUTS NEED MORE THAN THE READING MEASURE. 620px is right for
+   a column of text and a vertical path, and wrong for three framed
+   paintings side by side — it gave them 181px each, which wrapped every
+   title to three lines and shrank the art to a thumbnail. The shelf and
+   the gallery ask for 940 and nothing else changes.
+
+   :has() on the shell, so the page that contains the layout sets its own
+   measure and no other page is touched. Where :has() is unsupported the
+   column stays 620 — cramped, never broken. */
+.shell:has(.lm-path.is-gallery),
+.shell:has(.lm-path.is-shelf) {
+  grid-template-columns: 216px minmax(0, 940px) 330px;
+}
+@media (max-width: 1500px) {
+  .shell:has(.lm-path.is-gallery),
+  .shell:has(.lm-path.is-shelf) {
+    grid-template-columns: 216px minmax(0, 1fr) 330px;
+  }
+}
 
 /* Sidebar */
 .side-nav {
