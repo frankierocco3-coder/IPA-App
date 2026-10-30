@@ -168,13 +168,44 @@ exact by construction.
 *The pulse under the line, what happens when it bends, and why an
 irregular line is information rather than a mistake.*
 
-No metronome — Tempo-Rhythm already has one. The picture is five.
+**TYPOGRAPHIC.** Don't describe the pulse — make the line pulse. One
+famous line, lettered so the stressed syllables are heavy and gold and
+the unstressed are small and faint, so the alternation is visible as
+texture even at 92px where no word can be read.
 
-> Two actors sitting side by side on a closed flight case. One speaks
-> from memory, counting the five beats off on the spread fingers of one
-> raised hand, three fingers already folded down. The other beats the
-> same pulse out on the lid of the case with a flat open palm, arm
-> relaxed. Both faces are up and alert, caught on the same beat.
+The line is Sonnet 18's opening, verbatim from `js/data/sonnets.js` and
+the textbook-perfect pentameter every teacher reaches for.
+
+> A single line of antique hand-lettering across the middle of a warm
+> parchment ground (#efe9dc), nothing else in the frame — no
+> illustration, no border, no ornament, and no accent marks, breves,
+> slashes or notation of any kind.
+>
+> The line reads: Shall I compare thee to a summer’s day?
+>
+> It is lettered syllable by syllable in two alternating weights so the
+> line visibly pulses. LARGE, heavy, warm antique gold with fine
+> engraved hatching: the word "I"; the second syllable of "compare";
+> the word "to"; the first syllable of "summer's"; the word "day".
+> SMALL, light, pale sepia-brown: the word "Shall"; the first syllable
+> of "compare"; the word "thee"; the word "a"; the second syllable of
+> "summer's". The alternation runs strictly light-heavy, light-heavy
+> the whole way across.
+>
+> Five faint vertical rules divide the line into its five equal pairs,
+> one rule between each pair, so the eye counts five.
+>
+> Portrait, 3:4, with generous empty parchment above and below the line.
+
+**No scansion marks, deliberately.** The module teaches reading a scan,
+so breves and ictus marks are tempting — but a generator aligning tiny
+marks over specific syllables will misalign them, and misaligned
+scansion on a scansion card is a factual error that no gate here can
+see. Weight carries the same information and cannot be subtly wrong.
+
+**No metronome.** Acting's Tempo-Rhythm card already has one.
+
+Eight words, which is the lowest garble risk of any card in the set.
 
 ### 5. `folio` — The First Folio and Textual Clues
 *Where the plays came from, why two editions of one play disagree, and
