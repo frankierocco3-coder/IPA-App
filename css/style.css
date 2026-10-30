@@ -2533,6 +2533,26 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    lesson's place in its module, the sections it contains, and a reading
    estimate. Scoped by the elements themselves, which only that card
    emits, so every other rail card is unchanged. */
+/* The practice rows: icon, name, one line of what it is, chevron. Real
+   buttons, because each one goes somewhere — the same three destinations
+   the Practice pane opens. */
+.rail-rows { display: flex; flex-direction: column; gap: 8px; margin: 10px 0 2px; }
+.rail-row { display: grid; grid-template-columns: 34px 1fr 12px;
+  align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 9px 10px; border: 1px solid var(--line); border-radius: 11px;
+  background: var(--panel-2); cursor: pointer; font: inherit;
+  transition: border-color .12s ease, background .12s ease; }
+.rail-row:hover { border-color: var(--gold); background: var(--panel); }
+.rail-row:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.rail-ico { display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 9px; background: var(--bg); font-size: 17px; }
+.rail-row-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.rail-row-text b { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.rail-row-text i { font-style: normal; font-size: 11.5px; color: var(--muted);
+  line-height: 1.3; }
+.rail-chev { color: var(--muted); font-size: 15px; }
+@media (prefers-reduced-motion: reduce) { .rail-row { transition: none; } }
+
 .rail-mod { display: flex; align-items: center; gap: 9px; margin: 12px 0 4px;
   font-family: var(--serif, Georgia, serif); font-size: 17px;
   font-weight: 700; color: var(--ink); }

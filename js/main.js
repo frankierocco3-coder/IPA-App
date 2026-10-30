@@ -623,7 +623,7 @@ function drawRail(section) {
         : [];
       const at = sibs.findIndex(l => l.id === next.id);
       const steps = galleryRail ? lessonSteps(next) : [];
-      cards.push({ h: galleryRail ? 'Practice' : 'Next step', title: next.title,
+      cards.push({ h: 'Next step', title: next.title,
         note: ws === 'acting' ? 'Continue the acting course.'
           : ws === 'character' ? 'Continue Building a Character.' : 'Continue the Speech course.',
         body: galleryRail ? `
@@ -634,6 +634,33 @@ function drawRail(section) {
           CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l) && speechLessonDone(l.id)).length,
           CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l)).length) : '',
         actions: [['Continue', () => ws === 'speech' ? renderSpeechLesson(next.id) : renderActingLesson(next.id), true]] });
+      // THE PRACTICE PANEL, with the three things this course actually
+      // has. The owner's mockup draws four — Imagine, Improvise, Record,
+      // Reflect — and none of them exists. Record is the one that would
+      // have mattered most: CAPABILITIES.learnerSpeaking is false, so a
+      // row inviting a learner to capture their work would advertise a
+      // capability the app has deliberately switched off.
+      //
+      // The words are the Practice pane's own, so the two surfaces
+      // cannot drift into describing the same exercise differently.
+      if (galleryRail) {
+        const PRACTICE_ROWS = [
+          ['masks', '🃏', 'Mask Cards', 'Draw a mask and play what it gives you.', () => renderMaskCards()],
+          ['oneline', '🎭', 'One Line, Many Masks', 'One sentence, every character in turn.', () => renderOneLine()],
+          ['warmup', '🔥', 'Warmup', 'Twenty steps onto your feet, unscored.', () => renderWarmup()],
+        ];
+        cards.push({ h: 'Practice', title: 'Get on your feet',
+          note: 'Prompts to work with. Nothing here is scored.',
+          body: `<div class="rail-rows">${PRACTICE_ROWS.map(([id, icon, name, blurb]) => `
+            <button class="rail-row" id="cp-${id}" type="button">
+              <span class="rail-ico" aria-hidden="true">${icon}</span>
+              <span class="rail-row-text"><b>${esc(name)}</b><i>${esc(blurb)}</i></span>
+              <span class="rail-chev" aria-hidden="true">›</span>
+            </button>`).join('')}</div>`,
+          actions: [],
+          wire: root => PRACTICE_ROWS.forEach(([id, , , , go]) =>
+            root.querySelector(`#cp-${id}`)?.addEventListener('click', go)) });
+      }
     } else {
       cards.push({ h: 'Next step', title: 'Browse the Library',
         note: 'Every chapter is free to read in any order.',
@@ -684,6 +711,7 @@ function drawRail(section) {
       <p class="pane-note">Quests track the scored dialect drills.</p>
     </section>` : '');
 
+  cards.forEach(c => c.wire?.(q));
   cards.forEach((c, i) => {
     q.querySelector(`[data-t="${i}"]`).textContent = c.title;
     q.querySelector(`[data-n="${i}"]`).textContent = c.note;
