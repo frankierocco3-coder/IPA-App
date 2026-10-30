@@ -3972,8 +3972,21 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // would be the page lying about the course, so UPCOMING is the honest
   // word until somebody decides the modules should gate.
   const total = g.ls.length;
-  const state = done === total && total > 0 ? 'done' : holdsNext ? 'current' : 'ahead';
-  const stateWord = state === 'done' ? 'Completed' : state === 'current' ? 'Current' : 'Upcoming';
+  // LOCKED IS DERIVED FROM THE LESSONS, and it turns out to be true. When
+  // the shelf was built I refused to draw the owner's padlocks, on the
+  // grounds that the course did not gate its modules. That was wrong and
+  // it shipped: learnLockMap chains every book course, and measured on
+  // a fresh profile 25 of Acting's 26 lessons are locked, 36 of
+  // Shakespeare's 37, and 33 of Character's 34.
+  //
+  // A MODULE IS LOCKED WHEN EVERY LESSON IN IT IS, which is the only
+  // reading that cannot overstate it: one reachable lesson and the
+  // module is a door you can open.
+  const modLocked = total > 0 && g.ls.every(l => locked?.get(l.id) === true);
+  const state = done === total && total > 0 ? 'done'
+    : holdsNext ? 'current' : modLocked ? 'locked' : 'ahead';
+  const stateWord = state === 'done' ? 'Completed'
+    : state === 'current' ? 'Current' : state === 'locked' ? 'Locked' : 'Upcoming';
   const pct = total ? Math.round((done / total) * 100) : 0;
   // THE PATH CARD SAYS IT IN WORDS. A shelf tile is small and leans on
   // a chip; a wide card has room for the sentence the owner's mockup
@@ -3981,6 +3994,8 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // appears where there is progress to draw. A module nobody has started
   // shows the count and nothing else, rather than an empty track.
   const wordState = state === 'done' ? 'Completed'
+    : state === 'current' ? 'Current lesson'
+    : state === 'locked' ? 'Locked'
     : done > 0 ? `In progress · ${done}/${total} complete` : 'Not started';
   const shelfBits = scene.layout === 'path-cards' ? `
         <p class="lm-line">${total} ${total === 1 ? 'lesson' : 'lessons'}

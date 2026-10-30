@@ -84,6 +84,17 @@ export const LEARN_SCENES = {
     // js/data/acting/path-labels.js as ACTING_PATH_TITLE until 2026-10-21,
     // which left two sources of truth and one of them unread.
     title: 'The Actor’s Journey',
+    // THE ILLUSTRATED PATH (owner's mockup, 2026-10-30), the same layout
+    // Character took. Acting was always a route — Script Analysis, then
+    // where behaviour comes from, then listening, then rhythm — so the
+    // path it already had stays; what changes is that each module now
+    // shows its painting beside its words instead of above them.
+    layout: 'path-cards',
+    // The corner tab: what each module works on, in one word.
+    moduleTag: {
+      text: 'Text', work: 'Circumstance',
+      listening: 'Partner', rhythm: 'Rhythm',
+    },
     // LIVE since 2026-10-22, the first course to get this page.
     live: true,
     art: 'img/ui/acting-stage-house.jpg',
