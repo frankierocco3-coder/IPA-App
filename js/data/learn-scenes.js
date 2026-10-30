@@ -174,16 +174,24 @@ export const LEARN_SCENES = {
     // LIVE 2026-10-28, once all five module paintings were in and
     // the stage band stopped drawing a dark box on parchment.
     live: true,
-    // THE GALLERY LAYOUT (owner's mockup, 2026-10-29). Shakespeare's six
-    // modules stand on a shelf because they are six books; Character's
-    // five hang on a wall because they are five portraits — the five
-    // paintings already in this registry, which is the whole reason this
-    // course could take a gallery and the others could not.
+    // THE ILLUSTRATED PATH (owner's third mockup, 2026-10-30, replacing
+    // the gallery). Back to a vertical route, but each module is now a
+    // wide card: picture on the left, the module's words on the right,
+    // and a dashed rail threading the numbers down the margin.
     //
-    // The art was made for this without anybody knowing it: each card is
-    // people mid-action in a room, which is what a picture on a wall
-    // wants to be and what an emblem on a shelf would not.
-    layout: 'gallery',
+    // WHY THIS BEAT THE GALLERY. A wall shows five things at once and
+    // says nothing about their order. This course IS an order — form,
+    // then body, then voice, then status, then inner life — and the
+    // owner's own subtitle says so: "a complete path from form to inner
+    // life". The path layout puts that back and the wide card still
+    // gives each painting room.
+    layout: 'path-cards',
+    // THE CORNER TAB on each picture. One word for what the module works
+    // on, which is the spine of the course stated five times.
+    moduleTag: {
+      commedia: 'Form', physical: 'Body', vocal: 'Voice',
+      status: 'Status', piece: 'Inner life',
+    },
     art: null,
     // LIGHT, like Acting. The dark surface was never Character's own
     // decision — it is what .tr-view does by default, and the note above

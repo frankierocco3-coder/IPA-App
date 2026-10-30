@@ -1127,13 +1127,29 @@ body.modal-open { overflow: hidden; }
    :has() on the shell, so the page that contains the layout sets its own
    measure and no other page is touched. Where :has() is unsupported the
    column stays 620 — cramped, never broken. */
-.shell:has(.lm-path.is-gallery),
-.shell:has(.lm-path.is-shelf) {
-  grid-template-columns: 216px minmax(0, 940px) 330px;
-}
-@media (max-width: 1500px) {
+/* THE GRID LAYOUTS NEED MORE THAN THE READING MEASURE. 620px is right
+   for a column of text and a vertical path, and wrong for three framed
+   paintings side by side — it gave them 181px each, which wrapped every
+   title to three lines and shrank the art to a thumbnail.
+
+   BOTH RULES SIT ABOVE THE MOBILE BREAKPOINT ON PURPOSE. `.shell:has()`
+   outranks the plain `.shell` that collapses to one column at 979px, so
+   without the min-width guard these kept a 216px sidebar and a 330px
+   rail in the grid on a phone and squeezed the middle column to 152px.
+   The page had no horizontal overflow, so it looked survivable and was
+   not. Below 980 these do not apply at all and the shell's own mobile
+   rule takes over untouched. */
+@media (min-width: 980px) {
   .shell:has(.lm-path.is-gallery),
-  .shell:has(.lm-path.is-shelf) {
+  .shell:has(.lm-path.is-shelf),
+  .shell:has(.lm-path.is-pathcards) {
+    grid-template-columns: 216px minmax(0, 940px) 330px;
+  }
+}
+@media (min-width: 980px) and (max-width: 1500px) {
+  .shell:has(.lm-path.is-gallery),
+  .shell:has(.lm-path.is-shelf),
+  .shell:has(.lm-path.is-pathcards) {
     grid-template-columns: 216px minmax(0, 1fr) 330px;
   }
 }
@@ -2536,6 +2552,77 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   left: 0; top: 7px; width: 19px; height: 19px; border-radius: 50%;
   display: grid; place-items: center; font-size: 11px; font-weight: 700;
   color: var(--muted); border: 1px solid var(--line); }
+
+/* ── THE ILLUSTRATED PATH (owner's mockup, 2026-10-30) ──────────────
+   A vertical route again, but each module is a wide card: picture left,
+   words right, numbers threaded down a dashed rail in the margin. It
+   replaced the gallery because this course IS an order — form, body,
+   voice, status, inner life — and a wall of five says nothing about
+   sequence. Scoped to .is-pathcards; the other three layouts untouched. */
+.lm-path.is-pathcards { display: block; max-width: 900px;
+  padding-left: 52px; position: relative; }
+/* THE RAIL. One dashed line down the whole path rather than a segment
+   per card, so it reads as a single route and does not break at the gaps
+   between modules. */
+.lm-path.is-pathcards::before { content: ''; position: absolute;
+  left: 21px; top: 26px; bottom: 26px; width: 0;
+  border-left: 2px dashed var(--line); }
+.is-pathcards .lm-mod { position: relative; margin: 0 0 20px; }
+.is-pathcards .lm-fold { background: var(--panel, #fbf8f1);
+  border: 1px solid var(--line); border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(45, 27, 18, .08); }
+/* The number sits ON the rail, in the gutter the path reserves. */
+.is-pathcards .lm-n { position: absolute; left: -52px; top: 20px;
+  width: 34px; height: 34px; font-size: 16px; z-index: 2;
+  border: 3px solid var(--bg); }
+.is-pathcards .lm-head,
+.is-pathcards .lm-head.has-card { display: grid; padding: 0;
+  grid-template-columns: 300px 1fr; gap: 0; align-items: stretch; }
+/* THE PLATE is the picture's own box, so the corner tab has something to
+   sit in. The art is landscape here and the supplied files are 3:4, so
+   `cover` crops them to the band rather than distorting them — and new
+   landscape art drops in with no change. */
+/* THE PICTURE FILLS A BOX THE TEXT DEFINES, never the other way round.
+   Left to `height: 100%` inside an auto-height parent the image rendered
+   at its natural 3:4 — 300 wide became 400 tall and drove the whole card
+   to 402px, when the mockup's are about 200. Absolute positioning takes
+   the image out of flow entirely: the row height comes from the words,
+   the plate fills it, and `cover` crops the portrait to the band. The
+   floor stops a short blurb collapsing the picture to a strip. */
+.lm-plate { position: relative; display: block; overflow: hidden;
+  background: var(--panel-2); min-height: 190px; }
+.is-pathcards .lm-art { position: absolute; inset: 0;
+  width: 100%; height: 100%; aspect-ratio: auto;
+  object-fit: cover; object-position: center 28%;
+  border: 0; border-radius: 0; box-shadow: none; margin: 0; }
+.lm-tag { position: absolute; top: 0; right: 0;
+  padding: 6px 12px; border-bottom-left-radius: 10px;
+  background: rgba(251, 248, 241, .93); color: var(--ink);
+  font-size: 10.5px; font-weight: 800; letter-spacing: .13em;
+  text-transform: uppercase; }
+.is-pathcards .lm-head-text { padding: 18px 20px 16px; min-width: 0;
+  display: flex; flex-direction: column; }
+.is-pathcards .lm-eyebrow { display: none; }
+.is-pathcards .lm-title { font-size: 25px; margin-bottom: 8px; }
+.is-pathcards .lm-blurb { border-top: 0; padding-top: 0; font-size: 14.5px; }
+.lm-line { margin: 12px 0 0; font-size: 13.5px; color: var(--muted);
+  font-weight: 600; }
+.lm-dot { margin: 0 6px; opacity: .6; }
+.lm-state.is-done { color: #4a5c3b; }
+.lm-state.is-current { color: #8a6a22; }
+.is-pathcards .lm-bar { margin: 9px 0 0; }
+.is-pathcards .lm-count { font-size: 0; justify-content: flex-end;
+  margin-top: auto; padding-top: 10px; }
+/* One column on a phone: a 300px picture beside text in 375px is not a
+   card, it is two slivers. */
+@media (max-width: 700px) {
+  .lm-path.is-pathcards { padding-left: 38px; }
+  .lm-path.is-pathcards::before { left: 14px; }
+  .is-pathcards .lm-n { left: -38px; width: 28px; height: 28px; font-size: 14px; }
+  .is-pathcards .lm-head,
+  .is-pathcards .lm-head.has-card { grid-template-columns: 1fr; }
+  .lm-plate { min-height: 150px; max-height: 190px; }
+}
 
 .lm-list { list-style: none; margin: 0; padding: 0; }
 .lm-row { display: grid; grid-template-columns: var(--lm-node) 1fr;

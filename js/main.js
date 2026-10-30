@@ -3855,7 +3855,7 @@ function learnPathHtml(B, lessons, nextId) {
   // LAYOUTS ARE A LOOKUP, and the set is closed on purpose: a scene
   // cannot put an arbitrary class name into the page by naming itself
   // one. Shakespeare's shelf and Character's gallery today.
-  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery' };
+  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery', 'path-cards': ' is-pathcards' };
   const shelf = LAYOUTS[scene.layout] ?? '';
   return `<div class="lm-path${shelf}">
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
@@ -3883,9 +3883,18 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // THE ART IS NOT A LINK AND NOT A BUTTON. It sits inside the heading,
   // and the only pressable things in a band stay the lesson cards.
   const card = scene.moduleCard?.[g.m?.id];
-  const art = card ? `
+  // THE CORNER TAB rides with the picture, so it needs the picture to
+  // have a box of its own. A tag without a card would be a label on
+  // nothing, so it only renders where art exists.
+  const tag = scene.moduleTag?.[g.m?.id];
+  const art = card ? (scene.layout === 'path-cards' ? `
+      <span class="lm-plate">
+        <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
+             width="600" height="800" loading="lazy" decoding="async">
+        ${tag ? `<span class="lm-tag">${esc(tag)}</span>` : ''}
+      </span>` : `
       <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
-           width="600" height="800" loading="lazy" decoding="async">` : '';
+           width="600" height="800" loading="lazy" decoding="async">`) : '';
   // FOLDED, AND ONLY THE MODULE YOU ARE IN IS OPEN. Four modules of five to
   // nine lessons is a very long scroll, and the shape of the course — which
   // is the thing this page exists to show — was the first casualty of it.
@@ -3928,7 +3937,22 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   const state = done === total && total > 0 ? 'done' : holdsNext ? 'current' : 'ahead';
   const stateWord = state === 'done' ? 'Completed' : state === 'current' ? 'Current' : 'Upcoming';
   const pct = total ? Math.round((done / total) * 100) : 0;
-  const shelfBits = scene.layout ? `
+  // THE PATH CARD SAYS IT IN WORDS. A shelf tile is small and leans on
+  // a chip; a wide card has room for the sentence the owner's mockup
+  // writes — "7 lessons · In progress · 2/7 complete" — and the bar only
+  // appears where there is progress to draw. A module nobody has started
+  // shows the count and nothing else, rather than an empty track.
+  const wordState = state === 'done' ? 'Completed'
+    : done > 0 ? `In progress · ${done}/${total} complete` : 'Not started';
+  const shelfBits = scene.layout === 'path-cards' ? `
+        <p class="lm-line">${total} ${total === 1 ? 'lesson' : 'lessons'}
+          <span class="lm-dot" aria-hidden="true">·</span>
+          <span class="lm-state is-${state}">${wordState}</span></p>
+        ${done > 0 && done < total ? `
+        <div class="lm-bar" role="img" aria-label="${done} of ${total} lessons done">
+          <i style="width:${pct}%"></i>
+        </div>` : ''}`
+    : scene.layout ? `
         <p class="lm-chip is-${state}"><span aria-hidden="true"></span>${stateWord}</p>
         <div class="lm-bar" role="img" aria-label="${done} of ${total} lessons done">
           <i style="width:${pct}%"></i>
