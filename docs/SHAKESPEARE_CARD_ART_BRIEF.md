@@ -168,55 +168,69 @@ exact by construction.
 *The pulse under the line, what happens when it bends, and why an
 irregular line is information rather than a mistake.*
 
-**TYPOGRAPHIC, AND THE METRICAL FOOT IS A FOOT.** The module's own unit
-of measure is the *foot*, and the Renaissance printed step diagrams for
-exactly this purpose — Arbeau's dance manuals lay out footprints across
-the page to show where the weight falls. That is the same world the
-first two cards live in: engraved plate, gold and sepia, fine hatching,
-parchment. A light step and a heavy step, five times, is iambic
-pentameter drawn in the period's own idiom.
+**TYPOGRAPHIC, AND STACKED — THE FRAME DECIDED THIS.** Two drafts put one
+pentameter line horizontally across the card. Measured at 92x123, that
+fails: a full line strung edge to edge in a PORTRAIT frame forces tiny
+type and leaves about 80% of the card empty, so it renders as a blank
+parchment tile with a thread across it. It is the most elegant card in
+the set at 2x and the only illegible one at the size that ships.
 
-The line is Sonnet 18's opening, verbatim from `js/data/sonnets.js` and
-the textbook-perfect pentameter every teacher reaches for.
+The fix is not a different treatment, it is a different layout. **One
+foot per row, five rows down the frame.** The type gets large, the
+portrait shape is filled, and the count of five is readable at a glance
+as five bands.
 
-> An antique engraved plate on a warm parchment ground (#efe9dc), in the
-> manner of a Renaissance dance manual. Nothing else in the frame — no
-> border, no ornament, no arrows, no dotted lines, nothing modern or
-> diagrammatic.
+**THE LINE CHANGED FOR THIS, and it is a better line anyway.** Sonnet
+18's "Shall I compare thee to a summer's day?" splits "compare" and
+"summer's" across foot boundaries — true scansion, but stacked it gives
+rows reading "a sum" and "mer's day", which is ugly and hard to read.
+
+Sonnet 12 opens with ten monosyllables:
+
+> When I do count the clock that tells the time,
+
+Every foot breaks at a word boundary, so every row is two whole words
+and nothing is split. It is also a line about counting time, which is
+what metre is. Verbatim from `js/data/sonnets.js`.
+
+> An antique letterpress plate on a warm parchment ground (#efe9dc).
+> Nothing else in the frame — no border, no ornament, no illustration,
+> nothing modern or diagrammatic.
 >
-> Across the middle, one line of antique hand-lettering in warm antique
-> gold with fine engraved hatching, reading:
-> Shall I compare thee to a summer’s day?
+> A single line of verse is set as five stacked rows, one metrical foot
+> per row, the column large enough to fill the frame from top to bottom
+> with generous margins. The rows read, in order:
 >
-> Directly beneath the line, a row of ten bare footprints walks left to
-> right, engraved in dark sepia-brown with fine hatching, in the style
-> of the step diagrams in an old dance manual. They are arranged as five
-> clear PAIRS with a visible gap between pairs. In every pair the first
-> print is small, pale and lightly pressed; the second is larger,
-> darker and firmly pressed, as though the weight landed on it. Five
-> pairs, ten prints, light-then-heavy the whole way across.
+> When I
+> do count
+> the clock
+> that tells
+> the time
 >
-> Portrait, 3:4, generous empty parchment above and below.
+> Every row is two whole words. In each row the FIRST word is small,
+> pale and sepia-brown, and the SECOND is large, heavy and warm antique
+> gold with fine engraved hatching: "When" small and "I" large; "do"
+> small and "count" large; "the" small and "clock" large; "that" small
+> and "tells" large; "the" small and "time" large.
+>
+> The rows sit in one centred column with a hairline rule between each,
+> so the five are countable at a glance.
+>
+> Portrait, 3:4.
 
-**Why this and not the bouncing ball.** The ball was the better idea
-about *rhythm* — it reads at any size and the bounce is the scansion.
-But its dotted arc is a sing-along cartoon device, and next to the
-engraved gold-and-sepia of `language` and `form` it reads as an
-infographic dropped into a broadside. Footprints carry the same
-alternation in the aesthetic the set already has.
+**Why not the bouncing ball or the footprints.** Both were better ideas
+about rhythm than letter-weight alone, and both are rejected on the same
+grounds: the ball's dotted arc is a sing-along cartoon device and reads
+as an infographic beside the engraved gold-and-sepia of `language` and
+`form`; the footprints are period-correct but add a second register of
+imagery to a set that had just settled into pure type. Stacking keeps
+the set's own idiom and solves the size problem, which neither of the
+other two was actually required to solve.
 
-**It is also the safer card, which was not the point but matters.** The
-ball had to land ON specific syllables or the scansion was false. Ten
-footprints only have to alternate light-heavy five times; alignment
-under the syllables is a bonus, not load-bearing. A generator can get
-the spacing slightly wrong and the card is still true.
-
-**The pun is the teaching.** "Foot" is the actual metrical term, and the
-rehearsal-room practice of walking a line to find its pulse is real. The
-card says both at once without a word of explanation.
-
-**Still proof-read it:** eight words of lettering, and five pairs — not
-four, not six — with the heavy print second in every pair.
+**PROOF-READ THE ROWS.** Five rows, not four or six; two whole words
+each; the heavy word second every time. The division is the scansion,
+so a wrong row is false scansion on a scansion card, invisible to every
+gate here.
 
 **No metronome.** Acting's Tempo-Rhythm card already has one.
 
