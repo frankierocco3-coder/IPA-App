@@ -268,6 +268,12 @@ export const LEARN_SCENES = {
       // own parchment it sits in the set; the lettering is untouched.
       language: { src: 'img/ui/shakespeare-card-language.jpg',
         alt: 'The words “prithee wherefore” hand-lettered in tall ornate gold serif capitals with fine engraved hatching, on a plain parchment ground.' },
+      // Both quotes are Hamlet in the Nunnery Scene, minutes apart — the
+      // form changing under one speaker, which is what three of this
+      // module's four lessons are actually about. Verbatim from
+      // js/data/scenes.js so the card cannot drift from the edition.
+      form: { src: 'img/ui/shakespeare-card-form.jpg',
+        alt: 'Two blocks of antique lettering on parchment. Above, headed VERSE, two gold lines ending at different points: “To be, or not to be, that is the question: / Whether ’tis nobler in the mind to suffer”. Below, headed PROSE, a solid dark sepia block with straight edges: “Get thee to a nunnery. Why wouldst thou be a breeder of sinners?”' },
     },
     done: 'set',
     above: 'WHAT HAPPENS IN THE HOUSE',
