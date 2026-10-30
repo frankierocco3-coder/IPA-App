@@ -346,6 +346,32 @@ export const LEARN_SCENES = {
   rhetoric: {
     title: 'The Reasons You Raise',
     art: null,
+    // LIGHT AND LIVE, and on the shelf (owner's mockup, 2026-10-30).
+    // Rhetoric's six modules are six subjects rather than a route you
+    // must walk in order — what the word means, who you are talking to,
+    // where arguments come from, how language is shaped, delivery, and
+    // honesty — so the grid that shows all six at once suits it where a
+    // path would imply a sequence the course does not insist on.
+    light: true,
+    live: true,
+    layout: 'shelf',
+    // The six paintings are 9:5. One declaration, inherited by every
+    // plate: the art's shape is the course's fact, not the layout's.
+    artAspect: '1.798 / 1',
+    moduleCard: {
+      ground: { src: 'img/ui/rhetoric-scene-ground.jpg',
+        alt: 'A woman in a Greek robe speaks into a brass speaking trumpet aimed at a giant carved ear, with listeners below and columns behind.' },
+      audience: { src: 'img/ui/rhetoric-scene-audience.jpg',
+        alt: 'Two people seated opposite one another in conversation under a colonnade, one listening with a hand to the chin while the other speaks.' },
+      invention: { src: 'img/ui/rhetoric-scene-invention.jpg',
+        alt: 'A man at a table reading a document, with wall panels behind him showing a claim supported by reasons, evidence and objections.' },
+      shape: { src: 'img/ui/rhetoric-scene-shape.jpg',
+        alt: 'A woman speaking beside a winding ribbon lettered with the qualities of style, laurel leaves threaded through it.' },
+      delivery: { src: 'img/ui/rhetoric-scene-delivery.jpg',
+        alt: 'A speaker with an arm outstretched addressing rows of seated listeners in a stone amphitheatre.' },
+      ethics: { src: 'img/ui/rhetoric-scene-ethics.jpg',
+        alt: 'A woman standing with open hands beside a tall golden balance, the scales level, a colonnade behind her.' },
+    },
     done: 'raised',
     above: 'WHAT THE ROOM MAY EXAMINE',
     below: 'WHAT YOU RAISE',
