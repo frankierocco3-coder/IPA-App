@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v60';                     // 2026-10-28: tap a phoneme symbol to hear the owner's own recording — the owner asked for it and is waiting to open it, which is the rule at line 68
+const VERSION = 'sc-v61';                     // 2026-10-29: Shakespeare's shelf layout — gated, so no learner sees it, but the owner is opening the live site to look at it right now, which is the rule at line 68
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
