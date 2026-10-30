@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v65';                     // 2026-10-30: Acting takes the illustrated path, Shakespeare takes six painted scenes, and every course's module locks now show — both courses are live, and img/ files were REPLACED at existing paths
+const VERSION = 'sc-v66';                     // 2026-10-30: Rhetoric takes the shelf with six painted scenes, and Acting's stage band is suppressed — both live courses, both Learn pages changed
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
