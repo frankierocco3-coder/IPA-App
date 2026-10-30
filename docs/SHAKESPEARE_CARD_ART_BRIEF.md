@@ -97,15 +97,27 @@ module's own argument is how little about the man is documented.
 
 ### 3. `form` — Verse and Prose
 
-> An open book lying flat, both pages visible. The left-hand page is set
-> in short separate lines with a ragged uneven right edge; the
-> right-hand page is one solid justified block of text running to both
-> margins. The two page shapes are clearly different. The writing itself
-> is fine and indistinct, readable as texture rather than as words.
+> An open book lying flat, both pages visible. The left-hand page holds
+> only four short separate lines, well spaced, their right-hand ends at
+> conspicuously different points, leaving most of that page empty
+> parchment. The right-hand page is filled corner to corner with one
+> dense dark block of close-set lines, both margins straight, no gaps.
+> One page reads light and broken, the other reads as a solid dark
+> rectangle. The writing itself is fine and indistinct, texture rather
+> than words.
 
-**The emblem still teaches.** The verse-versus-prose contrast survives
-as page shape, which is exactly the test the lesson describes — telling
-them apart from across the room without reading anything.
+**PUSHED TO CARICATURE ON PURPOSE, and this was measured.** A first
+sketch set the two pages as ordinary verse and ordinary prose. At 1.8x
+the difference was lovely; at 92x123 both pages read as "a page" and the
+emblem said nothing but "a book". Light-versus-dark survives the
+downscale where ragged-versus-flush does not, so the left page is now
+nearly empty and the right nearly solid.
+
+**It is still the weakest emblem in the set**, because module 5 is also
+books. At card size an open book lying flat and two volumes standing
+upright are distinguishable, but they are the only pair that has to be
+told apart rather than simply recognised. If one of the six gets
+re-rolled, make it this one.
 
 ### 4. `metre` — Iambic Pentameter
 
