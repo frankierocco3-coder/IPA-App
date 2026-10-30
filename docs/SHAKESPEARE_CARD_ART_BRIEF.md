@@ -168,60 +168,57 @@ exact by construction.
 *The pulse under the line, what happens when it bends, and why an
 irregular line is information rather than a mistake.*
 
-**TYPOGRAPHIC, AND THE BALL CARRIES IT** (owner's idea, and it beat the
-weight-only draft it replaced). Don't describe the pulse — bounce along
-it. One famous line with a ball landing on each stress, like the
-sing-along films.
+**TYPOGRAPHIC, AND THE METRICAL FOOT IS A FOOT.** The module's own unit
+of measure is the *foot*, and the Renaissance printed step diagrams for
+exactly this purpose — Arbeau's dance manuals lay out footprints across
+the page to show where the weight falls. That is the same world the
+first two cards live in: engraved plate, gold and sepia, fine hatching,
+parchment. A light step and a heavy step, five times, is iambic
+pentameter drawn in the period's own idiom.
 
 The line is Sonnet 18's opening, verbatim from `js/data/sonnets.js` and
 the textbook-perfect pentameter every teacher reaches for.
 
-> A single line of antique hand-lettering across the middle of a warm
-> parchment ground (#efe9dc), with a ball bouncing along it. Nothing
-> else in the frame — no border, no ornament, no musical notation.
+> An antique engraved plate on a warm parchment ground (#efe9dc), in the
+> manner of a Renaissance dance manual. Nothing else in the frame — no
+> border, no ornament, no arrows, no dotted lines, nothing modern or
+> diagrammatic.
 >
-> The line reads: Shall I compare thee to a summer’s day?
+> Across the middle, one line of antique hand-lettering in warm antique
+> gold with fine engraved hatching, reading:
+> Shall I compare thee to a summer’s day?
 >
-> A small round ball in warm rust red travels left to right along the
-> line, shown at several positions with a faint dotted arc tracing its
-> path, like the bouncing ball in an old sing-along film. It dips down
-> to touch the top of exactly five syllables and arcs up between them.
-> The five it touches are: the word "I"; the second syllable of
-> "compare"; the word "to"; the first syllable of "summer's"; the word
-> "day". It touches no other syllable. Five touches, five arcs.
+> Directly beneath the line, a row of ten bare footprints walks left to
+> right, engraved in dark sepia-brown with fine hatching, in the style
+> of the step diagrams in an old dance manual. They are arranged as five
+> clear PAIRS with a visible gap between pairs. In every pair the first
+> print is small, pale and lightly pressed; the second is larger,
+> darker and firmly pressed, as though the weight landed on it. Five
+> pairs, ten prints, light-then-heavy the whole way across.
 >
-> The five syllables the ball touches are lettered slightly larger and
-> bolder in warm antique gold; the rest are a little smaller and
-> lighter in pale sepia-brown.
->
-> Portrait, 3:4, generous empty parchment above and below the line.
+> Portrait, 3:4, generous empty parchment above and below.
 
-**Why the ball wins.** The draft before it carried the pulse on letter
-weight alone, and the Verse and Prose card had just exposed the weakness
-in that: pale gold goes faint at 92px while dark shapes survive. An arc
-of red dots reads at any size, and the bounce is not a decoration of the
-rhythm, it IS the scansion — five landings, five feet.
+**Why this and not the bouncing ball.** The ball was the better idea
+about *rhythm* — it reads at any size and the bounce is the scansion.
+But its dotted arc is a sing-along cartoon device, and next to the
+engraved gold-and-sepia of `language` and `form` it reads as an
+infographic dropped into a broadside. Footprints carry the same
+alternation in the aesthetic the set already has.
 
-**Rust red, not fire-engine red.** It would otherwise be the only pure
-primary in a set built from teal, olive, rust terracotta, ochre, maroon
-and cream.
+**It is also the safer card, which was not the point but matters.** The
+ball had to land ON specific syllables or the scansion was false. Ten
+footprints only have to alternate light-heavy five times; alignment
+under the syllables is a bonus, not load-bearing. A generator can get
+the spacing slightly wrong and the card is still true.
 
-**The weight contrast is kept as a backstop.** If the ball drifts by a
-syllable the lettering still tells the truth, so the card cannot be
-silently wrong in both channels at once.
+**The pun is the teaching.** "Foot" is the actual metrical term, and the
+rehearsal-room practice of walking a line to find its pulse is real. The
+card says both at once without a word of explanation.
 
-**PROOF-READ THE LANDINGS, not just the spelling.** A ball on the wrong
-syllable is false scansion on a scansion card, and no gate here can see
-it. The five are I / -pare / to / sum- / day.
-
-**No scansion marks.** Breves and ictus marks are the obvious move for a
-module that teaches reading a scan, but a generator aligning tiny marks
-over specific syllables will misalign them. The ball is big enough to
-place reliably; a breve is not.
+**Still proof-read it:** eight words of lettering, and five pairs — not
+four, not six — with the heavy print second in every pair.
 
 **No metronome.** Acting's Tempo-Rhythm card already has one.
-
-Eight words, which is the lowest garble risk of any card in the set.
 
 ### 5. `folio` — The First Folio and Textual Clues
 *Where the plays came from, why two editions of one play disagree, and
