@@ -2398,8 +2398,10 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 /* The path's "N of M done" line and the shelf's own tally say the same
    thing, so only one of them is ever shown. The fold arrow lives on the
    path's line, so the shelf keeps the element and hides only the words. */
+/* font-size: 0 hides the path's "N of M done" words while keeping the
+   element, because the fold arrow lives inside it. The arrow is a
+   CSS-drawn 8px box, not a glyph, so font-size cannot shrink it. */
 .is-shelf .lm-count { font-size: 0; margin-top: 10px; justify-content: flex-end; }
-.is-shelf .lm-count .lm-fold-arrow { font-size: 13px; }
 .lm-chip { display: inline-flex; align-items: center; gap: 6px;
   margin: 11px 0 0; padding: 3px 10px 3px 7px; border-radius: 999px;
   font-size: 11px; font-weight: 700; letter-spacing: .08em;
@@ -2483,7 +2485,6 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .is-gallery .lm-chip { margin: 12px auto 0; }
 .is-gallery .lm-bar { width: 100%; }
 .is-gallery .lm-count { font-size: 0; justify-content: center; margin-top: 8px; }
-.is-gallery .lm-count .lm-fold-arrow { font-size: 13px; }
 @media (max-width: 900px) {
   .lm-path.is-gallery { grid-template-columns: repeat(2, 1fr); gap: 34px 20px; }
 }
