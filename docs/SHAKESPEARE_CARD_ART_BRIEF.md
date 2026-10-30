@@ -48,220 +48,107 @@ At the size these display — 132px wide on a desktop, 92px on a phone — one
 clear idea reads and a busy one turns to mush. Two or three figures, one
 action.
 
-## The house style
+## The house style: ENGRAVED EMBLEMS
 
-Identical to the Acting and Character sets. Same company, same room, same
-light. What moves is the **evidence on the table**: Acting and Character
-keep their props on bodies in a room, and this course's props lean toward
-the page and the playhouse — books, pages, the blackboard, the chairs set
-out as a house.
+**Settled 2026-10-29, and it supersedes both earlier directions.** This
+course's cards are neither paintings (Acting, Character) nor lettering
+(the two drafts before this). They are **single engraved emblems**, one
+object per module, in the manner of a seventeenth-century printed book.
 
-Paste this in front of each prompt:
+Four rounds of lettering taught the lesson that chose this. Quotes are
+beautiful at 2x and illegible at 92x123, which is the only size that
+ships; the Iambic Pentameter card rendered as a blank parchment tile
+with a thread across it. **One bold object reads at any size.** An
+hourglass is an hourglass at 92px. A sentence is not a sentence.
 
-> Detailed digital painting in warm storybook realism, crisp linework with
-> soft cel-shaded rendering, editorial book-illustration feel. Golden
-> afternoon light through a tall multi-pane window, ivy and green foliage
-> framing the edges. Earthy saturated palette: teal, olive green, rust
-> terracotta, warm ochre, deep maroon, cream. A theatre rehearsal room
-> with worn wooden chairs, flight cases, a patterned rug and a stage lamp.
-> Portrait, 3:4. Faces clear and in the upper half. No text, no lettering,
-> no signage, and no readable writing on any page, book or board.
+Paste this in front of each emblem below:
 
-## Avoiding the nine that already exist
-
-Each prompt below was written to stay clear of a picture already in the
-set. Worth knowing if you re-roll any of them:
-
-| already taken | by |
-|---|---|
-| two people at a desk with marked-up scripts | acting/text |
-| a metronome on a table | acting/rhythm |
-| two actors facing each other on chairs | acting/listening |
-| two standing close, face to face, speaking | character/vocal |
-| one actor walking the room while another watches | character/physical |
-| one actor alone in a chair, imagining | character/piece |
-
-## The five
-
-### 2. `language` — The Language
-*Why it feels hard, what actually changed, and how to find the plain
-sentence without flattening the line you have to speak.*
-
-The picture is the gap between the knot and the plain version.
-
-> One actor stands holding a single loose page up toward the window light,
-> head tilted back and brow furrowed, working out a difficult sentence.
-> A second actor leans on the back of a wooden chair nearby, saying it
-> back in plain words with an easy open hand and a half-shrug. One is
-> tangled and one is relaxed, and that contrast is the subject. The page
-> is held edge-on to us so nothing on it can be read.
-
-### 3. `form` — Verse and Prose
-*Which one you are in, why he moves between them, and what the crossing
-tells you about the person speaking.*
-
-**TYPOGRAPHIC, not a painting.** The lesson writes this card's brief
-itself: *"In a well-set edition you can tell which one you are in from
-across the room, without reading anything."* So the card IS that test —
-two blocks of text whose shapes differ, and the shape is the whole
-teaching. Words legible close up, shapes legible at 92px.
-
-**BOTH QUOTES ARE ONE MAN IN ONE SCENE.** An earlier draft paired The
-Balcony against Kill Claudio — two plays, two characters — which showed
-the *distinction* and nothing else. But three of this module's four
-lessons are about the **move** between forms, not telling them apart, and
-`sh-whymove` makes its case on exactly this character: *"Hamlet is a
-prince and speaks a great deal of prose."*
-
-So both come from **The Nunnery Scene**, already on the Scenes shelf.
-Hamlet opens it in verse and is in prose with Ophelia minutes later. One
-speaker, one scene, the form changing under him — which is the module.
-Text verbatim from `js/data/scenes.js`.
-
-Verse — two true pentameter lines, capital at each line start:
-
-> To be, or not to be, that is the question:
-> Whether ’tis nobler in the mind to suffer
-
-Prose — one sentence that wraps into a justified block:
-
-> Get thee to a nunnery. Why wouldst thou be a breeder of sinners?
-
-> Two blocks of hand-lettered antique type on a warm parchment ground,
-> nothing else in the frame — no illustration, no border, no ornament,
-> no page edges. The upper block is two separate lines, each beginning
-> with a capital, lettered in warm antique gold with fine engraved
-> hatching, and its right-hand edge is conspicuously uneven — the two
-> lines end at clearly different points, with a visible step between
-> them. Below it, across a wide band of empty parchment, a second block
-> in the same lettering style but in dark sepia-brown ink, set as a
-> solid justified paragraph of three lines that forms a clean rectangle,
-> both left and right edges perfectly straight and flush. The upper
-> shape is ragged and the lower shape is a solid brick, and that
-> contrast is the entire subject. Portrait, 3:4.
-
-**Exaggerate the two shapes.** Natural typesetting does not make the
-ragged-versus-flush contrast read at 92px; the prompt has to ask for it
-outright, which is why it says "conspicuously uneven", "a visible step"
-and "perfectly straight and flush".
-
-**Two colours on purpose.** At 92px two gold blocks merge into one grey
-mass; gold against sepia reads instantly as two different things.
-
-**The empty band between them is the switch**, so it should be wide
-enough to feel like a turn rather than a paragraph break.
-
-**Known overlap, accepted:** "To be, or not to be" is a soliloquy, and
-module 6 is soliloquies. Using it here is still right — the card is about
-the form, not the address, and keeping both quotes inside one scene buys
-more than the overlap costs.
-
-**THE RISK ON THIS ONE: generators misspell text.** Two words came back
-perfect on `language`; thirty will not reliably. Misquoted Shakespeare
-inside a JPEG in a Shakespeare course is invisible to every gate in this
-repo — `dialect_lint` cannot read a picture. **Check every word against
-the quotes above before it is installed.** If the generator will not
-hold the spelling, set the card in type instead; the words are then
-exact by construction.
-
-### 4. `metre` — Iambic Pentameter
-*The pulse under the line, what happens when it bends, and why an
-irregular line is information rather than a mistake.*
-
-**TYPOGRAPHIC, AND STACKED — THE FRAME DECIDED THIS.** Two drafts put one
-pentameter line horizontally across the card. Measured at 92x123, that
-fails: a full line strung edge to edge in a PORTRAIT frame forces tiny
-type and leaves about 80% of the card empty, so it renders as a blank
-parchment tile with a thread across it. It is the most elegant card in
-the set at 2x and the only illegible one at the size that ships.
-
-The fix is not a different treatment, it is a different layout. **One
-foot per row, five rows down the frame.** The type gets large, the
-portrait shape is filled, and the count of five is readable at a glance
-as five bands.
-
-**THE LINE CHANGED FOR THIS, and it is a better line anyway.** Sonnet
-18's "Shall I compare thee to a summer's day?" splits "compare" and
-"summer's" across foot boundaries — true scansion, but stacked it gives
-rows reading "a sum" and "mer's day", which is ugly and hard to read.
-
-Sonnet 12 opens with ten monosyllables:
-
-> When I do count the clock that tells the time,
-
-Every foot breaks at a word boundary, so every row is two whole words
-and nothing is split. It is also a line about counting time, which is
-what metre is. Verbatim from `js/data/sonnets.js`.
-
-> An antique letterpress plate on a warm parchment ground (#efe9dc).
-> Nothing else in the frame — no border, no ornament, no illustration,
-> nothing modern or diagrammatic.
->
-> A single line of verse is set as five stacked rows, one metrical foot
-> per row, the column large enough to fill the frame from top to bottom
-> with generous margins. The rows read, in order:
->
-> When I
-> do count
-> the clock
-> that tells
-> the time
->
-> Every row is two whole words. In each row the FIRST word is small,
-> pale and sepia-brown, and the SECOND is large, heavy and warm antique
-> gold with fine engraved hatching: "When" small and "I" large; "do"
-> small and "count" large; "the" small and "clock" large; "that" small
-> and "tells" large; "the" small and "time" large.
->
-> The rows sit in one centred column with a hairline rule between each,
-> so the five are countable at a glance.
->
+> A single engraved emblem centred on a warm parchment ground (#efe9dc).
+> Antique copperplate etching, fine hatched line work in dark
+> sepia-brown ink, the way an emblem is printed in a seventeenth-century
+> book. One object only, centred, large, filling the middle of the frame
+> with generous empty parchment around it. No colour beyond the sepia
+> ink and the parchment. No text, no lettering, no border, no frame.
 > Portrait, 3:4.
 
-**Why not the bouncing ball or the footprints.** Both were better ideas
-about rhythm than letter-weight alone, and both are rejected on the same
-grounds: the ball's dotted arc is a sing-along cartoon device and reads
-as an infographic beside the engraved gold-and-sepia of `language` and
-`form`; the footprints are period-correct but add a second register of
-imagery to a set that had just settled into pure type. Stacking keeps
-the set's own idiom and solves the size problem, which neither of the
-other two was actually required to solve.
+### THE TWO INSTALLED CARDS GET REPLACED
 
-**PROOF-READ THE ROWS.** Five rows, not four or six; two whole words
-each; the heavy word second every time. The division is the scansion,
-so a wrong row is false scansion on a scansion card, invisible to every
-gate here.
+`context` (the painted teacher at a blackboard) and `language` (the
+"prithee wherefore" lettering) are both live in the registry and both
+go. A set of six wants one idiom. Both files stay in git history, so
+this is reversible if the emblems disappoint.
 
-**No metronome.** Acting's Tempo-Rhythm card already has one.
+### 1. `context` — Shakespeare 101
+
+> The Globe playhouse seen from outside: a tall round timber-framed
+> theatre with a thatched roof, a flag flying from the roof turret, and
+> small figures at the door.
+
+**Not a portrait, deliberately.** A portrait head and the skull on
+module 6 are both head-shaped objects and would collide at 92px. The
+Globe also covers the module better than a likeness does — three of its
+seven lessons are about the playhouse and its conditions, and the
+module's own argument is how little about the man is documented.
+
+### 2. `language` — The Language
+
+> A tall quill pen standing upright in a squat inkwell, a few loose
+> sheets beneath it, a small sprig of leaves at the base.
+
+### 3. `form` — Verse and Prose
+
+> An open book lying flat, both pages visible. The left-hand page is set
+> in short separate lines with a ragged uneven right edge; the
+> right-hand page is one solid justified block of text running to both
+> margins. The two page shapes are clearly different. The writing itself
+> is fine and indistinct, readable as texture rather than as words.
+
+**The emblem still teaches.** The verse-versus-prose contrast survives
+as page shape, which is exactly the test the lesson describes — telling
+them apart from across the room without reading anything.
+
+### 4. `metre` — Iambic Pentameter
+
+> An hourglass standing upright, the sand half run through, a fine
+> stream falling from the upper bulb to the lower.
+
+**Time measured, which is what metre is.** It is also nothing like
+Tempo-Rhythm's metronome, and unlike the four drafts before it, it
+reads at card size.
 
 ### 5. `folio` — The First Folio and Textual Clues
-*Where the plays came from, why two editions of one play disagree, and
-how much of what looks like instruction is somebody else at the printing
-house.*
 
-The picture is the size difference. A folio is big and a quarto is small,
-and that single fact carries the whole module without one readable word.
+> Two bound books standing upright side by side, leaning slightly
+> together: one a large heavy leather folio, the other a small thin
+> quarto barely half its height. The difference in scale between them is
+> the subject.
 
-> A large heavy leather-bound book lies open on a table beside a small
-> thin pamphlet-sized one, both clearly the same kind of object at wildly
-> different scale. An actor stands over them with a hand flat on each,
-> looking between the two with an eyebrow up, plainly finding that they
-> disagree. A second person leans in over their shoulder to see. The
-> pages are angled away so no writing is legible.
+**Two books, not one.** The size difference carries the whole module —
+two editions of one play, disagreeing — without a word. A single volume
+would only say "a book", and `form` already has one.
 
 ### 6. `soliloquy` — Soliloquies and Monologues
-*Who you are talking to, what it costs to include the audience, and how
-to think a speech rather than recite it.*
 
-Not an actor alone — Character's `piece` card has that. The picture is
-the audience as scene partner.
+> A human skull resting on a closed book, three-quarter view, with a
+> guttered candle stub beside it.
 
-> One actor stands at the front of the room speaking directly out to three
-> company members seated in a short row of wooden chairs facing them. It
-> is plainly address, not performance: the speaker's hand is open in a
-> genuine question and the eyes are working mid-thought. One of the three
-> is leaning forward and meeting the look, caught up in it rather than
-> watching politely. Chairs set out as a small house.
+**The candle earns its place.** It separates the silhouette from the
+Globe on module 1 at small size, and a skull alone is the most
+over-used Shakespeare image there is; the objects around it make it a
+still life rather than a cliché.
+
+## Proof-reading an emblem
+
+Far less to check than lettering, which is most of the point, but not
+nothing:
+
+* **No text crept in.** Generators love adding a title to a book spine
+  or a banner under an emblem. Any lettering at all is a reject —
+  nothing in this repo can read a picture, so a misspelling ships
+  silently.
+* **The object is the right one and there is only one of it.**
+* **It reads at 92px.** Open the card at true size before installing.
+  That check is what rejected four drafts in a row.
 
 ## When they arrive
 
