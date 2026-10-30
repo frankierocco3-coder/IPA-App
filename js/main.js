@@ -3794,7 +3794,11 @@ function learnPathHtml(B, lessons, nextId) {
   // summaries out as cards standing in rows. Keeping one element tree is
   // what makes the keyboard handling, the focus ring and the no-JS
   // behaviour survive a change of appearance.
-  const shelf = scene.layout === 'shelf' ? ' is-shelf' : '';
+  // LAYOUTS ARE A LOOKUP, and the set is closed on purpose: a scene
+  // cannot put an arbitrary class name into the page by naming itself
+  // one. Shakespeare's shelf and Character's gallery today.
+  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery' };
+  const shelf = LAYOUTS[scene.layout] ?? '';
   return `<div class="lm-path${shelf}">
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
   </div>`;
@@ -3858,7 +3862,7 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   const state = done === total && total > 0 ? 'done' : holdsNext ? 'current' : 'ahead';
   const stateWord = state === 'done' ? 'Completed' : state === 'current' ? 'Current' : 'Upcoming';
   const pct = total ? Math.round((done / total) * 100) : 0;
-  const shelfBits = scene.layout === 'shelf' ? `
+  const shelfBits = scene.layout ? `
         <p class="lm-chip is-${state}"><span aria-hidden="true"></span>${stateWord}</p>
         <div class="lm-bar" role="img" aria-label="${done} of ${total} lessons done">
           <i style="width:${pct}%"></i>
