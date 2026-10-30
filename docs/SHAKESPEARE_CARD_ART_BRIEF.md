@@ -19,11 +19,22 @@ complete it changes nothing a learner sees. See `js/data/learn-scenes.js`.
   reaches the live site.
 * **File names** `img/ui/shakespeare-card-<id>.jpg`, using the module ids
   below. Ids are storage in this repo and never change.
-* **No text anywhere in the picture.** No signage, no lettering, no titles,
-  and no readable writing on any page, board or book. This one bites here
-  more than it did on the other two courses, because half of this course's
-  subject matter *is* text — so every idea below is built to work with the
-  words unreadable.
+* **The no-text rule is SUSPENDED for this course** (owner's call,
+  2026-10-29). It still holds for Acting and Character. It was written
+  here on the assumption that lettering would be unreadable at card size,
+  and that assumption was measured and found wrong: "prithee wherefore"
+  reads cleanly at 92px. This course's subject is words on a page, so
+  cards that *are* words are not a compromise — they are the subject.
+  Modules 2 and 3 are typographic. **Modules 4, 5 and 6 below are still
+  written as paintings and need rewriting if the whole set goes that way.**
+* **Generated lettering must be proof-read before it is installed.** No
+  gate in this repo can read a picture, so a misspelling inside a JPEG
+  ships silently. Short phrases survive generation; long passages often
+  do not.
+* **Generate on a warm parchment ground (#efe9dc), not white.** The
+  `language` card arrived on white and had to be multiplied onto the page
+  colour — among full-bleed painted cards a white tile reads as a hole
+  where an image failed to load.
 
 ## THE FRAMING RULE
 
@@ -89,14 +100,49 @@ The picture is the gap between the knot and the plain version.
 *Which one you are in, why he moves between them, and what the crossing
 tells you about the person speaking.*
 
-The picture is the switch itself — a person crossing a line mid-sentence.
+**TYPOGRAPHIC, not a painting.** The lesson writes this card's brief
+itself: *"In a well-set edition you can tell which one you are in from
+across the room, without reading anything."* So the card IS that test —
+two blocks of text whose shapes differ, and the shape is the whole
+teaching. Words legible close up, shapes legible at 92px.
 
-> One actor caught mid-stride stepping across the straight edge of a
-> patterned rug, as if crossing a boundary on the floor. The half of the
-> body still behind the line is upright and formal, chin level, one hand
-> raised and measured; the half already across has loosened — shoulder
-> dropped, other hand coming out of a pocket. A second actor at the edge
-> of the frame has just noticed and is starting to smile.
+The two quotes are the app's own exemplars, named in `sh-tellapart` and
+`sh-whymove` and both on the Scenes shelf: **The Balcony** (Romeo and
+Juliet, verse) and **Kill Claudio** (Much Ado, prose from beginning to
+end). Text verbatim from `js/data/scenes.js`.
+
+Verse — three lines, capital at each line start, right edge ragged:
+
+> But soft, what light through yonder window breaks?
+> It is the east, and Juliet is the sun!
+> Arise fair sun and kill the envious moon,
+
+Prose — one justified block that wraps to the edges:
+
+> O God, that I were a man! I would eat his heart in the market-place.
+
+> Two blocks of hand-lettered antique type on a warm parchment ground,
+> nothing else in the frame — no illustration, no border, no ornament.
+> The upper block is three separate short lines, each beginning with a
+> capital, the right-hand edge deliberately ragged and uneven, lettered
+> in warm antique gold with fine engraved hatching. Below it, separated
+> by clear space, a second block of the same lettering style in dark
+> sepia-brown ink, set as a solid justified paragraph that runs to both
+> edges and wraps, with a flush even right margin. The contrast between
+> the ragged short lines above and the solid block below is the entire
+> subject. Portrait, 3:4.
+
+**Two colours on purpose.** At 92px two gold blocks merge into one grey
+mass; gold against sepia reads instantly as two different things, which
+is the point of the card.
+
+**THE RISK ON THIS ONE: generators misspell text.** Two words came back
+perfect on `language`; thirty will not reliably. Misquoted Shakespeare
+inside a JPEG in a Shakespeare course is invisible to every gate in this
+repo — `dialect_lint` cannot read a picture. **Check every word against
+the quotes above before it is installed.** If the generator will not
+hold the spelling, set the card in type instead; the words are then
+exact by construction.
 
 ### 4. `metre` — Iambic Pentameter
 *The pulse under the line, what happens when it bends, and why an
