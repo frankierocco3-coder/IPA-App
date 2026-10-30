@@ -3460,6 +3460,19 @@ function sceneStageHtml(scene, lessons) {
   // That is deliberate, not drift: the label names the picture, so it has
   // nothing to name. It comes back with the painting.
   if (scene.light && !scene.art) return '';
+  // NO BAND ON A LAYOUT THAT ALREADY LEADS WITH PICTURES (owner, 2026-10-30).
+  //
+  // The band is the page's one big image, and it earns that on a plain
+  // path where the modules below are headings and rows. The shelf, the
+  // gallery and the path-cards all open with a painting per module, so
+  // the band stops being the page's picture and becomes a second one
+  // above it — on Acting it pushed the first module card about 600px
+  // down, so the course opened on scenery instead of on Script Analysis.
+  //
+  // The painting is not deleted and `art` still names it: a layout is a
+  // reversible choice, and switching Acting back to the plain path
+  // brings the band back with it.
+  if (scene.layout) return '';
   const lit = lessons.map(l => speechLessonDone(l.id));
   const box = scene.artRatio && scene.art
     ? `aspect-ratio:${esc(scene.artRatio)}`
