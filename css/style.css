@@ -2517,9 +2517,6 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    lesson's place in its module, the sections it contains, and a reading
    estimate. Scoped by the elements themselves, which only that card
    emits, so every other rail card is unchanged. */
-.rail-art { display: block; width: 100%; aspect-ratio: 4 / 3;
-  object-fit: cover; object-position: center 28%; border-radius: 8px;
-  margin: 0 0 12px; border: 1px solid var(--line); background: var(--panel-2); }
 .rail-mod { display: flex; align-items: center; gap: 9px; margin: 12px 0 4px;
   font-family: var(--serif, Georgia, serif); font-size: 17px;
   font-weight: 700; color: var(--ink); }

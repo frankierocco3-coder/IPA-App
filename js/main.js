@@ -618,7 +618,6 @@ function drawRail(section) {
       // "1 of 9". Character lessons carry `module`, like every book here.
       const mod = galleryRail
         ? (CHARACTER_MODULES.find(m => m.id === next.module) ?? null) : null;
-      const art = mod ? learnScene('character')?.moduleCard?.[mod.id] : null;
       const sibs = galleryRail
         ? CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l) && mod && l.module === mod.id)
         : [];
@@ -627,8 +626,6 @@ function drawRail(section) {
       cards.push({ h: galleryRail ? 'Practice' : 'Next step', title: next.title,
         note: ws === 'acting' ? 'Continue the acting course.'
           : ws === 'character' ? 'Continue Building a Character.' : 'Continue the Speech course.',
-        lead: art ? `<img class="rail-art" src="${esc(art.src)}" alt="${esc(art.alt)}"
-               width="600" height="800" loading="lazy" decoding="async">` : '',
         body: galleryRail ? `
         ${mod ? `<p class="rail-mod"><span class="rail-n">${mod.n}</span>${esc(mod.title)}</p>` : ''}
         ${at >= 0 ? `<p class="rail-pos">Lesson ${at + 1} of ${sibs.length} · ~${readingMinutes(next)} min</p>` : ''}
@@ -673,7 +670,6 @@ function drawRail(section) {
   q.innerHTML = cards.map((c, i) => `
     <section class="rail-card">
       <div class="rail-head"><h2>${esc(c.h)}</h2></div>
-      ${c.lead ?? ''}
       <p class="rail-next-title" data-t="${i}"></p>
       <p class="pane-note" data-n="${i}"></p>
       ${c.body ?? ''}
