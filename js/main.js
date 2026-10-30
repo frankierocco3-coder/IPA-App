@@ -596,9 +596,46 @@ function drawRail(section) {
           ['Practice this text', () => needWorkingText(t => renderSpeechExerciseChooser(t)), true],
         ] });
     } else if (next) {
-      cards.push({ h: 'Next step', title: next.title,
+      // THE PRACTICE PANEL (owner's gallery mockup, 2026-10-29). On the
+      // Character Learn page the rail becomes the lesson's own study
+      // card: the module's painting, where the lesson sits in its module,
+      // the sections it actually contains, and a real reading estimate.
+      //
+      // EVERY FIGURE HERE IS READ, NOT INVENTED. The mockup draws a fixed
+      // five-step list with per-step timings — Introduction 2 min, Watch
+      // & Learn 8 min and so on. No such data exists, there is no video
+      // in this app to watch, and the lessons have no common five-part
+      // shape: across the 51 Character lessons the median is two body
+      // headings and eight have none. So the list is the lesson's own
+      // headings, however many that is, and a lesson with none shows no
+      // list rather than a padded one.
+      const galleryRail = ws === 'character' && section === 'learn';
+      // moduleForLesson() is the SPEECH course's lookup and returns
+      // undefined for a Character lesson. That failed quietly in both
+      // directions: no thumbnail and no module line, and the sibling
+      // filter below degenerated to `undefined === undefined`, which
+      // matched every lesson and printed "Lesson 1 of 34" instead of
+      // "1 of 9". Character lessons carry `module`, like every book here.
+      const mod = galleryRail
+        ? (CHARACTER_MODULES.find(m => m.id === next.module) ?? null) : null;
+      const art = mod ? learnScene('character')?.moduleCard?.[mod.id] : null;
+      const sibs = galleryRail
+        ? CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l) && mod && l.module === mod.id)
+        : [];
+      const at = sibs.findIndex(l => l.id === next.id);
+      const steps = galleryRail ? lessonSteps(next) : [];
+      cards.push({ h: galleryRail ? 'Practice' : 'Next step', title: next.title,
         note: ws === 'acting' ? 'Continue the acting course.'
           : ws === 'character' ? 'Continue Building a Character.' : 'Continue the Speech course.',
+        lead: art ? `<img class="rail-art" src="${esc(art.src)}" alt="${esc(art.alt)}"
+               width="600" height="800" loading="lazy" decoding="async">` : '',
+        body: galleryRail ? `
+        ${mod ? `<p class="rail-mod"><span class="rail-n">${mod.n}</span>${esc(mod.title)}</p>` : ''}
+        ${at >= 0 ? `<p class="rail-pos">Lesson ${at + 1} of ${sibs.length} · ~${readingMinutes(next)} min</p>` : ''}
+        ${steps.length ? `<ol class="rail-steps">${steps.map(h => `<li>${esc(h)}</li>`).join('')}</ol>` : ''}` : '',
+        foot: galleryRail ? courseProgressHtml(
+          CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l) && speechLessonDone(l.id)).length,
+          CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l)).length) : '',
         actions: [['Continue', () => ws === 'speech' ? renderSpeechLesson(next.id) : renderActingLesson(next.id), true]] });
     } else {
       cards.push({ h: 'Next step', title: 'Browse the Library',
@@ -636,9 +673,12 @@ function drawRail(section) {
   q.innerHTML = cards.map((c, i) => `
     <section class="rail-card">
       <div class="rail-head"><h2>${esc(c.h)}</h2></div>
+      ${c.lead ?? ''}
       <p class="rail-next-title" data-t="${i}"></p>
       <p class="pane-note" data-n="${i}"></p>
+      ${c.body ?? ''}
       <div class="rail-actions" data-a="${i}"></div>
+      ${c.foot ?? ''}
     </section>`).join('')
     + (questsHtml ? `
     <section class="rail-card">
@@ -668,6 +708,28 @@ function drawRail(section) {
 
 function estMinutes(lesson) {
   return Math.max(2, Math.round((lesson.count ?? 8) * 0.4));
+}
+
+// READING LESSONS HAVE NO `count`, so estMinutes() above scores every one
+// of them 3 minutes from its own default — it measures exercises, and a
+// Character or Acting lesson is prose. This measures the prose instead,
+// at 200 words a minute, and falls back to estMinutes for anything that
+// really is a drill.
+function readingMinutes(lesson) {
+  const words = (lesson.body ?? []).reduce((n, b) => {
+    const text = b.p ?? b.h ?? (Array.isArray(b.list) ? b.list.join(' ') : '');
+    return n + String(text).split(/\s+/).filter(Boolean).length;
+  }, 0);
+  return words ? Math.max(1, Math.round(words / 200)) : estMinutes(lesson);
+}
+
+// The lesson's OWN sections, for the practice panel's step list. Body
+// headings only — not a fixed five-step template, because the lessons do
+// not have one: measured across the 51 Character lessons, the median is
+// two headings and eight have none at all. A lesson with no sections
+// shows no list rather than a padded one.
+function lessonSteps(lesson) {
+  return (lesson?.body ?? []).filter(b => typeof b.h === 'string').map(b => b.h);
 }
 
 function lessonKindName(lesson) {
@@ -3842,7 +3904,15 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // last module opens instead, because finishing should show you the end
   // of the path and not a wall of shut doors.
   const holdsNext = g.ls.some(l => l.id === nextId);
-  const openThis = nextId ? holdsNext : gi === (g.lastIndex ?? gi);
+  // A GRID LAYOUT OPENS NOTHING BY DEFAULT. On the vertical path, opening
+  // the module you are in is the whole point — it is where you left off
+  // and the page is a route. On a wall or a shelf the arrangement IS the
+  // content: auto-opening the first module made one painting fill the
+  // column and hid the other four, which is the opposite of what a
+  // gallery is for. The current module is marked by its chip instead,
+  // and the rail already carries the lesson you are on.
+  const openThis = scene.layout ? false
+    : nextId ? holdsNext : gi === (g.lastIndex ?? gi);
   const done = g.ls.filter(l => speechLessonDone(l.id)).length;
   // THE SHELF TILE'S OWN FURNITURE. A card standing on a shelf has to say
   // where you are in it without being opened, which the fold did by being

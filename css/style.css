@@ -2512,6 +2512,34 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   .is-gallery .lm-art { border-width: 7px; }
 }
 
+/* ── THE PRACTICE PANEL (owner's gallery mockup, 2026-10-29) ────────
+   The right rail on the Character Learn page: the module's painting, the
+   lesson's place in its module, the sections it contains, and a reading
+   estimate. Scoped by the elements themselves, which only that card
+   emits, so every other rail card is unchanged. */
+.rail-art { display: block; width: 100%; aspect-ratio: 4 / 3;
+  object-fit: cover; object-position: center 28%; border-radius: 8px;
+  margin: 0 0 12px; border: 1px solid var(--line); background: var(--panel-2); }
+.rail-mod { display: flex; align-items: center; gap: 9px; margin: 12px 0 4px;
+  font-family: var(--serif, Georgia, serif); font-size: 17px;
+  font-weight: 700; color: var(--ink); }
+.rail-n { flex: 0 0 auto; display: grid; place-items: center;
+  width: 25px; height: 25px; border-radius: 50%;
+  background: var(--gold); color: #fff; font-size: 13px; font-weight: 700; }
+.rail-pos { margin: 0 0 10px; font-size: 12.5px; color: var(--muted);
+  font-weight: 600; }
+/* The lesson's own sections, numbered. Not a checklist — nothing here is
+   tickable, because the app tracks a lesson as done, not a section. */
+.rail-steps { list-style: none; counter-reset: s; margin: 0 0 12px; padding: 0;
+  border-top: 1px solid var(--line); }
+.rail-steps li { counter-increment: s; position: relative;
+  padding: 8px 0 8px 28px; font-size: 13.5px; line-height: 1.35;
+  color: var(--ink); border-bottom: 1px solid var(--line); }
+.rail-steps li::before { content: counter(s); position: absolute;
+  left: 0; top: 7px; width: 19px; height: 19px; border-radius: 50%;
+  display: grid; place-items: center; font-size: 11px; font-weight: 700;
+  color: var(--muted); border: 1px solid var(--line); }
+
 .lm-list { list-style: none; margin: 0; padding: 0; }
 .lm-row { display: grid; grid-template-columns: var(--lm-node) 1fr;
   gap: var(--lm-gap); align-items: start; margin: 0 0 13px; }
