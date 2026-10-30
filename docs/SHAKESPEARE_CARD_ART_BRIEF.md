@@ -168,40 +168,56 @@ exact by construction.
 *The pulse under the line, what happens when it bends, and why an
 irregular line is information rather than a mistake.*
 
-**TYPOGRAPHIC.** Don't describe the pulse — make the line pulse. One
-famous line, lettered so the stressed syllables are heavy and gold and
-the unstressed are small and faint, so the alternation is visible as
-texture even at 92px where no word can be read.
+**TYPOGRAPHIC, AND THE BALL CARRIES IT** (owner's idea, and it beat the
+weight-only draft it replaced). Don't describe the pulse — bounce along
+it. One famous line with a ball landing on each stress, like the
+sing-along films.
 
 The line is Sonnet 18's opening, verbatim from `js/data/sonnets.js` and
 the textbook-perfect pentameter every teacher reaches for.
 
 > A single line of antique hand-lettering across the middle of a warm
-> parchment ground (#efe9dc), nothing else in the frame — no
-> illustration, no border, no ornament, and no accent marks, breves,
-> slashes or notation of any kind.
+> parchment ground (#efe9dc), with a ball bouncing along it. Nothing
+> else in the frame — no border, no ornament, no musical notation.
 >
 > The line reads: Shall I compare thee to a summer’s day?
 >
-> It is lettered syllable by syllable in two alternating weights so the
-> line visibly pulses. LARGE, heavy, warm antique gold with fine
-> engraved hatching: the word "I"; the second syllable of "compare";
-> the word "to"; the first syllable of "summer's"; the word "day".
-> SMALL, light, pale sepia-brown: the word "Shall"; the first syllable
-> of "compare"; the word "thee"; the word "a"; the second syllable of
-> "summer's". The alternation runs strictly light-heavy, light-heavy
-> the whole way across.
+> A small round ball in warm rust red travels left to right along the
+> line, shown at several positions with a faint dotted arc tracing its
+> path, like the bouncing ball in an old sing-along film. It dips down
+> to touch the top of exactly five syllables and arcs up between them.
+> The five it touches are: the word "I"; the second syllable of
+> "compare"; the word "to"; the first syllable of "summer's"; the word
+> "day". It touches no other syllable. Five touches, five arcs.
 >
-> Five faint vertical rules divide the line into its five equal pairs,
-> one rule between each pair, so the eye counts five.
+> The five syllables the ball touches are lettered slightly larger and
+> bolder in warm antique gold; the rest are a little smaller and
+> lighter in pale sepia-brown.
 >
-> Portrait, 3:4, with generous empty parchment above and below the line.
+> Portrait, 3:4, generous empty parchment above and below the line.
 
-**No scansion marks, deliberately.** The module teaches reading a scan,
-so breves and ictus marks are tempting — but a generator aligning tiny
-marks over specific syllables will misalign them, and misaligned
-scansion on a scansion card is a factual error that no gate here can
-see. Weight carries the same information and cannot be subtly wrong.
+**Why the ball wins.** The draft before it carried the pulse on letter
+weight alone, and the Verse and Prose card had just exposed the weakness
+in that: pale gold goes faint at 92px while dark shapes survive. An arc
+of red dots reads at any size, and the bounce is not a decoration of the
+rhythm, it IS the scansion — five landings, five feet.
+
+**Rust red, not fire-engine red.** It would otherwise be the only pure
+primary in a set built from teal, olive, rust terracotta, ochre, maroon
+and cream.
+
+**The weight contrast is kept as a backstop.** If the ball drifts by a
+syllable the lettering still tells the truth, so the card cannot be
+silently wrong in both channels at once.
+
+**PROOF-READ THE LANDINGS, not just the spelling.** A ball on the wrong
+syllable is false scansion on a scansion card, and no gate here can see
+it. The five are I / -pare / to / sum- / day.
+
+**No scansion marks.** Breves and ictus marks are the obvious move for a
+module that teaches reading a scan, but a generator aligning tiny marks
+over specific syllables will misalign them. The ball is big enough to
+place reliably; a breve is not.
 
 **No metronome.** Acting's Tempo-Rhythm card already has one.
 
