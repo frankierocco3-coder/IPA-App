@@ -106,35 +106,55 @@ across the room, without reading anything."* So the card IS that test —
 two blocks of text whose shapes differ, and the shape is the whole
 teaching. Words legible close up, shapes legible at 92px.
 
-The two quotes are the app's own exemplars, named in `sh-tellapart` and
-`sh-whymove` and both on the Scenes shelf: **The Balcony** (Romeo and
-Juliet, verse) and **Kill Claudio** (Much Ado, prose from beginning to
-end). Text verbatim from `js/data/scenes.js`.
+**BOTH QUOTES ARE ONE MAN IN ONE SCENE.** An earlier draft paired The
+Balcony against Kill Claudio — two plays, two characters — which showed
+the *distinction* and nothing else. But three of this module's four
+lessons are about the **move** between forms, not telling them apart, and
+`sh-whymove` makes its case on exactly this character: *"Hamlet is a
+prince and speaks a great deal of prose."*
 
-Verse — three lines, capital at each line start, right edge ragged:
+So both come from **The Nunnery Scene**, already on the Scenes shelf.
+Hamlet opens it in verse and is in prose with Ophelia minutes later. One
+speaker, one scene, the form changing under him — which is the module.
+Text verbatim from `js/data/scenes.js`.
 
-> But soft, what light through yonder window breaks?
-> It is the east, and Juliet is the sun!
-> Arise fair sun and kill the envious moon,
+Verse — two true pentameter lines, capital at each line start:
 
-Prose — one justified block that wraps to the edges:
+> To be, or not to be, that is the question:
+> Whether ’tis nobler in the mind to suffer
 
-> O God, that I were a man! I would eat his heart in the market-place.
+Prose — one sentence that wraps into a justified block:
+
+> Get thee to a nunnery. Why wouldst thou be a breeder of sinners?
 
 > Two blocks of hand-lettered antique type on a warm parchment ground,
-> nothing else in the frame — no illustration, no border, no ornament.
-> The upper block is three separate short lines, each beginning with a
-> capital, the right-hand edge deliberately ragged and uneven, lettered
-> in warm antique gold with fine engraved hatching. Below it, separated
-> by clear space, a second block of the same lettering style in dark
-> sepia-brown ink, set as a solid justified paragraph that runs to both
-> edges and wraps, with a flush even right margin. The contrast between
-> the ragged short lines above and the solid block below is the entire
-> subject. Portrait, 3:4.
+> nothing else in the frame — no illustration, no border, no ornament,
+> no page edges. The upper block is two separate lines, each beginning
+> with a capital, lettered in warm antique gold with fine engraved
+> hatching, and its right-hand edge is conspicuously uneven — the two
+> lines end at clearly different points, with a visible step between
+> them. Below it, across a wide band of empty parchment, a second block
+> in the same lettering style but in dark sepia-brown ink, set as a
+> solid justified paragraph of three lines that forms a clean rectangle,
+> both left and right edges perfectly straight and flush. The upper
+> shape is ragged and the lower shape is a solid brick, and that
+> contrast is the entire subject. Portrait, 3:4.
+
+**Exaggerate the two shapes.** Natural typesetting does not make the
+ragged-versus-flush contrast read at 92px; the prompt has to ask for it
+outright, which is why it says "conspicuously uneven", "a visible step"
+and "perfectly straight and flush".
 
 **Two colours on purpose.** At 92px two gold blocks merge into one grey
-mass; gold against sepia reads instantly as two different things, which
-is the point of the card.
+mass; gold against sepia reads instantly as two different things.
+
+**The empty band between them is the switch**, so it should be wide
+enough to feel like a turn rather than a paragraph break.
+
+**Known overlap, accepted:** "To be, or not to be" is a soliloquy, and
+module 6 is soliloquies. Using it here is still right — the card is about
+the form, not the address, and keeping both quotes inside one scene buys
+more than the overlap costs.
 
 **THE RISK ON THIS ONE: generators misspell text.** Two words came back
 perfect on `language`; thirty will not reliably. Misquoted Shakespeare
