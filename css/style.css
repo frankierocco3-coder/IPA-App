@@ -2333,6 +2333,100 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-blurb { margin: 0; font-size: 15.5px; line-height: 1.5; color: var(--muted);
   border-top: 1px solid var(--line); padding-top: 11px; }
 
+/* ── THE SHELF LAYOUT (owner's mockup, 2026-10-29) ──────────────────
+   A course whose six modules are six books, laid out as cards standing
+   in rows rather than walked as a vertical path. Set per course by
+   `layout: 'shelf'` in js/data/learn-scenes.js — Shakespeare today, any
+   course that asks for it tomorrow.
+
+   THE SAME ELEMENT TREE AS THE PATH. Every rule below is scoped to
+   .is-shelf and nothing outside it changes, so Acting, Character and
+   Rhetoric are untouched by a file that now describes two layouts. The
+   <details>/<summary> underneath is unchanged, which is why the keyboard
+   handling, the focus ring and the no-JS behaviour come along free.
+
+   AN OPEN MODULE SPANS THE WHOLE ROW. Grid puts the lessons of an open
+   module across all columns rather than squeezing them into a third of
+   the width, so the shelf stays a shelf and the lesson list stays
+   readable. `details[open]` does it with no JavaScript at all. */
+/* STRETCH, NOT START. Module titles run from two words to six and only
+   three of six have art yet, so tiles left to their natural heights
+   differ by up to 50px within a row — and a row of cards at different
+   heights is the one thing that stops a shelf reading as a shelf. The
+   row sets the height; the chip, bar and tally are pushed to the foot of
+   each tile so they line up across it. */
+.lm-path.is-shelf { max-width: 1040px; display: grid; gap: 22px 20px;
+  grid-template-columns: repeat(3, 1fr); align-items: stretch; }
+.is-shelf .lm-mod { padding: 0; display: flex; }
+.is-shelf .lm-fold { flex: 1; display: flex; flex-direction: column; }
+.is-shelf .lm-head,
+.is-shelf .lm-head.has-card { display: flex; flex-direction: column;
+  flex: 1 1 auto; }
+.is-shelf .lm-head-text { display: flex; flex-direction: column; flex: 1 1 auto; }
+.is-shelf .lm-chip { margin-top: auto; }
+/* THE GRID ITEM IS .lm-mod, NOT THE <details> INSIDE IT. Putting this on
+   the fold did nothing at all — measured 259px against a 596px row — and
+   it looked plausible enough to ship. :has() reaches the section from the
+   open fold without JavaScript. Where :has() is unsupported the open
+   module simply stays one column wide: narrower than intended, never
+   broken. */
+.is-shelf .lm-mod:has(.lm-fold[open]) { grid-column: 1 / -1; }
+/* The shelf itself. A wood tone behind the row, not a photograph: the
+   mockup's timber is an asset that does not exist yet, and a flat band
+   in the palette's own bark colour reads as a shelf without pretending
+   to be one. Replace with artwork if it ever arrives. */
+.lm-path.is-shelf::before { content: none; }
+.is-shelf .lm-fold { background: var(--panel, #fbf8f1);
+  border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(45, 27, 18, .10),
+              0 10px 0 -4px rgba(120, 92, 62, .22); }
+.is-shelf .lm-head { padding: 14px 14px 16px; }
+/* The tile stacks: emblem on top, words beneath. The path's side-by-side
+   card is wrong at a third of the width. */
+.is-shelf .lm-head.has-card { display: block; }
+.is-shelf .lm-art { width: 100%; max-width: 150px; margin: 0 auto 12px;
+  box-shadow: none; }
+.is-shelf .lm-eyebrow { display: none; }
+.is-shelf .lm-title { font-size: 21px; gap: 9px; margin-bottom: 7px; }
+.is-shelf .lm-n { width: 29px; height: 29px; font-size: 15px; }
+/* The blurb is the detail panel's job in the mockup and there is no
+   detail panel yet, so it stays — clamped, because six tiles of ragged
+   height is the thing that stops a shelf reading as a shelf. */
+.is-shelf .lm-blurb { font-size: 13.5px; padding-top: 9px;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  line-clamp: 3; overflow: hidden; }
+/* The path's "N of M done" line and the shelf's own tally say the same
+   thing, so only one of them is ever shown. The fold arrow lives on the
+   path's line, so the shelf keeps the element and hides only the words. */
+.is-shelf .lm-count { font-size: 0; margin-top: 10px; justify-content: flex-end; }
+.is-shelf .lm-count .lm-fold-arrow { font-size: 13px; }
+.lm-chip { display: inline-flex; align-items: center; gap: 6px;
+  margin: 11px 0 0; padding: 3px 10px 3px 7px; border-radius: 999px;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; border: 1px solid var(--line); }
+.lm-chip span { width: 9px; height: 9px; border-radius: 50%;
+  background: currentColor; display: block; }
+.lm-chip.is-done { color: #4a5c3b; background: rgba(74, 92, 59, .12);
+  border-color: rgba(74, 92, 59, .3); }
+.lm-chip.is-current { color: #8a6a22; background: rgba(201, 162, 75, .16);
+  border-color: rgba(201, 162, 75, .4); }
+.lm-chip.is-ahead { color: var(--muted); background: transparent; }
+.lm-bar { height: 6px; border-radius: 999px; margin: 10px 0 7px;
+  background: rgba(45, 27, 18, .10); overflow: hidden; }
+.lm-bar i { display: block; height: 100%; border-radius: 999px;
+  background: var(--gold); }
+.lm-chip.is-done ~ .lm-bar i { background: #4a5c3b; }
+.lm-tally { margin: 0; font-size: 12.5px; color: var(--muted); font-weight: 600; }
+/* Two columns on a tablet, one on a phone — a 132px emblem in a third of
+   a 390px screen is a thumbnail of a thumbnail. */
+@media (max-width: 900px) {
+  .lm-path.is-shelf { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .lm-path.is-shelf { grid-template-columns: 1fr; gap: 16px; }
+  .is-shelf .lm-art { max-width: 120px; }
+}
+
 .lm-list { list-style: none; margin: 0; padding: 0; }
 .lm-row { display: grid; grid-template-columns: var(--lm-node) 1fr;
   gap: var(--lm-gap); align-items: start; margin: 0 0 13px; }

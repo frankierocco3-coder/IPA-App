@@ -396,7 +396,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - RHETORIC_LIVE            false  js/main.js:278
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:219
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:9580
+- SCENE_STUDY_LIVE         false  js/main.js:9611
 - SHAKESPEARE_LIVE         true   js/views/context.js:193
 - SPEECH_LIVE              false  js/views/context.js:159
 
@@ -411,7 +411,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                12788 lines
+- js/main.js                12819 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  842
 

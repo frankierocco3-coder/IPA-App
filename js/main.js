@@ -3789,7 +3789,13 @@ function learnPathHtml(B, lessons, nextId) {
     if (!last || last.m?.id !== m?.id) groups.push({ m, ls: [l] });
     else last.ls.push(l);
   });
-  return `<div class="lm-path">
+  // THE SHELF is a layout, not a different page: the same groups, the same
+  // bands, the same <details>. Only the class changes, and CSS lays the
+  // summaries out as cards standing in rows. Keeping one element tree is
+  // what makes the keyboard handling, the focus ring and the no-JS
+  // behaviour survive a change of appearance.
+  const shelf = scene.layout === 'shelf' ? ' is-shelf' : '';
+  return `<div class="lm-path${shelf}">
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
   </div>`;
 }
@@ -3834,6 +3840,30 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   const holdsNext = g.ls.some(l => l.id === nextId);
   const openThis = nextId ? holdsNext : gi === (g.lastIndex ?? gi);
   const done = g.ls.filter(l => speechLessonDone(l.id)).length;
+  // THE SHELF TILE'S OWN FURNITURE. A card standing on a shelf has to say
+  // where you are in it without being opened, which the fold did by being
+  // open. Three things carry that: a state chip, a bar, and a count.
+  //
+  // THE STATE IS DERIVED, NEVER STORED. Completed means every lesson in
+  // the module is done; current means the module holds the next lesson;
+  // everything else is ahead. Nothing new is written to a learner's
+  // record for this, so the tile cannot drift from the lessons it counts.
+  //
+  // NOT "LOCKED". The owner's mockup shows padlocks on the later modules,
+  // and this course does not lock them — free play aside, a learner can
+  // open any module now. Drawing a padlock that does not lock anything
+  // would be the page lying about the course, so UPCOMING is the honest
+  // word until somebody decides the modules should gate.
+  const total = g.ls.length;
+  const state = done === total && total > 0 ? 'done' : holdsNext ? 'current' : 'ahead';
+  const stateWord = state === 'done' ? 'Completed' : state === 'current' ? 'Current' : 'Upcoming';
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  const shelfBits = scene.layout === 'shelf' ? `
+        <p class="lm-chip is-${state}"><span aria-hidden="true"></span>${stateWord}</p>
+        <div class="lm-bar" role="img" aria-label="${done} of ${total} lessons done">
+          <i style="width:${pct}%"></i>
+        </div>
+        <p class="lm-tally">${done} / ${total} lessons</p>` : '';
   const head = g.m ? `
     <summary class="lm-head${card ? ' has-card' : ''}">
       ${art}
@@ -3841,7 +3871,8 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
         <p class="lm-eyebrow">${esc(B.title)}</p>
         <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}</h2>
         ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
-        <p class="lm-count">${done} of ${g.ls.length} done<span class="lm-fold-arrow" aria-hidden="true"></span></p>
+        ${shelfBits}
+        <p class="lm-count">${done} of ${total} done<span class="lm-fold-arrow" aria-hidden="true"></span></p>
       </div>
     </summary>` : '';
   return `

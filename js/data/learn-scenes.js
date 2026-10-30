@@ -238,6 +238,17 @@ export const LEARN_SCENES = {
   shakespeare: {
     title: 'From the Page to the House',
     art: null,
+    // THE SHELF LAYOUT (owner's mockup, 2026-10-29). The other three
+    // courses walk a vertical path of folds; this one lays its six
+    // modules out as cards standing on shelves, because the course is
+    // six books rather than a route — you are meant to see the whole
+    // shelf at once.
+    //
+    // A FLAG, NOT A SECOND RENDERER. One renderer serves four courses
+    // and that is this session's own decision; forking it for one course
+    // is what the theming registry exists to prevent. Any other course
+    // can set this and get the same page.
+    layout: 'shelf',
     // LIGHT, the third course to come off the default dark ground. Still
     // owner-preview only — `live` is not set — so this changes nothing a
     // learner sees until the six module paintings land.
@@ -250,30 +261,36 @@ export const LEARN_SCENES = {
     // and the playhouse where Acting's and Character's stay on bodies in a
     // room. Same company, same light, same palette; different evidence on
     // the table.
+    // SIX ENGRAVED EMBLEMS, extracted from the owner's own page mockup
+    // (2026-10-29) rather than generated again — the emblems in it were
+    // already the right six objects in the right idiom.
+    //
+    // THEY ARE UPSCALED ~2.9x from 146px, which is what they measure in
+    // the mockup. That is normally unusable, and it is fine here only
+    // because fine engraved line work survives interpolation where a
+    // photograph would not. Checked at the real 92x123 and at 1.7x before
+    // being accepted. If any of them is ever re-generated at full size,
+    // these are the ones to replace.
     moduleCard: {
-      // The chalk portrait is the FOLIO ENGRAVING, drawn on a board by the
-      // teacher — one of only two likenesses with a real claim, and the
-      // subject of module 5. A framed authoritative portrait would quarrel
-      // with this module's own argument about how little is documented; a
-      // teaching aid does not.
-      context: { src: 'img/ui/shakespeare-card-context.jpg',
-        alt: 'A teacher in an olive cardigan stands at a blackboard in a rehearsal room, one hand open as she explains and the other holding a ruler against a large chalk drawing of Shakespeare in a high collar. Flight cases, a stage lamp, wooden chairs and a stack of books are around her, with ivy at a sunlit window.' },
-      // TYPOGRAPHIC, and the only card in any course that is. The alt text
-      // has to READ the words, because for a screen reader the words are
-      // the whole picture — there is nothing else in it to describe.
-      //
-      // GROUND MATCHED TO --bg (#efe9dc) ON PURPOSE. It arrived on white,
-      // which among nine full-bleed paintings read as a hole where an
-      // image had failed rather than as a card. Multiplied onto the page's
-      // own parchment it sits in the set; the lettering is untouched.
-      language: { src: 'img/ui/shakespeare-card-language.jpg',
-        alt: 'The words “prithee wherefore” hand-lettered in tall ornate gold serif capitals with fine engraved hatching, on a plain parchment ground.' },
-      // Both quotes are Hamlet in the Nunnery Scene, minutes apart — the
-      // form changing under one speaker, which is what three of this
-      // module's four lessons are actually about. Verbatim from
-      // js/data/scenes.js so the card cannot drift from the edition.
-      form: { src: 'img/ui/shakespeare-card-form.jpg',
-        alt: 'Two blocks of antique lettering on parchment. Above, headed VERSE, two gold lines ending at different points: “To be, or not to be, that is the question: / Whether ’tis nobler in the mind to suffer”. Below, headed PROSE, a solid dark sepia block with straight edges: “Get thee to a nunnery. Why wouldst thou be a breeder of sinners?”' },
+      context: { src: 'img/ui/shakespeare-emblem-context.jpg',
+        alt: 'An engraved portrait of Shakespeare in a high ruffed collar, in sepia line work on parchment.' },
+      language: { src: 'img/ui/shakespeare-emblem-language.jpg',
+        alt: 'An engraved quill pen standing in an inkwell, framed by a sprig of leaves, in sepia line work on parchment.' },
+      form: { src: 'img/ui/shakespeare-emblem-form.jpg',
+        alt: 'An engraved open book lying flat with both pages of close-set text visible, in sepia line work on parchment.' },
+      metre: { src: 'img/ui/shakespeare-emblem-metre.jpg',
+        alt: 'An engraved hourglass with the sand part run through, in sepia line work on parchment.' },
+      // THE ONLY ONE WITH LETTERING, and it keeps it. This is the First
+      // Folio's title page, which without its words is just a book — and
+      // module 3 already has a book. The word SHAKESPEARE is correctly
+      // spelled; the lines beneath it are texture at any size the card
+      // renders. Its background was keyed from dark green to parchment
+      // because it was the highlighted card in the mockup, so its edges
+      // are rougher than the other five at close range.
+      folio: { src: 'img/ui/shakespeare-emblem-folio.jpg',
+        alt: 'An engraved copy of the First Folio lying open at its title page, the word SHAKESPEARE legible across it, in sepia on parchment.' },
+      soliloquy: { src: 'img/ui/shakespeare-emblem-soliloquy.jpg',
+        alt: 'An engraved human skull resting among leaves, in sepia line work on parchment.' },
     },
     done: 'set',
     above: 'WHAT HAPPENS IN THE HOUSE',
