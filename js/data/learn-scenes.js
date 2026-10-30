@@ -237,8 +237,10 @@ export const LEARN_SCENES = {
       // Owner choice, 2026-10-28, over a first version of an actor talking
       // to an empty chair at sunset. That one never shipped and is in the
       // intake folder if it is ever wanted.
-      piece: { src: 'img/ui/character-card-piece.jpg',
+      piece: { src: 'img/ui/character-card-piece.jpg', focus: 'center top',
         alt: 'An actor sprawls in a wooden chair in a rehearsal room, in a maroon t-shirt and olive trousers, one hand raised as she imagines. Above her, in a thought bubble, the same woman appears as a queen in a jewelled gown and fur-trimmed robe, seated on a gilded throne in a great hall.' },
+        // Crops from the TOP: the thought bubble is the point of this
+        // painting and the default centre crop cut it in half.
     },
     done: 'built',
     above: 'WHO STANDS UP',

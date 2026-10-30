@@ -3887,9 +3887,19 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // have a box of its own. A tag without a card would be a label on
   // nothing, so it only renders where art exists.
   const tag = scene.moduleTag?.[g.m?.id];
+  // WHERE THE CROP SITS IS THE PAINTING'S BUSINESS, not the layout's. A
+  // wide band shows under half of a 3:4 picture, so one global value
+  // cannot serve five different compositions — From Within puts its
+  // thought bubble in the top third and lost it to the default.
+  //
+  // The value goes through a custom property and is matched against a
+  // strict pattern first: it lands in a style attribute, so anything
+  // that is not a plain CSS position is dropped rather than escaped.
+  const focus = /^[a-z0-9 .%]{1,24}$/.test(String(card?.focus ?? '')) ? card.focus : null;
   const art = card ? (scene.layout === 'path-cards' ? `
       <span class="lm-plate">
         <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
+             ${focus ? `style="--art-focus:${focus}"` : ''}
              width="600" height="800" loading="lazy" decoding="async">
         ${tag ? `<span class="lm-tag">${esc(tag)}</span>` : ''}
       </span>` : `
