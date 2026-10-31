@@ -666,6 +666,65 @@ function drawRail(section) {
         note: 'Every chapter is free to read in any order.',
         actions: [['Open the Library', () => goSection('library'), true]] });
     }
+  } else if (ws === 'shakespeare' && section === 'learn') {
+    // THE MODULE RAIL (owner's map mockup, 2026-10-31). Where you are,
+    // what opens it, and the whole course under it.
+    //
+    // EVERYTHING IS DERIVED FROM BOOKS.shakespeare, so this is one
+    // course's data read through the generic registry rather than a
+    // Shakespeare special case: swapping the book is all another course
+    // would need to take the same rail.
+    const SB = BOOKS.shakespeare;
+    const seq = SB.lessons.filter(l => !l.reference && SB.visible(l));
+    const nextL = seq.find(l => !speechLessonDone(l.id));
+    const lockMap = learnLockMap(SB, seq);
+    const mods = SB.modules.filter(m => seq.some(l => l.module === m.id));
+    const cur = nextL ? mods.find(m => m.id === nextL.module) : mods[mods.length - 1];
+    const at = mods.findIndex(m => m.id === cur?.id);
+    const inMod = m => seq.filter(l => l.module === m.id);
+    const stateOf = m => {
+      const ls = inMod(m);
+      const d = ls.filter(l => speechLessonDone(l.id)).length;
+      if (ls.length && d === ls.length) return 'done';
+      if (m.id === cur?.id) return 'current';
+      return ls.length && ls.every(l => lockMap.get(l.id) === true) ? 'locked' : 'ahead';
+    };
+    const WORD = { done: 'Done', current: 'Current', locked: 'Locked', ahead: 'Open' };
+    if (cur) {
+      const ls = inMod(cur);
+      const d = ls.filter(l => speechLessonDone(l.id)).length;
+      const pct = ls.length ? Math.round(d / ls.length * 100) : 0;
+      const openMod = m => {
+        const f = inMod(m).find(l => !speechLessonDone(l.id)) ?? inMod(m)[0];
+        if (f) renderActingLesson(f.id);
+      };
+      cards.push({ h: `Module ${at + 1} of ${mods.length}`,
+        title: moduleTitle(SB, cur),
+        note: cur.blurb ?? '',
+        body: `
+        ${nextL ? `
+        <button class="rail-row rail-next" id="sh-next" type="button">
+          <span class="rail-ico" aria-hidden="true">&#128214;</span>
+          <span class="rail-row-text"><b>Next lesson</b><i>${esc(nextL.title)}</i></span>
+          <span class="rail-chev" aria-hidden="true">&rsaquo;</span>
+        </button>` : ''}
+        <p class="rail-pos">${d} / ${ls.length} lessons</p>
+        <div class="lm-bar" role="img" aria-label="${d} of ${ls.length} lessons done"><i style="width:${pct}%"></i></div>
+        <p class="rail-all">All modules</p>
+        <ol class="rail-mods">${mods.map((m, i) => {
+          const st = stateOf(m);
+          return `<li><button class="rail-row rail-mod-row is-${st}" id="sh-m${i}" type="button">
+            <span class="rail-num">${String(i + 1).padStart(2, '0')}</span>
+            <span class="rail-row-text"><b>${esc(moduleTitle(SB, m))}</b></span>
+            <span class="rail-state">${WORD[st]}</span>
+            <span class="rail-chev" aria-hidden="true">&rsaquo;</span>
+          </button></li>`; }).join('')}</ol>`,
+        actions: [['Start module', () => openMod(cur), true]],
+        wire: root => {
+          root.querySelector('#sh-next')?.addEventListener('click', () => renderActingLesson(nextL.id));
+          mods.forEach((m, i) => root.querySelector(`#sh-m${i}`)?.addEventListener('click', () => openMod(m)));
+        } });
+    }
   } else if (ws === 'rhetoric' && section === 'learn') {
     // THE ETHICAL CHECK (owner's mockup, 2026-10-30), built from the
     // ethics module rather than from the mockup's labels.

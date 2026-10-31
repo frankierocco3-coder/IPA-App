@@ -2549,6 +2549,48 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 /* The ethical check is the same row, numbered — it is an ordered module,
    not a menu, so the list says so. No icon column: these are lessons,
    and six emoji beside six sentences would be decoration. */
+/* The module rail: where you are, then the whole course under it. */
+.rail-next { margin: 10px 0 14px; }
+.rail-all { margin: 16px 0 8px; font-size: 11px; letter-spacing: .13em;
+  text-transform: uppercase; color: var(--muted); font-weight: 700;
+  border-top: 1px solid var(--line); padding-top: 12px; }
+.rail-mods { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 6px; }
+/* THREE COLUMNS, NOT FOUR. The rail is about 190px of usable width and
+   a number, a title, a state word and a chevron do not fit in it: the
+   chevron wrapped onto its own line under every row and CURRENT was
+   clipped at the edge. The state word carries more than the chevron
+   does, and the whole row is already a button, so the chevron goes. */
+/* COMPOUNDED ON PURPOSE. `.rail-mod-row` alone is one class, the same
+   as `.rail-row`, which is defined LATER in this file and so won the
+   tie — the grid stayed 34px/1fr/12px and squeezed the state word to
+   12px no matter what this rule asked for. Two classes beats one. */
+.rail-row.rail-mod-row { grid-template-columns: 28px minmax(0, 1fr) max-content;
+  gap: 8px; padding: 8px 9px; }
+.rail-mod-row .rail-chev { display: none; }
+/* max-content on the state, and the TITLE is the thing that gives way.
+   With `auto` there the 1fr won and squeezed CURRENT to 12px against 57
+   of text — it rendered as "CURREN" with the T cut off, which is the
+   kind of clipping that looks like a font problem rather than a layout
+   one. A truncated module title is legible and recoverable; a truncated
+   state word is just wrong. */
+.rail-mod-row .rail-state { overflow: visible; }
+.rail-mod-row .rail-row-text { min-width: 0; }
+.rail-mod-row .rail-row-text b { font-size: 12.5px; line-height: 1.25;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  line-clamp: 2; overflow: hidden; }
+.rail-num { display: grid; place-items: center; width: 28px; height: 28px;
+  border-radius: 8px; background: var(--bg); color: var(--muted);
+  font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.rail-state { font-size: 10px; letter-spacing: .09em; text-transform: uppercase;
+  font-weight: 700; color: var(--muted); white-space: nowrap; }
+/* The current module is the one place this list raises its voice. */
+.rail-mod-row.is-current { border-color: var(--gold); background: var(--panel); }
+.rail-mod-row.is-current .rail-num { background: var(--gold); color: #fff; }
+.rail-mod-row.is-current .rail-state { color: #8a6a22; }
+.rail-mod-row.is-done .rail-state { color: #4a5c3b; }
+.rail-mod-row.is-locked { opacity: .72; }
+
 .rail-checks { list-style: none; counter-reset: e; margin: 10px 0 2px;
   padding: 0; display: flex; flex-direction: column; gap: 7px; }
 .rail-checks li { counter-increment: e; }
