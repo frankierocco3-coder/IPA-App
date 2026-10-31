@@ -2765,14 +2765,31 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   box-shadow: 0 1px 3px rgba(45, 27, 18, .3); }
 .gm-pin.is-locked .gm-n { background: #8a8172; }
 .gm-pin.is-done .gm-n { background: #4a5c3b; }
-/* ONE OR THE OTHER, NEVER BOTH. Six labels scattered over a square
-   picture are unreadable on a phone, so below 900px the map goes and
-   the grid is the page; above it the grid steps aside for the map. */
+/* THE MAP IS ALWAYS THERE; ITS LABELS ARE NOT. Hiding the whole map
+   below 900px was wrong for the way this gets looked at — on a narrow
+   pane the course's one illustration simply vanished and the page was
+   a list of tiles. What does not survive the narrow width is the TEXT
+   on it: six labels across a 260px square are about 60px each, which
+   is not reading, it is noise.
+   
+   So the picture stays at every width and sheds its words. Above 900
+   it carries the full labels and IS the control, so the grid steps
+   aside. Below, it keeps only the numbered discs — still buttons,
+   still live, big enough to hit — and the grid returns underneath as
+   the surface that actually names things. */
 @media (min-width: 901px) {
   .lm-path.is-shelf.has-map { display: none; }
 }
 @media (max-width: 900px) {
-  .gm { display: none; }
+  .gm { margin-bottom: 18px; }
+  /* THE OVERLAY COMES OFF ENTIRELY, it does not shrink. Dropping just
+     the text left the app's numbered discs sitting on top of the
+     labels PAINTED into the plate, so each module showed a crisp disc
+     over a blur of unreadable lettering — worse than either alone.
+     Narrow, the map is simply the illustration, painted labels and
+     all, and the grid beneath it is the control. One clean plate and
+     this whole branch becomes unnecessary. */
+  .gm-pin { display: none; }
 }
 
 /* ── THE ILLUSTRATED PATH (owner's mockup, 2026-10-30) ──────────────
