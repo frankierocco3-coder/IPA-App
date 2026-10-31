@@ -3715,6 +3715,15 @@ function bookLearnSequence(el, B) {
   // enforced by what the markup does and does not make pressable.
   el.querySelectorAll('.lm-card[data-item]').forEach(btn =>
     btn.addEventListener('click', () => renderActingLesson(btn.dataset.item)));
+  // THE MAP PINS ARE THE MODULE SURFACE ON DESKTOP, because the grid
+  // beneath them is display:none above 900px. They open the module's
+  // first unfinished lesson, which is what its card in the grid does.
+  el.querySelectorAll('.gm-pin[data-gm]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const ls = B.lessons.filter(l => !l.reference && B.visible(l) && l.module === btn.dataset.gm);
+      const go = ls.find(l => !speechLessonDone(l.id)) ?? ls[0];
+      if (go) renderActingLesson(go.id);
+    }));
 
   el.querySelectorAll('[data-card-go]').forEach(btn => btn.addEventListener('click', () => {
     if (!btn.disabled) renderActingLesson(btn.dataset.cardGo);
@@ -3993,11 +4002,39 @@ function learnPathHtml(B, lessons, nextId) {
   // one. Shakespeare's shelf and Character's gallery today.
   const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery', 'path-cards': ' is-pathcards' };
   const shelf = LAYOUTS[scene.layout] ?? '';
+  // THE MAP, when the scene has one: the illustration with the course
+  // standing on it, and the grid below as the narrow-screen fallback.
+  // Six labels scattered across a square picture cannot work at 375px,
+  // so CSS shows one or the other and both are always in the document —
+  // which also means the map needs no keyboard story of its own, since
+  // every module it names is a button in the grid underneath.
+  const pins = scene.map?.pins ?? null;
+  const mapHtml = scene.map && pins ? `
+    <figure class="gm" role="group" aria-label="The course on the playhouse">
+      <img class="gm-art" src="${esc(scene.map.src)}" alt="${esc(scene.map.alt ?? '')}"
+           width="1000" height="1000" decoding="async">
+      ${groups.map((g, i) => {
+        const id = g.m?.id; const at = id && pins[id];
+        if (!at) return '';
+        const ls = g.ls, dn = ls.filter(l => speechLessonDone(l.id)).length;
+        const st = dn === ls.length && ls.length ? 'done'
+          : ls.some(l => l.id === nextId) ? 'current'
+          : ls.length && ls.every(l => locked?.get(l.id) === true) ? 'locked' : 'ahead';
+        const WORDS = { done: 'completed', current: 'current', locked: 'locked', ahead: 'not started' };
+        return `<button class="gm-pin is-${st}" type="button" data-gm="${esc(id)}"
+            style="left:${at[0]}%;top:${at[1]}%"
+            aria-label="Module ${i + 1}, ${esc(moduleTitle(B, g.m))}, ${WORDS[st]}">
+          <span class="gm-n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
+          <span class="gm-t">${esc(moduleTitle(B, g.m))}</span>
+          ${st === 'current' ? '<span class="gm-s">Current</span>' : ''}
+        </button>`;
+      }).join('')}
+    </figure>` : '';
   // The art's shape is the COURSE'S fact, not the layout's: Shakespeare's
   // scenes are 2.06:1 paintings, the other courses' cards are 3:4. One
   // declaration on the path, inherited by every plate under it.
   const asp = /^[0-9. /]{1,12}$/.test(String(scene.artAspect ?? '')) ? scene.artAspect : null;
-  return `<div class="lm-path${shelf}"${asp ? ` style="--art-aspect:${asp}"` : ''}>
+  return `${mapHtml}<div class="lm-path${shelf}${mapHtml ? ' has-map' : ''}"${asp ? ` style="--art-aspect:${asp}"` : ''}>
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
   </div>`;
 }

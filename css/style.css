@@ -2636,6 +2636,70 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   display: grid; place-items: center; font-size: 11px; font-weight: 700;
   color: var(--muted); border: 1px solid var(--line); }
 
+/* ── THE PLAYHOUSE MAP (owner's mockup, 2026-10-31) ─────────────────
+   One square illustration with the six modules standing on it. The
+   labels are the app's, positioned over the ones painted into the
+   plate, so the look is the owner's and the state is live.
+
+   aria-hidden on the figure, and the pins are spans rather than
+   buttons, ON PURPOSE. Every module named here is already a real
+   button in the grid below, which is the accessible and the
+   narrow-screen surface both. A second focusable copy of the same six
+   would make the page read twice to a screen reader and add six tab
+   stops that go nowhere new. The map is the picture; the grid is the
+   control. */
+.gm { position: relative; margin: 0 0 26px; border-radius: 16px;
+  overflow: hidden; border: 1px solid var(--line);
+  box-shadow: 0 3px 14px rgba(45, 27, 18, .12); }
+.gm-art { display: block; width: 100%; height: auto; }
+/* THE CARD IS THE ANCHOR, not the stack. Centring the whole pin —
+   badge, card and chip together — put the card about 11px below the
+   point, so the painted badge peeked out above every label and the map
+   showed each module twice. The card alone is centred on the measured
+   point now, and the badge and chip hang off it, so the card lands on
+   the painted card whatever else the pin is carrying. */
+.gm-pin { position: absolute; transform: translate(-50%, -50%);
+  width: 23%; min-width: 124px;
+  border: 0; padding: 0; background: none; cursor: pointer; font: inherit; }
+.gm-pin:hover .gm-t { background: #fffaf0; }
+.gm-pin:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px;
+  border-radius: 12px; }
+.gm-pin.is-locked { cursor: default; }
+.gm-t { display: block; width: 100%; padding: 10px 11px; border-radius: 10px;
+  background: #f7f1e3; color: #2f2a22; text-align: center;
+  font-family: var(--serif, Georgia, serif); font-size: 13.5px;
+  font-weight: 700; line-height: 1.2;
+  box-shadow: 0 2px 8px rgba(45, 27, 18, .34); }
+.gm-n { position: absolute; left: 50%; top: 0;
+  transform: translate(-50%, -62%);
+  display: grid; place-items: center; width: 31px; height: 31px;
+  border-radius: 50%; background: #6b5633; color: #fff;
+  font-size: 12.5px; font-weight: 800; font-variant-numeric: tabular-nums;
+  z-index: 2; box-shadow: 0 1px 4px rgba(45, 27, 18, .45); }
+/* SIZED TO COVER, not just to read. The painted CURRENT pill is about
+   10% of the plate's width; a chip sized only to its own text came out
+   narrower and the painted one showed around it, which read as a
+   drop-shadow bug rather than as two chips. min-width is in percent of
+   the pin so it scales with the map. */
+.gm-s { position: absolute; left: 50%; bottom: 0;
+  transform: translate(-50%, 56%);
+  min-width: 82%; padding: 6px 12px; border-radius: 999px;
+  background: #e3cf9a; color: #5b4620; font-size: 9.5px; font-weight: 800;
+  letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(45, 27, 18, .3); }
+.gm-pin.is-locked .gm-n { background: #8a8172; }
+.gm-pin.is-done .gm-n { background: #4a5c3b; }
+/* ONE OR THE OTHER, NEVER BOTH. Six labels scattered over a square
+   picture are unreadable on a phone, so below 900px the map goes and
+   the grid is the page; above it the grid steps aside for the map. */
+@media (min-width: 901px) {
+  .lm-path.is-shelf.has-map { display: none; }
+}
+@media (max-width: 900px) {
+  .gm { display: none; }
+}
+
 /* ── THE ILLUSTRATED PATH (owner's mockup, 2026-10-30) ──────────────
    A vertical route again, but each module is a wide card: picture left,
    words right, numbers threaded down a dashed rail in the margin. It

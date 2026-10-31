@@ -316,6 +316,33 @@ export const LEARN_SCENES = {
     // centre a 3:4 portrait above the words; these are 2.06:1 and run
     // the full width of the card, so the card leads with its picture.
     artAspect: '2.06 / 1',
+    // THE PLAYHOUSE MAP (owner's mockup, 2026-10-31). One illustration
+    // with the six modules standing on it, in the order the course runs.
+    //
+    // THE LABELS IN THE SUPPLIED IMAGE ARE PAINTED INTO IT — checked at
+    // 3x, the timber shows through around each rounded card. Painted
+    // text cannot be clicked, cannot scale, is invisible to a screen
+    // reader, and its CURRENT chip is wrong the moment somebody finishes
+    // module 1. So the app draws its own labels ON TOP of them, at the
+    // positions below: the look is the owner's, the state is live.
+    //
+    // THE POSITIONS WERE MEASURED, NOT EYEballed. A connected-region
+    // pass over the illustration found the six painted cards and
+    // returned their centres; these are those centres as percentages,
+    // so they hold at every width the map is drawn at. Replace the
+    // plate with a clean one and nothing here changes.
+    map: {
+      src: 'img/ui/shakespeare-globe.jpg',
+      alt: 'A cutaway illustration of the Globe playhouse seen from above, two players on the thrust stage, the galleries full, and the river and city beyond.',
+      pins: {
+        context:   [49.8, 13.8],
+        language:  [75.8, 25.0],
+        form:      [79.2, 50.6],
+        metre:     [51.6, 70.2],
+        folio:     [17.2, 51.4],
+        soliloquy: [24.0, 25.4],
+      },
+    },
     moduleCard: {
       context: { src: 'img/ui/shakespeare-scene-context.jpg',
         alt: 'A painted portrait of Shakespeare in a lace collar, with ivy, a green drape and a stack of old books around him.' },
