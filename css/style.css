@@ -2471,7 +2471,11 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 }
 @media (max-width: 560px) {
   .lm-path.is-shelf { grid-template-columns: 1fr; gap: 16px; }
-  .is-shelf .lm-art { max-width: 120px; }
+  /* No max-width any more. That 120px was written when the shelf
+     floated a 3:4 emblem as a thumbnail; the art is full-bleed
+     landscape now, and the cap was pinning a 259px-wide plate's image
+     to 120px — the plate measured correct the whole time, which is why
+     it read as a crop rather than as a stale rule. */
 }
 
 /* ── THE GALLERY LAYOUT (owner's mockup, 2026-10-29) ────────────────
@@ -2549,6 +2553,77 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 /* The ethical check is the same row, numbered — it is an ordered module,
    not a menu, so the list says so. No icon column: these are lessons,
    and six emoji beside six sentences would be decoration. */
+/* ── THE SHAKESPEARE MODULE RAIL (owner's mockup, 2026-10-31) ───────
+   Matched to the rendering rather than approximated: the Start button
+   is at the TOP and maroon, the module title is large serif beside a
+   gold disc, the section labels are ruled small-caps, and each module
+   row carries a dark disc, a lock and a chevron. */
+/* The card's own heading becomes a ruled small-caps eyebrow, the way
+   the rendering draws it: the words, then a hairline to the edge. */
+.rail-card.is-bare .rail-head { margin-bottom: 14px; }
+.rail-card.is-bare .rail-head h2 { display: flex; align-items: center; gap: 10px;
+  font-family: inherit; font-size: 10.5px; font-weight: 700;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.rail-card.is-bare .rail-head h2::after { content: ''; flex: 1 1 auto;
+  height: 1px; background: var(--line); }
+.sm-head { display: flex; align-items: center; gap: 12px; margin: 2px 0 10px; }
+.sm-badge { flex: 0 0 auto; display: grid; place-items: center;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--gold); color: #fff;
+  font-size: 15px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.sm-title { font-family: var(--serif, Georgia, serif); font-size: 24px;
+  font-weight: 700; color: var(--ink); line-height: 1.1; }
+.sm-blurb { margin: 0 0 16px; padding-left: 52px; font-size: 13.5px;
+  line-height: 1.5; color: var(--muted); }
+/* Maroon, full width, at the top — the page's one loud control. */
+.sm-start { display: flex; align-items: center; justify-content: space-between;
+  width: 100%; margin: 0 0 16px; padding: 12px 16px; border: 0;
+  border-radius: 10px; background: #7b2430; color: #fff; cursor: pointer;
+  font-family: var(--serif, Georgia, serif); font-size: 15.5px; font-weight: 700;
+  box-shadow: 0 2px 6px rgba(70, 18, 25, .3); }
+.sm-start:hover { background: #8c2b38; }
+.sm-start:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.sm-go { opacity: .8; font-size: 17px; }
+.sm-eyebrow { margin: 16px 0 8px; padding-top: 12px;
+  border-top: 1px solid var(--line);
+  font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--muted); font-weight: 700; }
+.sm-next { display: grid; grid-template-columns: 34px minmax(0,1fr) 12px;
+  align-items: center; gap: 10px; width: 100%; padding: 8px 10px 8px 8px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2);
+  cursor: pointer; font: inherit; text-align: left; }
+.sm-next:hover { border-color: var(--gold); background: var(--panel); }
+.sm-next:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.sm-ico { display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 8px; background: var(--bg); font-size: 16px; }
+.sm-next-t { font-size: 14px; color: var(--ink); line-height: 1.25; }
+.sm-count { margin: 16px 0 7px; font-size: 13px; color: var(--muted);
+  font-weight: 600; }
+.sm-bar { height: 10px; border-radius: 999px; background: rgba(45,27,18,.09);
+  border: 1px solid var(--line); overflow: hidden; }
+.sm-bar i { display: block; height: 100%; background: var(--gold); }
+.sm-mods { list-style: none; margin: 0; padding: 0;
+  display: flex; flex-direction: column; gap: 2px; }
+.sm-row { display: grid; grid-template-columns: 34px minmax(0,1fr) max-content 10px;
+  align-items: center; gap: 10px; width: 100%; padding: 8px 6px;
+  border: 0; border-radius: 10px; background: none; cursor: pointer;
+  font: inherit; text-align: left; }
+.sm-row:hover { background: var(--panel-2); }
+.sm-row:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.sm-n { display: grid; place-items: center; width: 34px; height: 34px;
+  border-radius: 50%; background: #5f574a; color: #fff;
+  font-size: 12.5px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.sm-rt { font-size: 13.5px; line-height: 1.22; color: var(--ink); }
+.sm-st { display: inline-flex; align-items: center; gap: 5px;
+  font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase;
+  font-weight: 700; color: var(--muted); white-space: nowrap; }
+.sm-lock { font-size: 9px; opacity: .75; }
+.sm-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+.sm-row.is-current { background: #f6edd8; }
+.sm-row.is-current .sm-n { background: var(--gold); }
+.sm-row.is-current .sm-st { color: #8a6a22; }
+.sm-row.is-done .sm-n { background: #4a5c3b; }
+
 /* The module rail: where you are, then the whole course under it. */
 .rail-next { margin: 10px 0 14px; }
 .rail-all { margin: 16px 0 8px; font-size: 11px; letter-spacing: .13em;

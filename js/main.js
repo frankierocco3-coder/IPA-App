@@ -698,29 +698,37 @@ function drawRail(section) {
         const f = inMod(m).find(l => !speechLessonDone(l.id)) ?? inMod(m)[0];
         if (f) renderActingLesson(f.id);
       };
-      cards.push({ h: `Module ${at + 1} of ${mods.length}`,
-        title: moduleTitle(SB, cur),
-        note: cur.blurb ?? '',
+      cards.push({ h: `Module ${at + 1} of ${mods.length}`, bare: true,
+        title: '', note: '',
         body: `
+        <p class="sm-head"><span class="sm-badge">${String(at + 1).padStart(2, '0')}</span>
+          <span class="sm-title">${esc(moduleTitle(SB, cur))}</span></p>
+        ${cur.blurb ? `<p class="sm-blurb">${esc(cur.blurb)}</p>` : ''}
+        <button class="sm-start" id="sh-start" type="button">
+          <span>Start module</span><span class="sm-go" aria-hidden="true">&rsaquo;</span>
+        </button>
         ${nextL ? `
-        <button class="rail-row rail-next" id="sh-next" type="button">
-          <span class="rail-ico" aria-hidden="true">&#128214;</span>
-          <span class="rail-row-text"><b>Next lesson</b><i>${esc(nextL.title)}</i></span>
-          <span class="rail-chev" aria-hidden="true">&rsaquo;</span>
+        <p class="sm-eyebrow">Next lesson</p>
+        <button class="sm-next" id="sh-next" type="button">
+          <span class="sm-ico" aria-hidden="true">&#128214;</span>
+          <span class="sm-next-t">${esc(nextL.title)}</span>
+          <span class="sm-go" aria-hidden="true">&rsaquo;</span>
         </button>` : ''}
-        <p class="rail-pos">${d} / ${ls.length} lessons</p>
-        <div class="lm-bar" role="img" aria-label="${d} of ${ls.length} lessons done"><i style="width:${pct}%"></i></div>
-        <p class="rail-all">All modules</p>
-        <ol class="rail-mods">${mods.map((m, i) => {
+        <p class="sm-count">${d} / ${ls.length} lessons</p>
+        <div class="sm-bar" role="img" aria-label="${d} of ${ls.length} lessons done"><i style="width:${pct}%"></i></div>
+        <p class="sm-eyebrow">All modules</p>
+        <ol class="sm-mods">${mods.map((m, i) => {
           const st = stateOf(m);
-          return `<li><button class="rail-row rail-mod-row is-${st}" id="sh-m${i}" type="button">
-            <span class="rail-num">${String(i + 1).padStart(2, '0')}</span>
-            <span class="rail-row-text"><b>${esc(moduleTitle(SB, m))}</b></span>
-            <span class="rail-state">${WORD[st]}</span>
-            <span class="rail-chev" aria-hidden="true">&rsaquo;</span>
+          return `<li><button class="sm-row is-${st}" id="sh-m${i}" type="button"
+              aria-label="Module ${i + 1}, ${esc(moduleTitle(SB, m))}, ${WORD[st].toLowerCase()}">
+            <span class="sm-n">${String(i + 1).padStart(2, '0')}</span>
+            <span class="sm-rt">${esc(moduleTitle(SB, m))}</span>
+            <span class="sm-st">${st === 'locked' ? '<span class="sm-lock" aria-hidden="true">&#128274;</span>' : st === 'current' ? '<span class="sm-dot" aria-hidden="true"></span>' : ''}${WORD[st]}</span>
+            <span class="sm-go" aria-hidden="true">&rsaquo;</span>
           </button></li>`; }).join('')}</ol>`,
-        actions: [['Start module', () => openMod(cur), true]],
+        actions: [],
         wire: root => {
+          root.querySelector('#sh-start')?.addEventListener('click', () => openMod(cur));
           root.querySelector('#sh-next')?.addEventListener('click', () => renderActingLesson(nextL.id));
           mods.forEach((m, i) => root.querySelector(`#sh-m${i}`)?.addEventListener('click', () => openMod(m)));
         } });
@@ -790,10 +798,11 @@ function drawRail(section) {
     : '';
 
   q.innerHTML = cards.map((c, i) => `
-    <section class="rail-card">
+    <section class="rail-card${c.bare ? ' is-bare' : ''}">
       <div class="rail-head"><h2>${esc(c.h)}</h2></div>
+      ${c.bare ? '' : `
       <p class="rail-next-title" data-t="${i}"></p>
-      <p class="pane-note" data-n="${i}"></p>
+      <p class="pane-note" data-n="${i}"></p>`}
       ${c.body ?? ''}
       <div class="rail-actions" data-a="${i}"></div>
       ${c.foot ?? ''}
@@ -808,8 +817,10 @@ function drawRail(section) {
 
   cards.forEach(c => c.wire?.(q));
   cards.forEach((c, i) => {
-    q.querySelector(`[data-t="${i}"]`).textContent = c.title;
-    q.querySelector(`[data-n="${i}"]`).textContent = c.note;
+    const tEl = q.querySelector(`[data-t="${i}"]`);
+    const nEl = q.querySelector(`[data-n="${i}"]`);
+    if (tEl) tEl.textContent = c.title;
+    if (nEl) nEl.textContent = c.note;
     const box = q.querySelector(`[data-a="${i}"]`);
     for (const [label, go, primary] of c.actions) {
       const b = document.createElement('button');
