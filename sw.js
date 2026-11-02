@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v74';                     // 2026-11-02: lesson 1 — the same mask was drawn in both foot panels, and a leftover width rule pushed each step's drawing under its own number
+const VERSION = 'sc-v75';                     // 2026-11-02: lesson 1 — the leaf sprays, and the ornaments keyed to transparency so they sit on any tint; img replaced at existing paths, which is the case that REQUIRES a bump
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

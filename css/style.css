@@ -3423,13 +3423,33 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lxc-card-b { display: flex; align-items: flex-end; gap: 8px; }
 .lxc-card-p { margin: 0; font-size: 14.5px; line-height: 1.55; flex: 1 1 auto; }
 
-/* THE ORNAMENTS ARE OPAQUE PARCHMENT RECTANGLES, measured at about
-   #f8ecd5 in every corner — they are crops from the owner's concept
-   rendering, not cut-outs. `multiply` drops that ground into the card's
-   own parchment so only the ink survives; without it each card wears a
-   beige box. The same trick the troupe masks in the Learn rail needed. */
-.lxc-fig { flex: 0 0 auto; display: block; max-width: 48%; height: auto;
-  mix-blend-mode: multiply; }
+/* THE ORNAMENTS ARE CUT OUT NOW, so no blend mode. They arrived as
+   opaque parchment crops, about #f8ecd5 in every corner, and were being
+   multiplied into the card to hide the rectangle — which works on
+   parchment and fails on the terracotta panel, where the ground stayed
+   visible as a pink box. The line-art ones are keyed to transparency in
+   the asset instead: parchment to alpha, ink kept, soft ramp between so
+   the pen strokes keep their edges. They now sit on any tint.
+   (The hero and the notes thumbnail are full-colour paintings and are
+   NOT keyed — luminance keying would punch holes through their sky.) */
+.lxc-fig { flex: 0 0 auto; display: block; max-width: 48%; height: auto; }
+
+/* ── THE LEAF SPRAY ─────────────────────────────────────────────────
+   One asset, cropped from the owner's rendering, set at the corner of
+   each card and panel and beside a section heading. Purely decorative:
+   aria-hidden everywhere, and it never takes a click. */
+.lxc-sprig { position: absolute; pointer-events: none; user-select: none; }
+.lxc-sprig.is-corner { top: 8px; right: 8px; width: 62px; height: auto;
+  opacity: .9; }
+.lxc-sprig.is-beside { position: static; display: inline-block;
+  width: 46px; height: auto; margin-left: 10px; vertical-align: -6px; }
+.lxc-card, .lxc-panel { position: relative; }
+/* The card's title must not run under the spray sitting over it. */
+.lxc-card-h { padding-right: 56px; }
+.lxc-panel-h { padding-right: 60px; }
+.lx-take { position: relative; }
+.lx-take .lxc-sprig.is-corner { top: auto; bottom: 6px; right: 6px;
+  width: 48px; opacity: .85; }
 /* The words lead and the drawing sits in beside them. At 48% of a
    250px card the ornament took half the width and squeezed the text
    into a four-word column. */

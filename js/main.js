@@ -4588,9 +4588,18 @@ function lessonOrnamentHtml(key) {
 // for CONCEPTS, practice and takeaways, and that continuous prose stays
 // prose — so this kind exists to carry the three ideas the lesson names,
 // not to chop paragraphs up.
+// THE SPRIG IS SET ONCE AND REUSED. It is decorative, so every instance
+// is aria-hidden and none of them is announced; the class decides where
+// it sits and which way round it faces.
+const SPRIG = where => (f => f
+  ? `<img class="lxc-sprig ${where}" src="${esc(f.src)}" alt="" aria-hidden="true"
+       width="${f.w}" height="${f.h}" loading="lazy" decoding="async">` : '')
+(characterFigure('cm-l01-sprig'));
+
 function principleCardsHtml(cards) {
   return `<ol class="lxc-cards">${cards.map(c => `
     <li class="lxc-card">
+      ${SPRIG('is-corner')}
       <p class="lxc-card-h"><span class="lxc-card-n" aria-hidden="true"></span>
         <span>${esc(c.title)}</span></p>
       <div class="lxc-card-b">
@@ -4609,6 +4618,7 @@ const PANEL_TONES = { sage: 'is-sage', terracotta: 'is-terracotta' };
 function lessonPanelHtml(p) {
   const tone = PANEL_TONES[p.tone] ?? PANEL_TONES.sage;
   return `<section class="lxc-panel ${tone}">
+    ${tone === PANEL_TONES.sage ? SPRIG('is-corner') : ''}
     <p class="lxc-panel-h">${esc(p.title)}</p>
     <div class="lxc-panel-b">
       <p class="lxc-panel-p">${esc(p.text)}</p>
@@ -4625,7 +4635,10 @@ function actingChapterBlocks(l, opts) {
   const from = opts?.skipFirst ? 1 : 0;
   const to = opts?.dropLast ? body.length - 1 : body.length;
   return body.slice(from, to).map(b =>
-    b.h ? `<h2 class="guide-heading">${esc(b.h)}</h2>`
+    // A section heading in the study layout carries the owner's leaf
+    // spray beside it, as his rendering sets one next to "How this
+    // course uses them". Other surfaces get the plain heading.
+    b.h ? `<h2 class="guide-heading">${esc(b.h)}${opts?.sprig ? SPRIG('is-beside') : ''}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
     : b.steps ? stepCardsHtml(b.steps)
@@ -5135,7 +5148,7 @@ function renderActingLesson(id) {
             ${lead ? `<p class="guide-text lx-open-p">${esc(lead)}</p>` : ''}
           </div>
           <section class="sp-chapter lx-body" aria-label="The chapter">
-            ${actingChapterBlocks(l, { skipFirst: !!lead, dropLast: !!tailPanel })}
+            ${actingChapterBlocks(l, { skipFirst: !!lead, dropLast: !!tailPanel, sprig: true })}
             ${extras}
           </section>
           ${pairHtml}
@@ -5159,6 +5172,7 @@ function renderActingLesson(id) {
                 stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/>
                 <path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.4.8 1 .8 1.6V17h6v-1.1c0-.6.3-1.2.8-1.6A6.5 6.5 0 0 0 12 2.5Z"/>
                 </svg>Key takeaway</h3>
+              ${SPRIG('is-corner')}
               <p class="lx-take-p${l.takeaway ? ' is-lead' : ''}">${esc(take)}</p>
             </section>` : ''}
             ${marks.length ? `

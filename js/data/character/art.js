@@ -304,6 +304,12 @@ Object.assign(CHARACTER_FIGURES, {
   'cm-l01-reflect': l01('l01-reflect.png',
     'A pen drawing of a long-beaked leather mask lying on its side.', 140, 105),
   'cm-l01-town': l01('l01-town.png', '', 440, 150),
+  // CROPPED FROM THE OWNER'S OWN RENDERING, which his handoff allows in
+  // as many words: the assets folder is crops from it and may be used.
+  // His page sets a leaf spray at the corner of every card, beside the
+  // section heading and in the notes rail; the spray was in the picture
+  // all along and did not need commissioning.
+  'cm-l01-sprig': l01('l01-sprig.png', '', 76, 49),
 });
 
 export const characterFigure = key =>
