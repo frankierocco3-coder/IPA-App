@@ -3235,10 +3235,53 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lx-side-item.is-done .lx-side-n { background: #4a5c3b; color: #fbf8f1;
   box-shadow: inset 0 0 0 1.5px #4a5c3b; }
 
-/* The course's lessons, nested under Learn in the sidebar. */
-.lx-side-course { margin: 6px 0 4px 12px; font-size: 13px; font-weight: 700;
-  color: var(--ink); }
-.lx-side .side-item + .lx-side-course { margin-top: 2px; }
+/* The course sits under Learn as a row of its own, with its own icon,
+   and the module's lessons indent beneath it. */
+/* SENTENCE CASE AND ONE LINE. `.side-item` uppercases and letter-spaces
+   its label, which is right for LEARN and wrong for a course title —
+   "COMMEDIA DELL'ARTE" wrapped to two lines and read as a shout. */
+.lx-side .side-item.lx-side-course { margin-left: 10px; }
+.lx-side .lx-side-course .side-label { text-transform: none;
+  letter-spacing: 0; font-size: 14.5px; font-weight: 700; }
+.lx-side .lx-side-list { margin-left: 10px; }
+
+/* The workspace chip and the padlock, at the top of the chapter column
+   where the owner's rendering puts them. */
+.lx-bar { margin: 0 0 14px; }
+
+/* The drawn ground, behind the whole page. Positioned against the shell
+   and the three columns lifted above it, same as the Learn page. */
+.lx-shell.has-ground { position: relative; }
+/* A BAND AT THE TOP, NOT THE WHOLE PAGE. A lesson runs to three
+   thousand pixels; stretching a 1600x1200 drawing over that and letting
+   `cover` do the rest scaled it two and a half times, which put the hill
+   line straight through the middle of the prose. Bounded to roughly its
+   own proportions it stays where it was drawn to be — towns down the
+   left margin, the road down the right — and the long tail of a lesson
+   simply has no ornament, which is where the eye is reading anyway. */
+.lx-ground { top: 0; left: -40px; width: calc(100% + 80px);
+  height: 1180px; object-fit: cover; object-position: top center;
+  opacity: .38; }
+.lx-shell.has-ground > .lx-side,
+.lx-shell.has-ground > .lx-main,
+.lx-shell.has-ground > .lx-notes { position: relative; z-index: 1; }
+
+/* The rail's furniture: a lamp beside the takeaway, and the contents as
+   a list of rings with the one you are on filled. */
+.lx-take-h { display: flex; align-items: center; gap: 6px; }
+.lx-take-ico { width: 15px; height: 15px; flex: 0 0 auto; color: #8a6a22; }
+.lx-toc-list { list-style: none; padding-left: 0; }
+.lx-toc-i { display: grid; grid-template-columns: 14px 1fr; gap: 9px;
+  align-items: start; }
+.lx-toc-dot { width: 11px; height: 11px; margin-top: 4px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--line); }
+.lx-toc-i.is-here .lx-toc-dot { background: var(--gold);
+  box-shadow: inset 0 0 0 1.5px var(--gold); }
+
+/* The glyph on an action rides at its end, as the rendering draws it. */
+.btn-glyph { margin-left: 8px; }
+.lx-notes .practice-row .btn { display: inline-flex; align-items: center;
+  justify-content: center; }
 
 /* The breadcrumb's module name is the way back to Learn. */
 .lx-crumb-up { background: none; border: 0; padding: 0; font: inherit;
@@ -3332,12 +3375,24 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 @media (max-width: 560px) {
   .sx-steps { grid-template-columns: 1fr; }
 }
-/* A step that carries its own drawing sets it beside the words, and
-   numbers itself inline — the corner the plain card's counter sits in
-   is where the drawing goes. */
-.sx-steps.is-rich .sx-step { display: grid; gap: 12px; align-items: start;
-  grid-template-columns: 92px minmax(0, 1fr); padding: 14px; }
+/* ── THE ILLUSTRATED SEQUENCE (owner's rendering) ───────────────────
+   Not three separate cards: ONE panel with the steps laid across it and
+   a chevron between each pair, which is how his page draws the course's
+   three moves — as one journey rather than three tiles. */
+.sx-steps.is-rich { background: var(--panel); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px 10px; gap: 0;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.sx-steps.is-rich .sx-step { background: none; border: 0; border-radius: 0;
+  display: grid; gap: 12px; align-items: center; position: relative;
+  grid-template-columns: 92px minmax(0, 1fr); padding: 6px 22px 6px 10px; }
 .sx-steps.is-rich .sx-step::before { content: none; }
+/* The chevron rides the gap between one step and the next. */
+.sx-steps.is-rich .sx-step + .sx-step::after { content: '\203A';
+  position: absolute; left: -10px; top: 50%; transform: translateY(-50%);
+  font-size: 23px; line-height: 1; color: var(--muted); opacity: .75; }
+@media (max-width: 700px) {
+  .sx-steps.is-rich .sx-step + .sx-step::after { content: none; }
+}
 .sx-steps.is-rich .lxc-fig { max-width: 92px; align-self: center; }
 .sx-step-h { display: flex; align-items: center; gap: 9px; }
 .sx-step-n { flex: 0 0 auto; display: grid; place-items: center;
@@ -3382,6 +3437,15 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lxc-card-p { min-width: 0; }
 .sx-steps.is-rich .lxc-fig { max-width: 110px; }
 .lxc-panel .lxc-fig { max-width: 130px; align-self: center; }
+
+/* THE TWO BOXES SIT SIDE BY SIDE (owner's rendering). Try it on the
+   left, what this changes for an actor on the right. They stack on a
+   narrow column, where two half-width boxes would be two slivers. */
+.lxc-panels { display: grid; gap: 16px; margin: 24px 0 0; align-items: start; }
+@media (min-width: 820px) {
+  .lxc-panels { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+.lxc-panels .lxc-panel { margin: 0; height: 100%; }
 
 .lxc-panel { border-radius: 13px; padding: 16px 18px; margin: 22px 0;
   border: 1px solid var(--line); background: var(--panel); }
