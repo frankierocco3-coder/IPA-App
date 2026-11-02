@@ -734,6 +734,66 @@ function drawRail(section) {
           mods.forEach((m, i) => root.querySelector(`#sh-m${i}`)?.addEventListener('click', () => openMod(m)));
         } });
     }
+  } else if (ws === 'commedia' && section === 'learn') {
+    // ── THE COMMEDIA RAIL (owner's mockup, 2026-11-02) ─────────────
+    //
+    // Commedia matched no branch in this chain until today, so its rail
+    // rendered as two empty divs — the course got its own workspace on
+    // 2026-11-02 and nothing here knew. It is NOT added to the first
+    // branch's list: that one carries the working-text card and the
+    // Character gallery rail, which read CHARACTER_LESSONS and
+    // CHARACTER_MODULES, and those are the wrong book now.
+    //
+    // THE NUMBERS ARE RE-DERIVED, NOT SHARED. drawRail runs before
+    // learnMain and they hold no state in common, so this reads
+    // pathLessons(B) + B.visible exactly as the pane does. Deriving them
+    // any other way is what once printed "Lesson 1 of 34" on a 9-lesson
+    // course — see the comment above the Character gallery rail.
+    const CB = BOOKS.commedia;
+    const seq = pathLessons(CB).filter(CB.visible);
+    const nextL = seq.find(l => !speechLessonDone(l.id));
+    const d = seq.filter(l => speechLessonDone(l.id)).length;
+    const pct = seq.length ? Math.round(d / seq.length * 100) : 0;
+    const scene = learnScene('commedia');
+    // THE MASKS ARE THE COURSE'S OWN COMPANY, not a collection. This
+    // app deleted hearts, streaks, gems and XP on 2026-10-05 and does
+    // not award things; these three are the same players the opening
+    // module is painted from, and they are decorative. Nothing here
+    // says they were earned, and the line beneath counts lessons.
+    const TROUPE = [
+      ['pantalone', 'Pantalone'], ['arlecchino', 'Arlecchino'], ['capitano', 'Il Capitano'],
+    ];
+    cards.push({ h: 'Your troupe', bare: true, title: '', note: '',
+      body: `
+        <p class="cr-masks">${TROUPE.map(([f, name]) =>
+        `<span class="cr-mask-box"><img class="cr-mask"
+              src="img/lessons/commedia/${esc(f)}-mask.jpg"
+              alt="${esc(name)}'s leather half-mask" width="60" height="60"
+              loading="lazy" decoding="async"></span>`).join('')}</p>
+        <p class="sm-count">${d} of ${seq.length} lessons</p>
+        <div class="sm-bar" role="img" aria-label="${d} of ${seq.length} lessons done"><i style="width:${pct}%"></i></div>`,
+      actions: [] });
+    if (nextL) {
+      const m = CB.modules.find(x => x.id === nextL.module);
+      const inMod = seq.filter(l => l.module === nextL.module);
+      const at = inMod.findIndex(l => l.id === nextL.id);
+      // THE THUMBNAIL IS THE MODULE'S OWN CARD ART, and two of the three
+      // modules have none yet. A slot with no entry renders NOTHING —
+      // never a placeholder and never a broken image — so the row simply
+      // loses its picture until the owner draws cm-form and cm-cast.
+      const art = scene?.moduleCard?.[nextL.module] ?? null;
+      cards.push({ h: 'Current lesson', bare: true, title: '', note: '',
+        body: `
+        ${art ? `<img class="cr-thumb" src="${esc(art.src)}" alt="" aria-hidden="true"
+              width="96" height="128" loading="lazy" decoding="async">` : ''}
+        <p class="cr-mod">${m ? esc(moduleTitle(CB, m)) : ''}</p>
+        <p class="sm-count">Lesson ${at + 1} of ${inMod.length} · ${esc(nextL.title)}</p>`,
+        // A TUPLE, NOT AN OBJECT: the renderer destructures
+        // `[label, go, primary]`, so an object here throws "is not
+        // iterable" and takes the whole rail down with it.
+        actions: [[d ? 'Continue lesson' : 'Start course',
+          () => renderActingLesson(nextL.id), true]] });
+    }
   } else if (ws === 'rhetoric' && section === 'learn') {
     // THE ETHICAL CHECK (owner's mockup, 2026-10-30), built from the
     // ethics module rather than from the mockup's labels.
@@ -3715,7 +3775,10 @@ function bookLearnSequence(el, B) {
   const scene = learnScene(B.ws) ?? learnScene('acting');
 
   el.innerHTML = `
-    <div class="tr-view sc-${esc(B.ws)}${scene.light ? ' is-light' : ''}" style="${scenePaletteStyle(scene)}">
+    <div class="tr-view sc-${esc(B.ws)}${scene.light ? ' is-light' : ''}${scene.ground ? ' has-ground' : ''}" style="${scenePaletteStyle(scene)}">
+    ${scene.ground ? `
+    <img class="lm-ground" src="${esc(scene.ground)}" alt="" aria-hidden="true"
+         loading="lazy" decoding="async">` : ''}
     <div class="tr-top">
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
       <h1 class="tr-title">${esc(scene.title)}</h1>
@@ -3754,7 +3817,16 @@ function bookLearnSequence(el, B) {
       if (go) renderActingLesson(go.id);
     }));
 
-  el.querySelectorAll('[data-card-go]').forEach(btn => btn.addEventListener('click', () => {
+  // THE GUARD IS FOR THE ONE OF THESE THAT LIVES INSIDE A <summary>.
+  // The module card's "Continue module" button sits in the fold's own
+  // summary, where a click that reaches the summary would toggle the
+  // card shut on its way to opening a lesson. Measured in Chromium: a
+  // button inside a summary does NOT toggle it, so this changes nothing
+  // there — but Safari is untested in this project and the two calls
+  // cost nothing on the tree card, which is not inside a summary at all.
+  el.querySelectorAll('[data-card-go]').forEach(btn => btn.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!btn.disabled) renderActingLesson(btn.dataset.cardGo);
   }));
   // A path this long opens wherever you left off, not at the top. Without
@@ -4063,7 +4135,38 @@ function learnPathHtml(B, lessons, nextId) {
   // scenes are 2.06:1 paintings, the other courses' cards are 3:4. One
   // declaration on the path, inherited by every plate under it.
   const asp = /^[0-9. /]{1,12}$/.test(String(scene.artAspect ?? '')) ? scene.artAspect : null;
-  return `${mapHtml}<div class="lm-path${shelf}${mapHtml ? ' has-map' : ''}"${asp ? ` style="--art-aspect:${asp}"` : ''}>
+  // HOW WIDE THE PICTURE COLUMN IS, per course, for the same reason the
+  // aspect is per course: 216px is right for a 3:4 portrait card and far
+  // too narrow for a landscape plate, which wants about half the card.
+  // Same strict-pattern treatment as the aspect — it lands in a style
+  // attribute, so a value that is not a plain length is DROPPED rather
+  // than escaped. Courses that set nothing keep the 216px default.
+  const col = /^[0-9]{1,3}(\.[0-9]{1,2})?(%|px)$/.test(String(scene.artCol ?? ''))
+    ? scene.artCol : null;
+  // THE GROUND is the page's paper, not its picture (owner's Commedia
+  // mockup, 2026-11-02): an illustration lying behind the whole column at
+  // low opacity, with the cards standing on it.
+  //
+  // NOT `scene.art`. That names the BANNER at the top of a plain path,
+  // and sceneStageHtml deliberately returns '' for every layout — a
+  // course that opens with a painting per module should not also open
+  // with a painting above them. This is a different slot with a
+  // different job, which is why it is a different field.
+  //
+  // DECORATIVE, SO IT IS HIDDEN FROM THE READER: empty alt and
+  // aria-hidden, and pointer-events are off in the CSS so it can never
+  // eat a click meant for a card.
+  //
+  // IT IS DRAWN BY bookLearnSequence, NOT HERE. The ground belongs to the
+  // whole pane: `.lm-path` is only the cards column, capped at 900px with
+  // a 52px rail gutter, so a ground drawn inside it stopped dead at the
+  // card edges and left the margins — which is most of what the owner's
+  // mockup shows of it — empty. It now sits on `.tr-view`, behind the
+  // heading and the cards together. A scene with no `ground` renders
+  // nothing at all, which is this repo's rule for an empty art slot.
+  const pathStyle = [asp ? `--art-aspect:${asp}` : '', col ? `--art-col:${col}` : '']
+    .filter(Boolean).join(';');
+  return `${mapHtml}<div class="lm-path${shelf}${mapHtml ? ' has-map' : ''}"${pathStyle ? ` style="${pathStyle}"` : ''}>
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
   </div>`;
 }
@@ -4089,9 +4192,18 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // THE ART IS NOT A LINK AND NOT A BUTTON. It sits inside the heading,
   // and the only pressable things in a band stay the lesson cards.
   const card = scene.moduleCard?.[g.m?.id];
-  // THE CORNER TAB rides with the picture, so it needs the picture to
-  // have a box of its own. A tag without a card would be a label on
-  // nothing, so it only renders where art exists.
+  // DECLARED UP HERE because the art markup below reads it, and a const
+  // read before its declaration is a ReferenceError that blanks the page
+  // rather than a quiet undefined. It gates every path-cards-only piece
+  // in this function: the pips, the Continue button, and which side of
+  // the card the module tag is drawn on.
+  const pipped = scene.layout === 'path-cards';
+  // WHERE THE TAG SITS DIFFERS BY LAYOUT (owner's mockup, 2026-11-02).
+  // On the shelf it is a corner tab riding the picture, which needs the
+  // picture to have a box of its own — a tag without a card would be a
+  // label on nothing. On the path cards the owner draws it as a coloured
+  // eyebrow above the title instead, in the text column, so it reads as
+  // the module's kicker rather than as a sticker on the painting.
   const tag = scene.moduleTag?.[g.m?.id];
   // WHERE THE CROP SITS IS THE PAINTING'S BUSINESS, not the layout's. A
   // wide band shows under half of a 3:4 picture, so one global value
@@ -4107,7 +4219,7 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
         <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
              ${focus ? `style="--art-focus:${focus}"` : ''}
              width="600" height="800" loading="lazy" decoding="async">
-        ${tag ? `<span class="lm-tag">${esc(tag)}</span>` : ''}
+        ${tag && !pipped ? `<span class="lm-tag">${esc(tag)}</span>` : ''}
       </span>` : `
       <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
            width="600" height="800" loading="lazy" decoding="async">`) : '';
@@ -4171,15 +4283,34 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // writes — "7 lessons · In progress · 2/7 complete" — and the bar only
   // appears where there is progress to draw. A module nobody has started
   // shows the count and nothing else, rather than an empty track.
+  //
+  // THE FRACTION AND THE BAR BOTH CAME OUT WHEN THE PIPS WENT IN
+  // (owner's mockup, 2026-11-02). A card carrying pips, "2/3 complete"
+  // and a progress track is three drawings of one number in one card;
+  // the pips say it per lesson, which is strictly more, so the other two
+  // are noise. This is the rule written at css/style.css:2443 — of two
+  // things saying the same number, show one. The bar survives on the
+  // shelf and gallery layouts, which have no pips.
+  // (`pipped` is declared at the top of this function, because the art
+  // markup above reads it too.)
+  // "CURRENT MODULE", not "Current lesson" (owner's mockup, 2026-11-02).
+  // It labels a MODULE card, and the rail beside it is the thing that
+  // names the current lesson — the two said "current lesson" at once.
   const wordState = state === 'done' ? 'Completed'
-    : state === 'current' ? 'Current lesson'
+    : state === 'current' ? 'Current module'
     : state === 'locked' ? 'Locked'
-    : done > 0 ? `In progress · ${done}/${total} complete` : 'Not started';
+    : done > 0 ? (pipped ? 'In progress' : `In progress · ${done}/${total} complete`)
+    : 'Not started';
+  // THE PADLOCK IS DRAWN ONLY WHERE SOMETHING IS ACTUALLY LOCKED.
+  // `state` is already false for every module when free play is on,
+  // because learnLockMap short-circuits on store.freePlay — so this
+  // cannot draw a lock the learner can walk straight through.
+  const lockIco = state === 'locked' ? LM_LOCK_SVG : '';
   const shelfBits = scene.layout === 'path-cards' ? `
         <p class="lm-line">${total} ${total === 1 ? 'lesson' : 'lessons'}
           <span class="lm-dot" aria-hidden="true">·</span>
-          <span class="lm-state is-${state}">${wordState}</span></p>
-        ${done > 0 && done < total ? `
+          <span class="lm-state is-${state}">${lockIco}${wordState}</span></p>
+        ${!pipped && done > 0 && done < total ? `
         <div class="lm-bar" role="img" aria-label="${done} of ${total} lessons done">
           <i style="width:${pct}%"></i>
         </div>` : ''}`
@@ -4189,19 +4320,76 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
           <i style="width:${pct}%"></i>
         </div>
         <p class="lm-tally">${done} / ${total} lessons</p>` : '';
+  // ── THE LESSON PIPS (owner's mockup, 2026-11-02) ────────────────
+  // One numbered pip per lesson the module walks, so a closed card says
+  // where you are inside it without being opened — which is the thing a
+  // folded card otherwise cannot do.
+  //
+  // SIZED OFF g.ls, WHICH IS ALREADY THE WALKED PATH. The group's
+  // lessons come from pathLessons(), so references are gone before they
+  // get here: Commedia's cm-cast module lists sixteen ids and draws
+  // three pips, because thirteen of them are mask chapters you are sent
+  // to rather than steps you take. Sizing this off a module's raw id
+  // list would draw sixteen pips for a three-lesson module.
+  //
+  // NOT `.lm-pip` — that name is taken by the padlock badge on a locked
+  // lesson node, further down this file. Two different round things.
+  const pips = pipped && total ? `
+        <span class="lm-pips" aria-hidden="true">${g.ls.map((l, i) => {
+    const ps = speechLessonDone(l.id) ? ' is-done'
+      : l.id === nextId ? ' is-next'
+      : locked?.get(l.id) === true ? ' is-locked' : '';
+    return `<span class="lm-pip-n${ps}">${i + 1}</span>`;
+  }).join('')}</span>` : '';
+  // THE CONTINUE BUTTON RIDES THE CURRENT MODULE ONLY, and reuses the
+  // [data-card-go] wiring that already opens a lesson from this page —
+  // no new handler, and it cannot drift from the one the tree card uses.
+  //
+  // A <button> INSIDE A <summary> DOES NOT TOGGLE THE FOLD. Measured in
+  // this app's own page, with a control proving the harness could see a
+  // toggle: clicking the summary's text opened the details, clicking a
+  // button inside it did not, and the button's own handler fired. There
+  // is no other instance of this pattern in the app, so the handler
+  // guards it anyway — Safari is untested here and this is cheap.
+  const cont = pipped && state === 'current' && nextId ? `
+        <button class="btn btn-primary lm-go" type="button"
+                data-card-go="${esc(nextId)}">Continue module<span
+                class="btn-arrow" aria-hidden="true">&rarr;</span></button>` : '';
+  // THE CHEVRON ON A CARD THAT IS NOT THE CURRENT ONE (owner's mockup).
+  // The current card carries the Continue button and needs no second
+  // affordance; the others get the small chevron beside the title that
+  // the mockup draws. Decorative — the whole summary is already the
+  // control, so this must not read as a second one.
+  const titleChev = pipped && state !== 'current'
+    ? '<span class="lm-title-chev" aria-hidden="true">&rsaquo;</span>' : '';
+  // THE ORDER IS PIPS, ARROW, BUTTON — not pips, button, arrow.
+  // At a phone width the row has to wrap, and wrapping in DOM order put
+  // the button on line two and the fold chevron alone on line three.
+  // With the arrow ahead of the button it stays on the pip line where it
+  // belongs and only the button drops. See the wrap rules in style.css.
   const head = g.m ? `
     <summary class="lm-head${card ? ' has-card' : ''}">
       ${art}
       <div class="lm-head-text">
+        ${pipped && tag ? `<p class="lm-kicker">${esc(tag)}</p>` : ''}
         <p class="lm-eyebrow">${esc(B.title)}</p>
-        <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}</h2>
+        <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}${titleChev}</h2>
         ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
         ${shelfBits}
-        <p class="lm-count">${done} of ${total} done<span class="lm-fold-arrow" aria-hidden="true"></span></p>
+        <p class="lm-count">${pips}${done} of ${total} done<span class="lm-fold-arrow" aria-hidden="true"></span>${cont}</p>
       </div>
     </summary>` : '';
+  // THE STATE REACHES THE CARD NOW. Until 2026-11-02 the only element
+  // carrying it was the <span> around the state word, so nothing could
+  // border, tint or flip the card itself — the owner's mockup wants the
+  // current module ringed in gold, and `is-flip` wants an odd/even hook.
+  //
+  // THE FLIP ALTERNATES THE PICTURE'S SIDE, and it is deliberately a
+  // class on the card rather than a reordering of the markup: the art
+  // stays first in the DOM, so the reading order a screen reader gets is
+  // the same on every card, and only the painting moves.
   return `
-    <section class="lm-mod">
+    <section class="lm-mod is-${state}${gi % 2 ? ' is-flip' : ''}">
       <details class="lm-fold"${openThis ? ' open' : ''}>
         ${head}
         <ol class="lm-list">

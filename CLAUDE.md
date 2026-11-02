@@ -377,7 +377,8 @@ script instead and paste its block.
 ### Lessons, and whether they publish
 
 - Acting & Scene Work           34 records  (8 more in the withdrawn performance module, behind PERFORMANCE_LIVE)
-- Building a Character          47 records  (4 more in the withdrawn role module, behind ROLE_LIVE)
+- Building a Character          25 records  (4 more in the withdrawn role module, behind ROLE_LIVE) (22 further records in this file are Commedia dell’Arte, its own course since 2026-11-02)
+- Commedia dell’Arte            22 records  (13 of them reference pages, so the path walks 9)
 - Shakespeare                   37 records
 - Rhetoric                      36 records
 - Speech                        25 records  <- 13 UNPUBLISHED: sp-start-parts, sp-start-fluency, sp-start-alphabet, sp-start-offbook, sp-m-pace, sp-m-emphasis  WORKSPACE WITHDRAWN
@@ -398,7 +399,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - RHETORIC_LIVE            false  js/main.js:279
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:244
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:9943
+- SCENE_STUDY_LIVE         false  js/main.js:10131
 - SHAKESPEARE_LIVE         true   js/views/context.js:218
 - SPEECH_LIVE              false  js/views/context.js:164
 
@@ -413,7 +414,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                13151 lines
+- js/main.js                13339 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  842
 

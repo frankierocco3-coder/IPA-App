@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v67';                     // 2026-10-30: Rhetoric's Learn page gains the ethical check panel — a live course, and the panel is in js/ which is staleWhileRevalidate
+const VERSION = 'sc-v68';                     // 2026-11-02: Commedia becomes its own course and its Learn page is rebuilt to the owner's mockup — he asked for it three times and is waiting to see it, which is the rule above; the renderer and the CSS are both staleWhileRevalidate, so without this he gets it on the load after the one he opens
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

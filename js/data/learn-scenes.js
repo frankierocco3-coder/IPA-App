@@ -273,6 +273,16 @@ export const LEARN_SCENES = {
   commedia: {
     title: 'The Ready-Made Characters',
     art: null,
+    // THE MAP THE COURSE STANDS ON (owner's mockup, 2026-11-02): hill
+    // towns, cypresses and a dotted road down to Rome, behind the whole
+    // pane at low opacity so it reads as printed paper, not as a picture.
+    //
+    // DRAWN, NOT PHOTOGRAPHED — it is an SVG this repo generates, in the
+    // same spirit as the articulation diagrams and the tree scenery:
+    // a few hundred lines of geometry, ~10KB, one ink colour, and it
+    // rescales and re-themes for free. tools/ has no part in it; the file
+    // is checked in at img/ui/commedia-ground.svg.
+    ground: 'img/ui/commedia-ground.svg',
     light: true,
     // LIVE AS A LAYOUT, GATED AS A COURSE. COMMEDIA_LIVE in
     // js/views/context.js decides whether anyone can reach this page at
@@ -281,10 +291,36 @@ export const LEARN_SCENES = {
     // path did not, and nothing said why.
     live: true,
     layout: 'path-cards',
-    moduleTag: { commedia: 'Form' },
+    // KEYED TO THE THREE MODULES, not the single one this course arrived
+    // with. The ids changed under this when commedia split on the same
+    // day; a stale key here is not an error, it is a module that quietly
+    // renders as a plain heading, which is how the first bad split hid.
+    // THE OWNER'S OWN WORDS FROM THE MOCKUP, 2026-11-02. I flagged that
+    // "The Lazzi" names a lesson that lives in module 3, not module 2;
+    // he sent the same mockup back, so it is his call and it stands.
+    moduleTag: { 'cm-roots': 'Roots', 'cm-form': 'The Lazzi', 'cm-cast': 'The Company' },
+    // LANDSCAPE, AND WIDE (owner's mockup, 2026-11-02). The mockup draws
+    // a picture about half the card and twice as wide as it is tall. The
+    // other path-cards courses are 3:4 portraits in a 216px column and
+    // are untouched: both of these are per-course values.
+    artAspect: '3 / 2',
+    artCol: '46%',
+    // THE OWNER'S PAINTINGS, delivered 2026-11-02 — the three from his
+    // mockup. Converted from the generator's WEBP to baseline JPEG,
+    // because tools/build_artifact.py ships .jpg/.png/.svg/.json only and
+    // a .webp would sit in git and never reach the live site. 1400x933,
+    // which is 3:2 to three decimal places, so `artAspect` crops nothing.
+    //
+    // They replaced three engraved plates borrowed from the mask chapters
+    // that stood in here for about an hour. The plates are still in
+    // img/lessons/commedia and are still what the mask chapters use.
     moduleCard: {
-      commedia: { src: 'img/ui/character-card-commedia.jpg',
-        alt: 'Three commedia dell’arte players rehearsing in a sunlit room: a stooped Pantalone in a red cap leaning on a stick, a harlequin in a diamond-patterned costume mid-step, and a strutting Capitano with a hand on a prop sword, all in leather half-masks.' },
+      'cm-roots': { src: 'img/ui/commedia-card-cm-roots.jpg',
+        alt: 'Three masked players rehearsing in a sunlit studio: a stooped Pantalone in a red cap and dark brocade cloak leaning on a stick, a harlequin in a diamond-patterned costume crouched mid-step with both hands raised, and a strutting Capitano in red with a plumed hat and a sword at his hip. Character sketches are pinned to the walls and leather masks rest on a side table.' },
+      'cm-form': { src: 'img/ui/commedia-card-cm-form.jpg',
+        alt: 'A company building a play around a workshop table: a woman in a white blouse and red skirt leaning on the boards, a masked zanni in cream leaping with one boot up on the table, and two seated men watching and gesturing back. Leather masks hang in a row on the wall behind, and scenario pages and a jug lie on the table.' },
+      'cm-cast': { src: 'img/ui/commedia-card-cm-cast.jpg',
+        alt: 'Six leather commedia masks standing in a row on a worn wooden table by candlelight, long-nosed and dark and red and cream. Behind them hang five pinned character plates labelled Pantalone, Arlecchino, Colombina, Il Capitano and Il Dottore, each with an ink drawing of the figure.' },
     },
     done: 'played',
     above: 'WHAT THE MASK SHOWS',

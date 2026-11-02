@@ -74,18 +74,60 @@ def count(rel, pattern):
     return len(re.findall(pattern, read(rel)))
 
 
+def record_blocks(src):
+    """Every authored record as its own slice of text, keyed by its module.
+
+    One file can hold two courses since 2026-11-02 (character-course.js
+    holds Building a Character and Commedia dell'Arte), so any per-course
+    figure taken by sweeping a whole file is wrong for both of them. This
+    cuts the file at record boundaries instead and lets the caller keep
+    the records it owns. Both record styles are matched: id on the brace
+    line, and brace-on-its-own-line as speech-course.js writes it."""
+    hits = list(re.finditer(r"\n  \{(?:\s*\n\s+| )id: '([a-z0-9-]+)'", src))
+    starts = [m.start() for m in hits]
+    out = []
+    for m, a, b in zip(hits, starts, starts[1:] + [len(src)]):
+        block = src[a:b]
+        mod = re.search(r"module: '([a-z-]+)'", block)
+        # The RECORD's id, taken from the boundary match — a block also
+        # contains question ids and figure keys, and a loose sweep for
+        # `id:` would count those as lessons.
+        out.append((mod.group(1) if mod else None, m.group(1), block))
+    return out
+
+
 def lessons():
     """Authored lesson records per book course, and the module each course
     withdraws. Building a Character exports CHARACTER_LESSONS as
     CHARACTER_LESSONS_ALL.filter(l => ROLE_LIVE || l.module !== 'role'), so
-    counting the array overstates the course by the size of 'role'."""
+    counting the array overstates the course by the size of 'role'.
+
+    A COURSE IS NOT THE SAME THING AS A FILE, since 2026-11-02. Commedia
+    dell'Arte became its own course that day and its records stayed in
+    character-course.js, because they are reviewed prose and moving them
+    would risk a transcription error for tidiness. So this table counted
+    its 22 records under Building a Character and printed no Commedia row
+    at all — while the Workspaces section above it printed Commedia LIVE.
+    A session reading the block would have been told, by the one artifact
+    CLAUDE.md orders it to trust over memory, that a live course had no
+    lessons and that Building a Character had 22 it does not walk.
+
+    The `lifted` field is what keeps the two facts in step: it names a
+    module whose records are subtracted from the file's own course and
+    counted as a course in their own right. Unlike `withdrawn` it is not
+    behind a flag — a lift is not reversible by flipping anything, it is
+    simply where the course now lives."""
     return [
         ('Acting & Scene Work', 'js/data/acting/acting-course.js', r"\n  \{ id: 'ac-",
-         ('performance', 'PERFORMANCE_LIVE')),
+         ('performance', 'PERFORMANCE_LIVE'), None, None),
         ('Building a Character', 'js/data/character/character-course.js',
-         r"\n  \{ id: '(?:ch|ac)-[a-z-]+', module:", ('role', 'ROLE_LIVE')),
-        ('Shakespeare', 'js/data/shakespeare/shakespeare-course.js', r"\n  \{ id: 'sh-", None),
-        ('Rhetoric', 'js/data/rhetoric/rhetoric-course.js', r"\n  \{ id: 'rh-", None),
+         r"\n  \{ id: '(?:ch|ac)-[a-z-]+', module:", ('role', 'ROLE_LIVE'),
+         ('commedia', 'Commedia dell’Arte'), None),
+        # SAME FILE AS THE ROW ABOVE, by design — see the docstring.
+        ('Commedia dell’Arte', 'js/data/character/character-course.js',
+         r"\n  \{ id: '(?:ch|ac)-[a-z-]+', module: 'commedia'", None, None, 'commedia'),
+        ('Shakespeare', 'js/data/shakespeare/shakespeare-course.js', r"\n  \{ id: 'sh-", None, None, None),
+        ('Rhetoric', 'js/data/rhetoric/rhetoric-course.js', r"\n  \{ id: 'rh-", None, None, None),
         # THE COURSE IS CALLED 'Speech', NOT 'Voice & Speech'. The workspace
         # labelled Voice & Speech has id 'ipa' and is LIVE; the withdrawn
         # workspace is id 'speech', labelled Speech. This row said
@@ -99,7 +141,7 @@ def lessons():
         # line and the id on the next. The old r"\n  \{ id: 'sp-" therefore
         # matched ZERO and reported a 25-record course as 0 records.
         ('Speech', 'js/data/speech/speech-course.js',
-         r"\n  \{\s*\n\s+id: '(?:sp-|wsm)", None),
+         r"\n  \{\s*\n\s+id: '(?:sp-|wsm)", None, None, None),
     ]
 
 
@@ -138,23 +180,62 @@ def facts():
 
     pub = published_ids()
     books = []
-    for name, rel, pat, withdrawn in lessons():
+    for name, rel, pat, withdrawn, lifted, own_module in lessons():
         src = read(rel)
         n = count(rel, pat)
         note = ''
+        # The records this row owns, which is not the file when the file
+        # holds two courses. Kept in step with `n` below: whatever is
+        # subtracted from the count is dropped from this slice too.
+        drop = set()
+        if own_module:
+            own = [(i, b) for m, i, b in record_blocks(src) if m == own_module]
+        else:
+            if lifted:
+                drop.add(lifted[0])
+            if withdrawn and not flagmap.get(withdrawn[1], True):
+                drop.add(withdrawn[0])
+            own = [(i, b) for m, i, b in record_blocks(src) if m not in drop]
+        own_src = ''.join(b for _, b in own)
+        mine = [i for i, _ in own]
         if withdrawn:
             mod, flag = withdrawn
             if not flagmap.get(flag, True):
                 hidden = len(re.findall(r"module: '%s'" % mod, src))
                 n -= hidden
                 note = '(%d more in the withdrawn %s module, behind %s)' % (hidden, mod, flag)
+        if lifted:
+            mod, course = lifted
+            gone = len(re.findall(r"module: '%s'" % mod, src))
+            n -= gone
+            note = (note + ' (%d further records in this file are %s, '
+                           'its own course since 2026-11-02)' % (gone, course)).strip()
+        # HOW MANY OF THOSE RECORDS THE PATH ACTUALLY WALKS. A
+        # `reference: true` record is a page you are sent to and never a
+        # step: by the owner's order of 2026-09-22 it is "not listed in its
+        # module, shelved, counted or given a place in the Next sequence".
+        # So a record count is not a lesson count, and for Commedia the two
+        # differ by thirteen — which is the whole of its mask gallery.
+        #
+        # THIS LINE EXISTS BECAUSE THE SPLIT GOT BUILT WRONG WITHOUT IT. On
+        # 2026-11-02 Commedia's modules were drawn from its 22 records, three
+        # of the four held nothing but reference pages, and the Learn page
+        # rendered a single card. Nothing in this report said 9.
+        refs = len(re.findall(r"reference: true", own_src))
+        if refs:
+            note = (note + ' (%d of them reference pages, so the path walks %d)'
+                    % (refs, n - refs)).strip()
         if not flagmap.get({'Speech': 'SPEECH_LIVE'}.get(name, '_'), True):
             note = (note + ' WORKSPACE WITHDRAWN').strip()
         # Tolerate the brace-on-its-own-line style too (speech-course.js), or
         # an unpublished Speech lesson is invisible to the draft-gate warning
         # below — which is the one thing this report exists to catch.
-        allids = re.findall(r"\n  \{\s*\n?\s*id: '([a-z0-9-]+)'", src)
-        unpub = [x for x in allids if x not in pub and re.match(r'^(ac|ch|sh|rh|sp)-', x)]
+        #
+        # SCOPED TO THE ROW'S OWN RECORDS, not the whole file. Two rows now
+        # read character-course.js, so a file-wide sweep would report every
+        # unpublished commedia lesson twice — once under each course — and
+        # the draft-gate warning is the line this report exists for.
+        unpub = [x for x in mine if x not in pub and re.match(r'^(ac|ch|sh|rh|sp)-', x)]
         books.append((name, n, len(unpub), unpub[:6], note))
 
     return {

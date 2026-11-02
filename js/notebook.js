@@ -16,7 +16,7 @@
 
 import { metaGet, metaSet, dbSupported } from './db.js';
 import { esc } from './ui.js';
-import { characterOpen, shakespeareOpen, rhetoricOpen } from './views/context.js';
+import { characterOpen, commediaOpen, shakespeareOpen, rhetoricOpen } from './views/context.js';
 
 const TABS_KEY = 'notebook:tabs';
 const noteKey = id => `notebook:${id}`;
@@ -49,8 +49,17 @@ const CHARACTER_BOOK = { id: 'character', label: 'Building a Character' };
 // the storage keys and are never renamed.
 const SHAKESPEARE_BOOK = { id: 'shakespeare', label: 'Shakespeare' };
 const RHETORIC_BOOK = { id: 'rhetoric', label: 'Rhetoric' };
+// COMMEDIA GOT ITS OWN NOTEBOOK THE DAY IT GOT ITS OWN WORKSPACE
+// (2026-11-02), because the split is what broke it: the course used to
+// be module 1 of Building a Character, so notes taken in it filed under
+// `character` and were right. The moment it became workspace `commedia`
+// it fell through to the Acting notebook — the same gap the comment
+// above records for Shakespeare and Rhetoric, arriving a third time by
+// the same route. A new workspace needs a tab in the same commit.
+const COMMEDIA_BOOK = { id: 'commedia', label: 'Commedia' };
 const optionalBooks = () => [
   ...(characterOpen() ? [CHARACTER_BOOK] : []),
+  ...(commediaOpen() ? [COMMEDIA_BOOK] : []),
   ...(shakespeareOpen() ? [SHAKESPEARE_BOOK] : []),
   ...(rhetoricOpen() ? [RHETORIC_BOOK] : []),
 ];
@@ -74,6 +83,7 @@ let els = null;
 export function notebookForContext(workspace, course) {
   if (workspace === 'acting') return 'acting';
   if (workspace === 'character') return characterOpen() ? 'character' : 'acting';
+  if (workspace === 'commedia') return commediaOpen() ? 'commedia' : 'acting';
   if (workspace === 'shakespeare') return shakespeareOpen() ? 'shakespeare' : 'acting';
   if (workspace === 'rhetoric') return rhetoricOpen() ? 'rhetoric' : 'acting';
   if (workspace === 'ipa') return 'ipa';
