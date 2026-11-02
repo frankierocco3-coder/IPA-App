@@ -3435,7 +3435,9 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    into a four-word column. */
 .lxc-card .lxc-fig { max-width: 88px; margin-bottom: -4px; }
 .lxc-card-p { min-width: 0; }
-.sx-steps.is-rich .lxc-fig { max-width: 110px; }
+/* (the is-rich ornament width is set with the sequence panel above;
+   a second rule here used to override it to 110px and push the
+   drawing out of its 92px column, under the step's number.) */
 .lxc-panel .lxc-fig { max-width: 130px; align-self: center; }
 
 /* THE TWO BOXES SIT SIDE BY SIDE (owner's rendering). Try it on the

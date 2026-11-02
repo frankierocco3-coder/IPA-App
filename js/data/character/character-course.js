@@ -600,7 +600,13 @@ export const CHARACTER_LESSONS_ALL = [
       { p: 'By the time you reach the later modules, inventing a person from scratch or building one from a script, you will already know what a character is made of, because you will have taken thirteen of them apart.' },
       // The paragraph that used to follow the cards above, as the sage
       // panel the owner's rendering ends the page on. His wording.
-      { panel: { tone: 'sage', title: 'What this changes for an actor', fig: 'cm-l01-reflect',
+      // NO `fig` HERE. The mask belongs to Try it, which sits beside this
+      // panel, and giving both the same drawing put the same beaked mask
+      // twice across one row. The owner's rendering flanks this one with
+      // leaf sprigs instead, and there is no sprig in the handoff — so it
+      // goes without until there is one, rather than borrowing its
+      // neighbour's picture.
+      { panel: { tone: 'sage', title: 'What this changes for an actor',
         text: 'You are not only learning an old Venetian merchant. You are learning what a centre of gravity is, what it means for a nose to lead, how a want turns into a walk, and how a person puts themselves back together after being caught out. Every one of those is a question you will ask of every character you ever build.' } },
     ] },
 
