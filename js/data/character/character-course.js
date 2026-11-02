@@ -617,7 +617,67 @@ export const CHARACTER_LESSONS_ALL = [
     objective: 'Know where commedia came from, how its companies worked, what structured improvisation meant, and where its characters went after it faded.',
     orientation: 'Commedia was not actors making it all up. It was trained professionals improvising inside a form they knew completely.',
     reflection: 'The companies improvised inside a plot everyone already knew. Where in your own work do you know the destination but find the route fresh each time?',
+    // ── From the owner's lesson-2 handoff, 2026-11-02 ───────────────
+    // This lesson stacks its panels down the NOTES RAIL rather than
+    // pairing two at the foot of the chapter, which is what his
+    // rendering shows and what `notes` asks the layout for.
+    takeaway: 'Improvisation lived inside a structure.',
+    hero: 'cm-l02-hero',
+    thumb: 'cm-l02-hero',
+    notes: [
+      { tone: 'sage', icon: 'mask', title: 'What this changes for an actor',
+        items: [
+          'You work within a form, not a script.',
+          'Characters have a shared history and set of behaviours.',
+          'Improvisation becomes a skilled response, not random invention.',
+          'The structure gives you freedom to play more boldly.',
+        ] },
+      { tone: 'solid', icon: 'target', title: 'Try it',
+        lead: 'Look at the objects above.',
+        text: 'Choose one mask or prop and imagine your character\u2019s status, job and relationship to the others. What story might they enter with, and what do they want right now?' },
+      { tone: 'plain', icon: 'book', title: 'Reflection',
+        text: 'How does knowing there was a shared language change the way you think about improvisation?' },
+    ],
     body: [
+      // ── THE OVERVIEW (owner's lesson-2 handoff, 2026-11-02) ─────
+      // His brief: replace the uninterrupted historical article on the
+      // first screen with a concise introduction, a four-stage timeline
+      // and an object shelf — and keep the longer source material
+      // available below. So these blocks go in FRONT of the essay and
+      // nothing is removed from it; every one of the fourteen
+      // paragraphs that were here still is, further down.
+      //
+      // The copy is his, from the handoff.
+      { p: 'Commedia dell\u2019arte grew in Italy in the 1500s as professional touring theatre. Companies travelled from town to town, improvising each performance from a prepared plot, using a shared set of characters, masks and routines.' },
+      { p: 'It was a craft, passed from actor to actor, built on training, discipline and deep knowledge of form \u2014 not actors making it up as they went along.' },
+      { tiles: { kind: 'timeline', title: 'A Brief Timeline',
+        deck: 'From ancient roots to a travelling professional theatre.',
+        items: [
+          { title: 'Ancient comic types', fig: 'cm-l02-t1',
+            text: 'The roots go back to Roman comedy and Atellan farces, with fixed character types, masks and bold physicality.' },
+          { title: 'Professional companies \u00b7 1545', fig: 'cm-l02-t2',
+            text: 'By the mid-1500s, companies of professional actors were touring across Italy, performing for pay in city squares, palaces and marketplaces.' },
+          { title: 'Town-square touring', fig: 'cm-l02-t3',
+            text: 'They played in different cities and regions, adapting to audiences, spaces and local tastes, while keeping a shared form and character set.' },
+          { title: 'A shared character vocabulary', fig: 'cm-l02-t4',
+            text: 'Across companies, a common set of characters, masks, entrances and lazzi became a language everyone recognised.' },
+        ] } },
+      { tiles: { kind: 'shelf', title: 'What travelled with the troupe',
+        deck: 'They carried a simple set of tools that could create a whole world, anywhere.',
+        items: [
+          { title: 'Masks', fig: 'cm-l02-o1',
+            text: 'A set of character masks with distinctive shapes and expressions.' },
+          { title: 'Scenario page', fig: 'cm-l02-o2',
+            text: 'A brief plot outline with key beats, not a full script.' },
+          { title: 'Props', fig: 'cm-l02-o3',
+            text: 'Everyday objects that became tools for comedy.' },
+          { title: 'Costume pieces', fig: 'cm-l02-o4',
+            text: 'Flexible clothing elements used to build recognisable character types.' },
+        ] } },
+      // THE ESSAY ITSELF, UNTOUCHED, BELOW THE OVERVIEW. "The full
+      // history" is a label on a control, not teaching copy; every
+      // sentence under it is the lesson's own.
+      { h: 'The full history' },
       { p: 'Commedia dell’arte was professional popular theatre that grew up in Italy in the 1500s. Touring companies played recurring characters, most of them masked, and built each performance from a prepared plot outline, improvising much of the dialogue on the night. The word arte here means craft or trade, in the way a guild is a trade. A fair translation is “the comedy of the professionals”: it separated working actors, who lived by their skill, from the courtly amateurs who performed for pleasure.' },
       { p: 'Those amateurs had a comedy of their own, and it had a name: commedia erudita, the learned comedy. It was written down, it followed classical models closely enough that catching the references took an education, and it was staged indoors for invited guests at courts and academies, often performed by members of the court themselves. Even Machiavelli wrote one. It is also where the scenery revolution happened, with painted perspective sets that only resolved correctly from the centre of the room, where the ruler sat. That is what commedia dell’arte set itself against: one comedy written down and played indoors for people who had been invited, the other improvised in the open for anyone who paid.' },
       { p: 'Nobody invented it. It grew out of everything around it: the old Roman comedies of lovers, fathers and clever slaves, the masked Atellan farces of southern Italy, carnival and marketplace performers, jesters, acrobats and musicians, and the rivalries between Italy’s cities.' },

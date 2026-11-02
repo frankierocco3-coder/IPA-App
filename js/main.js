@@ -4609,19 +4609,77 @@ function principleCardsHtml(cards) {
     </li>`).join('')}</ol>`;
 }
 
+// ── TILE GRIDS (owner's lesson-2 handoff, 2026-11-02) ──────────────
+// Two shapes of the same thing: a titled section with an optional deck
+// and a four-up grid of illustrated tiles.
+//
+//   timeline — numbered stages with a chevron between them, the words
+//              above and the drawing below, for a sequence in time.
+//   shelf    — objects in one panel, the drawing above and the words
+//              below, for things rather than steps.
+//
+// FOUR, TWO, ONE. His responsive rule for both: four across on a wide
+// desktop, two by two on a tablet, one column on a phone. auto-fit with
+// a sensible minimum does all three without a breakpoint each.
+//
+// KINDS ARE A CLOSED LOOKUP, like the scene layouts: a lesson cannot put
+// an arbitrary class name into the page by naming itself one.
+const TILE_KINDS = { timeline: 'is-timeline', shelf: 'is-shelf' };
+function tileGridHtml(t) {
+  const kind = TILE_KINDS[t.kind] ?? TILE_KINDS.shelf;
+  const items = Array.isArray(t.items) ? t.items : [];
+  const numbered = t.kind === 'timeline';
+  return `
+    ${t.title ? `<h2 class="guide-heading lxt-h">${esc(t.title)}${SPRIG('is-beside')}</h2>` : ''}
+    ${t.deck ? `<p class="lxt-deck">${esc(t.deck)}</p>` : ''}
+    <ol class="lxt ${kind}">${items.map((it, i) => {
+    const head = `<p class="lxt-item-h">
+          ${numbered ? `<span class="lxt-n" aria-hidden="true">${i + 1}</span>` : ''}
+          <span>${esc(it.title)}</span></p>`;
+    const body = `<p class="lxt-item-p">${esc(it.text)}</p>`;
+    const art = it.fig ? lessonOrnamentHtml(it.fig) : '';
+    // A STAGE READS DOWNWARDS, AN OBJECT UPWARDS. On the timeline the
+    // words come first and the drawing settles under them; on the shelf
+    // the object is the thing and its label sits beneath it.
+    return `<li class="lxt-item">${numbered ? head + body + art : art + head + body}</li>`;
+  }).join('')}</ol>`;
+}
+
 // ── TINTED PANELS ──────────────────────────────────────────────────
 // The sage "what this changes for an actor" and the terracotta "try it".
 // The tones are a CLOSED LOOKUP for the same reason the learn layouts
 // are: a lesson cannot put an arbitrary class name into the page by
 // naming itself one. Both pairs are tokens that already exist.
-const PANEL_TONES = { sage: 'is-sage', terracotta: 'is-terracotta' };
+const PANEL_TONES = { sage: 'is-sage', terracotta: 'is-terracotta',
+  solid: 'is-solid', plain: 'is-plain' };
+// Small inline marks the owner's rail panels carry. Closed lookup, drawn
+// here rather than fetched, and every one is decorative.
+const PANEL_ICONS = {
+  lamp: '<path d="M9 18h6"/><path d="M10 21.5h4"/><path d="M12 2.5a6.5 6.5 0 0 0-3.8 11.8c.5.4.8 1 .8 1.6V17h6v-1.1c0-.6.3-1.2.8-1.6A6.5 6.5 0 0 0 12 2.5Z"/>',
+  mask: '<path d="M3 7c0-1.1.9-2 2-2h14a2 2 0 0 1 2 2v4c0 5-4 9-9 9s-9-4-9-9V7Z"/><path d="M8.5 10.5h1.5"/><path d="M14 10.5h1.5"/><path d="M9.5 15c1.5 1.2 3.5 1.2 5 0"/>',
+  target: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1"/>',
+  book: '<path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v16H5.5A2.5 2.5 0 0 0 3 21.5V5.5Z"/><path d="M21 5.5A2.5 2.5 0 0 0 18.5 3H13v16h5.5a2.5 2.5 0 0 1 2.5 2.5V5.5Z"/>',
+};
+const panelIcon = k => PANEL_ICONS[k]
+  ? `<svg class="lxc-panel-ico" viewBox="0 0 24 24" aria-hidden="true" fill="none"
+       stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+       stroke-linejoin="round">${PANEL_ICONS[k]}</svg>` : '';
+
 function lessonPanelHtml(p) {
   const tone = PANEL_TONES[p.tone] ?? PANEL_TONES.sage;
+  // A panel says its piece either as a paragraph or as a list of ticked
+  // lines — his "what this changes for an actor" is four of those.
+  const items = Array.isArray(p.items) ? p.items : null;
   return `<section class="lxc-panel ${tone}">
-    ${tone === PANEL_TONES.sage ? SPRIG('is-corner') : ''}
-    <p class="lxc-panel-h">${esc(p.title)}</p>
+    ${tone === PANEL_TONES.sage && !items ? SPRIG('is-corner') : ''}
+    <p class="lxc-panel-h">${panelIcon(p.icon)}${esc(p.title)}</p>
     <div class="lxc-panel-b">
-      <p class="lxc-panel-p">${esc(p.text)}</p>
+      <div class="lxc-panel-t">
+        ${p.lead ? `<p class="lxc-panel-lead">${esc(p.lead)}</p>` : ''}
+        ${items ? `<ul class="lxc-ticks">${items.map(x =>
+    `<li><span class="lxc-tick" aria-hidden="true">✓</span><span>${esc(x)}</span></li>`).join('')}</ul>`
+    : `<p class="lxc-panel-p">${esc(p.text)}</p>`}
+      </div>
       ${p.fig ? lessonOrnamentHtml(p.fig) : ''}
     </div>
   </section>`;
@@ -4643,6 +4701,7 @@ function actingChapterBlocks(l, opts) {
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
     : b.steps ? stepCardsHtml(b.steps)
     : b.cards ? principleCardsHtml(b.cards)
+    : b.tiles ? tileGridHtml(b.tiles)
     : b.panel ? lessonPanelHtml(b.panel)
     : b.fig ? actingFigureHtml(b.fig)
     : b.mask ? maskSheetHtml(b.mask)
@@ -4965,7 +5024,12 @@ function renderActingLesson(id) {
           <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
         ${l.doorway ? `<p class="pane-note">${esc(l.doorway.note ?? '')}
           <button class="linkish" data-shared="${esc(l.doorway.id)}" data-shared-ws="acting" type="button">Open ${esc(l.doorway.label)}</button></p>` : ''}`;
+  // The lesson before this one in the module, for the owner's
+  // "← Previous lesson" control. It walks the same sequence the Next
+  // button does, so the pair cannot disagree about the order.
+  const prv = at > 0 ? seq[at - 1] : null;
   const footer = `
+        ${prv ? `<button class="btn btn-lite lx-prev" id="ac-prev-lesson" type="button"><span class="btn-glyph is-back" aria-hidden="true">←</span>Previous lesson</button>` : ''}
         <div class="practice-row">
           <button class="btn ${isDone ? 'btn-lite' : 'btn-primary'}" id="ac-done" type="button" ${isDone ? 'disabled' : ''}>${isDone ? 'Completed ✓' : 'Mark lesson complete'}${isDone ? '' : '<span class="btn-glyph" aria-hidden="true">✓</span>'}</button>
           ${nxt ? `<button class="btn" id="ac-next-lesson" type="button">Next: ${esc(nxt.title)}<span class="btn-glyph" aria-hidden="true">→</span></button>` : ''}
@@ -5056,14 +5120,18 @@ function renderActingLesson(id) {
     // renders it full width, which is right for a lesson that ends on
     // one box rather than two.
     const bodyLast = l.body?.[l.body.length - 1];
-    const tailPanel = l.reflection && bodyLast?.panel ? bodyLast.panel : null;
+    const tailPanel = !Array.isArray(l.notes) && l.reflection && bodyLast?.panel
+      ? bodyLast.panel : null;
     const pairHtml = tailPanel ? `
           <div class="lxc-panels">
             ${lessonPanelHtml({ tone: 'terracotta', title: 'Try it',
     fig: 'cm-l01-reflect', text: l.reflection })}
             ${lessonPanelHtml(tailPanel)}
           </div>`
-      : l.reflection ? `
+      // A lesson whose panels live in the rail has already said this
+      // there; rendering it again here would put the same prompt twice
+      // on one page.
+      : l.reflection && !Array.isArray(l.notes) ? `
           <aside class="lx-reflect" aria-label="Reflection">
             <p class="lx-reflect-h">Try it</p>
             <p class="lx-q">${esc(l.reflection)}</p>
@@ -5078,6 +5146,16 @@ function renderActingLesson(id) {
     // The takeaway line if the lesson has one, else the objective — a
     // different kind of sentence, but the nearest true one.
     const take = l.takeaway ?? l.objective ?? null;
+    // ── PANELS IN THE RAIL (owner's lesson-2 handoff) ───────────────
+    // Lesson 1 ends on two panels across the foot of the chapter;
+    // lesson 2 stacks four of them down the notes rail instead. Which
+    // it is belongs to the lesson, not the layout, so a lesson that
+    // wants them in the rail says so by carrying `notes`.
+    const railPanels = Array.isArray(l.notes)
+      ? l.notes.map(lessonPanelHtml).join('') : '';
+    // A lesson with rail panels has already said its piece there; the
+    // "in this lesson" list and the foot pair would repeat it.
+    const showToc = !railPanels;
     // NO pageTopbar HERE. It emits its own #brand-home, and the sidebar
     // below now carries one — two of that id in the document and
     // getElementById hands wireBrandHome() the first, so the sidebar's
@@ -5161,10 +5239,13 @@ function renderActingLesson(id) {
             ${atMod >= 0 ? `<p class="lx-notes-pos">Lesson ${atMod + 1} of ${inMod.length}</p>` : ''}
             <p class="lx-notes-t">${esc(l.title)}</p>
             ${inMod.length > 1 ? `
-            <div class="lm-bar lx-notes-bar" role="img"
-                 aria-label="Lesson ${modAt} of ${inMod.length}">
-              <i style="width:${modPct}%"></i></div>
-            <p class="lx-notes-sub">${modAt} of ${inMod.length} lessons</p>` : ''}
+            <ol class="lx-steps" role="img"
+                aria-label="Lesson ${modAt} of ${inMod.length}">
+              ${inMod.map((x, i) => {
+    const st = speechLessonDone(x.id) ? ' is-done' : i === atMod ? ' is-here' : '';
+    return `<li class="lx-stepdot${st}"><span>${speechLessonDone(x.id) ? '✓' : i + 1}</span></li>`;
+  }).join('')}
+            </ol>` : ''}
             ${take ? `
             <section class="sp-takeaway lx-take">
               <h3 class="lx-take-h"><svg class="lx-take-ico" viewBox="0 0 24 24"
@@ -5175,7 +5256,8 @@ function renderActingLesson(id) {
               ${SPRIG('is-corner')}
               <p class="lx-take-p${l.takeaway ? ' is-lead' : ''}">${esc(take)}</p>
             </section>` : ''}
-            ${marks.length ? `
+            ${railPanels}
+            ${showToc && marks.length ? `
             <nav class="lx-toc" aria-label="In this lesson">
               <p class="lx-toc-h">In this lesson</p>
               <ol class="lx-toc-list">${marks.map((h, i) =>
@@ -5237,6 +5319,9 @@ function renderActingLesson(id) {
     b.addEventListener('click', () => openSharedRecord(b.dataset.sharedWs, b.dataset.shared)));
   document.getElementById('ac-next-lesson')?.addEventListener('click', () => navTo(() => {
     navStack.pop(); renderActingLesson(nxt.id);
+  }));
+  document.getElementById('ac-prev-lesson')?.addEventListener('click', () => navTo(() => {
+    navStack.pop(); renderActingLesson(prv.id);
   }));
   wireChapterList(renderActingLesson);
   // The study layout's left column. Same pop-then-render as the chapter

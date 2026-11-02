@@ -310,6 +310,31 @@ Object.assign(CHARACTER_FIGURES, {
   // section heading and in the notes rail; the spray was in the picture
   // all along and did not need commissioning.
   'cm-l01-sprig': l01('l01-sprig.png', '', 76, 49),
+
+  // ── Lesson 2, The History of Commedia (owner handoff, 2026-11-02) ──
+  // The hero, four timeline stages and four objects from the troupe's
+  // trunk. Same provenance and same caveat as lesson 1's: crops from his
+  // concept rendering, right at the size they display and soft above it.
+  // The eight line drawings are keyed to transparency; the hero is a
+  // painting and is not.
+  'cm-l02-hero': l01('l02-hero.png',
+    'A masked player in cream leaping into the middle of a crowded sunlit piazza, a stooped Pantalone in red behind him, a woman in a red dress and a harlequin beside her, with townspeople packed around them under the arcades.', 568, 308),
+  'cm-l02-t1': l01('l02-t1.png',
+    'A pen drawing of a masked Roman farce player leaning forward with one arm flung out.', 155, 110),
+  'cm-l02-t2': l01('l02-t2.png',
+    'A pen drawing of a touring company’s cart with players walking beside it.', 192, 84),
+  'cm-l02-t3': l01('l02-t3.png',
+    'A pen drawing of a crowd gathered in a town square before a row of houses.', 216, 92),
+  'cm-l02-t4': l01('l02-t4.png',
+    'A pen drawing of two masked players side by side, each in a different costume.', 196, 72),
+  'cm-l02-o1': l01('l02-o1.png',
+    'Three leather character masks in a row, one dark, one red, one cream, each with a long nose.', 217, 74),
+  'cm-l02-o2': l01('l02-o2.png',
+    'A handwritten scenario page with a small figure drawn in the margin.', 180, 77),
+  'cm-l02-o3': l01('l02-o3.png',
+    'A tambourine, a slapstick and a pewter jug.', 190, 78),
+  'cm-l02-o4': l01('l02-o4.png',
+    'A folded diamond-patterned costume, a white shirt and a feathered tricorn hat.', 205, 84),
 });
 
 export const characterFigure = key =>

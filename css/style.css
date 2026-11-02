@@ -3259,7 +3259,14 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    own proportions it stays where it was drawn to be — towns down the
    left margin, the road down the right — and the long tail of a lesson
    simply has no ornament, which is where the eye is reading anyway. */
-.lx-ground { top: 0; left: -40px; width: calc(100% + 80px);
+/* NO BLEED AT ALL, and the reason is worth writing down. An absolutely
+   positioned child resolves `100%` against its containing block's
+   PADDING box, and .lx-shell's padding box already spans the full
+   window — so `calc(100% + 32px)` with `left: -16px` reached 16px past
+   the right edge and gave the whole page a horizontal scrollbar. It was
+   40px before that, for the same reason. The shell is already as wide
+   as the page; the ground needs nothing added to it. */
+.lx-ground { top: 0; left: 0; width: 100%;
   height: 1180px; object-fit: cover; object-position: top center;
   opacity: .38; }
 .lx-shell.has-ground > .lx-side,
@@ -3478,6 +3485,92 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   font-size: 19px; line-height: 1.2; }
 .lxc-panel.is-sage .lxc-panel-h { color: #3f5230; }
 .lxc-panel.is-terracotta .lxc-panel-h { color: #a65b3a; }
+/* ── TILE GRIDS (owner's lesson-2 handoff) ─────────────────────────
+   Four across on a wide desktop, two by two on a tablet, one on a
+   phone — auto-fit with a minimum does all three without a breakpoint
+   for each. */
+.lxt-h { margin-bottom: 4px !important; }
+.lxt-deck { margin: 0 0 14px; font-size: 15px; color: var(--muted); }
+/* FOUR, THEN TWO, THEN ONE — the owner's rule, written out rather than
+   left to auto-fit. auto-fit with a 190px minimum gave three across:
+   four tracks need 4x190 plus three 12px gaps, which is 796 in a column
+   that measured 786, so it dropped a track. Explicit columns also give
+   exactly 2 on a tablet, where auto-fit would have gone 4, 3, 2, 1. */
+.lxt { list-style: none; margin: 0 0 26px; padding: 0; display: grid;
+  gap: 12px; grid-template-columns: 1fr; }
+@media (min-width: 620px) { .lxt { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1040px) { .lxt { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+/* `min-width: 0` or the row wraps three-and-one. A grid track sized
+   `minmax(190px, 1fr)` still refuses to go below its content's
+   min-content width, and these tiles hold images whose intrinsic width
+   attribute is up to 217px — so four tracks asked for more than the
+   column had and the fourth dropped to its own line. */
+.lxt-item { background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 14px; display: flex; flex-direction: column;
+  gap: 8px; position: relative; min-width: 0; }
+.lxt .lxc-fig { min-width: 0; }
+.lxt-item-h { display: flex; align-items: flex-start; gap: 9px; margin: 0;
+  font-family: var(--serif, Georgia, serif); font-size: 16.5px;
+  line-height: 1.2; }
+.lxt-n { flex: 0 0 auto; display: grid; place-items: center;
+  width: 23px; height: 23px; border-radius: 50%; background: var(--gold);
+  color: #4a3a12; font-family: var(--sans, system-ui, sans-serif);
+  font-size: 12px; font-weight: 800; }
+.lxt-item-p { margin: 0; font-size: 14px; line-height: 1.5; }
+.lxt .lxc-fig { max-width: 100%; width: auto; margin: auto auto 0;
+  align-self: center; }
+/* A stage reads downwards and its drawing settles at the foot; an
+   object is the thing and its label sits under it. */
+.lxt.is-timeline .lxc-fig { margin-top: 6px; max-height: 108px; }
+.lxt.is-shelf .lxc-fig { margin: 0 auto 4px; max-height: 92px; }
+.lxt.is-shelf .lxt-item { text-align: center; }
+.lxt.is-shelf .lxt-item-h { justify-content: center; }
+/* The chevron between stages, as on the course sequence. */
+.lxt.is-timeline .lxt-item + .lxt-item::after { content: '\203A';
+  position: absolute; left: -10px; top: 46px; font-size: 21px; line-height: 1;
+  color: var(--muted); opacity: .7; }
+@media (max-width: 860px) {
+  .lxt.is-timeline .lxt-item + .lxt-item::after { content: none; }
+}
+
+/* Panel tones the rail uses: a filled terracotta for Try it, and a plain
+   parchment card for Reflection. */
+.lxc-panel.is-solid { background: #c05b38; border-color: #a8492a; color: #fff6ef; }
+.lxc-panel.is-solid .lxc-panel-h { color: #fff6ef; }
+.lxc-panel.is-plain { background: var(--panel); border-color: var(--line); }
+.lxc-panel-h { display: flex; align-items: center; gap: 7px; }
+.lxc-panel-ico { width: 16px; height: 16px; flex: 0 0 auto; }
+.lxc-panel-lead { margin: 0 0 4px; font-weight: 700; font-size: 14px; }
+.lxc-ticks { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lxc-ticks li { display: grid; grid-template-columns: 17px 1fr; gap: 8px;
+  align-items: start; font-size: 14px; line-height: 1.45; }
+.lxc-tick { display: grid; place-items: center; width: 17px; height: 17px;
+  margin-top: 1px; border-radius: 50%; background: #4a5c3b; color: #fbf8f1;
+  font-size: 10px; font-weight: 800; }
+.lxc-panel-t { flex: 1 1 auto; min-width: 0; }
+
+/* The rail's stepper: one disc per lesson, the finished ones ticked. */
+/* THE DISCS DO NOT STRETCH. Giving each <li> `flex: 1` to make room for
+   a joining rule turns the disc itself into an ellipse — the li IS the
+   disc. The rule is drawn once behind the row instead, and the discs sit
+   on top of it with their own background, which punches it through. */
+.lx-steps { list-style: none; margin: 0 0 14px; padding: 0; display: flex;
+  align-items: center; justify-content: space-between; position: relative; }
+.lx-steps::before { content: ''; position: absolute; left: 12px; right: 12px;
+  top: 50%; height: 2px; background: var(--line); transform: translateY(-50%); }
+.lx-stepdot { flex: 0 0 auto; position: relative; display: grid;
+  place-items: center; width: 25px; height: 25px; border-radius: 50%;
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  background: var(--bg); box-shadow: inset 0 0 0 1.5px var(--line); }
+.lx-stepdot.is-done { background: #4a5c3b; color: #fbf8f1;
+  box-shadow: inset 0 0 0 1.5px #4a5c3b; }
+.lx-stepdot.is-here { background: var(--gold); color: #4a3a12;
+  box-shadow: inset 0 0 0 1.5px var(--gold); }
+
+.lx-prev { width: 100%; margin-bottom: 8px; display: inline-flex;
+  align-items: center; justify-content: center; }
+.btn-glyph.is-back { margin: 0 8px 0 0; }
+
 .lxc-panel-b { display: flex; align-items: flex-start; gap: 14px; }
 .lxc-panel-p { margin: 0; font-size: 15px; line-height: 1.6; flex: 1 1 auto;
   max-width: 62ch; }

@@ -399,7 +399,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - RHETORIC_LIVE            false  js/main.js:279
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:244
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:10460
+- SCENE_STUDY_LIVE         false  js/main.js:10545
 - SHAKESPEARE_LIVE         true   js/views/context.js:218
 - SPEECH_LIVE              false  js/views/context.js:164
 
@@ -410,11 +410,11 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - Stratagems                 38
 - Scenes                     27
 - Commedia masks             13
-- Commedia figures           45
+- Commedia figures           54
 
 ### Size
 
-- js/main.js                13668 lines
+- js/main.js                13753 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  842
 
