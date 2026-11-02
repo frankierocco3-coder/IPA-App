@@ -2810,34 +2810,12 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .is-pathcards .lm-n { position: absolute; left: -52px; top: 20px;
   width: 34px; height: 34px; font-size: 16px; z-index: 2;
   border: 3px solid var(--bg); }
-/* ── THE MASK MEDALLION (owner's mockup, 2026-11-02) ────────────────
-   The route number keeps its gold disc and the mask hangs beneath it, on
-   the dashed rail, exactly as the mockup draws the pair. Two earlier
-   attempts put the face BEHIND the digit with CSS gradients and both
-   failed — at 34px a face and a numeral in one circle fight, and the
-   numeral is the one that has to survive. Hanging it below gives each
-   its own room and costs nothing.
-
-   NO `position` ON .lm-n. It is already absolutely placed out in the
-   rail gutter at left:-52px; re-declaring it once re-anchored all three
-   medallions into the tops of the cards. The disc is already a
-   containing block, so ::after just needs offsets.
-
-   A REAL SVG, NOT GRADIENTS. Same-origin file, allowed by the CSP's
-   `img-src 'self'`, and it ships (.svg is on build_artifact's list). */
-.sc-commedia .is-pathcards .lm-n { font-weight: 800; }
-.sc-commedia .is-pathcards .lm-n::after {
-  content: ''; position: absolute; top: calc(100% + 3px); left: 50%;
-  width: 30px; height: 39px; margin-left: -15px;
-  background: url('../img/ui/commedia-medallion.svg') center / contain no-repeat;
-  pointer-events: none; }
-/* The hanging mask needs the gutter to be tall enough not to collide with
-   the next card's number: cards are 232px+ tall here, so there is room. On
-   a phone the disc shrinks to 28px and the gutter to 38px, which is too
-   little for a 30px mask beside a 16/9 picture — it drops off there. */
-@media (max-width: 700px) {
-  .sc-commedia .is-pathcards .lm-n::after { display: none; }
-}
+/* THE MASK MEDALLIONS ARE GONE (owner, 2026-11-02, the same day).
+   A gold mask cartouche hung under each route number here, drawn from
+   img/ui/commedia-medallion.svg, matching the mockup's rail. He had it
+   for about an hour and asked for it out. The numbers keep the plain
+   gold discs they always had. Do not re-add it without being asked:
+   three attempts went into that element and the last one shipped. */
 /* A CARD WITH NO PICTURE GETS NO PICTURE COLUMN. Both selectors used to
    take the two-column grid, so a module whose art the owner has not drawn
    yet reserved an empty 216px gutter and set its text in the remaining

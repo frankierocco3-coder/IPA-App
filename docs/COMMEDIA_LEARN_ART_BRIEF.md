@@ -130,22 +130,15 @@ has to lose to the text in front of it.
   close-ups already in the repo, and the same three players the opening
   module is painted from. No new files. If you want different masks in
   that panel, it is a one-line change and there are ten to choose from.
-## 6. The medallion mask face — the one piece of your mockup I did NOT build
+## 6. The medallion mask faces — BUILT, THEN REMOVED on your word
 
-Your mockup draws each route number as a gold medallion with a pale mask
-face behind the digit. The discs are there, in the right place and the
-right gold; **the face is not.**
+Your mockup draws each route number as a gold medallion with a mask face.
+It was built as an SVG cartouche hanging under each number, shipped, and
+you asked for it out the same day. **The route numbers keep the plain gold
+discs they always had, and that is the finished state.**
 
-I tried it in CSS and took it out. At 34px the face either disappeared or
-fought the numeral, and the numeral is the part that has to survive. The
-attempt also knocked all three medallions out of the rail gutter and into
-the tops of the cards before I caught it, which is a fair warning about
-how fiddly that element is.
-
-It wants either a real drawn glyph from you — **a single pale mask,
-96x96, PNG with transparency, flat and very simple, no shading** — or an
-SVG I draw properly and check at size. Your call which. It is the last
-visible gap between the page and your mockup apart from the paintings.
+Not re-queued and not a gap. If you ever want it back it is one SVG and
+one CSS rule, both in the git history at `f295bd2`.
 * **Lesson thumbnails.** The "Current lesson" rail panel reuses the
   module card art, scaled down. It is empty for `cm-form` and `cm-cast`
   until those two paintings land, which is the same empty state as the

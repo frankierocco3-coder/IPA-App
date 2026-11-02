@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v69';                     // 2026-11-02: the mask medallions, and a stray `}` in style.css that had been silently dropping `.lm-path.is-pathcards` — the fix is CSS, which is staleWhileRevalidate, and he is waiting on both
+const VERSION = 'sc-v70';                     // 2026-11-02: the mask medallions come back out on the owner's word — a removal he is looking for is as much "waiting to see this" as an addition, and a cached stylesheet would keep drawing them
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
