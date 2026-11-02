@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 52" width="40" height="52">
+  <!-- The mask medallion that hangs under each route number on the
+       Commedia Learn path (owner's mockup, 2026-11-02).
+
+       IT IS DRAWN FOR 30x39 CSS PIXELS, which is the only size it ever
+       renders at. Everything here is sized for that: the eyes are the
+       loudest shapes because two dark holes are what makes a face read
+       at a fingernail's width, and the brow and nose are one weight
+       lighter so they describe the mask without turning it to mush.
+       An earlier attempt did this with layered CSS gradients and was
+       taken out — at this size it needed real geometry. -->
+
+  <!-- The cartouche: gold plate with a darker rim. The colour matches the
+       stylesheet's gold token, #c9a24b. Do not write that token's CSS name
+       here: it starts with a double hyphen, which is illegal inside an XML
+       comment and makes the whole file fail to parse. It did exactly that
+       on the first draft, and a background-image that fails to parse is
+       silent — the computed style still reports the url. -->
+  <ellipse cx="20" cy="26" rx="17.5" ry="24.5" fill="#c9a24b"/>
+  <ellipse cx="20" cy="26" rx="17.5" ry="24.5" fill="none" stroke="#9c7a2c" stroke-width="1.5"/>
+  <ellipse cx="20" cy="26" rx="14.2" ry="20.8" fill="none" stroke="#e0c074"
+           stroke-width="1" stroke-opacity=".75"/>
+
+  <!-- the mask face, cream, with the long commedia jaw -->
+  <path d="M20 7.5 C29.5 7.5 32.5 15 32.5 24.5 C32.5 36 26.5 44.5 20 44.5
+           C13.5 44.5 7.5 36 7.5 24.5 C7.5 15 10.5 7.5 20 7.5 Z"
+        fill="#f4e7cb" stroke="#9c7a2c" stroke-width="1.1"/>
+
+  <!-- the brow ridge -->
+  <path d="M9.6 19.5 C13.5 15.6 26.5 15.6 30.4 19.5" fill="none"
+        stroke="#9c7a2c" stroke-width="1.3" stroke-linecap="round"/>
+
+  <!-- the eyes: the two shapes that make it read as a face -->
+  <ellipse cx="14.3" cy="24.2" rx="4.1" ry="3" fill="#43301a"
+           transform="rotate(-13 14.3 24.2)"/>
+  <ellipse cx="25.7" cy="24.2" rx="4.1" ry="3" fill="#43301a"
+           transform="rotate(13 25.7 24.2)"/>
+
+  <!-- the nose, hooked, which is the commedia tell -->
+  <path d="M20 23.5 C18.6 29 18.8 32.5 21.4 34.2" fill="none"
+        stroke="#9c7a2c" stroke-width="1.3" stroke-linecap="round"/>
+</svg>

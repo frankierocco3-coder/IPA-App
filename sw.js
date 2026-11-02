@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v68';                     // 2026-11-02: Commedia becomes its own course and its Learn page is rebuilt to the owner's mockup — he asked for it three times and is waiting to see it, which is the rule above; the renderer and the CSS are both staleWhileRevalidate, so without this he gets it on the load after the one he opens
+const VERSION = 'sc-v69';                     // 2026-11-02: the mask medallions, and a stray `}` in style.css that had been silently dropping `.lm-path.is-pathcards` — the fix is CSS, which is staleWhileRevalidate, and he is waiting on both
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

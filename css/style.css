@@ -2787,7 +2787,6 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
      the clash between drawn labels and painted ones. */
   .gm { margin-bottom: 18px; }
 }
-}
 
 /* ── THE ILLUSTRATED PATH (owner's mockup, 2026-10-30) ──────────────
    A vertical route again, but each module is a wide card: picture left,
@@ -2811,17 +2810,34 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .is-pathcards .lm-n { position: absolute; left: -52px; top: 20px;
   width: 34px; height: 34px; font-size: 16px; z-index: 2;
   border: 3px solid var(--bg); }
-/* THE MASK FACE ON THE MEDALLION IS NOT DONE, and that is deliberate.
-   The owner's mockup draws each route number as a gold medallion with a
-   pale mask face behind the digit. It was tried here as layered radial
-   gradients on a ::before and taken out again: at 34px the face either
-   disappears or fights the numeral, and the numeral is the part that has
-   to survive. A first attempt also re-declared `position` on the disc
-   and threw all three medallions out of the rail gutter and into the
-   tops of the cards, which is the cost of fiddling with this element.
-   The discs keep the mockup's shape and gold; the face wants either real
-   artwork or a proper SVG glyph, drawn once and checked at size. */
+/* ── THE MASK MEDALLION (owner's mockup, 2026-11-02) ────────────────
+   The route number keeps its gold disc and the mask hangs beneath it, on
+   the dashed rail, exactly as the mockup draws the pair. Two earlier
+   attempts put the face BEHIND the digit with CSS gradients and both
+   failed — at 34px a face and a numeral in one circle fight, and the
+   numeral is the one that has to survive. Hanging it below gives each
+   its own room and costs nothing.
+
+   NO `position` ON .lm-n. It is already absolutely placed out in the
+   rail gutter at left:-52px; re-declaring it once re-anchored all three
+   medallions into the tops of the cards. The disc is already a
+   containing block, so ::after just needs offsets.
+
+   A REAL SVG, NOT GRADIENTS. Same-origin file, allowed by the CSP's
+   `img-src 'self'`, and it ships (.svg is on build_artifact's list). */
 .sc-commedia .is-pathcards .lm-n { font-weight: 800; }
+.sc-commedia .is-pathcards .lm-n::after {
+  content: ''; position: absolute; top: calc(100% + 3px); left: 50%;
+  width: 30px; height: 39px; margin-left: -15px;
+  background: url('../img/ui/commedia-medallion.svg') center / contain no-repeat;
+  pointer-events: none; }
+/* The hanging mask needs the gutter to be tall enough not to collide with
+   the next card's number: cards are 232px+ tall here, so there is room. On
+   a phone the disc shrinks to 28px and the gutter to 38px, which is too
+   little for a 30px mask beside a 16/9 picture — it drops off there. */
+@media (max-width: 700px) {
+  .sc-commedia .is-pathcards .lm-n::after { display: none; }
+}
 /* A CARD WITH NO PICTURE GETS NO PICTURE COLUMN. Both selectors used to
    take the two-column grid, so a module whose art the owner has not drawn
    yet reserved an empty 216px gutter and set its text in the remaining
