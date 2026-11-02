@@ -64,14 +64,21 @@ export const CHARACTER_PRINCIPLE =
 // left Shakespeare.
 export const ROLE_LIVE = false;
 
+// RENUMBERED 1-4 ON 2026-11-02, when commedia left and took n:1 with
+// it. The numbers had been 1, 3, 4, 5, 6 — no module 2 has ever existed
+// here — so without this the course opened on a card marked "3".
+//
+// `n` IS DISPLAY ONLY. Ids are storage and never move; this changes the
+// number drawn on a card and nothing a learner has done. `role` takes 5
+// so it slots in rather than returning as a 9 among four.
 export const CHARACTER_MODULES_ALL = [
   { n: 1, id: 'commedia', title: 'Commedia dell’Arte',
     blurb: 'The course starts here: complete, ready-made characters that show you what every character is made of. Learn each form, then find your own life inside it.' },
-  { n: 3, id: 'physical', title: 'The Physical Character',
+  { n: 1, id: 'physical', title: 'The Physical Character',
     blurb: 'The tools the masks are built from, taught on their own: your own habits first, then centre, imagined body, weight, tempo, space, walk, animal and the one gesture that holds a want.' },
-  { n: 4, id: 'vocal', title: 'The Vocal Character',
+  { n: 2, id: 'vocal', title: 'The Vocal Character',
     blurb: 'The voice as a consequence of the body rather than a decision taken separately: how somebody thinks shows in how they phrase, what an accent can and cannot carry, and the words a person reaches for or refuses.' },
-  { n: 5, id: 'status', title: 'Status',
+  { n: 3, id: 'status', title: 'Status',
     blurb: 'Status as behaviour rather than rank: what raises or lowers a person second by second, in the body, the voice and the room, and where in a scene it changes hands.' },
   // Renamed 2026-10-13 by owner order, from "From the inside out" (itself a
   // rename of "Build from your life", 2026-09-28). THE ID STAYS `piece`, so
@@ -81,9 +88,9 @@ export const CHARACTER_MODULES_ALL = [
   // takes a side in the inside-out-versus-outside-in argument, which set it
   // quarrelling with The Physical Character two shelves above. "From Within"
   // keeps the meaning the owner wanted and drops the half that argued.
-  { n: 6, id: 'piece', title: 'From Within',
+  { n: 4, id: 'piece', title: 'From Within',
     blurb: 'Where the people you invent come from, and how improvising alone turns them into a character and a piece.' },
-  { n: 9, id: 'role', title: 'Playing the Role',
+  { n: 5, id: 'role', title: 'Playing the Role',
     blurb: 'Where the whole course points: turning what the text found into choices a body can play, deciding how far to transform, holding it while you genuinely listen, and keeping one record of the person you can return to.' },
 ];
 

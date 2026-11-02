@@ -391,15 +391,15 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - CHARACTER_LIVE           true   js/views/context.js:172
 - COCKNEY_LIVE             true   js/views/context.js:53
 - COINAGE_LIVE             false  js/main.js:306
-- COMMEDIA_LIVE            false  js/views/context.js:202
+- COMMEDIA_LIVE            true   js/views/context.js:208
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
-- RHETORIC_COURSE_LIVE     true   js/views/context.js:226
+- RHETORIC_COURSE_LIVE     true   js/views/context.js:232
 - RHETORIC_LIVE            false  js/main.js:279
-- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:238
+- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:244
 - ROLE_LIVE                false  js/data/character/character-course.js:65
 - SCENE_STUDY_LIVE         false  js/main.js:9943
-- SHAKESPEARE_LIVE         true   js/views/context.js:212
+- SHAKESPEARE_LIVE         true   js/views/context.js:218
 - SPEECH_LIVE              false  js/views/context.js:164
 
 ### Reference shelves

@@ -195,11 +195,17 @@ export const characterOpen = () => CHARACTER_LIVE || characterPreview();
 //
 // The preview key stays. It costs nothing and it is how the next course
 // gets read before it launches.
-// COMMEDIA, lifted out of Building a Character on 2026-11-02. It starts
-// GATED: the course is new as a course, even though every lesson in it
-// has been published inside Character for months. Flip when its own
-// Learn page and shelf have been looked at.
-export const COMMEDIA_LIVE = false;
+// COMMEDIA, lifted out of Building a Character on 2026-11-02.
+//
+// IT SHIPPED GATED FOR ABOUT AN HOUR AND THAT WAS A MISTAKE. Those
+// lessons were already published — nine of them live inside Building a
+// Character — and the split removed them from that course while this
+// one was shut. Content a learner could read in the morning was
+// reachable nowhere by the afternoon. Gating a NEW course is right;
+// gating a course made of already-published lessons is a withdrawal,
+// and withdrawals here are deliberate and flagged, not a side effect of
+// moving a file.
+export const COMMEDIA_LIVE = true;
 export const COMMEDIA_PREVIEW_KEY = 'speechcraft-commedia-preview';
 export const commediaPreview = () => {
   try { return localStorage.getItem(COMMEDIA_PREVIEW_KEY) === 'on'; } catch { return false; }
