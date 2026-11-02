@@ -552,20 +552,56 @@ export const CHARACTER_LESSONS_ALL = [
     objective: 'Understand why this course begins with characters that already exist, and how studying them prepares you to build your own.',
     orientation: 'Welcome to a craft that has transcended languages, cultures and centuries.',
     reflection: 'Think of a character you would love to play one day. Which parts of them could you describe right now, and which would you have to guess?',
+    // ── From the owner's lesson-1 handoff, 2026-11-02 ────────────────
+    // `takeaway` is the one line the notes rail leads with. Without it
+    // the rail falls back to `objective`, which is a different kind of
+    // sentence — what you will be able to do, rather than the thing to
+    // remember. `contents` is the rail's table of contents: the lesson's
+    // own shape in the owner's words, which the `h` blocks alone cannot
+    // give, since this lesson has only one heading.
+    takeaway: 'Start with what already works.',
+    contents: ['Welcome and context', 'Three reasons', 'How the course uses them',
+      'Try it', 'Reflection'],
+    hero: 'cm-l01-hero',
+    thumb: 'cm-l01-thumb',
     body: [
       { p: 'Masked players carried these characters from one town square to the next, across Italy and far beyond it, and audiences who did not share a language laughed at the same faces. The masks have outlived every actor who ever wore them, and they are still here, waiting for whoever puts them on next. Today, that is you.' },
       { p: 'We start with commedia because it gives you a cast of preloaded characters that have existed for centuries and always will. It takes the work out of building a brand-new, multidimensional character, which cuts the learning curve, so you can start building your own.' },
-      { p: 'Each of these characters arrives complete, with everything already decided: what they want and what they fear, where they stand in their world, who they deal with and how, where their body leads from, how they walk, how they think, what fear does to them, the business they are known for, and what their words are really for. Generations of actors refined them in front of audiences until nothing unnecessary was left. They are characters with the workings on the outside.' },
-      { p: 'That makes them the best teachers you could have. When you study Pantalone, you are not only learning an old Venetian merchant. You are learning what a centre of gravity is, what it means for a nose to lead, how a want turns into a walk, and how a person puts themselves back together after being caught out. Every one of those is a question you will ask of every character you ever build.' },
+      // THE THREE IDEAS OF THE PARAGRAPH THAT WAS HERE, as cards (owner
+      // handoff, 2026-11-02). The paragraph said all three in one breath
+      // — arrives complete, workings visible, bridge to your own — and
+      // the owner's rendering names them. His wording, from the handoff.
+      // The sentence the paragraph closed on, that generations of actors
+      // refined them until nothing unnecessary was left, is inside card
+      // two, so nothing it said has been dropped.
+      { cards: [
+        { title: 'Characters arrive complete', fig: 'cm-l01-complete',
+          text: 'Each character already has a clear form: what they want, what they fear, where they stand in the world, how they move, what they say, and how they are recognised.' },
+        { title: 'The workings are visible', fig: 'cm-l01-workings',
+          text: 'The business they are known for, the way their body leads, how they walk, how they speak, and what their words are really for have been refined over generations of actors.' },
+        { title: 'A bridge to building your own', fig: 'cm-l01-bridge',
+          text: 'It takes the work out of building a brand-new, multidimensional character, so you can start studying what makes a character tick and then build your own.' },
+      ] },
+      { p: 'That makes them the best teachers you could have.' },
       { p: 'Much of what the Acting course teaches you to dig for is already here, in plain sight. What this person wants. What they are afraid of losing. The contradiction they carry. Who they are to everyone else, and where the power sits between them. How they move, how they speak, and what their words are really for. In most storytelling you have to excavate all of that. In commedia the characters walk on wearing it.' },
       { p: 'The questions that belong to the scene rather than the person are answered too: the obstacle in the way tonight, what has just changed, what it will cost. Those live in the scenario, the outline of events every actor knows before the show begins. Nothing is hidden from the performer, which is what makes this such a good place to learn.' },
       { h: 'How this course uses them' },
+      // THE SAME THREE STEPS, with the titles and drawings the owner's
+      // handoff gives them. The sentences are the ones that were already
+      // here, unchanged — only a title and an ornament were added.
       { steps: [
-        'First you learn the characters as they are: the history, the form, and each mask in turn, broken down part by part.',
-        'Then you play them: find the stance, the walk and the signature business in your own body, and practise with Mask Cards and One Line, Many Masks.',
-        'Then you build your own. In My Characters, the same breakdown becomes a worksheet: first for your own version of a mask, then for a person you invent, and for a role you are cast in.',
+        { title: 'Learn the forms', fig: 'cm-l01-learn',
+          text: 'First you learn the characters as they are: the history, the form, and each mask in turn, broken down part by part.' },
+        { title: 'Put them in your body', fig: 'cm-l01-body',
+          text: 'Then you play them: find the stance, the walk and the signature business in your own body, and practise with Mask Cards and One Line, Many Masks.' },
+        { title: 'Build your own', fig: 'cm-l01-build',
+          text: 'Then you build your own. In My Characters, the same breakdown becomes a worksheet: first for your own version of a mask, then for a person you invent, and for a role you are cast in.' },
       ] },
       { p: 'By the time you reach the later modules, inventing a person from scratch or building one from a script, you will already know what a character is made of, because you will have taken thirteen of them apart.' },
+      // The paragraph that used to follow the cards above, as the sage
+      // panel the owner's rendering ends the page on. His wording.
+      { panel: { tone: 'sage', title: 'What this changes for an actor', fig: 'cm-l01-reflect',
+        text: 'You are not only learning an old Venetian merchant. You are learning what a centre of gravity is, what it means for a nose to lead, how a want turns into a walk, and how a person puts themselves back together after being caught out. Every one of those is a question you will ask of every character you ever build.' } },
     ] },
 
   { id: 'ch-cm-history', module: 'commedia', order: 2,

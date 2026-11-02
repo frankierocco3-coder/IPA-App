@@ -262,6 +262,50 @@ export const CHARACTER_FIGURES = {
     'The walk. Hunger at the front, and the legs catching up behind it.'),
 };
 
+// ── Lesson 1's own illustrations (owner handoff, 2026-11-02) ──────────
+// The ornaments on Why We Start With Commedia: a hero, a thumbnail, one
+// drawing per principle card, one per step of the course sequence, and a
+// mask for the practice card.
+//
+// THEY ARE CROPS FROM THE OWNER'S CONCEPT RENDERING and his handoff says
+// so: 145x160 for a card drawing, 646x228 for the hero. That is close to
+// the size they display at, so they are right at 1x and soft on a retina
+// screen. They go in as supplied, and a higher-resolution export drops
+// straight over them — the keys and the filenames do not change.
+//
+// NO CAPTIONS AND NO DISCLAIMER. fig() above appends the teaching-
+// interpretation line, which belongs to the mask plates: those are
+// claims about how a character was played. These are ornaments beside
+// prose that makes its own claims, so they are written flat, carry alt
+// text only, and are marked decorative where they repeat the words they
+// sit next to.
+//
+// EVERY ONE IS OPAQUE PARCHMENT, not a cut-out — measured, the corners
+// are about #f8ecd5. The CSS multiplies them into the card so only the
+// ink survives; without that each one is a beige rectangle on a beige
+// card. See .lxc-fig in style.css.
+const l01 = (file, alt, w, h) => ({ title: '', file, alt, w, h });
+Object.assign(CHARACTER_FIGURES, {
+  'cm-l01-hero': l01('l01-hero.png',
+    'Three masked players stepping through an open doorway into a sunlit rehearsal room, a stooped Pantalone in a red cap, a harlequin in a diamond-patterned costume, and a Capitano in red with a plumed hat, with a hill town visible through the door behind them.', 646, 228),
+  'cm-l01-thumb': l01('l01-thumb.png', '', 213, 95),
+  'cm-l01-complete': l01('l01-complete.png',
+    'A pen drawing of a masked merchant in a long coat, one hand raised.', 145, 160),
+  'cm-l01-workings': l01('l01-workings.png',
+    'A pen drawing of a masked servant in a loose white costume, crouched low with both hands open.', 145, 160),
+  'cm-l01-bridge': l01('l01-bridge.png',
+    'A pen drawing of a masked player in a diamond-patterned costume, mid-step with one arm thrown wide.', 145, 160),
+  'cm-l01-learn': l01('l01-learn.png',
+    'A pen drawing of an open book of character plates with a long-nosed leather mask resting on it.', 175, 130),
+  'cm-l01-body': l01('l01-body.png',
+    'A pen drawing of a masked figure in a wide stance, weight forward.', 130, 130),
+  'cm-l01-build': l01('l01-build.png',
+    'A pen drawing of a quill standing in an inkwell beside loose pages of notes.', 190, 130),
+  'cm-l01-reflect': l01('l01-reflect.png',
+    'A pen drawing of a long-beaked leather mask lying on its side.', 140, 105),
+  'cm-l01-town': l01('l01-town.png', '', 440, 150),
+});
+
 export const characterFigure = key =>
   (CHARACTER_FIGURES[key] ? { ...CHARACTER_FIGURES[key], src: DIR + CHARACTER_FIGURES[key].file } : null);
 

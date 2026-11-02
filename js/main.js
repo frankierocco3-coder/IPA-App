@@ -4540,22 +4540,95 @@ function stepLead(s) {
 // mistake rather than as a set. A block is titled only when every step
 // in it yields a lead-in, which is true of Slapstick's five beats and
 // false of the commedia opener's three.
+// A step may be a bare string or { title, text, fig }. Strings keep the
+// lead-in behaviour above; objects say outright what they are, which is
+// how the owner's handoff supplies them.
 function stepCardsHtml(steps) {
-  const leads = steps.map(s => stepLead(String(s)));
-  const titled = leads.every(Boolean);
-  return `<ol class="sx-steps">${steps.map((s, i) => `
-    <li class="sx-step">
-      ${titled ? `<p class="sx-step-h">${esc(leads[i].head)}</p>` : ''}
-      <p class="sx-step-p">${esc(titled ? leads[i].rest : s)}</p>
+  const rich = steps.some(s => s && typeof s === 'object');
+  const leads = rich ? [] : steps.map(s => stepLead(String(s)));
+  const titled = !rich && leads.every(Boolean);
+  return `<ol class="sx-steps${rich ? ' is-rich' : ''}">${steps.map((s, i) => {
+    const o = rich ? (typeof s === 'object' ? s : { text: s }) : null;
+    const head = rich ? o.title : titled ? leads[i].head : null;
+    const text = rich ? o.text : titled ? leads[i].rest : s;
+    // A rich step numbers itself inline beside its title, because the
+    // drawing occupies the corner the plain card's number sits in.
+    return `<li class="sx-step">
+      ${rich && o.fig ? lessonOrnamentHtml(o.fig) : ''}
+      <div class="sx-step-body">
+        ${head ? `<p class="sx-step-h">
+          ${rich ? `<span class="sx-step-n" aria-hidden="true">${i + 1}</span>` : ''}
+          <span>${esc(head)}</span></p>` : ''}
+        <p class="sx-step-p">${esc(text)}</p>
+      </div>
+    </li>`;
+  }).join('')}</ol>`;
+}
+
+// ── LESSON ORNAMENTS (owner handoff, 2026-11-02) ────────────────────
+// The small drawings that sit inside a card. NOT actingFigureHtml: that
+// builds a <figure> with a caption, sized to the full column, which is
+// the right thing for a plate the prose is talking about and the wrong
+// thing for an ornament beside three lines of text.
+//
+// DECORATIVE BY DEFAULT. A registry entry with empty alt is one that
+// repeats what the card already says in words, so it is hidden from a
+// screen reader rather than read out twice.
+function lessonOrnamentHtml(key) {
+  const f = characterFigure(key) ?? actingFigure(key) ?? shakespeareFigure(key);
+  if (!f) return '';
+  const deco = !f.alt;
+  return `<img class="lxc-fig" src="${esc(f.src)}" alt="${esc(f.alt ?? '')}"
+    ${deco ? 'aria-hidden="true"' : ''} width="${f.w ?? ''}" height="${f.h ?? ''}"
+    loading="lazy" decoding="async">`;
+}
+
+// ── PRINCIPLE CARDS ────────────────────────────────────────────────
+// Numbered concept cards. The owner's handoff is explicit that cards are
+// for CONCEPTS, practice and takeaways, and that continuous prose stays
+// prose — so this kind exists to carry the three ideas the lesson names,
+// not to chop paragraphs up.
+function principleCardsHtml(cards) {
+  return `<ol class="lxc-cards">${cards.map(c => `
+    <li class="lxc-card">
+      <p class="lxc-card-h"><span class="lxc-card-n" aria-hidden="true"></span>
+        <span>${esc(c.title)}</span></p>
+      <div class="lxc-card-b">
+        <p class="lxc-card-p">${esc(c.text)}</p>
+        ${c.fig ? lessonOrnamentHtml(c.fig) : ''}
+      </div>
     </li>`).join('')}</ol>`;
 }
 
-function actingChapterBlocks(l) {
-  return (l.body ?? []).map(b =>
+// ── TINTED PANELS ──────────────────────────────────────────────────
+// The sage "what this changes for an actor" and the terracotta "try it".
+// The tones are a CLOSED LOOKUP for the same reason the learn layouts
+// are: a lesson cannot put an arbitrary class name into the page by
+// naming itself one. Both pairs are tokens that already exist.
+const PANEL_TONES = { sage: 'is-sage', terracotta: 'is-terracotta' };
+function lessonPanelHtml(p) {
+  const tone = PANEL_TONES[p.tone] ?? PANEL_TONES.sage;
+  return `<section class="lxc-panel ${tone}">
+    <p class="lxc-panel-h">${esc(p.title)}</p>
+    <div class="lxc-panel-b">
+      <p class="lxc-panel-p">${esc(p.text)}</p>
+      ${p.fig ? lessonOrnamentHtml(p.fig) : ''}
+    </div>
+  </section>`;
+}
+
+// `opts.skipFirst` drops the opening block, for the study layout, which
+// lifts the lesson's first paragraph out to sit beside the hero. Every
+// other caller passes nothing and gets the whole body as before.
+function actingChapterBlocks(l, opts) {
+  const body = l.body ?? [];
+  return (opts?.skipFirst ? body.slice(1) : body).map(b =>
     b.h ? `<h2 class="guide-heading">${esc(b.h)}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
     : b.steps ? stepCardsHtml(b.steps)
+    : b.cards ? principleCardsHtml(b.cards)
+    : b.panel ? lessonPanelHtml(b.panel)
     : b.fig ? actingFigureHtml(b.fig)
     : b.mask ? maskSheetHtml(b.mask)
     : b.profile ? maskProfileHtml(b.profile)
@@ -4938,43 +5011,87 @@ function renderActingLesson(id) {
     // would render nothing; this is the picture the learner just came
     // from, which is also the honest answer to "where am I".
     const art = m ? learnScene(B.ws)?.moduleCard?.[m.id] ?? null : null;
+    // THE LESSON'S OWN HERO IF IT HAS ONE, else the module's card art.
+    // A lesson that has been illustrated gets its picture; one that has
+    // not falls back to the painting the learner just came from, which
+    // is still a true answer to "where am I" rather than a blank.
+    const hero = (l.hero && characterFigure(l.hero)) || art;
+    const thumb = (l.thumb && characterFigure(l.thumb)) || art;
+    // THE OPENING PARAGRAPH MOVES BESIDE THE HERO (owner's rendering).
+    // It is lifted, not copied: the body renderer is told to skip it so
+    // it cannot appear twice. Only a leading { p } qualifies — a lesson
+    // that opens on a heading or a figure keeps its body intact.
+    const lead = l.body?.[0]?.p && Object.keys(l.body[0]).length === 1
+      ? l.body[0].p : null;
     // The chapter's own section headings, which is exactly what an "in
     // this lesson" list is. lessonSteps() already derives them.
-    const marks = lessonSteps(l);
+    // The lesson's own contents if it supplies them, else its headings.
+    // A lesson with one heading cannot describe its own shape, which is
+    // why the owner's handoff gives this one an explicit five-line list.
+    const marks = Array.isArray(l.contents) && l.contents.length
+      ? l.contents : lessonSteps(l);
+    // The takeaway line if the lesson has one, else the objective — a
+    // different kind of sentence, but the nearest true one.
+    const take = l.takeaway ?? l.objective ?? null;
+    // NO pageTopbar HERE. It emits its own #brand-home, and the sidebar
+    // below now carries one — two of that id in the document and
+    // getElementById hands wireBrandHome() the first, so the sidebar's
+    // brand would get a second listener and the topbar's none. The
+    // breadcrumb's module name is the way back to Learn instead, which
+    // is what a breadcrumb is for, and the bottom nav carries the
+    // sections on a phone where the sidebar is not drawn.
     app.innerHTML = `
-      ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
       <div class="lx-shell">
-        <aside class="lx-side" aria-label="Lessons in this module">
-          ${m ? `<p class="lx-side-mod">Module ${m.n} · ${esc(moduleTitle(B, m))}</p>` : ''}
-          <ol class="lx-side-list">
-            ${inMod.map((x, i) => {
+        <aside class="lx-side side-nav" aria-label="Sections">
+          <button class="side-brand" id="brand-home" type="button">
+            <span class="side-brand-name">Speechcraft</span>
+            <span class="side-brand-sub">SPEAK · LEARN · CONNECT</span>
+          </button>
+          <nav aria-label="Sections">
+            ${SECTIONS.map(s => `
+              <button class="side-item ${s.id === 'learn' ? 'on' : ''}" data-sec="${s.id}" type="button">
+                <span class="side-icon">${navIcon(s)}</span><span class="side-label">${s.label}</span>
+              </button>
+              ${s.id === 'learn' && m ? `
+              <p class="lx-side-course">${esc(B.title)}</p>
+              <ol class="lx-side-list">
+                ${inMod.map((x, i) => {
     const done = speechLessonDone(x.id);
     const here = x.id === id;
     return `<li><button class="lx-side-item${here ? ' is-here' : ''}${done ? ' is-done' : ''}"
-                type="button" data-lx-go="${esc(x.id)}"${here ? ' aria-current="true"' : ''}>
-              <span class="lx-side-n" aria-hidden="true">${done ? '✓' : i + 1}</span>
-              <span class="lx-side-t">${esc(x.title)}</span>
-            </button></li>`;
+                    type="button" data-lx-go="${esc(x.id)}"${here ? ' aria-current="true"' : ''}>
+                  <span class="lx-side-n" aria-hidden="true">${done ? '✓' : i + 1}</span>
+                  <span class="lx-side-t">${esc(x.title)}</span>
+                </button></li>`;
   }).join('')}
-          </ol>
+              </ol>` : ''}`).join('')}
+          </nav>
         </aside>
         <main class="guide sp-lesson lx lx-main">
-          <p class="pane-note lx-crumb">${crumb}</p>
+          <p class="pane-note lx-crumb">
+            ${m ? `<button class="lx-crumb-up" id="lx-up" type="button">Module ${m.n} · ${esc(moduleTitle(B, m))}</button>
+            <span class="lx-crumb-sep" aria-hidden="true">›</span>` : ''}
+            <span>${l.reference ? 'Reference' : `Lesson ${atMod + 1} of ${inMod.length}`}</span>
+          </p>
           ${picker}
           <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
           ${l.orientation ? `<p class="lx-lead">${esc(l.orientation)}</p>` : ''}
           ${inMod.length > 1 ? `
           <div class="lx-prog">
-            <div class="lm-bar" role="img" aria-label="${modDone} of ${inMod.length} lessons complete">
+            <div class="lm-bar" role="img"
+                 aria-label="${modDone} of ${inMod.length} lessons complete">
               <i style="width:${modPct}%"></i></div>
-            <p class="lx-prog-t">${atMod >= 0 ? `Lesson ${atMod + 1} of ${inMod.length}` : ''}</p>
+            <p class="lx-prog-t">${modDone} of ${inMod.length} lessons</p>
           </div>` : ''}
-          ${art ? `
-          <figure class="lx-hero">
-            <img src="${esc(art.src)}" alt="${esc(art.alt)}" loading="lazy" decoding="async">
-          </figure>` : ''}
+          <div class="lx-open">
+            ${hero ? `
+            <figure class="lx-hero">
+              <img src="${esc(hero.src)}" alt="${esc(hero.alt)}" loading="lazy" decoding="async">
+            </figure>` : ''}
+            ${lead ? `<p class="guide-text lx-open-p">${esc(lead)}</p>` : ''}
+          </div>
           <section class="sp-chapter lx-body" aria-label="The chapter">
-            ${actingChapterBlocks(l)}
+            ${actingChapterBlocks(l, { skipFirst: !!lead })}
             ${extras}
           </section>
           ${l.reflection ? `
@@ -4986,25 +5103,34 @@ function renderActingLesson(id) {
         <aside class="lx-notes" aria-label="Lesson notes">
           <div class="lx-notes-in">
             <h2 class="lx-notes-h">Lesson notes</h2>
-            ${art ? `<img class="lx-notes-pic" src="${esc(art.src)}" alt="" aria-hidden="true"
+            ${thumb ? `<img class="lx-notes-pic" src="${esc(thumb.src)}" alt="" aria-hidden="true"
                    loading="lazy" decoding="async">` : ''}
             ${atMod >= 0 ? `<p class="lx-notes-pos">Lesson ${atMod + 1} of ${inMod.length}</p>` : ''}
             <p class="lx-notes-t">${esc(l.title)}</p>
-            ${l.objective ? `
+            ${inMod.length > 1 ? `
+            <div class="lm-bar lx-notes-bar" role="img"
+                 aria-label="${modDone} of ${inMod.length} lessons complete">
+              <i style="width:${modPct}%"></i></div>
+            <p class="lx-notes-sub">${modDone} of ${inMod.length} lessons</p>` : ''}
+            ${take ? `
             <section class="sp-takeaway lx-take">
               <h3 class="lx-take-h">Key takeaway</h3>
-              <p class="lx-take-p">${esc(l.objective)}</p>
+              <p class="lx-take-p${l.takeaway ? ' is-lead' : ''}">${esc(take)}</p>
             </section>` : ''}
             ${marks.length ? `
             <nav class="lx-toc" aria-label="In this lesson">
               <p class="lx-toc-h">In this lesson</p>
-              <ol class="lx-toc-list">${marks.map(h =>
-    `<li>${esc(h)}</li>`).join('')}</ol>
+              <ol class="lx-toc-list">${marks.map((h, i) =>
+    `<li class="lx-toc-i${i === 0 ? ' is-here' : ''}">${esc(h)}</li>`).join('')}</ol>
             </nav>` : ''}
             <div class="lx-foot" aria-label="Complete and continue">${footer}</div>
           </div>
         </aside>
-      </div>`;
+      </div>
+      <nav class="bottom-nav" aria-label="Sections">
+        ${SECTIONS.map(s => `<button class="bn-item ${s.id === 'learn' ? 'on' : ''}" data-sec="${s.id}" type="button">
+            <span class="bn-icon">${navIcon(s)}</span><span class="bn-label">${s.label}</span></button>`).join('')}
+      </nav>`;
   } else {
   app.innerHTML = `
     ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
@@ -5056,6 +5182,12 @@ function renderActingLesson(id) {
   // The study layout's left column. Same pop-then-render as the chapter
   // picker it sits beside, so walking sideways between lessons does not
   // pile a new entry on the back stack for every one you look at.
+  // The study layout carries the app's own section nav, in the sidebar
+  // and in the bottom bar, so those buttons behave exactly as the
+  // shell's do. The breadcrumb's module name goes back to Learn.
+  app.querySelectorAll('[data-sec]').forEach(b =>
+    b.addEventListener('click', () => goSection(b.dataset.sec)));
+  document.getElementById('lx-up')?.addEventListener('click', () => goSection('learn'));
   app.querySelectorAll('[data-lx-go]').forEach(b =>
     b.addEventListener('click', () => {
       if (b.dataset.lxGo === id) return;

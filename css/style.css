@@ -3187,7 +3187,7 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    980px; this one becomes rows, because the owner's mockup puts Mark
    lesson complete inside the notes and a phone would otherwise have no
    way to finish a lesson. One set of controls, every width. */
-.lx-shell { display: block; max-width: 1360px; margin: 0 auto;
+.lx-shell { display: block; max-width: 1500px; margin: 0 auto;
   padding: 0 16px 40px; }
 .lx-main.guide { max-width: none; margin: 0; }
 /* THE LEFT COLUMN IS DESKTOP-ONLY, because below the grid it would sit
@@ -3197,12 +3197,17 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    Mark lesson complete, so they stack at the end instead. */
 .lx-side { display: none; }
 @media (min-width: 1040px) {
-  .lx-shell { display: grid; align-items: start; gap: 30px;
-    grid-template-columns: 210px minmax(0, 1fr) 320px; }
+  .lx-shell { display: grid; align-items: start; gap: 26px;
+    grid-template-columns: 206px minmax(0, 1fr) 316px; }
   /* The chapter keeps its reading measure inside a wider column: the
-     prose clamps at 65ch on its own, and only the hero and the step
-     cards use the extra width. */
-  .lx-main.guide { max-width: 760px; }
+     prose clamps at 65ch on its own, and only the hero, the cards and
+     the step row use the extra width. The owner's rendering runs the
+     cards three-across, which needs about 900.
+     SCOPED THROUGH .lx-shell for specificity: `.guide.sp-lesson` caps
+     the column at 700px with the same two-class weight and is defined
+     further down the file, so it won was winning on source order and
+     the cards fell to two-across. */
+  .lx-shell .lx-main.guide { max-width: 920px; }
   .lx-side { display: block; }
   .lx-side, .lx-notes { position: sticky; top: 14px;
     max-height: calc(100dvh - 28px); overflow-y: auto;
@@ -3230,15 +3235,39 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lx-side-item.is-done .lx-side-n { background: #4a5c3b; color: #fbf8f1;
   box-shadow: inset 0 0 0 1.5px #4a5c3b; }
 
-/* Where you are, in words and in a bar, above the chapter. */
-.lx-prog { display: flex; align-items: center; gap: 12px; margin: 0 0 22px; }
+/* The course's lessons, nested under Learn in the sidebar. */
+.lx-side-course { margin: 6px 0 4px 12px; font-size: 13px; font-weight: 700;
+  color: var(--ink); }
+.lx-side .side-item + .lx-side-course { margin-top: 2px; }
+
+/* The breadcrumb's module name is the way back to Learn. */
+.lx-crumb-up { background: none; border: 0; padding: 0; font: inherit;
+  color: inherit; cursor: pointer; text-decoration: underline;
+  text-underline-offset: 2px; text-decoration-color: var(--line); }
+.lx-crumb-up:hover { text-decoration-color: currentColor; }
+.lx-crumb-up:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.lx-crumb-sep { margin: 0 7px; opacity: .6; }
+
+/* Where you are: a rule with the finished part filled, and the count
+   beside it — which is the three-step indicator the owner's lesson-1
+   rendering draws. (His Slapstick mockup draws the same thing as three
+   joined dots; one indicator for now, and the dots are a swap when that
+   page comes round.) */
+.lx-prog { display: flex; align-items: center; gap: 14px; margin: 0 0 24px; }
 .lx-prog .lm-bar { flex: 1 1 auto; margin: 0; }
 .lx-prog-t { margin: 0; flex: 0 0 auto; font-size: 13px; font-weight: 600;
   color: var(--muted); }
 
-.lx-hero { margin: 0 0 26px; }
+/* The opening: picture and the lesson's first paragraph side by side.
+   The picture leads at roughly 5:3, as the rendering has it. */
+.lx-open { display: grid; gap: 24px; margin: 0 0 28px; align-items: start; }
+@media (min-width: 760px) {
+  .lx-open { grid-template-columns: minmax(0, 1.65fr) minmax(0, 1fr); }
+}
+.lx-hero { margin: 0; }
 .lx-hero img { width: 100%; height: auto; display: block;
-  border-radius: 12px; border: 1px solid var(--line); }
+  border-radius: 13px; border: 1px solid var(--line); }
+.lx-open-p { margin: 0; max-width: none; }
 
 /* The right column. */
 .lx-notes-in { background: var(--panel); border: 1px solid var(--line);
@@ -3258,6 +3287,14 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lx-take-h { margin: 0 0 6px; font-size: 11.5px; font-weight: 800;
   letter-spacing: .12em; text-transform: uppercase; color: #4a5c3b; }
 .lx-take-p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+/* A lesson that supplies its own takeaway gets the serif display size
+   the owner's rendering gives it; one falling back to `objective` keeps
+   the small size, because an objective is a sentence, not a headline. */
+.lx-take-p.is-lead { font-family: var(--serif, Georgia, serif);
+  font-size: 19px; line-height: 1.25; }
+.lx-notes-bar { margin: 0 0 6px; }
+.lx-notes-sub { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); }
+.lx-toc-i.is-here { color: var(--ink); font-weight: 600; }
 .lx-toc { margin: 0 0 14px; }
 .lx-toc-h { margin: 0 0 6px; font-size: 11.5px; font-weight: 800;
   letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
@@ -3294,6 +3331,74 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   color: var(--ink); }
 @media (max-width: 560px) {
   .sx-steps { grid-template-columns: 1fr; }
+}
+/* A step that carries its own drawing sets it beside the words, and
+   numbers itself inline — the corner the plain card's counter sits in
+   is where the drawing goes. */
+.sx-steps.is-rich .sx-step { display: grid; gap: 12px; align-items: start;
+  grid-template-columns: 92px minmax(0, 1fr); padding: 14px; }
+.sx-steps.is-rich .sx-step::before { content: none; }
+.sx-steps.is-rich .lxc-fig { max-width: 92px; align-self: center; }
+.sx-step-h { display: flex; align-items: center; gap: 9px; }
+.sx-step-n { flex: 0 0 auto; display: grid; place-items: center;
+  width: 23px; height: 23px; border-radius: 50%; background: var(--gold);
+  color: #4a3a12; font-family: var(--sans, system-ui, sans-serif);
+  font-size: 12px; font-weight: 800; }
+@media (max-width: 700px) {
+  .sx-steps.is-rich .sx-step { grid-template-columns: 1fr; }
+  .sx-steps.is-rich .lxc-fig { justify-self: center; }
+}
+
+/* ── PRINCIPLE CARDS AND PANELS (owner handoff, 2026-11-02) ─────────
+   Cards are for CONCEPTS, practice and takeaways — the handoff is
+   explicit that continuous prose stays prose — so these two kinds are
+   deliberately the only ones that box anything up. */
+.lxc-cards { list-style: none; counter-reset: lxc; margin: 4px 0 26px;
+  padding: 0; display: grid; gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+.lxc-card { counter-increment: lxc; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 13px; padding: 16px 16px 10px; }
+.lxc-card-h { display: flex; align-items: center; gap: 10px; margin: 0 0 10px;
+  font-family: var(--serif, Georgia, serif); font-size: 19px; line-height: 1.15; }
+.lxc-card-n { flex: 0 0 auto; display: grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 50%; background: var(--gold);
+  color: #4a3a12; font-family: var(--sans, system-ui, sans-serif);
+  font-size: 13px; font-weight: 800; }
+.lxc-card-n::before { content: counter(lxc); }
+.lxc-card-b { display: flex; align-items: flex-end; gap: 8px; }
+.lxc-card-p { margin: 0; font-size: 14.5px; line-height: 1.55; flex: 1 1 auto; }
+
+/* THE ORNAMENTS ARE OPAQUE PARCHMENT RECTANGLES, measured at about
+   #f8ecd5 in every corner — they are crops from the owner's concept
+   rendering, not cut-outs. `multiply` drops that ground into the card's
+   own parchment so only the ink survives; without it each card wears a
+   beige box. The same trick the troupe masks in the Learn rail needed. */
+.lxc-fig { flex: 0 0 auto; display: block; max-width: 48%; height: auto;
+  mix-blend-mode: multiply; }
+/* The words lead and the drawing sits in beside them. At 48% of a
+   250px card the ornament took half the width and squeezed the text
+   into a four-word column. */
+.lxc-card .lxc-fig { max-width: 88px; margin-bottom: -4px; }
+.lxc-card-p { min-width: 0; }
+.sx-steps.is-rich .lxc-fig { max-width: 110px; }
+.lxc-panel .lxc-fig { max-width: 130px; align-self: center; }
+
+.lxc-panel { border-radius: 13px; padding: 16px 18px; margin: 22px 0;
+  border: 1px solid var(--line); background: var(--panel); }
+.lxc-panel.is-sage { background: var(--tint-sage); border-color: var(--edge-sage); }
+.lxc-panel.is-terracotta { background: var(--tint-terracotta);
+  border-color: var(--edge-terracotta); }
+.lxc-panel-h { margin: 0 0 8px; font-family: var(--serif, Georgia, serif);
+  font-size: 19px; line-height: 1.2; }
+.lxc-panel.is-sage .lxc-panel-h { color: #3f5230; }
+.lxc-panel.is-terracotta .lxc-panel-h { color: #a65b3a; }
+.lxc-panel-b { display: flex; align-items: flex-start; gap: 14px; }
+.lxc-panel-p { margin: 0; font-size: 15px; line-height: 1.6; flex: 1 1 auto;
+  max-width: 62ch; }
+@media (max-width: 560px) {
+  .lxc-cards { grid-template-columns: 1fr; }
+  .lxc-card-b, .lxc-panel-b { display: block; }
+  .lxc-fig, .lxc-panel .lxc-fig { max-width: 120px; margin: 10px auto 0; }
 }
 
 /* A module is a SIGN ALONG THE PATH, not a door. It names where you are
