@@ -2727,82 +2727,47 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   overflow: hidden; border: 1px solid var(--line);
   box-shadow: 0 3px 14px rgba(45, 27, 18, .12); }
 .gm-art { display: block; width: 100%; height: auto; }
-/* THE CARD IS THE ANCHOR, not the stack. Centring the whole pin —
-   badge, card and chip together — put the card about 11px below the
-   point, so the painted badge peeked out above every label and the map
-   showed each module twice. The card alone is centred on the measured
-   point now, and the badge and chip hang off it, so the card lands on
-   the painted card whatever else the pin is carrying. */
-.gm-pin { position: absolute; transform: translate(-50%, -50%);
-  width: 23%; min-width: 124px;
-  border: 0; padding: 0; background: none; cursor: pointer; font: inherit; }
-.gm-pin:hover .gm-t { background: #fffaf0; }
-.gm-pin:focus-visible { outline: 3px solid var(--gold); outline-offset: 4px;
-  border-radius: 12px; }
+/* THE PLATE SHOWS THE LABELS; THE APP SUPPLIES ONLY THE CLICKS.
+   (owner, 2026-11-02)
+
+   Drawing labels over the painted ones could only ever line up at ONE
+   map size. The painted badge, card and chip scale with the image; a
+   CSS badge offset by -62% of its own 31px does not. Tuned at 780px it
+   looked right; at 1455px every module showed its number twice, its
+   CURRENT chip twice, and the painted second line of the longer titles
+   peeking out below. Two of everything, drifting further apart the
+   wider the window.
+
+   So the overlay is gone and the pins are invisible: a transparent
+   button over each painted label, sized in PERCENT so it tracks the
+   picture at any width. Each still carries "Module N, title, state" for
+   a screen reader and still takes focus.
+
+   THE COST, AND IT IS REAL: the painted CURRENT chip is part of the
+   picture, so it will say CURRENT on module 1 forever. The rail beside
+   the map carries the live state — that is where a learner reads where
+   they are, and why this is survivable rather than a lie. A clean plate
+   without the painted labels would let the app draw live ones again. */
+.gm-pin { position: absolute; transform: translate(-50%, -55%);
+  width: 24%; height: 15%;
+  border: 0; padding: 0; background: none; cursor: pointer; font: inherit;
+  border-radius: 10px; }
+.gm-pin:hover { background: rgba(255, 252, 240, .22); }
+.gm-pin:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .gm-pin.is-locked { cursor: default; }
-.gm-t { display: block; width: 100%; padding: 10px 11px; border-radius: 10px;
-  background: #f7f1e3; color: #2f2a22; text-align: center;
-  font-family: var(--serif, Georgia, serif); font-size: 13.5px;
-  font-weight: 700; line-height: 1.2;
-  box-shadow: 0 2px 8px rgba(45, 27, 18, .34); }
-.gm-n { position: absolute; left: 50%; top: 0;
-  transform: translate(-50%, -62%);
-  display: grid; place-items: center; width: 31px; height: 31px;
-  border-radius: 50%; background: #6b5633; color: #fff;
-  font-size: 12.5px; font-weight: 800; font-variant-numeric: tabular-nums;
-  z-index: 2; box-shadow: 0 1px 4px rgba(45, 27, 18, .45); }
-/* SIZED TO COVER, not just to read. The painted CURRENT pill is about
-   10% of the plate's width; a chip sized only to its own text came out
-   narrower and the painted one showed around it, which read as a
-   drop-shadow bug rather than as two chips. min-width is in percent of
-   the pin so it scales with the map. */
-.gm-s { position: absolute; left: 50%; bottom: 0;
-  transform: translate(-50%, 56%);
-  min-width: 82%; padding: 6px 12px; border-radius: 999px;
-  background: #e3cf9a; color: #5b4620; font-size: 9.5px; font-weight: 800;
-  letter-spacing: .1em; text-transform: uppercase; white-space: nowrap;
-  text-align: center;
-  box-shadow: 0 1px 3px rgba(45, 27, 18, .3); }
-.gm-pin.is-locked .gm-n { background: #8a8172; }
-.gm-pin.is-done .gm-n { background: #4a5c3b; }
-/* THE MAP IS ALWAYS THERE; ITS LABELS ARE NOT. Hiding the whole map
-   below 900px was wrong for the way this gets looked at — on a narrow
-   pane the course's one illustration simply vanished and the page was
-   a list of tiles. What does not survive the narrow width is the TEXT
-   on it: six labels across a 260px square are about 60px each, which
-   is not reading, it is noise.
-   
-   So the picture stays at every width and sheds its words. Above 900
-   it carries the full labels and IS the control, so the grid steps
-   aside. Below, it keeps only the numbered discs — still buttons,
-   still live, big enough to hit — and the grid returns underneath as
-   the surface that actually names things. */
+/* The words and numbers live in the plate, not in the DOM. The button's
+   aria-label is its accessible name, so nothing is lost by hiding these. */
+.gm-t, .gm-n, .gm-s { display: none; }
+
 @media (min-width: 901px) {
   .lm-path.is-shelf.has-map { display: none; }
 }
 @media (max-width: 900px) {
+  /* Nothing to shed any more: the overlay was never visible, so the
+     same rules serve both widths. This branch existed only to manage
+     the clash between drawn labels and painted ones. */
   .gm { margin-bottom: 18px; }
-  /* THE OVERLAY GOES INVISIBLE, NOT AWAY. Three passes to get here:
-     drawn labels clashed with the painted ones; discs over painted
-     text was worse than either; and `display: none` was worse again,
-     because it took the CLICKS with it and left the six modules as
-     decoration on the surface this is actually looked at.
-     
-     So the pins keep their box and lose their paint. Each is still a
-     button, still focusable, still carries "Module N, title, state" —
-     an invisible hit area sitting exactly over the label painted into
-     the plate. The picture reads as the illustration it is, and every
-     card on it is live. */
-  /* The 124px floor is a desktop minimum and must not survive here:
-     six pins that wide across a 260px map overlap, and an overlapping
-     hit area does not fail visibly — it just opens the wrong module.
-     They scale with the picture instead. */
-  .gm-pin { min-width: 0; }
-  .gm-t { background: transparent; color: transparent; box-shadow: none;
-    padding: 7px 4px; }
-  .gm-n { background: transparent; color: transparent; box-shadow: none; }
-  .gm-s { display: none; }
-  .gm-pin:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+}
 }
 
 /* ── THE ILLUSTRATED PATH (owner's mockup, 2026-10-30) ──────────────
