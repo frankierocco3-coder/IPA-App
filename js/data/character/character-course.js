@@ -90,8 +90,14 @@ export const CHARACTER_MODULES_ALL = [
 // What the course actually shows. Everything downstream — the Learn path,
 // the Library shelves, the review census, the progress counts — reads this,
 // so the withdrawal happens in ONE place and cannot be half applied.
+// COMMEDIA LEFT THIS COURSE ON 2026-11-02 and became one of its own —
+// see js/data/commedia/commedia-course.js, which takes its slice from
+// the _ALL arrays below. The lessons stay in this file; only the course
+// they belong to changed. Filtering here rather than deleting is what
+// lets that happen without touching a line of reviewed prose.
 export const CHARACTER_MODULES = CHARACTER_MODULES_ALL
-  .filter(m => ROLE_LIVE || m.id !== 'role');
+  .filter(m => ROLE_LIVE || m.id !== 'role')
+  .filter(m => m.id !== 'commedia');
 
 // ── The masks: ONE record per character ─────────────────────
 // Read by the chapters ({ mask } shows the sheet, { profile } the full
@@ -2034,7 +2040,8 @@ export const CHARACTER_LESSONS_ALL = [
 // deliberate: a list would need maintaining if the module ever changed
 // shape, and this cannot drift out of step with CHARACTER_MODULES.
 export const CHARACTER_LESSONS = CHARACTER_LESSONS_ALL
-  .filter(l => ROLE_LIVE || l.module !== 'role');
+  .filter(l => ROLE_LIVE || l.module !== 'role')
+  .filter(l => l.module !== 'commedia');
 
 // One Library shelf per module, in path order.
 const SHELF_ICON = { piece: '📝', commedia: '🃏', physical: '🚶', vocal: '🗣️', status: '⚖️', role: '🎬' };

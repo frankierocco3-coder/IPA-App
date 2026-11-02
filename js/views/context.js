@@ -96,7 +96,12 @@ export const WORKSPACES = [
   // says "a character being built" — and comes out aspect 0.79 and 51% ink,
   // in family with its neighbours. Same artwork, no regeneration.
   { id: 'character', icon: '🧍', img: 'img/ui/building-character.png', label: 'Building a Character',
-    context: 'Inventing a person, building a cast role, and commedia dell’arte' },
+    context: 'Inventing a person and building a cast role' },
+  // COMMEDIA LEFT BUILDING A CHARACTER ON 2026-11-02 and the line above
+  // changed with it: that course's context promised commedia dell'arte,
+  // and promising it in two places would make one of them wrong.
+  { id: 'commedia', icon: '🃏', img: 'img/ui/commedia.png', label: 'Commedia dell’Arte',
+    context: 'The ready-made characters, and what every character is made of' },
   // THE PORTRAIT, NOT THE SKULL-HOLDER (owner decision 2026-10-14). It
   // pointed at soliloquy.png so that the commissioned lavender respin would
   // improve the chip and the shelf tile together; the owner chose the face
@@ -190,6 +195,20 @@ export const characterOpen = () => CHARACTER_LIVE || characterPreview();
 //
 // The preview key stays. It costs nothing and it is how the next course
 // gets read before it launches.
+// COMMEDIA, lifted out of Building a Character on 2026-11-02. It starts
+// GATED: the course is new as a course, even though every lesson in it
+// has been published inside Character for months. Flip when its own
+// Learn page and shelf have been looked at.
+export const COMMEDIA_LIVE = false;
+export const COMMEDIA_PREVIEW_KEY = 'speechcraft-commedia-preview';
+export const commediaPreview = () => {
+  try { return localStorage.getItem(COMMEDIA_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const commediaOpen = () => COMMEDIA_LIVE || commediaPreview();
+// A lesson shows when it is published, exactly as in the course it came
+// from — the approvals are keyed on ids that did not move.
+export const commediaVisible = l => commediaPreview() || speechPublished(l.id);
+
 export const SHAKESPEARE_LIVE = true;
 export const SHAKESPEARE_PREVIEW_KEY = 'speechcraft-shakespeare-preview';
 export const shakespearePreview = () => {
@@ -250,11 +269,12 @@ export const learnSequencePreview = () => {
 export const liveWorkspaces = () => WORKSPACES.filter(w =>
   (SPEECH_LIVE || w.id !== 'speech')
   && (w.id !== 'character' || characterOpen())
+  && (w.id !== 'commedia' || commediaOpen())
   && (w.id !== 'shakespeare' || shakespeareOpen())
   && (w.id !== 'rhetoric' || rhetoricOpen()));
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
-export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'shakespeare', 'rhetoric'];
+export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'commedia', 'shakespeare', 'rhetoric'];
 export const WORKSPACE_KEY = 'speechcraft-workspace';
 export const activeWorkspace = () => {
   try {

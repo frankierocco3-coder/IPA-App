@@ -79,6 +79,7 @@ import { DIALECT_FACETS, DIALECT_VARIATION_LINE } from './data/speech/dialect-fa
 import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
          ACTING_GLOSSARY, actingLessonsFor, actingLessonById, actingModuleFor,
          actingLessonNumber } from './data/acting/acting-course.js';
+import { COMMEDIA_PRINCIPLE, COMMEDIA_MODULES, COMMEDIA_LESSONS, COMMEDIA_COLLECTIONS } from './data/commedia/commedia-course.js';
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
          COMMEDIA_MASKS, commediaMask, MASK_SITUATIONS, MASK_PROBLEMS,
          ONE_LINES } from './data/character/character-course.js';
@@ -123,7 +124,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -966,6 +967,7 @@ function showSsbeIntro(course) {
 function learnMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLearnPane(el);
   if (ws === 'character') return bookLearnPane(el, BOOKS.character);
+  if (ws === 'commedia') return bookLearnPane(el, BOOKS.commedia);
   if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
   if (ws === 'rhetoric') {
     bookLearnPane(el, BOOKS.rhetoric);
@@ -1086,6 +1088,11 @@ const AUDIO_MODES = new Set(['listen', 'pairs', 'earacc']);
 function practiceMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingPracticePane(el);
   if (ws === 'character') return characterPracticePane(el);
+  // MASK CARDS AND ONE LINE ARE COMMEDIA EXERCISES and came with the
+  // course: both draw on the mask records, and One Line, Many Masks is
+  // literally one sentence through every mask. Warmup stays with
+  // Building a Character, which is where a warmup belongs.
+  if (ws === 'commedia') return commediaPracticePane(el);
   if (ws === 'shakespeare') return shakespearePracticePane(el);
   if (ws === 'rhetoric') return rhetoricPracticePane(el);
   if (ws === 'speech') return speechPracticePane(el);
@@ -3381,6 +3388,14 @@ const BOOKS = {
     collections: CHARACTER_COLLECTIONS, visible: characterVisible,
     moduleTone: () => 'is-terracotta',
     reviewCats() { return bookReviewCategories(this); } },
+  // ITS OWN COURSE SINCE 2026-11-02, lifted out of Building a Character.
+  // Every id is unchanged, so progress, reviews and audio flags all still
+  // resolve — see js/data/commedia/commedia-course.js.
+  commedia: { ws: 'commedia', icon: '🃏', title: 'Commedia dell’Arte', libraryName: 'Commedia Library',
+    principle: COMMEDIA_PRINCIPLE, modules: COMMEDIA_MODULES, lessons: COMMEDIA_LESSONS,
+    collections: COMMEDIA_COLLECTIONS, visible: commediaVisible,
+    moduleTone: () => 'is-terracotta',
+    reviewCats() { return bookReviewCategories(this); } },
   shakespeare: { ws: 'shakespeare', icon: '🪶', title: 'Shakespeare', libraryName: 'Shakespeare Library',
     principle: SHAKESPEARE_PRINCIPLE, modules: SHAKESPEARE_MODULES, lessons: SHAKESPEARE_LESSONS,
     collections: SHAKESPEARE_COLLECTIONS, visible: shakespeareVisible,
@@ -3392,6 +3407,7 @@ const BOOKS = {
     moduleTone: () => 'is-gold',
     reviewCats() { return bookReviewCategories(this); } },
 };
+const COMMEDIA_IDS = new Set(COMMEDIA_LESSONS.map(l => l.id));
 const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
 const SHAKESPEARE_IDS = new Set(SHAKESPEARE_LESSONS.map(l => l.id));
 const RHETORIC_IDS = new Set(RHETORIC_LESSONS.map(l => l.id));
@@ -3414,6 +3430,7 @@ const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m)) ||
 // and every unknown id behaving exactly as it did.
 const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
   : RHETORIC_IDS.has(id) ? BOOKS.rhetoric
+  : COMMEDIA_IDS.has(id) ? BOOKS.commedia
   : CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
 // Order matters and matches bookOf: Shakespeare owns the collection id
 // 'rhetoric' (its own module 6), while the Rhetoric COURSE uses ids like
@@ -3421,6 +3438,7 @@ const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
 // a word, resolved by asking Shakespeare first.
 const bookOfCollection = id => SHAKESPEARE_COLLECTIONS.some(c => c.id === id) ? BOOKS.shakespeare
   : RHETORIC_COLLECTIONS.some(c => c.id === id) ? BOOKS.rhetoric
+  : COMMEDIA_COLLECTIONS.some(c => c.id === id) ? BOOKS.commedia
   : CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
 const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // A `reference: true` record is a page you are sent to, never a step on
@@ -6930,32 +6948,38 @@ function characterPracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Character Practice</h1>
     <p class="pane-note">Prompts to get on your feet with. Nothing here is scored.</p>
-    <button class="track-card hub-card" id="chp-masks" type="button">
-      ${cardGlyph({ icon: '🃏', img: 'img/ui/commedia.png' })}
-      <div class="track-info"><h2>Mask Cards</h2></div>
-      <div class="track-arrow">›</div>
-    </button>
-    <button class="track-card hub-card" id="chp-oneline" type="button">
-      ${cardGlyph({ icon: '🎭', img: 'img/ui/one-line.png' })}
-      <div class="track-info"><h2>One Line, Many Masks</h2></div>
-      <div class="track-arrow">›</div>
-    </button>
     <button class="track-card hub-card" id="chp-warmup" type="button">
       ${cardGlyph({ icon: '🔥', img: 'img/ui/warmup.png' })}
       <div class="track-info"><h2>Warmup</h2></div>
-      <div class="track-arrow">›</div>
+      <div class="track-arrow">\u203a</div>
     </button>`;
-  el.querySelector('#chp-masks').addEventListener('click', () => renderMaskCards());
-  el.querySelector('#chp-oneline').addEventListener('click', () => renderOneLine());
   el.querySelector('#chp-warmup').addEventListener('click', renderWarmup);
 }
 
-// Shakespeare Practice. No drill has been built for this course yet, and
-// inventing one to fill the page would be worse than saying so: this is
-// the same honesty the app uses for unapproved content everywhere else.
-// What it does instead is send the reader at the real text the app
-// already carries, because the practice for this module IS reading verse
-// with the tools open beside it.
+// COMMEDIA'S OWN PRACTICE, and it took two of the three exercises with
+// it when the course split on 2026-11-02. Mask Cards deals the mask
+// records; One Line, Many Masks is one sentence through every mask.
+// Both are commedia work and were only ever under Building a Character
+// because commedia was. Warmup stayed, because a warmup is not about
+// one tradition.
+function commediaPracticePane(el) {
+  el.innerHTML = `
+    <h1 class="page-h">Commedia Practice</h1>
+    <p class="pane-note">Prompts to get on your feet with. Nothing here is scored.</p>
+    <button class="track-card hub-card" id="cmp-masks" type="button">
+      ${cardGlyph({ icon: '🃏', img: 'img/ui/commedia.png' })}
+      <div class="track-info"><h2>Mask Cards</h2></div>
+      <div class="track-arrow">\u203a</div>
+    </button>
+    <button class="track-card hub-card" id="cmp-oneline" type="button">
+      ${cardGlyph({ icon: '🎭', img: 'img/ui/one-line.png' })}
+      <div class="track-info"><h2>One Line, Many Masks</h2></div>
+      <div class="track-arrow">\u203a</div>
+    </button>`;
+  el.querySelector('#cmp-masks').addEventListener('click', () => renderMaskCards());
+  el.querySelector('#cmp-oneline').addEventListener('click', () => renderOneLine());
+}
+
 function shakespearePracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Shakespeare Practice</h1>
@@ -7396,6 +7420,7 @@ function renderActingDraft(itemId, ws = 'acting') {
 function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLibraryPane(el);
   if (ws === 'character') return characterLibraryPane(el);
+  if (ws === 'commedia') return bookLibraryPane(el, BOOKS.commedia);
   if (ws === 'shakespeare') return shakespeareLibraryPane(el);
   if (ws === 'rhetoric') return rhetoricLibraryPane(el);
   if (ws === 'speech') return speechLibraryPane(el);

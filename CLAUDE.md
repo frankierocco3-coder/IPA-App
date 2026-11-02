@@ -356,13 +356,14 @@ script instead and paste its block.
 
 - Acting (acting)            **LIVE**
 - Building a Character (character) **LIVE**
+- Commedia dell’Arte (commedia) **LIVE**
 - Shakespeare (shakespeare)  **LIVE**
 - Rhetoric (rhetoric)        **LIVE**
 - Voice & Speech (ipa)       **LIVE**
 - Accents & Dialects (accents) **LIVE**
 - Speech (speech)            withdrawn
 
-6 of 7 live.
+7 of 8 live.
 
 ### Accent courses
 
@@ -387,18 +388,19 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 ### Every X_LIVE switch
 
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
-- CHARACTER_LIVE           true   js/views/context.js:167
+- CHARACTER_LIVE           true   js/views/context.js:172
 - COCKNEY_LIVE             true   js/views/context.js:53
-- COINAGE_LIVE             false  js/main.js:305
+- COINAGE_LIVE             false  js/main.js:306
+- COMMEDIA_LIVE            false  js/views/context.js:202
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
-- RHETORIC_COURSE_LIVE     true   js/views/context.js:207
-- RHETORIC_LIVE            false  js/main.js:278
-- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:219
+- RHETORIC_COURSE_LIVE     true   js/views/context.js:226
+- RHETORIC_LIVE            false  js/main.js:279
+- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:238
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:9918
-- SHAKESPEARE_LIVE         true   js/views/context.js:193
-- SPEECH_LIVE              false  js/views/context.js:159
+- SCENE_STUDY_LIVE         false  js/main.js:9943
+- SHAKESPEARE_LIVE         true   js/views/context.js:212
+- SPEECH_LIVE              false  js/views/context.js:164
 
 ### Reference shelves
 
@@ -411,7 +413,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                13126 lines
+- js/main.js                13151 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  842
 

@@ -266,6 +266,36 @@ export const LEARN_SCENES = {
   // "The verse is not a constraint on the acting. It is information about
   // the acting, written down by somebody who expected actors to read it."
   // Marks set on the page; the house they turn into.
+  // COMMEDIA, its own course since 2026-11-02. It inherits Character's
+  // light parchment and its own module painting — the three masked
+  // players already in img/ui — so the page it arrives on is the page
+  // it had, minus the four modules that are not its subject.
+  commedia: {
+    title: 'The Ready-Made Characters',
+    art: null,
+    light: true,
+    // LIVE AS A LAYOUT, GATED AS A COURSE. COMMEDIA_LIVE in
+    // js/views/context.js decides whether anyone can reach this page at
+    // all; gating the layout as well would be a second lock on the same
+    // door, and it cost a confusing half hour — the course opened, the
+    // path did not, and nothing said why.
+    live: true,
+    layout: 'path-cards',
+    moduleTag: { commedia: 'Form' },
+    moduleCard: {
+      commedia: { src: 'img/ui/character-card-commedia.jpg',
+        alt: 'Three commedia dell’arte players rehearsing in a sunlit room: a stooped Pantalone in a red cap leaning on a stick, a harlequin in a diamond-patterned costume mid-step, and a strutting Capitano with a hand on a prop sword, all in leather half-masks.' },
+    },
+    done: 'played',
+    above: 'WHAT THE MASK SHOWS',
+    below: 'WHAT YOU BRING TO IT',
+    palette: {
+      '--tr-sky': '#2a3038', '--tr-soil': '#3e3a33', '--tr-soil-2': '#2f2c27',
+      '--tr-leaf': '#c6b183', '--tr-bark': '#8f7f63', '--tr-gold': '#e3c87f',
+      '--tr-dim': '#b9b09c', '--tr-accent': '#9fb4c4',
+    },
+  },
+
   shakespeare: {
     title: 'From the Page to the House',
     art: null,
