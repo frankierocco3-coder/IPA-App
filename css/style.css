@@ -2782,14 +2782,27 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 }
 @media (max-width: 900px) {
   .gm { margin-bottom: 18px; }
-  /* THE OVERLAY COMES OFF ENTIRELY, it does not shrink. Dropping just
-     the text left the app's numbered discs sitting on top of the
-     labels PAINTED into the plate, so each module showed a crisp disc
-     over a blur of unreadable lettering — worse than either alone.
-     Narrow, the map is simply the illustration, painted labels and
-     all, and the grid beneath it is the control. One clean plate and
-     this whole branch becomes unnecessary. */
-  .gm-pin { display: none; }
+  /* THE OVERLAY GOES INVISIBLE, NOT AWAY. Three passes to get here:
+     drawn labels clashed with the painted ones; discs over painted
+     text was worse than either; and `display: none` was worse again,
+     because it took the CLICKS with it and left the six modules as
+     decoration on the surface this is actually looked at.
+     
+     So the pins keep their box and lose their paint. Each is still a
+     button, still focusable, still carries "Module N, title, state" —
+     an invisible hit area sitting exactly over the label painted into
+     the plate. The picture reads as the illustration it is, and every
+     card on it is live. */
+  /* The 124px floor is a desktop minimum and must not survive here:
+     six pins that wide across a 260px map overlap, and an overlapping
+     hit area does not fail visibly — it just opens the wrong module.
+     They scale with the picture instead. */
+  .gm-pin { min-width: 0; }
+  .gm-t { background: transparent; color: transparent; box-shadow: none;
+    padding: 7px 4px; }
+  .gm-n { background: transparent; color: transparent; box-shadow: none; }
+  .gm-s { display: none; }
+  .gm-pin:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 }
 
 /* ── THE ILLUSTRATED PATH (owner's mockup, 2026-10-30) ──────────────
