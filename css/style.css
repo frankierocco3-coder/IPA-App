@@ -1113,7 +1113,12 @@ body.modal-open { overflow: hidden; }
 }
 
 /* ══ Duolingo-style shell, Speechcraft skin ═══════════════════ */
-#app:has(.shell) { max-width: none; }
+/* `.lx-shell` is the lesson's own three-column layout and needs the same
+   release from #app's 640px reading width that the app shell gets.
+   Without it the grid still ran, and the middle column — the one holding
+   the chapter — collapsed to 48px between a 210px sidebar and a 320px
+   notes column. */
+#app:has(.shell), #app:has(.lx-shell) { max-width: none; }
 .shell {
   display: grid; grid-template-columns: 216px minmax(0, 620px) 330px;
   gap: 28px; justify-content: center; padding: 0 16px 40px; width: 100%;
@@ -3171,6 +3176,125 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lx-q { font-family: var(--serif, Georgia, serif); font-size: 18px; line-height: 1.5;
   color: var(--ink); margin: 0; }
 .lx-foot { border-top: 1px solid var(--line); padding-top: 18px; }
+
+/* ── THE STUDY LAYOUT (owner's lesson mockups, 2026-11-02) ──────────
+   Lessons on the left, the chapter in the middle, the lesson's notes on
+   the right. Not the app shell — see the comment in renderActingLesson
+   for why — so these are the lesson's own columns, built from the same
+   tokens and the same measure.
+
+   IT STACKS, IT DOES NOT HIDE. The shell's rail is display:none below
+   980px; this one becomes rows, because the owner's mockup puts Mark
+   lesson complete inside the notes and a phone would otherwise have no
+   way to finish a lesson. One set of controls, every width. */
+.lx-shell { display: block; max-width: 1360px; margin: 0 auto;
+  padding: 0 16px 40px; }
+.lx-main.guide { max-width: none; margin: 0; }
+/* THE LEFT COLUMN IS DESKTOP-ONLY, because below the grid it would sit
+   between the title bar and the chapter and push the lesson itself a
+   screen down — to say what the "Lesson 1 of 3" picker in the main
+   column already says. The NOTES are not hidden the same way: they hold
+   Mark lesson complete, so they stack at the end instead. */
+.lx-side { display: none; }
+@media (min-width: 1040px) {
+  .lx-shell { display: grid; align-items: start; gap: 30px;
+    grid-template-columns: 210px minmax(0, 1fr) 320px; }
+  /* The chapter keeps its reading measure inside a wider column: the
+     prose clamps at 65ch on its own, and only the hero and the step
+     cards use the extra width. */
+  .lx-main.guide { max-width: 760px; }
+  .lx-side { display: block; }
+  .lx-side, .lx-notes { position: sticky; top: 14px;
+    max-height: calc(100dvh - 28px); overflow-y: auto;
+    overscroll-behavior: contain; }
+}
+
+/* The left column: where you are in the module. */
+.lx-side-mod { margin: 0 0 10px; font-size: 11.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.lx-side-list { list-style: none; margin: 0; padding: 0;
+  display: grid; gap: 2px; }
+.lx-side-item { width: 100%; display: grid; gap: 10px; align-items: start;
+  grid-template-columns: 24px 1fr; text-align: left; cursor: pointer;
+  background: transparent; border: 0; border-radius: 10px;
+  padding: 9px 10px; color: var(--ink); font: inherit; font-size: 14.5px;
+  line-height: 1.35; }
+.lx-side-item:hover { background: var(--panel); }
+.lx-side-item:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.lx-side-item.is-here { background: var(--panel); font-weight: 700; }
+.lx-side-n { display: grid; place-items: center; width: 24px; height: 24px;
+  border-radius: 50%; font-size: 12.5px; font-weight: 700;
+  color: var(--muted); box-shadow: inset 0 0 0 1.5px var(--line); }
+.lx-side-item.is-here .lx-side-n { background: var(--gold); color: #4a3a12;
+  box-shadow: inset 0 0 0 1.5px var(--gold); }
+.lx-side-item.is-done .lx-side-n { background: #4a5c3b; color: #fbf8f1;
+  box-shadow: inset 0 0 0 1.5px #4a5c3b; }
+
+/* Where you are, in words and in a bar, above the chapter. */
+.lx-prog { display: flex; align-items: center; gap: 12px; margin: 0 0 22px; }
+.lx-prog .lm-bar { flex: 1 1 auto; margin: 0; }
+.lx-prog-t { margin: 0; flex: 0 0 auto; font-size: 13px; font-weight: 600;
+  color: var(--muted); }
+
+.lx-hero { margin: 0 0 26px; }
+.lx-hero img { width: 100%; height: auto; display: block;
+  border-radius: 12px; border: 1px solid var(--line); }
+
+/* The right column. */
+.lx-notes-in { background: var(--panel); border: 1px solid var(--line);
+  border-radius: 14px; padding: 16px; }
+.lx-notes-h { font-family: var(--serif, Georgia, serif); font-size: 19px;
+  margin: 0 0 12px; }
+.lx-notes-pic { width: 100%; height: 108px; object-fit: cover;
+  border-radius: 10px; border: 1px solid var(--line); display: block;
+  margin: 0 0 10px; }
+.lx-notes-pos { margin: 0 0 2px; font-size: 12.5px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.lx-notes-t { margin: 0 0 14px; font-family: var(--serif, Georgia, serif);
+  font-size: 17px; line-height: 1.25; }
+/* .sp-takeaway already carries the sage tint and edge; this only sets the
+   type inside it, so no new panel colour enters the stylesheet. */
+.lx-take { margin: 0 0 14px; }
+.lx-take-h { margin: 0 0 6px; font-size: 11.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: #4a5c3b; }
+.lx-take-p { margin: 0; font-size: 14.5px; line-height: 1.5; }
+.lx-toc { margin: 0 0 14px; }
+.lx-toc-h { margin: 0 0 6px; font-size: 11.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.lx-toc-list { margin: 0; padding-left: 20px; display: grid; gap: 4px;
+  font-size: 14px; line-height: 1.4; color: var(--muted); }
+.lx-notes .lx-foot { border-top: 1px solid var(--line); padding-top: 14px; }
+.lx-notes .practice-row { display: grid; gap: 8px; }
+.lx-notes .practice-row .btn { width: 100%; }
+
+/* The reflection card gains the heading the mockup gives it. The tint is
+   the terracotta pair already in the token set, not a new colour. */
+.lx-reflect { background: var(--tint-terracotta);
+  border-color: var(--edge-terracotta); }
+.lx-reflect-h { margin: 0 0 6px; font-size: 11.5px; font-weight: 800;
+  letter-spacing: .12em; text-transform: uppercase; color: #a65b3a; }
+
+/* ── STEPS AS NUMBERED CARDS ────────────────────────────────────────
+   A counter rather than a list marker, because the number sits in its
+   own disc inside the card. auto-fit so three cards sit in a row and
+   five wrap to two rows instead of shrinking to slivers. */
+.sx-steps { list-style: none; counter-reset: sx; margin: 4px 0 26px;
+  padding: 0; display: grid; gap: 12px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }
+.sx-step { counter-increment: sx; position: relative;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 12px; padding: 40px 15px 15px; }
+.sx-step::before { content: counter(sx); position: absolute; top: 13px;
+  left: 15px; display: grid; place-items: center; width: 24px; height: 24px;
+  border-radius: 50%; background: var(--gold); color: #4a3a12;
+  font-size: 12.5px; font-weight: 800; }
+.sx-step-h { margin: 0 0 5px; font-family: var(--serif, Georgia, serif);
+  font-size: 17px; line-height: 1.2; }
+.sx-step-p { margin: 0; font-size: 14.5px; line-height: 1.5;
+  color: var(--ink); }
+@media (max-width: 560px) {
+  .sx-steps { grid-template-columns: 1fr; }
+}
 
 /* A module is a SIGN ALONG THE PATH, not a door. It names where you are
    without breaking the line, which runs straight past it unbroken. */

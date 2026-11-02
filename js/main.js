@@ -4504,12 +4504,58 @@ function actingFigureHtml(key) {
       ${f.caption ? `<figcaption class="sp-figcap">${esc(f.caption)}</figcaption>` : ''}
     </figure>` : '';
 }
+// ── STEPS AS NUMBERED CARDS (owner's lesson mockups, 2026-11-02) ────
+// A { steps } block used to be a plain <ol>. The mockups draw it as a
+// row of numbered cards, which is what the content already is: an
+// ordered sequence of short, parallel beats.
+//
+// THE LEAD-IN BECOMES THE CARD'S TITLE, BUT ONLY WHEN IT REALLY IS ONE.
+// Slapstick's steps are written "The setup: the audience sees the
+// problem before the character does", so the words before the colon are
+// a title and the mockup shows them as one. The commedia opener's are
+// written "First you learn the characters as they are: the history, the
+// form, and each mask in turn" — where the same split would title a card
+// with half a sentence. So the lead-in is promoted only if it is short
+// and carries no sentence punctuation of its own; otherwise the step
+// renders whole and the card simply has no title. Nothing is invented
+// and nothing is dropped either way.
+//
+// A LEADING ARTICLE COMES OFF the promoted title: "The setup" -> "Setup",
+// which is how the mockup labels them and how a list of headings reads.
+function stepLead(s) {
+  const i = s.indexOf(': ');
+  if (i < 0 || i > 28) return null;
+  const head = s.slice(0, i);
+  if (/[.;,!?]/.test(head)) return null;
+  // Dropping the article leaves a lower-case word — "The setup" became
+  // "setup" — so the first letter goes back up. Capitalising a word the
+  // owner wrote is presentation; it does not change what it says.
+  const bare = head.replace(/^(The|A|An) /i, '');
+  return { head: bare.charAt(0).toUpperCase() + bare.slice(1), rest: s.slice(i + 2) };
+}
+
+// ALL THE CARDS GET TITLES OR NONE DO. Promoting per card made a block
+// where only the middle step happened to be written "Then you play them:
+// …" — one titled card between two untitled ones, which reads as a
+// mistake rather than as a set. A block is titled only when every step
+// in it yields a lead-in, which is true of Slapstick's five beats and
+// false of the commedia opener's three.
+function stepCardsHtml(steps) {
+  const leads = steps.map(s => stepLead(String(s)));
+  const titled = leads.every(Boolean);
+  return `<ol class="sx-steps">${steps.map((s, i) => `
+    <li class="sx-step">
+      ${titled ? `<p class="sx-step-h">${esc(leads[i].head)}</p>` : ''}
+      <p class="sx-step-p">${esc(titled ? leads[i].rest : s)}</p>
+    </li>`).join('')}</ol>`;
+}
+
 function actingChapterBlocks(l) {
   return (l.body ?? []).map(b =>
     b.h ? `<h2 class="guide-heading">${esc(b.h)}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
-    : b.steps ? `<ol class="th-list">${b.steps.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`
+    : b.steps ? stepCardsHtml(b.steps)
     : b.fig ? actingFigureHtml(b.fig)
     : b.mask ? maskSheetHtml(b.mask)
     : b.profile ? maskProfileHtml(b.profile)
@@ -4864,24 +4910,101 @@ function renderActingLesson(id) {
   // exact failure the note above describes, shipped. It was invisible in
   // development because the owner's own profile has the key set.
   if (learnSceneLive(B.ws, learnSequencePreview())) {
+    // ── THE STUDY LAYOUT (owner's lesson mockups, 2026-11-02) ──────
+    // Three columns: the module's lessons down the left, the chapter in
+    // the middle, and the lesson's notes on the right.
+    //
+    // IT IS NOT THE APP SHELL, and that is deliberate. Rendering into
+    // #shell-main would have meant renderShell(), which calls resetNav()
+    // and clears the back stack the lesson depends on; it would also
+    // have put a SECOND #brand-home in the document, and
+    // getElementById returns the first, so wireBrandHome() would have
+    // wired the sidebar's brand twice and the lesson's not at all. This
+    // is the lesson's own grid, built from the same tokens.
+    //
+    // THE NOTES ARE A GRID CELL, NOT A FIXED RAIL. The shell's
+    // .right-rail is display:none below 980px, and the owner's mockup
+    // puts Mark complete inside it — which on a phone would leave no way
+    // to finish a lesson. As a grid child it simply stacks under the
+    // chapter instead, so every control survives at every width and
+    // nothing is rendered twice.
+    const pos = at >= 0 ? at + 1 : null;
+    const inMod = m ? bookLessonsFor(B, m.id).filter(B.visible) : [];
+    const atMod = inMod.findIndex(x => x.id === id);
+    const modDone = inMod.filter(x => speechLessonDone(x.id)).length;
+    const modPct = inMod.length ? Math.round(modDone / inMod.length * 100) : 0;
+    // The hero and the notes thumbnail are the MODULE's card art. There
+    // is no per-lesson art in this repo and inventing a slot for one
+    // would render nothing; this is the picture the learner just came
+    // from, which is also the honest answer to "where am I".
+    const art = m ? learnScene(B.ws)?.moduleCard?.[m.id] ?? null : null;
+    // The chapter's own section headings, which is exactly what an "in
+    // this lesson" list is. lessonSteps() already derives them.
+    const marks = lessonSteps(l);
     app.innerHTML = `
       ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
-      <main class="guide sp-lesson lx">
-        <p class="pane-note lx-crumb">${crumb}</p>
-        ${picker}
-        <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
-        ${l.orientation ? `<p class="lx-lead">${esc(l.orientation)}</p>` : ''}
-        ${l.objective ? `<p class="lx-aim">${esc(l.objective)}</p>` : ''}
-        <section class="sp-chapter lx-body" aria-label="The chapter">
-          ${actingChapterBlocks(l)}
-          ${extras}
-        </section>
-        ${l.reflection ? `
-        <aside class="lx-reflect" aria-label="Reflection">
-          <p class="lx-q">${esc(l.reflection)}</p>
-        </aside>` : ''}
-        <section class="lx-foot" aria-label="Complete and continue">${footer}</section>
-      </main>`;
+      <div class="lx-shell">
+        <aside class="lx-side" aria-label="Lessons in this module">
+          ${m ? `<p class="lx-side-mod">Module ${m.n} · ${esc(moduleTitle(B, m))}</p>` : ''}
+          <ol class="lx-side-list">
+            ${inMod.map((x, i) => {
+    const done = speechLessonDone(x.id);
+    const here = x.id === id;
+    return `<li><button class="lx-side-item${here ? ' is-here' : ''}${done ? ' is-done' : ''}"
+                type="button" data-lx-go="${esc(x.id)}"${here ? ' aria-current="true"' : ''}>
+              <span class="lx-side-n" aria-hidden="true">${done ? '✓' : i + 1}</span>
+              <span class="lx-side-t">${esc(x.title)}</span>
+            </button></li>`;
+  }).join('')}
+          </ol>
+        </aside>
+        <main class="guide sp-lesson lx lx-main">
+          <p class="pane-note lx-crumb">${crumb}</p>
+          ${picker}
+          <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
+          ${l.orientation ? `<p class="lx-lead">${esc(l.orientation)}</p>` : ''}
+          ${inMod.length > 1 ? `
+          <div class="lx-prog">
+            <div class="lm-bar" role="img" aria-label="${modDone} of ${inMod.length} lessons complete">
+              <i style="width:${modPct}%"></i></div>
+            <p class="lx-prog-t">${atMod >= 0 ? `Lesson ${atMod + 1} of ${inMod.length}` : ''}</p>
+          </div>` : ''}
+          ${art ? `
+          <figure class="lx-hero">
+            <img src="${esc(art.src)}" alt="${esc(art.alt)}" loading="lazy" decoding="async">
+          </figure>` : ''}
+          <section class="sp-chapter lx-body" aria-label="The chapter">
+            ${actingChapterBlocks(l)}
+            ${extras}
+          </section>
+          ${l.reflection ? `
+          <aside class="lx-reflect" aria-label="Reflection">
+            <p class="lx-reflect-h">Try it</p>
+            <p class="lx-q">${esc(l.reflection)}</p>
+          </aside>` : ''}
+        </main>
+        <aside class="lx-notes" aria-label="Lesson notes">
+          <div class="lx-notes-in">
+            <h2 class="lx-notes-h">Lesson notes</h2>
+            ${art ? `<img class="lx-notes-pic" src="${esc(art.src)}" alt="" aria-hidden="true"
+                   loading="lazy" decoding="async">` : ''}
+            ${atMod >= 0 ? `<p class="lx-notes-pos">Lesson ${atMod + 1} of ${inMod.length}</p>` : ''}
+            <p class="lx-notes-t">${esc(l.title)}</p>
+            ${l.objective ? `
+            <section class="sp-takeaway lx-take">
+              <h3 class="lx-take-h">Key takeaway</h3>
+              <p class="lx-take-p">${esc(l.objective)}</p>
+            </section>` : ''}
+            ${marks.length ? `
+            <nav class="lx-toc" aria-label="In this lesson">
+              <p class="lx-toc-h">In this lesson</p>
+              <ol class="lx-toc-list">${marks.map(h =>
+    `<li>${esc(h)}</li>`).join('')}</ol>
+            </nav>` : ''}
+            <div class="lx-foot" aria-label="Complete and continue">${footer}</div>
+          </div>
+        </aside>
+      </div>`;
   } else {
   app.innerHTML = `
     ${pageTopbar(B.icon + ' ' + esc(l.title), '#8a6d3b')}
@@ -4930,6 +5053,14 @@ function renderActingLesson(id) {
     navStack.pop(); renderActingLesson(nxt.id);
   }));
   wireChapterList(renderActingLesson);
+  // The study layout's left column. Same pop-then-render as the chapter
+  // picker it sits beside, so walking sideways between lessons does not
+  // pile a new entry on the back stack for every one you look at.
+  app.querySelectorAll('[data-lx-go]').forEach(b =>
+    b.addEventListener('click', () => {
+      if (b.dataset.lxGo === id) return;
+      navTo(() => { navStack.pop(); renderActingLesson(b.dataset.lxGo); });
+    }));
   document.getElementById('ac-done').addEventListener('click', () => {
     if (!markSpeechLessonDone(id)) return;
     const btn = document.getElementById('ac-done');
