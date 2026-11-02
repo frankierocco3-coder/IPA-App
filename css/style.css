@@ -2774,9 +2774,13 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    aria-label is its accessible name, so nothing is lost by hiding these. */
 .gm-t, .gm-n, .gm-s { display: none; }
 
-@media (min-width: 901px) {
-  .lm-path.is-shelf.has-map { display: none; }
-}
+/* THE MAP IS THE WHOLE SURFACE WHEN THERE IS ONE (owner, 2026-11-02).
+   The grid used to return below 900px as a fallback, which meant a
+   narrow window showed the playhouse AND six cards repeating the same
+   six modules underneath it. The map carries them already — every
+   label on it is a button, sized in percent, so it stays reachable at
+   any width. Two lists of one thing is one list too many. */
+.lm-path.is-shelf.has-map { display: none; }
 @media (max-width: 900px) {
   /* Nothing to shed any more: the overlay was never visible, so the
      same rules serve both widths. This branch existed only to manage
