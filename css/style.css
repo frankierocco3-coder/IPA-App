@@ -1190,11 +1190,20 @@ body.modal-open { overflow: hidden; }
 .course-chip { font: inherit; cursor: pointer; font-weight: 800; }
 .course-chip:hover { background: var(--panel-2); }
 .course-icon { font-size: 17px; font-family: var(--serif); }
-/* Workspace switcher rows carry drawn art at 32px; the stats-bar chip keeps
-   its emoji at 17px, where a shaded plate is unreadable. A row is 51px tall
-   and holds two lines of text, so 32px sits in it without changing its
-   height. Scoped to .ws-row-img so the accent-course rows below, and the
-   chip above, are untouched. */
+/* Workspace switcher rows carry drawn art at 32px, and the stats-bar chip
+   carries it too — at 24px, dropping to 20px below 1040px in the media
+   query further down. A row is 51px tall and holds two lines of text, so
+   32px sits in it without changing its height; the chip grows from 39px to
+   42px to hold 24.
+
+   THIS COMMENT SAID THE CHIP "KEEPS ITS EMOJI AT 17PX" until 2026-11-03,
+   which stopped being true when wsIcon() grew its `where` argument and gave
+   the chip a 24px image. Measured in the browser at both widths before this
+   was rewritten. The matching stale claim in js/main.js went with it.
+
+   Scoped so the accent-course rows, which are a different list, are
+   untouched. 20px is the smallest any drawn art here has to survive — see
+   docs/WORKSPACE_CHIP_BRIEF.md. */
 .course-icon.ws-row-img { display: flex; align-items: center; }
 .course-icon.ws-row-img img { width: 32px; height: 32px; object-fit: contain; display: block; }
 .course-icon.ws-chip-img { display: flex; align-items: center; }

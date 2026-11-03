@@ -477,16 +477,24 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
         </button>`;
   }).join('');
 
-  // THE MENU ROWS TAKE ART; THE CHIP DOES NOT, and the split is deliberate
-  // rather than unfinished. `.course-icon` is 17px, and 17px is emoji
-  // territory: rendered at that size the shipped plates are unreadable, worse
-  // than the 26px mush that held .mode-icon back until it was raised to 36px.
-  // A menu row is 51px tall and carries two lines of text, so a 32px picture
-  // sits in it comfortably. The chip is a 39px pill in the stats bar, and a
-  // 32px image inside it would leave two pixels of air and push the bar's
-  // height into every screen's header. So the switcher, where somebody is
-  // choosing a workspace and an icon earns its keep, gets the art; the chip,
-  // which is a label you glance at, keeps the emoji that is built for 17px.
+  // BOTH TAKE ART. This block said "THE MENU ROWS TAKE ART; THE CHIP DOES
+  // NOT" until 2026-11-03, directly above the line that gives the chip its
+  // art — it described the state before `wsIcon` grew its `where` argument
+  // and was never updated when it did. What was true in it, and still is:
+  // `.course-icon` at 17px is emoji territory, and a 32px plate inside the
+  // chip would push the stats bar into every screen's header.
+  //
+  // What changed is that 24px turned out to be the floor rather than 32, so
+  // the chip takes a 24px image and grows from 39px to 42px to hold it. See
+  // the note on `wsIcon` above. MEASURED 2026-11-03, all three live sizes:
+  //
+  //     menu row                 32px image
+  //     chip, 1040px and wider   24px image, 42px pill
+  //     chip, below 1040px       20px image, 36px pill
+  //
+  // 20px is the smallest surface any drawn art in this app has to survive,
+  // and it is the size the two undrawn workspace icons must be drawn for —
+  // see docs/WORKSPACE_CHIP_BRIEF.md.
   //
   // A workspace with no `img` renders its emoji here exactly as before, so
   // the two still undrawn degrade to today's behaviour rather than to blanks.
