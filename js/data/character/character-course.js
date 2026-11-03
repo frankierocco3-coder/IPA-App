@@ -649,7 +649,7 @@ export const CHARACTER_LESSONS_ALL = [
       //
       // The copy is his, from the handoff.
       { p: 'Commedia dell\u2019arte grew in Italy in the 1500s as professional touring theatre. Companies travelled from town to town, improvising each performance from a prepared plot, using a shared set of characters, masks and routines.' },
-      { p: 'It was a craft, passed from actor to actor, built on training, discipline and deep knowledge of form \u2014 not actors making it up as they went along.' },
+      { p: 'It was a craft, passed from actor to actor, built on training, discipline and deep knowledge of form, not actors making it up as they went along.' },
       { tiles: { kind: 'timeline', title: 'A Brief Timeline',
         deck: 'From ancient roots to a travelling professional theatre.',
         items: [

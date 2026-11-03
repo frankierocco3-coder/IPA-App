@@ -91,7 +91,32 @@ import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
 import { ACTING_GAMES, SCENE_STUDY_AREAS } from '../js/data/acting/practice.js';
 import { CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS, CHARACTER_PRINCIPLE,
          COMMEDIA_MASKS, commediaMask, ONE_LINES, MASK_SITUATIONS, MASK_PROBLEMS } from '../js/data/character/character-course.js';
-import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible } from '../js/views/context.js';
+import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible,
+         COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaVisible,
+         THEATRE_LIVE, MUSICAL_LIVE } from '../js/views/context.js';
+// COMMEDIA IS ITS OWN COURSE (2026-11-02) AND THIS SUITE DID NOT KNOW.
+// character-course.js kept the prose and `CHARACTER_LESSONS` stopped
+// including it the same day:
+//
+//   export const CHARACTER_LESSONS = CHARACTER_LESSONS_ALL
+//     .filter(l => ROLE_LIVE || l.module !== 'role')
+//     .filter(l => l.module !== 'commedia');
+//
+// Section 29 reads those records by id. From that commit until 2026-11-03
+// every commedia check in it was looking at an array the records had left,
+// and the FIRST unguarded one — `text(arle)` on a chapter that no longer
+// resolved — threw before any of the ~790 checks after it ran. A clean
+// tree at 8aa2f64 reported "3 suites, 41 checks, 1 failure": the two data
+// suites, and the regression suite crashed at check one. Measured, with
+// the work in progress stashed, before any of it was blamed.
+//
+// So the lesson of the whole flake history applies again and more plainly:
+// THE CHECK COUNT IS THE TELL. 41 is not a green run with a small number
+// of failures, it is no run at all.
+import { COMMEDIA_LESSONS, COMMEDIA_MODULES, COMMEDIA_COLLECTIONS,
+         COMMEDIA_PRINCIPLE } from '../js/data/commedia/commedia-course.js';
+import { THEATRE_LESSONS, THEATRE_MODULES, THEATRE_COLLECTIONS } from '../js/data/theatre/theatre-course.js';
+import { MUSICAL_LESSONS, MUSICAL_MODULES, MUSICAL_COLLECTIONS } from '../js/data/musical/musical-course.js';
 import { CHARACTER_FIGURES, characterFigure } from '../js/data/character/art.js';
 import { SHAKESPEARE_FIGURES, shakespeareFigure } from '../js/data/shakespeare/art.js';
 import { IPA_BOOKS, notebookForContext } from '../js/notebook.js';
@@ -2381,9 +2406,22 @@ export async function run({ navDoc = document } = {}) {
       // Phone width: the textbook must not scroll sideways.
       const oldW = frame.style.width;
       frame.style.width = '375px'; await sleep(250);
+      // MEASURED AGAINST THE VIEWPORT, NOT THE CLIENT BOX. These two checks
+      // compared documentElement.scrollWidth with clientWidth, and inside a
+      // frame narrowed to 375px that is not a test for sideways scroll: a
+      // page tall enough to need a classic 15px vertical scrollbar reports
+      // clientWidth 360 while the root's scrollWidth stays at the window's
+      // 375, so the arithmetic fails on the scrollbar gutter alone. The
+      // textbook failed exactly that way on 2026-11-03, and in a real 375px
+      // viewport the same page measured ZERO overflowing elements and
+      // scrollWidth === clientWidth === 375. The page was fine; the
+      // yardstick was not. innerWidth is the phone's width, gutter
+      // included, which is what "fits a phone" means, and a genuine
+      // overflow still pushes scrollWidth past it.
       check('textbook: fits a phone without horizontal scroll',
-        doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
-        `scroll=${doc.documentElement.scrollWidth} client=${doc.documentElement.clientWidth}`);
+        doc.documentElement.scrollWidth <= (doc.defaultView?.innerWidth ?? doc.documentElement.clientWidth) + 1,
+        `scroll=${doc.documentElement.scrollWidth} viewport=${doc.defaultView?.innerWidth} `
+        + `client=${doc.documentElement.clientWidth}`);
       frame.style.width = oldW; await sleep(200);
       clickIn(doc.getElementById('nav-back')); await sleep(300);
       check('textbook: Back returns to the Acting Library shelf', !!qeTile());
@@ -3145,9 +3183,10 @@ export async function run({ navDoc = document } = {}) {
       // A phone must hold a game without sideways scroll.
       const oldW19 = frame.style.width;
       frame.style.width = '375px'; await sleep(250);
+      // Same yardstick as the textbook check above, for the same reason.
       check('speech: a game fits a phone without horizontal scroll',
-        doc.documentElement.scrollWidth <= doc.documentElement.clientWidth + 1,
-        `scroll=${doc.documentElement.scrollWidth}`);
+        doc.documentElement.scrollWidth <= (doc.defaultView?.innerWidth ?? doc.documentElement.clientWidth) + 1,
+        `scroll=${doc.documentElement.scrollWidth} viewport=${doc.defaultView?.innerWidth}`);
       frame.style.width = oldW19; await sleep(200);
       clickIn(doc.getElementById('sp-done')); await sleep(300);
       clickIn(doc.getElementById('sp-refl-done')); await sleep(350);
@@ -3790,16 +3829,30 @@ export async function run({ navDoc = document } = {}) {
       // 42px and the Mask Cards Practice card at 46px. The app already reuses
       // one file across surfaces (scripts.png is Monologues and Practice My
       // Text), so this is the established pattern rather than a shortcut.
+      // THE COMMEDIA SHELF LEFT THIS LIBRARY ON 2026-11-02 and took
+      // commedia.png with it. Two clauses here looked it up in
+      // CHARACTER_COLLECTIONS and got undefined from that day, and the
+      // check has been red ever since without anybody seeing it, because
+      // the crash in section 29 ran first. The two facts are now pinned
+      // in the libraries that actually hold them.
       check('character: the Library shelf passes art through, emoji still the fallback',
         /img: c\.img/.test(glyphSrc)
-        && CHARACTER_COLLECTIONS.find(c => c.id === 'commedia')?.img === 'img/ui/commedia.png'
-        && CHARACTER_COLLECTIONS.find(c => c.id === 'commedia')?.icon === '🃏'
         // EVERY LIVE CHARACTER SHELF NOW HAS ART — this read "the other five
         // have no art yet" and asserted that any shelf without art kept its
         // emoji, which went vacuously true the day the fifth file landed. The
         // whole shelf being drawn is the thing worth holding now.
         && CHARACTER_COLLECTIONS.every(c => !!c.img && !!c.icon),
         `${CHARACTER_COLLECTIONS.filter(c => c.img).length} of ${CHARACTER_COLLECTIONS.length} shelves have art`);
+      // commedia.png serves TWO surfaces: this shelf tile at 42px and the
+      // Mask Cards Practice card at 46px. One file across surfaces is the
+      // established pattern here (scripts.png is Monologues and Practice
+      // My Text), not a shortcut. The other two shelves have no file yet
+      // and keep their emoji, which is the fallback this names.
+      check('commedia: its own Library shelves pass art through, emoji still the fallback',
+        COMMEDIA_COLLECTIONS.find(c => c.id === 'cm-roots')?.img === 'img/ui/commedia.png'
+        && COMMEDIA_COLLECTIONS.every(c => !!c.icon)
+        && COMMEDIA_COLLECTIONS.filter(c => !c.img).length === 2,
+        `${COMMEDIA_COLLECTIONS.filter(c => c.img).length} of ${COMMEDIA_COLLECTIONS.length} shelves have art`);
       // The Shakespeare Library passes art through the same way, and is at the
       // Character reached: every shelf drawn, every emoji kept as fallback. That
       // state is deliberate and must stay legible rather than rendering blanks,
@@ -5904,8 +5957,14 @@ export async function run({ navDoc = document } = {}) {
       // The reviewer is read off the records, never assumed from the course.
       && /reviewer: bookReviewerPhrase\(B\)/.test(famSrc)
       && /reviewer: reviewerPhraseOf\(l\)/.test(famSrc)
-      // All three books that had no route now have one.
-      && (famSrc.match(/reviewCats\(\) \{ return bookReviewCategories\(this\); \}/g) ?? []).length === 3
+      // EVERY BOOK BUT ACTING TAKES THE GENERIC BUILDER, so this number is
+      // the book count minus one. It was three when the hole was fixed on
+      // 2026-09-30 (Character, Shakespeare, Rhetoric), four when Commedia
+      // was lifted out on 2026-11-02, and six with Theatre History and
+      // Musical Theatre on 2026-11-03. Acting keeps
+      // actingReviewCategories() because its #review page carries
+      // approaches and practice texts as well as chapters.
+      && (famSrc.match(/reviewCats\(\) \{ return bookReviewCategories\(this\); \}/g) ?? []).length === 6
       && !/reviewCats: \(\) => \(\{ total: 0 \}\)/.test(famSrc));
     // THE BADGE IS READ OFF THE RECORD TOO. The inventory row and the draft
     // reader both used ACTING_DRAFT_BADGE — a constant for the surfaces
@@ -6735,7 +6794,15 @@ export async function run({ navDoc = document } = {}) {
       const names = [...code.matchAll(/import\s*\{([^}]*)\}\s*from/g)]
         .flatMap(m => m[1].split(',').map(b => b.trim().split(/\s+as\s+/).pop()).filter(Boolean));
       for (const n of names) {
-        const re = new RegExp(`(?<![\\w.$])${n.replace(/\$/g, '\\$')}\\s*(=(?![=>])|\\+=|-=|\\+\\+|--)`);
+        const esc = n.replace(/\$/g, '\\$');
+        // A LOCAL DECLARATION IS NOT A WRITE. `const WORDS = {...}` inside
+        // a function legally shadows an imported WORDS and throws nothing,
+        // and main.js has had one since the module map shipped — so this
+        // check reported a crash risk that does not exist, and had been
+        // doing so unseen behind the crash in section 29. Shadowing is
+        // still worth avoiding and that one is renamed; what this check is
+        // for is an assignment to the binding itself.
+        const re = new RegExp(`(?<![\\w.$])(?<!\\b(?:const|let|var)\\s+)${esc}\\s*(=(?![=>])|\\+=|-=|\\+\\+|--)`);
         if (re.test(code)) writes.push(`${rel}: ${n}`);
       }
     }
@@ -6855,16 +6922,34 @@ export async function run({ navDoc = document } = {}) {
   // hidden by default, every record whole, no id clash with Acting, and
   // the house copy rules on every learner-facing line.
   {
+    // TWO COURSES, ONE FILE, SINCE 2026-11-02. `CH_ALL` is every record
+    // character-course.js holds, which is what the checks about records
+    // want — ids, house style, whole-record shape — and `CM` is the
+    // commedia COURSE, which is what the checks about commedia want. A
+    // check that asks "is this course shaped right" keeps the single
+    // course it is about. See the import note above for what reading the
+    // wrong one cost.
+    const CM = COMMEDIA_LESSONS;
+    const CH_ALL = [...CHARACTER_LESSONS, ...CM];
     let savedPreview = null;
+    let savedCmPreview = null;
     try { savedPreview = localStorage.getItem(CHARACTER_PREVIEW_KEY); localStorage.removeItem(CHARACTER_PREVIEW_KEY); } catch {}
+    try { savedCmPreview = localStorage.getItem(COMMEDIA_PREVIEW_KEY); localStorage.removeItem(COMMEDIA_PREVIEW_KEY); } catch {}
     try {
       // Launched 2026-09-23. The workspace is a live one now, and every
       // record carries a publication entry, so visibility no longer
       // depends on the preview flag being set.
       check('character: the workspace is live and offered in the selector',
         CHARACTER_LIVE === true && liveWorkspaces().some(w => w.id === 'character'));
+      check('commedia: the workspace is live and offered in the selector',
+        COMMEDIA_LIVE === true && liveWorkspaces().some(w => w.id === 'commedia'));
       check('character: every lesson is published, and none rests on the preview flag',
         CHARACTER_LESSONS.every(l => characterVisible(l) && speechReviewFor(l.id) !== null));
+      // The lift published nothing new and withdrew nothing: the approvals
+      // are keyed on ids that did not move, which is the whole reason the
+      // course could ship open on the day it was cut.
+      check('commedia: every lesson is published on the ids it already had',
+        CM.every(l => commediaVisible(l) && speechReviewFor(l.id) !== null));
       // Published on owner editorial approval only. If this ever passes
       // with a specialist verdict it means someone recorded a sign-off,
       // which is a real event and should be a deliberate edit here.
@@ -6872,14 +6957,20 @@ export async function run({ navDoc = document } = {}) {
         CHARACTER_LESSONS.every(l => awaitingSpecialist(l.id)));
     } finally {
       try { if (savedPreview !== null) localStorage.setItem(CHARACTER_PREVIEW_KEY, savedPreview); } catch {}
+      try { if (savedCmPreview !== null) localStorage.setItem(COMMEDIA_PREVIEW_KEY, savedCmPreview); } catch {}
     }
     const modIds = new Set(CHARACTER_MODULES.map(m => m.id));
+    const cmModIds = new Set(COMMEDIA_MODULES.map(m => m.id));
+    const whole = l => l.title && l.objective && l.orientation && l.reflection
+      && l.requiredReviewer && Array.isArray(l.body) && l.body.length >= 3;
     check('character: every lesson is a whole record in a written module',
-      CHARACTER_LESSONS.length >= 16 && CHARACTER_LESSONS.every(l => modIds.has(l.module)
-        && l.title && l.objective && l.orientation && l.reflection && l.requiredReviewer
-        && Array.isArray(l.body) && l.body.length >= 3));
+      CHARACTER_LESSONS.length >= 16
+      && CHARACTER_LESSONS.every(l => modIds.has(l.module) && whole(l)));
+    check('commedia: every lesson is a whole record in one of its three modules',
+      CM.length === 22 && CM.every(l => cmModIds.has(l.module) && whole(l)),
+      `${CM.length} record(s), modules ${[...cmModIds].join('/')}`);
     const actingIds = new Set(ACTING_LESSONS.map(l => l.id));
-    const chIds = CHARACTER_LESSONS.map(l => l.id);
+    const chIds = CH_ALL.map(l => l.id);
     // Ids are unique, and no id lives in both courses. Seven carry the
     // `ac-` prefix on purpose: they ARE Acting's old lessons, moved here
     // with their ids on 2026-09-23 so completed progress survived.
@@ -6888,14 +6979,20 @@ export async function run({ navDoc = document } = {}) {
       && chIds.every(id => !actingIds.has(id))
       && chIds.filter(id => id.startsWith('ac-')).length === 7
       && chIds.every(id => id.startsWith('ch-') || id.startsWith('ac-')));
-    const shelved = CHARACTER_COLLECTIONS.flatMap(c => c.lessons);
-    const pathIds = CHARACTER_LESSONS.filter(l => !l.reference).map(l => l.id);
+    const shelvesWhole = (colls, lessons) => {
+      const shelved = colls.flatMap(c => c.lessons);
+      const pathIds = lessons.filter(l => !l.reference).map(l => l.id);
+      return shelved.length === pathIds.length && new Set(shelved).size === shelved.length
+        && pathIds.every(id => shelved.includes(id));
+    };
     check('character: the Library shelves every PATH lesson exactly once, and no reference page',
-      shelved.length === pathIds.length && new Set(shelved).size === shelved.length
-      && pathIds.every(id => shelved.includes(id)));
-    const maskBlocks = CHARACTER_LESSONS.flatMap(l => l.body.filter(b => b.mask).map(b => b.mask));
-    const rostered = CHARACTER_LESSONS.flatMap(l => l.body.flatMap(b => b.roster ?? []));
-    check('character: the cast lesson rosters every mask, from the same records',
+      shelvesWhole(CHARACTER_COLLECTIONS, CHARACTER_LESSONS));
+    check('commedia: the Library shelves its nine path lessons and none of the thirteen mask pages',
+      shelvesWhole(COMMEDIA_COLLECTIONS, CM)
+      && COMMEDIA_COLLECTIONS.flatMap(c => c.lessons).length === 9);
+    const maskBlocks = CM.flatMap(l => l.body.filter(b => b.mask).map(b => b.mask));
+    const rostered = CM.flatMap(l => l.body.flatMap(b => b.roster ?? []));
+    check('commedia: the cast lesson rosters every mask, from the same records',
       COMMEDIA_MASKS.every(k => rostered.includes(k.id)) && rostered.every(id => commediaMask(id)));
     // The owner's physical-performance framework (2026-09-22): every
     // principal character is a repeatable system, recorded field by field.
@@ -6903,25 +7000,35 @@ export async function run({ navDoc = document } = {}) {
       'contradiction', 'centre', 'leads', 'stance', 'walk', 'principle', 'thinking', 'fearResponse',
       'desireResponse', 'gestures', 'audience', 'signature', 'recovery', 'voice', 'rhetoric', 'line', 'play', 'note'];
     const filled = v => (Array.isArray(v) ? v.length > 0 && v.every(x => typeof x === 'string' && x) : typeof v === 'string' && v.length > 0);
-    check('character: every mask block names a whole mask record',
+    check('commedia: every mask block names a whole mask record',
       maskBlocks.length >= 9 && maskBlocks.every(id => commediaMask(id))
       && COMMEDIA_MASKS.every(k => MASK_FIELDS.every(f => filled(k[f]))),
       COMMEDIA_MASKS.flatMap(k => MASK_FIELDS.filter(f => !filled(k[f])).map(f => k.id + '.' + f)).slice(0, 4).join(', '));
-    const commediaOrder = CHARACTER_LESSONS.filter(l => l.module === 'commedia' && !l.reference)
+    const commediaOrder = CM.filter(l => !l.reference)
       .sort((a, b) => a.order - b.order).map(l => l.id);
-    check('character: commedia runs in the owner’s order (why, history, slapstick, scenario; Pantalone opens the characters; Lazzi last)',
+    check('commedia: the course runs in the owner’s order (why, history, slapstick, scenario; Pantalone opens the characters; Lazzi last)',
       commediaOrder[0] === 'ch-cm-why' && commediaOrder[1] === 'ch-cm-history' && commediaOrder[2] === 'ch-cm-slapstick'
       && commediaOrder[3] === 'ch-cm-scenario' && commediaOrder[4] === 'ch-cm-form'
       && commediaOrder[5] === 'ac-archetypes' && commediaOrder[6] === 'ch-cm-mask'
       && commediaOrder[7] === 'ch-cm-cast' && commediaOrder.at(-1) === 'ch-cm-lazzi'
       && commediaOrder.length === 9,
       commediaOrder.join(' › '));
-    // Commedia opens the course (owner decision 2026-09-22): the modules,
-    // the Library shelves and the lesson sequence all start there.
-    check('character: Commedia dell’Arte opens the course',
-      CHARACTER_MODULES[0].id === 'commedia' && CHARACTER_MODULES[0].n === 1
-      && CHARACTER_COLLECTIONS[0].id === 'commedia' && CHARACTER_LESSONS[0].id === 'ch-cm-why'
-      && CHARACTER_MODULES.every((m, i, all) => i === 0 || m.n > all[i - 1].n));
+    // COMMEDIA USED TO OPEN BUILDING A CHARACTER and this check used to
+    // pin that. It left on 2026-11-02 and took n:1 with it, so what is
+    // worth pinning now is the pair of facts the lift created: Building a
+    // Character opens on The Physical Character, renumbered 1-4 with no id
+    // moved, and the commedia course opens where that module used to.
+    check('character: The Physical Character opens the course, renumbered from 1',
+      CHARACTER_MODULES[0].id === 'physical' && CHARACTER_MODULES[0].n === 1
+      && CHARACTER_COLLECTIONS[0].id === 'physical'
+      && !CHARACTER_MODULES.some(m => m.id === 'commedia')
+      && CHARACTER_MODULES.every((m, i, all) => i === 0 || m.n > all[i - 1].n),
+      CHARACTER_MODULES.map(m => m.n + ':' + m.id).join(' '));
+    check('commedia: its own course opens on Where It Comes From, with the lessons that were module 1',
+      COMMEDIA_MODULES[0].id === 'cm-roots' && COMMEDIA_MODULES[0].n === 1
+      && COMMEDIA_COLLECTIONS[0].id === 'cm-roots' && CM[0].id === 'ch-cm-why'
+      && COMMEDIA_MODULES.length === 3
+      && COMMEDIA_MODULES.every((m, i, all) => i === 0 || m.n > all[i - 1].n));
     // HANDOVER DONE 2026-09-23. Acting's Building a Character module is
     // gone and these seven records carry its lesson ids themselves, which
     // is what preserves progress: a learner who completed ac-inside in
@@ -6930,15 +7037,15 @@ export async function run({ navDoc = document } = {}) {
                         'ac-noaim', 'ac-transcribe', 'ac-essence'];
     const actingById = id => ACTING_LESSONS.find(l => l.id === id);
     check('character: the seven Acting ids moved here and exist in exactly one course',
-      TAKEN_OVER.every(id => !!CHARACTER_LESSONS.find(l => l.id === id) && !actingById(id)));
+      TAKEN_OVER.every(id => !!CH_ALL.find(l => l.id === id) && !actingById(id)));
     check('character: nothing still points at an Acting module that no longer exists',
-      CHARACTER_LESSONS.every(l => !l.movesFrom)
+      CH_ALL.every(l => !l.movesFrom)
       && !ACTING_MODULES.some(m => m.id === 'character'));
     // The retired opener is gone from both courses, not merely hidden.
     check('character: the retired two-roads opener exists nowhere',
-      !actingById('ac-character') && !CHARACTER_LESSONS.some(l => l.id === 'ac-character'));
+      !actingById('ac-character') && !CH_ALL.some(l => l.id === 'ac-character'));
     // The framing's own phrases, not the word: "The Road Runner" is fine.
-    const roads = CHARACTER_LESSONS.filter(l =>
+    const roads = CH_ALL.filter(l =>
       /\b(two roads|the roads|other road|this road|feeling road|analysis road|either road|cross over)\b/i.test(JSON.stringify(l)));
     check('character: no lesson keeps the retired two-roads framing', roads.length === 0,
       roads.map(l => l.id).join(', '));
@@ -6946,7 +7053,7 @@ export async function run({ navDoc = document } = {}) {
     // names must never reach a learner-facing surface.
     const src31 = await viewSource();
     check('character: every lesson names the thinking it comes from',
-      CHARACTER_LESSONS.every(l => typeof l.attribution === 'string' && l.attribution.length));
+      CH_ALL.every(l => typeof l.attribution === 'string' && l.attribution.length));
     check('character: influence tags show only in the owner preview of the hidden course',
       src31.includes("B.ws === 'character' && !CHARACTER_LIVE && characterPreview()")
       && src31.includes('const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m))')
@@ -6958,12 +7065,12 @@ export async function run({ navDoc = document } = {}) {
       && /theatrical construction, not a medical portrait/.test(pant.note));
     check('character: no movement field duplicates the retired body/speech lines',
       COMMEDIA_MASKS.every(k => !('body' in k) && !('speech' in k)));
-    const chapterOf = id => CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === id));
+    const chapterOf = id => CM.find(l => l.body.some(b => b.profile === id));
     // The character chapters are REFERENCE pages now: reached from The
     // Cast, never listed as steps on the path or shelved beside them.
-    check('character: each character chapter is a reference page, off the path and off the shelves',
+    check('commedia: each character chapter is a reference page, off the path and off the shelves',
       COMMEDIA_MASKS.every(k => chapterOf(k.id)?.reference === true)
-      && CHARACTER_COLLECTIONS.every(c => !c.lessons.some(id => CHARACTER_LESSONS.find(l => l.id === id)?.reference)));
+      && COMMEDIA_COLLECTIONS.every(c => !c.lessons.some(id => CM.find(l => l.id === id)?.reference)));
     // Every mask has its own chapter, and every mask that HAS breakdown art
     // reserves all three slots for it. The Lovers are two performers, so that
     // one chapter carries both sets (the 2026-09-22 picture intake);
@@ -6996,22 +7103,28 @@ export async function run({ navDoc = document } = {}) {
       return [...want.filter(key => !!characterFigure(key)).map(key => key + ': art ships, no slot'),
         ...c.body.filter(b => b.fig).map(b => b.fig + ': slot on an exempt chapter')];
     });
-    check('character: every mask has its own chapter with the breakdown and its picture slots',
+    check('commedia: every mask has its own chapter with the breakdown and its picture slots',
       slotGaps.length === 0,
       slotGaps.slice(0, 4).join(', ')
         || `${NO_BREAKDOWN.length} mask(s) exempt by name, none with breakdown art`);
     // The two servant jobs live in their own characters' chapters, and the
     // frightened run with the second zanni (owner order 2026-09-22).
-    const chapter = id => CHARACTER_LESSONS.find(l => l.id === id);
-    const text = l => l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? '']).join(' ');
+    const chapter = id => CM.find(l => l.id === id);
+    // GUARDED, because it was not. `text(arle)` on the line below ran with
+    // no !!arle in front of it, so the moment the record stopped resolving
+    // this threw a TypeError instead of failing a check — and a throw here
+    // takes every check after it with it. A missing chapter is a red
+    // failure now, which is what it always should have been.
+    const text = l => (l?.body ?? []).flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? '']).join(' ');
     const brig = chapter('ch-cm-brighella'), arle = chapter('ch-cm-arlecchino');
-    check('character: the first and second zanni jobs are taught in Brighella and Arlecchino, as functions',
+    check('commedia: the first and second zanni jobs are taught in Brighella and Arlecchino, as functions',
       !!brig && !!arle && /first zanni/i.test(text(brig)) && /second zanni/i.test(text(arle))
       && /not measurements of intelligence/.test(text(brig))
       && /a job in the plot rather than a measure of intelligence/.test(text(arle))
-      && !CHARACTER_LESSONS.some(l => l.id === 'ch-cm-zanni-roles'));
-    check('character: the frightened run sits with the second zanni, labelled a modern training convention',
-      /convention of modern training/.test(text(arle)) && /does not prove/.test(text(arle))
+      && !CM.some(l => l.id === 'ch-cm-zanni-roles'),
+      brig && arle ? '' : 'chapter missing: ' + [!brig && 'brighella', !arle && 'arlecchino'].filter(Boolean).join(', '));
+    check('commedia: the frightened run sits with the second zanni, labelled a modern training convention',
+      !!arle && /convention of modern training/.test(text(arle)) && /does not prove/.test(text(arle))
       && arle.body.some(b => b.steps?.length === 8));
     const figs = Object.entries(CHARACTER_FIGURES);
     const figFiles = await Promise.all(figs.map(([, f]) =>
@@ -7022,10 +7135,25 @@ export async function run({ navDoc = document } = {}) {
     // whole point — a new figure that ships without a caption still fails,
     // so the exemption cannot spread by accident.
     const NO_CAPTION = ['cm-cast-tree'];
-    check('character: every picture that ships has its file, alt text and an interpretation caption',
-      figs.every(([k, f], i) => figFiles[i] && f.alt
-        && (NO_CAPTION.includes(k) ? !f.caption : /interpretation/i.test(f.caption ?? ''))),
-      `${figs.length} picture(s) registered, ${NO_CAPTION.length} exempt by name`);
+    // THREE CLASSES OF PICTURE, CHECKED AS THREE. This read every entry as
+    // a mask plate, which is what they all were until the lesson art
+    // landed on 2026-11-02; twenty-eight illustrations and ornaments then
+    // failed it for carrying no interpretation caption, and nobody saw,
+    // because the crash in this section ran first.
+    //   mask plate        alt, and a caption that says it is interpretation
+    //   lesson picture    alt, and NO interpretation caption: it claims
+    //                     nothing about how commedia was played
+    //   ornament          empty alt and no caption, deliberately, so a
+    //                     screen reader does not read the words beside it
+    //                     a second time
+    const pictureOk = ([k, f], i) => figFiles[i] && (f.lesson
+      ? !f.caption && (f.alt === '' || f.alt.length > 20)
+      : f.alt && (NO_CAPTION.includes(k) ? !f.caption : /interpretation/i.test(f.caption ?? '')));
+    check('commedia: every picture that ships has its file, and the alt and caption its class calls for',
+      figs.every(pictureOk),
+      figs.filter((e, i) => !pictureOk(e, i)).map(([k]) => k).slice(0, 4).join(', ')
+        || `${figs.length} registered: ${figs.filter(([, f]) => f.lesson).length} lesson, `
+           + `${figs.filter(([, f]) => !f.lesson).length} plate, ${NO_CAPTION.length} exempt by name`);
     // The commedia collection landed whole (2026-09-22), so every slot the
     // chapters reserve now resolves. A new slot without art would fail
     // here rather than render an invisible gap nobody notices.
@@ -7040,23 +7168,23 @@ export async function run({ navDoc = document } = {}) {
     // the count fell to 30 and this check had been failing since. The chart
     // renders through { plate: true } and is not a { fig } slot, so it is
     // registered in art.js but deliberately absent from this tally.
-    const figKeys = CHARACTER_LESSONS.flatMap(l => (l.body ?? []).filter(b => b.fig).map(b => b.fig));
-    check('character: every { fig } slot names a registered picture with real alt text',
+    const figKeys = CM.flatMap(l => (l.body ?? []).filter(b => b.fig).map(b => b.fig));
+    check('commedia: every { fig } slot names a registered picture with real alt text',
       figKeys.length === 33
       && figKeys.every(k => { const f = characterFigure(k); return !!f && f.alt.length > 40 && !!f.caption; }),
       `${figKeys.length} slot(s)`);
-    check('character: the Lovers chapter carries both performers, face then stance then walk',
+    check('commedia: the Lovers chapter carries both performers, face then stance then walk',
       String(figKeys.filter(k => k.startsWith('cm-innamorat')))
         === 'cm-innamorata-mask,cm-innamorato-mask,cm-innamorata-stance,cm-innamorata-walk,'
           + 'cm-innamorato-stance,cm-innamorato-walk');
     const capText = figs.map(([, f]) => f.caption).join(' ');
-    check('character: picture captions keep house copy (no em dashes, no straight quotes)',
+    check('commedia: picture captions keep house copy (no em dashes, no straight quotes)',
       !capText.includes('—') && !/["']/.test(capText));
-    const copy = [CHARACTER_PRINCIPLE, ...ONE_LINES, ...MASK_SITUATIONS, ...MASK_PROBLEMS,
-      ...CHARACTER_MODULES.flatMap(m => [m.title, m.blurb]),
-      ...CHARACTER_COLLECTIONS.map(c => c.title),
+    const copy = [CHARACTER_PRINCIPLE, COMMEDIA_PRINCIPLE, ...ONE_LINES, ...MASK_SITUATIONS, ...MASK_PROBLEMS,
+      ...[...CHARACTER_MODULES, ...COMMEDIA_MODULES].flatMap(m => [m.title, m.blurb]),
+      ...[...CHARACTER_COLLECTIONS, ...COMMEDIA_COLLECTIONS].map(c => c.title),
       ...COMMEDIA_MASKS.flatMap(k => Object.values(k).flat().filter(v => typeof v === 'string')),
-      ...CHARACTER_LESSONS.flatMap(l => [l.title, l.objective, l.orientation, l.reflection,
+      ...CH_ALL.flatMap(l => [l.title, l.objective, l.orientation, l.reflection,
         ...l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? ''])])];
     const styleBad = copy.filter(t => /[—–"]/.test(t) || /n’t\b|’(re|ll|ve|m|d)\b/.test(t)
       || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(t));

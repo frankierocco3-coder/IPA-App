@@ -284,7 +284,13 @@ export const CHARACTER_FIGURES = {
 // are about #f8ecd5. The CSS multiplies them into the card so only the
 // ink survives; without that each one is a beige rectangle on a beige
 // card. See .lxc-fig in style.css.
-const l01 = (file, alt, w, h) => ({ title: '', file, alt, w, h });
+// `lesson: true` IS LOAD-BEARING, not a label. A mask plate makes a claim
+// about how a character was played and carries the interpretation caption
+// that says so; a lesson illustration makes no such claim and must not
+// pretend to, and an ornament that only repeats the words beside it takes
+// empty alt so a screen reader does not read them twice. The suite checks
+// the three cases differently and this is how it tells them apart.
+const l01 = (file, alt, w, h) => ({ title: '', file, alt, w, h, lesson: true });
 Object.assign(CHARACTER_FIGURES, {
   'cm-l01-hero': l01('l01-hero.png',
     'Three masked players stepping through an open doorway into a sunlit rehearsal room, a stooped Pantalone in a red cap, a harlequin in a diamond-patterned costume, and a Capitano in red with a plumed hat, with a hill town visible through the door behind them.', 646, 228),
