@@ -94,7 +94,8 @@ import { CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS, CHARACTER_
 import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible,
          COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaVisible,
          THEATRE_LIVE, THEATRE_PREVIEW_KEY,
-         MUSICAL_LIVE, MUSICAL_PREVIEW_KEY } from '../js/views/context.js';
+         MUSICAL_LIVE, MUSICAL_PREVIEW_KEY,
+         SCREEN_LIVE, SCREEN_PREVIEW_KEY } from '../js/views/context.js';
 // COMMEDIA IS ITS OWN COURSE (2026-11-02) AND THIS SUITE DID NOT KNOW.
 // character-course.js kept the prose and `CHARACTER_LESSONS` stopped
 // including it the same day:
@@ -117,6 +118,7 @@ import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible
 import { COMMEDIA_LESSONS, COMMEDIA_MODULES, COMMEDIA_COLLECTIONS,
          COMMEDIA_PRINCIPLE } from '../js/data/commedia/commedia-course.js';
 import { THEATRE_LESSONS, THEATRE_MODULES, THEATRE_COLLECTIONS } from '../js/data/theatre/theatre-course.js';
+import { SCREEN_LESSONS, SCREEN_MODULES, SCREEN_COLLECTIONS } from '../js/data/screen/screen-course.js';
 import { MUSICAL_LESSONS, MUSICAL_MODULES, MUSICAL_COLLECTIONS } from '../js/data/musical/musical-course.js';
 import { CHARACTER_FIGURES, characterFigure } from '../js/data/character/art.js';
 import { SHAKESPEARE_FIGURES, shakespeareFigure } from '../js/data/shakespeare/art.js';
@@ -5961,11 +5963,11 @@ export async function run({ navDoc = document } = {}) {
       // EVERY BOOK BUT ACTING TAKES THE GENERIC BUILDER, so this number is
       // the book count minus one. It was three when the hole was fixed on
       // 2026-09-30 (Character, Shakespeare, Rhetoric), four when Commedia
-      // was lifted out on 2026-11-02, and six with Theatre History and
-      // Musical Theatre on 2026-11-03. Acting keeps
-      // actingReviewCategories() because its #review page carries
-      // approaches and practice texts as well as chapters.
-      && (famSrc.match(/reviewCats\(\) \{ return bookReviewCategories\(this\); \}/g) ?? []).length === 6
+      // was lifted out on 2026-11-02, six with Theatre History and Musical
+      // Theatre on 2026-11-03, and seven once Screen Acting joined them the
+      // same day. Acting keeps actingReviewCategories() because its #review
+      // page carries approaches and practice texts as well as chapters.
+      && (famSrc.match(/reviewCats\(\) \{ return bookReviewCategories\(this\); \}/g) ?? []).length === 7
       && !/reviewCats: \(\) => \(\{ total: 0 \}\)/.test(famSrc));
     // THE BADGE IS READ OFF THE RECORD TOO. The inventory row and the draft
     // reader both used ACTING_DRAFT_BADGE — a constant for the surfaces
@@ -7211,6 +7213,9 @@ export async function run({ navDoc = document } = {}) {
       { key: 'musical', name: 'Musical Theatre', prefix: 'mt-', live: MUSICAL_LIVE,
         lessons: MUSICAL_LESSONS,
         modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 14 },
+      { key: 'screen', name: 'Screen Acting', prefix: 'sc-', live: SCREEN_LIVE,
+        lessons: SCREEN_LESSONS,
+        modules: SCREEN_MODULES, colls: SCREEN_COLLECTIONS, min: 8 },
     ];
     const everyOtherId = new Set([...ACTING_LESSONS, ...CHARACTER_LESSONS, ...COMMEDIA_LESSONS,
       ...SHAKESPEARE_LESSONS, ...RHETORIC_LESSONS].map(l => l.id));
@@ -7220,7 +7225,7 @@ export async function run({ navDoc = document } = {}) {
     // workspace legitimately IN liveWorkspaces(), which is the whole
     // point of the key. What is being asserted is what a LEARNER sees.
     const savedPrev = {};
-    for (const k of [THEATRE_PREVIEW_KEY, MUSICAL_PREVIEW_KEY]) {
+    for (const k of [THEATRE_PREVIEW_KEY, MUSICAL_PREVIEW_KEY, SCREEN_PREVIEW_KEY]) {
       try { savedPrev[k] = localStorage.getItem(k); localStorage.removeItem(k); } catch {}
     }
     try {
@@ -7276,9 +7281,14 @@ export async function run({ navDoc = document } = {}) {
       // an acting coach's name stand in. That was the Rhetoric mislabel of
       // 2026-09-30 and it is the one thing these records assert about
       // their own review.
-      check(`${n}: every record asks for a theatre historian`,
-        B.lessons.every(l => l.requiredReviewer === 'theatre-history')
-        && B.lessons.every(l => awaitingSpecialist(l.id)));
+      // Screen Acting is craft, not history, so it asks for the reviewer
+      // Acting and Building a Character ask for. Naming the wrong
+      // specialist on a gated page is the Rhetoric mislabel of 2026-09-30.
+      const wants = B.key === 'screen' ? 'acting-professional' : 'theatre-history';
+      check(`${n}: every record asks for the right specialist`,
+        B.lessons.every(l => l.requiredReviewer === wants)
+        && B.lessons.every(l => awaitingSpecialist(l.id)),
+        `wants ${wants}`);
     }
     } finally {
       for (const [k, v] of Object.entries(savedPrev)) {
@@ -7298,7 +7308,7 @@ export async function run({ navDoc = document } = {}) {
     // does, failed this content on its own citations; that course simply
     // has no ranges in it.
     const unquoted = t => String(t ?? '').replace(/[“”"][^“”"]*[“”"]/g, ' ');
-    const thCopy = [...THEATRE_LESSONS, ...MUSICAL_LESSONS].flatMap(l => [
+    const thCopy = [...THEATRE_LESSONS, ...MUSICAL_LESSONS, ...SCREEN_LESSONS].flatMap(l => [
       l.title, l.objective, l.orientation, l.reflection, l.takeaway,
       ...(l.body ?? []).flatMap(b => [b.p, b.h, b.sub, b.key, b.quote, b.note,
         ...(b.list ?? []), ...(b.olist ?? []),
@@ -7315,10 +7325,35 @@ export async function run({ navDoc = document } = {}) {
     const thSources = THEATRE_LESSONS.flatMap(l => l.sources ?? []);
     check('theatre: source URLs live in sources only, never in a body block',
       thSources.length > 100 && thSources.every(x => /https?:\/\//.test(x))
-      && !/https?:\/\//.test(JSON.stringify(
-        THEATRE_LESSONS.map(l => l.body)) + JSON.stringify(MUSICAL_LESSONS.map(l => l.body))),
+      && !/https?:\/\//.test(JSON.stringify(THEATRE_LESSONS.map(l => l.body))
+        + JSON.stringify(MUSICAL_LESSONS.map(l => l.body))
+        + JSON.stringify(SCREEN_LESSONS.map(l => l.body))),
       `${thSources.length} source(s) recorded`);
     // NO LYRIC, EVER. The catalogue names songs and credits the writers.
+    // THE APP NEVER RECORDS THE LEARNER, and this is the course that would
+    // tempt it: every exercise in it is filmed. The learner films on their
+    // own phone and watches it back; the app captures nothing.
+    //
+    // THE FIRST VERSION OF THIS CHECK BANNED THE WORD "record" IN THE BODY
+    // AND THAT WAS WRONG. The copy SHOULD say record — "what the camera
+    // recorded", "re-record the weakest tape" — because recording is what
+    // the learner is being asked to go and do. Banning the word tested the
+    // prose instead of the app, and failed on correct writing.
+    //
+    // What matters is that no block in this course can PRODUCE a capture
+    // surface, so the block types are allow-listed. Add a `tryIt`, a
+    // `perform` or anything else interactive to a screen lesson and this
+    // fails, which is the thing worth catching.
+    const INERT = new Set(['note', 'h', 'sub', 'p', 'key', 'quote', 'list',
+      'olist', 'defs', 'table', 'qa', 'panel', 'cards', 'steps', 'tiles', 'fig']);
+    const liveBlocks = [...new Set(SCREEN_LESSONS
+      .flatMap(l => (l.body ?? []).flatMap(b => Object.keys(b)))
+      .filter(k => !INERT.has(k)))];
+    check('screen: every block is inert, so the filming stays the learner\u2019s own device',
+      CAPABILITIES.learnerSpeaking === false && liveBlocks.length === 0,
+      liveBlocks.join(', ') || 'all blocks from the inert set');
+    check('screen: the repetition chapter says it teaches one named tradition',
+      SCREEN_LESSONS.some(l => (l.body ?? []).some(b => /one approach among several/.test(b.note ?? ''))));
     check('musical: the catalogue carries no song text, only titles and credits',
       MUSICAL_LESSONS.every(l => !('lyric' in l) && !('lyrics' in l))
       && !/"(lyric|lyrics|verse|chorus)":/.test(JSON.stringify(MUSICAL_LESSONS)));

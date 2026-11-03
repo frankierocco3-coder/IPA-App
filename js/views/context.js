@@ -113,6 +113,13 @@ export const WORKSPACES = [
     context: 'Where the form came from, and what each stage asked of a performer' },
   { id: 'musical', icon: '🎼', label: 'Musical Theatre',
     context: 'The book musical, and a repertoire organised so you can find your song' },
+  // SCREEN ACTING, from his handoff of 2026-11-03. It sits next to Acting
+  // rather than with the history courses, because it is a craft course:
+  // the same job as Acting & Scene Work, done for a lens instead of a room.
+  // No `img` yet either — see docs/WORKSPACE_CHIP_BRIEF.md, which now owes
+  // three chips rather than two.
+  { id: 'screen', icon: '🎥', label: 'Screen Acting',
+    context: 'Acting for the lens: scale, stillness, listening and the self-tape' },
   // THE PORTRAIT, NOT THE SKULL-HOLDER (owner decision 2026-10-14). It
   // pointed at soliloquy.png so that the commissioned lavender respin would
   // improve the chip and the shelf tile together; the owner chose the face
@@ -266,6 +273,26 @@ export const musicalPreview = () => {
 export const musicalOpen = () => MUSICAL_LIVE || musicalPreview();
 export const musicalVisible = l => musicalPreview() || speechPublished(l.id);
 
+// ── SCREEN ACTING, same handoff, same day ─────────────────────
+//
+// GATED, for the ordinary reason: eight written chapters and not one
+// entry in the review ledger. It asks for an ACTING professional rather
+// than a theatre historian — the claims in it are craft claims about
+// scale, eyelines and listening, not historical ones — which is the same
+// reviewer Acting and Building a Character are still waiting on.
+//
+// It is also the course with the most to lose from a careless edit: its
+// eighth chapter teaches one named twentieth-century tradition, and the
+// chapter says so in a content note rather than presenting it as how
+// acting works. See the header of js/data/screen/screen-course.js.
+export const SCREEN_LIVE = false;
+export const SCREEN_PREVIEW_KEY = 'speechcraft-screen-preview';
+export const screenPreview = () => {
+  try { return localStorage.getItem(SCREEN_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const screenOpen = () => SCREEN_LIVE || screenPreview();
+export const screenVisible = l => screenPreview() || speechPublished(l.id);
+
 export const SHAKESPEARE_LIVE = true;
 export const SHAKESPEARE_PREVIEW_KEY = 'speechcraft-shakespeare-preview';
 export const shakespearePreview = () => {
@@ -329,12 +356,13 @@ export const liveWorkspaces = () => WORKSPACES.filter(w =>
   && (w.id !== 'commedia' || commediaOpen())
   && (w.id !== 'theatre' || theatreOpen())
   && (w.id !== 'musical' || musicalOpen())
+  && (w.id !== 'screen' || screenOpen())
   && (w.id !== 'shakespeare' || shakespeareOpen())
   && (w.id !== 'rhetoric' || rhetoricOpen()));
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
 export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'commedia',
-  'theatre', 'musical', 'shakespeare', 'rhetoric'];
+  'theatre', 'musical', 'screen', 'shakespeare', 'rhetoric'];
 export const WORKSPACE_KEY = 'speechcraft-workspace';
 export const activeWorkspace = () => {
   try {
@@ -343,6 +371,7 @@ export const activeWorkspace = () => {
     if (v === 'character' && !characterOpen()) return 'acting';
     if (v === 'theatre' && !theatreOpen()) return 'acting';
     if (v === 'musical' && !musicalOpen()) return 'acting';
+    if (v === 'screen' && !screenOpen()) return 'acting';
     if (v === 'shakespeare' && !shakespeareOpen()) return 'acting';
     if (v === 'rhetoric' && !rhetoricOpen()) return 'acting';
     if (WORKSPACES.some(w => w.id === v)) return v;

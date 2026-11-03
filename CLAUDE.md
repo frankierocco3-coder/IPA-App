@@ -116,9 +116,10 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
-**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **858**
-(841 before the two new courses were covered on 2026-11-03; 835 before
-2026-11-03; 824 before 2026-10-25). A short run skipped sections and is not
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **867**
+(858 before Screen Acting was covered on 2026-11-03; 841 before Theatre
+History and Musical Theatre were, the same day; 835 before 2026-11-03;
+824 before 2026-10-25). A short run skipped sections and is not
 comparable even if its failure count looks small — a green run with a short
 count is not a green run.
 
@@ -371,13 +372,14 @@ script instead and paste its block.
 - Commedia dell’Arte (commedia) **LIVE**
 - Theatre History (theatre)  withdrawn
 - Musical Theatre (musical)  withdrawn
+- Screen Acting (screen)     withdrawn
 - Shakespeare (shakespeare)  **LIVE**
 - Rhetoric (rhetoric)        **LIVE**
 - Voice & Speech (ipa)       **LIVE**
 - Accents & Dialects (accents) **LIVE**
 - Speech (speech)            withdrawn
 
-7 of 10 live.
+7 of 11 live.
 
 ### Accent courses
 
@@ -395,6 +397,7 @@ script instead and paste its block.
 - Commedia dell’Arte            22 records  (13 of them reference pages, so the path walks 9)
 - Theatre History               22 records  <- 22 UNPUBLISHED: th-what, th-greek, th-tragedy, th-comedy, th-romanstage, th-roman  WORKSPACE WITHDRAWN
 - Musical Theatre               14 records  <- 14 UNPUBLISHED: mt-book, mt-roots, mt-integration, mt-golden, mt-working, mt-rep-guide  WORKSPACE WITHDRAWN
+- Screen Acting                  8 records  <- 8 UNPUBLISHED: sc-how, sc-camera, sc-technical, sc-listen, sc-prep, sc-set  WORKSPACE WITHDRAWN
 - Shakespeare                   37 records
 - Rhetoric                      36 records
 - Speech                        25 records  <- 13 UNPUBLISHED: sp-start-parts, sp-start-fluency, sp-start-alphabet, sp-start-offbook, sp-m-pace, sp-m-emphasis  WORKSPACE WITHDRAWN
@@ -405,21 +408,22 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 ### Every X_LIVE switch
 
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
-- CHARACTER_LIVE           true   js/views/context.js:183
+- CHARACTER_LIVE           true   js/views/context.js:190
 - COCKNEY_LIVE             true   js/views/context.js:53
-- COINAGE_LIVE             false  js/main.js:308
-- COMMEDIA_LIVE            true   js/views/context.js:219
+- COINAGE_LIVE             false  js/main.js:309
+- COMMEDIA_LIVE            true   js/views/context.js:226
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
-- MUSICAL_LIVE             false  js/views/context.js:261
+- MUSICAL_LIVE             false  js/views/context.js:268
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
-- RHETORIC_COURSE_LIVE     true   js/views/context.js:283
-- RHETORIC_LIVE            false  js/main.js:281
-- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:295
+- RHETORIC_COURSE_LIVE     true   js/views/context.js:310
+- RHETORIC_LIVE            false  js/main.js:282
+- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:322
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:10725
-- SHAKESPEARE_LIVE         true   js/views/context.js:269
-- SPEECH_LIVE              false  js/views/context.js:175
-- THEATRE_LIVE             false  js/views/context.js:245
+- SCENE_STUDY_LIVE         false  js/main.js:10813
+- SCREEN_LIVE              false  js/views/context.js:288
+- SHAKESPEARE_LIVE         true   js/views/context.js:296
+- SPEECH_LIVE              false  js/views/context.js:182
+- THEATRE_LIVE             false  js/views/context.js:252
 
 ### Reference shelves
 
@@ -432,9 +436,9 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                13933 lines
+- js/main.js                14021 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  858
+- regression check() sites  860
 
 ### Review
 

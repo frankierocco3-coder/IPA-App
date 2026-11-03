@@ -82,6 +82,7 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
 import { COMMEDIA_PRINCIPLE, COMMEDIA_MODULES, COMMEDIA_LESSONS, COMMEDIA_COLLECTIONS } from './data/commedia/commedia-course.js';
 import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS } from './data/theatre/theatre-course.js';
 import { MUSICAL_PRINCIPLE, MUSICAL_MODULES, MUSICAL_LESSONS, MUSICAL_COLLECTIONS } from './data/musical/musical-course.js';
+import { SCREEN_PRINCIPLE, SCREEN_MODULES, SCREEN_LESSONS, SCREEN_COLLECTIONS } from './data/screen/screen-course.js';
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
          COMMEDIA_MASKS, commediaMask, MASK_SITUATIONS, MASK_PROBLEMS,
          ONE_LINES } from './data/character/character-course.js';
@@ -126,7 +127,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, SCREEN_LIVE, SCREEN_PREVIEW_KEY, screenOpen, screenPreview, screenVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -677,8 +678,8 @@ function drawRail(section) {
         note: 'Every chapter is free to read in any order.',
         actions: [['Open the Library', () => goSection('library'), true]] });
     }
-  } else if ((ws === 'shakespeare' || ws === 'theatre' || ws === 'musical')
-             && section === 'learn') {
+  } else if ((ws === 'shakespeare' || ws === 'theatre' || ws === 'musical'
+              || ws === 'screen') && section === 'learn') {
     // THE MODULE RAIL (owner's map mockup, 2026-10-31). Where you are,
     // what opens it, and the whole course under it.
     //
@@ -850,12 +851,79 @@ function drawRail(section) {
     // On Learn itself the path IS the next step — an "Open Learn" card
     // beside it was a door to the room you are standing in (owner UI
     // pass 2026-09-15). Everywhere else the pointer stays.
-    const track = trackFor(activeCourse());
-    const { done, total } = trackProgress(track);
-    cards.push({ h: 'Next step',
-      title: done >= total ? 'Practice to keep it sharp' : 'Continue your course',
-      note: `${done} of ${total} lessons complete.`,
-      actions: [['Open Learn', () => goSection('learn'), true]] });
+    //
+    // THE COUNT IS THE ACTIVE WORKSPACE'S, NOT THE STORED ACCENT COURSE.
+    // This branch read `trackFor(activeCourse())` for every workspace it
+    // caught, and activeCourse() is the stored DIALECT course. So the
+    // five book workspaces that reach this branch — commedia,
+    // shakespeare, rhetoric, and theatre/musical in owner preview —
+    // printed a Neutral American lesson count on every section but
+    // Learn: "0 of 18 lessons complete" in the Commedia Library, where
+    // the path walks 9. Acting and Character never showed it, because
+    // the first branch in this chain carries no section guard and
+    // catches them in the Library too; that is why the bug reads as
+    // seven courses and measures as five.
+    //
+    // VOICE & SPEECH WAS WRONG THE SAME WAY AND MORE QUIETLY. It works
+    // in IPA Foundations (30 lessons) — renderShell hands
+    // workspaceCourse(ws) to the statsbar, Learn and Practice, and the
+    // statsbar on this very screen reads "IPA Foundations" — while the
+    // rail counted whichever accent course was last selected, so the
+    // total moved between 14, 17 and 18 under that heading as a
+    // selection the workspace does not use changed. Measured all three.
+    // workspaceCourse(ws) is what the rest of the shell reads; reading
+    // anything else here is what put two disagreeing numbers on one page.
+    //
+    // Keyed on BOOKS rather than ACCENTLESS_WORKSPACES: that list holds
+    // 'speech', which has no book registry entry, so a lookup is both
+    // the test and the thing needed. (Speech cannot arrive here anyway —
+    // see the first branch — and would quietly take the accent path.)
+    const B = BOOKS[ws];
+    if (B) {
+      // RE-DERIVED, NOT SHARED, exactly as the commedia rail above
+      // re-derives its own: pathLessons(B) filtered by B.visible is the
+      // pair bookLearnPane() calls `avail`, so Learn and the rail cannot
+      // disagree about the length of a course.
+      const avail = pathLessons(B).filter(B.visible);
+      const done = avail.filter(l => speechLessonDone(l.id)).length;
+      // "PRACTICE TO KEEP IT SHARP" IS AN ACCENT-COURSE SENTENCE AND IT
+      // DOES NOT TRANSFER. A finished book course has no drill to come
+      // back to: Shakespeare's Practice pane says in its own words that
+      // no exercise has been built for it, Commedia's says nothing there
+      // is scored, and this app deleted the scored economy on
+      // 2026-10-05. What a read-through book actually offers next is the
+      // reading — which is what bookLearnPane() offers when it runs out
+      // of lessons, in these same words. The copy is lifted from that
+      // pane on purpose, so the two surfaces cannot drift.
+      //
+      // An empty course gets its own line rather than "0 of 0 lessons
+      // complete", which would read as finished. Nothing reachable is in
+      // that state today — theatre and musical are gated whole, so their
+      // lessons are only visible under the preview that opens the
+      // workspace at all — but the module tiles claimed "awaiting
+      // review" with nothing prepared once before, and the guard is one
+      // branch.
+      if (!avail.length) {
+        cards.push({ h: 'Next step', title: 'The course is written and in review',
+          note: `The ${B.libraryName} is open meanwhile.`,
+          actions: [['Open the Library', () => goSection('library'), true]] });
+      } else if (done >= avail.length) {
+        cards.push({ h: 'Next step', title: 'Every available lesson complete',
+          note: `${done} of ${avail.length} lessons complete. Every chapter stays free to read in any order.`,
+          actions: [['Open the Library', () => goSection('library'), true]] });
+      } else {
+        cards.push({ h: 'Next step', title: 'Continue your course',
+          note: `${done} of ${avail.length} lessons complete.`,
+          actions: [['Open Learn', () => goSection('learn'), true]] });
+      }
+    } else {
+      const track = trackFor(workspaceCourse(ws).id);
+      const { done, total } = trackProgress(track);
+      cards.push({ h: 'Next step',
+        title: done >= total ? 'Practice to keep it sharp' : 'Continue your course',
+        note: `${done} of ${total} lessons complete.`,
+        actions: [['Open Learn', () => goSection('learn'), true]] });
+    }
   }
 
   // 2 · Daily Quests — a KIND of next step, so it renders inside the
@@ -1050,6 +1118,7 @@ function learnMain(el, course, ws = activeWorkspace()) {
   // the point — a new book course should cost two lines here.
   if (ws === 'theatre') return bookLearnPane(el, BOOKS.theatre);
   if (ws === 'musical') return bookLearnPane(el, BOOKS.musical);
+  if (ws === 'screen') return bookLearnPane(el, BOOKS.screen);
   if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
   if (ws === 'rhetoric') {
     bookLearnPane(el, BOOKS.rhetoric);
@@ -1177,6 +1246,7 @@ function practiceMain(el, course, ws = activeWorkspace()) {
   if (ws === 'commedia') return commediaPracticePane(el);
   if (ws === 'theatre') return bookNoPracticePane(el, BOOKS.theatre);
   if (ws === 'musical') return bookNoPracticePane(el, BOOKS.musical);
+  if (ws === 'screen') return bookNoPracticePane(el, BOOKS.screen);
   if (ws === 'shakespeare') return shakespearePracticePane(el);
   if (ws === 'rhetoric') return rhetoricPracticePane(el);
   if (ws === 'speech') return speechPracticePane(el);
@@ -3383,6 +3453,7 @@ const BOOK_REVIEW_FILE = {
   rhetoric: 'js/data/rhetoric/rhetoric-course.js',
   theatre: 'js/data/theatre/theatre-course.js',
   musical: 'js/data/musical/musical-course.js',
+  screen: 'js/data/screen/screen-course.js',
 };
 const BOOK_REVIEW_CONCERNS = {
   rhetoric: 'Claims about the classical tradition are made checkable and are unchecked. '
@@ -3401,6 +3472,11 @@ const BOOK_REVIEW_CONCERNS = {
     + 'otherwise, and the exceptions are marked. Composer and lyricist credits vary by '
     + 'production and are unverified. Era labels are proposed teaching categories, not '
     + 'scholarly periods. Song and show titles only; no lyric is reproduced.',
+  screen: 'Craft claims about shot size, eyelines, continuity and set procedure are '
+    + 'stated as working practice and are unverified. The eighth chapter teaches one '
+    + 'named twentieth-century training tradition and says so in a content note; it '
+    + 'must not read as a universal account of acting. Every exercise is filmed by the '
+    + 'learner on their own device \u2014 the app captures nothing and must not start.',
 };
 const BOOK_REVIEW_CONCERNS_DEFAULT =
   'No single artistic interpretation implied; emotional states never taught as objectives; '
@@ -3519,6 +3595,14 @@ const BOOKS = {
     collections: MUSICAL_COLLECTIONS, visible: musicalVisible,
     moduleTone: () => 'is-gold',
     reviewCats() { return bookReviewCategories(this); } },
+  // ACTING FOR CAMERA, his handoff of 2026-11-03. Ordinary book course,
+  // gated like the two above it, and the only one of the three asking for
+  // an acting professional rather than a theatre historian.
+  screen: { ws: 'screen', icon: '🎥', title: 'Screen Acting', libraryName: 'Screen Acting Library',
+    principle: SCREEN_PRINCIPLE, modules: SCREEN_MODULES, lessons: SCREEN_LESSONS,
+    collections: SCREEN_COLLECTIONS, visible: screenVisible,
+    moduleTone: () => 'is-blue',
+    reviewCats() { return bookReviewCategories(this); } },
   shakespeare: { ws: 'shakespeare', icon: '🪶', title: 'Shakespeare', libraryName: 'Shakespeare Library',
     principle: SHAKESPEARE_PRINCIPLE, modules: SHAKESPEARE_MODULES, lessons: SHAKESPEARE_LESSONS,
     collections: SHAKESPEARE_COLLECTIONS, visible: shakespeareVisible,
@@ -3533,6 +3617,7 @@ const BOOKS = {
 const COMMEDIA_IDS = new Set(COMMEDIA_LESSONS.map(l => l.id));
 const THEATRE_IDS = new Set(THEATRE_LESSONS.map(l => l.id));
 const MUSICAL_IDS = new Set(MUSICAL_LESSONS.map(l => l.id));
+const SCREEN_IDS = new Set(SCREEN_LESSONS.map(l => l.id));
 const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
 const SHAKESPEARE_IDS = new Set(SHAKESPEARE_LESSONS.map(l => l.id));
 const RHETORIC_IDS = new Set(RHETORIC_LESSONS.map(l => l.id));
@@ -3558,6 +3643,7 @@ const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
   : COMMEDIA_IDS.has(id) ? BOOKS.commedia
   : THEATRE_IDS.has(id) ? BOOKS.theatre
   : MUSICAL_IDS.has(id) ? BOOKS.musical
+  : SCREEN_IDS.has(id) ? BOOKS.screen
   : CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
 // Order matters and matches bookOf: Shakespeare owns the collection id
 // 'rhetoric' (its own module 6), while the Rhetoric COURSE uses ids like
@@ -3568,6 +3654,7 @@ const bookOfCollection = id => SHAKESPEARE_COLLECTIONS.some(c => c.id === id) ? 
   : COMMEDIA_COLLECTIONS.some(c => c.id === id) ? BOOKS.commedia
   : THEATRE_COLLECTIONS.some(c => c.id === id) ? BOOKS.theatre
   : MUSICAL_COLLECTIONS.some(c => c.id === id) ? BOOKS.musical
+  : SCREEN_COLLECTIONS.some(c => c.id === id) ? BOOKS.screen
   : CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
 const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // A `reference: true` record is a page you are sent to, never a step on
@@ -8203,6 +8290,7 @@ function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'commedia') return bookLibraryPane(el, BOOKS.commedia);
   if (ws === 'theatre') return bookLibraryPane(el, BOOKS.theatre);
   if (ws === 'musical') return bookLibraryPane(el, BOOKS.musical);
+  if (ws === 'screen') return bookLibraryPane(el, BOOKS.screen);
   if (ws === 'shakespeare') return shakespeareLibraryPane(el);
   if (ws === 'rhetoric') return rhetoricLibraryPane(el);
   if (ws === 'speech') return speechLibraryPane(el);
