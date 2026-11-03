@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v84';                     // 2026-11-03: thirteen Theatre History modules, the Broadway Book Musical split into five chapters, and the repeated credit key gone from the eight repertoire pages. He asked for all of it and will open the preview to check it, which is the rule that matters here rather than the module-graph one: course data is a module, modules go through staleWhileRevalidate, and an installed copy would serve the old shape with the new one a revalidation away
+const VERSION = 'sc-v85';                     // 2026-11-03: Screen Acting joins the module graph (js/data/screen/screen-course.js, statically imported by main.js) and Theatre History finishes its split at twenty modules. BOTH reasons apply this time, the plain graph one and the one that matters: a new statically imported module would go unfetched offline behind a cached old main.js, and he asked for all of it and will open the preview to look
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
