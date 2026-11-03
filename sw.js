@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v81';                     // 2026-11-02: the course-sequence steps stack and their drawings are re-cut clear of the badges baked into them — three images REPLACED at existing paths, which cacheFirst never re-asks for
+const VERSION = 'sc-v82';                     // 2026-11-03: the module graph GAINED TWO FILES — js/data/theatre/theatre-course.js and js/data/musical/musical-course.js, both statically imported by main.js. This is the plain module-graph case the note above describes: an installed copy serving the old main.js would revalidate the new one into cache while the old code, which never imports them, leaves them unfetched. Offline, the next load then asks for modules that were never cached. Nothing a learner can see changed — both courses are shut behind their flags — so nobody is waiting on this one; the graph is the whole reason
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
