@@ -331,8 +331,11 @@ Object.assign(CHARACTER_FIGURES, {
     'Three leather character masks in a row, one dark, one red, one cream, each with a long nose.', 217, 74),
   'cm-l02-o2': l01('l02-o2.png',
     'A handwritten scenario page with a small figure drawn in the margin.', 180, 77),
+  // REPLACED 2026-11-02 with the owner's full-resolution drawing. The
+  // file he sent carries its label baked in; only the illustration is
+  // taken, because the words are the card's own HTML.
   'cm-l02-o3': l01('l02-o3.png',
-    'A tambourine, a slapstick and a pewter jug.', 190, 78),
+    'A tambourine, a slapstick and a pewter jug.', 600, 176),
   'cm-l02-o4': l01('l02-o4.png',
     'A folded diamond-patterned costume, a white shirt and a feathered tricorn hat.', 205, 84),
 

@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v78';                     // 2026-11-02: lesson 3 Slapstick built to the owner's rendering — illustrated gag steps, paired panels, the films as cards; eight new images plus js and css
+const VERSION = 'sc-v79';                     // 2026-11-02: the Props drawing replaced at its EXISTING path — img goes through cacheFirst, which never re-asks, so this bump is required not optional
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
