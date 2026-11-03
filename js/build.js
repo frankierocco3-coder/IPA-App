@@ -9,5 +9,5 @@
 // if this falls behind the newest commit that touched either.
 export const BUILD = Object.freeze({
   date: '2026-11-02',
-  commit: '17602e0',
+  commit: '8aa2f64',
 });
