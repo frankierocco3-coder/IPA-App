@@ -3209,9 +3209,20 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
      the cards fell to two-across. */
   .lx-shell .lx-main.guide { max-width: 920px; }
   .lx-side { display: block; }
-  .lx-side, .lx-notes { position: sticky; top: 14px;
+  /* THE LESSON LIST STICKS; THE NOTES DO NOT, and that is the fix for a
+     real defect rather than a preference. Both were sticky with
+     `max-height: calc(100dvh - 28px); overflow-y: auto`, which is fine
+     for the short left column and wrong for the notes: once that rail
+     carried a takeaway, three panels and two controls it ran past the
+     viewport, so it clipped mid-sentence and put Mark lesson complete
+     inside an inner scroll area nobody could see was scrollable. A
+     primary action must not hide inside a box that looks cut off.
+     Unstuck, the rail simply scrolls with the page and everything in it
+     is reachable. */
+  .lx-side { position: sticky; top: 14px;
     max-height: calc(100dvh - 28px); overflow-y: auto;
     overscroll-behavior: contain; }
+  .lx-notes { position: static; max-height: none; overflow: visible; }
 }
 
 /* The left column: where you are in the module. */
@@ -3269,9 +3280,15 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lx-ground { top: 0; left: 0; width: 100%;
   height: 1180px; object-fit: cover; object-position: top center;
   opacity: .38; }
+/* NO `position` IN THIS RULE. A grid child takes z-index on its own, so
+   the lift above the ground needs nothing else — and declaring
+   `position: relative` here outranked the sticky rule below it (three
+   classes against one) and quietly unstuck both columns, while their
+   max-height and overflow stayed. That is what clipped the notes rail
+   mid-sentence with Mark lesson complete inside the hidden part. */
 .lx-shell.has-ground > .lx-side,
 .lx-shell.has-ground > .lx-main,
-.lx-shell.has-ground > .lx-notes { position: relative; z-index: 1; }
+.lx-shell.has-ground > .lx-notes { z-index: 1; }
 
 /* The rail's furniture: a lamp beside the takeaway, and the contents as
    a list of rings with the one you are on filled. */
