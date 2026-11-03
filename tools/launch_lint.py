@@ -494,6 +494,8 @@ def main():
          ROOT / "js" / "data" / "theatre" / "theatre-course.js"),
         ("MUSICAL_LIVE", "musicalVisible", "mt-", "Musical Theatre",
          ROOT / "js" / "data" / "musical" / "musical-course.js"),
+        ("SCREEN_LIVE", "screenVisible", "sc-", "Screen Acting",
+         ROOT / "js" / "data" / "screen" / "screen-course.js"),
     ]:
         if "export const %s" % flag not in ctx_src:
             fail("the %s flag is missing from context.js" % flag)
@@ -510,7 +512,11 @@ def main():
         # Ids are never renamed here: that is what preserves stored progress.
         # The first and last lesson of every module, so a module cannot be
         # silently dropped or re-cut without this noticing.
-        pins = (["id: 'th-what'", "id: 'th-comedy'", "id: 'th-romanstage'",
+        pins = (["id: 'sc-how'", "id: 'sc-camera'", "id: 'sc-technical'",
+                 "id: 'sc-listen'", "id: 'sc-prep'", "id: 'sc-set'",
+                 "id: 'sc-selftape'", "id: 'sc-repetition'"]
+                if ident == "sc-" else
+                ["id: 'th-what'", "id: 'th-comedy'", "id: 'th-romanstage'",
                  "id: 'th-medieval'", "id: 'th-noh'", "id: 'th-kabuki'",
                  "id: 'th-shakespeare'", "id: 'th-moliere'", "id: 'th-race'",
                  "id: 'th-vaudeville'", "id: 'th-chekhov'", "id: 'th-irish'",
@@ -528,6 +534,25 @@ def main():
         for pin in pins:
             if pin not in src:
                 fail("a %s lesson id changed or vanished: %r" % (course, pin))
+        # Screen Acting asks for an ACTING professional, not a historian: its
+        # claims are about scale, eyelines and listening. Checked here and
+        # then skipped by the historian pin below.
+        if ident == "sc-":
+            if "requiredReviewer: 'acting-professional'" not in src:
+                fail("%s stopped asking for an acting professional" % course)
+            # NOTHING IN THIS APP RECORDS THE LEARNER and this course is the
+            # one most likely to grow a record button by accident: every
+            # exercise in it is filmed. CAPABILITIES.learnerSpeaking gates
+            # in-app capture and is frozen false; the course must stay
+            # written exercises only.
+            if "learnerSpeaking: false" not in (ROOT / "js" / "capabilities.js").read_text(encoding="utf-8"):
+                fail("learnerSpeaking is no longer false — Screen Acting's filmed "
+                     "exercises are the learner's own device, never a capture surface")
+            # Module 8 is one named tradition and has to keep saying so.
+            if "one approach among several" not in src:
+                fail("Screen Acting's repetition chapter dropped its content note — "
+                     "it teaches one named tradition and must not read as universal")
+            continue
         # The handoff is explicit that these are drafts whose historical
         # claims want checking, and the reviewer type is how the pages say
         # so. An acting coach is the wrong reader and saying so would be the
