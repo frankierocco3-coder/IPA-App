@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v83';                     // 2026-11-03: the Theatre History modules are retitled and resplit on his order, and he asked for it, so he is waiting to see it. The module graph did NOT change this time and nothing a learner can reach did either, because the course is shut — by the rule at the top of this file that means no bump. By the rule that actually matters, 'is somebody waiting to see this', it means bump: the course data is a module, modules go through staleWhileRevalidate, and an installed copy would serve the old titles with the new ones one revalidation away. That is the Lines & Memory shape, three times recorded above, and telling him to reload twice is not a fix
+const VERSION = 'sc-v84';                     // 2026-11-03: thirteen Theatre History modules, the Broadway Book Musical split into five chapters, and the repeated credit key gone from the eight repertoire pages. He asked for all of it and will open the preview to check it, which is the rule that matters here rather than the module-graph one: course data is a module, modules go through staleWhileRevalidate, and an installed copy would serve the old shape with the new one a revalidation away
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
