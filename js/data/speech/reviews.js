@@ -15,6 +15,10 @@
 //   'acting-professional' — acting principles and methods: qualified
 //                           acting teacher or coach
 //   'rhetoric'            — knowledgeable rhetoric/oratory reviewer
+//   'theatre-history'     — qualified theatre historian (added 2026-11-03
+//                           with Theatre History and Musical Theatre; the
+//                           claims those courses make are historical, and
+//                           an acting coach is the wrong reader for them)
 //   'dialect'             — qualified reviewer for the relevant
 //                           dialect or route
 //   'editorial'           — literary/editorial accuracy
@@ -674,6 +678,26 @@ export const SPEECH_REVIEWS = {
   'ch-ro-bible': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
     reviewer: 'Product owner', date: '2026-09-23', version: 1,
     notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
+
+  // ── Theatre History and Musical Theatre: NOTHING HERE ───────
+  //
+  // The two courses from the owner's handoff of 2026-11-03 have THIRTY-TWO
+  // records between them (twenty-two th- lessons, ten mt-) and not one
+  // entry in this ledger. That is not an oversight and it is not a thing
+  // to fix in a sweep.
+  //
+  // ABSENCE FROM THIS LEDGER MEANS DRAFT, which is the whole contract at
+  // the top of this file. Both courses are shut behind THEATRE_LIVE and
+  // MUSICAL_LIVE in js/views/context.js precisely because of it: a live
+  // course with no entries is a shelf of locked chapters, which is the
+  // failure the Building a Character launch taught.
+  //
+  // What it takes to add one: the owner reads the lesson and makes an
+  // editorial decision, one entry at a time. Claude may not, for anything,
+  // ever. And an editorial approval is still not specialist sign-off: the
+  // reviewer these two actually want is a THEATRE HISTORIAN, because the
+  // handoff that supplied them says in its own words to verify the
+  // historical claims before publication.
 };
 
 export const speechReviewFor = id => SPEECH_REVIEWS[id] ?? null;

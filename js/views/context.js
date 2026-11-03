@@ -102,6 +102,17 @@ export const WORKSPACES = [
   // and promising it in two places would make one of them wrong.
   { id: 'commedia', icon: '🃏', img: 'img/ui/commedia.png', label: 'Commedia dell’Arte',
     context: 'The ready-made characters, and what every character is made of' },
+  // THEATRE HISTORY AND MUSICAL THEATRE, from the owner's handoff of
+  // 2026-11-03. Both sit here, beside Commedia, because these three are
+  // the courses about where the work came from rather than about a
+  // technique: a tradition and its history, the whole history, and one
+  // genre's repertoire. NO `img` YET on either. A workspace with no
+  // artwork falls back to its emoji, which is honest and ugly; the owner
+  // makes the chips, and these two are waiting for theirs.
+  { id: 'theatre', icon: '🏺', label: 'Theatre History',
+    context: 'Where the form came from, and what each stage asked of a performer' },
+  { id: 'musical', icon: '🎼', label: 'Musical Theatre',
+    context: 'The book musical, and a repertoire organised so you can find your song' },
   // THE PORTRAIT, NOT THE SKULL-HOLDER (owner decision 2026-10-14). It
   // pointed at soliloquy.png so that the commissioned lavender respin would
   // improve the chip and the shelf tile together; the owner chose the face
@@ -215,6 +226,46 @@ export const commediaOpen = () => COMMEDIA_LIVE || commediaPreview();
 // from — the approvals are keyed on ids that did not move.
 export const commediaVisible = l => commediaPreview() || speechPublished(l.id);
 
+// ── THEATRE HISTORY, from the owner's handoff of 2026-11-03 ────
+//
+// GATED, and this one is the ordinary case rather than the Commedia
+// case. Commedia shipped open because its lessons were ALREADY
+// published and shutting the course would have withdrawn them. Nothing
+// here has ever been published: twenty-two lessons of supplied draft,
+// and the handoff says in its own words that they are "editorial
+// drafts, not a publication-ready scholarly edition" whose historical
+// claims want verifying first. So it opens the way Character,
+// Shakespeare and Rhetoric all opened — behind a flag, with a preview
+// key so the owner can read it before a learner can.
+//
+// Flipping this needs two things, not one: an owner editorial entry per
+// lesson in js/data/speech/reviews.js, and the knowledge that the
+// specialist this material asks for is a theatre historian. No record
+// here has either, and awaitingSpecialist() stays true when it does.
+export const THEATRE_LIVE = false;
+export const THEATRE_PREVIEW_KEY = 'speechcraft-theatre-preview';
+export const theatrePreview = () => {
+  try { return localStorage.getItem(THEATRE_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const theatreOpen = () => THEATRE_LIVE || theatrePreview();
+export const theatreVisible = l => theatrePreview() || speechPublished(l.id);
+
+// ── MUSICAL THEATRE, same handoff, same day ───────────────────
+//
+// GATED FOR A SECOND REASON ON TOP OF THE FIRST. Nothing here is
+// approved either, and beyond that the course cannot stand alone yet:
+// two written lessons and eight catalogue pages. That is the test
+// Speech failed in 2026-08 ("content too thin to stand alone"), and the
+// one Character and Shakespeare both waited to pass before launching.
+// It wants more written lessons, not just a ledger entry.
+export const MUSICAL_LIVE = false;
+export const MUSICAL_PREVIEW_KEY = 'speechcraft-musical-preview';
+export const musicalPreview = () => {
+  try { return localStorage.getItem(MUSICAL_PREVIEW_KEY) === 'on'; } catch { return false; }
+};
+export const musicalOpen = () => MUSICAL_LIVE || musicalPreview();
+export const musicalVisible = l => musicalPreview() || speechPublished(l.id);
+
 export const SHAKESPEARE_LIVE = true;
 export const SHAKESPEARE_PREVIEW_KEY = 'speechcraft-shakespeare-preview';
 export const shakespearePreview = () => {
@@ -276,17 +327,22 @@ export const liveWorkspaces = () => WORKSPACES.filter(w =>
   (SPEECH_LIVE || w.id !== 'speech')
   && (w.id !== 'character' || characterOpen())
   && (w.id !== 'commedia' || commediaOpen())
+  && (w.id !== 'theatre' || theatreOpen())
+  && (w.id !== 'musical' || musicalOpen())
   && (w.id !== 'shakespeare' || shakespeareOpen())
   && (w.id !== 'rhetoric' || rhetoricOpen()));
 // Workspaces that are about the work, not about an accent — they show
 // no accent chip and no accent selector.
-export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'commedia', 'shakespeare', 'rhetoric'];
+export const ACCENTLESS_WORKSPACES = ['speech', 'acting', 'character', 'commedia',
+  'theatre', 'musical', 'shakespeare', 'rhetoric'];
 export const WORKSPACE_KEY = 'speechcraft-workspace';
 export const activeWorkspace = () => {
   try {
     const v = localStorage.getItem(WORKSPACE_KEY);
     if (v === 'speech' && !SPEECH_LIVE) return 'acting';
     if (v === 'character' && !characterOpen()) return 'acting';
+    if (v === 'theatre' && !theatreOpen()) return 'acting';
+    if (v === 'musical' && !musicalOpen()) return 'acting';
     if (v === 'shakespeare' && !shakespeareOpen()) return 'acting';
     if (v === 'rhetoric' && !rhetoricOpen()) return 'acting';
     if (WORKSPACES.some(w => w.id === v)) return v;

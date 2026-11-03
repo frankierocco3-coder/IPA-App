@@ -126,6 +126,13 @@ def lessons():
         # SAME FILE AS THE ROW ABOVE, by design — see the docstring.
         ('Commedia dell’Arte', 'js/data/character/character-course.js',
          r"\n  \{ id: '(?:ch|ac)-[a-z-]+', module: 'commedia'", None, None, 'commedia'),
+        # The two courses from the owner's handoff of 2026-11-03. Both are
+        # shut (THEATRE_LIVE, MUSICAL_LIVE) and no record in either has a
+        # ledger entry, which is why the gate note below names them: a
+        # count with no "WORKSPACE WITHDRAWN" beside it would read as a
+        # live course sitting there unpublished.
+        ('Theatre History', 'js/data/theatre/theatre-course.js', r"\n  \{ id: 'th-", None, None, None),
+        ('Musical Theatre', 'js/data/musical/musical-course.js', r"\n  \{ id: 'mt-", None, None, None),
         ('Shakespeare', 'js/data/shakespeare/shakespeare-course.js', r"\n  \{ id: 'sh-", None, None, None),
         ('Rhetoric', 'js/data/rhetoric/rhetoric-course.js', r"\n  \{ id: 'rh-", None, None, None),
         # THE COURSE IS CALLED 'Speech', NOT 'Voice & Speech'. The workspace
@@ -171,7 +178,8 @@ def facts():
     # liveWorkspaces() hides speech / character / shakespeare / rhetoric on
     # their own flags; everything else is always shown.
     gate = {'speech': 'SPEECH_LIVE', 'character': 'CHARACTER_LIVE',
-            'shakespeare': 'SHAKESPEARE_LIVE', 'rhetoric': 'RHETORIC_COURSE_LIVE'}
+            'shakespeare': 'SHAKESPEARE_LIVE', 'rhetoric': 'RHETORIC_COURSE_LIVE',
+            'theatre': 'THEATRE_LIVE', 'musical': 'MUSICAL_LIVE'}
     ws_live = [(i, l, flagmap.get(gate[i], True) if i in gate else True) for i, l in ws]
 
     courses = listed(ctx, 'COURSES')
@@ -225,7 +233,9 @@ def facts():
         if refs:
             note = (note + ' (%d of them reference pages, so the path walks %d)'
                     % (refs, n - refs)).strip()
-        if not flagmap.get({'Speech': 'SPEECH_LIVE'}.get(name, '_'), True):
+        if not flagmap.get({'Speech': 'SPEECH_LIVE',
+                            'Theatre History': 'THEATRE_LIVE',
+                            'Musical Theatre': 'MUSICAL_LIVE'}.get(name, '_'), True):
             note = (note + ' WORKSPACE WITHDRAWN').strip()
         # Tolerate the brace-on-its-own-line style too (speech-course.js), or
         # an unpublished Speech lesson is invisible to the draft-gate warning
@@ -235,7 +245,7 @@ def facts():
         # read character-course.js, so a file-wide sweep would report every
         # unpublished commedia lesson twice — once under each course — and
         # the draft-gate warning is the line this report exists for.
-        unpub = [x for x in mine if x not in pub and re.match(r'^(ac|ch|sh|rh|sp)-', x)]
+        unpub = [x for x in mine if x not in pub and re.match(r'^(ac|ch|sh|rh|sp|th|mt)-', x)]
         books.append((name, n, len(unpub), unpub[:6], note))
 
     return {

@@ -371,8 +371,16 @@ def main():
     # be one you can take, so the word stays as plain text and the control
     # goes. With the carve-out spent, the ban now covers the whole view
     # layer, which is what it should always have been.
+    #
+    # "MUSICAL THEATRE" LEFT THIS LIST ON 2026-11-03, because it stopped
+    # being a deferred feature that day: the course exists, with ten
+    # records, its own workspace and its own data file. The pin moved the
+    # way Shakespeare's did at launch — while a thing is unbuilt the
+    # danger is a placeholder naming it, and once it is built the danger
+    # is the opposite one, a live course with no publication entries. That
+    # second pin is in 6p below and it is the one guarding this now.
     for banned in ["Body Language pathway", "Build a Character",
-                   "Musical Theatre", "Vocal Performance"]:
+                   "Vocal Performance"]:
         if banned.lower() in _strip_comments(views_js).lower():
             fail("a deferred feature grew a placeholder: %r" % banned)
     # "audio soon" joined the list on 2026-10-04: it was a promise in
@@ -474,6 +482,75 @@ def main():
         # started teaching one school as fact.
         if "very largely not the author" not in sh_src:
             fail("lesson 5.3 stopped saying the Folio typography is not the author's")
+    # 6p: Theatre History and Musical Theatre (owner handoff 2026-11-03).
+    # Both are SHUT, and while a course is shut the thing worth guarding is
+    # the flag and the gate. The moment a flag flips, the pin that matters
+    # flips with it: a live course whose lessons carry no publication entry
+    # shows a learner a shelf of locked chapters, which is the failure the
+    # Building a Character launch taught and the one Commedia repeated for
+    # an hour on 2026-11-02.
+    for flag, gate, ident, course, path in [
+        ("THEATRE_LIVE", "theatreVisible", "th-", "Theatre History",
+         ROOT / "js" / "data" / "theatre" / "theatre-course.js"),
+        ("MUSICAL_LIVE", "musicalVisible", "mt-", "Musical Theatre",
+         ROOT / "js" / "data" / "musical" / "musical-course.js"),
+    ]:
+        if "export const %s" % flag not in ctx_src:
+            fail("the %s flag is missing from context.js" % flag)
+        if "export const %s" % gate not in ctx_src:
+            fail("%s is missing — a live course with no gate would publish "
+                 "unreviewed lessons" % gate)
+        if "export const %s = true;" % flag in ctx_src and "'%s" % ident not in sh_reviews:
+            fail("%s is LIVE but no %s lesson has a publication entry — "
+                 "learners would see a shelf of locked chapters" % (course, ident))
+        if not path.exists():
+            fail("the %s course data is missing" % course)
+            continue
+        src = path.read_text(encoding="utf-8")
+        # Ids are never renamed here: that is what preserves stored progress.
+        # The first and last lesson of every module, so a module cannot be
+        # silently dropped or re-cut without this noticing.
+        pins = (["id: 'th-what'", "id: 'th-comedy'", "id: 'th-romanstage'",
+                 "id: 'th-medieval'", "id: 'th-noh'", "id: 'th-kabuki'",
+                 "id: 'th-shakespeare'", "id: 'th-moliere'", "id: 'th-race'",
+                 "id: 'th-vaudeville'", "id: 'th-chekhov'", "id: 'th-harlem'",
+                 "id: 'th-brecht'", "id: 'th-transform'"]
+                if ident == "th-" else
+                ["id: 'mt-book'", "id: 'mt-rep-guide'", "id: 'mt-rep-1940s'",
+                 "id: 'mt-rep-contemporary'", "id: 'mt-rep-poprock'",
+                 "id: 'mt-rep-jukebox'"])
+        for pin in pins:
+            if pin not in src:
+                fail("a %s lesson id changed or vanished: %r" % (course, pin))
+        # The handoff is explicit that these are drafts whose historical
+        # claims want checking, and the reviewer type is how the pages say
+        # so. An acting coach is the wrong reader and saying so would be the
+        # Rhetoric mislabel of 2026-09-30 all over again.
+        if "requiredReviewer: 'theatre-history'" not in src:
+            fail("%s stopped asking for a theatre historian" % course)
+        if "'theatre-history': 'a qualified theatre historian'" not in views_js:
+            fail("the theatre-history reviewer phrase is gone — gated pages would "
+                 "name the wrong specialist")
+    # NO LYRIC IS EVER REPRODUCED. The catalogue names songs and credits
+    # the people who wrote them; the words of a song are not ours to ship,
+    # and a table of titles is one careless edit from a table of verses.
+    #
+    # THIS IS NOT A WORD BAN, and the first attempt at it was. "Lyricist",
+    # "lyrics" and "conversational lyric delivery" are all credits or
+    # description, and a rule that fires on them teaches whoever next runs
+    # this tool to ignore it. What is pinned instead is the file's own
+    # statement of the rule, plus the data shape that would carry song text
+    # if anyone ever added one.
+    mt_path = ROOT / "js" / "data" / "musical" / "musical-course.js"
+    if mt_path.exists():
+        mt_src = mt_path.read_text(encoding="utf-8")
+        if "SONG AND SHOW TITLES ONLY" not in mt_src:
+            fail("the musical theatre course dropped its no-lyrics statement")
+        for field in ["lyric:", "lyrics:", "verse:", "chorus:"]:
+            if field in _strip_comments(mt_src):
+                fail("the musical theatre course gained a %r field — song text "
+                     "is not ours to ship" % field)
+
     # The Shapes of Argument: a glossary, deliberately not seventeen lessons. It lives
     # in the Rhetoric Library since 2026-09-28; the data file keeps its path
     # under shakespeare/ because moving a file renames nothing worth the

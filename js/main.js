@@ -80,6 +80,8 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
          ACTING_GLOSSARY, actingLessonsFor, actingLessonById, actingModuleFor,
          actingLessonNumber } from './data/acting/acting-course.js';
 import { COMMEDIA_PRINCIPLE, COMMEDIA_MODULES, COMMEDIA_LESSONS, COMMEDIA_COLLECTIONS } from './data/commedia/commedia-course.js';
+import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS } from './data/theatre/theatre-course.js';
+import { MUSICAL_PRINCIPLE, MUSICAL_MODULES, MUSICAL_LESSONS, MUSICAL_COLLECTIONS } from './data/musical/musical-course.js';
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
          COMMEDIA_MASKS, commediaMask, MASK_SITUATIONS, MASK_PROBLEMS,
          ONE_LINES } from './data/character/character-course.js';
@@ -124,7 +126,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -667,15 +669,21 @@ function drawRail(section) {
         note: 'Every chapter is free to read in any order.',
         actions: [['Open the Library', () => goSection('library'), true]] });
     }
-  } else if (ws === 'shakespeare' && section === 'learn') {
+  } else if ((ws === 'shakespeare' || ws === 'theatre' || ws === 'musical')
+             && section === 'learn') {
     // THE MODULE RAIL (owner's map mockup, 2026-10-31). Where you are,
     // what opens it, and the whole course under it.
     //
-    // EVERYTHING IS DERIVED FROM BOOKS.shakespeare, so this is one
-    // course's data read through the generic registry rather than a
-    // Shakespeare special case: swapping the book is all another course
-    // would need to take the same rail.
-    const SB = BOOKS.shakespeare;
+    // EVERYTHING IS DERIVED FROM THE BOOK REGISTRY, so this is one
+    // course's data read generically rather than a Shakespeare special
+    // case: swapping the book is all another course needs to take the
+    // same rail. TWO MORE TOOK IT ON 2026-11-03 — Theatre History and
+    // Musical Theatre — and that claim cost exactly the two lines above.
+    //
+    // The DOM ids inside were `sh-*` while one course used this. They are
+    // `bm-*` (book module) now, because an id saying Shakespeare on the
+    // Theatre History rail is a comment that lies.
+    const SB = BOOKS[ws];
     const seq = SB.lessons.filter(l => !l.reference && SB.visible(l));
     const nextL = seq.find(l => !speechLessonDone(l.id));
     const lockMap = learnLockMap(SB, seq);
@@ -705,12 +713,12 @@ function drawRail(section) {
         <p class="sm-head"><span class="sm-badge">${String(at + 1).padStart(2, '0')}</span>
           <span class="sm-title">${esc(moduleTitle(SB, cur))}</span></p>
         ${cur.blurb ? `<p class="sm-blurb">${esc(cur.blurb)}</p>` : ''}
-        <button class="sm-start" id="sh-start" type="button">
+        <button class="sm-start" id="bm-start" type="button">
           <span>Start module</span><span class="sm-go" aria-hidden="true">&rsaquo;</span>
         </button>
         ${nextL ? `
         <p class="sm-eyebrow">Next lesson</p>
-        <button class="sm-next" id="sh-next" type="button">
+        <button class="sm-next" id="bm-next" type="button">
           <span class="sm-ico" aria-hidden="true">&#128214;</span>
           <span class="sm-next-t">${esc(nextL.title)}</span>
           <span class="sm-go" aria-hidden="true">&rsaquo;</span>
@@ -720,7 +728,7 @@ function drawRail(section) {
         <p class="sm-eyebrow">All modules</p>
         <ol class="sm-mods">${mods.map((m, i) => {
           const st = stateOf(m);
-          return `<li><button class="sm-row is-${st}" id="sh-m${i}" type="button"
+          return `<li><button class="sm-row is-${st}" id="bm-m${i}" type="button"
               aria-label="Module ${i + 1}, ${esc(moduleTitle(SB, m))}, ${WORD[st].toLowerCase()}">
             <span class="sm-n">${String(i + 1).padStart(2, '0')}</span>
             <span class="sm-rt">${esc(moduleTitle(SB, m))}</span>
@@ -729,9 +737,9 @@ function drawRail(section) {
           </button></li>`; }).join('')}</ol>`,
         actions: [],
         wire: root => {
-          root.querySelector('#sh-start')?.addEventListener('click', () => openMod(cur));
-          root.querySelector('#sh-next')?.addEventListener('click', () => renderActingLesson(nextL.id));
-          mods.forEach((m, i) => root.querySelector(`#sh-m${i}`)?.addEventListener('click', () => openMod(m)));
+          root.querySelector('#bm-start')?.addEventListener('click', () => openMod(cur));
+          root.querySelector('#bm-next')?.addEventListener('click', () => renderActingLesson(nextL.id));
+          mods.forEach((m, i) => root.querySelector(`#bm-m${i}`)?.addEventListener('click', () => openMod(m)));
         } });
     }
   } else if (ws === 'commedia' && section === 'learn') {
@@ -1028,6 +1036,12 @@ function learnMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLearnPane(el);
   if (ws === 'character') return bookLearnPane(el, BOOKS.character);
   if (ws === 'commedia') return bookLearnPane(el, BOOKS.commedia);
+  // The two courses from the 2026-11-03 handoff use the shared book
+  // pages untouched: the module grid on Learn, the shelves in the
+  // Library, no practice surface of their own. Nothing bespoke, which is
+  // the point — a new book course should cost two lines here.
+  if (ws === 'theatre') return bookLearnPane(el, BOOKS.theatre);
+  if (ws === 'musical') return bookLearnPane(el, BOOKS.musical);
   if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
   if (ws === 'rhetoric') {
     bookLearnPane(el, BOOKS.rhetoric);
@@ -1153,6 +1167,8 @@ function practiceMain(el, course, ws = activeWorkspace()) {
   // literally one sentence through every mask. Warmup stays with
   // Building a Character, which is where a warmup belongs.
   if (ws === 'commedia') return commediaPracticePane(el);
+  if (ws === 'theatre') return bookNoPracticePane(el, BOOKS.theatre);
+  if (ws === 'musical') return bookNoPracticePane(el, BOOKS.musical);
   if (ws === 'shakespeare') return shakespearePracticePane(el);
   if (ws === 'rhetoric') return rhetoricPracticePane(el);
   if (ws === 'speech') return speechPracticePane(el);
@@ -3357,12 +3373,26 @@ const BOOK_REVIEW_FILE = {
   character: 'js/data/character/character-course.js',
   shakespeare: 'js/data/shakespeare/shakespeare-course.js',
   rhetoric: 'js/data/rhetoric/rhetoric-course.js',
+  theatre: 'js/data/theatre/theatre-course.js',
+  musical: 'js/data/musical/musical-course.js',
 };
 const BOOK_REVIEW_CONCERNS = {
   rhetoric: 'Claims about the classical tradition are made checkable and are unchecked. '
     + 'No practitioner is named in a lesson body. Positions the course takes are stated as '
     + 'the course\u2019s own rather than as fact, and two claims about how listeners behave '
     + 'are real findings carried without a source.',
+  // What a theatre historian is actually being asked to check, in the
+  // handoff's own terms. It names its own limits and this repeats them
+  // rather than softening them.
+  theatre: 'Historical claims, dates and attributions are editorial drafts and are '
+    + 'unverified. Where the source expressed uncertainty the uncertainty is kept, and '
+    + 'several lessons correct their own source transcript in the body text. Content '
+    + 'notes cover racism, antisemitism, sexual violence and suicide as historical and '
+    + 'dramatic subjects. Historical figures are named; no living person is.',
+  musical: 'Show dates follow the original Broadway production unless the entry says '
+    + 'otherwise, and the exceptions are marked. Composer and lyricist credits vary by '
+    + 'production and are unverified. Era labels are proposed teaching categories, not '
+    + 'scholarly periods. Song and show titles only; no lyric is reproduced.',
 };
 const BOOK_REVIEW_CONCERNS_DEFAULT =
   'No single artistic interpretation implied; emotional states never taught as objectives; '
@@ -3401,6 +3431,15 @@ const REVIEWER_PHRASE = {
   'acting-professional': 'a qualified acting teacher or coach',
   'voice-professional': 'a qualified voice professional',
   rhetoric: 'a knowledgeable rhetoric reader',
+  // ADDED 2026-11-03 with Theatre History and Musical Theatre. Those
+  // courses are not asking an acting coach to check whether Atellan farce
+  // predates the palliata, and the handoff that supplied them says in its
+  // own words to verify the historical claims before publication. A
+  // reviewer type that names the wrong specialist is worse than none: it
+  // is the Rhetoric failure of 2026-09-30, where thirty gated chapters
+  // announced themselves as awaiting an acting professional underneath a
+  // heading that said rhetoric reader.
+  'theatre-history': 'a qualified theatre historian',
 };
 const reviewerKindOf = l => l?.requiredReviewer || 'acting-professional';
 const reviewerPhraseOf = l => REVIEWER_PHRASE[reviewerKindOf(l)] ?? 'a qualified specialist';
@@ -3456,6 +3495,22 @@ const BOOKS = {
     collections: COMMEDIA_COLLECTIONS, visible: commediaVisible,
     moduleTone: () => 'is-terracotta',
     reviewCats() { return bookReviewCategories(this); } },
+  // THEATRE HISTORY AND MUSICAL THEATRE, from the owner's handoff of
+  // 2026-11-03. Both are ordinary book courses: same Learn cards, module
+  // page, lesson page, chapter page and collection page as the five above,
+  // resolved from the lesson id like every other. Both are GATED — see
+  // THEATRE_LIVE and MUSICAL_LIVE in js/views/context.js — so `visible`
+  // is what the owner sees in preview and nothing a learner can reach.
+  theatre: { ws: 'theatre', icon: '🏺', title: 'Theatre History', libraryName: 'Theatre History Library',
+    principle: THEATRE_PRINCIPLE, modules: THEATRE_MODULES, lessons: THEATRE_LESSONS,
+    collections: THEATRE_COLLECTIONS, visible: theatreVisible,
+    moduleTone: () => 'is-sage',
+    reviewCats() { return bookReviewCategories(this); } },
+  musical: { ws: 'musical', icon: '🎼', title: 'Musical Theatre', libraryName: 'Musical Theatre Library',
+    principle: MUSICAL_PRINCIPLE, modules: MUSICAL_MODULES, lessons: MUSICAL_LESSONS,
+    collections: MUSICAL_COLLECTIONS, visible: musicalVisible,
+    moduleTone: () => 'is-gold',
+    reviewCats() { return bookReviewCategories(this); } },
   shakespeare: { ws: 'shakespeare', icon: '🪶', title: 'Shakespeare', libraryName: 'Shakespeare Library',
     principle: SHAKESPEARE_PRINCIPLE, modules: SHAKESPEARE_MODULES, lessons: SHAKESPEARE_LESSONS,
     collections: SHAKESPEARE_COLLECTIONS, visible: shakespeareVisible,
@@ -3468,6 +3523,8 @@ const BOOKS = {
     reviewCats() { return bookReviewCategories(this); } },
 };
 const COMMEDIA_IDS = new Set(COMMEDIA_LESSONS.map(l => l.id));
+const THEATRE_IDS = new Set(THEATRE_LESSONS.map(l => l.id));
+const MUSICAL_IDS = new Set(MUSICAL_LESSONS.map(l => l.id));
 const CHARACTER_IDS = new Set(CHARACTER_LESSONS.map(l => l.id));
 const SHAKESPEARE_IDS = new Set(SHAKESPEARE_LESSONS.map(l => l.id));
 const RHETORIC_IDS = new Set(RHETORIC_LESSONS.map(l => l.id));
@@ -3491,6 +3548,8 @@ const moduleTitle = (B, m) => (showAttribution(B) && moduleAttribution(B, m)) ||
 const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
   : RHETORIC_IDS.has(id) ? BOOKS.rhetoric
   : COMMEDIA_IDS.has(id) ? BOOKS.commedia
+  : THEATRE_IDS.has(id) ? BOOKS.theatre
+  : MUSICAL_IDS.has(id) ? BOOKS.musical
   : CHARACTER_IDS.has(id) ? BOOKS.character : BOOKS.acting;
 // Order matters and matches bookOf: Shakespeare owns the collection id
 // 'rhetoric' (its own module 6), while the Rhetoric COURSE uses ids like
@@ -3499,6 +3558,8 @@ const bookOf = id => SHAKESPEARE_IDS.has(id) ? BOOKS.shakespeare
 const bookOfCollection = id => SHAKESPEARE_COLLECTIONS.some(c => c.id === id) ? BOOKS.shakespeare
   : RHETORIC_COLLECTIONS.some(c => c.id === id) ? BOOKS.rhetoric
   : COMMEDIA_COLLECTIONS.some(c => c.id === id) ? BOOKS.commedia
+  : THEATRE_COLLECTIONS.some(c => c.id === id) ? BOOKS.theatre
+  : MUSICAL_COLLECTIONS.some(c => c.id === id) ? BOOKS.musical
   : CHARACTER_COLLECTIONS.some(c => c.id === id) ? BOOKS.character : BOOKS.acting;
 const bookLessonById = (B, id) => B.lessons.find(l => l.id === id) ?? null;
 // A `reference: true` record is a page you are sent to, never a step on
@@ -4121,10 +4182,14 @@ function learnPathHtml(B, lessons, nextId) {
         const st = dn === ls.length && ls.length ? 'done'
           : ls.some(l => l.id === nextId) ? 'current'
           : ls.length && ls.every(l => locked?.get(l.id) === true) ? 'locked' : 'ahead';
-        const WORDS = { done: 'completed', current: 'current', locked: 'locked', ahead: 'not started' };
+        // RENAMED FROM `WORDS` (2026-11-03). It shadowed the WORDS this
+        // file imports from data/phonemes.js, which is legal and threw
+        // nothing, but it reads as a write to an import and the split
+        // check in the suite said so.
+        const STATE_WORD = { done: 'completed', current: 'current', locked: 'locked', ahead: 'not started' };
         return `<button class="gm-pin is-${st}" type="button" data-gm="${esc(id)}"
             style="left:${at[0]}%;top:${at[1]}%"
-            aria-label="Module ${i + 1}, ${esc(moduleTitle(B, g.m))}, ${WORDS[st]}">
+            aria-label="Module ${i + 1}, ${esc(moduleTitle(B, g.m))}, ${STATE_WORD[st]}">
           <span class="gm-n" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
           <span class="gm-t">${esc(moduleTitle(B, g.m))}</span>
           ${st === 'current' ? '<span class="gm-s">Current</span>' : ''}
@@ -4727,6 +4792,26 @@ function blockHtml(b, opts) {
     b.h ? `<h2 class="guide-heading">${esc(b.h)}${opts?.sprig ? SPRIG('is-beside') : ''}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
+    // ── EIGHT BLOCKS FROM THE 2026-11-03 HANDOFF ──────────────
+    // Theatre History and Musical Theatre are PROSE with furniture the
+    // five earlier book courses never needed: a second heading level, an
+    // ordered list, a term-and-definition row, a stated principle, a
+    // table of repertoire, a content note, and a knowledge check that
+    // prints its own answer. Every one is plain semantic HTML through
+    // esc(), and every one is available to any book course.
+    //
+    // `quote` reuses the `.th-quote` class the Speech and dialect block
+    // renderers already use for the same thing, rather than inventing a
+    // second blockquote style for the same element.
+    : b.sub ? `<h3 class="guide-subheading">${esc(b.sub)}</h3>`
+    : b.olist ? `<ol class="th-list is-ord">${b.olist.map(x => `<li>${esc(x)}</li>`).join('')}</ol>`
+    : b.defs ? `<dl class="lxdl">${b.defs.map(d =>
+        `<dt>${esc(d.label)}</dt><dd>${esc(d.text)}</dd>`).join('')}</dl>`
+    : b.key ? `<p class="guide-key">${esc(b.key)}</p>`
+    : b.quote ? `<blockquote class="th-quote"><p>${esc(b.quote)}</p></blockquote>`
+    : b.note ? `<p class="content-note"><b>Content note:</b> ${esc(b.note)}</p>`
+    : b.table ? lessonTableHtml(b.table)
+    : b.qa ? lessonQaHtml(b.qa)
     : b.steps ? stepCardsHtml(b.steps)
     : b.cards ? principleCardsHtml(b.cards)
     : b.tiles ? tileGridHtml(b.tiles)
@@ -4742,6 +4827,36 @@ function blockHtml(b, opts) {
     : b.dissect ? dissectQuestionsHtml({ button: false })
     : b.fourLists ? fourListsHtml()
     : b.markup ? scriptMarkupHtml(b.markup) : '');
+}
+
+// ── A table of repertoire or terms ────────────────────────────
+// Scrolls inside its own box rather than widening the page: the musical
+// theatre catalogue has four columns of prose and the lesson column is
+// 700px. The caption-less <table> is the right element here — these are
+// real rows and columns, read down a column as often as across a row.
+function lessonTableHtml(t) {
+  const head = (t.head ?? []).map(c => `<th scope="col">${esc(c)}</th>`).join('');
+  const rows = (t.rows ?? []).map(r =>
+    `<tr>${r.map((c, i) => i === 0
+      ? `<th scope="row">${esc(c)}</th>`
+      : `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+  return `<div class="lxtbl-wrap"><table class="lxtbl">
+      ${head ? `<thead><tr>${head}</tr></thead>` : ''}
+      <tbody>${rows}</tbody>
+    </table></div>`;
+}
+
+// ── A knowledge check that prints its own answers ─────────────
+// NOTHING HERE IS SCORED, which is the whole course's rule, so this is
+// not a quiz component: no inputs, no marking, no stored result. The
+// answer is a <details> so the reader can try the question first and
+// then look, and a screen reader meets both as ordinary text.
+function lessonQaHtml(qa) {
+  return `<ol class="lxqa">${qa.map(x => `
+    <li>
+      <p class="lxqa-q">${esc(x.q)}</p>
+      <details class="lxqa-a"><summary>Answer</summary><p>${esc(x.a)}</p></details>
+    </li>`).join('')}</ol>`;
 }
 
 // ── A marked-up page ──────────────────────────────────────────
@@ -7617,6 +7732,26 @@ function commediaPracticePane(el) {
   el.querySelector('#cmp-oneline').addEventListener('click', () => renderOneLine());
 }
 
+// ── A book course with no exercises yet, saying so ────────────
+// Theatre History and Musical Theatre have no practice surface, and the
+// honest thing is a sentence that says that and a door to the reading.
+// It is Shakespeare's wording below, which the owner approved for the
+// same situation, and the alternative is worse in both directions: fall
+// through to ipaPracticePane() and Theatre History offers accent drills,
+// or hide the section and the nav changes shape per workspace. Nothing
+// in this app says "coming soon".
+function bookNoPracticePane(el, B) {
+  el.innerHTML = `
+    <h1 class="page-h">${esc(B.title)} Practice</h1>
+    <p class="pane-note">No exercise has been built for this course yet. What is here is the reading, in the Library, and the lessons themselves. Nothing in this course is scored.</p>
+    <button class="track-card hub-card" id="bnp-library" type="button">
+      ${cardGlyph({ icon: B.icon })}
+      <div class="track-info"><h2>${esc(B.libraryName)}</h2><p>Every chapter, free to read in any order.</p></div>
+      <div class="track-arrow">\u203a</div>
+    </button>`;
+  el.querySelector('#bnp-library').addEventListener('click', () => goSection('library'));
+}
+
 function shakespearePracticePane(el) {
   el.innerHTML = `
     <h1 class="page-h">Shakespeare Practice</h1>
@@ -8058,6 +8193,8 @@ function libraryMain(el, course, ws = activeWorkspace()) {
   if (ws === 'acting') return actingLibraryPane(el);
   if (ws === 'character') return characterLibraryPane(el);
   if (ws === 'commedia') return bookLibraryPane(el, BOOKS.commedia);
+  if (ws === 'theatre') return bookLibraryPane(el, BOOKS.theatre);
+  if (ws === 'musical') return bookLibraryPane(el, BOOKS.musical);
   if (ws === 'shakespeare') return shakespeareLibraryPane(el);
   if (ws === 'rhetoric') return rhetoricLibraryPane(el);
   if (ws === 'speech') return speechLibraryPane(el);

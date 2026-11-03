@@ -357,13 +357,15 @@ script instead and paste its block.
 - Acting (acting)            **LIVE**
 - Building a Character (character) **LIVE**
 - Commedia dell’Arte (commedia) **LIVE**
+- Theatre History (theatre)  withdrawn
+- Musical Theatre (musical)  withdrawn
 - Shakespeare (shakespeare)  **LIVE**
 - Rhetoric (rhetoric)        **LIVE**
 - Voice & Speech (ipa)       **LIVE**
 - Accents & Dialects (accents) **LIVE**
 - Speech (speech)            withdrawn
 
-7 of 8 live.
+7 of 10 live.
 
 ### Accent courses
 
@@ -379,6 +381,8 @@ script instead and paste its block.
 - Acting & Scene Work           34 records  (8 more in the withdrawn performance module, behind PERFORMANCE_LIVE)
 - Building a Character          25 records  (4 more in the withdrawn role module, behind ROLE_LIVE) (22 further records in this file are Commedia dell’Arte, its own course since 2026-11-02)
 - Commedia dell’Arte            22 records  (13 of them reference pages, so the path walks 9)
+- Theatre History               22 records  <- 22 UNPUBLISHED: th-what, th-greek, th-tragedy, th-comedy, th-romanstage, th-roman  WORKSPACE WITHDRAWN
+- Musical Theatre               10 records  <- 10 UNPUBLISHED: mt-book, mt-rep-guide, mt-rep-1940s, mt-rep-golden, mt-rep-transitional, mt-rep-later  WORKSPACE WITHDRAWN
 - Shakespeare                   37 records
 - Rhetoric                      36 records
 - Speech                        25 records  <- 13 UNPUBLISHED: sp-start-parts, sp-start-fluency, sp-start-alphabet, sp-start-offbook, sp-m-pace, sp-m-emphasis  WORKSPACE WITHDRAWN
@@ -389,19 +393,21 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 ### Every X_LIVE switch
 
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
-- CHARACTER_LIVE           true   js/views/context.js:172
+- CHARACTER_LIVE           true   js/views/context.js:183
 - COCKNEY_LIVE             true   js/views/context.js:53
-- COINAGE_LIVE             false  js/main.js:306
-- COMMEDIA_LIVE            true   js/views/context.js:208
+- COINAGE_LIVE             false  js/main.js:308
+- COMMEDIA_LIVE            true   js/views/context.js:219
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
+- MUSICAL_LIVE             false  js/views/context.js:261
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
-- RHETORIC_COURSE_LIVE     true   js/views/context.js:232
-- RHETORIC_LIVE            false  js/main.js:279
-- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:244
+- RHETORIC_COURSE_LIVE     true   js/views/context.js:283
+- RHETORIC_LIVE            false  js/main.js:281
+- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:295
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:10580
-- SHAKESPEARE_LIVE         true   js/views/context.js:218
-- SPEECH_LIVE              false  js/views/context.js:164
+- SCENE_STUDY_LIVE         false  js/main.js:10717
+- SHAKESPEARE_LIVE         true   js/views/context.js:269
+- SPEECH_LIVE              false  js/views/context.js:175
+- THEATRE_LIVE             false  js/views/context.js:245
 
 ### Reference shelves
 
@@ -414,9 +420,9 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                13788 lines
+- js/main.js                13925 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  842
+- regression check() sites  848
 
 ### Review
 
