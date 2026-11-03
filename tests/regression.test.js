@@ -7210,7 +7210,7 @@ export async function run({ navDoc = document } = {}) {
         modules: THEATRE_MODULES, colls: THEATRE_COLLECTIONS, min: 22 },
       { key: 'musical', name: 'Musical Theatre', prefix: 'mt-', live: MUSICAL_LIVE,
         lessons: MUSICAL_LESSONS,
-        modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 10 },
+        modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 14 },
     ];
     const everyOtherId = new Set([...ACTING_LESSONS, ...CHARACTER_LESSONS, ...COMMEDIA_LESSONS,
       ...SHAKESPEARE_LESSONS, ...RHETORIC_LESSONS].map(l => l.id));

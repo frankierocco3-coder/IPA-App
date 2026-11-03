@@ -513,10 +513,16 @@ def main():
         pins = (["id: 'th-what'", "id: 'th-comedy'", "id: 'th-romanstage'",
                  "id: 'th-medieval'", "id: 'th-noh'", "id: 'th-kabuki'",
                  "id: 'th-shakespeare'", "id: 'th-moliere'", "id: 'th-race'",
-                 "id: 'th-vaudeville'", "id: 'th-chekhov'", "id: 'th-harlem'",
+                 "id: 'th-vaudeville'", "id: 'th-chekhov'", "id: 'th-irish'",
+                 "id: 'th-american'", "id: 'th-harlem'",
                  "id: 'th-brecht'", "id: 'th-transform'"]
                 if ident == "th-" else
-                ["id: 'mt-book'", "id: 'mt-rep-guide'", "id: 'mt-rep-1940s'",
+                # The five chapters of The Broadway Book Musical, split out
+                # of one record on 2026-11-03, plus the ends of the
+                # catalogue. `mt-book` kept its id and is chapter one.
+                ["id: 'mt-book'", "id: 'mt-roots'", "id: 'mt-integration'",
+                 "id: 'mt-golden'", "id: 'mt-working'",
+                 "id: 'mt-rep-guide'", "id: 'mt-rep-1940s'",
                  "id: 'mt-rep-contemporary'", "id: 'mt-rep-poprock'",
                  "id: 'mt-rep-jukebox'"])
         for pin in pins:
