@@ -4692,7 +4692,28 @@ function actingChapterBlocks(l, opts) {
   const body = l.body ?? [];
   const from = opts?.skipFirst ? 1 : 0;
   const to = opts?.dropLast ? body.length - 1 : body.length;
-  return body.slice(from, to).map(b =>
+  const slice = body.slice(from, to);
+  // CONSECUTIVE PANELS BECOME ONE ROW. The owner sets his two coloured
+  // boxes side by side — what this changes for an actor, and the
+  // practice beside it — and a lesson says so simply by putting the two
+  // panel blocks next to each other. A lone panel still runs full width.
+  const out = [];
+  for (let i = 0; i < slice.length; i++) {
+    if (slice[i]?.panel && slice[i + 1]?.panel) {
+      const run = [];
+      while (slice[i]?.panel) run.push(slice[i++].panel);
+      i--;
+      out.push(`<div class="lxc-panels">${run.map(lessonPanelHtml).join('')}</div>`);
+      continue;
+    }
+    out.push(blockHtml(slice[i], opts));
+  }
+  return out.join('');
+}
+
+function blockHtml(b, opts) {
+  if (!b) return '';
+  return (
     // A section heading in the study layout carries the owner's leaf
     // spray beside it, as his rendering sets one next to "How this
     // course uses them". Other surfaces get the plain heading.
@@ -4713,7 +4734,7 @@ function actingChapterBlocks(l, opts) {
     // the page uses, so the lesson and the reference cannot disagree.
     : b.dissect ? dissectQuestionsHtml({ button: false })
     : b.fourLists ? fourListsHtml()
-    : b.markup ? scriptMarkupHtml(b.markup) : '').join('');
+    : b.markup ? scriptMarkupHtml(b.markup) : '');
 }
 
 // ── A marked-up page ──────────────────────────────────────────
@@ -5120,7 +5141,13 @@ function renderActingLesson(id) {
     // renders it full width, which is right for a lesson that ends on
     // one box rather than two.
     const bodyLast = l.body?.[l.body.length - 1];
-    const tailPanel = !Array.isArray(l.notes) && l.reflection && bodyLast?.panel
+    // A LESSON THAT PAIRS ITS OWN PANELS IS LEFT ALONE. Lesson 1 has one
+    // trailing panel and a reflection, and the two are brought together
+    // at the foot. Lesson 3 already carries both of its panels in the
+    // body, adjacent, so pulling the reflection in as well gave that
+    // page two "Try it" boxes — one from the body and one synthesised.
+    const bodyPairs = (l.body ?? []).some((b, i) => b?.panel && l.body[i + 1]?.panel);
+    const tailPanel = !Array.isArray(l.notes) && !bodyPairs && l.reflection && bodyLast?.panel
       ? bodyLast.panel : null;
     const pairHtml = tailPanel ? `
           <div class="lxc-panels">
@@ -5131,7 +5158,7 @@ function renderActingLesson(id) {
       // A lesson whose panels live in the rail has already said this
       // there; rendering it again here would put the same prompt twice
       // on one page.
-      : l.reflection && !Array.isArray(l.notes) ? `
+      : l.reflection && !Array.isArray(l.notes) && !bodyPairs ? `
           <aside class="lx-reflect" aria-label="Reflection">
             <p class="lx-reflect-h">Try it</p>
             <p class="lx-q">${esc(l.reflection)}</p>
@@ -5255,6 +5282,7 @@ function renderActingLesson(id) {
                 </svg>Key takeaway</h3>
               ${SPRIG('is-corner')}
               <p class="lx-take-p${l.takeaway ? ' is-lead' : ''}">${esc(take)}</p>
+              ${l.takeawayNote ? `<p class="lx-take-n">${esc(l.takeawayNote)}</p>` : ''}
             </section>` : ''}
             ${railPanels}
             ${showToc && marks.length ? `

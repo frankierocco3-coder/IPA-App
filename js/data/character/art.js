@@ -335,6 +335,34 @@ Object.assign(CHARACTER_FIGURES, {
     'A tambourine, a slapstick and a pewter jug.', 190, 78),
   'cm-l02-o4': l01('l02-o4.png',
     'A folded diamond-patterned costume, a white shirt and a feathered tricorn hat.', 205, 84),
+
+  // ── Lesson 3, Slapstick (owner rendering, 2026-11-02) ─────────────
+  // No zip for this one — the illustrations are cut from the rendering
+  // itself, which is the practice his first two handoffs set out.
+  //
+  // THE TWO PANEL FIGURES ARE FLOOD-FILLED, NOT KEYED. They are drawn
+  // on tinted panels whose ground measures about lum 225 (sage) and 213
+  // (terracotta) — darker than parchment and overlapping the figures'
+  // own highlights, so no luminance threshold separates them without
+  // punching holes in the costume. The ground is edge-connected and the
+  // figure is not, so the background is cleared by flooding inward from
+  // the border instead. See the note in the extraction script.
+  'cm-l03-hero': l01('l03-hero.png',
+    'Two masked players in a rehearsal room: one in a diamond-patterned costume recoiling with both hands up, the other swinging a wooden slapstick at him.', 511, 216),
+  'cm-l03-s1': l01('l03-s1.png',
+    'A pen drawing of a servant carrying a loaded tray, leaning back under its weight.', 154, 96),
+  'cm-l03-s2': l01('l03-s2.png',
+    'A pen drawing of a figure striding out, a banana skin on the ground ahead of him.', 142, 106),
+  'cm-l03-s3': l01('l03-s3.png',
+    'A pen drawing of a figure mid-fall, legs up and hat flying off.', 151, 106),
+  'cm-l03-s4': l01('l03-s4.png',
+    'A pen drawing of a figure sitting up after a fall, one hand to his head.', 151, 106),
+  'cm-l03-s5': l01('l03-s5.png',
+    'A pen drawing of a figure going over backwards in a chair, a ladder toppling with him.', 150, 106),
+  'cm-l03-sage': l01('l03-sage.png',
+    'A pen drawing of a masked player standing square, weight low.', 89, 135),
+  'cm-l03-try': l01('l03-try.png',
+    'A pen drawing of a masked player reacting, both hands raised near his face.', 95, 160),
 });
 
 export const characterFigure = key =>

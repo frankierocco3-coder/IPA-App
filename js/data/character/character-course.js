@@ -701,33 +701,70 @@ export const CHARACTER_LESSONS_ALL = [
     objective: 'Know what slapstick is, where the word comes from, how a gag is built, and where to watch it done brilliantly.',
     orientation: 'Slapstick is the comedy of the body going wrong. It looks like chaos and is some of the most precise work an actor ever does.',
     reflection: 'Think of the last time you laughed at someone falling over in a film. What was really hurt: their body, or their dignity?',
+    // ── From the owner's lesson-3 rendering, 2026-11-02 ─────────────
+    // His rail leads on a takeaway headline with the lesson's own
+    // sentence under it. The sentence is already in the body — the
+    // audience laughs at the reaction more than at the event — so only
+    // the headline is new, and it is his.
+    takeaway: 'The audience laughs at the reaction.',
+    takeawayNote: 'Slapstick works because the audience knows the character is safe. The laugh comes from the reaction \u2014 how they take what just happened.',
+    hero: 'cm-l03-hero',
+    thumb: 'cm-l03-hero',
     body: [
       { p: 'Slapstick is physical comedy built on exaggerated, harmless mishap: slips, trips, falls, blows, collisions, chases, and objects that refuse to cooperate. The name comes straight from commedia. Arlecchino’s bat, the batacchio, was two thin slats of wood joined so that they slapped together with a loud crack on impact. A blow that barely touched another actor sounded tremendous. So the first slapstick was a safety device: the sound sold the hit, and nobody was hurt.' },
       { p: 'That is still the rule. Slapstick is funny only when the audience knows, somewhere underneath the laugh, that no one is really hurt. What gets hurt is dignity. The pompous man who slips on a banana skin is funnier than a child who does, because he had further to fall. That is why slapstick and status belong together: almost every physical gag is a status gag in disguise.' },
       { h: 'How a gag is built' },
+      // The same five sentences, with the drawings from his rendering.
+      // The titles are the words each one already opened on.
       { steps: [
-        'The setup: the audience sees the problem before the character does, the banana skin, the open trapdoor, the wet paint.',
-        'The anticipation: a beat in which the audience knows what is coming and waits for it.',
-        'The event: the slip, the bump or the crash, as clean and exact as a dance step.',
-        'The take: the reaction. Audiences laugh at the reaction more than at the event, so give it room.',
-        'The escalation: the same thing again, bigger, often three times, with a twist on the third.',
+        { title: 'Setup', fig: 'cm-l03-s1',
+          text: 'The audience sees the problem before the character does, the banana skin, the open trapdoor, the wet paint.' },
+        { title: 'Anticipation', fig: 'cm-l03-s2',
+          text: 'A beat in which the audience knows what is coming and waits for it.' },
+        { title: 'Event', fig: 'cm-l03-s3',
+          text: 'The slip, the bump or the crash, as clean and exact as a dance step.' },
+        { title: 'Take', fig: 'cm-l03-s4',
+          text: 'The reaction. Audiences laugh at the reaction more than at the event, so give it room.' },
+        { title: 'Escalation', fig: 'cm-l03-s5',
+          text: 'The same thing again, bigger, often three times, with a twist on the third.' },
       ] },
-      { p: 'Two rules matter more than the rest. Commit completely: the character never knows it is funny, and the moment you comment on the joke, it dies. And never improvise contact. Every fall, hit and collision you see on screen was choreographed and rehearsed, often by trained stunt performers, and falls in particular need proper training. You can learn most of slapstick’s craft, the timing and the take, without them.' },
-      { h: 'Where to see it' },
-      { list: [
-        'The Gold Rush (1925): snowbound and starving, Charlie Chaplin’s Tramp boils his boot and eats it like a feast, twirling the laces like spaghetti.',
-        'Safety Last! (1923): Harold Lloyd dangles from the hands of a clock high above the street.',
-        'Steamboat Bill, Jr. (1928): the front of a house falls on Buster Keaton, who survives because he is standing exactly where the open window lands.',
-        'The Music Box (1932): Laurel and Hardy try to deliver a piano up an enormous flight of outdoor steps, and it keeps coming back down.',
-        'Singin’ in the Rain (1952): in the number “Make ’Em Laugh”, Donald O’Connor runs up walls, fights a dummy and crashes through a set.',
-        'I Love Lucy, “Job Switching” (1952): Lucy and Ethel on a chocolate factory conveyor belt that speeds up faster than they can wrap.',
-        'Fawlty Towers, “Gourmet Night” (1975): Basil Fawlty’s car breaks down, and he gives it a thrashing with a tree branch.',
-        'Mr. Bean, “Merry Christmas, Mr. Bean” (1992): Mr. Bean gets his head stuck inside a turkey.',
-        'Home Alone (1990): two burglars break into a house full of traps, from paint cans swinging down the stairs to a red-hot doorknob.',
-        'The Road Runner cartoons: Wile E. Coyote and the anvils, rockets and cliff edges that betray him every time.',
-      ] },
-      { h: 'Try it: the take' },
-      { p: 'No falls needed. Stand easy and read an imaginary letter. The news in it is terrible, but do not react yet. Fold it, put it away, take one step, then stop: that is the take, the moment it finally lands. Now try the double take: glance at the news, look away as though it were nothing, and snap back to it. Now the slow burn: let it land so slowly that the audience watches your fury build for five whole seconds before you speak. Three reactions to the same event, and each one gets a different laugh.' },
+      { panel: { tone: 'sage', title: 'What this changes for an actor', fig: 'cm-l03-sage',
+        text: 'Two rules matter more than the rest. Commit completely: the character never knows it is funny, and the moment you comment on the joke, it dies. And never improvise contact. Every fall, hit and collision you see on screen was choreographed and rehearsed, often by trained stunt performers, and falls in particular need proper training. You can learn most of slapstick’s craft, the timing and the take, without them.' } },
+      // The practice and the actor's takeaway as the two panels his
+      // rendering ends on. Both keep the lesson's own sentences; the
+      // sage one is the paragraph on committing and never improvising
+      // contact, which is exactly what it is about.
+      { panel: { tone: 'terracotta', title: 'Try it: the take', fig: 'cm-l03-try',
+        text: 'No falls needed. Stand easy and read an imaginary letter. The news in it is terrible, but do not react yet. Fold it, put it away, take one step, then stop: that is the take, the moment it finally lands. Now try the double take: glance at the news, look away as though it were nothing, and snap back to it. Now the slow burn: let it land so slowly that the audience watches your fury build for five whole seconds before you speak. Three reactions to the same event, and each one gets a different laugh.' } },
+      // THE SAME TEN ENTRIES, as cards. Each already opened with its
+      // title and year before a colon, so the split is presentation and
+      // nothing is rewritten. NO STILLS: his rendering sets a frame from
+      // each film behind the label, and this repo ships no third-party
+      // imagery — with the store run on, frames from in-copyright films
+      // are not something to introduce quietly.
+      { tiles: { kind: 'shelf', title: 'Where to see it',
+        items: [
+          { title: 'The Gold Rush (1925)',
+            text: 'snowbound and starving, Charlie Chaplin’s Tramp boils his boot and eats it like a feast, twirling the laces like spaghetti.' },
+          { title: 'Safety Last! (1923)',
+            text: 'Harold Lloyd dangles from the hands of a clock high above the street.' },
+          { title: 'Steamboat Bill, Jr. (1928)',
+            text: 'the front of a house falls on Buster Keaton, who survives because he is standing exactly where the open window lands.' },
+          { title: 'The Music Box (1932)',
+            text: 'Laurel and Hardy try to deliver a piano up an enormous flight of outdoor steps, and it keeps coming back down.' },
+          { title: 'Singin’ in the Rain (1952)',
+            text: 'in the number “Make ’Em Laugh”, Donald O’Connor runs up walls, fights a dummy and crashes through a set.' },
+          { title: 'I Love Lucy, “Job Switching” (1952)',
+            text: 'Lucy and Ethel on a chocolate factory conveyor belt that speeds up faster than they can wrap.' },
+          { title: 'Fawlty Towers, “Gourmet Night” (1975)',
+            text: 'Basil Fawlty’s car breaks down, and he gives it a thrashing with a tree branch.' },
+          { title: 'Mr. Bean, “Merry Christmas, Mr. Bean” (1992)',
+            text: 'Mr. Bean gets his head stuck inside a turkey.' },
+          { title: 'Home Alone (1990)',
+            text: 'two burglars break into a house full of traps, from paint cans swinging down the stairs to a red-hot doorknob.' },
+          { title: 'The Road Runner cartoons',
+            text: 'Wile E. Coyote and the anvils, rockets and cliff edges that betray him every time.' },
+        ] } },
     ] },
 
   { id: 'ch-cm-scenario', module: 'commedia', order: 4,

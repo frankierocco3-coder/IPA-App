@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v77';                     // 2026-11-02: the notes rail was clipping itself with Mark lesson complete inside the hidden part — css only, staleWhileRevalidate, and he is looking at it
+const VERSION = 'sc-v78';                     // 2026-11-02: lesson 3 Slapstick built to the owner's rendering — illustrated gag steps, paired panels, the films as cards; eight new images plus js and css
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

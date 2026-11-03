@@ -3359,6 +3359,8 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    the small size, because an objective is a sentence, not a headline. */
 .lx-take-p.is-lead { font-family: var(--serif, Georgia, serif);
   font-size: 19px; line-height: 1.25; }
+.lx-take-n { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5;
+  color: var(--muted); }
 .lx-notes-bar { margin: 0 0 6px; }
 .lx-notes-sub { margin: 0 0 14px; font-size: 12.5px; color: var(--muted); }
 .lx-toc-i.is-here { color: var(--ink); font-weight: 600; }
