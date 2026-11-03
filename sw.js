@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v79';                     // 2026-11-02: the Props drawing replaced at its EXISTING path — img goes through cacheFirst, which never re-asks, so this bump is required not optional
+const VERSION = 'sc-v80';                     // 2026-11-02: the tile drawings fill their cards instead of floating small in them — css only, staleWhileRevalidate, and he is looking at it
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

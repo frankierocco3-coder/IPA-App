@@ -3536,11 +3536,17 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   color: #4a3a12; font-family: var(--sans, system-ui, sans-serif);
   font-size: 12px; font-weight: 800; }
 .lxt-item-p { margin: 0; font-size: 14px; line-height: 1.5; }
-.lxt .lxc-fig { max-width: 100%; width: auto; margin: auto auto 0;
-  align-self: center; }
+/* THE DRAWINGS GROW TO THE CARD, up to a point. Left at their natural
+   width they sat as small islands in a wide card — a 155px crop adrift
+   in 310px of column on a phone. `width: 100%` fills it instead, and
+   the max-width is the brake: these are crops at roughly the size they
+   appear in the owner's rendering, so past about 1.7x they go soft.
+   260 lets a narrow card fill out without pushing any of them there. */
+.lxt .lxc-fig { width: 100%; max-width: 260px; height: auto;
+  margin: auto auto 0; align-self: center; }
 /* A stage reads downwards and its drawing settles at the foot; an
    object is the thing and its label sits under it. */
-.lxt.is-timeline .lxc-fig { margin-top: 6px; max-height: 108px; }
+.lxt.is-timeline .lxc-fig { margin-top: 10px; }
 /* A FIXED BOX, CONTAINED. The shelf's four drawings do not share an
    aspect — the owner's full-resolution Props spreads three objects
    across 3.4:1 where the masks sit at 2.3:1 — so sizing by width alone
@@ -3548,8 +3554,8 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    ragged. A common height with `contain` gives every card the same
    picture area and lets each drawing sit at its own proportions inside
    it. */
-.lxt.is-shelf .lxc-fig { margin: 0 auto 4px; width: 100%; height: 78px;
-  object-fit: contain; object-position: center bottom; }
+.lxt.is-shelf .lxc-fig { margin: 0 auto 6px; width: 100%; max-width: 230px;
+  height: 92px; object-fit: contain; object-position: center bottom; }
 .lxt.is-shelf .lxt-item { text-align: center; }
 .lxt.is-shelf .lxt-item-h { justify-content: center; }
 /* The chevron between stages, as on the course sequence. */
