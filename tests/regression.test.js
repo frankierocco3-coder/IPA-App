@@ -93,7 +93,8 @@ import { CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS, CHARACTER_
          COMMEDIA_MASKS, commediaMask, ONE_LINES, MASK_SITUATIONS, MASK_PROBLEMS } from '../js/data/character/character-course.js';
 import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible,
          COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaVisible,
-         THEATRE_LIVE, MUSICAL_LIVE } from '../js/views/context.js';
+         THEATRE_LIVE, THEATRE_PREVIEW_KEY,
+         MUSICAL_LIVE, MUSICAL_PREVIEW_KEY } from '../js/views/context.js';
 // COMMEDIA IS ITS OWN COURSE (2026-11-02) AND THIS SUITE DID NOT KNOW.
 // character-course.js kept the prose and `CHARACTER_LESSONS` stopped
 // including it the same day:
@@ -7193,6 +7194,134 @@ export async function run({ navDoc = document } = {}) {
     const named = copy.filter(t => /\b(Stanislavski|Chekhov|Lecoq|Johnstone|Laban|Meisner|Adler|Bogosian|Andreini|Scala|Rudlin)\b/.test(t));
     check('character: no practitioner names in the copy (sources belong on Sources & Credits)',
       named.length === 0, named.slice(0, 2).join(' | '));
+  }
+
+  // ── 29b. Theatre History and Musical Theatre ─────────────────
+  // Two courses from the owner's handoff of 2026-11-03, both SHUT. The
+  // checks here are deliberately the ones that would have caught the
+  // commedia split: a course's records, its modules and its shelves have
+  // to agree with each other, and the ORDER has to stay in contiguous
+  // runs. Nothing checked that for any book course, which is how a
+  // regroup could silently reshuffle an approved reading order.
+  {
+    const BOOKS29 = [
+      { key: 'theatre', name: 'Theatre History', prefix: 'th-', live: THEATRE_LIVE,
+        lessons: THEATRE_LESSONS,
+        modules: THEATRE_MODULES, colls: THEATRE_COLLECTIONS, min: 22 },
+      { key: 'musical', name: 'Musical Theatre', prefix: 'mt-', live: MUSICAL_LIVE,
+        lessons: MUSICAL_LESSONS,
+        modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 10 },
+    ];
+    const everyOtherId = new Set([...ACTING_LESSONS, ...CHARACTER_LESSONS, ...COMMEDIA_LESSONS,
+      ...SHAKESPEARE_LESSONS, ...RHETORIC_LESSONS].map(l => l.id));
+    // THE PREVIEW KEYS HAVE TO COME OFF FOR THE SHUT CHECK, and leaving
+    // them on is what made it fail first time round: a dev profile with
+    // `speechcraft-theatre-preview` set has theatreOpen() true and the
+    // workspace legitimately IN liveWorkspaces(), which is the whole
+    // point of the key. What is being asserted is what a LEARNER sees.
+    const savedPrev = {};
+    for (const k of [THEATRE_PREVIEW_KEY, MUSICAL_PREVIEW_KEY]) {
+      try { savedPrev[k] = localStorage.getItem(k); localStorage.removeItem(k); } catch {}
+    }
+    try {
+    for (const B of BOOKS29) {
+      const n = B.name.toLowerCase().split(' ')[0];
+      const modIds = B.modules.map(m => m.id);
+      check(`${n}: every lesson is a whole record in a declared module`,
+        B.lessons.length === B.min
+        && B.lessons.every(l => modIds.includes(l.module) && l.title && l.objective
+          && l.takeaway && l.requiredReviewer && Array.isArray(l.body) && l.body.length >= 3),
+        `${B.lessons.length} record(s), ${modIds.length} module(s)`);
+      // THE INVARIANT THE COMMEDIA SPLIT WROTE DOWN AND NOTHING TESTED. A
+      // learner walks the modules in sequence, so each module must be a
+      // CONTIGUOUS run of `order`: cut anywhere else and the walk is no
+      // longer the reading order the course was written in.
+      const runs = B.modules.map(m => B.lessons.filter(l => l.module === m.id && !l.reference)
+        .map(l => l.order).sort((a, b) => a - b));
+      const flat = runs.flat();
+      check(`${n}: the modules are contiguous runs of order, in module sequence`,
+        flat.length === new Set(flat).size
+        && flat.every((o, i) => i === 0 || o === flat[i - 1] + 1)
+        && runs.every(r => r.length > 0),
+        runs.map((r, i) => `${modIds[i]}:${r[0]}-${r.at(-1)}`).join(' '));
+      check(`${n}: module numbers are display-only and strictly ascending from 1`,
+        B.modules[0].n === 1 && B.modules.every((m, i, all) => i === 0 || m.n > all[i - 1].n)
+        && B.modules.every(m => m.title && m.blurb),
+        B.modules.map(m => m.n + ':' + m.id).join(' '));
+      const shelved = B.colls.flatMap(c => c.lessons);
+      const pathIds = B.lessons.filter(l => !l.reference).map(l => l.id);
+      check(`${n}: the Library shelves every path lesson exactly once`,
+        shelved.length === pathIds.length && new Set(shelved).size === shelved.length
+        && pathIds.every(id => shelved.includes(id))
+        && B.colls.every(c => !!c.icon && !!c.title),
+        `${shelved.length} shelved, ${pathIds.length} on the path`);
+      check(`${n}: ids carry the ${B.prefix} prefix and exist in no other course`,
+        B.lessons.every(l => l.id.startsWith(B.prefix))
+        && B.lessons.every(l => !everyOtherId.has(l.id)),
+        B.lessons.filter(l => everyOtherId.has(l.id)).map(l => l.id).join(', '));
+      // SHUT, AND NOTHING APPROVED. Both halves matter and they are not
+      // the same fact: the flag is the door, the ledger is the content.
+      // If the flag ever flips, the second clause flips with it — a live
+      // course whose records carry no entry shows a shelf of locked
+      // chapters, which is the Character-launch failure.
+      check(`${n}: it is shut, and nothing in it is published`,
+        B.live === false
+        && !liveWorkspaces().some(w => w.id === B.key)
+        && B.lessons.every(l => !speechPublished(l.id) && !speechReviewFor(l.id)),
+        `live=${B.live}, in switcher=${liveWorkspaces().some(w => w.id === B.key)}, `
+        + `${B.lessons.filter(l => speechPublished(l.id)).length} published, `
+        + `${B.lessons.filter(l => speechReviewFor(l.id)).length} with a ledger entry`);
+      // The handoff asks for the historical claims to be verified before
+      // publication, so the pages ask for a historian rather than letting
+      // an acting coach's name stand in. That was the Rhetoric mislabel of
+      // 2026-09-30 and it is the one thing these records assert about
+      // their own review.
+      check(`${n}: every record asks for a theatre historian`,
+        B.lessons.every(l => l.requiredReviewer === 'theatre-history')
+        && B.lessons.every(l => awaitingSpecialist(l.id)));
+    }
+    } finally {
+      for (const [k, v] of Object.entries(savedPrev)) {
+        try { if (v !== null) localStorage.setItem(k, v); } catch {}
+      }
+    }
+    // HOUSE STYLE, WITH THE EXEMPTION THE CONVERSION ACTUALLY APPLIED.
+    // Quoted matter is a title or a line of dialogue and is left alone:
+    // expanding the contraction in “Can’t Take My Eyes Off You” is not a
+    // style fix, it is a wrong song title. So the rule is checked OUTSIDE
+    // quotes, which is the rule that was implemented.
+    // AND WITH THE DASH RULE THE CONTENT ACTUALLY NEEDS. The house rule is
+    // NO EM DASH — one used as a sentence break where a comma or a colon
+    // belongs. An EN dash is different and is correct here: “1940–1960”,
+    // “chapters 10–11” and “the Keith–Albee circuit” are a range, a range
+    // and a joined pair of names. Banning both, as the character check
+    // does, failed this content on its own citations; that course simply
+    // has no ranges in it.
+    const unquoted = t => String(t ?? '').replace(/[“”"][^“”"]*[“”"]/g, ' ');
+    const thCopy = [...THEATRE_LESSONS, ...MUSICAL_LESSONS].flatMap(l => [
+      l.title, l.objective, l.orientation, l.reflection, l.takeaway,
+      ...(l.body ?? []).flatMap(b => [b.p, b.h, b.sub, b.key, b.quote, b.note,
+        ...(b.list ?? []), ...(b.olist ?? []),
+        ...(b.defs ?? []).flatMap(d => [d.label, d.text])])]).filter(Boolean);
+    const thBad = thCopy.filter(t => /—/.test(unquoted(t))
+      || /\bn’t\b|’(re|ll|ve|m)\b/.test(unquoted(t))
+      || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(unquoted(t))
+      || /["*]|\]\(http/.test(unquoted(t)));
+    check('theatre: copy keeps house style outside quotes, and quotes keep their own words',
+      thBad.length === 0 && thCopy.length > 3000,
+      thBad.slice(0, 2).join(' | ') || `${thCopy.length} string(s) checked`);
+    // No external link reaches a learner surface. The URLs the handoff
+    // supplied are preserved in `sources`, which only #review reads.
+    const thSources = THEATRE_LESSONS.flatMap(l => l.sources ?? []);
+    check('theatre: source URLs live in sources only, never in a body block',
+      thSources.length > 100 && thSources.every(x => /https?:\/\//.test(x))
+      && !/https?:\/\//.test(JSON.stringify(
+        THEATRE_LESSONS.map(l => l.body)) + JSON.stringify(MUSICAL_LESSONS.map(l => l.body))),
+      `${thSources.length} source(s) recorded`);
+    // NO LYRIC, EVER. The catalogue names songs and credits the writers.
+    check('musical: the catalogue carries no song text, only titles and credits',
+      MUSICAL_LESSONS.every(l => !('lyric' in l) && !('lyrics' in l))
+      && !/"(lyric|lyrics|verse|chorus)":/.test(JSON.stringify(MUSICAL_LESSONS)));
   }
 
   // ── 30. The notebook: grouped tabs, same stored notes ────────

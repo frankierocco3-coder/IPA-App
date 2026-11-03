@@ -116,10 +116,22 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
-**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **835**
-(824 before 2026-10-25). A short run skipped sections and is not comparable
-even if its failure count looks small — a green run with a short count is not
-a green run.
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **858**
+(841 before the two new courses were covered on 2026-11-03; 835 before
+2026-11-03; 824 before 2026-10-25). A short run skipped sections and is not
+comparable even if its failure count looks small — a green run with a short
+count is not a green run.
+
+**AND "41 CHECKS, 1 FAILURE" IS THE WORST SHAPE OF THAT, BECAUSE IT LOOKS
+ALMOST GREEN.** It is the two data suites at 20 + 20, and the regression suite
+dead on check one. It happened for real between 2026-11-02 and 2026-11-03:
+the commedia lift added `.filter(l => l.module !== 'commedia')` to
+`CHARACTER_LESSONS`, section 29 reads those records by id, and the first
+lookup without a `!!x` guard threw a TypeError rather than failing a check —
+which aborts `run()` and takes the other ~790 with it. A full day of commits
+went in over a suite that was not running. **Any change to what a course
+exports — a filter, a lift, a rename, a new course — means re-run the suite in
+the same session**, and read the count before the failures.
 
 **ONE CAUSE OF THE EMBEDDED-BROWSER FLAKE IS FIXED (2026-10-25), AND IT WAS A
 REAL APP BUG. IT IS NOT THE ONLY CAUSE — STILL RUN IN CHROME.** From
@@ -422,7 +434,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 - js/main.js                13925 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  848
+- regression check() sites  858
 
 ### Review
 

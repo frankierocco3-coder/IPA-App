@@ -48,19 +48,21 @@ export const THEATRE_PRINCIPLE =
   'Theatre has no agreed first moment and no single tradition. Walk the history as a working actor: what each form asked of a performer, and what it left behind that you can still use.';
 
 export const THEATRE_MODULES = [
-  { n: 1, id: 'th-origins', title: 'Where Theatre Comes From',
-    blurb: 'No agreed first moment, five competing theories, and the Athenian festival that turned a chorus into a city arguing with itself.' },
-  { n: 2, id: 'th-rome', title: 'Rome and the Medieval Stage',
+  { n: 1, id: 'th-origins', title: 'What Counts as Theatre',
+    blurb: 'No agreed first moment and five competing theories: ritual, myth, clowning, play and the urge to imitate, and what changes when an ordinary action is framed for someone to watch.' },
+  { n: 2, id: 'th-greeks', title: 'The Greeks',
+    blurb: 'The festival that turned a chorus into a city arguing with itself, the vocabulary Aristotle built from it, and the comedy that made authority ridiculous.' },
+  { n: 3, id: 'th-rome', title: 'Rome and the Medieval Stage',
     blurb: 'A form crossing into another society, the comedy and tragedy Rome made of it, and the long argument about whether theatre ever went away.' },
-  { n: 3, id: 'th-asia', title: 'Classical Theatre of Japan',
+  { n: 4, id: 'th-asia', title: 'Classical Theatre of Japan',
     blurb: 'Two traditions built on precision rather than illusion: the unseen made present, and a character shared between several performers.' },
-  { n: 4, id: 'th-earlymodern', title: 'The Early Modern Stage',
+  { n: 5, id: 'th-earlymodern', title: 'The Early Modern Stage',
     blurb: 'Disguise, recognition and uncertain happy endings; and the comedy that got close enough to power to be banned.' },
-  { n: 5, id: 'th-america19', title: 'Nineteenth-Century America',
+  { n: 6, id: 'th-america19', title: 'Nineteenth-Century America',
     blurb: 'Who was permitted to make the image, and the variety industry that taught a performer how to hold a room in nine minutes.' },
-  { n: 6, id: 'th-modern', title: 'The Modern Breakthrough',
-    blurb: 'Life beneath the lines, a national theatre arguing with its own audience, and the small American stages that changed what a play could be.' },
-  { n: 7, id: 'th-argument', title: 'Theatre as Argument',
+  { n: 7, id: 'th-modern', title: 'Moscow, Dublin, New York, Harlem',
+    blurb: 'Life beneath the lines, a national theatre arguing with its own audience, the small American stages that changed what a play could be, and a community taking control of how it was shown.' },
+  { n: 8, id: 'th-argument', title: 'Brecht to Boal',
     blurb: 'Making the familiar strange, the promise that does not arrive, the stages built outside the institutions, and theatre used to rehearse change.' },
 ];
 
@@ -375,7 +377,7 @@ export const THEATRE_LESSONS = [
       { p: 'Its origins remain uncertain. That uncertainty is not a failure of the subject; it is an invitation to examine evidence carefully and recognise that different cultures have made performance meaningful in different ways.' },
     ] },
 
-  { id: 'th-greek', module: 'th-origins', order: 2,
+  { id: 'th-greek', module: 'th-greeks', order: 2,
     title: 'Ancient Greek Theatre',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -715,7 +717,7 @@ export const THEATRE_LESSONS = [
       { p: 'Its lasting contribution is not only a collection of famous plays. It is the possibility that a community can watch people act under pressure, and use that experience to examine its own beliefs.' },
     ] },
 
-  { id: 'th-tragedy', module: 'th-origins', order: 3,
+  { id: 'th-tragedy', module: 'th-greeks', order: 3,
     title: 'Aristotle and Greek Tragedy',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -1078,7 +1080,7 @@ export const THEATRE_LESSONS = [
       { p: 'Aristotle gives us a vocabulary for examining those actions. The Oresteia tests how far any simple explanation of justice can take us.' },
     ] },
 
-  { id: 'th-comedy', module: 'th-origins', order: 4,
+  { id: 'th-comedy', module: 'th-greeks', order: 4,
     title: 'Greek Comedy and Satyr Plays',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -7873,9 +7875,10 @@ export const THEATRE_LESSONS = [
 ];
 
 const SHELF_ICON = {
-  'th-origins': '🏱',
+  'th-origins': '🌱',
+  'th-greeks': '🏺',
   'th-rome': '🏛️',
-  'th-asia': '🪆',
+  'th-asia': '🎎',
   'th-earlymodern': '👑',
   'th-america19': '🎪',
   'th-modern': '💬',
