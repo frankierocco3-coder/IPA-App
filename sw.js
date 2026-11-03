@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v80';                     // 2026-11-02: the tile drawings fill their cards instead of floating small in them — css only, staleWhileRevalidate, and he is looking at it
+const VERSION = 'sc-v81';                     // 2026-11-02: the course-sequence steps stack and their drawings are re-cut clear of the badges baked into them — three images REPLACED at existing paths, which cacheFirst never re-asks for
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',

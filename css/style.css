@@ -3408,10 +3408,15 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .sx-steps.is-rich { background: var(--panel); border: 1px solid var(--line);
   border-radius: 14px; padding: 16px 10px; gap: 0;
   grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+/* ONE COLUMN: the words, then the drawing beneath them. Beside the text
+   the picture took 92px out of a 275px card and left 139 for the
+   sentence, which wrapped the title onto two lines and ran the body
+   three words wide. Stacked, both take the whole card. */
 .sx-steps.is-rich .sx-step { background: none; border: 0; border-radius: 0;
-  display: grid; gap: 12px; align-items: center; position: relative;
-  grid-template-columns: 92px minmax(0, 1fr); padding: 6px 22px 6px 10px; }
+  display: flex; flex-direction: column; gap: 10px; position: relative;
+  padding: 6px 16px 6px 10px; }
 .sx-steps.is-rich .sx-step::before { content: none; }
+.sx-steps.is-rich .sx-step-body { flex: 0 0 auto; }
 /* The chevron rides the gap between one step and the next. */
 .sx-steps.is-rich .sx-step + .sx-step::after { content: '\203A';
   position: absolute; left: -10px; top: 50%; transform: translateY(-50%);
@@ -3419,7 +3424,21 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 @media (max-width: 700px) {
   .sx-steps.is-rich .sx-step + .sx-step::after { content: none; }
 }
-.sx-steps.is-rich .lxc-fig { max-width: 92px; align-self: center; }
+/* The drawing takes the card's width, with the same 260px brake the
+   tiles use: these are crops at roughly the size they appear in the
+   owner's rendering, so past about 1.7x they go soft. `margin-top:auto`
+   settles it at the foot so a row of steps lines its pictures up even
+   when their sentences differ in length. */
+/* A COMMON PICTURE BOX, because the three do not share an aspect: the
+   book is 153x128 and the figure 85x143, so filling the card's width
+   made the portrait one 418px tall beside neighbours at 208 and 250 and
+   it swamped the row. A fixed height with `contain` levels them and
+   caps the upscale at about 1.3x, which these crops take. The box sits
+   at the foot so the pictures line up across steps whose sentences run
+   to different lengths. */
+.sx-steps.is-rich .lxc-fig { width: 100%; max-width: 260px; height: 170px;
+  object-fit: contain; object-position: center bottom;
+  margin: auto auto 0; align-self: center; }
 .sx-step-h { display: flex; align-items: center; gap: 9px; }
 .sx-step-n { flex: 0 0 auto; display: grid; place-items: center;
   width: 23px; height: 23px; border-radius: 50%; background: var(--gold);

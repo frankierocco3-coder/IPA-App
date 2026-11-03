@@ -4553,14 +4553,21 @@ function stepCardsHtml(steps) {
     const text = rich ? o.text : titled ? leads[i].rest : s;
     // A rich step numbers itself inline beside its title, because the
     // drawing occupies the corner the plain card's number sits in.
+    //
+    // THE DRAWING COMES AFTER THE WORDS, and the card stacks them. Set
+    // beside the text it took a 92px column out of a 275px card and left
+    // 139px for the sentence, which wrapped "Learn the / forms" and put
+    // three words on a line underneath. Stacked, both get the card's
+    // full width — and it is the same shape the lesson-2 timeline uses,
+    // so a stage reads the same way wherever it appears.
     return `<li class="sx-step">
-      ${rich && o.fig ? lessonOrnamentHtml(o.fig) : ''}
       <div class="sx-step-body">
         ${head ? `<p class="sx-step-h">
           ${rich ? `<span class="sx-step-n" aria-hidden="true">${i + 1}</span>` : ''}
           <span>${esc(head)}</span></p>` : ''}
         <p class="sx-step-p">${esc(text)}</p>
       </div>
+      ${rich && o.fig ? lessonOrnamentHtml(o.fig) : ''}
     </li>`;
   }).join('')}</ol>`;
 }
