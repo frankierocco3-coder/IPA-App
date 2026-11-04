@@ -273,7 +273,14 @@ function drawWhatIsIpa(step, st) {
   document.getElementById('wii-reveal')?.addEventListener('click', () => { st.revealed = true; drawWhatIsIpa(step, st); });
   document.getElementById('wii-foundations')?.addEventListener('click', () => { setCourse('core'); setWorkspace('ipa'); goSection('learn'); });
   document.getElementById('wii-chart')?.addEventListener('click', () => renderChart());
-  document.getElementById('wii-course')?.addEventListener('click', () => { setWorkspace('accents'); goSection('learn'); });
+  // 'ipa' SINCE THE 2026-11-03 MERGE, not 'accents'. This button only
+  // renders when the stored course is an accent ("Continue Neutral
+  // American"), and that course now lives in Voice & Speech alongside
+  // IPA Foundations — so the workspace moves and the course it is
+  // already set to is what the workspace opens on. `wii-foundations`
+  // above needs no change: its setCourse('core') was redundant while the
+  // workspace pinned the course and is load-bearing now.
+  document.getElementById('wii-course')?.addEventListener('click', () => { setWorkspace('ipa'); goSection('learn'); });
   wireWiiQuestions(app, st);
   const h = app.querySelector('.guide-step h1');
   if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }

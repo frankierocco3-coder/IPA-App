@@ -1,10 +1,18 @@
 // Screen Acting — the tenth workspace (owner handoff, 2026-11-03).
 //
-// Supplied complete, as a written course rather than as transcripts: eight
+// Supplied complete, as a written course rather than as transcripts: NINE
 // subjects, each with a core idea, a numbered set of lessons, filmed
 // exercises and a checkpoint question. The conversion applied house style
 // (no em dashes, no contractions, curly quotes) and nothing else — the
 // teaching, the exercise timings and the checkpoints are his.
+//
+// A SECOND PASS OF THE SAME HANDOFF LANDED 2026-11-03, after the first was
+// already live, and it was a superset rather than a rewrite: seventeen more
+// numbered lessons across five existing chapters, one more exercise in
+// Technical Craft, and one whole subject that had no chapter at all,
+// Talking to the Lens. Nothing was replaced and no id moved. Where the
+// second pass and the first disagreed on wording, the first pass stands,
+// because it is the one that was reviewed and published.
 //
 // ONE SUBJECT PER MODULE, which is the shape he settled on for Theatre
 // History the same day. Each module holds one chapter; the course is a
@@ -29,11 +37,14 @@
 // js/data/acting/approaches.js. Do not let a later edit present it as how
 // acting simply works.
 //
-// GATED. SCREEN_LIVE is false in js/views/context.js and not one of the
-// eight records has an entry in js/data/speech/reviews.js, which by that
-// ledger’s own contract means draft. It asks for an acting professional,
-// the same reviewer Acting and Building a Character ask for, because the
-// claims here are craft claims rather than historical ones.
+// LIVE SINCE 2026-11-03, on the owner’s order, and every record carries an
+// 'owner-approved' entry in js/data/speech/reviews.js so that none of them
+// renders as a draft gate. That is publication, NOT review: it asks for an
+// acting professional, the same reviewer Acting and Building a Character
+// ask for, because the claims here are craft claims rather than historical
+// ones, and awaitingSpecialist() is true for all nine. A lesson added to
+// this file after today needs its own ledger entry IN THE SAME COMMIT, or
+// it alone will gate while the eight around it read normally.
 //
 // IDS ARE PERMANENT from the first push.
 
@@ -56,7 +67,15 @@ export const SCREEN_MODULES = [
     blurb: 'How a shot actually gets made, and the ninety per cent of the job that happens between takes.' },
   { n: 7, id: 'sc-tape', title: 'Self-Tape and Audition',
     blurb: 'A close-up, a technical standard and a reader who gives you nothing: everything in the course tested in sixty seconds.' },
-  { n: 8, id: 'sc-root', title: 'Repetition and the Reality of Doing',
+  // DIRECT ADDRESS IS ITS OWN SUBJECT, and it is the one place the course
+  // contradicts itself on purpose: every other module works from the rule
+  // that the camera does not exist. It arrived unnumbered in the handoff,
+  // sitting between the practicum and the repetition module, so it takes
+  // that position here. Repetition moves from 8 to 9; module numbers are
+  // display order, not ids, and no lesson id moved.
+  { n: 8, id: 'sc-address', title: 'Talking to the Lens',
+    blurb: 'The exception to the whole course: when the script speaks to the audience, the lens stops being a record and becomes one person in the dark.' },
+  { n: 9, id: 'sc-root', title: 'Repetition and the Reality of Doing',
     blurb: 'Nothing is self-generated: a training tradition built on responding to the other person until the responses are immediate and uncensored.' },
 ];
 
@@ -124,7 +143,7 @@ export const SCREEN_LESSONS = [
     objective: 'Calibrate a performance down to what a close-up can hold, use stillness and a steady gaze as choices, and find on playback the frame where thinking stopped and performing started.',
     reflection: 'Can you identify, on playback, the exact frame where you stopped thinking and started performing?',
     takeaway: 'If a take felt like nothing, it was probably right.',
-    contents: ['Do less than feels natural, and let the thought be seen', 'The eight lessons', 'Exercises'],
+    contents: ['Do less than feels natural, and let the thought be seen', 'The ten lessons', 'Exercises'],
     body: [
       { h: 'What you will learn' },
       { list: [
@@ -137,7 +156,7 @@ export const SCREEN_LESSONS = [
       { defs: [
         { label: 'Core idea', text: 'On stage you project to the back row; on film the audience is inches from your face. The camera sees thought, so your job is to think truthfully and let it be seen, not to show it.' },
       ] },
-      { h: 'The eight lessons' },
+      { h: 'The ten lessons' },
       { olist: [
         'Do less than feels natural. What reads as subtle in the room reads as enormous in a close-up. If a take felt like nothing, it was probably right.',
         'Stillness is power. Unmotivated movement, fidgeting and head-bobbing pull focus; the actor who holds still owns the frame.',
@@ -147,6 +166,8 @@ export const SCREEN_LESSONS = [
         'Listen as if you have never heard the words before, every take. Reacting is most of film acting.',
         'Film is cut from reactions. The editor will often choose the shot of the person listening, so stay alive when the other actor is speaking.',
         'Energy is internal, not physical. Volume, gesture and pace drop; intensity of thought stays high.',
+        'Listen with a full inner life. While the other person talks, think of extraordinary things to say back, and decide not to say them. That is what the camera reads as listening.',
+        'Film runs slower than stage. A flick of the eyes is a big event in a close-up; take your time and let small things land.',
       ] },
       { h: 'Exercises' },
       { p: 'Exercise 1A: The still close-up, 30 minutes. Frame a tight close-up. Deliver a two-line monologue three ways: as you would on stage, at half that size, then with almost no visible expression but full inner intention. Watch back. Note which take you believed.' },
@@ -164,7 +185,7 @@ export const SCREEN_LESSONS = [
     objective: 'Recalibrate one scene for three shot sizes, hit a mark without looking down, and repeat your own business closely enough that the material can be cut.',
     reflection: 'Could an editor cut your three takes together without a visible jump?',
     takeaway: 'The same scene played in a wide and a close-up should look like two different performances.',
-    contents: ['The size of the shot decides the size of the performance', 'Shot size sets the scale', 'The eight lessons', 'Exercises'],
+    contents: ['The size of the shot decides the size of the performance', 'Shot size sets the scale', 'The twelve lessons', 'Exercises'],
     body: [
       { h: 'What you will learn' },
       { list: [
@@ -188,7 +209,7 @@ export const SCREEN_LESSONS = [
         ] } },
       { p: 'Ask the operator what the shot is before every take, then calibrate.' },
       { key: 'The same scene played in a wide and a close-up should look like two different performances.' },
-      { h: 'The eight lessons' },
+      { h: 'The twelve lessons' },
       { olist: [
         'Hit your mark without looking. Count steps in rehearsal, feel for the tape with your foot, or use a prop or furniture edge as the stop. Looking down breaks the shot.',
         'Eyelines are the grammar of the edit. Looking a few degrees off your partner’s eye, toward the lens, opens your face to camera; the audience reads it as direct contact.',
@@ -198,11 +219,16 @@ export const SCREEN_LESSONS = [
         'Walking and talking: the line goes with the step, not before or after, so the pace of speech and the pace of movement match across takes.',
         'Know the coverage. Master, two-shot, singles: the single is where your close work lives, so save the finest detail for it and keep the master clean and repeatable.',
         'Less time, more precision. Film gives you minutes of rehearsal, not weeks; arrive with the technical decisions already made.',
+        'Land on the mark from behind. Walk a half-step past it, then step back onto it as you start the line. Focus is a narrow plane; a foot too far forward and you are soft, and stepping back reads as natural.',
+        'Rising out of a close-up, take the camera with you. Stand slowly so the operator can follow; popping up out of frame kills the shot.',
+        'Ask how much room you have in the frame. In a locked tight shot you can not move an inch and must work with the eyes alone; if the shot is looser, you do not have to freeze. Knowing which it is stops you tensing up.',
+        'Never fiddle in the master. Props, cigarettes, hands: plan every action and repeat it exactly in every size. The performance can change between takes; the action can not.',
       ] },
       { h: 'Exercises' },
       { p: 'Exercise 2A: Three sizes, 40 minutes. Film the same thirty-second scene in a wide, a medium and a close-up. Recalibrate the performance for each. On playback, check whether the close-up still has visible effort.' },
       { p: 'Exercise 2B: Marks and eyelines, 30 minutes. Tape a mark on the floor. Enter, cross, land on the mark and deliver a line to a partner standing just beside the lens. Repeat five times. Goal: identical landings, no glance down, eyes steady.' },
       { p: 'Exercise 2C: Continuity drill, 30 minutes. Play a one-minute scene with a cup, a phone and a chair. Film three takes. On playback, list every action that differed between takes.' },
+      { p: 'Exercise 2D: Step back and rise, 20 minutes. Set the phone to a shallow depth of field, portrait mode, and tape a mark where the focus is sharp. Five times: walk past the mark, step back onto it on the first word of a line. Then, seated in a close-up, stand on a line five times with a partner panning up to follow you. On playback: were you sharp on every landing, and did you ever leave the frame?' },
       { h: 'Takeaway' },
       { key: 'The same scene played in a wide and a close-up should look like two different performances.' },
       { p: 'Continuity is not the script supervisor’s problem alone. An unrepeatable take cannot be cut, however good it was.' },
@@ -254,7 +280,7 @@ export const SCREEN_LESSONS = [
     objective: 'Work a scene down to a want and an obstacle, prepare the pivot so it lands in the single, and arrive with decisions made that stay invisible on the take.',
     reflection: 'On playback, can you point to the pivot of the scene, and did it land in the single?',
     takeaway: 'Rehearse the behaviour, not the result.',
-    contents: ['Know it well enough to throw the plan away', 'The prep checklist for every scene', 'The eight lessons', 'Exercises'],
+    contents: ['Know it well enough to throw the plan away', 'The prep checklist for every scene', 'The eleven lessons', 'Exercises'],
     body: [
       { h: 'What you will learn' },
       { list: [
@@ -277,7 +303,7 @@ export const SCREEN_LESSONS = [
         'What does the character physically do here, props and business, that I can repeat identically?',
         'What is the size of the shot likely to be, and how does that change my choices?',
       ] },
-      { h: 'The eight lessons' },
+      { h: 'The eleven lessons' },
       { olist: [
         'Know the lines cold. Film gives no time to find them; hesitation reads as the actor, not the character. Learn them without inflection so no reading gets baked in.',
         'Build the character from what they do, not from adjectives. A list of actions is playable; a list of traits is not.',
@@ -287,6 +313,9 @@ export const SCREEN_LESSONS = [
         'Personalize only as far as it helps. Use your own experience to understand the stakes, then drop it and play the scene.',
         'Keep the prep off your face. Decisions made in advance should be invisible on the take; the audience sees only the result.',
         'Rehearse the behaviour, not the result. Practise the business, the moves and the listening, never the emotional climax.',
+        'The night-before ritual. Run the exact performance over and over; rearrange the furniture in your room to match the set, lay out the props, and time each line to each action so the business is automatic by morning.',
+        'Physical states are tiny on camera. Drunk, exhausted, in pain: a slightly different way of sitting, reactions a beat slower, two inches of movement. Never a performance of the state.',
+        'The rehearsal test. If someone walking past can tell you are rehearsing, it is wrong. It should look like two people talking, so that they join the conversation by mistake.',
       ] },
       { h: 'Exercises' },
       { p: 'Exercise 4A: Want and obstacle, 30 minutes. Take a two-page scene. Write the want in one sentence and the obstacle in one sentence. Film the scene once pursuing the want relentlessly. Watch for whether the want was visible without being announced.' },
@@ -304,7 +333,7 @@ export const SCREEN_LESSONS = [
     objective: 'Follow a shot through its stages, give a full performance off camera for somebody else’s single, take a note without discussion, and keep take fourteen alive.',
     reflection: 'Did take fourteen look like the first time it had ever happened?',
     takeaway: 'Give the same performance for the other actor’s single.',
-    contents: ['Ten per cent happens on action, and ninety per cent around it', 'How a shot gets made', 'The eight lessons', 'Exercises'],
+    contents: ['Ten per cent happens on action, and ninety per cent around it', 'How a shot gets made', 'The fifteen lessons', 'Exercises'],
     body: [
       { h: 'What you will learn' },
       { list: [
@@ -326,7 +355,7 @@ export const SCREEN_LESSONS = [
         'Reset between takes: props back, positions back, clothing checked.',
         'Check the gate and move on: the shot is done; the next set-up begins.',
       ] },
-      { h: 'The eight lessons' },
+      { h: 'The fifteen lessons' },
       { olist: [
         'Know the crew’s words. Mark, eyeline, cheat, first positions, back to one, tail slate: understanding them saves minutes on every set-up.',
         'Save the full performance for the take. Rehearsals are for the camera and sound; you burn energy and give the editor nothing if you play them all out.',
@@ -336,6 +365,13 @@ export const SCREEN_LESSONS = [
         'Tiredness, repetition and waiting are the job. Take fourteen must be as alive as take one; find a way to make each take the first time.',
         'Keep continuity notes yourself. Script supervisors are excellent, but a line in your own script about hand, cup and timing is faster.',
         'Be easy to work with. On a crew of forty, the actor who is prepared, quiet between set-ups and generous off camera is the one who is called back.',
+        'Off camera, get right up against the lens. Not beside it: against it, so the on-camera actor’s face comes round to the most open angle.',
+        'Between the master and the close-up, do not hold the emotion. The close-up may come hours later. Sit on set working out what is next; when the camera comes in, the person inside is the same, you only calm the face down for the closer shot.',
+        'The one-day part is the hardest job. Nobody knows you, you have one line, and the nerves are worst while the lead is relaxed. Prepare it like a lead role, arrive early, and treat the line as the only thing that matters that day.',
+        'Have any stunt or effect demonstrated first. Whatever the schedule pressure, say show me, and do not do it until someone has.',
+        'Intimate scenes stay professional. Do not socialize with the other actor the night before; keep the set easy with humour so they are never uneasy; prepare like any other scene.',
+        'Steal from the best. When you see a great actor do something that works, take it and make it your own until nobody can trace where it came from.',
+        'Rushes are for learning, not for working. While studying, playback is your teacher; on a job, do not watch the dailies, because you will only look at yourself. Trust the director to tell you what landed.',
       ] },
       { h: 'Exercises' },
       { p: 'Exercise 5A: Off-camera generosity, 30 minutes. Film your partner’s single. You are off camera, beside the lens. Give a full performance. Then film it again giving a lazy off-camera read. Watch your partner’s footage from both; the difference is the lesson.' },
@@ -353,7 +389,7 @@ export const SCREEN_LESSONS = [
     objective: 'Meet the technical standard without thinking about it, treat a flat reader as a scene partner, and watch your own tape the way a stranger would.',
     reflection: 'Watch your tape as a stranger. Mute it: is the thinking visible? Play it at double speed: is the body still?',
     takeaway: 'Make the strong choice, then make it small.',
-    contents: ['A close-up, a technical standard, and a reader who gives you almost nothing', 'The technical standard for every tape', 'The seven lessons', 'The practicum'],
+    contents: ['A close-up, a technical standard, and a reader who gives you almost nothing', 'The technical standard for every tape', 'The eight lessons', 'The practicum'],
     body: [
       { h: 'What you will learn' },
       { list: [
@@ -378,7 +414,7 @@ export const SCREEN_LESSONS = [
           ['Slate', 'Name, role, height if asked; relaxed, no performance'],
           ['Length', 'Trim dead air; one take per scene unless two are requested'],
         ] } },
-      { h: 'The seven lessons' },
+      { h: 'The eight lessons' },
       { olist: [
         'The reader is your scene partner, however flat they are. Put your attention on them and respond to what they actually give.',
         'Make the strong choice, then make it small. Casting watches hundreds of tapes; the actor who is still, specific and thinking stands out from the actor who is busy.',
@@ -387,6 +423,7 @@ export const SCREEN_LESSONS = [
         'Learn the sides cold, even for a next-day deadline. Eyes dropping to the page kill the take.',
         'Two takes, two real choices. If asked for two, change the want or the relationship, not just the volume.',
         'Watch your tape as a stranger. Mute it and ask whether the thinking is visible; play it at double speed and ask whether the body is still.',
+        'A screen test is usually a scene with another actor, with a turn to profile, rather than a monologue to the lens. What most screen tests show is fear, so the work is to relax; nobody can tell from the room who reads on camera, only the footage knows.',
       ] },
       { h: 'The practicum' },
       { p: 'Round one. Record three tapes from sides you have never seen before, each with a twenty-four hour turnaround from first read to finished tape. Apply the technical standard to every one.' },
@@ -397,7 +434,42 @@ export const SCREEN_LESSONS = [
       { p: 'Everything in this course is tested in sixty seconds of close-up with a reader who gives you nothing.' },
     ] },
 
-  { id: 'sc-repetition', module: 'sc-root', order: 8,
+  { id: 'sc-lens', module: 'sc-address', order: 8,
+    title: 'Talking to the Lens',
+    attribution: 'Screen acting',
+    requiredReviewer: 'acting-professional',
+    objective: 'Play direct address as a private conversation with one person: warm, slower and smaller than feels natural, with the eyes carrying what the face does not.',
+    reflection: 'Could a stranger watching the tape believe you were talking only to them?',
+    takeaway: 'One person, sitting in the dark, and you are telling them a secret.',
+    contents: ['The one time the camera is allowed to exist', 'The five lessons', 'Exercises'],
+    body: [
+      { h: 'What you will learn' },
+      { list: [
+        'Pitch direct address to one person rather than to a room.',
+        'Bring the scale and pace down further than instinct suggests.',
+        'Let the eyes carry the comedy or the grief while the face stays still.',
+        'Hold a steady eyeline straight down the lens.',
+      ] },
+      { h: 'The one time the camera is allowed to exist' },
+      { defs: [
+        { label: 'Core idea', text: 'The rule everywhere else is that the camera does not exist. The exception is direct address, when the script has you speak to the audience. Then the lens is not an audience; it is your best friend, one person, sitting in the dark, and you are telling them a secret.' },
+      ] },
+      { h: 'The five lessons' },
+      { olist: [
+        'One person, not a crowd. Every viewer must feel they alone are being told. Pitch it as a private conversation, never a speech.',
+        'Slower and smaller than feels natural. Intimacy on camera is quiet; what reads as conspiratorial in the room reads as shouting in the cut.',
+        'No faces. Nerves come out as twitches, eyebrow work and grimaces. Let the eyes carry that you find it funny, sad or outrageous; the face stays still.',
+        'You like them and they like you. The relationship with the lens is warm and amused; it is ready to hear every word, so you never have to sell it.',
+        'Hold the eyeline steady. Looking straight into the lens, the same rules apply: one eye, no blinking on the key line, no drifting off.',
+      ] },
+      { h: 'Exercises' },
+      { p: 'Exercise DA: The secret, 20 minutes. Write three sentences about someone you know, in your own words. Film them to the lens three ways: to a room, to a friend across a table, to one person who already agrees with you. Watch back and mark which version you would keep watching.' },
+      { h: 'Takeaway' },
+      { key: 'One person, sitting in the dark, and you are telling them a secret.' },
+      { p: 'Everywhere else in this course the lens is a record you answer to. Here it is the only other person in the scene.' },
+    ] },
+
+  { id: 'sc-repetition', module: 'sc-root', order: 9,
     title: 'Repetition and the Reality of Doing',
     attribution: 'Screen acting',
     requiredReviewer: 'acting-professional',

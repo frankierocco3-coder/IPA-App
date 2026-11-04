@@ -604,12 +604,24 @@ def main():
         if "title: 'The Shapes of Argument'" not in views_js:
             fail("The Shapes of Argument lost the Library card that opens it")
 
-    # 6m: the three-workspace IA (2026-08-13)
-    for pin in ["id: 'speech'", "id: 'ipa'", "id: 'accents'"]:
+    # 6m: the workspace IA (2026-08-13), as amended by the merge of
+    # 2026-11-03. This pinned three ids — 'speech', 'ipa' and 'accents' —
+    # and it caught the merge, which is what a pin is for. The owner
+    # merged Voice & Speech and Accents & Dialects into the single 'ipa'
+    # workspace that carries all six courses, so 'accents' is a RETIRED
+    # id: it must be absent from the selector and must still be redirected
+    # for anyone who has it stored, which is the pair of facts below.
+    for pin in ["id: 'speech'", "id: 'ipa'"]:
         if pin not in views_js:
             fail("a workspace is missing from the selector: %r" % pin)
+    if "id: 'accents'" in views_js:
+        fail("the retired workspace id 'accents' is back in the selector "
+             "— it merged into 'ipa' on 2026-11-03")
+    if "if (v === 'accents') return 'ipa';" not in views_js:
+        fail("a stored 'accents' workspace no longer redirects to 'ipa' "
+             "— returning learners would be stranded on a retired id")
     if "IPA Foundations" not in views_js:
-        fail("the IPA workspace lost its accent-neutral context label")
+        fail("the merged workspace lost the IPA Foundations course label")
     # The Speech Library presents COLLECTIONS, never stage labels.
     for banned in ["Stage 1 · Foundation", "Stage 2 · Shaping Meaning",
                    "Stage 3 · The Whole Speaker"]:

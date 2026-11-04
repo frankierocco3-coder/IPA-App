@@ -174,11 +174,24 @@ export async function run({ navDoc = document } = {}) {
   results.length = 0;
 
   // Workspaces (2026-08-13 IA): sections 1–18 exercise the IPA/accent
-  // surfaces, so the suite pins the Accents & Dialects workspace for
-  // them. Section 19 drives the switching itself; the finally-block
-  // there restores whatever the user had.
+  // surfaces, so the suite pins the workspace that owns them. Section 19
+  // drives the switching itself; the finally-block there restores
+  // whatever the user had.
+  //
+  // THAT WORKSPACE IS 'ipa' SINCE 2026-11-03, not 'accents'. The owner
+  // merged Voice & Speech and Accents & Dialects into one workspace that
+  // carries all six courses, so 'accents' is a retired id — redirected by
+  // activeWorkspace(), never rendered, and useless as a pin.
   const workspaceBefore = localStorage.getItem('speechcraft-workspace');
-  try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+  try {
+    localStorage.setItem('speechcraft-workspace', 'ipa');
+    // The course is part of the pin now — see seedWorkspace() in
+    // tests/run-all.js for why. The merge migration would otherwise pin
+    // 'core' over it and every accent check below would test the wrong
+    // course.
+    localStorage.setItem('speechcraft-course', 'nam');
+    localStorage.setItem('speechcraft-ipa-accents-merged', '1');
+  } catch { /* ignore */ }
 
   // ── THE PIN ABOVE WAS A WISH, NOT A PIN (fixed 2026-10-12) ──
   // Writing to localStorage does not move an app that has ALREADY BOOTED
@@ -214,12 +227,15 @@ export async function run({ navDoc = document } = {}) {
       // identical failures every run on a browser whose stored workspace was
       // 'acting', and zero on one left in 'accents'.
       //
-      // The course chip is only ever rendered by the accent workspaces —
-      // measured in both directions, Acting false / Accents true — because
-      // ACCENTLESS_WORKSPACES is exactly the set that has no accent to name.
-      const inAccentsNow = doc => !!doc?.getElementById('course-chip');
+      // The course chip is only ever rendered by the workspace that has
+      // courses — measured in both directions, Acting false / Voice & Speech
+      // true — because ACCENTLESS_WORKSPACES is exactly the set that has no
+      // course to name. The merge of 2026-11-03 left this detector alone on
+      // purpose: there is now ONE workspace with a course chip instead of
+      // two, which makes it a sharper tell than it was, not a weaker one.
+      const inCourseWsNow = doc => !!doc?.getElementById('course-chip');
       let wsDoc = navDoc;
-      if (!inAccentsNow(wsDoc)) {
+      if (!inCourseWsNow(wsDoc)) {
         wsFrame.contentWindow.location.reload();
         for (let i = 0; i < 40; i++) {
           await scSleep(150);
@@ -227,13 +243,13 @@ export async function run({ navDoc = document } = {}) {
           if (wsDoc?.querySelector('.side-nav .side-item')) break;
         }
       }
-      const inAccents = inAccentsNow(wsDoc);
-      check('precondition: the app under test is in the Accents workspace',
-        inAccents,
+      const inCourseWs = inCourseWsNow(wsDoc);
+      check('precondition: the app under test is in the Voice & Speech workspace',
+        inCourseWs,
         `stored="${localStorage.getItem('speechcraft-workspace')}" `
-        + `courseChip=${inAccents} `
+        + `courseChip=${inCourseWs} `
         + `freeplay=${!!wsDoc?.getElementById('freeplay')} (no longer a workspace tell) `
-        + '— sections 1 to 18 need Accents; every check below this is unreliable without it');
+        + '— sections 1 to 18 need the course workspace; every check below this is unreliable without it');
     }
   }
 
@@ -1000,7 +1016,7 @@ export async function run({ navDoc = document } = {}) {
       // flag, not a deletion — the credited pathway stays whole in
       // source, pinned copy included, ready to flip back.
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
-      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(420);
+      clickIn(doc.querySelector('[data-ws="ipa"]')); await sleep(420);
       clickIn(side('Library')); await sleep(400);
       check('pathway: Rhetoric & Oratory is withdrawn from the Library while RHETORIC_LIVE is false',
         !doc.querySelector('[data-tile="rhetoric"]')
@@ -1971,7 +1987,7 @@ export async function run({ navDoc = document } = {}) {
       // workspace rather than inheriting whatever ran last.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
-      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ws="ipa"]')); await sleep(400);
       clickIn(side('Library')); await sleep(350);
       // Withdrawn 2026-08-17 behind DIALECT_ACTION_LIVE. The card must be
       // ABSENT while the flag is false — not merely empty.
@@ -2165,7 +2181,7 @@ export async function run({ navDoc = document } = {}) {
       // Studio is its own pane), so pin the accents workspace first.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
-      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ws="ipa"]')); await sleep(400);
       clickIn(side('Studio')); await sleep(350);
       clickIn(card('Scripts & Speeches')); await sleep(400);
       check('editions UI: no Featured Texts shelf — collections only',
@@ -2502,7 +2518,7 @@ export async function run({ navDoc = document } = {}) {
       // so pin the accents workspace before reading its Library.
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(doc.getElementById('ws-chip')); await sleep(150);
-      clickIn(doc.querySelector('[data-ws="accents"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ws="ipa"]')); await sleep(400);
       clickIn(side('Library')); await sleep(350);
       const tileTitles = () => [...doc.querySelectorAll('.tile-grid .tile .tile-title')]
         .map(t => [...t.childNodes].filter(n => n.nodeType === 3)
@@ -2789,29 +2805,30 @@ export async function run({ navDoc = document } = {}) {
       // ── The three workspaces ──────────────────────────────────
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Learn')); await sleep(350);
+      // 'accents' IS GONE FROM THIS LIST, not forgotten (2026-11-03 merge).
+      // This drive is skipped while SPEECH_LIVE is false, so it is also the
+      // easiest place in the suite to leave a stale assertion that nobody
+      // runs — which is exactly why it is updated with the rest.
       check('workspaces: all three are selectable from the persistent selector',
         !!doc.getElementById('ws-chip')
-        && ['speech', 'ipa', 'accents'].every(id => {
+        && ['speech', 'ipa', 'acting'].every(id => {
           doc.getElementById('ws-chip').click();
           return !!doc.querySelector(`[data-ws="${id}"]`);
         }));
-      await pickWorkspace('accents');
-      check('workspaces: Accents & Dialects keeps its accent selector and course',
+      await pickWorkspace('ipa');
+      check('workspaces: Voice & Speech keeps its course selector and course',
         !!doc.getElementById('course-chip')
         && statsbarText().includes('Neutral American')
         && doc.body.textContent.includes('Stage 1 · Orientation'));
       clickIn(doc.getElementById('course-chip')); await sleep(200);
-      check('workspaces: the accent menu offers the four accent courses, not IPA Foundations',
-        ['Neutral American', 'Traditional RP', 'Standard British', 'Australian']
-          .every(n => [...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes(n)))
-        && ![...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes('IPA Foundations')));
+      check('workspaces: the course menu offers all six, IPA Foundations included',
+        ['IPA Foundations', 'Neutral American', 'Traditional RP',
+         'Standard British', 'Cockney', 'Australian']
+          .every(n => [...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes(n))));
       clickIn(doc.body); await sleep(150);
-      await pickWorkspace('ipa');
-      check('workspaces: IPA is accent-neutral — fixed IPA Foundations context, no accent selector',
-        !!doc.getElementById('ipa-context')
-        && statsbarText().includes('IPA Foundations')
-        && !doc.getElementById('course-chip')
-        && !statsbarText().includes('Neutral American'));
+      check('workspaces: the pinned IPA-Foundations label is gone with the merge',
+        !doc.getElementById('ipa-context')
+        && !doc.querySelector('[data-ws="accents"]'));
       check('workspaces: the sidebar works unchanged inside a workspace',
         [...doc.querySelectorAll('.side-nav .side-item .side-label')].map(e => e.textContent.trim())
           .join() === EXPECTED_NAV.join());
@@ -3315,7 +3332,7 @@ export async function run({ navDoc = document } = {}) {
       if (spProj) await deleteProject(spProj.id).catch(() => {});
       if (modesBefore[0] === null) localStorage.removeItem('speechcraft-working-text');
       else localStorage.setItem('speechcraft-working-text', modesBefore[0]);
-      try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+      try { localStorage.setItem('speechcraft-workspace', 'ipa'); } catch { /* ignore */ }
     }
   } else if (navDoc !== document) {
     // Withdrawn: prove the workspace is genuinely gone from the UI while
@@ -3958,18 +3975,44 @@ export async function run({ navDoc = document } = {}) {
         !!doc.querySelector('[data-tile="col:approaches"]')
         && ACTING_APPROACHES.every(a => !speechLessonById(a.id)));
 
-      // IPA and Accents & Dialects are untouched.
+      // VOICE & SPEECH IS UNTOUCHED BY THE ACTING DRIVE, and since
+      // 2026-11-03 it is one workspace rather than two. This pair read
+      // `#ipa-context` for a pinned, unclickable "IPA Foundations" label and
+      // then switched to 'accents' for the selector; the merge deleted the
+      // label, gave that workspace all six courses, and retired the second
+      // id, so the pair becomes one check of the rule that replaced them.
       await pickWs('ipa');
-      check('acting: the IPA workspace is unchanged and still accent-neutral',
-        !!doc.getElementById('ipa-context') && !doc.getElementById('course-chip'));
-      await pickWs('accents');
-      check('acting: Accents & Dialects keeps its accent selector',
-        !!doc.getElementById('course-chip'));
+      // TWO MENUS SINCE 2026-11-04, AND THIS CHECKS THE SPLIT. The courses
+      // hung inside the workspace menu until the owner moved them onto the
+      // course chip, so the workspace chip opens workspaces and the course
+      // chip opens courses. Opening the wrong one is how this check read
+      // `rows=0` the first time it ran after the move.
+      clickIn(doc.getElementById('ws-chip')); await sleep(250);
+      const wsOnly = [...doc.querySelectorAll('#ws-menu [data-course]')].length;
+      const wsRowCount = [...doc.querySelectorAll('#ws-menu [data-ws]')].length;
+      clickIn(doc.getElementById('course-chip')); await sleep(300);
+      const mergedRows = [...doc.querySelectorAll('#course-menu .course-row')]
+        .map(r => r.textContent);
+      check('acting: Voice & Speech carries one selector offering all six courses',
+        !!doc.getElementById('course-chip')
+        && !doc.getElementById('ipa-context')
+        && ['IPA Foundations', 'Neutral American', 'Traditional RP',
+            'Standard British', 'Cockney', 'Australian']
+          .every(n => mergedRows.some(r => r.includes(n))),
+        `rows=${mergedRows.length}`);
+      check('acting: the course list is the course chip’s, never the workspace menu’s',
+        wsOnly === 0 && wsRowCount > 0
+        && !doc.querySelector('#ws-menu #course-menu'),
+        `courses in ws menu=${wsOnly}, workspace rows=${wsRowCount}`);
+      check('acting: the merged workspace retired the separate Accents row',
+        !doc.querySelector('[data-ws="accents"]')
+        && !!doc.querySelector('[data-ws="ipa"]'));
+      clickIn(doc.body); await sleep(150);
       check('acting: zero microphone calls across the Acting drive', mic20 === 0);
     } catch (err) {
       bad('Acting workspace drive', String(err?.stack ?? err).slice(0, 220));
     } finally {
-      try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* ignore */ }
+      try { localStorage.setItem('speechcraft-workspace', 'ipa'); } catch { /* ignore */ }
     }
   } else {
     ok('Acting workspace drive (runner only — run tests/run-all.html)');
@@ -6201,7 +6244,7 @@ export async function run({ navDoc = document } = {}) {
         // Shakespeare section restores what it borrowed.
         try {
           clickIn(doc.getElementById('ws-chip')); await sleep(250);
-          clickIn(doc.querySelector('#ws-menu [data-ws="accents"]')); await sleep(550);
+          clickIn(doc.querySelector('#ws-menu [data-ws="ipa"]')); await sleep(550);
           clickIn(doc.getElementById('brand-home')); await sleep(350);
         } catch { /* best effort */ }
       }
@@ -7215,7 +7258,7 @@ export async function run({ navDoc = document } = {}) {
         modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 14 },
       { key: 'screen', name: 'Screen Acting', prefix: 'sc-', live: SCREEN_LIVE,
         lessons: SCREEN_LESSONS,
-        modules: SCREEN_MODULES, colls: SCREEN_COLLECTIONS, min: 8 },
+        modules: SCREEN_MODULES, colls: SCREEN_COLLECTIONS, min: 9 },
     ];
     const everyOtherId = new Set([...ACTING_LESSONS, ...CHARACTER_LESSONS, ...COMMEDIA_LESSONS,
       ...SHAKESPEARE_LESSONS, ...RHETORIC_LESSONS].map(l => l.id));
@@ -7264,18 +7307,34 @@ export async function run({ navDoc = document } = {}) {
         B.lessons.every(l => l.id.startsWith(B.prefix))
         && B.lessons.every(l => !everyOtherId.has(l.id)),
         B.lessons.filter(l => everyOtherId.has(l.id)).map(l => l.id).join(', '));
-      // SHUT, AND NOTHING APPROVED. Both halves matter and they are not
-      // the same fact: the flag is the door, the ledger is the content.
-      // If the flag ever flips, the second clause flips with it — a live
-      // course whose records carry no entry shows a shelf of locked
-      // chapters, which is the Character-launch failure.
-      check(`${n}: it is shut, and nothing in it is published`,
-        B.live === false
-        && !liveWorkspaces().some(w => w.id === B.key)
-        && B.lessons.every(l => !speechPublished(l.id) && !speechReviewFor(l.id)),
+      // OPEN, AND EVERYTHING PUBLISHED. Both halves matter and they are
+      // not the same fact: the flag is the door, the ledger is the
+      // content. This check read "it is shut, and nothing in it is
+      // published" until 2026-11-03 and its own comment predicted the day
+      // the flag flipped — a live course whose records carry no entry
+      // shows a shelf of locked chapters, which is the Character-launch
+      // failure, so the two clauses have to move together or not at all.
+      //
+      // They moved together. The owner opened all three and approved
+      // every record in the same change, so the assertion is now the
+      // launched invariant: the door is open AND there is a ledger entry
+      // behind every lesson. The preview keys are cleared above, so this
+      // is what a LEARNER sees, not what the owner sees.
+      check(`${n}: it is open, and every lesson in it is published`,
+        B.live === true
+        && liveWorkspaces().some(w => w.id === B.key)
+        && B.lessons.every(l => speechPublished(l.id) && !!speechReviewFor(l.id)),
         `live=${B.live}, in switcher=${liveWorkspaces().some(w => w.id === B.key)}, `
-        + `${B.lessons.filter(l => speechPublished(l.id)).length} published, `
+        + `${B.lessons.filter(l => speechPublished(l.id)).length}/${B.lessons.length} published, `
         + `${B.lessons.filter(l => speechReviewFor(l.id)).length} with a ledger entry`);
+      // AND PUBLICATION IS STILL NOT REVIEW. The entries are owner
+      // editorial, so every record must remain outstanding for its
+      // specialist; a 'approved' verdict slipping in here would silently
+      // retire the awaiting-review badges, which is the 2026-08-19 bug.
+      check(`${n}: published on owner editorial only, specialist still owed`,
+        B.lessons.every(l => speechReviewFor(l.id)?.verdict === 'owner-approved')
+        && B.lessons.every(l => !speechApproved(l.id) && awaitingSpecialist(l.id)),
+        `${B.lessons.filter(l => speechApproved(l.id)).length} falsely claim specialist sign-off`);
       // The handoff asks for the historical claims to be verified before
       // publication, so the pages ask for a historian rather than letting
       // an acting coach's name stand in. That was the Rhetoric mislabel of
@@ -7372,7 +7431,12 @@ export async function run({ navDoc = document } = {}) {
     try {
       check('notebook: opens on the notebook for wherever the learner is',
         notebookForContext('acting', 'nam') === 'acting' && notebookForContext('ipa', 'core') === 'ipa'
-        && notebookForContext('accents', 'rp') === 'rp' && notebookForContext('accents', 'cockney') === 'ipa');
+        && notebookForContext('ipa', 'rp') === 'rp' && notebookForContext('ipa', 'cockney') === 'ipa'
+        // Three workspaces went live on 2026-11-03 and each got its own
+        // tab in the same commit, per the rule in js/notebook.js.
+        && notebookForContext('theatre') === 'theatre'
+        && notebookForContext('musical') === 'musical'
+        && notebookForContext('screen') === 'screen');
       check('notebook: the Building a Character notebook opens with its launched course',
         notebookForContext('character', 'nam') === 'character');
     } finally {

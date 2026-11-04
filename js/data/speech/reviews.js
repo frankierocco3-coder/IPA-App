@@ -679,25 +679,175 @@ export const SPEECH_REVIEWS = {
     reviewer: 'Product owner', date: '2026-09-23', version: 1,
     notes: 'Editorially approved by the product owner for learner-facing publication on 2026-09-23. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, and none is named.' },
 
-  // ── Theatre History and Musical Theatre: NOTHING HERE ───────
+  // ── Theatre History, Musical Theatre and Screen Acting ──────
   //
-  // The two courses from the owner's handoff of 2026-11-03 have THIRTY-TWO
-  // records between them (twenty-two th- lessons, ten mt-) and not one
-  // entry in this ledger. That is not an oversight and it is not a thing
-  // to fix in a sweep.
+  // FORTY-FOUR ENTRIES FROM ONE OWNER DECISION, 2026-11-03, and the
+  // shape of that decision is recorded here rather than smoothed over.
+  // The owner was shown the count and the consequence — forty-four
+  // records with no entry, three flags about to open, every lesson
+  // rendering "Prepared draft — awaiting review" to every learner — and
+  // approved all three courses for learner-facing publication in one
+  // instruction, so that the flags and the entries ship together.
   //
-  // ABSENCE FROM THIS LEDGER MEANS DRAFT, which is the whole contract at
-  // the top of this file. Both courses are shut behind THEATRE_LIVE and
-  // MUSICAL_LIVE in js/views/context.js precisely because of it: a live
-  // course with no entries is a shelf of locked chapters, which is the
-  // failure the Building a Character launch taught.
+  // IT WAS A BLANKET APPROVAL, NOT FORTY-FOUR READINGS. The block that
+  // stood here said an entry takes the owner reading that lesson, one at
+  // a time, and warned against exactly a sweep. A later session weighing
+  // how much these entries are worth should weigh them as one editorial
+  // judgement about three courses, which is what they are.
   //
-  // What it takes to add one: the owner reads the lesson and makes an
-  // editorial decision, one entry at a time. Claude may not, for anything,
-  // ever. And an editorial approval is still not specialist sign-off: the
-  // reviewer these two actually want is a THEATRE HISTORIAN, because the
+  // WHAT THEY ARE NOT is specialist sign-off. Every verdict below is
+  // 'owner-approved', never 'approved', so awaitingSpecialist() stays
+  // TRUE for all forty-four and the badges keep saying so on the page.
+  // Theatre History and Musical Theatre want a THEATRE HISTORIAN — the
   // handoff that supplied them says in its own words to verify the
-  // historical claims before publication.
+  // historical claims first, and nobody has. Screen Acting wants a
+  // qualified acting teacher or coach. No name or credential is invented
+  // anywhere in this block.
+
+  // Theatre History — 22 records, reviewer still owed: a qualified theatre historian
+  'th-what': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-greek': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-tragedy': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-comedy': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-romanstage': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-roman': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-sacred': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-medieval': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-noh': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-kabuki': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-shakespeare': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-moliere': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-race': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-vaudeville': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-chekhov': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-irish': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-american': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-harlem': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-brecht': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-dream': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-beyond': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'th-transform': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+
+  // Musical Theatre — 14 records, reviewer still owed: a qualified theatre historian
+  'mt-book': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-roots': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-integration': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-golden': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-working': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-guide': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-1940s': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-golden': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-transitional': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-later': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-early-contemporary': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-contemporary': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-poprock': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+  'mt-rep-jukebox': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT the theatre-history review this record asks for: no qualified theatre historian has read it, its historical claims are unverified, and awaitingSpecialist stays true.' },
+
+  // Screen Acting — 8 records, reviewer still owed: a qualified acting teacher or coach
+  'sc-how': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-camera': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-technical': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-listen': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-prep': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-set': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-selftape': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  // ADDED WITH THE LESSON ITSELF, same day. Talking to the Lens arrived in
+  // the second pass of the Screen Acting handoff; Screen Acting was already
+  // LIVE by then, so shipping the chapter without this entry would have put
+  // one draft gate in the middle of a course whose other eight read fine.
+  'sc-lens': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
+  'sc-repetition': { verdict: 'owner-approved', reviewerType: 'product-owner-editorial',
+    reviewer: 'Product owner', date: '2026-11-03', version: 1,
+    notes: 'Approved by the product owner for learner-facing publication on 2026-11-03. This is an owner editorial decision, NOT specialist sign-off: no qualified acting teacher, coach or studio has reviewed this material, none is named, and awaitingSpecialist stays true.' },
 };
 
 export const speechReviewFor = id => SPEECH_REVIEWS[id] ?? null;

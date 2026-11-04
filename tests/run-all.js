@@ -31,8 +31,31 @@ function seedOnboarding() {
 //
 // Setting it is the fix; the detector below it is the backstop. Nothing else
 // is touched — this is the one key, and progress is never written.
+//
+// THE VALUE IS 'ipa' SINCE 2026-11-03. It was 'accents' until the owner
+// merged Voice & Speech and Accents & Dialects into one workspace; 'accents'
+// is a retired id now, and seeding a retired id would leave the app in
+// whatever activeWorkspace() redirects it to rather than pinning anything.
+// 'ipa' is the workspace that holds all six courses.
 function seedWorkspace() {
-  try { localStorage.setItem('speechcraft-workspace', 'accents'); } catch { /* as above */ }
+  try {
+    localStorage.setItem('speechcraft-workspace', 'ipa');
+    // AND THE COURSE, WHICH USED TO COME FREE AND NO LONGER DOES.
+    // Sections 1 to 18 test the ACCENT surfaces — the IPA-for-this-accent
+    // tile, the inventory chips, the dialect sound pages — and they got
+    // Neutral American only because activeCourse() happens to default to
+    // it. After the 2026-11-03 merge the app runs a one-time migration
+    // that pins the course to 'core' for anyone whose stored workspace is
+    // 'ipa', which is precisely what this function seeds: the suite
+    // seeded itself into the accent-neutral course and 57 accent checks
+    // failed on a tree with nothing wrong with it.
+    //
+    // So pin the course too, and pre-set the migration key so the
+    // migration cannot un-pin it. Both are suite preconditions now, not
+    // inherited luck.
+    localStorage.setItem('speechcraft-course', 'nam');
+    localStorage.setItem('speechcraft-ipa-accents-merged', '1');
+  } catch { /* as above */ }
 }
 
 // IF THE SHELL NEVER RENDERS, SAY SO — DO NOT RUN THE SUITE ANYWAY.

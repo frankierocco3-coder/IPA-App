@@ -127,7 +127,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, SCREEN_LIVE, SCREEN_PREVIEW_KEY, screenOpen, screenPreview, screenVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, SCREEN_LIVE, SCREEN_PREVIEW_KEY, screenOpen, screenPreview, screenVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, migrateMergedWorkspace, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -428,55 +428,70 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
   // the boost chip. All four are gone (2026-10-05), so it is the workspace
   // and context chips and nothing else. Free Play still hides in the
   // workspaces that are not governed by the pronunciation game.
-  // Header contract per workspace: Speech shows NO accent context at
-  // all; IPA shows the fixed accent-neutral label; Accents & Dialects
-  // keeps the full accent selector.
-  const contextChip = ACCENTLESS_WORKSPACES.includes(ws) ? ''
-    : ws === 'ipa' ? `
-    <span class="stat-chip course-chip is-static" id="ipa-context" title="IPA Foundations">
-      <span class="course-icon" aria-hidden="true">ʃə</span>
-      <span class="course-name">IPA Foundations</span>
-    </span>`
-    : `
-    <button class="stat-chip course-chip is-sub" id="course-chip" type="button"
-            aria-haspopup="menu" aria-expanded="false" title="Switch course or workspace"
-            aria-label="Change course or workspace. Current course: ${esc(course.label)}.">
-      <span class="chip-prefix">Course</span>
-      <span class="course-icon" aria-hidden="true">${course.icon}</span>
-      <span class="course-name" aria-hidden="true">${esc(course.label)}</span> <span aria-hidden="true">▾</span>
-    </button>`;
-
-  // ONE MENU, NOT TWO (owner decision 2026-10-06). The accent courses used
-  // to live behind a SECOND chip, so reaching Cockney meant finding one
-  // hidden control inside another. Eleven destinations sat behind two chips
-  // that do not read as menus, and the owner — who built all of it — could
-  // not find four of his own courses. A stranger will not look as long.
+  // TWO MENUS AGAIN, AND THE REASON THE ONE MENU EXISTED IS GONE
+  // (owner order 2026-11-04). The courses hung under the Voice & Speech row
+  // inside the workspace menu from 2026-10-06 until today, and that was the
+  // right fix for the problem of its day: FIVE accent courses sat behind a
+  // second chip in a build where the workspace you needed was not obvious,
+  // and the owner could not find four of his own courses.
   //
-  // The courses are now nested under the Accents & Dialects row of the one
-  // menu. Both chips open that same menu; the course chip stays because it is
-  // the only at-a-glance statement of which course you are in.
+  // What changed is the merge of 2026-11-03. The courses now belong to ONE
+  // workspace, and that workspace puts a chip on screen reading
+  // "COURSE · <name> ▾" the moment you are in it. The nesting was answering
+  // "where did my courses go" with a menu-inside-a-menu, when the answer is
+  // a labelled control sitting right beside the workspace chip. So: the
+  // workspace menu lists workspaces, the course chip lists courses, and
+  // neither one contains the other.
   //
-  // THEY RENDER IN THE ACCENTS WORKSPACE ONLY, and that is a concession.
-  // Rendering them everywhere would put Cockney one tap from Acting, which
-  // is what I wanted — but the header contract says an accentless workspace
-  // shows NO accent context, and `#statsbar.textContent` is how the suite
-  // checks it, so a hidden menu still counts. Two checks pin that rule, for
-  // Acting and for IPA. It is a real rule about not implying you are in a
-  // course you are not, and it outranks saving a tap.
+  // THEY STILL RENDER IN VOICE & SPEECH ONLY. The header contract says an
+  // accentless workspace shows NO course context, `#statsbar.textContent`
+  // is how the suite checks it, and a hidden menu still counts as context.
+  // `contextChip` carries the menu now, so that rule holds by construction:
+  // no chip, no menu.
   //
-  // `#course-menu` survives as the id of the nested group. That keeps the
-  // product rule it has always carried — the accent list offers the five
-  // accents and NEVER IPA Foundations, which is a course in another
-  // workspace — and keeps the checks that pin that rule honest.
-  const accentRows = visibleCourses().filter(c => c.id !== 'core').map(c => {
+  // ALL SIX, AND THE RULE THAT EXCLUDED ONE IS GONE. This list filtered
+  // 'core' out, because the accent list offered the five accents and NEVER
+  // IPA Foundations, "which is a course in another workspace". After the
+  // merge there is no other workspace, so the filter would hide the course
+  // the workspace is named for.
+  //
+  // `#course-menu` is still the id of the course list, so the checks that
+  // find it keep finding it — it just hangs off the course chip now.
+  const accentRows = visibleCourses().map(c => {
     const { done, total } = trackProgress(trackFor(c.id));
-    const here = ws === 'accents' && c.id === course.id;
-    return `<button class="course-row is-nested ${here ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
+    const here = ws === 'ipa' && c.id === course.id;
+    return `<button class="course-row ${here ? 'on' : ''}" data-course="${c.id}" role="menuitem" type="button">
           <span class="course-icon">${c.icon}</span>
           <span class="course-row-info"><b>${esc(c.label)}</b><small>${done}/${total} steps</small></span>
           ${here ? '<span class="course-check">✓</span>' : ''}
         </button>`;
   }).join('');
+
+  // Header contract per workspace: an ACCENTLESS workspace shows no
+  // course context at all; Voice & Speech — the one workspace that has
+  // courses since the 2026-11-03 merge — shows the selector.
+  //
+  // THE STATIC CHIP IS GONE, and it is worth saying what it was. Voice &
+  // Speech used to render `#ipa-context`, an unclickable label reading
+  // "IPA Foundations", because its course was pinned and there was
+  // nothing to choose. The merge gave that workspace all six courses, so
+  // a label you cannot click would now be a lie about a choice you do
+  // have. It becomes the same `#course-chip` the accent workspace had.
+  const contextChip = ACCENTLESS_WORKSPACES.includes(ws) ? '' : `
+    <span class="course-sel-wrap">
+      <button class="stat-chip course-chip is-sub" id="course-chip" type="button"
+              aria-haspopup="menu" aria-expanded="false" title="Switch course"
+              aria-label="Change course. Current course: ${esc(course.label)}.">
+        <span class="chip-prefix">Course</span>
+        <span class="course-icon" aria-hidden="true">${course.icon}</span>
+        <span class="course-name" aria-hidden="true">${esc(course.label)}</span> <span aria-hidden="true">▾</span>
+      </button>
+      <div class="course-menu" id="course-menu" role="menu" hidden>
+        <p class="course-menu-h">Course</p>
+        ${accentRows}
+      </div>
+    </span>`;
+
 
   // BOTH TAKE ART. This block said "THE MENU ROWS TAKE ART; THE CHIP DOES
   // NOT" until 2026-11-03, directly above the line that gives the chip its
@@ -513,10 +528,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
           ${wsRowIcon(w)}
           <span class="course-row-info"><b>${esc(w.label)}</b><small>${esc(w.context)}</small></span>
           ${w.id === ws ? '<span class="course-check">✓</span>' : ''}
-        </button>${w.id === 'accents' && ws === 'accents' ? `
-        <div class="ws-courses" id="course-menu">
-          ${accentRows}
-        </div>` : ''}`).join('')}
+        </button>`).join('')}
     </div>
     ${contextChip}
     ${/* THE PADLOCK FOLLOWS THE LOCK CHAIN, not the accent/book split.
@@ -534,18 +546,33 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
   // Both chips open the ONE menu. The course chip is no longer a second
   // control with a second popup behind it; it is a label that happens to be
   // clickable, so tapping either one shows the same eleven destinations.
+  // TWO CHIPS, TWO MENUS, AND EACH ONE CLOSES THE OTHER (2026-11-04).
+  // Both chips drove the single workspace menu until today. Now the course
+  // chip owns `#course-menu` and the workspace chip owns `#ws-menu`, so
+  // opening one has to shut the other or a tap on the second leaves two
+  // panels stacked over the page.
   const wsChip = bar.querySelector('#ws-chip');
   const wsMenu = bar.querySelector('#ws-menu');
   const chip = bar.querySelector('#course-chip');
-  const setOpen = open => {
-    wsMenu.hidden = !open;
-    wsChip.setAttribute('aria-expanded', String(open));
-    chip?.setAttribute('aria-expanded', String(open));
+  const courseMenu = bar.querySelector('#course-menu');
+  const show = (menu, btn, open) => {
+    if (!menu) return;
+    menu.hidden = !open;
+    btn?.setAttribute('aria-expanded', String(open));
   };
-  const close = () => setOpen(false);
-  const toggle = e => { e.stopPropagation(); setOpen(wsMenu.hidden); };
-  wsChip.addEventListener('click', toggle);
-  chip?.addEventListener('click', toggle);
+  const close = () => { show(wsMenu, wsChip, false); show(courseMenu, chip, false); };
+  wsChip.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = wsMenu.hidden;
+    close();
+    show(wsMenu, wsChip, open);
+  });
+  chip?.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = courseMenu?.hidden;
+    close();
+    show(courseMenu, chip, open);
+  });
 
   wsMenu.querySelectorAll('[data-ws]').forEach(b =>
     b.addEventListener('click', () => {
@@ -557,9 +584,9 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
       goSection(SECTIONS.some(x => x.id === here) ? here : 'learn');
     }));
 
-  // Course rows only exist in the accents workspace (see above), so this is
-  // the same switch it always was — it just lives in the one menu now.
-  wsMenu.querySelectorAll('[data-course]').forEach(b =>
+  // Course rows live in the course menu now, not the workspace one, so this
+  // reads them off `bar` rather than off `wsMenu`. Same switch it always was.
+  bar.querySelectorAll('[data-course]').forEach(b =>
     b.addEventListener('click', () => { setCourse(b.dataset.course); renderShell(activeSection()); }));
 
   document.addEventListener('click', close, { once: true });
@@ -929,7 +956,7 @@ function drawRail(section) {
   // 2 · Daily Quests — a KIND of next step, so it renders inside the
   //     same rail rather than replacing it. Dialect drills only, which
   //     is where the scored economy lives.
-  const questsHtml = (ws === 'ipa' || ws === 'accents') && store.hasEarnedAnything
+  const questsHtml = ws === 'ipa' && store.hasEarnedAnything
     ? questRows().map(r => `
         <div class="quest-row mini">
           <span class="quest-icon">${r.icon}</span>
@@ -5782,8 +5809,8 @@ function renderActorIpaTools() {
     b.addEventListener('click', () => {
       const k = b.dataset.item;
       if (k === 'chart') return renderChart();
-      if (k === 'accents') { setWorkspace('accents'); return goSection('learn'); }
-      if (k === 'action') { setWorkspace('accents'); return renderDialectAction(d); }
+      if (k === 'accents') { setWorkspace('ipa'); return goSection('learn'); }
+      if (k === 'action') { setWorkspace('ipa'); return renderDialectAction(d); }
       renderDialectsInSpeech();
     }));
 }
@@ -13948,6 +13975,14 @@ if (['localhost', '127.0.0.1'].includes(location.hostname)) {
 }
 
 if (!framedHostile) {
+  // ONE-TIME, AND IT MUST RUN BEFORE THE FIRST RENDER. The Voice &
+  // Speech / Accents merge of 2026-11-03 unpinned the course that
+  // workspace used to force, so a reader who was inside IPA Foundations
+  // would otherwise open on whichever accent was buried underneath. This
+  // is synchronous and keyed, so it is cheap and happens once; see
+  // migrateMergedWorkspace in js/views/context.js.
+  migrateMergedWorkspace();
+
   // One-time: turn any old "Train Any Text" draft into a real project. The
   // original localStorage value is left untouched as a backup.
   migrateLegacyCustomText().catch(err => console.warn('migration skipped:', err));

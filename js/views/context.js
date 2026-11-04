@@ -145,27 +145,33 @@ export const WORKSPACES = [
   // instrument, then the accents.
   { id: 'rhetoric', icon: '🏛️', img: 'img/ui/rhetoric.png', label: 'Rhetoric',
     context: 'How speech changes what people think and do, built on purpose rather than by luck' },
+  // ── ONE WORKSPACE, SIX COURSES (owner order 2026-11-03) ──────
+  //
+  // Voice & Speech and Accents & Dialects were two workspaces until
+  // today, and the split was never about the work: both are the same
+  // instrument, and the only real difference was that this one pinned
+  // itself to IPA Foundations while the other let you pick among the
+  // five accents. The owner merged them — "one workspace, with the
+  // option to pick accents and dialects in it" — so the course selector
+  // now offers all SIX and the instrument and the accents share a roof.
+  //
+  // THE ID STAYS 'ipa' AND THE RETIRED ID IS 'accents'. Ids are storage;
+  // this one was already a label that does not match its id (renamed to
+  // Voice & Speech by owner order 2026-09-03, "the id never moved"), and
+  // keeping it means the surviving workspace adds no SECOND id/label
+  // mismatch to a project whose own instructions call that the easiest
+  // mistake here. A stored 'accents' migrates in activeWorkspace()
+  // below, the way a stored 'speech' falls back to 'acting'; 'accents'
+  // is retired and is never reused.
+  //
+  // globe.png is NOT orphaned by this. It was named for an object rather
+  // than for "accents" precisely so it could serve twice — see
+  // docs/PRACTICE_ICON_BRIEF.md, which specs the same small globe for the
+  // Name the Accent game. The switcher row it used to fill is gone; the
+  // game tile still renders it. instrument.png wins the merged row
+  // because the workspace is the instrument, accents included.
   { id: 'ipa', icon: 'ʃə', img: 'img/ui/instrument.png', label: 'Voice & Speech',
-    context: 'The instrument, the sounds and the alphabet of speech — IPA Foundations inside' },
-  // NAMED globe.png, NOT accents.png, because it is meant to serve twice.
-  // docs/PRACTICE_ICON_BRIEF.md specs name-accent.png for the Name the Accent
-  // game as "a small globe on a stand"; the switcher row renders at 32px and
-  // that mode tile at 36px, close enough for one file, and this app already
-  // reuses a single drawing across surfaces where the subject is the same.
-  // An object name travels between two different labels; "accents" would not.
-  //
-  // Drawn as a sphere with NO STAND, deliberately. At 32px a stand is a
-  // spindly stick that wastes the square box and drags the aspect down, which
-  // is exactly what sank the full-length mannequin above.
-  //
-  // KNOWN: it is the least house-styled icon in the set — brighter and cooler
-  // than the muted sage and terracotta around it, with detailed coastlines
-  // rather than bold simple land, and no warm gold anywhere. Accepted by the
-  // owner 2026-10-14. It also happens to make Accents the one instantly
-  // findable row in the list, which is a navigational virtue rather than only
-  // a cost. Measures aspect 0.99 and 78% ink, the best of the six.
-  { id: 'accents', icon: '🌍', img: 'img/ui/globe.png', label: 'Accents & Dialects',
-    context: 'Accent and dialect courses' },
+    context: 'The instrument, the sounds and the accents — IPA Foundations and the five accent courses inside' },
   // Withdrawn behind SPEECH_LIVE and therefore never rendered, so its
   // position is moot until that flag flips. Kept last rather than
   // deleted: the kill switch is a flag, not a removal.
@@ -247,9 +253,17 @@ export const commediaVisible = l => commediaPreview() || speechPublished(l.id);
 //
 // Flipping this needs two things, not one: an owner editorial entry per
 // lesson in js/data/speech/reviews.js, and the knowledge that the
-// specialist this material asks for is a theatre historian. No record
-// here has either, and awaitingSpecialist() stays true when it does.
-export const THEATRE_LIVE = false;
+// specialist this material asks for is a theatre historian.
+//
+// OPENED 2026-11-03 ON OWNER ORDER, with the first of those two in hand
+// and the second still outstanding. All twenty-two records carry an
+// 'owner-approved' entry as of that date, so nothing renders as a draft
+// gate — but they came from ONE blanket approval of three courses, not
+// twenty-two readings, and no theatre historian has read a word. The
+// historical claims the handoff asked to verify are still unverified;
+// awaitingSpecialist() is true for every record and the page says so.
+// See the forty-four-entry block in js/data/speech/reviews.js.
+export const THEATRE_LIVE = true;
 export const THEATRE_PREVIEW_KEY = 'speechcraft-theatre-preview';
 export const theatrePreview = () => {
   try { return localStorage.getItem(THEATRE_PREVIEW_KEY) === 'on'; } catch { return false; }
@@ -259,13 +273,21 @@ export const theatreVisible = l => theatrePreview() || speechPublished(l.id);
 
 // ── MUSICAL THEATRE, same handoff, same day ───────────────────
 //
-// GATED FOR A SECOND REASON ON TOP OF THE FIRST. Nothing here is
-// approved either, and beyond that the course cannot stand alone yet:
-// two written lessons and eight catalogue pages. That is the test
-// Speech failed in 2026-08 ("content too thin to stand alone"), and the
-// one Character and Shakespeare both waited to pass before launching.
-// It wants more written lessons, not just a ledger entry.
-export const MUSICAL_LIVE = false;
+// GATED FOR A SECOND REASON ON TOP OF THE FIRST, and that second reason
+// has since expired. It read "two written lessons and eight catalogue
+// pages" — the Speech test of 2026-08, content too thin to stand alone.
+// MEASURED 2026-11-03, after the content work of that morning: FIVE
+// prose lessons of 495 to 984 words, a repertoire guide, and the eight
+// catalogue pages. That is the same order as Screen Acting's eight, so
+// thinness is no longer what holds it shut.
+//
+// OPENED 2026-11-03 ON OWNER ORDER. All fourteen records carry an
+// 'owner-approved' entry, from the same blanket approval of three
+// courses described in js/data/speech/reviews.js — one editorial
+// judgement, not fourteen readings. The theatre historian these
+// claims want has still not read them, and awaitingSpecialist() stays
+// true for all fourteen. It remains the thinnest of the three.
+export const MUSICAL_LIVE = true;
 export const MUSICAL_PREVIEW_KEY = 'speechcraft-musical-preview';
 export const musicalPreview = () => {
   try { return localStorage.getItem(MUSICAL_PREVIEW_KEY) === 'on'; } catch { return false; }
@@ -275,17 +297,22 @@ export const musicalVisible = l => musicalPreview() || speechPublished(l.id);
 
 // ── SCREEN ACTING, same handoff, same day ─────────────────────
 //
-// GATED, for the ordinary reason: eight written chapters and not one
-// entry in the review ledger. It asks for an ACTING professional rather
-// than a theatre historian — the claims in it are craft claims about
-// scale, eyelines and listening, not historical ones — which is the same
-// reviewer Acting and Building a Character are still waiting on.
+// It asks for an ACTING professional rather than a theatre historian —
+// the claims in it are craft claims about scale, eyelines and listening,
+// not historical ones — which is the same reviewer Acting and Building a
+// Character are still waiting on.
+//
+// OPENED 2026-11-03 ON OWNER ORDER, one day after it was written. All
+// eight chapters carry an 'owner-approved' entry from the blanket
+// approval described in js/data/speech/reviews.js, so none renders as a
+// draft gate; no acting teacher or coach has reviewed any of it, and
+// awaitingSpecialist() stays true for all eight.
 //
 // It is also the course with the most to lose from a careless edit: its
 // eighth chapter teaches one named twentieth-century tradition, and the
 // chapter says so in a content note rather than presenting it as how
 // acting works. See the header of js/data/screen/screen-course.js.
-export const SCREEN_LIVE = false;
+export const SCREEN_LIVE = true;
 export const SCREEN_PREVIEW_KEY = 'speechcraft-screen-preview';
 export const screenPreview = () => {
   try { return localStorage.getItem(SCREEN_PREVIEW_KEY) === 'on'; } catch { return false; }
@@ -374,23 +401,71 @@ export const activeWorkspace = () => {
     if (v === 'screen' && !screenOpen()) return 'acting';
     if (v === 'shakespeare' && !shakespeareOpen()) return 'acting';
     if (v === 'rhetoric' && !rhetoricOpen()) return 'acting';
+    // 'accents' IS A RETIRED ID as of the 2026-11-03 merge: its workspace
+    // and Voice & Speech are one, and the accent courses are six rows in
+    // that workspace's course menu. Anyone whose last workspace was
+    // Accents & Dialects lands in Voice & Speech on the course they were
+    // already in, because the course is stored separately and untouched.
+    // Same shape as the 'speech' fallback above, and for the same reason:
+    // an id is storage, so it is redirected, never renamed or reused.
+    if (v === 'accents') return 'ipa';
     if (WORKSPACES.some(w => w.id === v)) return v;
     // Migration from the retired page-level tabs, then inference from
     // the stored course — existing users land exactly where they were.
     if (localStorage.getItem('speechcraft-learn-mode') === 'speech'
       || localStorage.getItem('speechcraft-practice-mode') === 'speech')
       return SPEECH_LIVE ? 'speech' : 'acting';
-    return activeCourse() === 'core' ? 'ipa' : 'accents';
-  } catch { return 'accents'; }
+    // Both arms of this used to be reachable — 'ipa' for the core course,
+    // 'accents' for an accent one. One workspace now holds both courses,
+    // so the inference has nothing left to infer.
+    return 'ipa';
+  } catch { return 'ipa'; }
 };
 export const setWorkspace = w => { try { localStorage.setItem(WORKSPACE_KEY, w); } catch {} };
-// The course a workspace works in. IPA is always the accent-neutral
-// core course; Accents & Dialects uses the stored dialect course (the
-// stored value is preserved even while other workspaces are active).
-export const workspaceCourse = ws => {
-  if (ws === 'ipa') return COURSES.find(c => c.id === 'core');
-  const c = activeCourse();
-  return COURSES.find(x => x.id === (c === 'core' ? 'nam' : c));
+// The course a workspace works in — now simply the stored one, which is
+// the whole point of the 2026-11-03 merge.
+//
+// IT USED TO BE TWO RULES AND A REMAP. Voice & Speech pinned itself to
+// 'core' and ignored the stored value; everything else took the stored
+// value but remapped 'core' to 'nam', because 'core' belonged to a
+// workspace you were not in. One workspace holds all six courses now, so
+// 'core' is an ordinary selectable course here and the remap would
+// silently refuse the one it was written to exclude.
+//
+// `activeCourse()` already validates against visibleCourses() and falls
+// back to 'nam', so an unreadable or retired stored value cannot arrive
+// here. The find therefore cannot miss, and the book workspaces that pass
+// through here get a course object they ignore, exactly as before.
+//
+// `ws` is now UNUSED and is kept on purpose: every caller passes it, the
+// answer simply no longer depends on it, and a signature change here
+// would touch call sites for no behavioural gain.
+export const workspaceCourse = ws =>
+  COURSES.find(x => x.id === activeCourse());
+
+// ── The merge's one-time course migration (2026-11-03) ────────
+//
+// A learner in the old Voice & Speech was ALWAYS in IPA Foundations,
+// whatever `speechcraft-course` said: the workspace pinned 'core' and the
+// stored value sat underneath holding whichever accent they last picked
+// in the other workspace. Drop the pin and that buried value surfaces, so
+// a reader who was three lessons into IPA Foundations would open the app
+// in Neutral American instead — nothing lost, but silently relocated.
+//
+// This runs ONCE, keyed, and only for the people that describes: stored
+// workspace 'ipa'. Anyone arriving from 'accents' already has the right
+// course stored and is left alone. Nothing is deleted and nothing is
+// overwritten for anyone else, so the merge stays reversible.
+export const MERGE_KEY = 'speechcraft-ipa-accents-merged';
+export const migrateMergedWorkspace = () => {
+  try {
+    if (localStorage.getItem(MERGE_KEY)) return false;
+    const was = localStorage.getItem(WORKSPACE_KEY);
+    localStorage.setItem(MERGE_KEY, '1');
+    if (was !== 'ipa') return false;
+    localStorage.setItem('speechcraft-course', 'core');
+    return true;
+  } catch { return false; }   // storage unreadable: nothing to migrate
 };
 export const setCourse = c => { try { localStorage.setItem('speechcraft-course', c); } catch {} };
 export const trackFor = d => TRACKS.find(t => t.id === d);

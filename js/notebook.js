@@ -16,7 +16,8 @@
 
 import { metaGet, metaSet, dbSupported } from './db.js';
 import { esc } from './ui.js';
-import { characterOpen, commediaOpen, shakespeareOpen, rhetoricOpen } from './views/context.js';
+import { characterOpen, commediaOpen, theatreOpen, musicalOpen, screenOpen,
+         shakespeareOpen, rhetoricOpen } from './views/context.js';
 
 const TABS_KEY = 'notebook:tabs';
 const noteKey = id => `notebook:${id}`;
@@ -57,9 +58,22 @@ const RHETORIC_BOOK = { id: 'rhetoric', label: 'Rhetoric' };
 // above records for Shakespeare and Rhetoric, arriving a third time by
 // the same route. A new workspace needs a tab in the same commit.
 const COMMEDIA_BOOK = { id: 'commedia', label: 'Commedia' };
+// AND A FOURTH, FIFTH AND SIXTH TIME, 2026-11-03 — but caught by the rule
+// above rather than by a learner. Theatre History, Musical Theatre and
+// Screen Acting all went live on the owner's order that day, and all three
+// would have filed their notes under Acting: defensible for Screen Acting,
+// which is acting, and plainly wrong for a note about Noh or a note about
+// a 1943 book musical. Each is gated on its own course being open, so
+// re-shutting any of the three flags takes its tab away with it.
+const THEATRE_BOOK = { id: 'theatre', label: 'Theatre History' };
+const MUSICAL_BOOK = { id: 'musical', label: 'Musical Theatre' };
+const SCREEN_BOOK = { id: 'screen', label: 'Screen Acting' };
 const optionalBooks = () => [
   ...(characterOpen() ? [CHARACTER_BOOK] : []),
   ...(commediaOpen() ? [COMMEDIA_BOOK] : []),
+  ...(theatreOpen() ? [THEATRE_BOOK] : []),
+  ...(musicalOpen() ? [MUSICAL_BOOK] : []),
+  ...(screenOpen() ? [SCREEN_BOOK] : []),
   ...(shakespeareOpen() ? [SHAKESPEARE_BOOK] : []),
   ...(rhetoricOpen() ? [RHETORIC_BOOK] : []),
 ];
@@ -84,10 +98,21 @@ export function notebookForContext(workspace, course) {
   if (workspace === 'acting') return 'acting';
   if (workspace === 'character') return characterOpen() ? 'character' : 'acting';
   if (workspace === 'commedia') return commediaOpen() ? 'commedia' : 'acting';
+  if (workspace === 'theatre') return theatreOpen() ? 'theatre' : 'acting';
+  if (workspace === 'musical') return musicalOpen() ? 'musical' : 'acting';
+  if (workspace === 'screen') return screenOpen() ? 'screen' : 'acting';
   if (workspace === 'shakespeare') return shakespeareOpen() ? 'shakespeare' : 'acting';
   if (workspace === 'rhetoric') return rhetoricOpen() ? 'rhetoric' : 'acting';
-  if (workspace === 'ipa') return 'ipa';
-  if (workspace === 'accents') return isIpa(course) ? course : 'ipa';
+  // ONE WORKSPACE, SO ONE RULE — and it is the ACCENTS rule, not the old
+  // 'ipa' one. 'ipa' returned the General IPA notebook unconditionally
+  // because that workspace's course was pinned to IPA Foundations; after
+  // the 2026-11-03 merge the course varies across all six, so it takes the
+  // behaviour the retired 'accents' branch had: the dialect's own notebook
+  // where one exists, General IPA otherwise (Cockney has no book, so it
+  // lands there). A stored 'accents' never reaches this — activeWorkspace()
+  // redirects it — but the arm is kept so a direct caller cannot regress.
+  if (workspace === 'ipa' || workspace === 'accents')
+    return isIpa(course) ? course : 'ipa';
   return 'acting';
 }
 
