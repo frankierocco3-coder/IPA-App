@@ -1323,9 +1323,34 @@ body.modal-open { overflow: hidden; }
 .ch-start-where { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
 .ch-start-go { margin-bottom: 12px; }
 
-.ch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
 /* One column when two cannot hold a readable heading — the handoff's rule,
-   and the chapter order stays 1-4 either way because it is source order. */
+   and the chapter order stays 1-4 either way because it is source order.
+
+   THE RULE WAS RIGHT AND THE MEASUREMENT WAS WRONG. It was `repeat(2,
+   minmax(0, 1fr))` with the one-column fallback on a 760px VIEWPORT
+   query, and a viewport is not what sets the card width: the side nav
+   and the right rail do. At 1024px both are present, the content column
+   is about 390px, and two cards came out 186px wide while the query sat
+   quiet because 1024 > 760. Measured there, "Political & Experimental
+   Theatre" ran 38px past its own card and `overflow: hidden` cut it off
+   mid-word.
+
+   A CARD HAS A MINIMUM WIDTH ITS OWN CONTENT DECIDES, so that is what
+   is written here now. The head is [numeral][title] in a row; the
+   numeral block is 58px, and the longest single word in a chapter title
+   is 122px at 19px serif. With the paddings, the gap and the gold rule
+   that comes to about 242px, and 250 leaves a little headroom for a
+   longer title later. auto-fit then drops to one column whenever two of
+   those will not fit, whatever is sitting beside the grid.
+
+   Measured at four widths before and after: 1500 and 1280 unchanged at
+   two columns, 1024 goes from two clipped cards to one clean one, 375
+   unchanged at one. The fix is a no-op everywhere it was already right.
+
+   The 760px query stays. auto-fit would give a phone two columns of its
+   own accord once the nav and rail collapse, and the handoff's rule is
+   that a phone gets one. */
+.ch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
 @media (max-width: 760px) { .ch-grid { grid-template-columns: 1fr; } }
 .ch-card {
   font: inherit; text-align: left; cursor: pointer; color: var(--ink);

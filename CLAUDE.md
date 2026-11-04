@@ -116,10 +116,10 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
-**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **867**
-(858 before Screen Acting was covered on 2026-11-03; 841 before Theatre
-History and Musical Theatre were, the same day; 835 before 2026-11-03;
-824 before 2026-10-25). A short run skipped sections and is not
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **879**
+(measured 2026-11-04; 867 before the 2026-11-04 work, 858 before Screen
+Acting was covered on 2026-11-03, 841 before Theatre History and Musical
+Theatre were, 835 before 2026-11-03, 824 before 2026-10-25). A short run skipped sections and is not
 comparable even if its failure count looks small — a green run with a short
 count is not a green run.
 
