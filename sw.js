@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v85';                     // 2026-11-03: Screen Acting joins the module graph (js/data/screen/screen-course.js, statically imported by main.js) and Theatre History finishes its split at twenty modules. BOTH reasons apply this time, the plain graph one and the one that matters: a new statically imported module would go unfetched offline behind a cached old main.js, and he asked for all of it and will open the preview to look
+const VERSION = 'sc-v86';                     // 2026-11-04: the Theatre History chapter cards decide their own minimum width, so a long chapter title is no longer clipped mid-word at a squeezed content column. A stylesheet change goes through staleWhileRevalidate and would be one revalidation away; he reported this one and is waiting to see it fixed, which is the rule that matters
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
