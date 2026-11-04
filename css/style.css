@@ -464,7 +464,15 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .guide-start .btn { padding: 14px 42px; font-size: 16px; }
 
 /* ── Lesson chrome ── */
-.lesson-top { display: flex; align-items: center; gap: 14px; padding: 16px 20px; }
+/* PINNED, because this bar carries the ONLY way out of a guided exercise.
+   A lesson screen has no side nav and no `#brand-home` — it has `#quit` and
+   nothing else (see the gotcha in CLAUDE.md) — so when this scrolled away on
+   a long step the learner was shut in and had to scroll back up to leave.
+   The background stops the step content running under the progress bar. */
+.lesson-top {
+  display: flex; align-items: center; gap: 14px; padding: 16px 20px;
+  position: sticky; top: 0; z-index: 5; background: var(--bg);
+}
 .quit { font-size: 18px; border: none; background: none; color: var(--muted); cursor: pointer; }
 .progress { flex: 1; height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--green); border-radius: 7px; transition: width 0.3s; }
@@ -1180,7 +1188,25 @@ body.modal-open { overflow: hidden; }
 
 /* Main column + stats bar */
 .main-col { min-width: 0; padding-top: 18px; }
-.statsbar { position: relative; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+/* STICKY AT EVERY WIDTH (owner order 2026-11-04). This was `position:
+   relative` here and sticky only inside the max-width:979px block below, so
+   the workspace chip, the course chip and the padlock scrolled away on any
+   screen wider than a phone — on a long Library the controls left the page
+   and the only way back to them was to scroll up. The phone rule proved the
+   shape; this promotes it to the base and the phone rule keeps only its own
+   spacing.
+
+   `sticky` is still a positioning context, so `.course-menu` and
+   `.course-sel-wrap` anchor exactly as they did under `relative`.
+
+   The background is load-bearing: without it the page content scrolls
+   through the chips. z-index 20 sits under `.course-menu`'s 30 so an open
+   menu still covers the bar it hangs from. */
+.statsbar {
+  position: sticky; top: 0; z-index: 20; background: var(--bg);
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 0; margin: 0 0 8px;
+}
 .stat-chip {
   display: inline-flex; align-items: center; gap: 5px; font-weight: 800; font-size: 14px;
   background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 7px 11px;
@@ -1356,7 +1382,9 @@ body.modal-open { overflow: hidden; }
      growth to about four. */
   .course-icon.ws-chip-img img { width: 20px; height: 20px; }
   .course-name { white-space: normal; }
-  .statsbar { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 10px 0; margin: 0 0 8px; }
+  /* The base rule is sticky for every width now — see the note there. This
+     keeps only the row-gap the wrapped phone layout needs. */
+  .statsbar { row-gap: 6px; }
   .guidebook-btn span { display: none; }
 }
 
