@@ -94,8 +94,7 @@ export const THEATRE_CHAPTERS = [
     topics: [
       { module: 'th-sacred-drama' },
       { module: 'th-noh-form' },
-      { course: 'commedia', title: 'Commedia dell’Arte',
-        note: 'Its own course in this app, nine chapters long.' },
+      { module: 'th-arte' },
       { module: 'th-bard' },
       { module: 'th-kabuki-form' },
       { module: 'th-france' },
@@ -155,33 +154,37 @@ export const THEATRE_MODULES = [
   // Noh, Commedia, Shakespeare, Kabuki & Bunraku, Molière. The two lesson
   // `order` values were swapped to match, so the Learn path and the
   // chapter card cannot disagree about what comes next. No id moved.
-  { n: 6, id: 'th-bard', title: 'Shakespeare & the English Renaissance',
+  // ITS OWN MODULE SINCE 2026-11-04, replacing the cross-link that stood in
+  // chapter 2 while this course had no commedia chapter of its own.
+  { n: 6, id: 'th-arte', title: 'Commedia dell’Arte',
+    blurb: 'The moment acting became a paid trade in Europe: contracts, touring companies, women on the professional stage, and a repertoire nobody wrote down.' },
+  { n: 7, id: 'th-bard', title: 'Shakespeare & the English Renaissance',
     blurb: 'Disguise, desire and recognition, and the question of whose happiness a happy ending actually serves.' },
-  { n: 7, id: 'th-kabuki-form', title: 'Kabuki & Bunraku',
+  { n: 8, id: 'th-kabuki-form', title: 'Kabuki & Bunraku',
     blurb: 'Spectacle that never hides its own construction, and a single character carried between a chanter, a musician and three puppeteers.' },
-  { n: 8, id: 'th-france', title: 'Molière & French Theatre',
+  { n: 9, id: 'th-france', title: 'Molière & French Theatre',
     blurb: 'A company under royal patronage, and the comedy that got close enough to power to be banned.' },
-  { n: 9, id: 'th-minstrel', title: 'Minstrelsy & Resistance',
+  { n: 10, id: 'th-minstrel', title: 'Minstrelsy & Resistance',
     blurb: 'The caricature industry that sold a version of Black life to white audiences, and the Black theatre-makers working against it on the same stages.' },
-  { n: 10, id: 'th-variety', title: 'Vaudeville',
+  { n: 11, id: 'th-variety', title: 'Vaudeville',
     blurb: 'Seven to ten acts, nine minutes each, and the booking circuit that decided who was allowed to stand in front of a crowd at all.' },
   // THE LABEL IS THE OWNER'S, VERBATIM: 'Russia: Realism & the Modern
   // Actor'. It was 'Moscow' and the handoff names this one explicitly.
-  { n: 11, id: 'th-moscow', title: 'Russia: Realism & the Modern Actor',
+  { n: 12, id: 'th-moscow', title: 'Russia: Realism & the Modern Actor',
     blurb: 'A life changing while somebody discusses the weather, and the actor’s tools for finding the purposeful activity inside it.' },
-  { n: 12, id: 'th-dublin', title: 'Dublin & the Irish Theatre Revival',
+  { n: 13, id: 'th-dublin', title: 'Dublin & the Irish Theatre Revival',
     blurb: 'A national theatre giving a community a voice and arguing with its image of itself in the same season.' },
-  { n: 13, id: 'th-newyork', title: 'New York & the Little Theatre Movement',
+  { n: 14, id: 'th-newyork', title: 'New York & the Little Theatre Movement',
     blurb: 'Small stages, ordinary lives, and the competing forms that opened once a play no longer had to be a recognisable room.' },
-  { n: 14, id: 'th-harlem', title: 'Harlem & Black Theatre',
+  { n: 15, id: 'th-harlem', title: 'Harlem & Black Theatre',
     blurb: 'A community taking control of who could author, produce, perform and judge a play, not only of which plays were written.' },
-  { n: 15, id: 'th-epic', title: 'Brecht & Political Theatre',
+  { n: 16, id: 'th-epic', title: 'Brecht & Political Theatre',
     blurb: 'Gestus, episodic structure and behaviour shown as the product of circumstances, so an audience can care what happens and still ask why it happens that way.' },
-  { n: 16, id: 'th-dream-m', title: 'Postwar American Drama',
+  { n: 17, id: 'th-dream-m', title: 'Postwar American Drama',
     blurb: 'A family argument carrying memory, money, prejudice and an inherited promise into the room with the characters.' },
-  { n: 17, id: 'th-offbroadway', title: 'Beyond Broadway',
+  { n: 18, id: 'th-offbroadway', title: 'Beyond Broadway',
     blurb: 'Who can make work, for whom, and under whose control, and what the stages built outside the institutions made possible.' },
-  { n: 18, id: 'th-transformation', title: 'Grotowski & Boal',
+  { n: 19, id: 'th-transformation', title: 'Grotowski & Boal',
     blurb: 'A practice that strips the performer’s work to its essentials, one that dissolves the line between actor and spectator, and the claim that theatre transforms.' },
 ];
 
@@ -3435,7 +3438,7 @@ export const THEATRE_LESSONS = [
       { key: 'Do not confuse doing less with making less happen. Give every action attention, direction, and consequence.' },
     ] },
 
-  { id: 'th-kabuki', module: 'th-kabuki-form', order: 11,
+  { id: 'th-kabuki', module: 'th-kabuki-form', order: 12,
     title: 'Kabuki and Bunraku',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -3868,7 +3871,87 @@ export const THEATRE_LESSONS = [
       { key: 'Believability does not require ordinary behaviour. It requires clear intention, coherent response, and precise relationships between the parts.' },
     ] },
 
-  { id: 'th-shakespeare', module: 'th-bard', order: 10,
+  // COMMEDIA AS HISTORY, NOT AS CRAFT (owner order 2026-11-04). This topic
+  // was a cross-link to the Commedia dell’Arte course until today. It is a
+  // written chapter now, and the division of labour is the point: that
+  // course teaches the masks, the figures and the lazzi, and this one asks
+  // what changed in European theatre when acting became a paid trade. The
+  // craft is named here and not taught here, so the two never answer the
+  // same question differently.
+  //
+  // THE HANDOFF ASKED FOR THE HISTORICAL CLAIMS TO BE VERIFIED, so the two
+  // genuinely contested points carry their uncertainty on the page rather
+  // than in a footnote: the 1545 deed is the earliest SURVIVING record and
+  // not provably the first company, and the question of the first documented
+  // actress is unsettled between two names. A history chapter that hides a
+  // dispute is worse than one that names it.
+  { id: 'th-commedia', module: 'th-arte', order: 10,
+    title: 'Commedia dell’Arte: Europe’s First Professional Companies',
+    attribution: 'Theatre history',
+    requiredReviewer: 'theatre-history',
+    objective: 'Place commedia dell’arte in the history of the stage as the moment acting became an organised profession in Europe, with contracts, touring companies and women paid to perform.',
+    orientation: 'What changes when acting stops being an occasion and becomes a trade',
+    reflection: 'What does a company of actors need in order to survive on its own earnings, and what does that change about the work it makes?',
+    takeaway: 'The lasting invention was not the masks. It was the company: a group that could write nothing down, travel anywhere, and still earn its living by playing.',
+    contents: ['The word arte means trade, not art', 'The earliest company we can prove', 'How a company held together', 'Women on the professional stage', 'The Gelosi and Isabella Andreini', 'A scenario is not a script', 'The companies that toured Europe', 'Decline, and a reform that wrote it down', 'Reading the tradition honestly'],
+    sources: [
+      'Treccani: commedia dell’arte — https://www.treccani.it/enciclopedia/commedia-dell-arte',
+      'Encyclopedia.com: commedia dell’arte — https://www.encyclopedia.com/literature-and-arts/performing-arts/theater/commedia-dellarte',
+      'Commedia dell’arte, overview — https://en.wikipedia.org/wiki/Commedia_dell%27arte',
+      'Compagnia dei Gelosi — https://en.wikipedia.org/wiki/Gelosi',
+      'Isabella Andreini — https://en.wikipedia.org/wiki/Isabella_Andreini',
+      'Treccani: Isabella Andreini — https://www.treccani.it/enciclopedia/isabella-andreini',
+      'Lucrezia Di Siena, and the disputed first actress — https://en.wikipedia.org/wiki/Lucrezia_Di_Siena',
+      'Flaminio Scala — https://en.wikipedia.org/wiki/Flaminio_Scala',
+      'Treccani: Flaminio Scala — https://www.treccani.it/enciclopedia/flaminio-scala',
+      'La commedia dell’arte nel secondo Cinquecento, 1545 to 1590 — https://muse.jhu.edu/article/234189',
+      'Moliere — https://en.wikipedia.org/wiki/Moli%C3%A8re',
+      'Carlo Goldoni — https://en.wikipedia.org/wiki/Carlo_Goldoni',
+    ],
+    body: [
+      { h: 'What you will learn' },
+      { list: [
+        'Why commedia dell’arte matters to the history of the stage even before you look at a mask.',
+        'What the earliest surviving company contract actually proves, and what it does not.',
+        'How a company that owned no theatre and published no plays stayed alive.',
+        'Why women on the Italian professional stage is a fact worth stopping on.',
+      ] },
+      { h: 'The word arte means trade, not art' },
+      { p: 'Commedia dell’arte is usually translated as comedy of art, and that is the one phrase worth correcting before anything else. Arte here carries the older sense of a craft, a trade, a guild: the comedy of the profession. It names who was performing rather than what was performed.' },
+      { p: 'That is the whole historical hinge. Before these companies, playing in Europe was mostly something a community did on an occasion, or something amateurs and students and guild members did at a festival. Commedia is where a group of people could say that acting was their living.' },
+      { key: 'The subject of this chapter is not a style of comedy. It is the arrival of the professional company.' },
+      { h: 'The earliest company we can prove' },
+      { p: 'On 25 February 1545, in Padua, a notary recorded a deed binding eight men into a company to perform together and share what they earned. It is the earliest surviving contract of its kind, and that date is now marked as a world day for the form.' },
+      { p: 'Be careful with what the document proves. It is the earliest record that survives, which is not the same as the first company that existed. The deed refers to the possibility of patronage in a way that reads as familiar rather than novel, which suggests the practice was already under way when this particular notary wrote it down.' },
+      { p: 'Earliest surviving is a claim about the archive. First ever is a claim about the past. They are not the same claim, and only one of them can be made from a single document.' },
+      { h: 'How a company held together' },
+      { p: 'A company was a small business before it was anything else. The members held shares in the takings rather than wages, which meant a bad season was a loss everybody carried. They moved to where an audience was: market squares, hired halls, courts and great houses.' },
+      { p: 'Owning no playhouse was a constraint and an advantage. A company that carried its stage with it could follow money and favour across borders, and several did, which is why a northern Italian trade became a European one inside a generation.' },
+      { h: 'Women on the professional stage' },
+      { p: 'By the 1560s Italian companies were engaging women to perform, and paying them. Set that beside England, where the public stages used boys in women’s roles until after 1660, and the difference is not a detail. It changed what the plays could be about, because a company with adult women in it could play adult love, jealousy and marriage without the audience doing arithmetic.' },
+      { p: 'Which woman was first is genuinely unsettled, and the sources disagree. One line of evidence points to a contract naming a woman in 1564; another names a celebrated performer documented in 1566. The honest position is that the practice is firmly attested in the 1560s and that the individual claim to be first is contested.' },
+      { h: 'The Gelosi and Isabella Andreini' },
+      { p: 'The Compagnia dei Gelosi, formed around 1569, shows what the profession could become. It performed for Italian courts and travelled to France, and it was famous enough that its leading players were known by name across Europe.' },
+      { p: 'Isabella Andreini, who lived from 1562 to 1604, was its most celebrated member. She was a performer and also a published writer, admitted to a literary academy at a time when that was rare for any woman and rarer still for an actress. She died at Lyon while the company was travelling, and the mourning for her was public and international.' },
+      { key: 'An actress whose death is marked across Europe is evidence of a profession, not of a fashion.' },
+      { h: 'A scenario is not a script' },
+      { p: 'These companies did not work from a written play. They worked from a scenario: an outline posted backstage that set out who enters, what each scene must accomplish and how it ends, leaving the words to performers who had spent years building the parts they played.' },
+      { p: 'In 1611 Flaminio Scala published a collection of fifty such scenarios, the first substantial body of them to reach print. It is the reason we can describe the shape of this repertoire at all, and it is worth remembering that it is a record of a practice rather than the practice itself.' },
+      { p: 'The craft inside that practice, the fixed figures, the leather masks and the set pieces of comic business, is the subject of its own course in this app. This chapter stops at the door of it on purpose.' },
+      { h: 'The companies that toured Europe' },
+      { p: 'Italian companies played in France, Spain and England, and a troupe was resident in Paris for long stretches of the seventeenth century. Moliere and his company shared a Paris theatre with Italian players, and the traffic of ideas ran in both directions.' },
+      { p: 'This is the route by which a form developed in Italian market squares reached courts that had no Italian, and it is the reason the influence shows up in national comic traditions that otherwise have little in common.' },
+      { h: 'Decline, and a reform that wrote it down' },
+      { p: 'By the eighteenth century the form had hardened. A repertoire of inherited business, performed by companies who had learned it from other companies, can become a set of effects reproduced without the reason for them.' },
+      { p: 'Carlo Goldoni, who lived from 1707 to 1793, answered that by writing the comedies out in full and asking his actors to play characters rather than types. It is a reform, and it is also a loss, and both halves of that are worth holding at once.' },
+      { h: 'Reading the tradition honestly' },
+      { p: 'Lists of the fixed figures vary between sources and between centuries, and a tidy chart of them is usually a modern convenience rather than a historical record. The vocabulary belongs to one tradition in one place over roughly two centuries. It is not a universal grammar of character, and it is not evidence about how people elsewhere behaved.' },
+      { h: 'Takeaway' },
+      { key: 'The lasting invention was not the masks. It was the company: a group that could write nothing down, travel anywhere, and still earn its living by playing.' },
+      { p: 'Every professional company since has been solving the problem those eight men in Padua wrote into a notarial deed, which is how to keep a group of actors together and fed for long enough to get good.' },
+    ] },
+
+  { id: 'th-shakespeare', module: 'th-bard', order: 11,
     title: 'Shakespeare’s Comedies, Heroines, and Uncertain Happy Endings',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -4250,7 +4333,7 @@ export const THEATRE_LESSONS = [
       { p: 'The actor’s job is not to guarantee laughter or announce happiness. It is to pursue the character’s needs truthfully, and let the audience discover how funny, painful, or incomplete the resolution may be.' },
     ] },
 
-  { id: 'th-moliere', module: 'th-france', order: 12,
+  { id: 'th-moliere', module: 'th-france', order: 13,
     title: 'Molière: Comedy, Hypocrisy, and the Politics of Performance',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -4658,7 +4741,7 @@ export const THEATRE_LESSONS = [
       { p: 'That is where the laughter, and the danger, begins.' },
     ] },
 
-  { id: 'th-race', module: 'th-minstrel', order: 13,
+  { id: 'th-race', module: 'th-minstrel', order: 14,
     title: 'Race, Representation, and Resistance',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -4993,7 +5076,7 @@ export const THEATRE_LESSONS = [
       { p: 'To understand it, ask not only what the audience sees, but who is permitted to create the image, and whose humanity the performance allows them to recognise.' },
     ] },
 
-  { id: 'th-vaudeville', module: 'th-variety', order: 14,
+  { id: 'th-vaudeville', module: 'th-variety', order: 15,
     title: 'Vaudeville',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -5280,7 +5363,7 @@ export const THEATRE_LESSONS = [
       { key: 'Make the action clear. Give it somewhere to go. Listen to the room. Know when you have arrived.' },
     ] },
 
-  { id: 'th-chekhov', module: 'th-moscow', order: 15,
+  { id: 'th-chekhov', module: 'th-moscow', order: 16,
     title: 'Chekhov, Stanislavski, and the Life Beneath the Lines',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -5667,7 +5750,7 @@ export const THEATRE_LESSONS = [
       { p: 'Know the circumstances. Pursue something specific. Attend to the other person. Let what happens change what you do.' },
     ] },
 
-  { id: 'th-irish', module: 'th-dublin', order: 16,
+  { id: 'th-irish', module: 'th-dublin', order: 17,
     title: 'Irish Drama: Language, Identity, and the Power of Wit',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -6080,7 +6163,7 @@ export const THEATRE_LESSONS = [
       { p: 'Find the thought, the need, the listener, and the consequence. Then let the words do their work.' },
     ] },
 
-  { id: 'th-american', module: 'th-newyork', order: 17,
+  { id: 'th-american', module: 'th-newyork', order: 18,
     title: 'American Modernism',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -6488,7 +6571,7 @@ export const THEATRE_LESSONS = [
       { key: 'What kind of attention does this play require, and how can my work make that experience clear?' },
     ] },
 
-  { id: 'th-harlem', module: 'th-harlem', order: 18,
+  { id: 'th-harlem', module: 'th-harlem', order: 19,
     title: 'The Harlem Renaissance',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -6745,7 +6828,7 @@ export const THEATRE_LESSONS = [
       { key: 'Representation is not only about who appears onstage. It is also about who controls the story, who can enter the room, and whose experience the theatre treats as worth understanding.' },
     ] },
 
-  { id: 'th-brecht', module: 'th-epic', order: 19,
+  { id: 'th-brecht', module: 'th-epic', order: 20,
     title: 'Bertolt Brecht',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -7069,7 +7152,7 @@ export const THEATRE_LESSONS = [
       { key: 'The audience should be able to care about what happens and still ask why it happens that way.' },
     ] },
 
-  { id: 'th-dream', module: 'th-dream-m', order: 20,
+  { id: 'th-dream', module: 'th-dream-m', order: 21,
     title: 'The American Dream Under Pressure',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -7374,7 +7457,7 @@ export const THEATRE_LESSONS = [
       { key: 'What does this person need now, and what larger promise, fear, or dream makes that need matter so much?' },
     ] },
 
-  { id: 'th-beyond', module: 'th-offbroadway', order: 21,
+  { id: 'th-beyond', module: 'th-offbroadway', order: 22,
     title: 'Beyond Broadway',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -7680,7 +7763,7 @@ export const THEATRE_LESSONS = [
       { p: 'The answer shapes the stories that can be told, the forms they can take, and the relationships created between performers and audiences.' },
     ] },
 
-  { id: 'th-transform', module: 'th-transformation', order: 22,
+  { id: 'th-transform', module: 'th-transformation', order: 23,
     title: 'Theatre as Transformation',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',

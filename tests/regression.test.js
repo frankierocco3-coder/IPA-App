@@ -7252,10 +7252,10 @@ export async function run({ navDoc = document } = {}) {
     const BOOKS29 = [
       { key: 'theatre', name: 'Theatre History', prefix: 'th-', live: THEATRE_LIVE,
         lessons: THEATRE_LESSONS,
-        modules: THEATRE_MODULES, colls: THEATRE_COLLECTIONS, min: 22 },
+        modules: THEATRE_MODULES, colls: THEATRE_COLLECTIONS, min: 23 },
       { key: 'musical', name: 'Musical Theatre', prefix: 'mt-', live: MUSICAL_LIVE,
         lessons: MUSICAL_LESSONS,
-        modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 14 },
+        modules: MUSICAL_MODULES, colls: MUSICAL_COLLECTIONS, min: 22 },
       { key: 'screen', name: 'Screen Acting', prefix: 'sc-', live: SCREEN_LIVE,
         lessons: SCREEN_LESSONS,
         modules: SCREEN_MODULES, colls: SCREEN_COLLECTIONS, min: 9 },
@@ -7320,12 +7320,29 @@ export async function run({ navDoc = document } = {}) {
       // launched invariant: the door is open AND there is a ledger entry
       // behind every lesson. The preview keys are cleared above, so this
       // is what a LEARNER sees, not what the owner sees.
-      check(`${n}: it is open, and every lesson in it is published`,
+      // OPEN, AND PUBLICATION PINNED TO WHAT IS ACTUALLY TRUE. This read
+      // "every lesson in it is published" until 2026-11-04, when two courses
+      // gained written-but-unread content the owner deliberately gated:
+      // Theatre History's commedia chapter, and nineteen Musical Theatre
+      // lessons from that day's handoff. Those gates are the correct state,
+      // not a regression, so asserting all-published would have been the
+      // suite demanding a thing the owner refused.
+      //
+      // It pins the real count instead, which still catches the failure the
+      // original guarded: a lesson quietly losing its entry shows up here as
+      // a number that moved. Update the number WITH the approval, never to
+      // make a red check green.
+      // Screen Acting is NINE since Talking to the Lens was written on
+      // 2026-11-04; this said eight and was simply out of date.
+      const WANT_PUBLISHED = { theatre: 22, musical: 3, screen: 9 };
+      const pub = B.lessons.filter(l => speechPublished(l.id)).length;
+      check(`${n}: it is open, and its published count is exactly what was approved`,
         B.live === true
         && liveWorkspaces().some(w => w.id === B.key)
-        && B.lessons.every(l => speechPublished(l.id) && !!speechReviewFor(l.id)),
+        && pub === WANT_PUBLISHED[B.key]
+        && B.lessons.every(l => speechPublished(l.id) === !!speechReviewFor(l.id)),
         `live=${B.live}, in switcher=${liveWorkspaces().some(w => w.id === B.key)}, `
-        + `${B.lessons.filter(l => speechPublished(l.id)).length}/${B.lessons.length} published, `
+        + `${pub}/${B.lessons.length} published, want ${WANT_PUBLISHED[B.key]}, `
         + `${B.lessons.filter(l => speechReviewFor(l.id)).length} with a ledger entry`);
       // THE CHAPTER LAYER, AND THE ONE WAY IT CAN GO WRONG (2026-11-04).
       // Theatre History groups its eighteen topics under four chapters, and
@@ -7336,6 +7353,12 @@ export async function run({ navDoc = document } = {}) {
       if (B.key === 'theatre') {
         const chMods = THEATRE_CHAPTERS.flatMap(c => c.topics.filter(t => t.module).map(t => t.module));
         const modIds2 = B.modules.map(m => m.id);
+        // EVERY TOPIC IS A MODULE AGAIN as of 2026-11-04: the commedia
+        // cross-link became a written chapter, so the chapter layer holds
+        // nineteen modules and no cross-links at all.
+        const chLinks = THEATRE_CHAPTERS.flatMap(c => c.topics.filter(t => t.course));
+        check('theatre: every topic is a module, no cross-links left',
+          chLinks.length === 0, `${chLinks.length} cross-link(s)`);
         check('theatre: every module belongs to exactly one chapter',
           chMods.length === modIds2.length
           && chMods.length === new Set(chMods).size
@@ -7382,8 +7405,14 @@ export async function run({ navDoc = document } = {}) {
       // editorial, so every record must remain outstanding for its
       // specialist; a 'approved' verdict slipping in here would silently
       // retire the awaiting-review badges, which is the 2026-08-19 bug.
+      // OF THE RECORDS THAT CARRY AN ENTRY, every one must be owner-editorial
+      // and none may claim specialist sign-off. Phrased over the entries
+      // that exist rather than over every lesson, because a gated lesson has
+      // no entry by design; the dangerous half, a record silently promoted
+      // to 'approved', is what this is actually for and is unchanged.
       check(`${n}: published on owner editorial only, specialist still owed`,
-        B.lessons.every(l => speechReviewFor(l.id)?.verdict === 'owner-approved')
+        B.lessons.filter(l => speechReviewFor(l.id))
+          .every(l => speechReviewFor(l.id).verdict === 'owner-approved')
         && B.lessons.every(l => !speechApproved(l.id) && awaitingSpecialist(l.id)),
         `${B.lessons.filter(l => speechApproved(l.id)).length} falsely claim specialist sign-off`);
       // The handoff asks for the historical claims to be verified before

@@ -82,7 +82,8 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
 import { COMMEDIA_PRINCIPLE, COMMEDIA_MODULES, COMMEDIA_LESSONS, COMMEDIA_COLLECTIONS } from './data/commedia/commedia-course.js';
 import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS, THEATRE_CHAPTERS,
          THEATRE_DATE_NOTE, THEATRE_SUBTITLE } from './data/theatre/theatre-course.js';
-import { MUSICAL_PRINCIPLE, MUSICAL_MODULES, MUSICAL_LESSONS, MUSICAL_COLLECTIONS } from './data/musical/musical-course.js';
+import { MUSICAL_PRINCIPLE, MUSICAL_MODULES, MUSICAL_LESSONS, MUSICAL_COLLECTIONS,
+         MUSICAL_WORKBOOK } from './data/musical/musical-course.js';
 import { SCREEN_PRINCIPLE, SCREEN_MODULES, SCREEN_LESSONS, SCREEN_COLLECTIONS } from './data/screen/screen-course.js';
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
          COMMEDIA_MASKS, commediaMask, MASK_SITUATIONS, MASK_PROBLEMS,
@@ -4111,8 +4112,16 @@ function bookLearnSequence(el, B) {
 // forbids inventing completion. A cross-link topic has no lessons of its own
 // and is never counted either way — it would otherwise read as permanently
 // unexplored, or as explored without anyone reading anything.
-const chapterTopics = (B, ch) => ch.topics.map(t => t.course ? { ...t, lessons: [] }
+//
+// `prepared` IS THE RECORDS THAT EXIST, `lessons` THE ONES A LEARNER MAY
+// READ, and the gap between them is the whole point. A topic whose chapter
+// is written but not yet approved has prepared > 0 and lessons 0, and
+// without this it rendered as "0 lessons" — a dead card, which is worse
+// than the cross-link it replaced. The app's rule everywhere else is an
+// honest awaiting-review state, so the card says that instead.
+const chapterTopics = (B, ch) => ch.topics.map(t => t.course ? { ...t, lessons: [], prepared: 0 }
   : { ...t, mod: B.modules.find(m => m.id === t.module) ?? null,
+      prepared: pathLessons(B).filter(l => l.module === t.module).length,
       lessons: pathLessons(B).filter(l => l.module === t.module && B.visible(l)) });
 const topicExplored = t => !t.course && t.lessons.length > 0
   && t.lessons.every(l => speechLessonDone(l.id));
@@ -4218,10 +4227,12 @@ function renderChapter(ws, chId) {
       <ol class="ch-topics">
         ${ts.map((t, i) => {
           const openTitle = t.course ? t.title : moduleTitle(B, t.mod ?? { title: '' });
+          const awaiting = !t.course && t.lessons.length === 0 && t.prepared > 0;
           const sub = t.course ? esc(t.note ?? '')
+            : awaiting ? `Prepared draft, awaiting ${esc(bookReviewerKind(B))} review`
             : `${t.lessons.length} lesson${t.lessons.length === 1 ? '' : 's'}`;
           return `
-        <li><button class="ch-topic${topicExplored(t) ? ' is-done' : ''}${t.course ? ' is-link' : ''}"
+        <li><button class="ch-topic${topicExplored(t) ? ' is-done' : ''}${t.course ? ' is-link' : ''}${awaiting ? ' is-draft' : ''}"
             data-topic="${esc(t.course ? 'course:' + t.course : t.module)}" type="button">
           <span class="ch-topic-n">${i + 1}</span>
           <span class="ch-topic-t"><b>${esc(openTitle)}</b><i>${sub}</i></span>
@@ -5128,6 +5139,7 @@ function blockHtml(b, opts) {
     : b.key ? `<p class="guide-key">${esc(b.key)}</p>`
     : b.quote ? `<blockquote class="th-quote"><p>${esc(b.quote)}</p></blockquote>`
     : b.note ? `<p class="content-note"><b>Content note:</b> ${esc(b.note)}</p>`
+    : b.cta ? `<p class="lx-cta"><button class="btn" data-cta="${esc(b.cta.page)}" type="button">${esc(b.cta.label)}</button></p>`
     : b.table ? lessonTableHtml(b.table)
     : b.qa ? lessonQaHtml(b.qa)
     : b.steps ? stepCardsHtml(b.steps)
@@ -5169,6 +5181,24 @@ function lessonTableHtml(t) {
 // not a quiz component: no inputs, no marking, no stored result. The
 // answer is a <details> so the reader can try the question first and
 // then look, and a screen reader meets both as ordinary text.
+// ONE PAGE ONLY, BY NAME, AND WIRED IN ONE PLACE. A lesson may link to an
+// in-app page; the map keeps that to pages that exist, so a typo renders a
+// button that does nothing rather than throwing, and no lesson can invent a
+// destination.
+//
+// IT IS A FUNCTION BECAUSE A BOOK LESSON HAS TWO RENDERERS. The first
+// version of this wired `renderActingLesson` only, and a Repertoire chapter
+// opened from the Library shelf goes through `renderActingChapter` instead,
+// so the workbook button rendered correctly and did nothing at all. Both
+// call this now; anything else that renders a lesson body must too.
+const CTA_PAGES = { workbook: renderMusicalWorkbook };
+function wireLessonCtas() {
+  app.querySelectorAll('[data-cta]').forEach(b => b.addEventListener('click', () => {
+    const go = CTA_PAGES[b.dataset.cta];
+    if (go) navTo(go);
+  }));
+}
+
 function lessonQaHtml(qa) {
   return `<ol class="lxqa">${qa.map(x => `
     <li>
@@ -5425,6 +5455,7 @@ function renderActingChapter(id) {
   document.getElementById('ac-prev')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderActingChapter(prev.id); }, 'back'));
   document.getElementById('ac-next')?.addEventListener('click', () => navTo(() => { navStack.pop(); renderActingChapter(nxt.id); }));
   wireChapterList(renderActingChapter);
+  wireLessonCtas();
 }
 
 // ── The Chapters control (owner order 2026-09-15) ─────────────
@@ -5812,6 +5843,7 @@ function renderActingLesson(id) {
       if (b.dataset.lxGo === id) return;
       navTo(() => { navStack.pop(); renderActingLesson(b.dataset.lxGo); });
     }));
+  wireLessonCtas();
   document.getElementById('ac-done').addEventListener('click', () => {
     if (!markSpeechLessonDone(id)) return;
     const btn = document.getElementById('ac-done');
@@ -6040,13 +6072,22 @@ const SHELF_PAGES = {
   ],
 };
 
-function renderActingCollection(collectionId) {
-  record(() => renderActingCollection(collectionId));
+function renderActingCollection(collectionId, entryId = null) {
+  record(() => renderActingCollection(collectionId, entryId));
   stopSpeech();
   const B = bookOfCollection(collectionId);
   const c = B.collections.find(x => x.id === collectionId);
   if (!c) return goSection('library');
-  const lessons = c.lessons.map(x => bookLessonById(B, x)).filter(Boolean);
+  const allLessons = c.lessons.map(x => bookLessonById(B, x)).filter(Boolean);
+  // ENTRY LINKS FILTER, THEY DO NOT FORK. The handoff is explicit that era
+  // and style jump within the same module and must not create duplicate
+  // lesson records, so this narrows the SAME list by id. Completion is read
+  // off the lesson, so both views necessarily agree about it.
+  const picks = (B.modules.find(m => m.id === collectionId)?.entries) ?? [];
+  const pick = picks.find(e => e.id === entryId) ?? null;
+  const lessons = pick
+    ? allLessons.filter(l => pick.lessons.includes(l.id))
+    : allLessons;
   // Page tiles that lead the shelf, then the lessons in order, with any
   // lesson a page REPLACES swapped for that page in its own position. The
   // seq numbers and the chapter count both come off this one list, so they
@@ -6065,9 +6106,25 @@ function renderActingCollection(collectionId) {
     pageTopbar(`📚 ${B.libraryName}`, '#8a6d3b'),
     `<div class="ws-head">
        <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id] ?? c.icon}</span>${esc(moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }))}</h1>
-       <p class="ws-sub">${entries.length} chapters · ${esc(B.libraryName)}</p>
+       <p class="ws-sub">${/* THE MODULE'S SIZE, NOT THE FILTER'S. `entries`
+            is the visible tile list, so under an entry link this said
+            "2 chapters" of a module that has twelve. The heading describes
+            the module; the line under the links describes the filter. */
+          pages.filter(p2 => !p2.replaces).length + allLessons.length} chapters · ${esc(B.libraryName)}</p>
      </div>`,
-    `<p class="pane-note">Read in any order. This sequence is a suggested starting point.</p>
+    `${picks.length ? `
+     <div class="entry-links">
+       ${picks.map(e => `
+       <button class="entry-link${pick?.id === e.id ? ' on' : ''}" data-entry="${esc(e.id)}" type="button">
+         <b>${esc(e.label)}</b><i>${esc(e.note ?? '')}</i>
+       </button>`).join('')}
+       <button class="entry-link${pick ? '' : ' on'}" data-entry="" type="button">
+         <b>All ${allLessons.length} lessons</b><i>The module in its reading order.</i>
+       </button>
+     </div>` : ''}
+     <p class="pane-note">${pick
+       ? `Showing ${lessons.length} of ${allLessons.length}. The same lessons as the full list, with the same progress.`
+       : 'Read in any order. This sequence is a suggested starting point.'}</p>
      <div class="item-grid">
        ${entries.map((e, i) => itemTileHtml({
          ...e, seq: String(i + 1).padStart(2, '0'),
@@ -6103,6 +6160,37 @@ function renderActingCollection(collectionId) {
     const p = pages.find(x => x.key === b.dataset.item);
     return p ? navTo(p.go) : renderActingChapter(b.dataset.item);
   }));
+  // Re-render the same shelf under a different entry. It is the same page
+  // and the same records, so it replaces rather than stacking on the back
+  // stack: Back from here should leave the module, not walk the filters.
+  app.querySelectorAll('[data-entry]').forEach(b => b.addEventListener('click', () =>
+    navTo(() => renderActingCollection(collectionId, b.dataset.entry || null))));
+}
+
+// ── The workbook (owner handoff, 2026-11-04) ─────────────────
+// The worksheet as the usable first version, which is what the handoff asks
+// for in place of the My Songbook tool it proposes but does not build. There
+// is no save control, because nothing here is stored and a button that
+// pretended otherwise would be the nonfunctional one it tells us to omit.
+function renderMusicalWorkbook() {
+  record(renderMusicalWorkbook);
+  stopSpeech();
+  const W = MUSICAL_WORKBOOK;
+  workspacePage(
+    pageTopbar('\u{1F4DD} Musical Theatre workbook', '#8a6d3b'),
+    `<div class="ws-head">
+       <h1 class="page-h">Workbook</h1>
+       <p class="ws-sub">${esc(W.intro)}</p>
+     </div>`,
+    `<p class="pane-note">Copy these prompts into your own notes. The app does not store your answers, and nothing here is sent anywhere.</p>
+     ${W.sections.map(sec => `
+     <section class="wb-sec">
+       <h2 class="sec-h">${esc(sec.title)}</h2>
+       ${(sec.notes ?? []).map(n => `<p class="guide-text">${esc(n)}</p>`).join('')}
+       ${sec.prompts ? `<ul class="wb-prompts">${sec.prompts.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+       ${sec.table ? lessonTableHtml(sec.table) : ''}
+     </section>`).join('')}`);
+  wireBrandHome();
 }
 
 function renderActingGlossary() {

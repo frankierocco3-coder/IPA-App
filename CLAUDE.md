@@ -394,8 +394,8 @@ script instead and paste its block.
 - Acting & Scene Work           34 records  (8 more in the withdrawn performance module, behind PERFORMANCE_LIVE)
 - Building a Character          25 records  (4 more in the withdrawn role module, behind ROLE_LIVE) (22 further records in this file are Commedia dell’Arte, its own course since 2026-11-02)
 - Commedia dell’Arte            22 records  (13 of them reference pages, so the path walks 9)
-- Theatre History               22 records
-- Musical Theatre               14 records
+- Theatre History               23 records  <- 1 UNPUBLISHED: th-commedia
+- Musical Theatre               22 records  <- 19 UNPUBLISHED: mt-book, mt-1-02, mt-1-03, mt-1-04, mt-1-05, mt-1-06
 - Screen Acting                  9 records
 - Shakespeare                   37 records
 - Rhetoric                      36 records
@@ -409,16 +409,16 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
 - CHARACTER_LIVE           true   js/views/context.js:196
 - COCKNEY_LIVE             true   js/views/context.js:53
-- COINAGE_LIVE             false  js/main.js:310
+- COINAGE_LIVE             false  js/main.js:311
 - COMMEDIA_LIVE            true   js/views/context.js:232
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
 - MUSICAL_LIVE             true   js/views/context.js:290
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
 - RHETORIC_COURSE_LIVE     true   js/views/context.js:337
-- RHETORIC_LIVE            false  js/main.js:283
+- RHETORIC_LIVE            false  js/main.js:284
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:349
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:11061
+- SCENE_STUDY_LIVE         false  js/main.js:11149
 - SCREEN_LIVE              true   js/views/context.js:315
 - SHAKESPEARE_LIVE         true   js/views/context.js:323
 - SPEECH_LIVE              false  js/views/context.js:188
@@ -435,13 +435,13 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                14277 lines
+- js/main.js                14365 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  869
+- regression check() sites  870
 
 ### Review
 
-- 227 ledger entries, 0 with specialist sign-off.
+- 216 ledger entries, 0 with specialist sign-off.
   Every published lesson rests on the owner editorial verdict alone.
   The awaiting-review badges say so; do not describe them as reviewed.
 <!-- facts:end -->

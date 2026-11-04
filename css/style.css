@@ -1272,6 +1272,30 @@ body.modal-open { overflow: hidden; }
    nav instead of scrolling. */
 .ws-menu { max-height: calc(100dvh - 215px); overflow-y: auto; overscroll-behavior: contain; }
 
+/* ── Repertoire entry links and the workbook (2026-11-04) ───
+   Two ways into one module. They FILTER the shelf rather than forking it,
+   so the pressed state matters: it is the only thing telling a reader they
+   are looking at a subset of the same twelve. */
+.entry-links { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 14px; }
+.entry-link {
+  font: inherit; text-align: left; cursor: pointer; color: var(--ink);
+  flex: 1 1 220px; display: flex; flex-direction: column; gap: 2px;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 10px 12px;
+}
+.entry-link b { font-family: var(--serif); font-size: 16px; }
+.entry-link i { color: var(--muted); font-size: 12.5px; font-style: normal; }
+.entry-link:hover { border-color: var(--green); }
+.entry-link:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+.entry-link.on { background: var(--accent-tint); border-color: var(--green); }
+
+.wb-sec { margin: 0 0 26px; }
+.wb-prompts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.wb-prompts li {
+  border-bottom: 2px solid var(--line); padding: 8px 2px 10px;
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 14px; color: var(--ink);
+}
+.lx-cta { margin: 14px 0; }
+
 /* ── Theatre History: chapters (owner handoff, 2026-11-04) ──
    Four chapter cards on Learn, then a chapter's topic list. Scoped to
    `.ch-*` so no other course's Learn page is touched.
@@ -1352,6 +1376,11 @@ body.modal-open { overflow: hidden; }
 .ch-topic-go { color: var(--muted); font-size: 20px; }
 .ch-topic.is-done .ch-topic-n { background: var(--accent-tint); color: var(--green-dark); border-color: var(--green); }
 .ch-topic.is-link { border-style: dashed; }
+/* A topic whose chapter is written but not yet approved. Same dashed
+   treatment as a cross-link because both are "this does not open a lesson
+   here", with the muted number saying it is not a step you can take yet. */
+.ch-topic.is-draft { border-style: dashed; }
+.ch-topic.is-draft .ch-topic-t i { color: var(--muted); font-style: italic; }
 
 /* The Theatre History rail panels (owner handoff, 2026-11-04). */
 .rail-topics { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 15px; font-weight: 800; color: var(--ink); margin: 0 0 8px; }
