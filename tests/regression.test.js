@@ -7334,7 +7334,10 @@ export async function run({ navDoc = document } = {}) {
       // make a red check green.
       // Screen Acting is NINE since Talking to the Lens was written on
       // 2026-11-04; this said eight and was simply out of date.
-      const WANT_PUBLISHED = { theatre: 22, musical: 3, screen: 9 };
+      // Musical Theatre went 3 -> 22 on 2026-11-04 when the owner read and
+      // approved the course. Theatre History stays 22 of 23: its commedia
+      // chapter is Claude's writing and is not his to rubber-stamp.
+      const WANT_PUBLISHED = { theatre: 22, musical: 22, screen: 9 };
       const pub = B.lessons.filter(l => speechPublished(l.id)).length;
       check(`${n}: it is open, and its published count is exactly what was approved`,
         B.live === true

@@ -395,7 +395,7 @@ script instead and paste its block.
 - Building a Character          25 records  (4 more in the withdrawn role module, behind ROLE_LIVE) (22 further records in this file are Commedia dell’Arte, its own course since 2026-11-02)
 - Commedia dell’Arte            22 records  (13 of them reference pages, so the path walks 9)
 - Theatre History               23 records  <- 1 UNPUBLISHED: th-commedia
-- Musical Theatre               22 records  <- 19 UNPUBLISHED: mt-book, mt-1-02, mt-1-03, mt-1-04, mt-1-05, mt-1-06
+- Musical Theatre               22 records
 - Screen Acting                  9 records
 - Shakespeare                   37 records
 - Rhetoric                      36 records
@@ -441,7 +441,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Review
 
-- 216 ledger entries, 0 with specialist sign-off.
+- 235 ledger entries, 0 with specialist sign-off.
   Every published lesson rests on the owner editorial verdict alone.
   The awaiting-review badges say so; do not describe them as reviewed.
 <!-- facts:end -->
