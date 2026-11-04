@@ -1,11 +1,12 @@
-# Workspace chips — Theatre History and Musical Theatre
+# Workspace chips — Theatre History, Musical Theatre and Screen Acting
 
-Written 2026-11-03, the day both courses were built. Two icons, and they
+Written 2026-11-03, the day Theatre History and Musical Theatre were built;
+Screen Acting joined on 2026-11-04 when it went live. Three icons, and they
 are **the hardest size in the app**.
 
-Every other workspace carries drawn art in the switcher. These two fall back
-to an emoji — 🏺 and 🎼 — which is honest and ugly, and makes them the only
-two rows in that column wearing a different visual language.
+Every other workspace carries drawn art in the switcher. These three fall
+back to an emoji — 🏺, 🎼 and 🎥 — which is honest and ugly, and makes them
+the only three rows in that column wearing a different visual language.
 
 ---
 
@@ -123,12 +124,19 @@ its neighbours. The hues are already spoken for:
 | 1 | Acting | sage-olive and terracotta (two masks) |
 | 2 | Building a Character | warm gold and olive |
 | 3 | Commedia | muted lavender and gold |
-| **4** | **Theatre History** | **— this brief —** |
-| **5** | **Musical Theatre** | **— this brief —** |
-| 6 | Shakespeare | very dark olive against cream |
-| 7 | Rhetoric | terracotta, all of it |
-| 8 | Voice & Speech | pale cream — the lightest in the set |
-| 9 | Accents | slate and navy blue |
+| **4** | **Theatre History** | **terracotta and gold — this brief** |
+| **5** | **Musical Theatre** | **slate blue and gold — this brief** |
+| **6** | **Screen Acting** | **muted sage — this brief** |
+| 7 | Shakespeare | very dark olive against cream |
+| 8 | Rhetoric | terracotta, all of it |
+| 9 | Voice & Speech | pale cream — the lightest in the set |
+
+REVISED 2026-11-04. This table read nine rows ending in Accents & Dialects,
+slate and navy. That workspace no longer exists: it merged into Voice &
+Speech on 2026-11-03 and its id is retired, so `globe.png` is out of the
+column and the blue it held is free — which is what lets Musical Theatre keep
+slate blue at row 5 without a second blue five rows down. Screen Acting took
+the vacated ninth slot in the list, at row 6.
 
 **So separation has to come from SILHOUETTE, not hue.** Both subjects below
 are shapes nothing else in the set uses, and each is pitched at a tone that
@@ -216,7 +224,72 @@ is second.
 
 ---
 
-## Before either is installed
+## 3 · `screen-acting.png` — a clapperboard
+
+Added 2026-11-04, when Screen Acting went live and became the third row in
+this column wearing an emoji.
+
+**Why a clapperboard and not a camera.** A camera is the obvious choice and
+it is the wrong one twice over: it is what the emoji already is (🎥), and a
+camera body with a lens barrel, a handle and a viewfinder is exactly the
+fine-detail object the style block bans. A clapperboard is a **flat rectangle
+with one bold hinged bar**, and nothing else in the set is a flat rectangle —
+every other chip is a rounded mass. That is the whole argument: the column
+separates by silhouette, and this is a silhouette the column does not own.
+
+**The diagonal question, which is real.** The row directly above is the top
+hat with a cane, and that icon is *defined* as "cylinder plus one diagonal".
+Two diagonals in adjacent rows is a legitimate worry. They survive together
+because the masses differ: the cane is a thin line crossing the whole frame
+over a round body, the clapper is a thick striped bar sitting across the top
+edge of a square one. **Check this pair side by side at 20px before either is
+accepted** — if they read as the same gesture, move the clapper bar to fully
+closed and horizontal, which removes the diagonal entirely and costs little.
+
+**Muted sage, the one colour this column does not use.** Row 5 above is slate
+blue and row 7 below is very dark olive against cream, so this icon cannot be
+either without sandwiching two dark masses or two blues. Muted sage `#8D997D`
+is a mid-tone, it is in the palette, and it is the only house colour not
+already carrying a row as its dominant.
+
+**Add to the style block:**
+
+> The object is a film clapperboard, closed, seen straight on and
+> square to the frame: a solid slate body in muted sage green with
+> softly rounded corners, and across its top edge a hinged clapper
+> stick carrying four bold diagonal stripes in cream and deep olive.
+> A small warm gold hinge pin sits where the stick meets the body.
+> The body is a heavy solid rectangle filling most of the frame; the
+> stripes are wide and few. No text, no letters, no numbers, and no
+> writing of any kind on the slate — it is a blank board.
+
+**Attach `img/ui/textbook.png` as a reference image.** It is the closest
+shipped structure: a flat rectangular object with a banded edge, drawn square
+to the frame, modelled with soft shading rather than outline. Per
+`PRACTICE_ICON_BRIEF` point 1, the attachment carries the finish in a way the
+words cannot.
+
+**The hazard, and what to check.** The stripes are this icon's one piece of
+pattern, and the style block bans pattern for the usual reason. They are
+allowed only because they degrade gracefully: at 20px they should read as a
+single light bar across the top of a darker block, and the icon must still
+work if they mush into one. **If the stripes are doing the recognising rather
+than the rectangle, reject the image.** Four stripes is the maximum; six will
+turn to grey at 20px.
+
+A blank slate is deliberate and non-negotiable: the style block bans text,
+and a clapperboard with scene and take numbers on it is both a style
+violation and unreadable at this size.
+
+**If it comes back wrong**, the fallback subject is a camera lens seen
+head-on — a thick ring in deep olive with a warm gold focus band and a dark
+cream-flecked glass centre. A ring is the one silhouette in the set that is
+not a solid mass, so it separates well, but it risks reading as a coin or a
+button at 20px, which is why it is second.
+
+---
+
+## Before any of them is installed
 
 The four measurements from `PRACTICE_ICON_BRIEF` point 6, plus one this batch
 adds:
