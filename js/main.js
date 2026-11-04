@@ -706,7 +706,58 @@ function drawRail(section) {
         note: 'Every chapter is free to read in any order.',
         actions: [['Open the Library', () => goSection('library'), true]] });
     }
-  } else if ((ws === 'shakespeare' || ws === 'theatre' || ws === 'musical'
+  } else if (ws === 'theatre' && section === 'learn') {
+    // ── THE CHAPTER RAIL (owner handoff, 2026-11-04) ───────────────
+    //
+    // Three panels from the approved mockup: where you are in the course,
+    // a line about what the course is for, and the two courses this one
+    // points at. Theatre History leaves the shared MODULE RAIL below
+    // because that rail lists every module — which for this course is the
+    // twenty-flat-cards problem the chapters were built to solve.
+    const B = BOOKS.theatre;
+    const tot = courseTotals(B);
+    cards.push({ h: 'Your course', bare: true, title: '', note: '',
+      body: `
+        <p class="rail-topics">${tot.explored} / ${tot.topics} topics explored</p>
+        ${courseProgressHtml(tot.explored, tot.topics)}`,
+      // `actions` IS NOT OPTIONAL: the renderer below does
+      // `for (const [label, go, primary] of c.actions)` with no guard, so a
+      // card without it throws "is not iterable" and takes the whole rail —
+      // and the first render with it — down. Same family as the tuple note
+      // on the commedia card.
+      actions: [] });
+    // THE THREE ICONS ARE EMOJI, NOT NEW ART. The handoff says to use the
+    // icons the project already has and not to add anything solely to
+    // mimic the mockup, and nothing in img/ui is a column or a quill.
+    // They are decorative, so they are hidden from assistive tech and the
+    // sentence beside them carries the meaning.
+    cards.push({ h: 'Across the centuries', bare: true, title: '', note: '',
+      body: `
+        <p class="rail-welcome">Discover the stages, meet the makers, try the craft.</p>
+        <p class="rail-icons" aria-hidden="true">
+          <span class="rail-ico-tile">\u{1F3AD}</span>
+          <span class="rail-ico-tile">\u{1F3DB}\uFE0F</span>
+          <span class="rail-ico-tile">\u{1FAB6}</span>
+        </p>`,
+      actions: [] });
+    // Both of these are full courses in their own right, and chapter 2
+    // links to Commedia as a topic for the same reason: this course tells
+    // their story in one chapter, those courses teach them.
+    const DEEPER = [
+      ['commedia', 'Commedia dell’Arte course'],
+      ['shakespeare', 'Shakespeare course'],
+    ];
+    cards.push({ h: 'Go deeper', bare: true, title: '', note: '',
+      body: `<div class="rail-deeper">${DEEPER.map(([id, label]) => `
+        <button class="rail-deep" id="rd-${id}" type="button">
+          <span>${esc(label)}</span><span class="rail-deep-go" aria-hidden="true">&rarr;</span>
+        </button>`).join('')}</div>`,
+      actions: [],
+      wire: root => DEEPER.forEach(([id]) =>
+        root.querySelector(`#rd-${id}`)?.addEventListener('click', () => {
+          setWorkspace(id); goSection('learn');
+        })) });
+  } else if ((ws === 'shakespeare' || ws === 'musical'
               || ws === 'screen') && section === 'learn') {
     // THE MODULE RAIL (owner's map mockup, 2026-10-31). Where you are,
     // what opens it, and the whole course under it.
@@ -4091,6 +4142,14 @@ function chapterLearnPane(el, B) {
       <p class="ws-sub">${esc(B.subtitle ?? '')}</p>
       <p class="ch-meta">${B.chapters.length} chapters &middot; ${tot.topics} topics</p>
     </div>
+    ${/* ONE PROGRESS DISPLAY, NOT THREE. The mockup draws a bar here AND a
+          "Your course" panel in the rail, and the handoff's own note says to
+          avoid duplicated progress displays if the page becomes busy. Built
+          both ways: with both, "19" appears three times above the fold — the
+          meta line, this bar and the rail — and the shared renderer labels
+          this one "Course progress" while the rail says "topics explored",
+          so it reads as two different measures of the same thing. The rail
+          panel is the course's progress; this card's one job is to resume. */''}
     ${next ? `
     <section class="ch-start" aria-labelledby="ch-start-h">
       <p class="ch-eyebrow">${done ? 'Continue' : 'Start here'}</p>
@@ -4099,13 +4158,12 @@ function chapterLearnPane(el, B) {
       <button class="btn btn-primary ch-start-go" id="ch-go" type="button">
         ${done ? 'Continue learning' : 'Start learning'} <span aria-hidden="true">&rarr;</span>
       </button>
-      ${courseProgressHtml(tot.explored, tot.topics)}
+      ${B.chapters ? '' : courseProgressHtml(tot.explored, tot.topics)}
     </section>` : `
     <section class="ch-start" aria-labelledby="ch-start-h">
       <p class="ch-eyebrow">Done</p>
       <h2 id="ch-start-h">Every chapter read</h2>
       <p class="ch-start-where">The ${esc(B.libraryName)} stays open in any order.</p>
-      ${courseProgressHtml(tot.explored, tot.topics)}
     </section>`}
     <div class="ch-grid">
       ${B.chapters.map(ch => {

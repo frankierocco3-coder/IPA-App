@@ -1353,6 +1353,27 @@ body.modal-open { overflow: hidden; }
 .ch-topic.is-done .ch-topic-n { background: var(--accent-tint); color: var(--green-dark); border-color: var(--green); }
 .ch-topic.is-link { border-style: dashed; }
 
+/* The Theatre History rail panels (owner handoff, 2026-11-04). */
+.rail-topics { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 15px; font-weight: 800; color: var(--ink); margin: 0 0 8px; }
+.rail-welcome { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+.rail-icons { display: flex; gap: 10px; margin: 0; }
+.rail-ico-tile {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 46px; height: 46px; font-size: 22px;
+  background: var(--accent-tint); border: 2px solid var(--line); border-radius: 12px;
+}
+.rail-deeper { display: flex; flex-direction: column; gap: 8px; }
+.rail-deep {
+  font: inherit; font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 14px; font-weight: 700;
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  width: 100%; text-align: left; cursor: pointer; color: var(--green-dark);
+  background: none; border: none; border-bottom: 2px solid var(--line);
+  padding: 8px 2px;
+}
+.rail-deep:last-child { border-bottom: none; }
+.rail-deep:hover { color: var(--ink); }
+.rail-deep:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+
 /* ── Library parts (2026-11-04) ─────────────────────────────
    The grouping layer Theatre History needed and no other book has: seven
    headed sections over its twenty shelves. Scoped to `.lib-part` so every
