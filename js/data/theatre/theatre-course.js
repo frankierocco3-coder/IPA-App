@@ -47,6 +47,63 @@
 export const THEATRE_PRINCIPLE =
   'Theatre has no agreed first moment and no single tradition. Walk the history as a working actor: what each form asked of a performer, and what it left behind that you can still use.';
 
+// ── PARTS: the layer above the modules (owner order 2026-11-04) ──
+//
+// WHY THIS EXISTS, AND WHY IT IS NOT A REGROUPING. Theatre History runs
+// TWENTY modules over twenty-two lessons: nineteen of them hold exactly one
+// chapter. Every other course here runs four to six lessons per module. So
+// its module layer stopped grouping anything, and because THEATRE_COLLECTIONS
+// is derived MODULES.map(...), the Library shelf layer mirrored a layer that
+// was already one-to-one with the chapters — three levels that were all the
+// same level, and a Library that was twenty flat cards to scroll.
+//
+// The obvious fix is to merge the modules back into six. That is the wrong
+// fix twice over: it undoes the 2026-11-03 order that a module is ONE
+// SUBJECT rather than a bracket around whatever fitted, and it collides with
+// the 2026-10-21 order that every shelf carries its module's name, so the
+// same chapters never answer to two names on two pages.
+//
+// Both of those orders are right. Theatre History is simply where they
+// collide, because its subjects genuinely are one chapter each. So this adds
+// a level ABOVE the modules instead of merging them: nothing is renamed, no
+// module id moves, no lesson order changes, and the shelf still carries its
+// module's name. Parts group; modules remain the subject.
+//
+// TWO OF THESE EARN THEIR KEEP BEYOND BROWSING. 'Four Cities' restores the
+// shape of the module split on 2026-11-03 without un-splitting it — the four
+// are a thematic set inside one era, and as a part that reads as deliberate
+// rather than as four loose chapters. 'Classical Japan' names the one
+// geographic detour in an otherwise Western line, so Noh and Kabuki sitting
+// between the medieval town and Shakespeare is a choice on the page instead
+// of looking like a slip in the chronology.
+//
+// EVERY MODULE BELONGS TO EXACTLY ONE PART, and the suite pins that: a module
+// missing from this list would vanish from the Library, which is the failure
+// mode a grouping layer invites.
+export const THEATRE_PARTS = [
+  { n: 1, id: 'th-pt-ancient', title: 'Beginnings and the Ancient World',
+    blurb: 'Where theatre is held to begin, the festival that turned a chorus into a city arguing with itself, and what Rome made of the form when it crossed over.',
+    modules: ['th-origins', 'th-greeks', 'th-romanstage', 'th-latin'] },
+  { n: 2, id: 'th-pt-faith', title: 'Faith and the Town',
+    blurb: 'What actually continued after Rome, and the century when a whole town became the producer.',
+    modules: ['th-sacred-drama', 'th-town'] },
+  { n: 3, id: 'th-pt-japan', title: 'Classical Japan',
+    blurb: 'The detour, and it is deliberate: two traditions built on precision rather than illusion, running alongside the European story rather than after it.',
+    modules: ['th-noh-form', 'th-kabuki-form'] },
+  { n: 4, id: 'th-pt-earlymodern', title: 'The Early Modern Stage',
+    blurb: 'Two companies under two kinds of patronage, and the comedy that got close enough to power to be banned.',
+    modules: ['th-bard', 'th-france'] },
+  { n: 5, id: 'th-pt-popular', title: 'Popular Stages in America',
+    blurb: 'The caricature industry, the people working against it on the same stages, and the circuit that decided who was allowed in front of a crowd at all.',
+    modules: ['th-minstrel', 'th-variety'] },
+  { n: 6, id: 'th-pt-cities', title: 'Four Cities',
+    blurb: 'Moscow, Dublin, New York and Harlem: one era read through the four places that changed what a play could be about.',
+    modules: ['th-moscow', 'th-dublin', 'th-newyork', 'th-harlem'] },
+  { n: 7, id: 'th-pt-argument', title: 'Theatre as Argument',
+    blurb: 'Making the familiar strange, the promise that does not arrive, the stages built outside the institutions, and theatre used to rehearse change.',
+    modules: ['th-epic', 'th-dream-m', 'th-offbroadway', 'th-transformation'] },
+];
+
 export const THEATRE_MODULES = [
   { n: 1, id: 'th-origins', title: 'What Counts as Theatre',
     blurb: 'No agreed first moment and five competing theories: ritual, myth, clowning, play and the urge to imitate, and what changes when an ordinary action is framed for someone to watch.' },

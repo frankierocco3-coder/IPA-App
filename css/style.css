@@ -1272,6 +1272,25 @@ body.modal-open { overflow: hidden; }
    nav instead of scrolling. */
 .ws-menu { max-height: calc(100dvh - 215px); overflow-y: auto; overscroll-behavior: contain; }
 
+/* ── Library parts (2026-11-04) ─────────────────────────────
+   The grouping layer Theatre History needed and no other book has: seven
+   headed sections over its twenty shelves. Scoped to `.lib-part` so every
+   other Library, which renders one flat `.tile-grid`, is untouched.
+
+   The heading carries its own number rather than a CSS counter, because the
+   number comes from the data (`part.n`) and the two must not be able to
+   disagree — a counter would renumber silently if a part were ever hidden. */
+.lib-part { margin: 0 0 26px; }
+.lib-part + .lib-part { margin-top: 30px; }
+.lib-part-h { display: flex; align-items: baseline; gap: 10px; margin-bottom: 2px; }
+.lib-part-n {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 26px; height: 26px; padding: 0 6px; border-radius: 8px;
+  background: var(--panel); border: 2px solid var(--line);
+  font-family: var(--sans); font-size: 13px; font-weight: 800; color: var(--muted);
+}
+.lib-part-blurb { color: var(--muted); font-size: 14px; margin: 0 0 12px; max-width: 62ch; }
+
 /* Right rail */
 .right-rail { position: sticky; top: 0; align-self: start; padding-top: 18px; display: flex; flex-direction: column; gap: 14px; }
 .rail-card { background: var(--panel); border: 2px solid var(--line); border-radius: 16px; padding: 14px 16px; }

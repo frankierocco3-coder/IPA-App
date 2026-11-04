@@ -80,7 +80,7 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
          ACTING_GLOSSARY, actingLessonsFor, actingLessonById, actingModuleFor,
          actingLessonNumber } from './data/acting/acting-course.js';
 import { COMMEDIA_PRINCIPLE, COMMEDIA_MODULES, COMMEDIA_LESSONS, COMMEDIA_COLLECTIONS } from './data/commedia/commedia-course.js';
-import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS } from './data/theatre/theatre-course.js';
+import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS, THEATRE_PARTS } from './data/theatre/theatre-course.js';
 import { MUSICAL_PRINCIPLE, MUSICAL_MODULES, MUSICAL_LESSONS, MUSICAL_COLLECTIONS } from './data/musical/musical-course.js';
 import { SCREEN_PRINCIPLE, SCREEN_MODULES, SCREEN_LESSONS, SCREEN_COLLECTIONS } from './data/screen/screen-course.js';
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
@@ -3614,6 +3614,10 @@ const BOOKS = {
   // is what the owner sees in preview and nothing a learner can reach.
   theatre: { ws: 'theatre', icon: '🏺', title: 'Theatre History', libraryName: 'Theatre History Library',
     principle: THEATRE_PRINCIPLE, modules: THEATRE_MODULES, lessons: THEATRE_LESSONS,
+    // THE ONLY BOOK WITH A PART LAYER, and optional on purpose — see
+    // THEATRE_PARTS. A book without `parts` renders the flat shelf grid it
+    // always did, so adding this to one course changed none of the others.
+    parts: THEATRE_PARTS,
     collections: THEATRE_COLLECTIONS, visible: theatreVisible,
     moduleTone: () => 'is-sage',
     reviewCats() { return bookReviewCategories(this); } },
@@ -7805,15 +7809,38 @@ function shakespeareLibraryPane(el) {
 // Parameterised 2026-09-25 when Shakespeare became the third book. The
 // body is Character's, unchanged except for the book it is handed.
 function bookLibraryPane(el, B) {
+  const shelf = c => tileHtml({ key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon, img: c.img,
+    title: moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }) });
+  const byId = new Map(B.collections.map(c => [c.id, c]));
+  // GROUPED WHEN THE BOOK HAS PARTS, FLAT WHEN IT DOES NOT. Only Theatre
+  // History has them, because only Theatre History has twenty shelves — see
+  // THEATRE_PARTS for why that is a level above the modules rather than a
+  // regrouping of them.
+  //
+  // A shelf whose module is in no part would silently DISAPPEAR from this
+  // page, which is the failure a grouping layer invites, so anything the
+  // parts do not claim is swept into a final group rather than dropped. The
+  // suite pins that the sweep is empty; this is the belt to its braces.
+  const claimed = new Set((B.parts ?? []).flatMap(p => p.modules));
+  const leftovers = B.collections.filter(c => !claimed.has(c.id));
+  const grouped = B.parts ? `
+      ${B.parts.map(part => `
+      <section class="lib-part">
+        <h2 class="sec-h lib-part-h"><span class="lib-part-n">${part.n}</span>${esc(part.title)}</h2>
+        ${part.blurb ? `<p class="lib-part-blurb">${esc(part.blurb)}</p>` : ''}
+        <div class="tile-grid">${part.modules.map(id => byId.get(id)).filter(Boolean).map(shelf).join('')}</div>
+      </section>`).join('')}
+      ${leftovers.length ? `
+      <section class="lib-part">
+        <h2 class="sec-h lib-part-h">More</h2>
+        <div class="tile-grid">${leftovers.map(shelf).join('')}</div>
+      </section>` : ''}` : `
+    <div class="tile-grid">${B.collections.map(shelf).join('')}</div>`;
   el.innerHTML = `
     <div class="ws-head">
       <h1 class="page-h">${esc(B.libraryName)}</h1>
       <p class="ws-sub">Every chapter is free to read in any order.</p>
-    </div>
-    <div class="tile-grid">
-      ${B.collections.map(c => tileHtml({ key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon, img: c.img,
-        title: moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }) })).join('')}
-    </div>`;
+    </div>${grouped}`;
   el.querySelectorAll('[data-tile]').forEach(b =>
     b.addEventListener('click', () => navTo(() => renderActingCollection(b.dataset.tile.slice(4)))));
 }
