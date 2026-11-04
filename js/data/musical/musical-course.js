@@ -48,10 +48,26 @@ export const MUSICAL_PRINCIPLE =
 export const MUSICAL_MODULES = [
   { n: 1, id: 'mt-form', title: 'The Book Musical',
     blurb: 'What a book musical is made of, the traditions it came from, what a song does that speech cannot, and how to approach a number as playable action.' },
-  { n: 2, id: 'mt-era', title: 'Repertoire by Era',
-    blurb: 'How the catalogue is built, then six working periods from the 1940s songbook to the present, each with its own definition, study focus and representative shows.' },
-  { n: 3, id: 'mt-style', title: 'Repertoire by Style',
-    blurb: 'The two categories that cut across every period: an original score built on popular music, and a score assembled from one that already existed.' },
+  // ONE REPERTOIRE, NOT TWO (owner order 2026-11-04). This was 'Repertoire
+  // by Era' and 'Repertoire by Style', and the split described how the
+  // catalogue is INDEXED rather than what a reader comes here to do. Someone
+  // looking for a song does not first decide whether they want an era or a
+  // style; they open the repertoire and look. Two shelves both beginning
+  // 'Repertoire by' also read as one thing filed twice.
+  //
+  // Nothing was rewritten and no page moved: the nine chapters are in the
+  // same order they were, the guide first, the six periods, then the two
+  // categories that cut across all of them. The retired id is 'mt-style';
+  // it stays retired and is never reused, and 'mt-era' survives because it
+  // held seven of the nine and came first.
+  //
+  // THE ID NO LONGER MATCHES THE TITLE and that is deliberate rather than
+  // sloppy: 'mt-era' is storage, the shelf and the module page read it, and
+  // renaming it to 'mt-rep' would move a learner's place for the sake of
+  // tidiness. The same trade this project made for the 'ipa' workspace
+  // labelled Voice & Speech.
+  { n: 2, id: 'mt-era', title: 'Repertoire',
+    blurb: 'How the catalogue is built, six working periods from the 1940s songbook to the present, and the two categories that cut across all of them.' },
 ];
 
 export const MUSICAL_LESSONS = [
@@ -660,7 +676,7 @@ export const MUSICAL_LESSONS = [
       { p: 'Reference examples: official Waitress credits, Concord’s Hadestown, official SIX credits.' },
     ] },
 
-  { id: 'mt-rep-poprock', module: 'mt-style', order: 13,
+  { id: 'mt-rep-poprock', module: 'mt-era', order: 13,
     title: 'Pop/Rock',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -690,7 +706,7 @@ export const MUSICAL_LESSONS = [
       { p: 'Reference example: MTI’s Spring Awakening.' },
     ] },
 
-  { id: 'mt-rep-jukebox', module: 'mt-style', order: 14,
+  { id: 'mt-rep-jukebox', module: 'mt-era', order: 14,
     title: 'Jukebox',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
