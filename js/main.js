@@ -80,7 +80,8 @@ import { ACTING_PRINCIPLE, ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS,
          ACTING_GLOSSARY, actingLessonsFor, actingLessonById, actingModuleFor,
          actingLessonNumber } from './data/acting/acting-course.js';
 import { COMMEDIA_PRINCIPLE, COMMEDIA_MODULES, COMMEDIA_LESSONS, COMMEDIA_COLLECTIONS } from './data/commedia/commedia-course.js';
-import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS, THEATRE_PARTS } from './data/theatre/theatre-course.js';
+import { THEATRE_PRINCIPLE, THEATRE_MODULES, THEATRE_LESSONS, THEATRE_COLLECTIONS, THEATRE_CHAPTERS,
+         THEATRE_DATE_NOTE, THEATRE_SUBTITLE } from './data/theatre/theatre-course.js';
 import { MUSICAL_PRINCIPLE, MUSICAL_MODULES, MUSICAL_LESSONS, MUSICAL_COLLECTIONS } from './data/musical/musical-course.js';
 import { SCREEN_PRINCIPLE, SCREEN_MODULES, SCREEN_LESSONS, SCREEN_COLLECTIONS } from './data/screen/screen-course.js';
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
@@ -1143,7 +1144,7 @@ function learnMain(el, course, ws = activeWorkspace()) {
   // pages untouched: the module grid on Learn, the shelves in the
   // Library, no practice surface of their own. Nothing bespoke, which is
   // the point — a new book course should cost two lines here.
-  if (ws === 'theatre') return bookLearnPane(el, BOOKS.theatre);
+  if (ws === 'theatre') return chapterLearnPane(el, BOOKS.theatre);
   if (ws === 'musical') return bookLearnPane(el, BOOKS.musical);
   if (ws === 'screen') return bookLearnPane(el, BOOKS.screen);
   if (ws === 'shakespeare') return bookLearnPane(el, BOOKS.shakespeare);
@@ -3614,10 +3615,11 @@ const BOOKS = {
   // is what the owner sees in preview and nothing a learner can reach.
   theatre: { ws: 'theatre', icon: '🏺', title: 'Theatre History', libraryName: 'Theatre History Library',
     principle: THEATRE_PRINCIPLE, modules: THEATRE_MODULES, lessons: THEATRE_LESSONS,
-    // THE ONLY BOOK WITH A PART LAYER, and optional on purpose — see
-    // THEATRE_PARTS. A book without `parts` renders the flat shelf grid it
-    // always did, so adding this to one course changed none of the others.
-    parts: THEATRE_PARTS,
+    // THE ONLY BOOK WITH A CHAPTER LAYER, and optional on purpose — see
+    // THEATRE_CHAPTERS. A book without `chapters` renders the flat shelf
+    // grid and the plain module Learn page it always did, so this course
+    // having one changed none of the others.
+    chapters: THEATRE_CHAPTERS, dateNote: THEATRE_DATE_NOTE, subtitle: THEATRE_SUBTITLE,
     collections: THEATRE_COLLECTIONS, visible: theatreVisible,
     moduleTone: () => 'is-sage',
     reviewCats() { return bookReviewCategories(this); } },
@@ -4045,6 +4047,138 @@ function bookLearnSequence(el, B) {
   // down a page that just changed shape under you.
   const cur = el.querySelector('.lm-row.is-current');
   if (cur) cur.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+}
+
+// ── Learn -> Chapter -> Topic -> Lesson (owner handoff, 2026-11-04) ──
+//
+// The approved landing page for Theatre History: four chapter cards, not
+// nineteen topic cards. Only a book with `chapters` gets this; every other
+// course keeps bookLearnPane untouched.
+//
+// A TOPIC IS "EXPLORED" WHEN EVERY LESSON IN IT IS DONE, and that rule is
+// written once, here, because the handoff asks for one consistent rule and
+// forbids inventing completion. A cross-link topic has no lessons of its own
+// and is never counted either way — it would otherwise read as permanently
+// unexplored, or as explored without anyone reading anything.
+const chapterTopics = (B, ch) => ch.topics.map(t => t.course ? { ...t, lessons: [] }
+  : { ...t, mod: B.modules.find(m => m.id === t.module) ?? null,
+      lessons: pathLessons(B).filter(l => l.module === t.module && B.visible(l)) });
+const topicExplored = t => !t.course && t.lessons.length > 0
+  && t.lessons.every(l => speechLessonDone(l.id));
+const chapterCounts = (B, ch) => {
+  const ts = chapterTopics(B, ch);
+  return { topics: ts.length, explored: ts.filter(topicExplored).length,
+           lessons: ts.reduce((n, t) => n + t.lessons.length, 0) };
+};
+const courseTotals = B => B.chapters.reduce((a, ch) => {
+  const c = chapterCounts(B, ch);
+  return { topics: a.topics + c.topics, explored: a.explored + c.explored, lessons: a.lessons + c.lessons };
+}, { topics: 0, explored: 0, lessons: 0 });
+
+function chapterLearnPane(el, B) {
+  const tot = courseTotals(B);
+  // The Start Here panel resumes the real next lesson when there is
+  // progress, and says so — it never claims a position nobody reached.
+  const seq = pathLessons(B).filter(B.visible);
+  const done = seq.filter(l => speechLessonDone(l.id)).length;
+  const next = seq.find(l => !speechLessonDone(l.id)) ?? null;
+  const nextCh = next ? B.chapters.find(c => c.topics.some(t => t.module === next.module)) : null;
+  const nextMod = next ? B.modules.find(m => m.id === next.module) : null;
+  const pct = tot.topics ? Math.round(tot.explored / tot.topics * 100) : 0;
+  el.innerHTML = `
+    <div class="ws-head">
+      <h1 class="page-h">${esc(B.title)}</h1>
+      <p class="ws-sub">${esc(B.subtitle ?? '')}</p>
+      <p class="ch-meta">${B.chapters.length} chapters &middot; ${tot.topics} topics</p>
+    </div>
+    ${next ? `
+    <section class="ch-start" aria-labelledby="ch-start-h">
+      <p class="ch-eyebrow">${done ? 'Continue' : 'Start here'}</p>
+      <h2 id="ch-start-h">${esc(nextMod?.title ?? next.title)}</h2>
+      <p class="ch-start-where">${nextCh ? `Chapter ${nextCh.n} &middot; ${esc(nextCh.title)}` : ''}</p>
+      <button class="btn btn-primary ch-start-go" id="ch-go" type="button">
+        ${done ? 'Continue learning' : 'Start learning'} <span aria-hidden="true">&rarr;</span>
+      </button>
+      ${courseProgressHtml(tot.explored, tot.topics)}
+    </section>` : `
+    <section class="ch-start" aria-labelledby="ch-start-h">
+      <p class="ch-eyebrow">Done</p>
+      <h2 id="ch-start-h">Every chapter read</h2>
+      <p class="ch-start-where">The ${esc(B.libraryName)} stays open in any order.</p>
+      ${courseProgressHtml(tot.explored, tot.topics)}
+    </section>`}
+    <div class="ch-grid">
+      ${B.chapters.map(ch => {
+        const c = chapterCounts(B, ch);
+        return `
+      <button class="ch-card" data-ch="${esc(ch.id)}" type="button"
+              aria-label="Chapter ${ch.n}, ${esc(ch.title)}, ${c.topics} topics">
+        <span class="ch-card-head">
+          <span class="ch-card-n"><i>Chapter</i><b>${ch.n}</b></span>
+          <span class="ch-card-title"><b>${esc(ch.title)}</b><i>${esc(ch.dates)}</i></span>
+        </span>
+        ${ch.img ? `<img class="ch-card-img" src="${esc(ch.img)}" alt="${esc(ch.alt ?? '')}"
+             width="411" height="111" loading="lazy" decoding="async">` : ''}
+        <span class="ch-card-body">
+          <span class="ch-card-prev">${esc(ch.preview)}</span>
+          <span class="ch-card-foot">
+            <span class="ch-card-count">${c.topics} topics${c.explored ? ` &middot; ${c.explored} explored` : ''}</span>
+            <span class="ch-card-go">Explore chapter <span aria-hidden="true">&rarr;</span></span>
+          </span>
+        </span>
+      </button>`; }).join('')}
+    </div>
+    ${B.dateNote ? `<p class="ch-datenote">${esc(B.dateNote)}</p>` : ''}`;
+  el.querySelector('#ch-go')?.addEventListener('click', () => renderActingLesson(next.id));
+  el.querySelectorAll('[data-ch]').forEach(b =>
+    b.addEventListener('click', () => navTo(() => renderChapter(B.ws, b.dataset.ch))));
+}
+
+// One chapter: its topics, each opening the lessons it holds. The cross-link
+// topic opens another workspace instead, and says so on the card rather than
+// pretending to be a chapter of this course.
+function renderChapter(ws, chId) {
+  const B = BOOKS[ws];
+  const ch = B.chapters.find(c => c.id === chId);
+  if (!ch) return goSection('learn');
+  record(() => renderChapter(ws, chId));
+  const ts = chapterTopics(B, ch);
+  app.innerHTML = `
+    ${pageTopbar(`Chapter ${ch.n}`)}
+    <main class="wrap">
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <button class="crumb" id="cr-learn" type="button">${esc(B.title)}</button>
+        <span class="crumb-sep" aria-hidden="true">&rsaquo;</span>
+        <span class="crumb is-here" aria-current="page">Chapter ${ch.n}</span>
+      </nav>
+      <div class="ws-head">
+        <h1 class="page-h">${esc(ch.title)}</h1>
+        <p class="ws-sub">${esc(ch.dates)}</p>
+      </div>
+      ${ch.img ? `<img class="ch-hero" src="${esc(ch.img)}" alt="${esc(ch.alt ?? '')}"
+           width="411" height="111" loading="lazy" decoding="async">` : ''}
+      <ol class="ch-topics">
+        ${ts.map((t, i) => {
+          const openTitle = t.course ? t.title : moduleTitle(B, t.mod ?? { title: '' });
+          const sub = t.course ? esc(t.note ?? '')
+            : `${t.lessons.length} lesson${t.lessons.length === 1 ? '' : 's'}`;
+          return `
+        <li><button class="ch-topic${topicExplored(t) ? ' is-done' : ''}${t.course ? ' is-link' : ''}"
+            data-topic="${esc(t.course ? 'course:' + t.course : t.module)}" type="button">
+          <span class="ch-topic-n">${i + 1}</span>
+          <span class="ch-topic-t"><b>${esc(openTitle)}</b><i>${sub}</i></span>
+          <span class="ch-topic-go" aria-hidden="true">${t.course ? '&#8599;' : '&rsaquo;'}</span>
+        </button></li>`; }).join('')}
+      </ol>
+      ${B.dateNote ? `<p class="ch-datenote">${esc(B.dateNote)}</p>` : ''}
+    </main>`;
+  wireBrandHome();
+  app.querySelector('#cr-learn')?.addEventListener('click', () => goSection('learn'));
+  app.querySelectorAll('[data-topic]').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.topic;
+    if (v.startsWith('course:')) { setWorkspace(v.slice(7)); return goSection('learn'); }
+    navTo(() => renderActingCollection(v));
+  }));
 }
 
 function bookLearnPane(el, B) {
@@ -7821,14 +7955,15 @@ function bookLibraryPane(el, B) {
   // page, which is the failure a grouping layer invites, so anything the
   // parts do not claim is swept into a final group rather than dropped. The
   // suite pins that the sweep is empty; this is the belt to its braces.
-  const claimed = new Set((B.parts ?? []).flatMap(p => p.modules));
+  const chModules = ch => ch.topics.filter(t => t.module).map(t => t.module);
+  const claimed = new Set((B.chapters ?? []).flatMap(chModules));
   const leftovers = B.collections.filter(c => !claimed.has(c.id));
-  const grouped = B.parts ? `
-      ${B.parts.map(part => `
+  const grouped = B.chapters ? `
+      ${B.chapters.map(ch => `
       <section class="lib-part">
-        <h2 class="sec-h lib-part-h"><span class="lib-part-n">${part.n}</span>${esc(part.title)}</h2>
-        ${part.blurb ? `<p class="lib-part-blurb">${esc(part.blurb)}</p>` : ''}
-        <div class="tile-grid">${part.modules.map(id => byId.get(id)).filter(Boolean).map(shelf).join('')}</div>
+        <h2 class="sec-h lib-part-h"><span class="lib-part-n">${ch.n}</span>${esc(ch.title)}</h2>
+        ${ch.dates ? `<p class="lib-part-blurb">${esc(ch.dates)}</p>` : ''}
+        <div class="tile-grid">${chModules(ch).map(id => byId.get(id)).filter(Boolean).map(shelf).join('')}</div>
       </section>`).join('')}
       ${leftovers.length ? `
       <section class="lib-part">
@@ -7839,7 +7974,8 @@ function bookLibraryPane(el, B) {
   el.innerHTML = `
     <div class="ws-head">
       <h1 class="page-h">${esc(B.libraryName)}</h1>
-      <p class="ws-sub">Every chapter is free to read in any order.</p>
+      <p class="ws-sub">${B.chapters ? 'Every topic is free to read in any order.'
+        : 'Every chapter is free to read in any order.'}</p>
     </div>${grouped}`;
   el.querySelectorAll('[data-tile]').forEach(b =>
     b.addEventListener('click', () => navTo(() => renderActingCollection(b.dataset.tile.slice(4)))));

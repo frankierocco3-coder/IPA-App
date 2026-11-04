@@ -1272,6 +1272,87 @@ body.modal-open { overflow: hidden; }
    nav instead of scrolling. */
 .ws-menu { max-height: calc(100dvh - 215px); overflow-y: auto; overscroll-behavior: contain; }
 
+/* ── Theatre History: chapters (owner handoff, 2026-11-04) ──
+   Four chapter cards on Learn, then a chapter's topic list. Scoped to
+   `.ch-*` so no other course's Learn page is touched.
+
+   NOTE: `--sans` is used 21 times in this stylesheet and defined nowhere,
+   so every one of those rules quietly inherits the serif. The rules below
+   pass a fallback stack instead of relying on it, which is why they read as
+   sans and the older ones do not. Defining the token would change all 21 at
+   once and is a separate decision.
+
+   The card is ONE button rather than a link wrapping more buttons: the
+   handoff asks for the whole card to be clickable and warns against nesting
+   interactive elements, which is also what keeps it reachable with one tab
+   stop and one Enter. */
+.ch-meta { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 13px; font-weight: 700; color: var(--muted); margin: 6px 0 0; }
+.ch-start {
+  background: var(--panel); border: 2px solid var(--line); border-radius: 16px;
+  padding: 16px 18px; margin: 16px 0 22px;
+}
+.ch-eyebrow {
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 11px; font-weight: 800; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--green-dark); margin: 0 0 2px;
+}
+.ch-start h2 { margin: 0 0 2px; font-size: 22px; }
+.ch-start-where { color: var(--muted); font-size: 14px; margin: 0 0 12px; }
+.ch-start-go { margin-bottom: 12px; }
+
+.ch-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+/* One column when two cannot hold a readable heading — the handoff's rule,
+   and the chapter order stays 1-4 either way because it is source order. */
+@media (max-width: 760px) { .ch-grid { grid-template-columns: 1fr; } }
+.ch-card {
+  font: inherit; text-align: left; cursor: pointer; color: var(--ink);
+  background: var(--bg); border: 2px solid var(--line); border-radius: 16px;
+  overflow: hidden; display: flex; flex-direction: column; padding: 0;
+}
+.ch-card:hover { border-color: var(--green); }
+.ch-card:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+.ch-card-head { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px 10px; background: var(--accent-tint); }
+.ch-card-n { display: flex; flex-direction: column; line-height: 1; }
+.ch-card-n i { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.ch-card-n b { font-size: 34px; color: var(--green-dark); }
+.ch-card-title { display: flex; flex-direction: column; gap: 2px; padding-left: 12px; border-left: 2px solid var(--gold); }
+.ch-card-title b { font-family: var(--serif); font-size: 19px; line-height: 1.2; }
+.ch-card-title i { color: var(--muted); font-size: 13px; }
+/* The supplied crops are ~411x111 and soft; they are banners at their own
+   size and are never scaled up to imply detail that is not there. */
+.ch-card-img { width: 100%; aspect-ratio: 3.65 / 1; object-fit: cover; display: block; }
+.ch-card-body { display: flex; flex-direction: column; gap: 10px; padding: 12px 16px 14px; }
+.ch-card-prev { color: var(--ink); font-size: 14px; }
+.ch-card-foot { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.ch-card-count { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 12px; font-weight: 700; color: var(--muted); }
+.ch-card-go { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 13px; font-weight: 800; color: var(--green-dark); }
+.ch-datenote { text-align: center; color: var(--muted); font-style: italic; font-size: 13px; margin: 22px 0 0; }
+
+.crumbs { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; flex-wrap: wrap; }
+.crumb { font: inherit; font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 13px; font-weight: 700; background: none; border: none; padding: 0; cursor: pointer; color: var(--green-dark); text-decoration: underline; }
+.crumb.is-here { color: var(--muted); text-decoration: none; cursor: default; }
+.crumb-sep { color: var(--muted); }
+
+.ch-hero { width: 100%; max-width: 420px; aspect-ratio: 3.65 / 1; object-fit: cover; border-radius: 12px; display: block; margin: 0 0 16px; }
+.ch-topics { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ch-topic {
+  font: inherit; width: 100%; text-align: left; cursor: pointer; color: var(--ink);
+  display: flex; align-items: center; gap: 14px;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 12px 14px;
+}
+.ch-topic:hover { border-color: var(--green); }
+.ch-topic:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+.ch-topic-n {
+  flex: none; width: 30px; height: 30px; border-radius: 9px; display: inline-flex;
+  align-items: center; justify-content: center; background: var(--bg); border: 2px solid var(--line);
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif); font-size: 13px; font-weight: 800; color: var(--muted);
+}
+.ch-topic-t { flex: 1; display: flex; flex-direction: column; }
+.ch-topic-t b { font-family: var(--serif); font-size: 17px; }
+.ch-topic-t i { color: var(--muted); font-size: 12.5px; font-style: normal; }
+.ch-topic-go { color: var(--muted); font-size: 20px; }
+.ch-topic.is-done .ch-topic-n { background: var(--accent-tint); color: var(--green-dark); border-color: var(--green); }
+.ch-topic.is-link { border-style: dashed; }
+
 /* ── Library parts (2026-11-04) ─────────────────────────────
    The grouping layer Theatre History needed and no other book has: seven
    headed sections over its twenty shelves. Scoped to `.lib-part` so every

@@ -117,7 +117,7 @@ import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible
 // of failures, it is no run at all.
 import { COMMEDIA_LESSONS, COMMEDIA_MODULES, COMMEDIA_COLLECTIONS,
          COMMEDIA_PRINCIPLE } from '../js/data/commedia/commedia-course.js';
-import { THEATRE_LESSONS, THEATRE_MODULES, THEATRE_COLLECTIONS, THEATRE_PARTS } from '../js/data/theatre/theatre-course.js';
+import { THEATRE_LESSONS, THEATRE_MODULES, THEATRE_COLLECTIONS, THEATRE_CHAPTERS } from '../js/data/theatre/theatre-course.js';
 import { SCREEN_LESSONS, SCREEN_MODULES, SCREEN_COLLECTIONS } from '../js/data/screen/screen-course.js';
 import { MUSICAL_LESSONS, MUSICAL_MODULES, MUSICAL_COLLECTIONS } from '../js/data/musical/musical-course.js';
 import { CHARACTER_FIGURES, characterFigure } from '../js/data/character/art.js';
@@ -7327,34 +7327,55 @@ export async function run({ navDoc = document } = {}) {
         `live=${B.live}, in switcher=${liveWorkspaces().some(w => w.id === B.key)}, `
         + `${B.lessons.filter(l => speechPublished(l.id)).length}/${B.lessons.length} published, `
         + `${B.lessons.filter(l => speechReviewFor(l.id)).length} with a ledger entry`);
-      // THE PART LAYER, AND THE ONE WAY IT CAN GO WRONG (2026-11-04).
-      // Theatre History groups its twenty shelves under seven parts. The
-      // Library renders FROM the parts, so a module missing from the list
-      // would simply stop appearing on the page — content that still
-      // exists, is still published, and is reachable from nowhere. That is
-      // the failure a grouping layer invites and the reason this check
-      // exists. It also pins that no module is claimed twice, which would
-      // shelve the same chapters under two headings.
+      // THE CHAPTER LAYER, AND THE ONE WAY IT CAN GO WRONG (2026-11-04).
+      // Theatre History groups its eighteen topics under four chapters, and
+      // Learn renders FROM the chapters — so a module in no chapter would
+      // stop appearing anywhere a learner can reach, while still existing
+      // and still being published. That is the failure a grouping layer
+      // invites and the reason these checks exist.
       if (B.key === 'theatre') {
-        const claimed = THEATRE_PARTS.flatMap(p => p.modules);
+        const chMods = THEATRE_CHAPTERS.flatMap(c => c.topics.filter(t => t.module).map(t => t.module));
         const modIds2 = B.modules.map(m => m.id);
-        check('theatre: every module belongs to exactly one part',
-          claimed.length === modIds2.length
-          && claimed.length === new Set(claimed).size
-          && modIds2.every(id => claimed.includes(id))
-          && claimed.every(id => modIds2.includes(id)),
-          `${claimed.length} claimed, ${modIds2.length} modules, `
-          + `unclaimed ${modIds2.filter(id => !claimed.includes(id)).join(',') || 'none'}`);
-        check('theatre: the parts are numbered 1..n in order, each with a title',
-          THEATRE_PARTS.every((p, i) => p.n === i + 1 && !!p.title && !!p.id)
-          && new Set(THEATRE_PARTS.map(p => p.id)).size === THEATRE_PARTS.length,
-          THEATRE_PARTS.map(p => p.n).join(' '));
-        // The parts must not reorder the course: flattening them has to give
-        // back the module sequence the Learn path walks, or the Library and
-        // the pathway would disagree about what comes after what.
-        check('theatre: flattening the parts reproduces the module order exactly',
-          claimed.join() === modIds2.join(),
-          `parts: ${claimed.slice(0, 4).join(',')}… modules: ${modIds2.slice(0, 4).join(',')}…`);
+        check('theatre: every module belongs to exactly one chapter',
+          chMods.length === modIds2.length
+          && chMods.length === new Set(chMods).size
+          && modIds2.every(id => chMods.includes(id)),
+          `${chMods.length} claimed, ${modIds2.length} modules, `
+          + `unclaimed ${modIds2.filter(id => !chMods.includes(id)).join(',') || 'none'}`);
+        // The approved landing page says four chapters and nineteen topics,
+        // and a topic is a module OR a cross-link to another course. If this
+        // drifts, the page prints a count it does not show.
+        const topicCount = THEATRE_CHAPTERS.reduce((n, c) => n + c.topics.length, 0);
+        check('theatre: four chapters and nineteen topics, 3 / 6 / 6 / 4',
+          THEATRE_CHAPTERS.length === 4 && topicCount === 19
+          && String(THEATRE_CHAPTERS.map(c => c.topics.length)) === String([3, 6, 6, 4]),
+          `${THEATRE_CHAPTERS.length} chapters, ${topicCount} topics, `
+          + THEATRE_CHAPTERS.map(c => c.topics.length).join('/'));
+        // Flattening the chapters has to give back the module order the Learn
+        // path walks, or the chapter card and the pathway disagree about what
+        // comes next. This is what pins Shakespeare ahead of Kabuki.
+        check('theatre: flattening the chapters reproduces the module order exactly',
+          chMods.join() === modIds2.join(),
+          `chapters: ${chMods.slice(0, 4).join(',')}… modules: ${modIds2.slice(0, 4).join(',')}…`);
+        // Every chapter needs its number, title, dates and illustration, and
+        // an illustration needs alt text — it is a real picture, not decoration.
+        check('theatre: every chapter carries number, title, dates, image and alt text',
+          THEATRE_CHAPTERS.every((c, i) => c.n === i + 1 && !!c.title && !!c.dates
+            && !!c.img && !!c.alt && !!c.preview && !!c.id),
+          THEATRE_CHAPTERS.map(c => c.n).join(' '));
+        // The two merges must keep BOTH bodies: Ancient Rome and Medieval
+        // Theatre each hold the two lessons they were made from.
+        const inMod = id => THEATRE_LESSONS.filter(l => l.module === id).map(l => l.id);
+        check('theatre: the two merged topics kept both of their lessons',
+          String(inMod('th-romanstage')) === String(['th-romanstage', 'th-roman'])
+          && String(inMod('th-sacred-drama')) === String(['th-sacred', 'th-medieval']),
+          `rome ${inMod('th-romanstage')} / medieval ${inMod('th-sacred-drama')}`);
+        // The retired module ids must not come back; they are not reused.
+        check('theatre: the merged-away module ids stay retired',
+          !modIds2.includes('th-latin') && !modIds2.includes('th-town'));
+        // His label, verbatim.
+        check('theatre: Russia keeps the label the handoff names',
+          B.modules.some(m => m.title === 'Russia: Realism & the Modern Actor'));
       }
 
       // AND PUBLICATION IS STILL NOT REVIEW. The entries are owner

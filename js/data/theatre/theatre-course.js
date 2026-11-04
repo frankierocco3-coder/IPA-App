@@ -47,103 +47,141 @@
 export const THEATRE_PRINCIPLE =
   'Theatre has no agreed first moment and no single tradition. Walk the history as a working actor: what each form asked of a performer, and what it left behind that you can still use.';
 
-// ── PARTS: the layer above the modules (owner order 2026-11-04) ──
+// ── CHAPTERS: the layer above the topics (owner handoff, 2026-11-04) ──
 //
-// WHY THIS EXISTS, AND WHY IT IS NOT A REGROUPING. Theatre History runs
-// TWENTY modules over twenty-two lessons: nineteen of them hold exactly one
-// chapter. Every other course here runs four to six lessons per module. So
-// its module layer stopped grouping anything, and because THEATRE_COLLECTIONS
-// is derived MODULES.map(...), the Library shelf layer mirrored a layer that
-// was already one-to-one with the chapters — three levels that were all the
-// same level, and a Library that was twenty flat cards to scroll.
+// THE LANDING PAGE HE APPROVED IS FOUR CARDS, NOT NINETEEN. Theatre History
+// ran twenty modules over twenty-two lessons — nineteen of them one chapter
+// each — so its own module layer had stopped grouping anything and the
+// Library was twenty flat cards to scroll. This is the approved answer:
+// four chapters, nineteen topics, Learn -> Chapter -> Topic -> Lesson.
 //
-// The obvious fix is to merge the modules back into six. That is the wrong
-// fix twice over: it undoes the 2026-11-03 order that a module is ONE
-// SUBJECT rather than a bracket around whatever fitted, and it collides with
-// the 2026-10-21 order that every shelf carries its module's name, so the
-// same chapters never answer to two names on two pages.
+// IT REPLACES THE SEVEN-PART LAYER of earlier the same day. That was the
+// same diagnosis and a different grouping, written before this handoff
+// existed; keeping both would be two groupings of one course.
 //
-// Both of those orders are right. Theatre History is simply where they
-// collide, because its subjects genuinely are one chapter each. So this adds
-// a level ABOVE the modules instead of merging them: nothing is renamed, no
-// module id moves, no lesson order changes, and the shelf still carries its
-// module's name. Parts group; modules remain the subject.
+// THE VOCABULARY IS THE HANDOFF'S AND IT COLLIDES WITH THIS APP'S. Here a
+// "chapter" has always meant a LESSON — the Library still says every chapter
+// is free to read in any order. In the handoff a chapter is this new top
+// group and a topic is what the code calls a module. The approved mockup
+// prints CHAPTER 1..4, so the handoff wins on screen, and the Theatre
+// History Library copy changes to say "topic" so one page does not use the
+// word both ways. Everywhere else in the app, chapter still means lesson.
 //
-// TWO OF THESE EARN THEIR KEEP BEYOND BROWSING. 'Four Cities' restores the
-// shape of the module split on 2026-11-03 without un-splitting it — the four
-// are a thematic set inside one era, and as a part that reads as deliberate
-// rather than as four loose chapters. 'Classical Japan' names the one
-// geographic detour in an otherwise Western line, so Noh and Kabuki sitting
-// between the medieval town and Shakespeare is a choice on the page instead
-// of looking like a slip in the chronology.
-//
-// EVERY MODULE BELONGS TO EXACTLY ONE PART, and the suite pins that: a module
-// missing from this list would vanish from the Library, which is the failure
-// mode a grouping layer invites.
-export const THEATRE_PARTS = [
-  { n: 1, id: 'th-pt-ancient', title: 'Beginnings and the Ancient World',
-    blurb: 'Where theatre is held to begin, the festival that turned a chorus into a city arguing with itself, and what Rome made of the form when it crossed over.',
-    modules: ['th-origins', 'th-greeks', 'th-romanstage', 'th-latin'] },
-  { n: 2, id: 'th-pt-faith', title: 'Faith and the Town',
-    blurb: 'What actually continued after Rome, and the century when a whole town became the producer.',
-    modules: ['th-sacred-drama', 'th-town'] },
-  { n: 3, id: 'th-pt-japan', title: 'Classical Japan',
-    blurb: 'The detour, and it is deliberate: two traditions built on precision rather than illusion, running alongside the European story rather than after it.',
-    modules: ['th-noh-form', 'th-kabuki-form'] },
-  { n: 4, id: 'th-pt-earlymodern', title: 'The Early Modern Stage',
-    blurb: 'Two companies under two kinds of patronage, and the comedy that got close enough to power to be banned.',
-    modules: ['th-bard', 'th-france'] },
-  { n: 5, id: 'th-pt-popular', title: 'Popular Stages in America',
-    blurb: 'The caricature industry, the people working against it on the same stages, and the circuit that decided who was allowed in front of a crowd at all.',
-    modules: ['th-minstrel', 'th-variety'] },
-  { n: 6, id: 'th-pt-cities', title: 'Four Cities',
-    blurb: 'Moscow, Dublin, New York and Harlem: one era read through the four places that changed what a play could be about.',
-    modules: ['th-moscow', 'th-dublin', 'th-newyork', 'th-harlem'] },
-  { n: 7, id: 'th-pt-argument', title: 'Theatre as Argument',
-    blurb: 'Making the familiar strange, the promise that does not arrive, the stages built outside the institutions, and theatre used to rehearse change.',
-    modules: ['th-epic', 'th-dream-m', 'th-offbroadway', 'th-transformation'] },
+// NINETEEN TOPICS = 18 MODULES + 1 CROSS-LINK. Commedia dell'Arte is a topic
+// in chapter 2 and there has never been a commedia lesson in this course —
+// it is its own nine-chapter course in this app. Rather than write a thin
+// duplicate of material that already exists, the topic is a CROSS-LINK that
+// opens that course. A module with no lessons would also break the
+// contiguous-order invariant the suite pins, so this is the honest shape as
+// well as the safe one. If he wants a written timeline chapter here instead,
+// that is new content and needs a ledger entry in the same commit.
+export const THEATRE_CHAPTERS = [
+  { n: 1, id: 'th-ch-ancient', title: 'Origins & the Ancient Stage',
+    dates: 'Origins–c. 500 CE',
+    img: 'img/theatre/chapter-01-ancient.png',
+    alt: 'A sunlit ancient amphitheatre with theatrical masks and a classical column.',
+    preview: 'What Counts as Theatre? · Ancient Greece · Ancient Rome',
+    topics: [
+      { module: 'th-origins' },
+      { module: 'th-greeks' },
+      { module: 'th-romanstage' },
+    ] },
+  { n: 2, id: 'th-ch-earlymodern', title: 'Medieval & Early Modern Theatre',
+    dates: 'c. 900–1700',
+    img: 'img/theatre/chapter-02-early-modern.png',
+    alt: 'A Commedia performer beside the Globe playhouse and a Noh mask, shown as a symbolic collage.',
+    preview: 'Medieval theatre, Noh, Commedia, Shakespeare, Kabuki & Bunraku, and Molière.',
+    topics: [
+      { module: 'th-sacred-drama' },
+      { module: 'th-noh-form' },
+      { course: 'commedia', title: 'Commedia dell’Arte',
+        note: 'Its own course in this app, nine chapters long.' },
+      { module: 'th-bard' },
+      { module: 'th-kabuki-form' },
+      { module: 'th-france' },
+    ] },
+  { n: 3, id: 'th-ch-modern', title: 'The Modern Stage Takes Shape',
+    dates: 'c. 1800–1940',
+    img: 'img/theatre/chapter-03-modern.png',
+    alt: 'Actors studying scripts in a warm Russian rehearsal room beside a theatre marquee.',
+    preview: 'Minstrelsy & resistance, vaudeville, Russia, Dublin, New York, and Harlem.',
+    topics: [
+      { module: 'th-minstrel' },
+      { module: 'th-variety' },
+      { module: 'th-moscow' },
+      { module: 'th-dublin' },
+      { module: 'th-newyork' },
+      { module: 'th-harlem' },
+    ] },
+  { n: 4, id: 'th-ch-experimental', title: 'Political & Experimental Theatre',
+    dates: 'c. 1920–present',
+    img: 'img/theatre/chapter-04-experimental.png',
+    alt: 'A performer addressing spectators in an intimate experimental theatre with visible stage lights.',
+    preview: 'Brecht, postwar American drama, stages beyond Broadway, Grotowski & Boal.',
+    topics: [
+      { module: 'th-epic' },
+      { module: 'th-dream-m' },
+      { module: 'th-offbroadway' },
+      { module: 'th-transformation' },
+    ] },
 ];
 
+// THE DATES ARE COVERAGE, NOT LIFESPANS, and this line is his, verbatim. Noh,
+// Kabuki and Bunraku are living traditions and the handoff is explicit that
+// no end date may be implied for them.
+export const THEATRE_DATE_NOTE = 'Traditions overlap; these dates guide the journey.';
+export const THEATRE_SUBTITLE = 'Explore the history of the stage, one chapter at a time.';
+
 export const THEATRE_MODULES = [
-  { n: 1, id: 'th-origins', title: 'What Counts as Theatre',
+  { n: 1, id: 'th-origins', title: 'What Counts as Theatre?',
     blurb: 'No agreed first moment and five competing theories: ritual, myth, clowning, play and the urge to imitate, and what changes when an ordinary action is framed for someone to watch.' },
-  { n: 2, id: 'th-greeks', title: 'The Greeks',
+  { n: 2, id: 'th-greeks', title: 'Ancient Greece',
     blurb: 'The festival that turned a chorus into a city arguing with itself, the vocabulary Aristotle built from it, and the comedy that made authority ridiculous.' },
-  { n: 3, id: 'th-romanstage', title: 'The Roman Stage',
+  // ANCIENT ROME IS TWO MODULES MERGED, and both bodies are kept whole:
+  // 'From Greek Comedy to the Roman Stage' and 'Roman Comedy and Tragedy'
+  // now sit in one topic in that order. The retired id is 'th-latin'; it
+  // stays retired and is never reused.
+  { n: 3, id: 'th-romanstage', title: 'Ancient Rome',
     blurb: 'What changes when a theatrical form crosses into another society, with its own festivals, its own competition for attention and its own Italian comic traditions already in place.' },
-  { n: 4, id: 'th-latin', title: 'Roman Comedy and Tragedy',
-    blurb: 'Stock types as a starting point rather than a performance, language as theatrical action, mistaken identity that matters, and speech that carries a character towards a decision.' },
-  { n: 5, id: 'th-sacred-drama', title: 'Sacred Drama',
+  // MEDIEVAL THEATRE IS THE OTHER MERGE, same rule: 'From Roman Spectacle
+  // to Medieval Sacred Drama' and 'The Town Becomes the Stage' in one
+  // topic. The retired id is 'th-town'.
+  { n: 4, id: 'th-sacred-drama', title: 'Medieval Theatre',
     blurb: 'What actually continued after Rome, and the Easter sepulchre exchange read as a piece of playable action rather than as the moment theatre restarted.' },
-  { n: 6, id: 'th-town', title: 'The Town Becomes the Stage',
-    blurb: 'Mystery, morality, miracle and folk drama, a whole town as the producer, and how to make a large idea concrete through a person, a purpose and an obstacle.' },
-  { n: 7, id: 'th-noh-form', title: 'Noh',
+  { n: 5, id: 'th-noh-form', title: 'Noh',
     blurb: 'A form built on precision rather than illusion, where a gesture, a turn or a musical cue can transform an encounter, and doing less is not making less happen.' },
-  { n: 8, id: 'th-kabuki-form', title: 'Kabuki and Bunraku',
-    blurb: 'Spectacle that never hides its own construction, and a single character carried between a chanter, a musician and three puppeteers.' },
-  { n: 9, id: 'th-bard', title: 'Shakespeare',
+  // SHAKESPEARE NOW PRECEDES KABUKI, which is a real change to the reading
+  // order and not a display trick: the approved chapter 2 runs Medieval,
+  // Noh, Commedia, Shakespeare, Kabuki & Bunraku, Molière. The two lesson
+  // `order` values were swapped to match, so the Learn path and the
+  // chapter card cannot disagree about what comes next. No id moved.
+  { n: 6, id: 'th-bard', title: 'Shakespeare & the English Renaissance',
     blurb: 'Disguise, desire and recognition, and the question of whose happiness a happy ending actually serves.' },
-  { n: 10, id: 'th-france', title: 'Molière',
+  { n: 7, id: 'th-kabuki-form', title: 'Kabuki & Bunraku',
+    blurb: 'Spectacle that never hides its own construction, and a single character carried between a chanter, a musician and three puppeteers.' },
+  { n: 8, id: 'th-france', title: 'Molière & French Theatre',
     blurb: 'A company under royal patronage, and the comedy that got close enough to power to be banned.' },
-  { n: 11, id: 'th-minstrel', title: 'Minstrelsy and Resistance',
+  { n: 9, id: 'th-minstrel', title: 'Minstrelsy & Resistance',
     blurb: 'The caricature industry that sold a version of Black life to white audiences, and the Black theatre-makers working against it on the same stages.' },
-  { n: 12, id: 'th-variety', title: 'Vaudeville',
+  { n: 10, id: 'th-variety', title: 'Vaudeville',
     blurb: 'Seven to ten acts, nine minutes each, and the booking circuit that decided who was allowed to stand in front of a crowd at all.' },
-  { n: 13, id: 'th-moscow', title: 'Moscow',
+  // THE LABEL IS THE OWNER'S, VERBATIM: 'Russia: Realism & the Modern
+  // Actor'. It was 'Moscow' and the handoff names this one explicitly.
+  { n: 11, id: 'th-moscow', title: 'Russia: Realism & the Modern Actor',
     blurb: 'A life changing while somebody discusses the weather, and the actor’s tools for finding the purposeful activity inside it.' },
-  { n: 14, id: 'th-dublin', title: 'Dublin',
+  { n: 12, id: 'th-dublin', title: 'Dublin & the Irish Theatre Revival',
     blurb: 'A national theatre giving a community a voice and arguing with its image of itself in the same season.' },
-  { n: 15, id: 'th-newyork', title: 'New York',
+  { n: 13, id: 'th-newyork', title: 'New York & the Little Theatre Movement',
     blurb: 'Small stages, ordinary lives, and the competing forms that opened once a play no longer had to be a recognisable room.' },
-  { n: 16, id: 'th-harlem', title: 'Harlem',
+  { n: 14, id: 'th-harlem', title: 'Harlem & Black Theatre',
     blurb: 'A community taking control of who could author, produce, perform and judge a play, not only of which plays were written.' },
-  { n: 17, id: 'th-epic', title: 'Brecht',
+  { n: 15, id: 'th-epic', title: 'Brecht & Political Theatre',
     blurb: 'Gestus, episodic structure and behaviour shown as the product of circumstances, so an audience can care what happens and still ask why it happens that way.' },
-  { n: 18, id: 'th-dream-m', title: 'The American Dream',
+  { n: 16, id: 'th-dream-m', title: 'Postwar American Drama',
     blurb: 'A family argument carrying memory, money, prejudice and an inherited promise into the room with the characters.' },
-  { n: 19, id: 'th-offbroadway', title: 'Beyond Broadway',
+  { n: 17, id: 'th-offbroadway', title: 'Beyond Broadway',
     blurb: 'Who can make work, for whom, and under whose control, and what the stages built outside the institutions made possible.' },
-  { n: 20, id: 'th-transformation', title: 'Grotowski and Boal',
+  { n: 18, id: 'th-transformation', title: 'Grotowski & Boal',
     blurb: 'A practice that strips the performer’s work to its essentials, one that dissolves the line between actor and spectator, and the claim that theatre transforms.' },
 ];
 
@@ -1863,7 +1901,7 @@ export const THEATRE_LESSONS = [
       { key: 'The same story changes when its audience, setting, rhythm, and conditions change.' },
     ] },
 
-  { id: 'th-roman', module: 'th-latin', order: 6,
+  { id: 'th-roman', module: 'th-romanstage', order: 6,
     title: 'Roman Comedy and Tragedy',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -2577,7 +2615,7 @@ export const THEATRE_LESSONS = [
       { key: 'A familiar story becomes dramatic when someone pursues a purpose, encounters new evidence, and changes what they do.' },
     ] },
 
-  { id: 'th-medieval', module: 'th-town', order: 8,
+  { id: 'th-medieval', module: 'th-sacred-drama', order: 8,
     title: 'Medieval Theatre: The Town Becomes the Stage',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -3397,7 +3435,7 @@ export const THEATRE_LESSONS = [
       { key: 'Do not confuse doing less with making less happen. Give every action attention, direction, and consequence.' },
     ] },
 
-  { id: 'th-kabuki', module: 'th-kabuki-form', order: 10,
+  { id: 'th-kabuki', module: 'th-kabuki-form', order: 11,
     title: 'Kabuki and Bunraku',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
@@ -3830,7 +3868,7 @@ export const THEATRE_LESSONS = [
       { key: 'Believability does not require ordinary behaviour. It requires clear intention, coherent response, and precise relationships between the parts.' },
     ] },
 
-  { id: 'th-shakespeare', module: 'th-bard', order: 11,
+  { id: 'th-shakespeare', module: 'th-bard', order: 10,
     title: 'Shakespeare’s Comedies, Heroines, and Uncertain Happy Endings',
     attribution: 'Theatre history',
     requiredReviewer: 'theatre-history',
