@@ -516,7 +516,30 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
   //
   // A workspace with no `img` renders its emoji here exactly as before, so
   // the two still undrawn degrade to today's behaviour rather than to blanks.
+  // ── BACK, TOP LEFT, ON EVERY PAGE THAT HAS ONE (owner order,
+  // 2026-11-04) ───────────────────────────────────────────────
+  // Sub-pages have had a `‹` since pageTopbar existed — 107 of them. The
+  // pages that did not were the ones rendered INSIDE the shell: the six
+  // section roots and, the one he was looking at, every lesson screen.
+  // A lesson had only its breadcrumb and the sidebar wordmark, and
+  // CLAUDE.md's note that lesson screens carry a `#quit` ✕ is stale for
+  // the study layout, which carries neither.
+  //
+  // ONE PLACE COVERS BOTH, because the lesson page renders its own
+  // `#statsbar` (`.lx-bar`) and this function fills it. So the arrow
+  // lands on every shell page and every lesson from a single edit, and
+  // nowhere near the topbar pages that already have their own.
+  //
+  // IT HIDES WHERE THERE IS GENUINELY NOWHERE TO GO, and the ordering
+  // makes that free rather than a guess. renderShell calls resetNav()
+  // before it calls this, so a section root reports an empty stack; the
+  // lesson calls this AFTER its own record(), so it reports one. An
+  // arrow on a page with no history would be a control that lies, which
+  // is worse than no control.
+  const canBack = navStack.length > 0;
   bar.innerHTML = `
+    <button class="backbtn statsbar-back" id="shell-back" type="button"
+            aria-label="Back" title="Back"${canBack ? '' : ' hidden'}>‹</button>
     <button class="stat-chip ws-chip" id="ws-chip" type="button"
             aria-haspopup="menu" aria-expanded="false" title="Switch workspace or course"
             aria-label="Change workspace or course. Current workspace: ${esc(wsDef.label)}.">
@@ -553,6 +576,7 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
   // chip owns `#course-menu` and the workspace chip owns `#ws-menu`, so
   // opening one has to shut the other or a tap on the second leaves two
   // panels stacked over the page.
+  bar.querySelector('#shell-back')?.addEventListener('click', () => shellBack());
   const wsChip = bar.querySelector('#ws-chip');
   const wsMenu = bar.querySelector('#ws-menu');
   const chip = bar.querySelector('#course-chip');

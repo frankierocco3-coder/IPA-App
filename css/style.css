@@ -3667,6 +3667,14 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    where the owner's rendering puts them. */
 .lx-bar { margin: 0 0 14px; }
 
+/* The shell's back arrow (owner order, 2026-11-04). Same component as the
+   sub-page `.backbtn` so the two cannot drift, a size down because it
+   sits in a chip row rather than a page header, and `hidden` when the
+   nav stack is empty — see drawStatsbar for why that is exact rather
+   than a guess. */
+.statsbar-back { width: 36px; height: 36px; font-size: 22px; padding: 0 2px 2px 0; }
+.statsbar-back[hidden] { display: none; }
+
 /* The drawn ground, behind the whole page. Positioned against the shell
    and the three columns lifted above it, same as the Learn page. */
 .lx-shell.has-ground { position: relative; }
