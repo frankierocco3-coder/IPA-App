@@ -3616,9 +3616,17 @@ export async function run({ navDoc = document } = {}) {
       // The shared right rail legitimately names the next acting chapter
       // in its "Next step" card on every section, so chapter titles are
       // asserted absent from the Library pane itself, never the whole body.
+      // SELECTOR, NOT LAYOUT. These two pinned `.tile-grid .tile`, which was
+      // the Acting Library's only markup until the owner's approved panel
+      // redesign landed on 2026-11-04 — the doors render as `.lib-row`
+      // inside `.lib-panel` now, and both checks went red while the thing
+      // they protect was untouched. What they are actually about is WHICH
+      // DOORS the landing offers and in what order, so they ask for the
+      // doors: `main [data-tile]` is emitted by both the tile and the row,
+      // so this now holds whichever layout a library is rendered in.
       check('acting: the Library landing shows collections only, never all 39 items at once',
         doc.querySelector('.page-h')?.textContent === 'Acting Library'
-        && String([...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile))
+        && String([...doc.querySelectorAll('main [data-tile]')].map(b => b.dataset.tile))
           // Both cards are back (owner, 2026-09-29). Removing them was my
           // misreading of an order that was about what the LESSON carries.
           // col:rehearsal left this list on 2026-10-25 with its module.
@@ -3642,7 +3650,7 @@ export async function run({ navDoc = document } = {}) {
           libSearch20.value = q;
           libSearch20.dispatchEvent(new w20.Event('input', { bubbles: true }));
           await sleep(260);
-          found.push(`${q}:${[...doc.querySelectorAll('.tile-grid .tile')].map(b => b.dataset.tile).join('|') || 'NOTHING'}`);
+          found.push(`${q}:${[...doc.querySelectorAll('main [data-tile]')].map(b => b.dataset.tile).join('|') || 'NOTHING'}`);
         }
         check('acting: every standalone page on the shelf is findable by its own name',
           found.every(f => f.includes('col:scene')), found.join(' '));

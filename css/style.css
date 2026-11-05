@@ -1579,6 +1579,95 @@ body.modal-open { overflow: hidden; }
 .th-list { margin: 4px 0 12px; padding-left: 22px; display: grid; gap: 5px; }
 .th-list li { font-size: 15px; line-height: 1.45; }
 
+
+/* ══ The Library panel layout (owner handoff, 2026-11-04) ══════
+   His approved Acting Library: four illustrated panels in a two-column
+   grid, each a banner, a sage title bar and full-width rows carrying a
+   description. Opt-in — a library that passes no `panels` keeps the tile
+   grid, so the other five are untouched.
+
+   THE REFERENCE'S HEXES ARE NOT USED. It shipped its own approximations
+   (#f5efe4 cream, #d7dfbc sage, #a67b27 accent, #ded1bc line) and its own
+   START-HERE says to reuse equivalent app tokens, so these are --bg,
+   --accent-tint, --gold and --line. The one that matters is the line:
+   #ded1bc against the house #ddd6c4 is a difference nobody can see and a
+   second border colour everybody would have to maintain. */
+.lib-head { display: flex; align-items: center; gap: 24px; margin: 0 0 22px; flex-wrap: wrap; }
+.lib-head-intro { flex: 1 1 280px; min-width: 0; }
+.lib-head-search { flex: 0 1 460px; min-width: 220px; margin: 0; }
+.lib-head-search input { width: 100%; }
+.lib-resume {
+  font: inherit; font-family: var(--serif); font-size: 16px; cursor: pointer;
+  /* The mockup's warm brown, which is deliberately NOT one of the greens:
+     Resume is the one thing on this page that leaves it. There is no house
+     token at this value, so it is written once, here, rather than invented
+     as a --token nothing else would ever use. */
+  white-space: nowrap; color: #8c5a16; background: none;
+  border: 0; border-left: 1px solid var(--line); padding: 2px 0 2px 22px;
+}
+.lib-resume:hover { text-decoration: underline; }
+@media (max-width: 900px) {
+  .lib-head { gap: 12px; }
+  .lib-head-intro { flex-basis: 100%; }
+  .lib-head-search { flex: 1 1 100%; }
+  .lib-resume { border-left: 0; padding-left: 0; }
+}
+
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 22px 24px; align-items: start; }
+.lib-panel { min-width: 0; border: 2px solid var(--line); border-radius: 16px;
+  overflow: hidden; background: var(--panel); }
+/* The supplied banners are 654-690 x 128-129 and must not be enlarged —
+   the handoff says so and says detail does not come back. A fixed 5.2
+   ratio with cover crops a few pixels off the wider two rather than
+   scaling any of them up. */
+.lib-panel-banner { display: block; width: 100%; height: auto; aspect-ratio: 5.2 / 1;
+  object-fit: cover; background: var(--panel-2); }
+.lib-panel-h {
+  font-family: var(--serif); font-size: 21px; line-height: 1.15; margin: 0;
+  padding: 8px 20px; color: var(--ink); text-transform: uppercase;
+  letter-spacing: .01em; background: var(--accent-tint);
+}
+.lib-panel-rows { padding: 0 14px; }
+
+.lib-row {
+  font: inherit; text-align: left; cursor: pointer; color: var(--ink);
+  background: none; border: 0; border-bottom: 1px solid var(--line);
+  width: 100%; display: grid; align-items: center; gap: 12px;
+  grid-template-columns: 46px minmax(110px, .95fr) minmax(0, 1.15fr) 14px;
+  padding: 12px 4px;
+}
+.lib-panel-rows .lib-row:last-child { border-bottom: 0; }
+.lib-row:hover { background: var(--accent-tint); }
+.lib-row:focus-visible { outline: 3px solid var(--green-dark); outline-offset: -2px; border-radius: 8px; }
+.lib-row-ico { width: 42px; height: 42px; object-fit: contain; display: block; }
+.lib-row-ico.is-emoji { font-size: 26px; line-height: 42px; text-align: center; }
+.lib-row-name { font-family: var(--serif); font-size: 17px; font-weight: 700; line-height: 1.18; min-width: 0; }
+.lib-row-meta { display: block; font-family: inherit; font-size: 12.5px;
+  font-weight: 400; color: var(--muted); margin-top: 3px; }
+.lib-row-badge { margin-left: 6px; vertical-align: middle; }
+.lib-row-desc { font-size: 12.5px; line-height: 1.38; color: var(--ink);
+  border-left: 1px solid var(--line); padding-left: 20px; min-width: 0; }
+.lib-row-go { font-size: 20px; color: var(--muted); }
+
+/* Below the two-column width the description drops under the title and
+   loses its rule, which is the reference's own behaviour: a 12px column
+   of prose beside a title is unreadable before it is narrow enough to
+   wrap. */
+@media (max-width: 1100px) {
+  .lib-row { grid-template-columns: 38px minmax(0, 1fr) 14px; gap: 10px; }
+  .lib-row-ico { width: 34px; height: 34px; }
+  .lib-row-ico.is-emoji { line-height: 34px; }
+  .lib-row-desc { grid-column: 2; border-left: 0; padding-left: 0; margin-top: 4px; font-size: 13.5px; }
+  .lib-row-go { grid-column: 3; grid-row: 1 / span 2; }
+}
+@media (max-width: 620px) {
+  .lib-grid { grid-template-columns: 1fr; }
+  .lib-panel-h { font-size: 18px; padding: 8px 14px; }
+  .lib-panel-rows { padding: 0 10px; }
+  .lib-row-name { font-size: 16px; }
+}
+
 /* ══ Lesson prose furniture (2026-11-03) ══════════════════════
    Theatre History and Musical Theatre are long prose with a second
    heading level, ordered lists, defined terms, stated principles,

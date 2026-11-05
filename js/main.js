@@ -3399,10 +3399,27 @@ const TILE_TONES = ['is-sage', 'is-terracotta', 'is-blue', 'is-lavender', 'is-go
 // defaults to the lowercased name, which is right for acting, speech and
 // rhetoric and wrong for Shakespeare: lowercasing a proper noun was a live
 // copy defect the moment that library came through here (2026-09-28).
-function workspaceLibrary(el, { workspace, subject, cards, state }) {
+// ── One Library renderer, two layouts (owner handoff, 2026-11-04) ──
+// Six libraries call this: Speech, Acting, Rhetoric, Shakespeare and the
+// book courses. The owner's approved Acting Library redesign is a PANEL
+// layout — a banner, a sage title bar and full-width rows carrying a
+// description — and it is opt-in rather than a second renderer: pass
+// `panels` and you get it, pass nothing and you get the tile grid exactly
+// as the other five have always had it.
+//
+// Everything that is not layout stays shared and therefore stays tested:
+// the search box and its placeholder, the result count, the no-results
+// state, the counts and their pluraliser, and the [data-tile] wiring that
+// turns a key into navTo(card.go). A row carries data-tile like a tile
+// does, so the click handler below needed no change at all.
+function workspaceLibrary(el, { workspace, subject, cards, state, panels, subtitle, resume }) {
   const q = (state.query ?? '').trim().toLowerCase();
+  // THE DESCRIPTION IS SEARCHABLE TOO. The panel layout is the first to put
+  // a sentence on the page beside each title, and a reader who can see
+  // "given circumstances" has every right to expect searching it to work.
   const match = c => !q
     || c.title.toLowerCase().includes(q)
+    || (c.desc ?? '').toLowerCase().includes(q)
     || (c.keywords ?? '').toLowerCase().includes(q);
   const shown = cards.filter(match);
 
@@ -3414,16 +3431,34 @@ function workspaceLibrary(el, { workspace, subject, cards, state }) {
   const countLabel = c => c.count == null ? ''
     : `${c.count} ${c.count === 1 ? c.unit : plural(c.unit)}`;
 
-  el.innerHTML = `
+  // The panel layout puts the title, the search and Resume on one row at
+  // desktop width and stacks them below it; the tile layout keeps the
+  // stacked head it has always had.
+  const headHtml = panels ? `
+    <div class="lib-head">
+      <div class="lib-head-intro">
+        <h1 class="page-h">${esc(workspace)} Library</h1>
+        <p class="ws-sub">${esc(subtitle ?? `Browse the complete ${subject ?? workspace.toLowerCase()} reference by topic.`)}</p>
+      </div>
+      <label class="field lib-head-search" for="lib-search">
+        <span class="field-label sr-only">Search the Library</span>
+        <input class="sonnet-search" id="lib-search" type="search" value="${esc(state.query ?? '')}"
+               placeholder="Collection or topic…" autocomplete="off">
+      </label>
+      ${resume ? `<button class="lib-resume" id="lib-resume" type="button">${esc(resume.label)} <span aria-hidden="true">&rarr;</span></button>` : ''}
+    </div>` : `
     <div class="ws-head">
       <h1 class="page-h">${esc(workspace)} Library</h1>
-      <p class="ws-sub">Browse the complete ${esc(subject ?? workspace.toLowerCase())} reference by topic.</p>
+      <p class="ws-sub">${esc(subtitle ?? `Browse the complete ${subject ?? workspace.toLowerCase()} reference by topic.`)}</p>
     </div>
     <label class="field sp-search-field" for="lib-search">
       <span class="field-label">Search the Library</span>
       <input class="sonnet-search" id="lib-search" type="search" value="${esc(state.query ?? '')}"
              placeholder="Collection or topic…" autocomplete="off">
-    </label>
+    </label>`;
+
+  el.innerHTML = `
+    ${headHtml}
     ${state.extraHtml ?? ''}
     ${q ? `<p class="pane-note" aria-live="polite">${shown.length} result${shown.length === 1 ? '' : 's'} for “${esc(state.query)}”</p>`
         : (shown.some(c => c.group) ? '' : '<h2 class="sec-h">Collections</h2>')}
@@ -3436,6 +3471,36 @@ function workspaceLibrary(el, { workspace, subject, cards, state }) {
         key: c.key, tone: c.tone, emoji: c.emoji, img: c.img, title: c.title, wide: c.wide,
         badge: c.badge, meta: countLabel(c),
       });
+      // ── PANEL LAYOUT ──────────────────────────────────────
+      // Four illustrated panels in a two-column grid, each a banner, a
+      // sage title bar and its rows. A SEARCH FILTERS THE ROWS AND HIDES
+      // AN EMPTY PANEL rather than collapsing to a flat grid: the panels
+      // are how this page is read, and dropping them the moment somebody
+      // types would answer a search by rearranging the page.
+      if (panels) {
+        const row = c => `
+          <button class="lib-row" type="button" data-tile="${esc(c.key)}">
+            ${c.img ? `<img class="lib-row-ico" src="${esc(c.img)}" alt="" width="42" height="42">`
+                    : `<span class="lib-row-ico is-emoji" aria-hidden="true">${esc(c.emoji ?? '')}</span>`}
+            <span class="lib-row-name">${esc(c.title)}${
+              c.badge ? `<span class="tag lib-row-badge">${esc(c.badge.label)}</span>` : ''}${
+              countLabel(c) ? `<span class="lib-row-meta">${esc(countLabel(c))}</span>` : ''}</span>
+            <span class="lib-row-desc">${esc(c.desc ?? '')}</span>
+            <span class="lib-row-go" aria-hidden="true">&rsaquo;</span>
+          </button>`;
+        const built = panels.map(p => {
+          const rows = shown.filter(c => c.group === p.group);
+          if (!rows.length) return '';
+          return `
+            <section class="lib-panel">
+              <img class="lib-panel-banner" src="${esc(p.img)}" alt="${esc(p.alt ?? '')}"
+                   width="690" height="129" loading="lazy">
+              <h2 class="lib-panel-h">${esc(p.group)}</h2>
+              <div class="lib-panel-rows">${rows.map(row).join('')}</div>
+            </section>`;
+        }).join('');
+        return built ? `<div class="lib-grid">${built}</div>` : '';
+      }
       if (q || !shown.some(c => c.group)) return `<div class="tile-grid">${shown.map(tile).join('')}</div>`;
       let out = '', open = false, at = null;
       for (const c of shown) {
@@ -3456,14 +3521,15 @@ function workspaceLibrary(el, { workspace, subject, cards, state }) {
   input.addEventListener('input', () => {
     state.query = input.value;
     const at = input.selectionStart;
-    workspaceLibrary(el, { workspace, subject, cards, state });
+    workspaceLibrary(el, { workspace, subject, cards, state, panels, subtitle, resume });
     const again = el.querySelector('#lib-search');
     again.focus();
     try { again.setSelectionRange(at, at); } catch { /* fine */ }
   });
+  el.querySelector('#lib-resume')?.addEventListener('click', () => navTo(() => resume.go()));
   el.querySelector('#lib-clear')?.addEventListener('click', () => {
     state.query = '';
-    workspaceLibrary(el, { workspace, subject, cards, state });
+    workspaceLibrary(el, { workspace, subject, cards, state, panels, subtitle, resume });
     el.querySelector('#lib-search').focus();
   });
   state.wire?.(el);
@@ -5892,6 +5958,23 @@ function actingLibraryPane(el) {
       + 'question everything Question Everything dissection given circumstances objective '
       + 'obstacle tactics text investigation questions',
   };
+  // ── The owner's approved descriptions (handoff, 2026-11-04) ───
+  // Verbatim from his content.json. One line per door, shown beside the
+  // title in the panel layout and searchable with it.
+  const DESC = {
+    'col:scene': 'Break down the script to find its action, stakes and meaning.',
+    'col:lists': 'Use four focused lists to clarify the essentials of each scene.',
+    'col:question': 'Ask the right questions to uncover deeper choices and possibilities.',
+    'col:principles': 'Discover the given circumstances and human behavior that drive action.',
+    'col:listening': 'Build truthful, alive exchanges through active listening and clear response.',
+    'col:rhythm': 'Work with timing, pace and rhythm to give your performance energy and life.',
+    'col:actions': 'Turn analysis into clear, playable acting choices on stage or screen.',
+    'col:monologues': 'A wide range of monologues for study, practice and performance.',
+    'col:scenes': 'Curated scenes for two or more actors, from classic and modern plays.',
+    'col:approaches': 'Explore major acting methods and ideas to expand your practice.',
+    'col:professional': 'Practical guidance on training, rehearsal, collaboration and a life in the theatre.',
+    'col:textbook': 'A comprehensive reference for the craft, process and practice of acting.',
+  };
   const colTile = id => {
     // A WITHDRAWN COLLECTION HAS NO RECORD, so this returns null and the
     // caller drops the tile. 'rehearsal' went behind PERFORMANCE_LIVE on
@@ -5909,6 +5992,7 @@ function actingLibraryPane(el) {
       emoji: ACTING_COLLECTION_EMOJI[c.id], img: COL_ART[c.id], title: c.title,
       keywords: [c.lessons.map(lid => actingLessonById(lid)?.title ?? '').join(' '),
         EXTRA_KEYWORDS[c.id] ?? ''].join(' ').trim(),
+      desc: DESC[`col:${c.id}`],
       go: () => renderActingCollection(c.id),
     };
   };
@@ -5984,8 +6068,37 @@ function actingLibraryPane(el) {
       go: renderTextbook },
     // `{ ...null }` spreads to `{}`, so a withdrawn colTile leaves a tile
     // with a group and no key. Dropping on `key` removes exactly those.
-  ].filter(c => c.key);
-  workspaceLibrary(el, { workspace: 'Acting', cards, state: libState.acting });
+  ].filter(c => c.key).map(c => ({ ...c, desc: c.desc ?? DESC[c.key] }));
+  // ── The approved panel layout (owner handoff, 2026-11-04) ─────
+  // The four groups were already the shelf's reading order (owner UI pass
+  // 2026-09-15) and the twelve doors were already these twelve in this
+  // order, so NOTHING MOVED: the mockup was made from the live page. What
+  // this adds is a banner per group, a description per door, and the row
+  // layout. The counts stay computed — 178 monologues is
+  // Object.values(LIBRARIES) and 27 scenes is PROVIDED_SCENES.length, and
+  // both happened to match the screenshot exactly, which is the proof.
+  //
+  // A GROUP WITH NO DOORS RENDERS NOTHING rather than an empty frame, so
+  // Develop the Performance is four rows today and five the day
+  // PERFORMANCE_LIVE flips, with no edit here.
+  const panels = [
+    { group: G1, img: 'img/library/prepare.jpg',
+      alt: 'Script pages and a pencil on a warmly lit wooden rehearsal table.' },
+    { group: G2, img: 'img/library/develop.jpg',
+      alt: 'Two actors shown head to toe rehearsing a scene in a sunlit studio.' },
+    { group: G3, img: 'img/library/material.jpg',
+      alt: 'A hand selecting a green play volume from shelves of scripts in a warmly lit library.' },
+    { group: G4, img: 'img/library/deepen.jpg',
+      alt: 'An acting coach working with two performers in a bright rehearsal room.' },
+  ];
+  // Resume is the real next lesson, never a fixed link: the same records
+  // and the same done-check the rail uses, so the two cannot disagree.
+  const next = ACTING_LESSONS.filter(actingVisible).find(l => !speechLessonDone(l.id));
+  workspaceLibrary(el, {
+    workspace: 'Acting', cards, state: libState.acting, panels,
+    subtitle: 'Find the tools, texts and ideas for your next rehearsal.',
+    resume: next ? { label: 'Continue learning', go: () => renderActingLesson(next.id) } : null,
+  });
 }
 
 function renderSpeechForActors() {
