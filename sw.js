@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v89';                     // 2026-11-05: Back goes to the previous page — sections are on the nav stack now. js/main.js and js/ui.js are both staleWhileRevalidate, so an installed copy would keep the arrow dead at a section root with the fix one revalidation away, and he is waiting on this one
+const VERSION = 'sc-v90';                     // 2026-11-05: Shakespeare's Learn page is the cards layout. js/main.js, css/style.css and js/data/learn-scenes.js are all staleWhileRevalidate, so an installed copy would serve the playhouse map with the new page one revalidation away, and the six module paintings have never been seen by anybody
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
