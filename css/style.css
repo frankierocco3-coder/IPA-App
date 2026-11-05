@@ -1167,6 +1167,36 @@ body.modal-open { overflow: hidden; }
   }
 }
 
+/* A LIBRARY IN PANEL LAYOUT TAKES THE RAIL'S COLUMN (owner order,
+   2026-11-04). His approved Acting Library is two columns of panels and
+   has no rail; ours had a 330px rail and a 620px reading measure, so two
+   330px panels could not fit at any window size and the page stayed one
+   column on a 1500px screen.
+
+   The rail is not merely emptied, it is removed from the grid: the only
+   card it carried on this page was Next step, and the approved head
+   carries that as Continue learning, pointing at the same lesson through
+   the same records. Leaving both would have been the same door twice,
+   which is the duplication this redesign exists to remove.
+
+   KEYED ON THE LAYOUT, NOT THE WORKSPACE. `.lib-grid` is emitted only by
+   a library that was passed `panels`, so a second library adopting the
+   look gets the width with it and no edit here. The other five keep
+   their rail because they keep their tile grid.
+
+   Same `:has()` and the same min-width guard as the gallery rules above,
+   for the reasons that comment gives: below 980 the shell's own mobile
+   rule collapses to one column and must not be outranked, and where
+   `:has()` is unsupported the page keeps the rail and the 620px measure
+   — cramped, never broken. */
+@media (min-width: 980px) {
+  .shell:has(.lib-grid) { grid-template-columns: 216px minmax(0, 1160px); }
+  .shell:has(.lib-grid) .right-rail { display: none; }
+}
+@media (min-width: 980px) and (max-width: 1500px) {
+  .shell:has(.lib-grid) { grid-template-columns: 216px minmax(0, 1fr); }
+}
+
 /* Sidebar */
 .side-nav {
   position: sticky; top: 0; align-self: start; height: 100vh; height: 100dvh;
@@ -1613,7 +1643,15 @@ body.modal-open { overflow: hidden; }
   .lib-resume { border-left: 0; padding-left: 0; }
 }
 
-.lib-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+/* TWO COLUMNS AT MOST, which is the approved design, and the floor is
+   what enforces it rather than a count. Once the rail's column came back
+   to this page the content area reached 1224px and `minmax(330px, 1fr)`
+   duly fitted THREE panels of 392 — tidy, responsive and not what he
+   approved. A 420px floor admits two at any width this column reaches
+   (2x420+24 = 864) and never three (3x420+48 = 1308, past the 1160 cap),
+   and still drops to one when the column is narrow — on a phone, or
+   wherever `:has()` is unsupported and the rail keeps its 330px. */
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
   gap: 22px 24px; align-items: start; }
 .lib-panel { min-width: 0; border: 2px solid var(--line); border-radius: 16px;
   overflow: hidden; background: var(--panel); }
