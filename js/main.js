@@ -4050,6 +4050,75 @@ function treeCardHtml(B, lessons, nextId) {
       </div>`;
 }
 
+// A stem and two leaves, centred on the rule that divides the opening
+// from the modules. DRAWN, NOT A FILE, for the reason commedia-ground.svg
+// is drawn: it is six path commands, it takes its colour from the rule it
+// sits on, and it costs no request and no cache entry. The one leaf
+// ornament this repo owns as a raster — img/lessons/commedia/l01-sprig.png
+// — belongs to Commedia's lesson art and to Character's registry, and
+// pulling one course's artwork onto another course's page is not a thing
+// this project does.
+const LM_SPRIG_SVG = '<svg class="lm-rule-ico" viewBox="0 0 34 16" aria-hidden="true">'
+  + '<path d="M17 14V4"/>'
+  + '<path d="M17 9.2c-2.7 0-5-1.2-6.2-3.2 2.4-1 4.8-.6 6.2 1"/>'
+  + '<path d="M17 9.2c2.7 0 5-1.2 6.2-3.2-2.4-1-4.8-.6-6.2 1"/></svg>';
+
+// ── THE CARDS LAYOUT'S OPENING (owner's mockup, 2026-11-05) ───────
+//
+// Three things the vertical path has no equivalent of, in the order the
+// mockup draws them: a resume banner, the course's progress said in words
+// with a bar under it, and a ruled break before the modules begin.
+//
+// IT REPLACES treeCardHtml FOR THIS LAYOUT ONLY, and deliberately. The
+// tree card is the cream strip the other three scened courses close on,
+// and two Acting checks query `.tr-card .tr-card-title` and
+// `.tr-view.sc-acting .tr-title` by name. Handing every course the dark
+// banner would take both red as selector staleness rather than as a
+// regression — see the note at tests/regression.test.js:3618 for why
+// re-anchoring a check is the right fix only when the change is meant for
+// every layout. This one is meant for one.
+//
+// THE PAINTING BESIDE IT IS THE MODULE'S OWN, not a new asset. The banner
+// names the lesson you are going back to, so the picture that belongs
+// next to it is the one that lesson's module already carries — which also
+// means it changes as you move through the course, and nothing has to be
+// drawn for it. It is decorative here: the title says what the thing is,
+// and the painting's real alt text is spent on the module card.
+function cardsResumeHtml(B, lessons, nextId, scene) {
+  const avail = lessons.filter(B.visible);
+  const done = avail.filter(l => speechLessonDone(l.id)).length;
+  const pct = avail.length ? Math.round(done / avail.length * 100) : 0;
+  const l = treeCardLesson(B, lessons, nextId);
+  const art = l ? scene.moduleCard?.[bookModuleFor(B, l)?.id] : null;
+  const open = l ? B.visible(l) : false;
+  // RESUME ONLY ONCE THERE IS SOMETHING TO RESUME. On a course nobody has
+  // started, "Resume" over lesson one is the page describing a past the
+  // reader does not have.
+  const word = done ? 'Resume' : 'Start here';
+  const goes = open ? (done ? 'Continue learning' : 'Start learning') : 'In review';
+  return `
+    ${l ? `
+    <section class="lm-resume" aria-label="${done ? 'Resume' : 'Start'} the course">
+      ${art ? `
+      <img class="lm-resume-art" src="${esc(art.src)}" alt="" aria-hidden="true"
+           width="782" height="380" loading="lazy" decoding="async">` : ''}
+      <div class="lm-resume-text">
+        <p class="lm-resume-eyebrow">${word}</p>
+        <h2 class="lm-resume-title">${esc(l.title)}</h2>
+        ${l.objective ? `<p class="lm-resume-aim">${esc(l.objective)}</p>` : ''}
+      </div>
+      <button class="btn lm-resume-go" data-card-go="${esc(l.id)}" type="button"
+        ${open ? '' : 'disabled'}>${goes}<span class="btn-arrow" aria-hidden="true">&rarr;</span></button>
+    </section>` : ''}
+    <div class="lm-prog">
+      <p class="lm-prog-say">${done} of ${avail.length} ${avail.length === 1 ? 'lesson' : 'lessons'} complete</p>
+      <div class="bar" role="img"
+           aria-label="Course progress: ${done} of ${avail.length} lessons complete"><i
+           style="width:${pct}%"></i></div>
+    </div>
+    <p class="lm-rule">${LM_SPRIG_SVG}</p>`;
+}
+
 
 // ── The upper band: an actor on a stage ───────────────────────
 // Owner direction 2026-10-20, and it REPLACED FOUR SEPARATE METAPHORS — a
@@ -4134,6 +4203,22 @@ function bookLearnSequence(el, B) {
   // A course with no scene never reaches here, because bookLearnPane only
   // routes the ones that have one.
   const scene = learnScene(B.ws) ?? learnScene('acting');
+  // THE CARDS LAYOUT REORDERS THE PAGE (owner's mockup, 2026-11-05). The
+  // path puts its resume strip at the BOTTOM, after you have scrolled the
+  // route; the cards page puts it at the TOP, because a shelf you read
+  // across has no bottom to arrive at. Same data, same [data-card-go]
+  // wiring, different place on the page.
+  const isCards = scene.layout === 'cards';
+  // AND IT COUNTS THE COURSE RATHER THAN NARRATING IT. "0 of 37 set
+  // across 6 modules" belongs over a route; the mockup's heading states
+  // the size of the thing — 6 modules, 37 lessons — and leaves the
+  // progress to the line under the banner, which says it once, in words,
+  // with a bar.
+  const heroSub = isCards
+    ? `${B.modules.length} ${B.modules.length === 1 ? 'module' : 'modules'}
+       <span aria-hidden="true">·</span>
+       ${avail.length} ${avail.length === 1 ? 'lesson' : 'lessons'}`
+    : `${done} of ${avail.length} ${esc(scene.done)} across ${B.modules.length} modules.`;
 
   el.innerHTML = `
     <div class="tr-view sc-${esc(B.ws)}${scene.light ? ' is-light' : ''}${scene.ground ? ' has-ground' : ''}" style="${scenePaletteStyle(scene)}">
@@ -4143,13 +4228,14 @@ function bookLearnSequence(el, B) {
     <div class="tr-top">
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
       <h1 class="tr-title">${esc(scene.title)}</h1>
-      <p class="tr-sub">${done} of ${avail.length} ${esc(scene.done)} across ${B.modules.length} modules.</p>
+      <p class="tr-sub">${heroSub}</p>
       ${learnScene(B.ws)?.live ? '' : `
       <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>`}
     </div>
     ${sceneStageHtml(scene, lessons)}
+    ${isCards ? cardsResumeHtml(B, lessons, next?.id ?? null, scene) : ''}
     ${learnPathHtml(B, lessons, next?.id ?? null)}
-    ${treeCardHtml(B, lessons, next?.id ?? null)}
+    ${isCards ? '' : treeCardHtml(B, lessons, next?.id ?? null)}
     ${cats.total ? reviewStripHtml('ac-review-link', cats.total,
       `${esc(B.title)} drafts awaiting ${bookReviewerKind(B)} review`) : ''}
     </div>`;
@@ -4611,7 +4697,14 @@ function learnPathHtml(B, lessons, nextId) {
   // LAYOUTS ARE A LOOKUP, and the set is closed on purpose: a scene
   // cannot put an arbitrary class name into the page by naming itself
   // one. Shakespeare's shelf and Character's gallery today.
-  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery', 'path-cards': ' is-pathcards' };
+  //
+  // `cards` JOINED THEM 2026-11-05 (owner's mockup) and it is the fourth,
+  // not a replacement: two columns of wide cards, the picture always on
+  // the LEFT and never alternating, no rail, no fold arrow on the face.
+  // It is near neighbour to `path-cards` — same element tree, same plate,
+  // same gold ring on the current module — and differs in that the path
+  // is a route you walk down and this is a shelf you read across.
+  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery', 'path-cards': ' is-pathcards', cards: ' is-cards' };
   const shelf = LAYOUTS[scene.layout] ?? '';
   // THE MAP, when the scene has one: the illustration with the course
   // standing on it, and the grid below as the narrow-screen fallback.
@@ -4712,6 +4805,10 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // in this function: the pips, the Continue button, and which side of
   // the card the module tag is drawn on.
   const pipped = scene.layout === 'path-cards';
+  // THE CARDS LAYOUT, declared beside `pipped` and for the same reason:
+  // the art markup above reads it, and a const read before its
+  // declaration blanks the page rather than reading undefined.
+  const isCards = scene.layout === 'cards';
   // WHERE THE TAG SITS DIFFERS BY LAYOUT (owner's mockup, 2026-11-02).
   // On the shelf it is a corner tab riding the picture, which needs the
   // picture to have a box of its own — a tag without a card would be a
@@ -4728,7 +4825,11 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // strict pattern first: it lands in a style attribute, so anything
   // that is not a plain CSS position is dropped rather than escaped.
   const focus = /^[a-z0-9 .%]{1,24}$/.test(String(card?.focus ?? '')) ? card.focus : null;
-  const art = card ? (scene.layout === 'path-cards' || scene.layout === 'shelf' ? `
+  // THE PLATE IS THE POSITIONING BOX, and a layout that wants the picture
+  // cropped to a shape needs it. `cards` is listed here for that reason:
+  // without the plate it emits a bare <img> that falls back to the 3/4
+  // default and ignores --art-aspect entirely.
+  const art = card ? (scene.layout === 'path-cards' || scene.layout === 'shelf' || scene.layout === 'cards' ? `
       <span class="lm-plate">
         <img class="lm-art" src="${esc(card.src)}" alt="${esc(card.alt)}"
              ${focus ? `style="--art-focus:${focus}"` : ''}
@@ -4820,7 +4921,25 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // because learnLockMap short-circuits on store.freePlay — so this
   // cannot draw a lock the learner can walk straight through.
   const lockIco = state === 'locked' ? LM_LOCK_SVG : '';
-  const shelfBits = scene.layout === 'path-cards' ? `
+  // THE CARDS FOOTER IS THE LESSON COUNT AND VERY LITTLE ELSE (owner's
+  // mockup, 2026-11-05): a book glyph, "7 LESSONS" in small caps, and a
+  // chevron on the far right. The mockup draws no bar and no fraction on
+  // a card, because the page already carries one progress line for the
+  // whole course directly under the resume banner — the rule at
+  // css/style.css:2443 again, of two things saying the same number show
+  // one.
+  //
+  // DONE AND LOCKED STILL SAY SO. "Upcoming" and "Current" do not: the
+  // gold ring and the CURRENT pill carry current, and ahead is the
+  // default state a card is in, so naming it adds nothing. A finished or
+  // a locked module is a fact the count alone would hide.
+  const cardsState = state === 'done' || state === 'locked'
+    ? `<span class="lm-dot" aria-hidden="true">·</span>
+       <span class="lm-state is-${state}">${lockIco}${wordState}</span>` : '';
+  const shelfBits = isCards ? `
+        <p class="lm-line lm-line-cards">${LM_BOOK_SVG}${total} ${total === 1 ? 'lesson' : 'lessons'}${cardsState}<span
+          class="lm-cards-chev" aria-hidden="true">&rsaquo;</span></p>`
+    : scene.layout === 'path-cards' ? `
         <p class="lm-line">${total} ${total === 1 ? 'lesson' : 'lessons'}
           <span class="lm-dot" aria-hidden="true">·</span>
           <span class="lm-state is-${state}">${lockIco}${wordState}</span></p>
@@ -4881,17 +5000,40 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // the button on line two and the fold chevron alone on line three.
   // With the arrow ahead of the button it stays on the pip line where it
   // belongs and only the button drops. See the wrap rules in style.css.
+  // THE NUMBER IS PADDED ON THE CARDS, and only there. The owner's mockup
+  // writes 01..06, which reads as a set of six rather than as a count
+  // that happens to have reached six. Every other layout keeps the bare
+  // number it has always drawn.
+  const modNum = isCards ? String(g.m?.n ?? '').padStart(2, '0') : (g.m?.n ?? '');
+  // THE CURRENT PILL rides the card's top-right corner (owner's mockup).
+  // It is `.lm-chip.is-current` — the gold the whole app already uses for
+  // "this is where you are" — given a corner position by a second class,
+  // rather than a restyle of `.lm-tag`, which is the shelf's own corner
+  // tab and belongs to the other courses.
+  // NO STATE DOT ON THIS ONE. `.lm-chip` draws a filled circle before its
+  // word because on a shelf it is one of four chips and the dot carries
+  // the state at a glance; here it is the only chip on the page and the
+  // mockup draws the word alone.
+  const cardsPill = isCards && state === 'current'
+    ? `<p class="lm-chip is-current lm-chip-corner">Current</p>` : '';
+  // THE CARDS LAYOUT DRAWS NO "0 of 7 done" LINE. It would sit directly
+  // under the "7 LESSONS" footer saying a second version of the same
+  // thing, and the mockup has neither it nor the fold arrow on the face
+  // of the card — the chevron in the footer is the affordance.
+  const countLine = isCards ? ''
+    : `<p class="lm-count">${pips}${done} of ${total} done<span class="lm-fold-arrow" aria-hidden="true"></span>${cont}</p>`;
   const head = g.m ? `
     <summary class="lm-head${card ? ' has-card' : ''}">
       ${art}
       <div class="lm-head-text">
         ${pipped && tag ? `<p class="lm-kicker">${esc(tag)}</p>` : ''}
         <p class="lm-eyebrow">${esc(B.title)}</p>
-        <h2 class="lm-title"><span class="lm-n">${g.m.n}</span>${esc(moduleTitle(B, g.m))}${titleChev}</h2>
+        <h2 class="lm-title"><span class="lm-n">${modNum}</span>${esc(moduleTitle(B, g.m))}${titleChev}</h2>
         ${g.m.blurb ? `<p class="lm-blurb">${esc(g.m.blurb)}</p>` : ''}
         ${shelfBits}
-        <p class="lm-count">${pips}${done} of ${total} done<span class="lm-fold-arrow" aria-hidden="true"></span>${cont}</p>
+        ${countLine}
       </div>
+      ${cardsPill}
     </summary>` : '';
   // THE STATE REACHES THE CARD NOW. Until 2026-11-02 the only element
   // carrying it was the <span> around the state word, so nothing could
@@ -4967,6 +5109,15 @@ function learnLessonCardHtml(B, l, i, nextId, locked) {
 
 const LM_TICK_SVG = '<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">'
   + '<path d="M4.6 12.8l4.8 4.8L19.6 7.2"/></svg>';
+// The open book on the cards layout's footer line. Same 24-unit grid and
+// same `.lp-ico` stroke treatment as the tick and the padlock above, and
+// the same two paths PANEL_ICONS.book already draws further down this
+// file — repeated rather than shared because that lookup is a closed
+// registry for a different surface, and reaching into it from here would
+// tie the Learn card to the panel icons for no gain.
+const LM_BOOK_SVG = '<svg class="lp-ico lm-line-ico" viewBox="0 0 24 24" aria-hidden="true">'
+  + '<path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H11v16H5.5A2.5 2.5 0 0 0 3 21.5V5.5Z"/>'
+  + '<path d="M21 5.5A2.5 2.5 0 0 0 18.5 3H13v16h5.5a2.5 2.5 0 0 1 2.5 2.5V5.5Z"/></svg>';
 const LM_LOCK_SVG = '<svg class="lp-ico" viewBox="0 0 24 24" aria-hidden="true">'
   + '<rect x="4.6" y="10.4" width="14.8" height="10.2" rx="2.4"/>'
   + '<path d="M8.2 10.4V7.6a3.8 3.8 0 0 1 7.6 0v2.8"/></svg>';

@@ -1197,6 +1197,29 @@ body.modal-open { overflow: hidden; }
   .shell:has(.lib-grid) { grid-template-columns: 216px minmax(0, 1fr); }
 }
 
+/* A LEARN PAGE IN CARDS LAYOUT TAKES THE RAIL'S COLUMN TOO (owner's
+   mockup, 2026-11-05), by the same reasoning as the Library above and
+   the same decision he approved there.
+
+   Two 380px cards plus the gap need 782px, and the 620px reading measure
+   cannot hold them at any window size — the page would stay one column
+   on a 1500px screen, which is the exact failure the Library hit. The
+   mockup also draws no rail, and what the rail carries on this page is
+   Next step, which the resume banner at the top now says better and in
+   more words. The same door twice is what both redesigns remove.
+
+   KEYED ON THE LAYOUT, NOT THE WORKSPACE, as everything else here is: a
+   second course that sets layout 'cards' gets the width with it. The
+   three path layouts above keep their rail, because a single column of
+   cards leaves room for one. */
+@media (min-width: 980px) {
+  .shell:has(.lm-path.is-cards) { grid-template-columns: 216px minmax(0, 1160px); }
+  .shell:has(.lm-path.is-cards) .right-rail { display: none; }
+}
+@media (min-width: 980px) and (max-width: 1500px) {
+  .shell:has(.lm-path.is-cards) { grid-template-columns: 216px minmax(0, 1fr); }
+}
+
 /* Sidebar */
 .side-nav {
   position: sticky; top: 0; align-self: start; height: 100vh; height: 100dvh;
@@ -3367,6 +3390,216 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    so it cannot shout louder than the sentence it belongs to. */
 .lm-state .lp-ico { width: 13px; height: 13px; vertical-align: -2px;
   margin-right: 5px; }
+
+/* ── THE CARDS LAYOUT (owner's mockup, 2026-11-05) ──────────────────
+   Shakespeare's Learn page. Two columns of wide cards, picture always on
+   the LEFT and never alternating, opened by a dark resume banner and the
+   course's progress.
+
+   IT IS A NEAR NEIGHBOUR OF .is-pathcards, NOT A COPY OF IT. Everything
+   inside the card — the plate, the crop, the gold ring, the title, the
+   blurb — is the same vocabulary; what differs is that the path is a
+   single column you walk down with a rail beside it, and this is a grid
+   you read across. So the rules below mostly SWITCH OFF path furniture
+   (the rail, the flip, the absolute badge) and set the grid.
+
+   THE GRID FLOOR IS 380px AND IT IS LOAD-BEARING, the same reasoning as
+   the Library's 420: two fit at any width this column reaches
+   (2x380+22 = 782) and three never do (3x380+44 = 1184, past the 1160
+   cap), and it still drops to one when the column is narrow.
+   THE CAP MATCHES THE SHELL RULE above, which hands this layout the
+   rail's column at 1160. A narrower cap here would waste the width the
+   shell just gave it and squeeze the words beside each picture. This is
+   measured against the COLUMN, not the viewport — the mistake recorded
+   on .ch-grid above, where a viewport query stacked cards at 1500px.
+
+   AND THE FLOOR IS WRAPPED IN min(380px, 100%), BECAUSE A FLOOR IS A
+   MINIMUM AND NOT A PREFERENCE. A bare minmax(380px, 1fr) holds the
+   track at 380px inside a 347px column, so at 375px the cards hung off
+   the right edge of the phone — measured, with the CURRENT pill and the
+   end of every blurb cut away. min() lets the track collapse to the
+   column when the column is the smaller of the two. */
+.lm-path.is-cards { display: grid; gap: 22px 22px; max-width: 1160px;
+  grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+  align-items: stretch; padding-left: 0; }
+/* No rail: the dashed line down the left is the path's, and there is no
+   path here. */
+.lm-path.is-cards::before { content: none; }
+/* The grid item is .lm-mod and it has to be full height, so two cards in
+   a row match even when one blurb runs a line longer. */
+.is-cards .lm-mod { position: relative; margin: 0; padding: 0; display: flex; }
+.is-cards .lm-fold { flex: 1; display: flex; flex-direction: column;
+  background: var(--panel, #fbf8f1); border: 1px solid var(--line);
+  border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 6px rgba(45, 27, 18, .10); }
+/* AND ITS PICTURE DOES NOT GROW WITH IT. --art-col is a PERCENTAGE, so a
+   card that doubles in width doubles its painting: 42% of a full row is
+   479px of portrait against a lesson list, which makes the opened module
+   look like a different page rather than the same card unfolded. A fixed
+   column holds the picture at about the size it was closed. */
+.is-cards .lm-mod:has(.lm-fold[open]) .lm-head.has-card,
+.is-cards .lm-mod.is-flip:has(.lm-fold[open]) .lm-head.has-card {
+  grid-template-columns: 280px 1fr; }
+/* AN OPEN CARD TAKES THE WHOLE ROW, the same :has() trick the shelf uses
+   and for the same reason: a module's lesson list is a long column and
+   it should not be squeezed into half a row. Where :has() is unsupported
+   the open card simply stays one column wide — narrower, never broken. */
+.is-cards .lm-mod:has(.lm-fold[open]) { grid-column: 1 / -1; }
+
+/* PICTURE LEFT, WORDS RIGHT, AND IT NEVER FLIPS. The path alternates the
+   side to keep a long scroll from marching; a grid read across would
+   just look misaligned, so .is-flip is explicitly undone here rather
+   than left to not apply. */
+.is-cards .lm-head { display: block; padding: 0; }
+.is-cards .lm-head.has-card { display: grid; padding: 0; gap: 0;
+  grid-template-columns: var(--art-col, 216px) 1fr; align-items: stretch; }
+.is-cards .lm-mod.is-flip .lm-head.has-card {
+  grid-template-columns: var(--art-col, 216px) 1fr; }
+.is-cards .lm-mod.is-flip .lm-head.has-card > .lm-plate { order: 0; }
+.is-cards .lm-mod.is-flip .lm-head.has-card > .lm-head-text { order: 1; }
+/* THE PLATE FILLS THE CARD'S HEIGHT rather than sitting at its own
+   aspect inside it, so two cards of unequal text still show one clean
+   edge down the middle.
+
+   `aspect-ratio: auto` IS LOAD-BEARING AND NOT TIDYING. The base
+   `.lm-plate` sets `aspect-ratio: var(--art-aspect)`, and a box given
+   both a height and an aspect computes its WIDTH from the height — so
+   `height: 100%` alone made the picture wider than its grid column and
+   it spilled straight over the words. Measured, not reasoned: the first
+   build of this page drew the portrait across the title.
+
+   The card's min-height is what keeps the picture a picture when a blurb
+   is short: 196px against a 226px column is about 7:6, which is the
+   shape the mockup draws. --art-aspect still sets the crop everywhere
+   else the plate is used, and on a phone, where the picture goes back to
+   sitting at its own aspect above the words. */
+.is-cards .lm-fold { min-height: 196px; }
+.is-cards .lm-plate { height: 100%; width: 100%; aspect-ratio: auto; }
+.is-cards .lm-art { position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: var(--art-focus, center center); }
+.is-cards .lm-head-text { padding: 16px 18px 14px; min-width: 0;
+  display: flex; flex-direction: column; }
+.is-cards .lm-eyebrow { display: none; }
+
+/* THE BADGE IS INLINE, NOT ON A RAIL. On the path it is pulled out to
+   the left to sit on the dashed line; here it leads the title.
+   IT IS GREEN, WHICH INVERTS THIS APP'S USUAL READING, and that is the
+   owner's mockup rather than an oversight: on this page gold is spent on
+   the CURRENT pill and the ring around the current card, so a gold badge
+   on all six would say "current" six times. */
+.is-cards .lm-n { position: static; width: 32px; height: 32px;
+  display: inline-flex; align-items: center; justify-content: center;
+  flex: 0 0 auto; margin: 0 10px 0 0; border: 0;
+  background: var(--green-dark); color: #fdfcf7;
+  font-size: 14.5px; font-variant-numeric: tabular-nums; }
+.is-cards .lm-title { display: flex; align-items: center; font-size: 20px;
+  line-height: 1.2; margin: 0 0 6px; }
+.is-cards .lm-blurb { border-top: 0; padding-top: 0; margin: 0 0 10px;
+  font-size: 13.5px; line-height: 1.45; }
+
+/* THE FOOTER LINE: book glyph, "7 LESSONS", chevron hard right. The
+   uppercase is written out rather than reached for through var(--sans),
+   which is undefined in this stylesheet and would quietly inherit the
+   serif of the card title above it. */
+.lm-line-cards { display: flex; align-items: center; gap: 7px;
+  margin: auto 0 0; padding-top: 10px; border-top: 1px solid var(--line);
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 11.5px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--muted); }
+.lm-line-ico { width: 15px; height: 15px; flex: 0 0 auto; }
+.lm-cards-chev { margin-left: auto; font-size: 19px; line-height: 1;
+  color: var(--muted); }
+.is-cards .lm-mod:has(.lm-fold[open]) .lm-cards-chev { transform: rotate(90deg); }
+
+/* THE CURRENT PILL, top-right of the card. .lm-chip already carries the
+   gold this app spends on "you are here"; the second class only moves
+   it, so the two cannot drift apart. */
+.is-cards .lm-fold { position: relative; }
+.lm-chip-corner { position: absolute; top: 12px; right: 12px; z-index: 2;
+  margin: 0; padding: 3px 8px; font-size: 10px; letter-spacing: .07em;
+  background: #f6eed8; }
+/* AND THE TITLE KEEPS OUT OF ITS WAY. The pill is positioned, so it is
+   out of flow and the heading ran straight under it — "Shakespeare 101"
+   with CURRENT sitting on the 101. Only the current card pays the indent.
+
+   70px IS MEASURED, NOT CHOSEN. The pill is 73px wide at right:12 inside
+   a text column padded 18, so it reaches 67px into the title's box; 70
+   clears it. Walking the value down in the live page, 74 and above wrapped
+   "Shakespeare 101" onto two lines and 70 and below did not, so this is
+   the largest reserve that still fits the longest current title at this
+   card width. If the pill's word or tracking ever changes, re-measure —
+   a flex title reports ONE client rect however many lines its text takes,
+   so the only honest check is a Range over the text node. */
+.is-cards .lm-mod.is-current .lm-title { padding-right: 70px; }
+.is-cards .lm-mod.is-current > .lm-fold {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 3px 12px rgba(45, 27, 18, .10); }
+/* The lesson list, once a card is opened. */
+.is-cards .lm-list { padding: 0 18px 16px; }
+
+/* ── THE OPENING: RESUME BANNER, PROGRESS, RULE ─────────────────────
+   THE ONE DARK SURFACE OUTSIDE .tr-view'S OWN, and it is written as a
+   literal rather than a new token, the way .lib-resume's brown was. This
+   app has no dark theme and this must not quietly start one: the colour
+   lives on this one element and nothing else may reach for it.
+   #3a4a2f is var(--green-dark) taken down far enough to hold #fdfcf7 at
+   AA — the same care the comment on .btn-primary records, where sage
+   #6f8657 held white at only 4.02:1. */
+.lm-resume { display: grid; grid-template-columns: 148px 1fr auto;
+  align-items: center; gap: 0 20px; margin: 0 0 16px;
+  background: #3a4a2f; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 8px rgba(45, 27, 18, .12); }
+.lm-resume-art { display: block; width: 148px; height: 100%;
+  min-height: 104px; object-fit: cover; }
+.lm-resume-text { min-width: 0; padding: 16px 0; }
+.lm-resume-eyebrow { margin: 0 0 3px;
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 11px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #e3c87f; }
+.lm-resume-title { margin: 0 0 4px; font-family: var(--serif, Georgia, serif);
+  font-size: 25px; line-height: 1.15; color: #fdfcf7; font-weight: 600; }
+.lm-resume-aim { margin: 0; font-size: 13.5px; line-height: 1.45;
+  color: rgba(253, 252, 247, .82); }
+/* Cream on the dark panel, which is the inverse of .btn-primary and the
+   only place in the app that needs it. */
+.lm-resume-go { margin-right: 18px; white-space: nowrap; min-height: 44px;
+  flex: 0 0 auto; background: #f6f1e8; color: #2f3a2e; border: 0;
+  font-weight: 700; }
+.lm-resume-go:hover:not(:disabled) { background: #fffdf7; }
+.lm-resume-go:disabled { background: rgba(246, 241, 232, .4); color: rgba(253, 252, 247, .7); }
+
+.lm-prog { margin: 0 0 20px; }
+.lm-prog-say { margin: 0 0 7px; font-size: 13.5px; color: var(--muted); }
+
+/* The rule that divides the opening from the modules: a hairline either
+   side of a drawn sprig. The pseudo-elements carry the line so the SVG
+   needs no background of its own to punch a hole in it. */
+.lm-rule { display: flex; align-items: center; gap: 14px;
+  margin: 0 0 22px; color: var(--sage); }
+.lm-rule::before, .lm-rule::after { content: ''; flex: 1 1 auto;
+  height: 1px; background: var(--line); }
+.lm-rule-ico { width: 32px; height: 15px; flex: 0 0 auto; fill: none;
+  stroke: currentColor; stroke-width: 1.5; stroke-linecap: round;
+  stroke-linejoin: round; }
+
+@media (max-width: 860px) {
+  /* The picture goes on top at a phone width: a 42% column of a 340px
+     card is 143px, which is not a picture, and the words beside it wrap
+     to five lines. */
+  .is-cards .lm-head.has-card,
+  .is-cards .lm-mod.is-flip .lm-head.has-card { grid-template-columns: 1fr; }
+  /* THE ASPECT HAS TO COME BACK WITH IT. Stacked, the plate is a grid ROW
+     and nothing above it sets a height, and its only child is the
+     absolutely positioned <img> — so `aspect-ratio: auto` left it 0px
+     tall and the painting vanished from every card on a phone. The
+     desktop rule can drop the aspect because the picture is a full-height
+     column there; here the aspect IS the height. */
+  .is-cards .lm-plate { height: auto; aspect-ratio: var(--art-aspect, 3 / 4); }
+  .lm-resume { grid-template-columns: 1fr; gap: 0; }
+  .lm-resume-art { width: 100%; height: 132px; }
+  .lm-resume-text { padding: 14px 18px 0; }
+  .lm-resume-go { margin: 12px 18px 16px; width: calc(100% - 36px); }
+}
 
 /* ── THE COMMEDIA RAIL (owner's mockup, 2026-11-02) ─────────────────
    Usable width inside .rail-card is about 294px, and the comment on the

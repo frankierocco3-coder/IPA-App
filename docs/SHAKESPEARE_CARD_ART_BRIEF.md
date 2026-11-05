@@ -1,184 +1,150 @@
-# Shakespeare — module title cards: brief for the owner
+# Shakespeare Learn page — art brief for the owner
 
-Six pictures, one per module, rendering as the thumbnail on the left of
-each module's title card on the Shakespeare Learn page — the same slot the
-four Acting and five Character cards already fill.
+Rewritten 2026-11-05, for the **cards** layout. This file previously
+specified 3:4 engraved emblems for a layout that no longer exists, and
+before that a shelf; taking the old spec and drawing to it would produce
+art no registry reads. Everything below is current.
 
-**One is done.** `context` landed 2026-10-28. Five remain, and they are
-the only thing between this course's Learn page and shipping: the folds,
-the lesson counts, the rail and the parchment ground are all built. The
-course sits behind `light: true` with no `live`, so until the set is
-complete it changes nothing a learner sees. See `js/data/learn-scenes.js`.
+**The page ships and works now.** Nothing here is blocking — the layout is
+live with the paintings that already exist. This is the list of what would
+make it match the mockup exactly.
 
-## What the app needs
+## What is already there, and good
 
-* **1086 x 1448, which is 3:4 portrait.** Same as the Acting and Character
-  sets. Shipped at 600 x 800, baseline JPEG q90, about 250KB each.
-* **PNG or JPEG out of the generator.** Not WEBP — `tools/build_artifact.py`
-  ships `.jpg/.png/.svg/.json` only, so a .webp lands in git and never
-  reaches the live site.
-* **File names** `img/ui/shakespeare-card-<id>.jpg`, using the module ids
-  below. Ids are storage in this repo and never change.
-* **The no-text rule is SUSPENDED for this course** (owner's call,
-  2026-10-29). It still holds for Acting and Character. It was written
-  here on the assumption that lettering would be unreadable at card size,
-  and that assumption was measured and found wrong: "prithee wherefore"
-  reads cleanly at 92px. This course's subject is words on a page, so
-  cards that *are* words are not a compromise — they are the subject.
-  Modules 2 and 3 are typographic. **Modules 4, 5 and 6 below are still
-  written as paintings and need rewriting if the whole set goes that way.**
-* **Generated lettering must be proof-read before it is installed.** No
-  gate in this repo can read a picture, so a misspelling inside a JPEG
-  ships silently. Short phrases survive generation; long passages often
-  do not.
-* **Generate on a warm parchment ground (#efe9dc), not white.** The
-  `language` card arrived on white and had to be multiplied onto the page
-  colour — among full-bleed painted cards a white tile reads as a hole
-  where an image failed to load.
+Six painted module scenes, one per module, shipped and registered in
+`js/data/learn-scenes.js` under `moduleCard`:
 
-## THE FRAMING RULE
+| Module | id | File | What it shows |
+|---|---|---|---|
+| 1 | `context` | `img/ui/shakespeare-scene-context.jpg` | Shakespeare in a lace collar, ivy, green drape, books |
+| 2 | `language` | `img/ui/shakespeare-scene-language.jpg` | Quill in an inkwell on a written page |
+| 3 | `form` | `img/ui/shakespeare-scene-form.jpg` | Open book lying flat, lit candle, red drape |
+| 4 | `metre` | `img/ui/shakespeare-scene-metre.jpg` | Hourglass on books, red drape, ivy |
+| 5 | `folio` | `img/ui/shakespeare-scene-folio.jpg` | Gold-tooled First Folio on loose pages |
+| 6 | `soliloquy` | `img/ui/shakespeare-scene-soliloquy.jpg` | Ivy-wreathed skull on old books |
 
-Keep everything that matters inside the middle 80% vertically, and put
-faces in the upper half. A picture whose subject runs from the very top to
-the very bottom has no safe crop if the container ever changes. Learned on
-Tempo-Rhythm, whose faces sit in the upper third and whose metronome sits
-in the lower half — no crop keeps both.
+**These had never been visible to anyone.** They were registered on
+2026-10-30 and the playhouse map that landed the next day hid the whole
+card grid behind one CSS rule, at every screen width. They are on the page
+now for the first time.
 
-At the size these display — 132px wide on a desktop, 92px on a phone — one
-clear idea reads and a busy one turns to mush. Two or three figures, one
-action.
+The subjects are right and the set hangs together. Do not re-invent them.
 
-## The house style: ENGRAVED EMBLEMS
+## 1. The six cards want redrawing at the new shape — the main ask
 
-**Settled 2026-10-29, and it supersedes both earlier directions.** This
-course's cards are neither paintings (Acting, Character) nor lettering
-(the two drafts before this). They are **single engraved emblems**, one
-object per module, in the manner of a seventeenth-century printed book.
+They are **782 x 380, a 2.06:1 band**, because they were drawn for a
+layout that ran them across the full width of a card. The cards layout
+stands the picture up the full height of the card at its left, so the app
+crops them to **5:4** with `object-fit: cover` and takes the middle 61% of
+each.
 
-Four rounds of lettering taught the lesson that chose this. Quotes are
-beautiful at 2x and illegible at 92x123, which is the only size that
-ships; the Iambic Pentameter card rendered as a blank parchment tile
-with a thread across it. **One bold object reads at any size.** An
-hourglass is an hourglass at 92px. A sentence is not a sentence.
+Every subject is centred, so nothing essential is lost — but the outer
+thirds go, and the clearest casualty is the stack of books at the left of
+the `context` portrait. They are also 2x upscales of ~391px originals, so
+a cropped 5:4 slot is running on roughly 190px of real detail where Acting
+and Character ship 600 x 800.
 
-Paste this in front of each emblem below:
+**What to draw:** the same six subjects, recomposed for a **5:4 upright-ish
+rectangle** rather than a wide band. Target **1000 x 800** source, shipped
+at that size, baseline JPEG q90, around 250KB each.
 
-> A single engraved emblem centred on a warm parchment ground (#efe9dc).
-> Antique copperplate etching, fine hatched line work in dark
-> sepia-brown ink, the way an emblem is printed in a seventeenth-century
-> book. One object only, centred, large, filling the middle of the frame
-> with generous empty parchment around it. No colour beyond the sepia
-> ink and the parchment. No text, no lettering, no border, no frame.
-> Portrait, 3:4.
+Keep the file names exactly as they are. Overwriting in place is correct,
+and it needs a service-worker bump (see Installing, below).
 
-### THE TWO INSTALLED CARDS GET REPLACED
+## 2. A clean wide Globe for the heading
 
-`context` (the painted teacher at a blackboard) and `language` (the
-"prithee wherefore" lettering) are both live in the registry and both
-go. A set of six wants one idiom. Both files stay in git history, so
-this is reversible if the emblems disappoint.
+The mockup opens with a landscape Globe illustration bleeding off the
+right edge behind the title. **There is no file that can do this job.**
 
-### 1. `context` — Shakespeare 101
+`img/ui/shakespeare-globe.jpg` is 864 x 852 — square, not landscape — and
+more to the point it has the six module labels, the numbered roundels, a
+CURRENT chip and the dashed arrows **painted into the picture**. Every
+horizontal slice between 14% and 70% of its height has lettering in it, so
+there is no clean band to crop. The painted CURRENT chip would also sit on
+module 1 for ever.
 
-> The Globe playhouse seen from outside: a tall round timber-framed
-> theatre with a thatched roof, a flag flying from the roof turret, and
-> small figures at the door.
+**What to draw:** the same playhouse, **wide** — around **2000 x 800** —
+with **no lettering of any kind**: no module names, no roundels, no CURRENT
+chip, no arrows. Compose it so the building sits right of centre and the
+left third is quiet, because the title sits over that side and the right
+edge is cropped off.
 
-**Not a portrait, deliberately.** A portrait head and the skull on
-module 6 are both head-shaped objects and would collide at 92px. The
-Globe also covers the module better than a likeness does — three of its
-seven lessons are about the playhouse and its conditions, and the
-module's own argument is how little about the man is documented.
+Ship it at a **new path**, `img/ui/shakespeare-hero.jpg`, rather than
+replacing the old plate. The old one stays recoverable and no cache bump
+is needed for a new path.
 
-### 2. `language` — The Language
+The heading reads perfectly well without it, which is why this is second
+on the list and not first.
 
-> A tall quill pen standing upright in a squat inkwell, a few loose
-> sheets beneath it, a small sprig of leaves at the base.
+## 3. The vine margin — probably not artwork at all
 
-### 3. `form` — Verse and Prose
+The mockup draws vine and leaf down the far-left margin and across the
+bottom. The app already has a slot for exactly this — `ground` on a scene
+record, which draws a decorative layer behind the whole pane at low
+opacity, bleeding past the text column into the margins.
 
-> An open book lying flat, both pages visible. The left-hand page holds
-> only four short separate lines, well spaced, their right-hand ends at
-> conspicuously different points, leaving most of that page empty
-> parchment. The right-hand page is filled corner to corner with one
-> dense dark block of close-set lines, both margins straight, no gaps.
-> One page reads light and broken, the other reads as a solid dark
-> rectangle. The writing itself is fine and indistinct, texture rather
-> than words.
+Commedia's is `img/ui/commedia-ground.svg`: **drawn in code**, 7.6KB, one
+ink colour, and it rescales and re-themes for free. A raster strip down a
+margin of unknown height tiles badly, which is the failure
+`docs/LEARN_BAND_IMAGE_SPEC.md` records.
 
-**PUSHED TO CARICATURE ON PURPOSE, and this was measured.** A first
-sketch set the two pages as ordinary verse and ordinary prose. At 1.8x
-the difference was lovely; at 92x123 both pages read as "a page" and the
-emblem said nothing but "a book". Light-versus-dark survives the
-downscale where ragged-versus-flush does not, so the left page is now
-nearly empty and the right nearly solid.
+**Recommendation: say the word and this gets drawn as an SVG, no artwork
+needed from you.** If you would rather draw it, it has to be a full-pane
+decorative layer, not a strip.
 
-**It is still the weakest emblem in the set**, because module 5 is also
-books. At card size an open book lying flat and two volumes standing
-upright are distinguishable, but they are the only pair that has to be
-told apart rather than simply recognised. If one of the six gets
-re-rolled, make it this one.
+The small leaf on the rule between the banner and the cards is already
+drawn in code and needs nothing.
 
-### 4. `metre` — Iambic Pentameter
+## What is NOT needed
 
-> An hourglass standing upright, the sand half run through, a fine
-> stream falling from the upper bulb to the lower.
+**The resume banner's painting.** The mockup shows a still life of books, a
+gold mask and laurel beside "Why He Still Matters to Actors". The banner
+uses **the module's own painting** instead — whichever module the lesson
+you are resuming belongs to — so it changes as you move through the course
+and no new file is required. If you would rather have a fixed still life
+there, that is a separate ask.
 
-**Time measured, which is what metre is.** It is also nothing like
-Tempo-Rhythm's metronome, and unlike the four drafts before it, it
-reads at card size.
+**The book glyph, the chevron, the gold CURRENT pill and the numbered
+roundels.** All CSS and inline SVG. No files.
 
-### 5. `folio` — The First Folio and Textual Clues
+## House rules any new file has to follow
 
-> Two bound books standing upright side by side, leaning slightly
-> together: one a large heavy leather folio, the other a small thin
-> quarto barely half its height. The difference in scale between them is
-> the subject.
+* **Baseline JPEG q90** for anything with its own background. PNG only for
+  a cutout on transparency. **Never WEBP** — `tools/build_artifact.py`
+  ships `.jpg/.png/.svg/.json` only, so a .webp lands in git and 404s on
+  the live site.
+* **Generate on warm parchment `#efe9dc`, not white.** A white tile among
+  full-bleed painted cards reads as a hole where an image failed to load.
+  The `language` card arrived on white once and had to be multiplied onto
+  the page colour.
+* **Weight is real.** The repo is near the ~1GB Pages soft limit. Around
+  250KB each is the house figure.
+* **Lettering is allowed in this course** — it is the one place the no-text
+  rule is suspended — but **no gate in this repo can read a picture**, so a
+  misspelling inside a JPEG ships silently. Proof-read by eye. For the hero
+  the rule is the opposite: no lettering at all.
+* **Module ids are storage and never change**: `context`, `language`,
+  `form`, `metre`, `folio`, `soliloquy`.
 
-**Two books, not one.** The size difference carries the whole module —
-two editions of one play, disagreeing — without a word. A single volume
-would only say "a book", and `form` already has one.
+## Installing
 
-### 6. `soliloquy` — Soliloquies and Monologues
+Convert **one `sips` call per file, by name**. Do not loop over a variable
+— zsh does not word-split an unquoted parameter, so `for x in $var` runs
+once and writes every image into one name. That happened to the Acting set.
 
-> A human skull resting on a closed book, three-quarter view, with a
-> guttered candle stub beside it.
+```bash
+sips -s format jpeg -s formatOptions 90 in.png --out img/ui/shakespeare-scene-context.jpg
+```
 
-**The candle earns its place.** It separates the silhouette from the
-Globe on module 1 at small size, and a skull alone is the most
-over-used Shakespeare image there is; the objects around it make it a
-still life rather than a cliché.
+Then:
 
-## Proof-reading an emblem
+* a new file at a **new** path (the hero) → add it to the scene record in
+  `js/data/learn-scenes.js`;
+* a file replacing one at an **existing** path (the six cards) → **bump
+  `VERSION` in `sw.js`**. Media is cacheFirst and never revalidates, so
+  without a bump every installed copy keeps the old picture for ever. This
+  has already caught this project out once.
 
-Far less to check than lettering, which is most of the point, but not
-nothing:
-
-* **No text crept in.** Generators love adding a title to a book spine
-  or a banner under an emblem. Any lettering at all is a reject —
-  nothing in this repo can read a picture, so a misspelling ships
-  silently.
-* **The object is the right one and there is only one of it.**
-* **It reads at 92px.** Open the card at true size before installing.
-  That check is what rejected four drafts in a row.
-
-## When they arrive
-
-1. Drop the files anywhere; they get converted to 600 x 800 JPEG q90 and
-   installed in `img/ui/`. **Convert each file by name, one `sips` call
-   per file** — zsh does not word-split an unquoted parameter, so a
-   `for x in $var` loop runs once and writes every image into one name.
-   That happened on the Acting set.
-2. Each one goes into Shakespeare's `moduleCard` in
-   `js/data/learn-scenes.js`, keyed by module id, with real alt text
-   describing the picture.
-3. When all six are in, the course can take `live: true` — the same
-   single predicate the other courses go through, `learnSceneLive()`.
-4. `sw.js` VERSION bump. New files at new paths do not strictly need one,
-   but the renderer and styles that reference them are
-   staleWhileRevalidate, so without a bump the first load shows the old
-   page with the new art fetching behind it.
-
-Until then the page shows plain headings where the pictures go — the
-correct empty state in this repo, never a broken image and never a promise
-that art is coming.
+An unregistered key renders **nothing** — never a broken image and never a
+"coming soon". That is the rule across the whole app, and it is why the
+page is honest with the hero slot empty today.

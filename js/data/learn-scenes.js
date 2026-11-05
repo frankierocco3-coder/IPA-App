@@ -349,7 +349,14 @@ export const LEARN_SCENES = {
     // and that is this session's own decision; forking it for one course
     // is what the theming registry exists to prevent. Any other course
     // can set this and get the same page.
-    layout: 'shelf',
+    //
+    // 'shelf' → 'cards' (owner's mockup, 2026-11-05). The shelf stood the
+    // six modules three-up with the picture on top of each; the mockup
+    // lays them two-up with the picture on the left and opens the page
+    // with a resume banner and the course's progress. The shelf is not
+    // deleted — Rhetoric still uses it, and it is still the right answer
+    // for a course whose cards are portrait.
+    layout: 'cards',
     // LIGHT, the third course to come off the default dark ground. Still
     // owner-preview only — `live` is not set — so this changes nothing a
     // learner sees until the six module paintings land.
@@ -381,34 +388,46 @@ export const LEARN_SCENES = {
     // LANDSCAPE, which is why --art-aspect exists. The shelf used to
     // centre a 3:4 portrait above the words; these are 2.06:1 and run
     // the full width of the card, so the card leads with its picture.
-    artAspect: '2.06 / 1',
-    // THE PLAYHOUSE MAP (owner's mockup, 2026-10-31). One illustration
-    // with the six modules standing on it, in the order the course runs.
     //
-    // THE LABELS IN THE SUPPLIED IMAGE ARE PAINTED INTO IT — checked at
-    // 3x, the timber shows through around each rounded card. Painted
-    // text cannot be clicked, cannot scale, is invisible to a screen
-    // reader, and its CURRENT chip is wrong the moment somebody finishes
-    // module 1. So the app draws its own labels ON TOP of them, at the
-    // positions below: the look is the owner's, the state is live.
+    // 2.06:1 → 5:4, AND THIS IS A CROP, NOT A RESHOOT (2026-11-05). The
+    // cards layout stands the picture up the full height of the card at
+    // its left, and a 2.06:1 plate in a 42% column is 110px tall beside
+    // 150px of text — a letterbox slot with a gap under it. 5:4 is the
+    // shape the owner's mockup draws, and object-fit: cover takes the
+    // middle 61% of each painting to reach it.
     //
-    // THE POSITIONS WERE MEASURED, NOT EYEballed. A connected-region
-    // pass over the illustration found the six painted cards and
-    // returned their centres; these are those centres as percentages,
-    // so they hold at every width the map is drawn at. Replace the
-    // plate with a clean one and nothing here changes.
-    map: {
-      src: 'img/ui/shakespeare-globe.jpg',
-      alt: 'A cutaway illustration of the Globe playhouse seen from above, two players on the thrust stage, the galleries full, and the river and city beyond.',
-      pins: {
-        context:   [49.8, 13.8],
-        language:  [75.8, 25.0],
-        form:      [79.2, 50.6],
-        metre:     [51.6, 70.2],
-        folio:     [17.2, 51.4],
-        soliloquy: [24.0, 25.4],
-      },
-    },
+    // WHAT THAT COSTS, named so nobody has to rediscover it: the six
+    // paintings are 782x380 and composed for a wide band, so a 5:4 crop
+    // loses the outer thirds — the stack of books at the left of the
+    // `context` portrait is the clearest casualty. Every subject is
+    // centred, so nothing essential goes, and `focus` on a moduleCard
+    // entry can nudge any individual crop. The real fix is six paintings
+    // drawn at this shape; see docs/SHAKESPEARE_CARD_ART_BRIEF.md.
+    artAspect: '5 / 4',
+    // THE PICTURE COLUMN. 216px is the default and it is tuned for a 3:4
+    // portrait on a full-width path card; these cards are half the width
+    // and want the picture to be a little under half of each.
+    artCol: '42%',
+    // THE PLAYHOUSE MAP IS RETIRED (owner, 2026-11-05). It was one
+    // illustration with the six modules standing on it, drawn from the
+    // owner's 2026-10-31 mockup, and it was the whole page: the pins
+    // below were the only module controls a desktop reader ever had,
+    // because css/style.css hid the card grid wherever a map was set.
+    //
+    // WHY IT GOES, rather than being kept beside the cards. The labels
+    // were PAINTED INTO the supplied plate — checked at 3x, the timber
+    // shows through around each rounded card — so the app drew live
+    // labels on top of painted ones at measured positions. That held the
+    // look together and left two things it could never fix: the painted
+    // CURRENT chip sits on module 1 for ever, and the painted lettering
+    // cannot scale, cannot be read aloud and cannot be translated. The
+    // owner's new mockup asks for cards, which carry all three for free.
+    //
+    // THE PLATE ITSELF IS NOT DELETED. img/ui/shakespeare-globe.jpg
+    // still ships and is still the right picture for this course; what it
+    // needs to return as the heading's illustration is a clean redraw
+    // with no painted labels, no roundels and no CURRENT chip. See
+    // docs/SHAKESPEARE_CARD_ART_BRIEF.md.
     moduleCard: {
       context: { src: 'img/ui/shakespeare-scene-context.jpg',
         alt: 'A painted portrait of Shakespeare in a lace collar, with ivy, a green drape and a stack of old books around him.' },
