@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v86';                     // 2026-11-04: the Theatre History chapter cards decide their own minimum width, so a long chapter title is no longer clipped mid-word at a squeezed content column. A stylesheet change goes through staleWhileRevalidate and would be one revalidation away; he reported this one and is waiting to see it fixed, which is the rule that matters
+const VERSION = 'sc-v87';                     // 2026-11-04: the approved Acting Library — four illustrated panels, a description per door, and the right rail's column given to the page. Four NEW images at new paths, which needs no bump on its own, and a stylesheet and a renderer, which go through staleWhileRevalidate and would be one revalidation away. He asked for this one and is waiting to see it
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
