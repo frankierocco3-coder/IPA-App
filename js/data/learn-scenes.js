@@ -428,6 +428,18 @@ export const LEARN_SCENES = {
     // needs to return as the heading's illustration is a clean redraw
     // with no painted labels, no roundels and no CURRENT chip. See
     // docs/SHAKESPEARE_CARD_ART_BRIEF.md.
+    // THE IVY (owner order, 2026-11-05: "yes do the vine"). His reference
+    // draws ivy down the far-left margin of the page and along its bottom
+    // edge, and it arrived painted into the screenshot rather than as an
+    // asset — which is just as well, because a raster strip is the wrong
+    // answer for a margin whose height is whatever the page happens to be.
+    //
+    // DRAWN, like img/ui/commedia-ground.svg: geometry, one ink colour,
+    // 9KB, and it rescales and re-themes for free. Unlike that one it has
+    // a generator beside it, tools/make_vine_ground.py, because a vine is
+    // leaves placed along a curve at its own tangent and that is
+    // arithmetic rather than handwork. Edit the script, not the SVG.
+    ground: 'img/ui/shakespeare-ground.svg',
     // THE HEADING'S ILLUSTRATION (owner artwork, 2026-11-05). The wide,
     // clean playhouse the brief asked for: no painted module labels, no
     // roundels, no CURRENT chip, no arrows — so the app can draw its own

@@ -445,6 +445,23 @@ def main():
     if "export const SHAKESPEARE_LIVE = true;" in ctx_src and "'sh-" not in sh_reviews:
         fail("Shakespeare is LIVE but no sh- lesson has a publication entry — "
              "learners would see a shelf of locked chapters")
+    # 6o-ii: EVERY PICTURE THE LEARN SCENE NAMES HAS TO EXIST, and nothing
+    # else in this repo checks that. The Shakespeare Learn page is almost
+    # entirely unpinned — no browser check and no other gate reads
+    # learn-scenes.js — so a renamed or un-added file would ship as a
+    # missing picture and a full 879-check suite run would stay green.
+    #
+    # It reads the paths out of the scene source rather than listing them
+    # here, so adding a seventh module card needs no edit to this gate; and
+    # it is deliberately about EXISTENCE only. An art slot with no registry
+    # entry is legal and renders nothing, which is this project's rule. A
+    # registry entry pointing at a file that is not there is not legal, and
+    # that is the whole difference.
+    scenes_src = (ROOT / "js" / "data" / "learn-scenes.js").read_text(encoding="utf-8")
+    for rel in sorted(set(re.findall(r"'(img/ui/[A-Za-z0-9._/-]+)'", scenes_src))):
+        if not (ROOT / rel).exists():
+            fail(f"js/data/learn-scenes.js names {rel}, which does not ship")
+
     sh_path = ROOT / "js" / "data" / "shakespeare" / "shakespeare-course.js"
     if not sh_path.exists():
         fail("the Shakespeare course data is missing")

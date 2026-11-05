@@ -3705,10 +3705,49 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 @media (max-width: 979px) {
   .lm-ground { left: -16px; width: calc(100% + 32px); }
 }
-/* Everything the reader actually reads sits above it. The heading and the
-   path are the pane's only two children besides the ground itself. */
+/* THE BLEED IS SIZED FOR THE PANE IT IS IN, and the cards layout is a
+   different pane. The 610px above is the Commedia path's: a 620px reading
+   measure plus 250 left and 360 right reaches the window edges either
+   side. The cards layout already holds 1160px, so the same +610 ran the
+   drawing 344px past the right of a 1440 window and put a horizontal
+   scrollbar on the page — measured, scrollWidth 1784 against 1440.
+
+   So it bleeds LEFT only. That is also where the drawing is: the owner's
+   reference puts the ivy down the far-left margin and along the bottom,
+   and there is no right margin left to put anything in.
+
+   AND IT ANCHORS BOTTOM-LEFT. `object-fit: cover` has to crop something,
+   and with the default `top center` it cropped the bottom — which is
+   where half this drawing lives. The left stem runs off the top of its
+   own viewBox, so losing the top costs nothing.
+
+   Keyed on the layout rather than the workspace, like every other rule
+   here, so a second course setting layout 'cards' gets it too. */
+@media (min-width: 980px) {
+  .tr-view:has(.lm-path.is-cards) .lm-ground {
+    left: -248px; width: calc(100% + 248px);
+    object-position: left bottom; }
+}
+/* AND IT IS NOT DRAWN ON A PHONE AT ALL. This decoration is a MARGIN, and
+   a phone has no margin to put it in: the content runs the full width, so
+   `cover` would scale the drawing to a tall narrow box and show whatever
+   happened to land under the words — a random slice of ivy behind the
+   reading, which is the opposite of what a watermark is for. Nothing is
+   lost by leaving it out, because there was never room for it. */
+@media (max-width: 979px) {
+  .tr-view:has(.lm-path.is-cards) .lm-ground { display: none; }
+}
+/* Everything the reader actually reads sits above it.
+   THIS LIST IS NOT OPTIONAL AND IT HAS TO GROW WITH THE PANE. It used to
+   say the heading and the path were the pane's only two children, and
+   that stopped being true on 2026-11-05 when the cards layout added a
+   resume banner, a progress row and a rule. A child left off this list
+   does not fail loudly — it renders UNDER the drawing. */
 .tr-view.has-ground > .tr-top,
 .tr-view.has-ground > .lm-path,
+.tr-view.has-ground > .lm-resume,
+.tr-view.has-ground > .lm-prog,
+.tr-view.has-ground > .lm-rule,
 .tr-view.has-ground > .gm { position: relative; z-index: 1; }
 /* One column on a phone: a 300px picture beside text in 375px is not a
    card, it is two slivers. */
