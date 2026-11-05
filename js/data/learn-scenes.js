@@ -428,6 +428,29 @@ export const LEARN_SCENES = {
     // needs to return as the heading's illustration is a clean redraw
     // with no painted labels, no roundels and no CURRENT chip. See
     // docs/SHAKESPEARE_CARD_ART_BRIEF.md.
+    // THE HEADING'S ILLUSTRATION (owner artwork, 2026-11-05). The wide,
+    // clean playhouse the brief asked for: no painted module labels, no
+    // roundels, no CURRENT chip, no arrows — so the app can draw its own
+    // live text over it and nothing in the picture can go stale.
+    //
+    // IT REPLACES NOTHING. img/ui/shakespeare-globe.jpg, the square plate
+    // with the labels painted in, still ships at its own path; this is a
+    // new file, which is why no service-worker bump was needed for it.
+    //
+    // 687x221 and that is its true size, not a downscale: it was cut from
+    // the owner's 1536x1024 reference, so it is a 1x asset. It holds at
+    // the width this heading gives it and will look soft on a retina
+    // screen until a larger master exists.
+    hero: {
+      src: 'img/ui/shakespeare-hero.jpg',
+      alt: 'The Globe playhouse drawn from outside, its thatch and flag above a timbered gallery, with playgoers gathering and the city beyond.',
+    },
+    // THE RESUME BANNER'S STILL LIFE (owner artwork, 2026-11-05): books, a
+    // gold mask and laurel on a red drape. Decorative — the lesson title
+    // beside it names the thing — so it ships with empty alt. Without it
+    // the banner falls back to the painting of the module holding the
+    // lesson you are returning to, which is what shipped this morning.
+    resumeArt: { src: 'img/ui/shakespeare-resume.jpg', alt: '' },
     moduleCard: {
       context: { src: 'img/ui/shakespeare-scene-context.jpg',
         alt: 'A painted portrait of Shakespeare in a lace collar, with ivy, a green drape and a stack of old books around him.' },

@@ -48,33 +48,36 @@ and Character ship 600 x 800.
 rectangle** rather than a wide band. Target **1000 x 800** source, shipped
 at that size, baseline JPEG q90, around 250KB each.
 
+**The six crops in the second handoff were NOT installed, deliberately.**
+`assets/01-…` through `assets/06-…` are 185 x 151 and 195 x 151 — cuts
+from the 1536-wide reference, not masters, as that handoff says itself.
+The card slot is about 235 x 188, so those crops would be **enlarged**
+about 1.27x, while the paintings already shipping have 2x headroom in the
+same slot. Installing them would have made the cards visibly softer.
+
+Three of the reference's subjects do differ from what ships — **two actors
+rehearsing** for The Language, **two manuscript sheets** for Verse and
+Prose, and **an actor holding a skull** for Soliloquies, against the
+quill-and-inkwell, open-book-and-candle and skull-on-books that are live.
+If those three are the ones you want, they are worth redrawing at 1000 x
+800 rather than installing at 185px. Say so and they go straight in.
+
 Keep the file names exactly as they are. Overwriting in place is correct,
 and it needs a service-worker bump (see Installing, below).
 
-## 2. A clean wide Globe for the heading
+## 2. The heading's Globe — DONE (2026-11-05)
 
-The mockup opens with a landscape Globe illustration bleeding off the
-right edge behind the title. **There is no file that can do this job.**
+`img/ui/shakespeare-hero.jpg`, 687 x 221, from the second handoff. Clean:
+no module labels, no roundels, no CURRENT chip, no arrows. It is in place
+and the heading draws its own live text beside it.
 
-`img/ui/shakespeare-globe.jpg` is 864 x 852 — square, not landscape — and
-more to the point it has the six module labels, the numbered roundels, a
-CURRENT chip and the dashed arrows **painted into the picture**. Every
-horizontal slice between 14% and 70% of its height has lettering in it, so
-there is no clean band to crop. The painted CURRENT chip would also sit on
-module 1 for ever.
+**One caveat worth knowing.** It was cut from the 1536 x 1024 reference,
+so it is a **1x asset** — it holds at the width the heading gives it and
+will look soft on a retina screen. A larger master would be an
+improvement, not a fix, and nothing is wrong without one.
 
-**What to draw:** the same playhouse, **wide** — around **2000 x 800** —
-with **no lettering of any kind**: no module names, no roundels, no CURRENT
-chip, no arrows. Compose it so the building sits right of centre and the
-left third is quiet, because the title sits over that side and the right
-edge is cropped off.
-
-Ship it at a **new path**, `img/ui/shakespeare-hero.jpg`, rather than
-replacing the old plate. The old one stays recoverable and no cache bump
-is needed for a new path.
-
-The heading reads perfectly well without it, which is why this is second
-on the list and not first.
+The old square plate, `img/ui/shakespeare-globe.jpg`, still ships at its
+own path and is now unused. It is kept rather than deleted.
 
 ## 3. The vine margin — probably not artwork at all
 
@@ -97,12 +100,10 @@ drawn in code and needs nothing.
 
 ## What is NOT needed
 
-**The resume banner's painting.** The mockup shows a still life of books, a
-gold mask and laurel beside "Why He Still Matters to Actors". The banner
-uses **the module's own painting** instead — whichever module the lesson
-you are resuming belongs to — so it changes as you move through the course
-and no new file is required. If you would rather have a fixed still life
-there, that is a separate ask.
+**The resume banner's still life — DONE.** `img/ui/shakespeare-resume.jpg`,
+326 x 112, books, a gold mask and laurel. In place. Where a course sets no
+`resumeArt` the banner still falls back to the painting of the module
+holding the lesson being resumed, which is what shipped first.
 
 **The book glyph, the chevron, the gold CURRENT pill and the numbered
 roundels.** All CSS and inline SVG. No files.

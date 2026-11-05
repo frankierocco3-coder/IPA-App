@@ -3419,8 +3419,10 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    the right edge of the phone — measured, with the CURRENT pill and the
    end of every blurb cut away. min() lets the track collapse to the
    column when the column is the smaller of the two. */
-.lm-path.is-cards { display: grid; gap: 22px 22px; max-width: 1160px;
-  grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr));
+.lm-path.is-cards { display: grid; gap: 18px; max-width: 1160px;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: repeat(var(--cards-rows, 3), auto);
+  grid-auto-flow: column;
   align-items: stretch; padding-left: 0; }
 /* No rail: the dashed line down the left is the path's, and there is no
    path here. */
@@ -3432,27 +3434,19 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   background: var(--panel, #fbf8f1); border: 1px solid var(--line);
   border-radius: 14px; overflow: hidden;
   box-shadow: 0 2px 6px rgba(45, 27, 18, .10); }
-/* AND ITS PICTURE DOES NOT GROW WITH IT. --art-col is a PERCENTAGE, so a
-   card that doubles in width doubles its painting: 42% of a full row is
-   479px of portrait against a lesson list, which makes the opened module
-   look like a different page rather than the same card unfolded. A fixed
-   column holds the picture at about the size it was closed. */
-.is-cards .lm-mod:has(.lm-fold[open]) .lm-head.has-card,
-.is-cards .lm-mod.is-flip:has(.lm-fold[open]) .lm-head.has-card {
-  grid-template-columns: 280px 1fr; }
-/* AN OPEN CARD TAKES THE WHOLE ROW, the same :has() trick the shelf uses
-   and for the same reason: a module's lesson list is a long column and
-   it should not be squeezed into half a row. Where :has() is unsupported
-   the open card simply stays one column wide — narrower, never broken. */
-.is-cards .lm-mod:has(.lm-fold[open]) { grid-column: 1 / -1; }
 
 /* PICTURE LEFT, WORDS RIGHT, AND IT NEVER FLIPS. The path alternates the
    side to keep a long scroll from marching; a grid read across would
    just look misaligned, so .is-flip is explicitly undone here rather
    than left to not apply. */
 .is-cards .lm-head { display: block; padding: 0; }
-.is-cards .lm-head.has-card { display: grid; padding: 0; gap: 0;
+/* THE THUMBNAIL IS INSET AND ROUNDED, not flush to the card edge — the
+   owner's second mockup frames each painting with the card's cream
+   showing all the way round it, which reads as a picture laid on the card
+   rather than as a card half made of picture. */
+.is-cards .lm-head.has-card { display: grid; padding: 12px; gap: 14px;
   grid-template-columns: var(--art-col, 216px) 1fr; align-items: stretch; }
+.is-cards .lm-plate { border-radius: 10px; }
 .is-cards .lm-mod.is-flip .lm-head.has-card {
   grid-template-columns: var(--art-col, 216px) 1fr; }
 .is-cards .lm-mod.is-flip .lm-head.has-card > .lm-plate { order: 0; }
@@ -3477,7 +3471,7 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .is-cards .lm-plate { height: 100%; width: 100%; aspect-ratio: auto; }
 .is-cards .lm-art { position: absolute; inset: 0; width: 100%; height: 100%;
   object-fit: cover; object-position: var(--art-focus, center center); }
-.is-cards .lm-head-text { padding: 16px 18px 14px; min-width: 0;
+.is-cards .lm-head-text { padding: 4px 4px 2px 0; min-width: 0;
   display: flex; flex-direction: column; }
 .is-cards .lm-eyebrow { display: none; }
 
@@ -3509,13 +3503,13 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-line-ico { width: 15px; height: 15px; flex: 0 0 auto; }
 .lm-cards-chev { margin-left: auto; font-size: 19px; line-height: 1;
   color: var(--muted); }
-.is-cards .lm-mod:has(.lm-fold[open]) .lm-cards-chev { transform: rotate(90deg); }
+
 
 /* THE CURRENT PILL, top-right of the card. .lm-chip already carries the
    gold this app spends on "you are here"; the second class only moves
    it, so the two cannot drift apart. */
 .is-cards .lm-fold { position: relative; }
-.lm-chip-corner { position: absolute; top: 12px; right: 12px; z-index: 2;
+.lm-chip-corner { position: absolute; top: 16px; right: 16px; z-index: 2;
   margin: 0; padding: 3px 8px; font-size: 10px; letter-spacing: .07em;
   background: #f6eed8; }
 /* AND THE TITLE KEEPS OUT OF ITS WAY. The pill is positioned, so it is
@@ -3534,8 +3528,14 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .is-cards .lm-mod.is-current > .lm-fold {
   border-color: var(--gold);
   box-shadow: 0 0 0 1px var(--gold), 0 3px 12px rgba(45, 27, 18, .10); }
-/* The lesson list, once a card is opened. */
-.is-cards .lm-list { padding: 0 18px 16px; }
+/* The card is a whole button now, so it has to look like one surface and
+   behave like one control: no inherited button chrome, text left, and the
+   focus ring on the card rather than on something inside it. */
+.is-cards .lm-fold { width: 100%; padding: 0; text-align: left; font: inherit;
+  color: inherit; cursor: pointer; appearance: none; }
+.is-cards .lm-fold:hover { border-color: var(--sage); }
+.is-cards .lm-fold:focus-visible { outline: 3px solid var(--green-dark);
+  outline-offset: 2px; }
 
 /* ── THE OPENING: RESUME BANNER, PROGRESS, RULE ─────────────────────
    THE ONE DARK SURFACE OUTSIDE .tr-view'S OWN, and it is written as a
@@ -3548,9 +3548,11 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-resume { display: grid; grid-template-columns: 148px 1fr auto;
   align-items: center; gap: 0 20px; margin: 0 0 16px;
   background: #3a4a2f; border-radius: 14px; overflow: hidden;
+  border: 1px solid rgba(201, 162, 75, .5);
   box-shadow: 0 2px 8px rgba(45, 27, 18, .12); }
 .lm-resume-art { display: block; width: 148px; height: 100%;
-  min-height: 104px; object-fit: cover; }
+  min-height: 104px; object-fit: cover;
+  border-right: 1px solid rgba(201, 162, 75, .55); }
 .lm-resume-text { min-width: 0; padding: 16px 0; }
 .lm-resume-eyebrow { margin: 0 0 3px;
   font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
@@ -3568,8 +3570,12 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-resume-go:hover:not(:disabled) { background: #fffdf7; }
 .lm-resume-go:disabled { background: rgba(246, 241, 232, .4); color: rgba(253, 252, 247, .7); }
 
-.lm-prog { margin: 0 0 20px; }
-.lm-prog-say { margin: 0 0 7px; font-size: 13.5px; color: var(--muted); }
+/* THE LABEL SITS BESIDE THE BAR, not above it (owner's second mockup):
+   one line that reads "0 of 37 lessons complete ———————", which is how
+   the reference draws it and one line shorter than stacking them. */
+.lm-prog { display: flex; align-items: center; gap: 18px; margin: 0 0 18px; }
+.lm-prog-say { margin: 0; flex: 0 0 auto; font-size: 13.5px; color: var(--muted); }
+.lm-prog .bar { flex: 1 1 auto; }
 
 /* The rule that divides the opening from the modules: a hairline either
    side of a drawn sprig. The pseudo-elements carry the line so the SVG
@@ -3581,6 +3587,55 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-rule-ico { width: 32px; height: 15px; flex: 0 0 auto; fill: none;
   stroke: currentColor; stroke-width: 1.5; stroke-linecap: round;
   stroke-linejoin: round; }
+
+/* ── THE HEADING'S PLAYHOUSE (owner artwork, 2026-11-05) ────────────
+   Title and count on the left, the Globe on the right, bleeding off the
+   edge of the column.
+
+   IT IS ABSOLUTELY POSITIONED AND THE TEXT IS NOT, so the picture can
+   overhang the column's right edge without widening the page or pushing
+   the title. `overflow: hidden` on .tr-top is what crops it, and it is
+   also what stops the overhang becoming a horizontal scrollbar — the
+   failure the Acting Library hit when a banner was allowed to set the
+   page width.
+
+   THE FADE IS A MASK, NOT A PAINTED GRADIENT. The file carries its own
+   parchment, and a drawn fade would only match the page at one theme and
+   one screen; a mask dissolves whatever is actually there into whatever
+   the page actually is. The left stop is far enough in that the title
+   never sits on busy artwork, which is the one thing the brief asked for
+   by name.
+
+   MIN-HEIGHT, NOT HEIGHT, so a wrapped title at a narrow width pushes the
+   block taller instead of running out under the picture. */
+.tr-top.has-hero { position: relative; overflow: hidden;
+  min-height: 150px; padding-right: 0; }
+/* :not(.tr-hero) IS LOAD-BEARING. Lifting "every child" above the picture
+   lifted the PICTURE too — `position: relative` beat its own `absolute`,
+   it dropped back into flow, and the playhouse rendered as a band across
+   the top of the heading instead of beside it. */
+.tr-top.has-hero > *:not(.tr-hero) { position: relative; z-index: 1; max-width: 62%; }
+.tr-hero { position: absolute; z-index: 0; top: 0; right: -24px;
+  width: 620px; height: auto; pointer-events: none; user-select: none;
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 34%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 34%); }
+/* A hairline under the title, as the reference draws it, stopping short
+   of the picture rather than running under it. */
+.tr-top.has-hero .tr-title { margin-bottom: 8px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--line); }
+
+@media (max-width: 979px) {
+  /* ONE COLUMN, AND THE FLOW GOES BACK TO ROWS. Column flow with an
+     explicit row count in a single-column grid does not stack — it opens
+     a second column off the side of the phone and the cards march away
+     to the right. Both halves of the rule have to be undone together. */
+  .lm-path.is-cards { grid-template-columns: 1fr; grid-template-rows: none;
+    grid-auto-flow: row; }
+  /* The playhouse goes behind the words at a phone width, faint enough to
+     read over, because there is no column left to put it beside. */
+  .tr-top.has-hero > *:not(.tr-hero) { max-width: 100%; }
+  .tr-hero { right: -90px; width: 420px; opacity: .3; }
+}
 
 @media (max-width: 860px) {
   /* The picture goes on top at a phone width: a 42% column of a 340px

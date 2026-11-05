@@ -4089,7 +4089,14 @@ function cardsResumeHtml(B, lessons, nextId, scene) {
   const done = avail.filter(l => speechLessonDone(l.id)).length;
   const pct = avail.length ? Math.round(done / avail.length * 100) : 0;
   const l = treeCardLesson(B, lessons, nextId);
-  const art = l ? scene.moduleCard?.[bookModuleFor(B, l)?.id] : null;
+  // THE BANNER'S OWN PAINTING WINS WHERE A COURSE HAS ONE (owner's second
+  // mockup, 2026-11-05: a still life of books, a gold mask and laurel).
+  // Where it has none the banner borrows the painting of whichever module
+  // holds the lesson you are returning to, which needs no new asset and
+  // changes as you move through the course. Both are decorative: the
+  // title beside it already names the thing.
+  const art = scene.resumeArt
+    ?? (l ? scene.moduleCard?.[bookModuleFor(B, l)?.id] : null);
   const open = l ? B.visible(l) : false;
   // RESUME ONLY ONCE THERE IS SOMETHING TO RESUME. On a course nobody has
   // started, "Resume" over lesson one is the page describing a past the
@@ -4225,7 +4232,10 @@ function bookLearnSequence(el, B) {
     ${scene.ground ? `
     <img class="lm-ground" src="${esc(scene.ground)}" alt="" aria-hidden="true"
          loading="lazy" decoding="async">` : ''}
-    <div class="tr-top">
+    <div class="tr-top${isCards && scene.hero ? ' has-hero' : ''}">
+      ${isCards && scene.hero ? `
+      <img class="tr-hero" src="${esc(scene.hero.src)}" alt="${esc(scene.hero.alt ?? '')}"
+           width="687" height="221" decoding="async">` : ''}
       <p class="lp-course">${esc(B.title.toUpperCase())}</p>
       <h1 class="tr-title">${esc(scene.title)}</h1>
       <p class="tr-sub">${heroSub}</p>
@@ -4257,6 +4267,12 @@ function bookLearnSequence(el, B) {
   // THE MAP PINS ARE THE MODULE SURFACE ON DESKTOP, because the grid
   // beneath them is display:none above 900px. They open the module's
   // first unfinished lesson, which is what its card in the grid does.
+  // THE CARDS LAYOUT'S MODULE CARDS OPEN THE MODULE PAGE. They are whole
+  // buttons rather than folds (see learnModuleBandHtml), so this is the
+  // only door out of them — the same destination the shelf's tiles used
+  // before it, through the same renderer.
+  el.querySelectorAll('[data-mod-go]').forEach(btn =>
+    btn.addEventListener('click', () => navTo(() => renderActingModule(+btn.dataset.modGo, B.ws))));
   el.querySelectorAll('.gm-pin[data-gm]').forEach(btn =>
     btn.addEventListener('click', () => {
       const ls = B.lessons.filter(l => !l.reference && B.visible(l) && l.module === btn.dataset.gm);
@@ -4771,7 +4787,15 @@ function learnPathHtml(B, lessons, nextId) {
   // mockup shows of it — empty. It now sits on `.tr-view`, behind the
   // heading and the cards together. A scene with no `ground` renders
   // nothing at all, which is this repo's rule for an empty art slot.
-  const pathStyle = [asp ? `--art-aspect:${asp}` : '', col ? `--art-col:${col}` : '']
+  // HOW MANY ROWS THE CARDS LAYOUT NEEDS, so CSS can flow it by column:
+  // 01-02-03 down the left and 04-05-06 down the right (owner's mockup,
+  // 2026-11-05). `grid-auto-flow: column` needs an explicit row count or
+  // it puts every card in one row, and the count is a fact about the
+  // course rather than a number CSS can work out. Computed, never passed
+  // in, so a course with five or seven modules is right without an edit.
+  const rows = scene.layout === 'cards' ? Math.ceil(groups.length / 2) : 0;
+  const pathStyle = [asp ? `--art-aspect:${asp}` : '', col ? `--art-col:${col}` : '',
+    rows ? `--cards-rows:${rows}` : '']
     .filter(Boolean).join(';');
   return `${mapHtml}<div class="lm-path${shelf}${mapHtml ? ' has-map' : ''}"${pathStyle ? ` style="${pathStyle}"` : ''}>
     ${groups.map((g, gi) => learnModuleBandHtml(B, g, gi, nextId, scene, locked)).join('')}
@@ -5022,8 +5046,24 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // of the card — the chevron in the footer is the affordance.
   const countLine = isCards ? ''
     : `<p class="lm-count">${pips}${done} of ${total} done<span class="lm-fold-arrow" aria-hidden="true"></span>${cont}</p>`;
+  // A CARD THAT NAVIGATES IS A BUTTON, NOT A DISCLOSURE (owner's second
+  // mockup, 2026-11-05). The other layouts fold a module open in place and
+  // a <summary> is exactly right for that. This one does not: the mockup
+  // draws a chevron, which means GO, shows no opened state, and the module
+  // page it goes to already exists and lists every lesson.
+  //
+  // So the tag changes with the job. A <summary> announced as a disclosure
+  // that actually leaves the page is a control that lies about itself, and
+  // a real <button> gets the right role, the right announcement and the
+  // same keyboard and focus behaviour for free.
+  //
+  // IT ALSO MAKES THE COLUMN ORDER POSSIBLE. The mockup reads 01-02-03
+  // down the left and 04-05-06 down the right, which is grid-auto-flow
+  // column — and an item that can expand to span both columns cannot be
+  // placed by column flow. No fold, no conflict.
+  const headTag = isCards ? 'span' : 'summary';
   const head = g.m ? `
-    <summary class="lm-head${card ? ' has-card' : ''}">
+    <${headTag} class="lm-head${card ? ' has-card' : ''}">
       ${art}
       <div class="lm-head-text">
         ${pipped && tag ? `<p class="lm-kicker">${esc(tag)}</p>` : ''}
@@ -5034,7 +5074,24 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
         ${countLine}
       </div>
       ${cardsPill}
-    </summary>` : '';
+    </${headTag}>` : '';
+  // The whole card is the control, so it carries the name a screen reader
+  // reads out — the heading, the state and the lesson count in one phrase,
+  // rather than announcing a bare "button" and leaving the reader to hunt.
+  if (isCards && g.m) {
+    const says = `${moduleTitle(B, g.m)}, module ${g.m.n}, `
+      + `${total} ${total === 1 ? 'lesson' : 'lessons'}`
+      + (state === 'current' ? ', current module'
+        : state === 'done' ? ', completed'
+        : state === 'locked' ? ', locked' : '');
+    return `
+    <section class="lm-mod is-${state}">
+      <button class="lm-fold" type="button" data-mod-go="${esc(String(g.m.n))}"
+              aria-label="${esc(says)}">
+        ${head}
+      </button>
+    </section>`;
+  }
   // THE STATE REACHES THE CARD NOW. Until 2026-11-02 the only element
   // carrying it was the <span> around the state word, so nothing could
   // border, tint or flip the card itself — the owner's mockup wants the
