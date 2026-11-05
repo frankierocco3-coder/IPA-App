@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v91';                     // 2026-11-05: the Shakespeare Learn page matched to the owner's reference — column order, card buttons, the heading's playhouse and the banner's still life. The two images are NEW paths and need no bump of their own; js/main.js, css/style.css and js/data/learn-scenes.js are staleWhileRevalidate and he is waiting on this one
+const VERSION = 'sc-v92';                     // 2026-11-05: the ivy ground on the Shakespeare Learn page. The SVG is a new path and needs no bump of its own; css/style.css and js/data/learn-scenes.js are staleWhileRevalidate, so an installed copy would keep the page without it and, worse, with the stale z-index lift list
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
