@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v89';                     // 2026-11-04: Back goes to the previous page — sections are on the nav stack now. js/main.js and js/ui.js are both staleWhileRevalidate, so an installed copy would keep the arrow dead at a section root with the fix one revalidation away, and he is waiting on this one                     // 2026-11-04: a back arrow top left on every shell page and every lesson. A renderer and a stylesheet, both staleWhileRevalidate, so an installed copy would serve the arrow-less lesson with the fix one revalidation away — and he reported this one
+const VERSION = 'sc-v89';                     // 2026-11-05: Back goes to the previous page — sections are on the nav stack now. js/main.js and js/ui.js are both staleWhileRevalidate, so an installed copy would keep the arrow dead at a section root with the fix one revalidation away, and he is waiting on this one
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
