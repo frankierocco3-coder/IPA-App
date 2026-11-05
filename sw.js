@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v87';                     // 2026-11-04: the approved Acting Library — four illustrated panels, a description per door, and the right rail's column given to the page. Four NEW images at new paths, which needs no bump on its own, and a stylesheet and a renderer, which go through staleWhileRevalidate and would be one revalidation away. He asked for this one and is waiting to see it
+const VERSION = 'sc-v88';                     // 2026-11-04: a back arrow top left on every shell page and every lesson. A renderer and a stylesheet, both staleWhileRevalidate, so an installed copy would serve the arrow-less lesson with the fix one revalidation away — and he reported this one
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
