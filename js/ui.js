@@ -16,6 +16,10 @@ import { PHONEMES } from './data/phonemes.js';
 export const app = document.getElementById('app');
 export const navStack = [];
 let navRestoring = false;
+// Nothing calls this since 2026-11-04, when renderShell stopped wiping the
+// stack on every section change and started recording the section instead.
+// Kept because a hard reset of navigation is a real operation and this is
+// the one correct way to do it; delete it if it is still unused in a year.
 export function resetNav() { navStack.length = 0; navRestoring = false; }
 
 // The shell registers how to get home. Keeping this a callback is what
@@ -277,12 +281,20 @@ export function shellBack() {
     document.getElementById('nb-close')?.click();
     return true;
   }
-  // HOME IS NOT ON THE STACK — goBack() falls through to homeHandler()
-  // when it pops the last entry, so an empty stack means "already home".
-  // One entry is a real page with somewhere to return to, which is why
-  // this is > 0 and not > 1. (It was > 1 for one draft, and that exited
-  // the app from any single-level page instead of going back.)
-  if (navStack.length > 0) { goBack(); return true; }
+  // THE SECTION IS ON THE STACK NOW (owner order, 2026-11-04), so the top
+  // entry is always the page in front of you and ONE entry is a root with
+  // nothing beneath it. Hence > 1.
+  //
+  // It was > 0, correctly, under the previous model: renderShell called
+  // resetNav() and the shell was never recorded, so "empty" meant home
+  // and one entry meant a real sub-page. That comment warned that > 1
+  // "exited the app from any single-level page instead of going back" —
+  // true then, and the reason it is safe now is exactly what changed:
+  // a single-level page today reports TWO, its section and itself.
+  //
+  // Left at > 0 this would have stopped a native shell's hardware back
+  // from ever leaving the app, because a section root now reports one.
+  if (navStack.length > 1) { goBack(); return true; }
   return false;
 }
 

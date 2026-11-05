@@ -8160,10 +8160,23 @@ export async function run({ navDoc = document } = {}) {
 
     // Hardware back for the Android shell (2026-10-04). Driven in the live
     // app, because the whole question is what the REAL nav stack does.
-    // HOME IS NOT ON THE STACK: goBack() falls through to homeHandler()
-    // when it pops the last entry, so one entry is a real page. A first
-    // draft tested `> 1` and would have exited the app from every
-    // single-level page — invisible to any source-only check.
+    //
+    // THE SECTION IS ON THE STACK (owner order, 2026-11-04: "the back arrow
+    // should just go back to the previous page"). renderShell records
+    // `section:<id>` instead of calling resetNav(), so the top entry is
+    // always the page in front of you and a section ROOT reports one entry
+    // with nothing beneath it. shellBack() therefore tests `> 1`.
+    //
+    // It tested `> 0` until that change, and correctly: the shell was never
+    // recorded, so an empty stack meant home and one entry meant a real
+    // sub-page. A `> 1` draft back then would have exited the app from every
+    // single-level page. Both thresholds are right for their own model —
+    // what makes this one safe is that a single-level page now reports TWO,
+    // its section and itself. Do not "restore" `> 0` on the strength of the
+    // older comment.
+    //
+    // The two checks below still read the same way: at a section root the
+    // shell is asked to exit, and one level deeper Back moves the page.
     const frameB = document.querySelector('iframe');
     if (frameB) {
       frameB.contentWindow.location.reload();
@@ -8175,7 +8188,7 @@ export async function run({ navDoc = document } = {}) {
 
       check('shell back: the hook exists for the native shell to call',
         typeof winB.__shellBack === 'function');
-      check('shell back: at home it answers false, so the shell exits',
+      check('shell back: at a section root it answers false, so the shell exits',
         winB.__shellBack() === false,
         'returning true at the root makes the back button look dead');
 

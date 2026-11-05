@@ -24,7 +24,7 @@ import { RHETORIC } from './data/shakespeare/rhetoric.js';
 import { CAPABILITIES } from './capabilities.js';
 import { BUILD } from './build.js';
 import { tryItHtml, performCaptureHtml } from './record-ui.js';
-import { app, navStack, resetNav, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
+import { app, navStack, setHomeHandler, setTeardownHooks, esc, record, goBack, navTo,
          goHome, goSection, setSectionHandler, openModal, phonemeSlug,
          pageTopbar, wireBrandHome, EMBLEM, BRAND_BTN, courseProgressHtml,
          runStepSequence, tileHtml, itemTileHtml, reviewStripHtml,
@@ -349,7 +349,6 @@ function showSection(id) {
 
 function renderShell(section) {
   stopSpeech();
-  resetNav();
   setSection(section);
   window.scrollTo(0, 0);          // each section starts at its own top
   releaseTryIt();
@@ -359,6 +358,35 @@ function renderShell(section) {
     section = 'learn';
     setSection(section);
   }
+  // ── A SECTION IS A PAGE ON THE STACK (owner order, 2026-11-04) ──
+  // This called resetNav() and wiped the stack on every section change,
+  // because the model was "the shell IS home and home is not on the
+  // stack". That made Back mean nothing at a section root: tap Learn,
+  // then Library, and there was no previous page to return to.
+  //
+  // His instruction is that the arrow just goes back to the previous
+  // page, so the sections join the stack like everything else and the
+  // special case for home goes away.
+  //
+  // THE KEY IS WHAT STOPS A SECTION STACKING ON ITSELF. record()
+  // compares function identity, which never matches for a fresh closure,
+  // so without `section:<id>` every re-render of the same section would
+  // push another copy and Back would walk through them one at a time.
+  // Re-renders of the current section are common — tapping the section
+  // you are already on, and the views that call goSection(current) after
+  // an action — so this is not a theoretical case.
+  //
+  // Alternating sections DO each push, and that is the point, not a
+  // leak: Learn → Library → Learn is three pages and Back visits them in
+  // turn, exactly as a browser would. A reader who taps between two
+  // sections fifty times carries fifty closures, which is cheap and is
+  // what "back goes to the previous page" costs.
+  //
+  // THE TOP OF THE STACK IS NOW THE CURRENT PAGE EVERYWHERE, which is
+  // why both readers of navStack.length moved from > 0 to > 1 — see
+  // shellBack() in js/ui.js. One entry is a root with nothing beneath
+  // it; two is a page with somewhere to go.
+  record(() => renderShell(section), `section:${section}`);
   const course = workspaceCourse(ws);
 
   app.innerHTML = `
@@ -530,13 +558,15 @@ function drawStatsbar(course, section, ws = activeWorkspace()) {
   // lands on every shell page and every lesson from a single edit, and
   // nowhere near the topbar pages that already have their own.
   //
-  // IT HIDES WHERE THERE IS GENUINELY NOWHERE TO GO, and the ordering
-  // makes that free rather than a guess. renderShell calls resetNav()
-  // before it calls this, so a section root reports an empty stack; the
-  // lesson calls this AFTER its own record(), so it reports one. An
-  // arrow on a page with no history would be a control that lies, which
-  // is worse than no control.
-  const canBack = navStack.length > 0;
+  // IT HIDES ONLY AT A ROOT, where there is genuinely nothing beneath.
+  // Since the section joined the stack the top entry is always the page
+  // in front of you, so one entry is a root and two is a page with
+  // somewhere to return to. An arrow on a page with no history would be
+  // a control that lies, which is worse than no control.
+  // > 1, not > 0: since 2026-11-04 the section itself is on the stack, so
+  // the top entry is the page you are looking at and one entry means a
+  // root with nothing beneath it.
+  const canBack = navStack.length > 1;
   bar.innerHTML = `
     <button class="backbtn statsbar-back" id="shell-back" type="button"
             aria-label="Back" title="Back"${canBack ? '' : ' hidden'}>‹</button>
@@ -5649,9 +5679,9 @@ function renderActingLesson(id) {
     // the middle, and the lesson's notes on the right.
     //
     // IT IS NOT THE APP SHELL, and that is deliberate. Rendering into
-    // #shell-main would have meant renderShell(), which calls resetNav()
-    // and clears the back stack the lesson depends on; it would also
-    // have put a SECOND #brand-home in the document, and
+    // #shell-main would have meant renderShell(), which records a
+    // section entry over the lesson's own and would have put a SECOND
+    // #brand-home in the document, and
     // getElementById returns the first, so wireBrandHome() would have
     // wired the sidebar's brand twice and the lesson's not at all. This
     // is the lesson's own grid, built from the same tokens.
