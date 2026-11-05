@@ -79,24 +79,19 @@ improvement, not a fix, and nothing is wrong without one.
 The old square plate, `img/ui/shakespeare-globe.jpg`, still ships at its
 own path and is now unused. It is kept rather than deleted.
 
-## 3. The vine margin — probably not artwork at all
+## 3. The vine margin — DONE (2026-11-05), and it is code
 
-The mockup draws vine and leaf down the far-left margin and across the
-bottom. The app already has a slot for exactly this — `ground` on a scene
-record, which draws a decorative layer behind the whole pane at low
-opacity, bleeding past the text column into the margins.
+`img/ui/shakespeare-ground.svg`, 9KB, drawn rather than painted: ivy down
+the far-left margin and along the bottom, through the `ground` slot that
+Commedia already uses. **You drew nothing for this and you do not need to.**
 
-Commedia's is `img/ui/commedia-ground.svg`: **drawn in code**, 7.6KB, one
-ink colour, and it rescales and re-themes for free. A raster strip down a
-margin of unknown height tiles badly, which is the failure
-`docs/LEARN_BAND_IMAGE_SPEC.md` records.
+It has a generator, `tools/make_vine_ground.py`, which places leaves along
+a curve at the curve's own tangent. If you want it denser, fainter, longer
+or a different green, say so — that is a few numbers in the script, then
+re-run it. Do not hand-edit the SVG; the next run would overwrite you.
 
-**Recommendation: say the word and this gets drawn as an SVG, no artwork
-needed from you.** If you would rather draw it, it has to be a full-pane
-decorative layer, not a strip.
-
-The small leaf on the rule between the banner and the cards is already
-drawn in code and needs nothing.
+It is **not drawn on a phone**, deliberately. The decoration is a margin
+and a phone has none.
 
 ## What is NOT needed
 
