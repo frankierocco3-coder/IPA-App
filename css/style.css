@@ -1155,6 +1155,7 @@ body.modal-open { overflow: hidden; }
 @media (min-width: 980px) {
   .shell:has(.lm-path.is-gallery),
   .shell:has(.lm-path.is-shelf),
+  .shell:has(.lm-path.is-banded),
   .shell:has(.lm-path.is-pathcards) {
     grid-template-columns: 216px minmax(0, 940px) 330px;
   }
@@ -1162,6 +1163,7 @@ body.modal-open { overflow: hidden; }
 @media (min-width: 980px) and (max-width: 1500px) {
   .shell:has(.lm-path.is-gallery),
   .shell:has(.lm-path.is-shelf),
+  .shell:has(.lm-path.is-banded),
   .shell:has(.lm-path.is-pathcards) {
     grid-template-columns: 216px minmax(0, 1fr) 330px;
   }
@@ -3390,6 +3392,117 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    so it cannot shout louder than the sentence it belongs to. */
 .lm-state .lp-ico { width: 13px; height: 13px; vertical-align: -2px;
   margin-right: 5px; }
+
+/* ── THE BANDED LAYOUT (owner's four-course handoff, 2026-11-06) ────
+   Acting, Building a Character, Musical Theatre and Screen Acting.
+
+   A two-column grid of cards, each one a sage band carrying MODULE, the
+   number and the title, a wide picture under it, and a footer of blurb
+   and "Explore module". Unlike the cards layout it reads ACROSS — 1 and
+   2 on the first row, 3 and 4 on the second — so this is plain row flow
+   and needs no row count.
+
+   IT KEEPS THE RIGHT RAIL, which the cards layout gives up. That is not
+   an inconsistency: the mockups for these four draw a rail and put the
+   course's progress in it, and three of the four already have one worth
+   keeping. So the grid lives in the 940px track the path layouts use,
+   not the 1160px one.
+
+   THE PICTURE'S SHAPE IS THE COURSE'S, through --art-aspect, and the
+   four differ more than any other layout's: 3.19:1 for Acting, 2.22:1
+   for Character, 2.05:1 for Musical and 7.8:1 for Screen. The last is
+   not a mistake — the mockup draws Screen as thin letterboxed strips,
+   which is the one place in this app where the picture is shaped like
+   the medium the course teaches. */
+.lm-path.is-banded { display: grid; gap: 18px; max-width: 1040px;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  align-items: start; padding-left: 0; }
+.lm-path.is-banded::before { content: none; }
+.lm-path.is-banded { align-items: stretch; }
+.is-banded .lm-mod { position: relative; margin: 0; padding: 0; display: flex; }
+
+/* The whole card is one button, so it carries the focus ring and sheds
+   every inherited button default. */
+.lb-card { flex: 1; display: flex; flex-direction: column; width: 100%;
+  padding: 0; text-align: left; font: inherit; color: inherit;
+  cursor: pointer; appearance: none; overflow: hidden;
+  background: var(--panel, #fbf8f1); border: 1px solid var(--line);
+  border-radius: 15px; box-shadow: 0 2px 6px rgba(45, 27, 18, .08); }
+.lb-card:hover { border-color: var(--sage); }
+.lb-card:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+
+/* THE BAND. The number is the only large numeral on the page, so it is
+   set in the serif and sits under its own small-caps label, with a gold
+   hairline between it and the title. */
+.lb-band { display: flex; align-items: center; gap: 14px;
+  padding: 10px 16px; background: var(--accent-tint, #e6ebdd);
+  border-bottom: 1px solid var(--line); }
+.lb-n { display: flex; flex-direction: column; align-items: flex-start;
+  flex: 0 0 auto; line-height: 1; padding-right: 14px;
+  border-right: 2px solid var(--gold); }
+.lb-n small { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 9.5px; font-weight: 700; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--muted); }
+.lb-n b { font-family: var(--serif, Georgia, serif); font-size: 27px;
+  font-weight: 700; color: var(--green-dark);
+  font-variant-numeric: tabular-nums; }
+.lb-title { font-family: var(--serif, Georgia, serif); font-size: 19px;
+  line-height: 1.2; color: var(--ink); min-width: 0; }
+
+/* THE PICTURE sits at its own aspect, full card width, cropped by
+   object-fit rather than squashed — the ASSET-MAP's one explicit
+   instruction about these files was not to stretch them into tall
+   thumbnails. */
+.lb-plate { display: block; width: 100%; overflow: hidden;
+  background: var(--panel-2); aspect-ratio: var(--art-aspect, 2.2 / 1); }
+.lb-art { display: block; width: 100%; height: 100%; object-fit: cover;
+  object-position: var(--art-focus, center center); }
+
+.lb-foot { display: flex; align-items: flex-end; justify-content: space-between;
+  gap: 14px; padding: 11px 16px 13px; }
+/* THE REAL BLURB, CLAMPED TO THREE LINES. The mockup writes a short
+   two-line description under each card; the course data carries the
+   module's own blurb, which runs to five or six lines on some modules
+   and left the cards in a row at visibly different heights. The handoff
+   says to use actual course data, so the data stays and the CARD does
+   the shortening — the whole blurb is still on the module page.
+   The clamp needs the old flexbox syntax; it is the only thing every
+   engine supports, and `display: -webkit-box` here does not leak,
+   because the element holds one run of text and nothing else. */
+.lb-desc { font-size: 13px; line-height: 1.4; color: var(--muted); min-width: 0;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
+  line-clamp: 3; overflow: hidden; }
+.lb-go { flex: 0 0 auto; white-space: nowrap;
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 13px; font-weight: 700; color: var(--green-dark); }
+.lb-go i { font-style: normal; margin-left: 6px; }
+.lb-card:hover .lb-go { color: var(--ink); }
+
+/* The current module is ringed, the same gold the other two layouts use
+   for "this is where you are". */
+.is-banded .lm-mod.is-current > .lb-card {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 3px 12px rgba(45, 27, 18, .10); }
+
+/* ── THE BANDED LAYOUT'S OPENING PANEL ──────────────────────────────
+   Cream with a thin border, not the cards layout's dark green: these
+   four mockups draw it light, with the one green button on the page. */
+.lb-start { display: flex; align-items: center; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap; margin: 0 0 20px; padding: 16px 20px;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.lb-start-text { flex: 1 1 18rem; min-width: 0; }
+.lb-start-eyebrow { margin: 0 0 2px;
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 11px; font-weight: 700; letter-spacing: .14em;
+  text-transform: uppercase; color: #8a6a22; }
+.lb-start-title { margin: 0 0 3px; font-family: var(--serif, Georgia, serif);
+  font-size: 25px; line-height: 1.15; color: var(--ink); font-weight: 600; }
+.lb-start-aim { margin: 0; font-size: 13.5px; line-height: 1.45; color: var(--muted); }
+.lb-start-go { flex: 0 0 auto; white-space: nowrap; min-height: 44px; }
+
+@media (max-width: 780px) {
+  .lb-start-go { flex: 1 0 100%; }
+}
 
 /* ── THE CARDS LAYOUT (owner's mockup, 2026-11-05) ──────────────────
    Shakespeare's Learn page. Two columns of wide cards, picture always on

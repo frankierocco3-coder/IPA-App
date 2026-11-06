@@ -89,7 +89,20 @@ export const LEARN_SCENES = {
     // where behaviour comes from, then listening, then rhythm — so the
     // path it already had stays; what changes is that each module now
     // shows its painting beside its words instead of above them.
-    layout: 'path-cards',
+        // BANDED (owner's four-course handoff, 2026-11-06). The vertical path
+    // with its dashed rail becomes a two-column grid of cards, each with a
+    // sage band carrying MODULE, its number and its title, a wide picture
+    // under it, and a footer of blurb and "Explore module".
+    //
+    // THE PICTURES CHANGED SHAPE WITH IT, and that is the whole cost of
+    // this change. The 3:4 portraits this course shipped are still on
+    // disk and are still the higher-resolution art — 600x800, from
+    // 1086x1448 masters — but a 2:1 band cannot be cropped out of a 3:4
+    // portrait without cutting the faces the art brief put in its upper
+    // half. The owner supplied NEW wide paintings of the same scenes, and
+    // they are about 1x for the slot they fill. See the brief.
+    layout: 'banded',
+    artAspect: '3.19 / 1',
     // The corner tab: what each module works on, in one word.
     moduleTag: {
       text: 'Text', work: 'Circumstance',
@@ -158,13 +171,13 @@ export const LEARN_SCENES = {
     // image, the same rule figures follow. 'performance' has no card and
     // needs none: it is withdrawn behind PERFORMANCE_LIVE.
     moduleCard: {
-      text: { src: 'img/ui/acting-card-text.jpg',
+      text: { src: 'img/ui/acting-band-text.jpg',
         alt: 'A woman in a maroon shirt and an older man in an olive jacket sit side by side at a cluttered desk, each reading marked-up script pages. A plaster mask, stacked books and a window hung with ivy are behind them.' },
-      work: { src: 'img/ui/acting-card-work.jpg',
+      work: { src: 'img/ui/acting-band-work.jpg',
         alt: 'In a vaulted library reading room, a young woman leans across a desk to whisper behind her hand to an older woman in a green cardigan, who raises her own hand to reply. An open book lies between them under a brass lamp.' },
-      listening: { src: 'img/ui/acting-card-listening.jpg',
+      listening: { src: 'img/ui/acting-band-listening.jpg',
         alt: 'Two actors sit facing each other on wooden chairs in a sunlit rehearsal room, a stage lamp behind them. The older woman speaks with an open hand; the young man sits with his hands clasped, watching her.' },
-      rhythm: { src: 'img/ui/acting-card-rhythm.jpg',
+      rhythm: { src: 'img/ui/acting-band-rhythm.jpg',
         alt: 'A large wooden metronome stands on a rehearsal-room table with its pendulum mid-swing. Behind it a woman holding script pages watches an older man who is gesturing with both hands as he speaks.' },
     },
     done: 'cultivated',
@@ -196,7 +209,20 @@ export const LEARN_SCENES = {
     // owner's own subtitle says so: "a complete path from form to inner
     // life". The path layout puts that back and the wide card still
     // gives each painting room.
-    layout: 'path-cards',
+        // BANDED (owner's four-course handoff, 2026-11-06). The vertical path
+    // with its dashed rail becomes a two-column grid of cards, each with a
+    // sage band carrying MODULE, its number and its title, a wide picture
+    // under it, and a footer of blurb and "Explore module".
+    //
+    // THE PICTURES CHANGED SHAPE WITH IT, and that is the whole cost of
+    // this change. The 3:4 portraits this course shipped are still on
+    // disk and are still the higher-resolution art — 600x800, from
+    // 1086x1448 masters — but a 2:1 band cannot be cropped out of a 3:4
+    // portrait without cutting the faces the art brief put in its upper
+    // half. The owner supplied NEW wide paintings of the same scenes, and
+    // they are about 1x for the slot they fill. See the brief.
+    layout: 'banded',
+    artAspect: '2.22 / 1',
     // THE CORNER TAB on each picture. One word for what the module works
     // on, which is the spine of the course stated five times.
     moduleTag: {
@@ -222,11 +248,15 @@ export const LEARN_SCENES = {
     // 'role' will never have one. It is withdrawn behind ROLE_LIVE, and
     // leaving it without art is part of what lets it come back whole.
     moduleCard: {
-      commedia: { src: 'img/ui/character-card-commedia.jpg',
-        alt: 'Three commedia dell’arte players rehearsing in a sunlit room: a stooped Pantalone in a red cap leaning on a stick, a harlequin in a diamond-patterned costume caught mid-step with both arms wide, and a captain in red with a plumed hat and a sword. All three wear leather half-masks with long curved noses.' },
-      physical: { src: 'img/ui/character-card-physical.jpg',
+      // THE `commedia` KEY WAS REMOVED ON 2026-11-06, with the banded
+      // rebuild. Commedia dell'Arte became its own course on 2026-11-02
+      // and character-course.js filters it out of CHARACTER_MODULES, so
+      // this entry had been unreachable ever since — its painting was
+      // still shipping and no screen could draw it. The course has its
+      // own scene and its own art now.
+      physical: { src: 'img/ui/character-band-physical.jpg',
         alt: 'A rehearsal room with a patterned rug and a stage lamp. One actor in a rust cardigan and olive corduroy trousers walks slowly across the floor in a transformed physicality: hunched forward, weight low in the hips, one hand reaching down. A second actor sits on a wooden chair a few feet away watching her closely, chin resting on his hand.' },
-      vocal: { src: 'img/ui/character-card-vocal.jpg',
+      vocal: { src: 'img/ui/character-band-vocal.jpg',
         alt: 'Two actors standing close and facing each other in a rehearsal room. One, in a maroon t-shirt and olive trousers, speaks with her mouth open and her chin lifted, one hand laid flat on her breastbone and the other on her belly, feeling where the sound is coming from. The other, in a teal cardigan, leans in to listen with his head tilted and one hand half-raised.' },
       // THE SECOND ATTEMPT AT THIS ONE, and the reason is worth keeping.
       // The first came back with a gold crown, a carved throne and the
@@ -235,7 +265,7 @@ export const LEARN_SCENES = {
       // rather than rank". It would have taught the opposite of its own
       // chapter. The re-run keeps the height difference, which is what
       // made the first one read, and strips every badge of office.
-      status: { src: 'img/ui/character-card-status.jpg',
+      status: { src: 'img/ui/character-band-status.jpg',
         alt: 'A status exercise in a rehearsal room. One actor sprawls back in a worn teal armchair with one arm along its back and her legs crossed, chin level, looking down with mild amusement and filling the whole chair. Another kneels on the rug beside her, shoulders rounded, elbows in, hands fidgeting in his lap, chin tipped up to meet her eyes. A third actor watches from behind with a notebook on her knee.' },
       // THE ONLY ONE WITH A DEVICE IN IT, and the only one with nobody
       // else in the room. Both earn their place: this is the chapter about
@@ -248,7 +278,7 @@ export const LEARN_SCENES = {
       // Owner choice, 2026-10-28, over a first version of an actor talking
       // to an empty chair at sunset. That one never shipped and is in the
       // intake folder if it is ever wanted.
-      piece: { src: 'img/ui/character-card-piece.jpg', focus: 'center top',
+      piece: { src: 'img/ui/character-band-piece.jpg', focus: 'center top',
         alt: 'An actor sprawls in a wooden chair in a rehearsal room, in a maroon t-shirt and olive trousers, one hand raised as she imagines. Above her, in a thought bubble, the same woman appears as a queen in a jewelled gown and fur-trimmed robe, seated on a gilded throne in a great hall.' },
         // Crops from the TOP: the thought bubble is the point of this
         // painting and the default centre crop cut it in half.
@@ -490,6 +520,85 @@ export const LEARN_SCENES = {
   // "It makes your reasons available while leaving them able to examine
   // those reasons." The room is above and free to look; the reasons are
   // columns you raise one at a time.
+  // ── MUSICAL THEATRE ────────────────────────────────────────────
+  // Its first Learn scene (owner's four-course handoff, 2026-11-06).
+  // Before this the course fell through to the plain tile grid and had
+  // no artwork of any kind, in common with Screen Acting.
+  //
+  // TWO MODULES, AND THAT IS THE COURSE, not an abridgement for the
+  // page: 'Repertoire by Era' and 'Repertoire by Style' became one
+  // 'Repertoire' by owner order on 2026-11-04, and 'mt-style' is a
+  // RETIRED id that must never be reused.
+  musical: {
+    title: 'Musical Theatre',
+    live: true,
+    layout: 'banded',
+    light: true,
+    // The supplied bands are 548x268 and 551x268.
+    artAspect: '2.05 / 1',
+    done: 'learned',
+    moduleCard: {
+      'mt-form': { src: 'img/ui/musical-band-mt-form.jpg',
+        alt: 'A painted chorus in an open prairie landscape, a windmill and a barn behind them, a woman in a gingham dress and a man in a waistcoat singing out at the front of the company.' },
+      'mt-era': { src: 'img/ui/musical-band-mt-era.jpg',
+        alt: 'Five performers side by side in the costume of different decades, from a wide feathered hat and a tailcoat through a red evening gown to a leather jacket and a hand microphone.' },
+    },
+    palette: {
+      '--tr-sky': '#2a2b38', '--tr-soil': '#3b3630', '--tr-soil-2': '#2c2824',
+      '--tr-leaf': '#d2b27e', '--tr-bark': '#8d7a5e', '--tr-gold': '#e6c87f',
+      '--tr-dim': '#b6ad9b', '--tr-accent': '#c2a2b4',
+    },
+  },
+
+  // ── SCREEN ACTING ──────────────────────────────────────────────
+  // Its first Learn scene (owner's four-course handoff, 2026-11-06).
+  //
+  // NINE MODULES. 'sc-address' (Talking to the Lens) is real and has
+  // been since the course was opened to learners; an early note in the
+  // vault said eight and was out of date.
+  //
+  // THE BANDS ARE CINEMASCOPE-SHALLOW, about 7.8:1, and that is the
+  // design rather than a bad crop: the owner's mockup draws this course
+  // as a row of thin letterboxed strips, which is the one place in this
+  // app where the picture is shaped like the medium it teaches.
+  //
+  // MODULE 9 HAS NO CARD. The supplied strip for it is 455x33, cut off
+  // by the bottom edge of the mockup it was taken from rather than drawn
+  // that way, and half the height of its neighbours. An art slot with no
+  // entry renders NOTHING here, which is honest; a squashed band would
+  // not be. See docs/SCREEN_LEARN_ART_BRIEF.md.
+  screen: {
+    title: 'Screen Acting',
+    live: true,
+    layout: 'banded',
+    light: true,
+    artAspect: '7.8 / 1',
+    done: 'filmed',
+    moduleCard: {
+      'sc-start': { src: 'img/ui/screen-band-sc-start.jpg',
+        alt: 'Two people talking across a table in a warmly lit room, one gesturing as she explains, framed photographs on the wall behind them.' },
+      'sc-presence': { src: 'img/ui/screen-band-sc-presence.jpg',
+        alt: 'An actor standing in front of a lit film camera on a tripod while an operator watches the monitor beside it.' },
+      'sc-craft': { src: 'img/ui/screen-band-sc-craft.jpg',
+        alt: 'A crew member crouching to lay a tape mark on the floor while a camera operator lines up the shot behind them.' },
+      'sc-reacting': { src: 'img/ui/screen-band-sc-reacting.jpg',
+        alt: 'Two actors in close conversation under a practical lamp, one listening with her attention entirely on the other.' },
+      'sc-preparation': { src: 'img/ui/screen-band-sc-preparation.jpg',
+        alt: 'Two people leaning over a marked-up script on a table, a coffee cup beside it, working through the scene line by line.' },
+      'sc-onset': { src: 'img/ui/screen-band-sc-onset.jpg',
+        alt: 'A film set seen wide: a boom operator with the microphone raised, two actors mid-scene, and lamps and a black flag around them.' },
+      'sc-tape': { src: 'img/ui/screen-band-sc-tape.jpg',
+        alt: 'A woman performing to a phone mounted on a small tripod in a plain room lit by a window, recording a self-tape.' },
+      'sc-address': { src: 'img/ui/screen-band-sc-address.jpg',
+        alt: 'A man looking straight down the lens, lit by a lamp at one side, speaking directly to the camera.' },
+    },
+    palette: {
+      '--tr-sky': '#23262a', '--tr-soil': '#32363a', '--tr-soil-2': '#25282b',
+      '--tr-leaf': '#c8ccd2', '--tr-bark': '#7d848c', '--tr-gold': '#d8c489',
+      '--tr-dim': '#a8aeb6', '--tr-accent': '#8fa3b4',
+    },
+  },
+
   rhetoric: {
     title: 'The Reasons You Raise',
     art: null,

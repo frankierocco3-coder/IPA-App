@@ -674,6 +674,28 @@ function drawRail(section) {
       : ws === 'character'
       ? CHARACTER_LESSONS.filter(l => !l.reference && characterVisible(l)).find(l => !speechLessonDone(l.id)) ?? null
       : nextSpeechLesson();
+    // ACTING'S LEARN RAIL OPENS WITH THE COURSE (owner's four-course
+    // handoff, 2026-11-06). Its mockup draws a "Your course" panel at the
+    // top of the rail, and Acting was the only one of the four that had
+    // no progress in the rail at all: the working-text card below resolves
+    // first, and `galleryRail` is false for this workspace, so there was
+    // no footer carrying it either.
+    //
+    // IT DOES NOT DUPLICATE ANYTHING, which is the condition the ruling at
+    // the top of bookLearnSequence sets. The banded page's heading states
+    // the SIZE of the course — "4 modules · 26 lessons" — and this states
+    // how far through it you are. Character, Musical and Screen already
+    // carry their progress in the rail and are left alone.
+    if (ws === 'acting' && section === 'learn') {
+      const AB = BOOKS.acting;
+      const walked = pathLessons(AB).filter(AB.visible);
+      const did = walked.filter(l => speechLessonDone(l.id)).length;
+      cards.push({ h: 'Your course', bare: true, title: '', note: '',
+        body: courseProgressHtml(did, walked.length),
+        // `actions` is not optional — the renderer destructures it with no
+        // guard, and a card without it takes the whole rail down.
+        actions: [] });
+    }
     // Character work needs no working text, so it never asks for one.
     const wantsText = inLearnOrPractice && ws !== 'character';
     const wt = wantsText ? workingText() : null;
@@ -4063,6 +4085,40 @@ const LM_SPRIG_SVG = '<svg class="lm-rule-ico" viewBox="0 0 34 16" aria-hidden="
   + '<path d="M17 9.2c-2.7 0-5-1.2-6.2-3.2 2.4-1 4.8-.6 6.2 1"/>'
   + '<path d="M17 9.2c2.7 0 5-1.2 6.2-3.2-2.4-1-4.8-.6-6.2 1"/></svg>';
 
+// ── THE BANDED LAYOUT'S OPENING (owner's handoff, 2026-11-06) ─────
+//
+// A cream panel with a thin border: the eyebrow, the lesson you are
+// starting or returning to, its objective, and the one green button on
+// the page. It is the same job as the cards layout's dark banner and the
+// path's tree card, done in the shape this handoff draws.
+//
+// NO PROGRESS LINE UNDER IT. The other two put the course's progress
+// beside the opening; these four mockups put it in the right rail's
+// "Your Course" card instead, and saying it twice on one screen is the
+// duplication every one of these redesigns has existed to remove.
+//
+// IT REPLACES treeCardHtml FOR THIS LAYOUT ONLY, which is what keeps the
+// two Acting checks that name `.tr-card .tr-card-title` honest for every
+// course that still draws a tree card.
+function bandedStartHtml(B, lessons, nextId) {
+  const avail = lessons.filter(B.visible);
+  const done = avail.filter(l => speechLessonDone(l.id)).length;
+  const l = treeCardLesson(B, lessons, nextId);
+  if (!l) return '';
+  const open = B.visible(l);
+  return `
+    <section class="lb-start" aria-label="${done ? 'Resume' : 'Start'} the course">
+      <div class="lb-start-text">
+        <p class="lb-start-eyebrow">${done ? 'Resume' : 'Start here'}</p>
+        <h2 class="lb-start-title" data-card-title>${esc(l.title)}</h2>
+        ${l.objective ? `<p class="lb-start-aim" data-card-aim>${esc(l.objective)}</p>` : ''}
+      </div>
+      <button class="btn btn-primary lb-start-go" data-card-go="${esc(l.id)}" type="button"
+        ${open ? '' : 'disabled'}>${open ? (done ? 'Continue learning' : 'Start learning')
+        : 'In review'}<span class="btn-arrow" aria-hidden="true">&rarr;</span></button>
+    </section>`;
+}
+
 // ── THE CARDS LAYOUT'S OPENING (owner's mockup, 2026-11-05) ───────
 //
 // Three things the vertical path has no equivalent of, in the order the
@@ -4216,12 +4272,17 @@ function bookLearnSequence(el, B) {
   // across has no bottom to arrive at. Same data, same [data-card-go]
   // wiring, different place on the page.
   const isCards = scene.layout === 'cards';
+  // THE BANDED LAYOUT opens the same way — its panel at the top, no tree
+  // card at the bottom — and differs in keeping the right rail, which
+  // carries the progress these mockups take out of the main column.
+  const isBanded = scene.layout === 'banded';
+  const opensAtTop = isCards || isBanded;
   // AND IT COUNTS THE COURSE RATHER THAN NARRATING IT. "0 of 37 set
   // across 6 modules" belongs over a route; the mockup's heading states
   // the size of the thing — 6 modules, 37 lessons — and leaves the
   // progress to the line under the banner, which says it once, in words,
   // with a bar.
-  const heroSub = isCards
+  const heroSub = opensAtTop
     ? `${B.modules.length} ${B.modules.length === 1 ? 'module' : 'modules'}
        <span aria-hidden="true">·</span>
        ${avail.length} ${avail.length === 1 ? 'lesson' : 'lessons'}`
@@ -4243,9 +4304,10 @@ function bookLearnSequence(el, B) {
       <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>`}
     </div>
     ${sceneStageHtml(scene, lessons)}
-    ${isCards ? cardsResumeHtml(B, lessons, next?.id ?? null, scene) : ''}
+    ${isCards ? cardsResumeHtml(B, lessons, next?.id ?? null, scene)
+      : isBanded ? bandedStartHtml(B, lessons, next?.id ?? null) : ''}
     ${learnPathHtml(B, lessons, next?.id ?? null)}
-    ${isCards ? '' : treeCardHtml(B, lessons, next?.id ?? null)}
+    ${opensAtTop ? '' : treeCardHtml(B, lessons, next?.id ?? null)}
     ${cats.total ? reviewStripHtml('ac-review-link', cats.total,
       `${esc(B.title)} drafts awaiting ${bookReviewerKind(B)} review`) : ''}
     </div>`;
@@ -4720,7 +4782,8 @@ function learnPathHtml(B, lessons, nextId) {
   // It is near neighbour to `path-cards` — same element tree, same plate,
   // same gold ring on the current module — and differs in that the path
   // is a route you walk down and this is a shelf you read across.
-  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery', 'path-cards': ' is-pathcards', cards: ' is-cards' };
+  const LAYOUTS = { shelf: ' is-shelf', gallery: ' is-gallery',
+    'path-cards': ' is-pathcards', cards: ' is-cards', banded: ' is-banded' };
   const shelf = LAYOUTS[scene.layout] ?? '';
   // THE MAP, when the scene has one: the illustration with the course
   // standing on it, and the grid below as the narrow-screen fallback.
@@ -4833,6 +4896,14 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // the art markup above reads it, and a const read before its
   // declaration blanks the page rather than reading undefined.
   const isCards = scene.layout === 'cards';
+  // THE BANDED LAYOUT (owner's four-course handoff, 2026-11-06). Its card
+  // is a different SHAPE rather than a different skin: a sage header band
+  // carrying the word MODULE, the number and the title, then a wide
+  // picture under it, then a footer of blurb and "Explore module". The
+  // other layouts all put the number inside the title and the picture
+  // beside or above the words, so this one builds its own markup below
+  // instead of threading four more conditionals through the shared head.
+  const isBanded = scene.layout === 'banded';
   // WHERE THE TAG SITS DIFFERS BY LAYOUT (owner's mockup, 2026-11-02).
   // On the shelf it is a corner tab riding the picture, which needs the
   // picture to have a box of its own — a tag without a card would be a
@@ -5061,6 +5132,43 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // down the left and 04-05-06 down the right, which is grid-auto-flow
   // column — and an item that can expand to span both columns cannot be
   // placed by column flow. No fold, no conflict.
+  // THE BANDED CARD, built whole rather than assembled from the shared
+  // head. It is a BUTTON for the same reason the cards layout's is: the
+  // mockup's affordance is "Explore module", which leaves the page, and
+  // the module page it goes to already lists every lesson.
+  //
+  // THE PICTURE IS DECORATIVE HERE, with empty alt. The card already
+  // names itself twice over — the title in the band and the blurb in the
+  // footer — so alt text would make a screen reader read the module three
+  // times. The registry's real alt text still serves every other layout,
+  // where the picture is the card's only description of itself.
+  if (isBanded && g.m) {
+    const says = `${moduleTitle(B, g.m)}, module ${g.m.n}, `
+      + `${total} ${total === 1 ? 'lesson' : 'lessons'}`
+      + (state === 'current' ? ', current module'
+        : state === 'done' ? ', completed'
+        : state === 'locked' ? ', locked' : '');
+    return `
+    <section class="lm-mod is-${state}">
+      <button class="lm-fold lb-card" type="button" data-mod-go="${esc(String(g.m.n))}"
+              aria-label="${esc(says)}">
+        <span class="lb-band">
+          <span class="lb-n"><small>Module</small><b>${g.m.n}</b></span>
+          <span class="lb-title">${esc(moduleTitle(B, g.m))}</span>
+        </span>
+        ${card ? `
+        <span class="lb-plate">
+          <img class="lb-art" src="${esc(card.src)}" alt="" aria-hidden="true"
+               ${focus ? `style="--art-focus:${focus}"` : ''}
+               width="900" height="400" loading="lazy" decoding="async">
+        </span>` : ''}
+        <span class="lb-foot">
+          <span class="lb-desc">${esc(g.m.blurb ?? '')}</span>
+          <span class="lb-go">Explore module<i aria-hidden="true">&rarr;</i></span>
+        </span>
+      </button>
+    </section>`;
+  }
   const headTag = isCards ? 'span' : 'summary';
   const head = g.m ? `
     <${headTag} class="lm-head${card ? ' has-card' : ''}">

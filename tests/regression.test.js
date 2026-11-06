@@ -3528,9 +3528,19 @@ export async function run({ navDoc = document } = {}) {
       //
       // The invariant is unchanged and so is its value: .tr-card is the same
       // shape, a chapter title beside a fixed-width button ('Open lesson').
+      //
+      // AND IT READS [data-card-title] SINCE 2026-11-06, not
+      // '.tr-card .tr-card-title'. Acting moved to the banded layout with
+      // the owner's four-course handoff, and its opening panel is
+      // `.lb-start` rather than `.tr-card` — the third different element
+      // to do this one job. The thing the check protects has never
+      // changed: a title beside a fixed-width button, at two widths. So
+      // it asks for the HOOK both panels carry instead of whichever class
+      // this month's layout spells it with. Same fix, same reasoning, as
+      // the Acting Library's `main [data-tile]` below.
       {
         const cardLines = () => {
-          const h2 = doc.querySelector('.tr-card .tr-card-title');
+          const h2 = doc.querySelector('[data-card-title]');
           if (!h2) return null;
           const r = doc.createRange(); r.selectNodeContents(h2);
           return r.getClientRects().length;
