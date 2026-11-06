@@ -4920,6 +4920,19 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
   // strict pattern first: it lands in a style attribute, so anything
   // that is not a plain CSS position is dropped rather than escaped.
   const focus = /^[a-z0-9 .%]{1,24}$/.test(String(card?.focus ?? '')) ? card.focus : null;
+  // A PICTURE MAY OVERRIDE THE COURSE'S SHAPE, for the one case where a
+  // card's art genuinely is not the shape the rest of the set is. The
+  // aspect is normally the COURSE's fact and lives on the scene — see
+  // learnPathHtml — because a set of paintings commissioned together
+  // share a shape. Screen Acting's module 9 does not: its band is 13.8:1
+  // where its eight neighbours are about 7.8:1, and cover-cropping it to
+  // match would have thrown away 44% of its width, which is where the
+  // clapperboard and the ladder are.
+  //
+  // Same strict-pattern treatment as the scene's own aspect and as
+  // `focus` above: it lands in a style attribute, so a value that is not
+  // a plain ratio is DROPPED rather than escaped.
+  const cardAspect = /^[0-9. /]{1,12}$/.test(String(card?.aspect ?? '')) ? card.aspect : null;
   // THE PLATE IS THE POSITIONING BOX, and a layout that wants the picture
   // cropped to a shape needs it. `cards` is listed here for that reason:
   // without the plate it emits a bare <img> that falls back to the 3/4
@@ -5157,7 +5170,7 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
           <span class="lb-title">${esc(moduleTitle(B, g.m))}</span>
         </span>
         ${card ? `
-        <span class="lb-plate">
+        <span class="lb-plate"${cardAspect ? ` style="--art-aspect:${cardAspect}"` : ''}>
           <img class="lb-art" src="${esc(card.src)}" alt="" aria-hidden="true"
                ${focus ? `style="--art-focus:${focus}"` : ''}
                width="900" height="400" loading="lazy" decoding="async">

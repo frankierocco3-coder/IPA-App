@@ -45,21 +45,33 @@ So the old portraits are higher resolution and the wrong shape; the new
 bands are the right shape and about 1x. Re-rendering the eighteen at
 roughly **1400px wide** would be a real improvement and is not urgent.
 
-### 2. Screen Acting module 9 has no card
+### 2. Screen Acting module 9 keeps its own shape
 
-`09-repetition-and-the-reality-of-doing.png` is **455 × 33** — half the
-height of its eight neighbours, because the bottom edge of the mockup it
-was cut from runs through it. It is a truncated screenshot, not a drawing.
+`09-repetition-and-the-reality-of-doing.png` is **455 × 33**, where its
+eight neighbours are about 455 × 58. That is not a bad crop and there are
+no more rows to recover: checked against the full 1579 × 996 mockup, the
+picture ends and the card's cream footer begins 35 rows down. The owner's
+mockup simply compresses its cards down the page, and this is the last of
+nine.
 
-An art slot with no entry renders **nothing** in this app, which is honest;
-a squashed band would not be. So `sc-root` ships without a picture and its
-card is title, blurb and "Explore module".
+**So that card sets its own aspect — 13.8:1 — rather than being
+cover-cropped to the course's 7.8:1.** Cropping would have scaled it UP
+1.48x and kept only 56% of its width, losing the clapperboard on the left
+and the ladder on the right, which are the two things that make the
+picture about doing it again. As registered it displays at 373 × 27 from a
+455 × 33 file: a **1.22x downscale, full width, nothing cropped** — the
+same sharpness as the other eight. Module 9 sits alone on the last row, so
+a shallower band there costs nothing.
 
-**To fix it:** one band for `sc-root` at the same shape as the others
-(about 1400 × 180 at the suggested size, or 455 × 62 to match what ships),
-installed as `img/ui/screen-band-sc-root.jpg` and added to the `screen`
-scene's `moduleCard` in `js/data/learn-scenes.js`. `launch_lint.py` fails
-if that registry names a file that does not ship, so a typo cannot pass.
+A `moduleCard` entry may now carry `aspect`, validated by the same strict
+pattern as the scene's own. It is for exactly this case: a set of
+paintings commissioned together share a shape, and one that genuinely does
+not should say so rather than be cropped into line.
+
+**A redraw at the other eight's shape is still the better answer** — about
+1400 × 180, installed over `img/ui/screen-band-sc-root.jpg`, after which
+the `aspect` line comes out of the `screen` scene. Replacing a file at an
+existing path needs a service-worker bump.
 
 ## What was NOT built, and why
 

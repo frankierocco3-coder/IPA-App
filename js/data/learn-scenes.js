@@ -591,6 +591,24 @@ export const LEARN_SCENES = {
         alt: 'A woman performing to a phone mounted on a small tripod in a plain room lit by a window, recording a self-tape.' },
       'sc-address': { src: 'img/ui/screen-band-sc-address.jpg',
         alt: 'A man looking straight down the lens, lit by a lamp at one side, speaking directly to the camera.' },
+      // THE ONE CARD THAT SETS ITS OWN SHAPE. Its band is 455x33 where the
+      // other eight are about 455x58, because the owner's mockup
+      // compresses its cards down the page and this is the last of nine.
+      // There are no more rows to recover: checked against the full
+      // 1579x996 mockup, the picture ends and the card's cream footer
+      // begins 35 rows down.
+      //
+      // So it keeps 13.8:1 rather than being cover-cropped to the
+      // course's 7.8:1, which would have scaled it UP 1.48x and kept only
+      // 56% of its width — losing the clapperboard on the left and the
+      // ladder on the right, which are the two things that make the
+      // picture about doing it again. Module 9 sits alone on the last
+      // row, so a shallower band there costs nothing.
+      //
+      // A redraw at the other eight's shape is still the better answer;
+      // see docs/SCREEN_LEARN_ART_BRIEF.md.
+      'sc-root': { src: 'img/ui/screen-band-sc-root.jpg', aspect: '13.8 / 1',
+        alt: 'A hand holding a clapperboard at the edge of a lit set, two actors standing apart mid-scene, with lamps and a ladder behind them.' },
     },
     palette: {
       '--tr-sky': '#23262a', '--tr-soil': '#32363a', '--tr-soil-2': '#25282b',
