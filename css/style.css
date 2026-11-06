@@ -3402,6 +3402,101 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lm-state .lp-ico { width: 13px; height: 13px; vertical-align: -2px;
   margin-right: 5px; }
 
+/* ── IPA FOUNDATIONS: UNIT CARDS AND THE UNIT TRAIL ─────────────────
+   Owner handoff, 2026-11-06. The course overview lists its units as cards;
+   each one opens its own trail. The trail itself is the existing .path and
+   is not restyled here — only the page around it.
+
+   THE STONES ARE LIVE TEXT, NOT ARTWORK. The handoff is explicit that the
+   IPA must be real Unicode with a font that supports it, and warns that
+   the glyphs in the generated mockups are wrong — their ɪ is a capital I
+   and their ː is a colon. Rendering them as text is also the only way they
+   stay correct at any size and reach a screen reader. */
+.unit-grid { display: grid; gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  margin: 4px 0 8px; }
+.unit-card { display: flex; flex-direction: column; gap: 10px; width: 100%;
+  padding: 14px 16px 12px; text-align: left; font: inherit; color: inherit;
+  cursor: pointer; appearance: none;
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 16px; box-shadow: 0 2px 6px rgba(45, 27, 18, .08); }
+.unit-card:hover { border-color: var(--unit-color, var(--sage)); }
+.unit-card:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+
+.uc-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.uc-n { flex: 0 0 auto; padding: 2px 9px; border-radius: 999px;
+  background: var(--unit-color, var(--green-dark)); color: #fdfcf7;
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; }
+.uc-title { font-family: var(--serif, Georgia, serif); font-size: 20px;
+  line-height: 1.15; color: var(--ink); }
+
+/* The stones. Round, raised, sitting in a row — the mockup's three pebbles,
+   drawn in CSS rather than shipped as art so they re-colour per unit and
+   carry whatever symbols the lessons actually teach. */
+.uc-stones { display: flex; gap: 8px; }
+.uc-stone { display: grid; place-items: center; width: 46px; height: 38px;
+  border-radius: 50% / 46%;
+  background: linear-gradient(#fbf6ea, #ece2cd);
+  border: 1px solid var(--line);
+  box-shadow: 0 2px 0 -1px rgba(120, 92, 62, .35), 0 3px 5px rgba(45, 27, 18, .12);
+  font-family: var(--serif, Georgia, serif); font-size: 20px; color: var(--ink); }
+
+.uc-foot { display: flex; align-items: baseline; justify-content: space-between;
+  gap: 10px; margin-top: auto; padding-top: 4px; }
+.uc-count { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 12px; font-weight: 700; color: var(--muted);
+  font-variant-numeric: tabular-nums; }
+.uc-go { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 13px; font-weight: 700; color: var(--green-dark); }
+.uc-go i { font-style: normal; margin-left: 5px; }
+.unit-card:hover .uc-go { color: var(--ink); }
+
+/* THREE STATES, EACH SAID TWICE — once in colour and once in text or a
+   mark, because colour alone is not a state anybody can read. The handoff
+   asks for this by name. */
+.unit-card.is-current { border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold), 0 3px 12px rgba(45, 27, 18, .10); }
+.unit-card.is-done .uc-count::after { content: ' \2713'; color: #4a5c3b; }
+.unit-card.is-locked { background: var(--panel-2); }
+.unit-card.is-locked .uc-stone { opacity: .55; }
+.unit-card.is-locked .uc-count::before { content: '\1F512\00a0'; }
+
+/* ── The unit trail page ── */
+.ut-head { border-bottom: 1px solid var(--line); padding-bottom: 12px; }
+.ut-title-row { display: flex; align-items: center; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap; }
+/* THE GUIDEBOOK BUTTON WAS BUILT FOR A COLOURED BANNER — white ink on a
+   translucent white fill, which is right on the unit banner it has always
+   sat on and invisible on this page's cream. It keeps its shape and takes
+   the page's own ink and border here, rather than being restyled globally
+   where the banner still needs the original. */
+.ut-head .guidebook-btn { color: var(--green-dark); background: var(--panel);
+  border-color: var(--line); }
+.ut-head .guidebook-btn:hover { background: var(--accent-tint);
+  border-color: var(--sage); }
+.ut-title { margin: 0; }
+.ut-sub { margin: 4px 0 0; }
+.ut-blurb { margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted);
+  max-width: 54ch; }
+/* The trail's own unit banner is redundant here — the page is the unit and
+   its heading says so. Hiding it in CSS rather than adding a branch to
+   buildTrackPath keeps one renderer with one set of states. */
+.ut-trail .unit-banner { display: none; }
+
+.ut-next { display: flex; align-items: center; gap: 12px; width: 100%;
+  margin: 22px 0 8px; padding: 13px 16px; text-align: left; font: inherit;
+  color: inherit; cursor: pointer; appearance: none;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; }
+.ut-next:hover { border-color: var(--sage); }
+.ut-next:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
+.ut-next-label { flex: 0 0 auto; padding: 2px 9px; border-radius: 999px;
+  background: var(--accent-tint); color: var(--green-dark);
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.ut-next-title { font-family: var(--serif, Georgia, serif); font-size: 18px; color: var(--ink); }
+.ut-next-go { margin-left: auto; font-size: 20px; color: var(--muted); }
+
 /* ── THE BANDED LAYOUT (owner's four-course handoff, 2026-11-06) ────
    Acting, Building a Character, Musical Theatre and Screen Acting.
 

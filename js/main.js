@@ -1305,9 +1305,47 @@ function ipaLearnPane(el, course) {
   // course, not on things to decline. The preface lives permanently in
   // More → Why Speech Matters; the diagnostic in More → Preferences.
 
+  // ── THE TWO-SCREEN COURSE, IPA FOUNDATIONS ONLY ───────────────
+  // Owner handoff, 2026-11-06. The units become cards and each one opens
+  // its own trail; the trail itself is unchanged. Scoped to 'core' because
+  // the handoff says so in terms — the five accent tracks keep the single
+  // scroll, and extending it later is this condition and nothing else.
+  const twoScreen = course.id === 'core';
+  // THE UP-NEXT CARD NOW SHOWS FROM LESSON ONE, and the reasoning it used
+  // to fail is recorded above: a continue card duplicated the path's own
+  // start node, which sat right below it. On this screen the path is not
+  // here — it is one tap away inside a unit — so the duplication is gone
+  // and the card is the one obvious way in. The old rule still holds for
+  // the five accent courses, which still show the path.
+  const upNext = twoScreen ? continueCard(track, course) : cc;
+  const unitCards = !twoScreen ? '' : track.unitIds.map((uid, ui) => {
+    const unit = unitById[uid];
+    const st = unitState(uid, track);
+    const stones = unitStones(uid);
+    // The locked state is drawn, not hidden: a learner should see the
+    // shape of the course ahead of them. Tapping a locked unit still opens
+    // its trail, where each node explains its own lock — the same promise
+    // the Library makes, that reading is never gated.
+    return `
+      <button class="unit-card is-${st.state}" data-unit-card="${esc(uid)}" type="button"
+              style="--unit-color:${unit.color}"
+              aria-label="Unit ${ui + 1}, ${esc(unit.title)}, ${st.done} of ${st.total} done">
+        <span class="uc-head">
+          <span class="uc-n">Unit ${ui + 1}</span>
+          <span class="uc-title">${esc(unit.title)}</span>
+        </span>
+        <span class="uc-stones" aria-hidden="true">${stones
+          .map(ph => `<span class="uc-stone">${esc(ph)}</span>`).join('')}</span>
+        <span class="uc-foot">
+          <span class="uc-count">${st.done} / ${st.total}</span>
+          <span class="uc-go">Explore unit <i aria-hidden="true">&rarr;</i></span>
+        </span>
+      </button>`;
+  }).join('');
+
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
-    ${cc ? cc.html : ''}
+    ${upNext ? upNext.html : ''}
     ${course.id === 'core' ? whatIsIpaCard() : ''}
     <div class="hub-progress">
       <div class="track-progress">
@@ -1315,11 +1353,114 @@ function ipaLearnPane(el, course) {
         <span>${done}/${total}${done === total && total ? ' · 🎓 mastered' : ''}</span>
       </div>
     </div>
-    <div class="track-scroll hub-scroll">${path.html}</div>`;
-  cc?.wire(el);
+    ${twoScreen
+      ? `<div class="unit-grid">${unitCards}</div>`
+      : `<div class="track-scroll hub-scroll">${path.html}</div>`}`;
+  upNext?.wire(el);
   wireWhatIsIpaCard(el);
-  path.wire(el);
+  if (twoScreen) {
+    el.querySelectorAll('[data-unit-card]').forEach(b => b.addEventListener('click',
+      () => navTo(() => renderUnitTrail(b.dataset.unitCard, track, course))));
+  } else {
+    path.wire(el);
+  }
   if (course.id === 'ssbe' && !store.introsSeen.ssbe && !skipCourseIntroOnce) showSsbeIntro(course);
+}
+
+// ── IPA FOUNDATIONS: THE TWO-SCREEN COURSE (owner handoff, 2026-11-06)
+//
+// His words: "in ipa this is the vibe we are going for." The course was one
+// long scroll of all six units' nodes; it is now an OVERVIEW of unit cards
+// and a TRAIL per unit.
+//
+// WHY THIS IS NOT THE REDESIGN THE AUDIT WARNED OFF. The 2026-11-06 audit
+// found the star path SUITS this course and that the card layouts built for
+// the book courses would cost it its two load-bearing features — the locked
+// chain and the checkpoint games. Both survive here untouched: the trail is
+// the same buildTrackPath, with the same nodes, states, locks and wiring.
+// What changed is how much of it you meet at once.
+//
+// SCOPED TO 'core' BY THE HANDOFF, which says in terms not to change other
+// courses. The five accent tracks keep the single scroll. Everything below
+// is driven off track/unit data rather than off the course id, so extending
+// it is a condition in ipaLearnPane and nothing else.
+
+// The symbols a unit card wears: the first three distinct phonemes its
+// lessons actually teach, in teaching order. Derived, never authored — a
+// unit that changes its lessons changes its own stones, and no second list
+// can fall out of step with the first.
+//
+// IT FALLS BACK TO THE UNIT'S OWN `icon`, because a unit of lessons that
+// name no phoneme (a round-up, a listening unit) would otherwise show an
+// empty row rather than a card.
+function unitStones(uid) {
+  const out = [];
+  for (const l of UNIT_EXPANDED[uid]) {
+    for (const ph of (l.phonemes ?? [])) {
+      if (!out.includes(ph)) out.push(ph);
+      if (out.length === 3) return out;
+    }
+  }
+  return out.length ? out : [unitById[uid].icon].filter(Boolean);
+}
+
+// A unit's state, derived from its lessons exactly as the nodes derive
+// theirs. Never stored: a unit cannot drift from the lessons it counts.
+function unitState(uid, track) {
+  const chain = TRACK_LESSONS[track.id];
+  const ls = UNIT_EXPANDED[uid].map(raw => chain.find(x => x.id === raw.id)).filter(Boolean);
+  const done = ls.filter(l => store.isCompleted(l.id)).length;
+  const open = ls.some(l => isUnlocked(l));
+  return {
+    total: ls.length,
+    done,
+    state: ls.length && done === ls.length ? 'done'
+      : ls.some(l => isUnlocked(l) && !store.isCompleted(l.id)) ? 'current'
+      : open ? 'open' : 'locked',
+  };
+}
+
+// ONE UNIT'S TRAIL, as its own page.
+//
+// A SUB-PAGE, NOT A SECOND SHELL. It goes through workspacePage/pageTopbar
+// like every other page in this workspace, which is what gives it the back
+// arrow, the brand button, the focus move onto the heading and the record()
+// entry for free. An earlier draft of this rebuilt the shell by hand and
+// invented four helpers that do not exist.
+function renderUnitTrail(uid, track, course) {
+  record(() => renderUnitTrail(uid, track, course), `unit:${track.id}:${uid}`);
+  stopSpeech();
+  const unit = unitById[uid];
+  const ui = track.unitIds.indexOf(uid);
+  const path = buildTrackPath(track, { guidebook: false, labels: true, only: uid });
+  const st = unitState(uid, track);
+  // The next unit is offered only when it EXISTS, and is never gated on
+  // this one being finished: the lock chain already decides what opens,
+  // node by node, and a second gate here would be the same rule written
+  // twice — which this file has had to unpick three times.
+  const nextUid = track.unitIds[ui + 1] ?? null;
+  workspacePage(
+    pageTopbar(`${course.icon} ${esc(course.label)}`, unit.color),
+    `<div class="ws-head ut-head" style="--unit-color:${unit.color}">
+       <div class="ut-title-row">
+         <h1 class="page-h ut-title">${esc(unit.title)}</h1>
+         <button class="guidebook-btn" id="ut-guide" type="button"
+                 aria-label="Guidebook for ${esc(unit.title)}">\u{1F4D8}<span> Guidebook</span></button>
+       </div>
+       <p class="ws-sub ut-sub">Unit ${ui + 1} of ${track.unitIds.length} \u00b7 ${st.done} of ${st.total} done</p>
+       ${unit.blurb ? `<p class="ut-blurb">${esc(unit.blurb)}</p>` : ''}
+     </div>`,
+    `<div class="track-scroll hub-scroll ut-trail">${path.html}</div>
+     ${nextUid ? `
+     <button class="ut-next" id="ut-next" type="button">
+       <span class="ut-next-label">Next unit</span>
+       <span class="ut-next-title">${esc(unitById[nextUid].title)}</span>
+       <span class="ut-next-go" aria-hidden="true">&rsaquo;</span>
+     </button>` : ''}`);
+  path.wire(app);
+  app.querySelector('#ut-guide').addEventListener('click', () => renderGuidebook(unit, track));
+  app.querySelector('#ut-next')?.addEventListener('click',
+    () => navTo(() => renderUnitTrail(nextUid, track, course)));
 }
 
 // Per-unit guidebook: what the unit teaches, in one readable page.
@@ -14067,7 +14208,21 @@ function buildTrackPath(track, opts = {}) {
   const active = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l));
   let gi = 0;
 
-  const html = track.unitIds.map((uid, ui) => {
+  // ONE UNIT AT A TIME, OPTIONALLY (owner's IPA handoff, 2026-11-06). The
+  // course overview lists units as cards and each card opens its own
+  // trail, so this renders one unit when asked and the whole track when
+  // not. Everything else — node states, the lock chain, the active ring,
+  // the mascot, the wiring — is untouched and shared, which is the point:
+  // a second renderer would be a second place for the lock rules to drift.
+  //
+  // `ui` STAYS THE UNIT'S REAL POSITION IN THE TRACK, not its position in
+  // the filtered list, because it is what prints "Unit 3" on the banner.
+  // Filtering before the map would have renumbered every unit to 1.
+  const units = track.unitIds
+    .map((uid, ui) => ({ uid, ui }))
+    .filter(u => !opts.only || u.uid === opts.only);
+
+  const html = units.map(({ uid, ui }) => {
     const unit = unitById[uid];
     const rows = UNIT_EXPANDED[uid].map(raw => {
       const l = chain.find(x => x.id === raw.id);
