@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v96';                     // 2026-11-06: Screen Acting's bands stop being cropped. js/data/learn-scenes.js is staleWhileRevalidate, so an installed copy would keep cutting the faces off modules 7, 8 and 9
+const VERSION = 'sc-v97';                     // 2026-11-06: Rhetoric and Theatre History move to the end of the workspace switcher. js/views/context.js is staleWhileRevalidate, so an installed copy would keep the old order
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
