@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v93';                     // 2026-11-06: four Learn pages in the banded layout. The 18 bands are NEW paths and need no bump of their own, but js/main.js, css/style.css and js/data/learn-scenes.js are all staleWhileRevalidate, so an installed copy would serve Acting and Character on the old path layout and Musical and Screen with no art at all
+const VERSION = 'sc-v94';                     // 2026-11-06: the module rail's Start module button goes green. css/style.css is staleWhileRevalidate, so an installed copy would keep the maroon one revalidation longer, and he is looking at it now
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
