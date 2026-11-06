@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v94';                     // 2026-11-06: the module rail's Start module button goes green. css/style.css is staleWhileRevalidate, so an installed copy would keep the maroon one revalidation longer, and he is looking at it now
+const VERSION = 'sc-v95';                     // 2026-11-06: Screen Acting module 9 gets its band. The image is a NEW path, but js/main.js and js/data/learn-scenes.js are staleWhileRevalidate and an installed copy would keep the one card in the app with no picture
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
