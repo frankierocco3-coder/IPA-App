@@ -1310,7 +1310,11 @@ function ipaLearnPane(el, course) {
   // its own trail; the trail itself is unchanged. Scoped to 'core' because
   // the handoff says so in terms — the five accent tracks keep the single
   // scroll, and extending it later is this condition and nothing else.
-  const twoScreen = course.id === 'core';
+  // EVERY COURSE IN THIS WORKSPACE (owner order 2026-11-06: "now do the
+  // same thing for the individual dialects"). It shipped for 'core' alone
+  // an hour earlier because that handoff said not to touch other courses;
+  // this supersedes that for the five accents.
+  const twoScreen = true;
   // THE UP-NEXT CARD NOW SHOWS FROM LESSON ONE, and the reasoning it used
   // to fail is recorded above: a continue card duplicated the path's own
   // start node, which sat right below it. On this screen the path is not
@@ -1322,6 +1326,11 @@ function ipaLearnPane(el, course) {
     const unit = unitById[uid];
     const st = unitState(uid, track);
     const stones = unitStones(uid);
+    // NO "Unit 1" PILL BESIDE "Stage 1 · Orientation". The five accent
+    // courses number their units inside the title; IPA Foundations does
+    // not. Printing both gave "Unit 1 | Stage 1 · Orientation", which
+    // numbers the same thing twice and in two vocabularies.
+    const stageTitled = /^Stage\s+\d/.test(unit.title);
     // The locked state is drawn, not hidden: a learner should see the
     // shape of the course ahead of them. Tapping a locked unit still opens
     // its trail, where each node explains its own lock — the same promise
@@ -1331,7 +1340,7 @@ function ipaLearnPane(el, course) {
               style="--unit-color:${unit.color}"
               aria-label="Unit ${ui + 1}, ${esc(unit.title)}, ${st.done} of ${st.total} done">
         <span class="uc-head">
-          <span class="uc-n">Unit ${ui + 1}</span>
+          ${stageTitled ? '' : `<span class="uc-n">Unit ${ui + 1}</span>`}
           <span class="uc-title">${esc(unit.title)}</span>
         </span>
         <span class="uc-stones" aria-hidden="true">${stones
@@ -1385,23 +1394,42 @@ function ipaLearnPane(el, course) {
 // is driven off track/unit data rather than off the course id, so extending
 // it is a condition in ipaLearnPane and nothing else.
 
-// The symbols a unit card wears: the first three distinct phonemes its
-// lessons actually teach, in teaching order. Derived, never authored — a
-// unit that changes its lessons changes its own stones, and no second list
-// can fall out of step with the first.
+// The symbols a unit card wears: up to three phonemes THIS unit teaches and
+// its siblings do not. Derived, never authored — a unit that changes its
+// lessons changes its own stones, and no second list can fall out of step.
 //
-// IT FALLS BACK TO THE UNIT'S OWN `icon`, because a unit of lessons that
-// name no phoneme (a round-up, a listening unit) would otherwise show an
-// empty row rather than a card.
+// "AND ITS SIBLINGS DO NOT" IS THE WHOLE RULE, and it is what makes one
+// function serve two very different courses. Measured 2026-11-06:
+//
+//   IPA Foundations' units are SOUND FAMILIES, and each owns symbols no
+//   other unit has — Short Vowels owns ɒ, Long Vowels owns uː ɑː ɔː ɜː,
+//   Diphthongs owns eɪ aɪ ɔɪ əʊ, Stops & Nasals owns p b t d. Stones are
+//   the most informative thing a card can wear.
+//
+//   The five accent courses' units are STAGES OF WORK — Orientation, The
+//   Sounds, Shift Work, Mastery. Stage 2 carries the whole inventory (41
+//   for American, 44 for RP and Australian) and the other three re-use the
+//   accent's signature sounds, so THREE OF EVERY FOUR UNITS HAVE NO UNIQUE
+//   PHONEME AT ALL. Taking "the first three" there printed ɝ ɚ ɑ on all
+//   four American cards: four identical rows of stones, which is worse
+//   than none because it looks like information.
+//
+// So a unit with nothing of its own falls back to its `icon`, which for
+// those courses is exactly the mark that does distinguish them — 📍 for
+// Orientation, 🔧 for Shift Work, 🏆 for Mastery.
 function unitStones(uid) {
-  const out = [];
+  const own = [];
   for (const l of UNIT_EXPANDED[uid]) {
-    for (const ph of (l.phonemes ?? [])) {
-      if (!out.includes(ph)) out.push(ph);
-      if (out.length === 3) return out;
-    }
+    for (const ph of (l.phonemes ?? [])) if (!own.includes(ph)) own.push(ph);
   }
-  return out.length ? out : [unitById[uid].icon].filter(Boolean);
+  const track = TRACKS.find(t => t.unitIds.includes(uid));
+  const siblings = new Set();
+  for (const other of (track?.unitIds ?? [])) {
+    if (other === uid) continue;
+    for (const l of UNIT_EXPANDED[other]) for (const ph of (l.phonemes ?? [])) siblings.add(ph);
+  }
+  const mine = own.filter(ph => !siblings.has(ph)).slice(0, 3);
+  return mine.length ? mine : [unitById[uid].icon].filter(Boolean);
 }
 
 // A unit's state, derived from its lessons exactly as the nodes derive

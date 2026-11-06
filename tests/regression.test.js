@@ -2579,8 +2579,24 @@ export async function run({ navDoc = document } = {}) {
       clickIn(side('More')); await sleep(350);
       check('IA: Why Speech Matters lives under More', !!card('Why Speech Matters'));
 
-      // Learn on an UNSTARTED course: no standalone continue card above
-      // Unit 1 — Stage 1 · Orientation with its START node is the entry.
+      // Learn on an unstarted course. REWRITTEN 2026-11-06, because both
+      // checks below pinned the SINGLE-SCREEN design and the owner
+      // replaced it: every course in this workspace now opens on unit
+      // cards, and its trail lives one tap inside a unit.
+      //
+      // The first check asserted there is NO continue card until progress
+      // exists. That rule was real and its reasoning is recorded in
+      // ipaLearnPane: the card duplicated the path's own START node
+      // sitting directly below it. The path is not on this screen any
+      // more, so the duplication is gone and the card is now the one
+      // obvious way in — the rule it encoded has been deliberately
+      // reversed, not broken.
+      //
+      // The second required `.start-flag`, which is drawn on a path node
+      // and so cannot exist on a screen with no path. What it was
+      // protecting is that the start of an unstarted course is obvious,
+      // and that still holds — it is named in the Up next card and its
+      // unit is the one card marked current. So it asks for THAT.
       const completedBefore = store.completed.size;
       clickIn(side('Learn')); await sleep(350);
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
@@ -2588,12 +2604,14 @@ export async function run({ navDoc = document } = {}) {
       await sleep(500);
       const doneNow = parseInt(doc.querySelector('.hub-progress .track-progress span')?.textContent ?? '', 10);
       const ccNow = !!doc.querySelector('.continue-card[aria-label="Continue learning"], .continue-card[aria-label="Course complete"]');
-      check('IA: the continue card appears exactly when the course has progress',
-        (doneNow === 0) === !ccNow, `done=${doneNow} continueCard=${ccNow}`);
+      check('IA: the Up next card names the lesson the course opens on',
+        ccNow && (doc.querySelector('.continue-card h2')?.textContent ?? '').includes('Meet the accent'),
+        `done=${doneNow} card=${ccNow} says="${doc.querySelector('.continue-card h2')?.textContent ?? ''}"`);
       check('IA: Stage 1 · Orientation and Meet the accent stay the clear start',
         doc.body.textContent.includes('Stage 1 · Orientation')
         && doc.body.textContent.includes('Meet the accent')
-        && !!doc.querySelector('.start-flag'));
+        && !!doc.querySelector('.unit-card.is-current'),
+        `units=${doc.querySelectorAll('.unit-card').length} current=${!!doc.querySelector('.unit-card.is-current')}`);
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American')));
       await sleep(500);
