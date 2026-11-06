@@ -370,12 +370,12 @@ script instead and paste its block.
 - Acting (acting)            **LIVE**
 - Building a Character (character) **LIVE**
 - Commedia dell’Arte (commedia) **LIVE**
-- Theatre History (theatre)  **LIVE**
 - Musical Theatre (musical)  **LIVE**
 - Screen Acting (screen)     **LIVE**
 - Shakespeare (shakespeare)  **LIVE**
-- Rhetoric (rhetoric)        **LIVE**
 - Voice & Speech (ipa)       **LIVE**
+- Rhetoric (rhetoric)        **LIVE**
+- Theatre History (theatre)  **LIVE**
 - Speech (speech)            withdrawn
 
 9 of 10 live.
@@ -407,22 +407,22 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 ### Every X_LIVE switch
 
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
-- CHARACTER_LIVE           true   js/views/context.js:196
+- CHARACTER_LIVE           true   js/views/context.js:213
 - COCKNEY_LIVE             true   js/views/context.js:53
 - COINAGE_LIVE             false  js/main.js:311
-- COMMEDIA_LIVE            true   js/views/context.js:232
+- COMMEDIA_LIVE            true   js/views/context.js:249
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
-- MUSICAL_LIVE             true   js/views/context.js:290
+- MUSICAL_LIVE             true   js/views/context.js:307
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
-- RHETORIC_COURSE_LIVE     true   js/views/context.js:337
+- RHETORIC_COURSE_LIVE     true   js/views/context.js:354
 - RHETORIC_LIVE            false  js/main.js:284
-- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:349
+- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:366
 - ROLE_LIVE                false  js/data/character/character-course.js:65
 - SCENE_STUDY_LIVE         false  js/main.js:11645
-- SCREEN_LIVE              true   js/views/context.js:315
-- SHAKESPEARE_LIVE         true   js/views/context.js:323
-- SPEECH_LIVE              false  js/views/context.js:188
-- THEATRE_LIVE             true   js/views/context.js:266
+- SCREEN_LIVE              true   js/views/context.js:332
+- SHAKESPEARE_LIVE         true   js/views/context.js:340
+- SPEECH_LIVE              false  js/views/context.js:205
+- THEATRE_LIVE             true   js/views/context.js:283
 
 ### Reference shelves
 

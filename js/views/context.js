@@ -83,6 +83,9 @@ export const activeCourse = () => {
 // screen. Owner order 2026-09-25: Acting, Building a Character,
 // Shakespeare, Voice & Speech, Accents & Dialects — the work first, the
 // instrument and the accents after it.
+//
+// AMENDED 2026-11-06: Rhetoric and Theatre History moved to the END, in
+// that order, by owner order. See the comment above them.
 export const WORKSPACES = [
   { id: 'acting', icon: '🎭', img: 'img/ui/scenes.png', label: 'Acting',
     context: 'Scene study, character, text and rehearsal' },
@@ -102,15 +105,18 @@ export const WORKSPACES = [
   // and promising it in two places would make one of them wrong.
   { id: 'commedia', icon: '🃏', img: 'img/ui/commedia.png', label: 'Commedia dell’Arte',
     context: 'The ready-made characters, and what every character is made of' },
-  // THEATRE HISTORY AND MUSICAL THEATRE, from the owner's handoff of
-  // 2026-11-03. Both sit here, beside Commedia, because these three are
-  // the courses about where the work came from rather than about a
-  // technique: a tradition and its history, the whole history, and one
-  // genre's repertoire. NO `img` YET on either. A workspace with no
-  // artwork falls back to its emoji, which is honest and ugly; the owner
-  // makes the chips, and these two are waiting for theirs.
-  { id: 'theatre', icon: '🏺', label: 'Theatre History',
-    context: 'Where the form came from, and what each stage asked of a performer' },
+  // MUSICAL THEATRE, from the owner's handoff of 2026-11-03. It sits here
+  // beside Commedia because both are courses about where the work came
+  // from rather than about a technique: a tradition and its history, and
+  // one genre's repertoire.
+  //
+  // THEATRE HISTORY ARRIVED WITH IT AND HAS SINCE MOVED to the end of
+  // this array, with Rhetoric (owner order, 2026-11-06). Its own comment
+  // went down there with it.
+  //
+  // NO `img` YET. A workspace with no artwork falls back to its emoji,
+  // which is honest and ugly; the owner makes the chips and this one is
+  // still waiting for its.
   { id: 'musical', icon: '🎼', label: 'Musical Theatre',
     context: 'The book musical, and a repertoire organised so you can find your song' },
   // SCREEN ACTING, from his handoff of 2026-11-03. It sits next to Acting
@@ -135,16 +141,6 @@ export const WORKSPACES = [
   // respin still has somewhere to land.
   { id: 'shakespeare', icon: '🪶', img: 'img/ui/shakespeare.png', label: 'Shakespeare',
     context: 'The language, the verse, and text that is harder to read than it is to play' },
-  // Renamed from 'IPA' by owner order (2026-09-03): Voice & Speech is
-  // the conservatory class name. The internal id stays 'ipa' (stored
-  // values, lint pins); the IPA Foundations course chip stays inside.
-  // Rhetoric is the sixth workspace (owner decision 2026-09-28: separate,
-  // like Acting and Building a Character, not a module inside Shakespeare).
-  // It sits after Shakespeare and before the instrument, which keeps the
-  // owner's 2026-09-25 ordering intact: the work first, then the
-  // instrument, then the accents.
-  { id: 'rhetoric', icon: '🏛️', img: 'img/ui/rhetoric.png', label: 'Rhetoric',
-    context: 'How speech changes what people think and do, built on purpose rather than by luck' },
   // ── ONE WORKSPACE, SIX COURSES (owner order 2026-11-03) ──────
   //
   // Voice & Speech and Accents & Dialects were two workspaces until
@@ -172,9 +168,30 @@ export const WORKSPACES = [
   // because the workspace is the instrument, accents included.
   { id: 'ipa', icon: 'ʃə', img: 'img/ui/instrument.png', label: 'Voice & Speech',
     context: 'The instrument, the sounds and the accents — IPA Foundations and the five accent courses inside' },
+  // ── RHETORIC, THEN THEATRE HISTORY, LAST (owner order 2026-11-06) ──
+  //
+  // His words: "put rhetoric and theatre history as the last 2 in the
+  // workspaces in that order."
+  //
+  // This supersedes the 2026-09-25 ordering at the top of the array FOR
+  // THESE TWO ONLY. Rhetoric sat after Shakespeare and before the
+  // instrument, on the reasoning that the work came first and then the
+  // instrument; Theatre History sat beside Commedia with Musical Theatre,
+  // as one of the courses about where the work came from. The rest of
+  // that order is untouched.
+  //
+  // THEY ARE THE LAST TWO A LEARNER SEES even though `speech` is below
+  // them, because `speech` is withdrawn behind SPEECH_LIVE and
+  // liveWorkspaces() never returns it.
+  { id: 'rhetoric', icon: '🏛️', img: 'img/ui/rhetoric.png', label: 'Rhetoric',
+    context: 'How speech changes what people think and do, built on purpose rather than by luck' },
+  // NO `img` YET — see docs/WORKSPACE_CHIP_BRIEF.md, which owes this one
+  // a chip along with Musical Theatre and Screen Acting.
+  { id: 'theatre', icon: '🏺', label: 'Theatre History',
+    context: 'Where the form came from, and what each stage asked of a performer' },
   // Withdrawn behind SPEECH_LIVE and therefore never rendered, so its
-  // position is moot until that flag flips. Kept last rather than
-  // deleted: the kill switch is a flag, not a removal.
+  // position is moot until that flag flips. Kept at the very end rather
+  // than deleted: the kill switch is a flag, not a removal.
   { id: 'speech', icon: '🗣', label: 'Speech',
     context: 'Clarity, confidence, persuasion and vocal freedom' },
 ];
