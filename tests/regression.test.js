@@ -2607,8 +2607,10 @@ export async function run({ navDoc = document } = {}) {
       check('IA: the Up next card names the lesson the course opens on',
         ccNow && (doc.querySelector('.continue-card h2')?.textContent ?? '').includes('Meet the accent'),
         `done=${doneNow} card=${ccNow} says="${doc.querySelector('.continue-card h2')?.textContent ?? ''}"`);
-      check('IA: Stage 1 · Orientation and Meet the accent stay the clear start',
-        doc.body.textContent.includes('Stage 1 · Orientation')
+      // 'Stage 1 · Meet the Accent' since the 2026-11-06 regroup; it was
+      // 'Stage 1 · Orientation' when every accent ran four stages.
+      check('IA: Stage 1 and Meet the accent stay the clear start',
+        doc.body.textContent.includes('Stage 1 · Meet the Accent')
         && doc.body.textContent.includes('Meet the accent')
         && !!doc.querySelector('.unit-card.is-current'),
         `units=${doc.querySelectorAll('.unit-card').length} current=${!!doc.querySelector('.unit-card.is-current')}`);
@@ -2837,7 +2839,7 @@ export async function run({ navDoc = document } = {}) {
       check('workspaces: Voice & Speech keeps its course selector and course',
         !!doc.getElementById('course-chip')
         && statsbarText().includes('Neutral American')
-        && doc.body.textContent.includes('Stage 1 · Orientation'));
+        && doc.body.textContent.includes('Stage 1 · Meet the Accent'));
       clickIn(doc.getElementById('course-chip')); await sleep(200);
       check('workspaces: the course menu offers all six, IPA Foundations included',
         ['IPA Foundations', 'Neutral American', 'Traditional RP',
@@ -4551,8 +4553,13 @@ export async function run({ navDoc = document } = {}) {
     const { TRACKS, COURSE } = await import('../js/data/dialect-course.js');
     const { DIALECT_INFO } = await import('../js/data/dialects.js');
     const track = TRACKS.find(t => t.id === 'cockney');
-    check('cockney: track registered — 🚕, accent course, four stages',
-      !!track && track.icon === '🚕' && track.accent === true && track.unitIds.length === 4);
+    // THREE stages since 2026-11-06, not four. Every accent was Orientation
+    // (1 lesson) / The Sounds (9) / Shift Work (2) / Mastery (1); two of
+    // those held a single lesson. The lessons and their order did not
+    // change — the check below still pins all ten, ck-0 through ck-final.
+    check('cockney: track registered — 🚕, accent course, three stages',
+      !!track && track.icon === '🚕' && track.accent === true && track.unitIds.length === 3,
+      `units=${track?.unitIds?.join(',')}`);
     const lessons = COURSE.filter(u => (track?.unitIds ?? []).includes(u.id)).flatMap(u => u.lessons);
     check('cockney: ten lessons, ck-0 through ck-final',
       lessons.length === 10 && lessons[0]?.id === 'ck-0' && lessons[9]?.id === 'ck-final',

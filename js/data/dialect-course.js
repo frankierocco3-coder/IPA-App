@@ -77,103 +77,117 @@ export const COURSE = [
       { id: 'r-4', title: 'Reading round-up', guide: 'Everything at once: type spellings from IPA, fill transcription gaps, and read full sentences in both directions. Fluency is when none of this feels like translation anymore.', phonemes: ['ɪ', 'iː', 'æ', 'ʃ', 'tʃ', 'θ', 'ð', 'ə'], types: ['typeWord', 'gapBuild', 'sentenceToEnglish', 'englishToIpa', 'spellBlank'] },
     ],
   },
+  // ── THREE STAGES, NOT FOUR (owner order, 2026-11-06) ──────────
+  //
+  // Every accent ran Orientation (1 lesson) / The Sounds (9) / Shift Work
+  // (2) / Mastery (1). Two of those four held a single lesson, which is
+  // not a unit, and the third held most of the course — invisible while
+  // the Learn page was one long scroll, and impossible to miss the moment
+  // it became a grid of unit cards.
+  //
+  // THE LESSONS DID NOT MOVE IN ORDER and NOT ONE LESSON ID CHANGED. This
+  // is a regrouping: the same lessons, the same sequence, the same lock
+  // chain. Ids are storage here and are never renamed.
+  //
+  // THE GENERATED CHECKPOINT IDS DID CHANGE, because expandUnit keys them
+  // to the unit they sit in (`chk-<unit>-<n>`). js/state.js carries a
+  // versioned migration that maps the old ones across by position, so no
+  // completed checkpoint is lost.
   {
-    id: 'nam-intro',
-    title: 'Stage 1 · Orientation',
+    id: 'nam-meet',
+    title: 'Stage 1 · Meet the Accent',
     color: '#b05f4d',
     icon: '📍',
-    blurb: 'What Neutral American is, and why actors start here.',
+    blurb: 'What Neutral American is, and the three sounds that give it away.',
     lessons: [
       { id: 'nam-0', title: 'Meet the accent', accent: 'nam', guide: 'Neutral American is a performance target based on broadly regionally unmarked U.S. speech. It is rhotic — /r/ is pronounced in every position, spoken as the approximant [ɹ] — and it avoids strongly identifiable regional features, but no single pronunciation represents every American speaker. This course teaches one consistent target and flags the common areas of variation as they come up. Its signature moves: BATH words stay flat /æ/, LOT opens to /ɑ/, and GOAT starts back and rounded at /oʊ/. This first lesson is a gentle tour — the stages after it go deep.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'æ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+      { id: 'nam-1', title: 'R is everywhere', accent: 'nam', guide: 'Neutral American is rhotic: /r/ is pronounced in all positions — spoken as the approximant [ɹ], written /r/ in broad transcription. After a vowel it colors the vowel itself — the stressed NURSE vowel becomes /ɝ/ (word, learn) and the unstressed lettER ending becomes /ɚ/ (teacher, father). Elsewhere the /r/ simply survives: car /kɑr/, here /hɪr/.', phonemes: ['ɝ', 'ɚ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
+      { id: 'nam-2', title: 'Flat BATH, open LOT', accent: 'nam', guide: 'Two vowels separate American from British at a glance. BATH words keep flat /æ/ — bath, dance, grass, ask — where RP broadens to /ɑː/. And LOT words open and unround to /ɑ/ — lot, stop, father — where RP keeps rounded /ɒ/. One common variation to know: before nasals, /æ/ often raises — man and dance drift toward [ɛə] — a feature to recognize even while the broad symbol stays /æ/.', phonemes: ['æ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
+      { id: 'nam-3', title: 'The American GOAT', accent: 'nam', guide: 'The GOAT diphthong starts differently on each side of the Atlantic. American /oʊ/ begins back and rounded (go, home, soap); RP /əʊ/ begins at the neutral schwa. Your ear will catch it faster than your eye.', phonemes: ['oʊ', 'ɑ', 'ɚ'], types: ['accentFact', 'soundToSymbol', 'build'] },
     ],
   },
   {
-    id: 'nam',
+    id: 'nam-sounds',
     title: 'Stage 2 · The Sounds',
     color: '#b05f4d',
     icon: '🇺🇸',
     accent: true,
-    blurb: 'The baseline stage accent for American actors — rhotic, flat BATH, open LOT.',
+    blurb: 'Every vowel and consonant of the accent, swept through in order.',
     lessons: [
-      { id: 'nam-1', title: 'R is everywhere', accent: 'nam', guide: 'Neutral American is rhotic: /r/ is pronounced in all positions — spoken as the approximant [ɹ], written /r/ in broad transcription. After a vowel it colors the vowel itself — the stressed NURSE vowel becomes /ɝ/ (word, learn) and the unstressed lettER ending becomes /ɚ/ (teacher, father). Elsewhere the /r/ simply survives: car /kɑr/, here /hɪr/.', phonemes: ['ɝ', 'ɚ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
-      { id: 'nam-2', title: 'Flat BATH, open LOT', accent: 'nam', guide: 'Two vowels separate American from British at a glance. BATH words keep flat /æ/ — bath, dance, grass, ask — where RP broadens to /ɑː/. And LOT words open and unround to /ɑ/ — lot, stop, father — where RP keeps rounded /ɒ/. One common variation to know: before nasals, /æ/ often raises — man and dance drift toward [ɛə] — a feature to recognize even while the broad symbol stays /æ/.', phonemes: ['æ', 'ɑ'], types: ['accentFact', 'build', 'soundToSymbol'] },
-      { id: 'nam-3', title: 'The American GOAT', accent: 'nam', guide: 'The GOAT diphthong starts differently on each side of the Atlantic. American /oʊ/ begins back and rounded (go, home, soap); RP /əʊ/ begins at the neutral schwa. Your ear will catch it faster than your eye.', phonemes: ['oʊ', 'ɑ', 'ɚ'], types: ['accentFact', 'soundToSymbol', 'build'] },
       { id: 'nam-v1', title: 'The vowels · short & central', accent: 'nam', guide: 'Every short and central vowel of Neutral American, one by one. /ɪ/ (kit), /e/ (dress), /æ/ (trap — and BATH words too), /ʌ/ (but), /ʊ/ (foot), /ɑ/ (lot, open and unrounded), and the schwa /ə/ that fills every unstressed syllable. Open the diagram on each to see where your tongue sits.', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɑ', 'ə'], types: ['soundToSymbol', 'symbolToWord', 'description'] },
       { id: 'nam-v2', title: 'The vowels · tense & r-coloured', accent: 'nam', guide: 'The tense vowels and the sounds that make American American. This course writes /iː uː ɔː/ with length marks as learner-friendly broad symbols — American vowel length is not a contrastive system the way it can look on the page; duration varies with context. /ɔː/ (thought) rounds at the back, and here is a variation worth knowing: many Americans merge THOUGHT into LOT — the cot–caught merger — saying both as /ɑ/. This course keeps the distinction as its target; treat the merger as a common, completely standard variation to recognize. Then the r-coloured pair: /ɝ/ stressed (word, learn) and /ɚ/ unstressed (teacher, father).', phonemes: ['iː', 'uː', 'ɔː', 'ɝ', 'ɚ'], types: ['soundToSymbol', 'symbolToWord', 'minimalPair'] },
       { id: 'nam-v3', title: 'The diphthongs', accent: 'nam', guide: 'The five gliding vowels: /eɪ/ (face), /aɪ/ (price), /ɔɪ/ (choice), /aʊ/ (mouth), and the American GOAT /oʊ/ — back and rounded at the start, where RP begins at schwa. Each diagram shows the glide as an arrow from where it starts to where it lands.', phonemes: ['eɪ', 'aɪ', 'ɔɪ', 'aʊ', 'oʊ'], types: ['soundToSymbol', 'symbolToWord', 'match'] },
       { id: 'nam-c1', title: 'The consonants · stops & nasals', accent: 'nam', guide: 'The plosives /p b t d k g/ block and release; the nasals /m n ŋ/ send air through the nose. The American signature move lives here: between vowels, /t/ and /d/ are usually tapped to a quick flap [ɾ] — better [ˈbeɾɚ], city [ˈsɪɾi], ladder [ˈlæɾɚ] — so “latter” and “ladder” can sound identical. It is a realization of /t d/, not an extra phoneme; the broad transcription keeps /t d/.', phonemes: ['p', 'b', 't', 'd', 'k', 'g', 'm', 'n', 'ŋ'], types: ['description', 'soundToSymbol', 'match'] },
       { id: 'nam-c2', title: 'The consonants · fricatives & the rest', accent: 'nam', guide: 'The friction sounds and approximants: /f v θ ð s z ʃ ʒ h/, the affricates /tʃ dʒ/, and /l r w j/. The American /r/ — the approximant [ɹ] — survives everywhere, including after vowels: the single loudest marker of the accent. /l/ is dark [ɫ] in most positions, made with the tongue back raised — feel the difference in “feel” vs a clear British “leg”. And yods drop after /t d n/: tune /tuːn/, duty /ˈduːti/, new /nuː/ — no /j/ where RP keeps one.', phonemes: ['f', 'v', 'θ', 'ð', 's', 'z', 'ʃ', 'ʒ', 'h', 'tʃ', 'dʒ', 'l', 'r', 'w', 'j'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'nam-4', title: 'Transcribe American', accent: 'nam', guide: 'Full Neutral American transcriptions. Keep every /r/, keep BATH flat at /æ/, open LOT to /ɑ/, start GOAT at /oʊ/, and give r-colored vowels their hooks: /ɝ/ stressed, /ɚ/ unstressed. In connected speech, function words weaken — “can” is usually /kən/, “was” /wəz/ — and the rhythm rides the stressed syllables while everything between them compresses.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ'], types: ['build', 'accentFact', 'soundToSymbol'] },
     ],
   },
   {
-    id: 'nam-shift',
-    title: 'Stage 3 · Shift Work',
+    id: 'nam-use',
+    title: 'Stage 3 · Putting It to Work',
     color: '#b05f4d',
-    icon: '🔧',
-    blurb: 'Arriving at Neutral American from British forms — the actor’s transformation skill.',
+    icon: '🎯',
+    blurb: 'Transcribe it, arrive at it from British forms, and prove it at speed.',
     lessons: [
+      { id: 'nam-4', title: 'Transcribe American', accent: 'nam', guide: 'Full Neutral American transcriptions. Keep every /r/, keep BATH flat at /æ/, open LOT to /ɑ/, start GOAT at /oʊ/, and give r-colored vowels their hooks: /ɝ/ stressed, /ɚ/ unstressed. In connected speech, function words weaken — “can” is usually /kən/, “was” /wəz/ — and the rhythm rides the stressed syllables while everything between them compresses.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ'], types: ['build', 'accentFact', 'soundToSymbol'] },
       { id: 'nam-s1', title: 'Into American I', shiftTo: 'nam', guide: 'You know the sounds; now practice arriving at them. Given the British form of a word, produce the American one: restore the r’s, flatten BATH to /æ/, unround LOT to /ɑ/. The wrong answers will tempt you with the form you started from — that’s the trap your mouth sets on stage too.', phonemes: ['ɑ', 'ɝ', 'ɚ', 'æ'], types: ['shiftChoice', 'shiftBuild'] },
       { id: 'nam-s2', title: 'Into American II', shiftTo: 'nam', guide: 'Same skill, harder mix — building transcriptions from the British form and checking your ear between rounds. By the end of this stage the shift should feel like flipping a switch.', phonemes: ['ɑ', 'ɝ', 'ɚ', 'oʊ', 'æ'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
-    ],
-  },
-  {
-    id: 'nam-mastery',
-    title: 'Stage 4 · Mastery',
-    color: '#b05f4d',
-    icon: '🏆',
-    blurb: 'The final: everything from every stage, mixed and at speed.',
-    lessons: [
       { id: 'nam-final', title: 'Neutral American final', accent: 'nam', shiftTo: 'nam', count: 12, guide: 'Twelve questions, every exercise type, everything the course taught: the r-colored vowels, flat BATH, open LOT, American GOAT, full transcriptions, shifts from British forms, and your ear. Pass this and Neutral American is yours — the course is complete.', phonemes: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'æ'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
     ],
   },
+  // ── THREE STAGES, NOT FOUR (owner order, 2026-11-06) ──────────
+  //
+  // Every accent ran Orientation (1 lesson) / The Sounds (9) / Shift Work
+  // (2) / Mastery (1). Two of those four held a single lesson, which is
+  // not a unit, and the third held most of the course — invisible while
+  // the Learn page was one long scroll, and impossible to miss the moment
+  // it became a grid of unit cards.
+  //
+  // THE LESSONS DID NOT MOVE IN ORDER and NOT ONE LESSON ID CHANGED. This
+  // is a regrouping: the same lessons, the same sequence, the same lock
+  // chain. Ids are storage here and are never renamed.
+  //
+  // THE GENERATED CHECKPOINT IDS DID CHANGE, because expandUnit keys them
+  // to the unit they sit in (`chk-<unit>-<n>`). js/state.js carries a
+  // versioned migration that maps the old ones across by position, so no
+  // completed checkpoint is lost.
   {
-    id: 'aus-intro',
-    title: 'Stage 1 · Orientation',
+    id: 'aus-meet',
+    title: 'Stage 1 · Meet the Accent',
     color: '#5f8a86',
     icon: '📍',
-    blurb: 'What Australian English is, and how it sits beside RP.',
+    blurb: 'What Australian is, and the three sounds that give it away.',
     lessons: [
       { id: 'aus-0', title: 'Meet the accent', accent: 'aus', guide: 'This course teaches General Australian English — the mainstream variety most Australians speak — using the revised Australian transcription system, so the symbols match what you will meet in Australian phonetics references. Australian runs on a spectrum from Broad through General to Cultivated (which leaned toward RP and is now recessive), and it varies by region and social group like any living accent; General is the target here. It is non-rhotic like RP — the written r goes silent unless a vowel follows — but its vowels have shifted noticeably: PALM and BATH become /ɐː/, STRUT becomes /ɐ/, GOOSE fronts to /ʉː/, and the diphthongs start from wider, lower positions. Learn the shifts and the accent falls into place quickly.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'æɪ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+      { id: 'aus-1', title: 'Central vowels', accent: 'aus', guide: 'Australian pulls its open vowels toward the centre of the mouth. STRUT is /ɐ/ (cup, love, blood) and PALM/BATH lengthen to /ɐː/ (car, father, bath). Both sit further forward than the RP /ʌ/ and /ɑː/ they replace — the difference an ear notices first. BATH itself varies by region: “dance” and “castle” take /ɐː/ for some Australians and /æ/ for others, split roughly along state lines — both are genuinely Australian.', phonemes: ['ɐ', 'ɐː'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'aus-2', title: 'The fronted GOOSE', accent: 'aus', guide: 'GOOSE moves a long way forward: /ʉː/, a close central rounded vowel, not the back /uː/ of RP. Say “two, blue, goose” with your tongue high and forward and the accent arrives on its own. Non-rhoticity still applies throughout — no /r/ unless a vowel follows, though linking R returns before vowels (“far away”) and intrusive R appears where no r is written (“law-r-and order”).', phonemes: ['ʉː', 'ɜː', 'oː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'aus-3', title: 'The shifted diphthongs', accent: 'aus', guide: 'Four diphthongs distinguish Australian at a glance. FACE opens to /æɪ/ (day, rain), PRICE retracts and lands mid-front: /ɑe/ (high, my), MOUTH becomes /æɔ/ (now, mouth), and GOAT glides toward that fronted /ʉ/: /əʉ/ (go, home, soap). Each starts from a wider or lower position than its RP counterpart.', phonemes: ['æɪ', 'ɑe', 'æɔ', 'əʉ'], types: ['accentFact', 'soundToSymbol', 'build'] },
     ],
   },
   {
-    id: 'aus',
+    id: 'aus-sounds',
     title: 'Stage 2 · The Sounds',
     color: '#5f8a86',
     icon: '🇦🇺',
     accent: true,
-    blurb: 'Central vowels, fronted GOOSE, and the four shifted diphthongs.',
+    blurb: 'Every vowel and consonant of the accent, swept through in order.',
     lessons: [
-      { id: 'aus-1', title: 'Central vowels', accent: 'aus', guide: 'Australian pulls its open vowels toward the centre of the mouth. STRUT is /ɐ/ (cup, love, blood) and PALM/BATH lengthen to /ɐː/ (car, father, bath). Both sit further forward than the RP /ʌ/ and /ɑː/ they replace — the difference an ear notices first. BATH itself varies by region: “dance” and “castle” take /ɐː/ for some Australians and /æ/ for others, split roughly along state lines — both are genuinely Australian.', phonemes: ['ɐ', 'ɐː'], types: ['accentFact', 'soundToSymbol', 'build'] },
-      { id: 'aus-2', title: 'The fronted GOOSE', accent: 'aus', guide: 'GOOSE moves a long way forward: /ʉː/, a close central rounded vowel, not the back /uː/ of RP. Say “two, blue, goose” with your tongue high and forward and the accent arrives on its own. Non-rhoticity still applies throughout — no /r/ unless a vowel follows, though linking R returns before vowels (“far away”) and intrusive R appears where no r is written (“law-r-and order”).', phonemes: ['ʉː', 'ɜː', 'oː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'build'] },
-      { id: 'aus-3', title: 'The shifted diphthongs', accent: 'aus', guide: 'Four diphthongs distinguish Australian at a glance. FACE opens to /æɪ/ (day, rain), PRICE retracts and lands mid-front: /ɑe/ (high, my), MOUTH becomes /æɔ/ (now, mouth), and GOAT glides toward that fronted /ʉ/: /əʉ/ (go, home, soap). Each starts from a wider or lower position than its RP counterpart.', phonemes: ['æɪ', 'ɑe', 'æɔ', 'əʉ'], types: ['accentFact', 'soundToSymbol', 'build'] },
       { id: 'aus-v1', title: 'The vowels · short & central', accent: 'aus', guide: 'The short vowels, including the two that pull toward the centre. /ɪ/ (kit), /e/ (dress), /æ/ (trap), /ʊ/ (foot), /ɔ/ (lot — written /ɔ/ in the Australian system because it sits higher than the RP /ɒ/), schwa /ə/ — and the Australian STRUT /ɐ/, further forward than the RP /ʌ/ it replaces. Each diagram shows how far forward the tongue sits.', phonemes: ['ɪ', 'e', 'æ', 'ʊ', 'ɔ', 'ə', 'ɐ'], types: ['soundToSymbol', 'symbolToWord', 'description'] },
       { id: 'aus-v2', title: 'The vowels · long & fronted', accent: 'aus', guide: 'The long vowels carry the accent. /ɐː/ takes PALM and BATH (car, father), /ʉː/ is GOOSE pushed high and forward, THOUGHT rises to /oː/ (law, north, four) — a noticeably closer vowel than RP /ɔː/ — and SQUARE is the steady monophthong /eː/ (square, fair, there): no glide. /iː/ (fleece) keeps its place on the chart, though many speakers say it with a small onglide, closer to [ɪi]. /ɜː/ (nurse) holds the centre. Non-rhotic throughout — no /r/ unless a vowel follows.', phonemes: ['iː', 'ɐː', 'ʉː', 'oː', 'eː', 'ɜː'], types: ['soundToSymbol', 'symbolToWord', 'minimalPair'] },
       { id: 'aus-v3', title: 'The diphthongs', accent: 'aus', guide: 'The four shifted glides that make the accent unmistakable — FACE /æɪ/, PRICE /ɑe/, MOUTH /æɔ/, GOAT /əʉ/ — plus CHOICE /oɪ/ (starting higher than RP /ɔɪ/) and centring NEAR /ɪə/. CURE /ʊə/ survives only as a rare, receding relic: most contemporary Australians merge CURE words into other vowels, usually /oː/ (“sure” sounding like “shore”). The arrows show each journey.', phonemes: ['æɪ', 'ɑe', 'æɔ', 'əʉ', 'oɪ', 'ɪə', 'ʊə'], types: ['soundToSymbol', 'symbolToWord', 'match'] },
       { id: 'aus-c1', title: 'The consonants · stops & nasals', accent: 'aus', guide: 'The plosives /p b t d k g/ and nasals /m n ŋ/ — shared ground with RP and American. Knowing exactly where each is made is what lets you keep them steady while the vowels around them shift.', phonemes: ['p', 'b', 't', 'd', 'k', 'g', 'm', 'n', 'ŋ'], types: ['description', 'soundToSymbol', 'match'] },
       { id: 'aus-c2', title: 'The consonants · fricatives & the rest', accent: 'aus', guide: 'The fricatives /f v θ ð s z ʃ ʒ h/, affricates /tʃ dʒ/, and approximants /l r w j/. Australian is non-rhotic like RP, so /r/ appears only before a vowel — but the consonants do more work than they look: /t/ and /d/ tap to [ɾ] between vowels (“better”, “ladder”) much as in American, word-final /t/ can optionally glottal to [ʔ], /l/ runs dark [ɫ] and often vocalizes toward a w-like sound at word ends (“milk”, “feel”), and yods coalesce — “tune” /tʃʉːn/, “duty” /ˈdʒʉːtiː/.', phonemes: ['f', 'v', 'θ', 'ð', 's', 'z', 'ʃ', 'ʒ', 'h', 'tʃ', 'dʒ', 'l', 'r', 'w', 'j'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'aus-4', title: 'Transcribe Australian', accent: 'aus', guide: 'Full Australian transcriptions in the revised system. Keep it non-rhotic, centralise STRUT and PALM to /ɐ ɐː/, front GOOSE to /ʉː/, raise LOT and THOUGHT to /ɔ oː/, hold SQUARE steady at /eː/, and give the diphthongs their shifted starting points: /æɪ ɑe æɔ əʉ oɪ/. Australian rhythm rides long, open vowels, and statements often carry a rising intonation contour — the famous uptalk — without turning into questions.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'ɔ', 'oː', 'æɪ', 'ɑe', 'æɔ', 'əʉ'], types: ['build', 'accentFact', 'soundToSymbol'] },
     ],
   },
   {
-    id: 'aus-shift',
-    title: 'Stage 3 · Shift Work',
+    id: 'aus-use',
+    title: 'Stage 3 · Putting It to Work',
     color: '#5f8a86',
-    icon: '🔧',
-    blurb: 'Arriving at Australian from RP — the transformation on command.',
+    icon: '🎯',
+    blurb: 'Transcribe it, arrive at it from other forms, and prove it at speed.',
     lessons: [
+      { id: 'aus-4', title: 'Transcribe Australian', accent: 'aus', guide: 'Full Australian transcriptions in the revised system. Keep it non-rhotic, centralise STRUT and PALM to /ɐ ɐː/, front GOOSE to /ʉː/, raise LOT and THOUGHT to /ɔ oː/, hold SQUARE steady at /eː/, and give the diphthongs their shifted starting points: /æɪ ɑe æɔ əʉ oɪ/. Australian rhythm rides long, open vowels, and statements often carry a rising intonation contour — the famous uptalk — without turning into questions.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'ɔ', 'oː', 'æɪ', 'ɑe', 'æɔ', 'əʉ'], types: ['build', 'accentFact', 'soundToSymbol'] },
       { id: 'aus-s1', title: 'Into Australian I', shiftTo: 'aus', shiftFrom: 'rp', guide: 'Given the RP form, produce the Australian one: centralise /ʌ/ to /ɐ/ and /ɑː/ to /ɐː/, front /uː/ to /ʉː/, raise /ɒ/ to /ɔ/ and /ɔː/ to /oː/, and flatten gliding /eə/ to steady /eː/. Non-rhoticity carries over unchanged — that part you already have. The trap answers are the RP forms you are moving away from.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'ɔ', 'oː', 'eː'], types: ['shiftChoice', 'shiftBuild'] },
       { id: 'aus-s2', title: 'Into Australian II', shiftTo: 'aus', shiftFrom: 'rp', guide: 'Now the diphthongs, which carry most of the accent: /eɪ/→/æɪ/, /aɪ/→/ɑe/, /aʊ/→/æɔ/, /əʊ/→/əʉ/, /ɔɪ/→/oɪ/. Build them from tiles, then let your ear confirm which accent you are hearing.', phonemes: ['æɪ', 'ɑe', 'æɔ', 'əʉ', 'oɪ'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
-    ],
-  },
-  {
-    id: 'aus-mastery',
-    title: 'Stage 4 · Mastery',
-    color: '#5f8a86',
-    icon: '🏆',
-    blurb: 'The final: the whole accent, mixed and at speed.',
-    lessons: [
       { id: 'aus-final', title: 'Australian final', accent: 'aus', shiftTo: 'aus', shiftFrom: 'rp', count: 12, guide: 'Twelve questions across everything the course taught: central /ɐ ɐː/, fronted /ʉː/, raised /ɔ oː/, steady /eː/, the shifted diphthongs, full transcriptions, shifts from RP, and ear checks. Pass it and General Australian is yours.', phonemes: ['ɐ', 'ɐː', 'ʉː', 'ɔ', 'oː', 'æɪ', 'ɑe', 'æɔ', 'əʉ'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
     ],
   },
@@ -190,150 +204,171 @@ export const COURSE = [
       { id: 'sh-4', title: 'Round trip', guide: 'Both directions, mixed and at speed — plus your ear keeping you honest. This is the drill that makes an accent a switch you flip, not a costume you put on slowly.', phonemes: ['ɑː', 'ɑ', 'ɝ', 'ɜː', 'oʊ', 'əʊ', 'æ'], types: ['shiftChoice', 'shiftBuild', 'accentEar'] },
     ],
   },
+  // ── THREE STAGES, NOT FOUR (owner order, 2026-11-06) ──────────
+  //
+  // Every accent ran Orientation (1 lesson) / The Sounds (9) / Shift Work
+  // (2) / Mastery (1). Two of those four held a single lesson, which is
+  // not a unit, and the third held most of the course — invisible while
+  // the Learn page was one long scroll, and impossible to miss the moment
+  // it became a grid of unit cards.
+  //
+  // THE LESSONS DID NOT MOVE IN ORDER and NOT ONE LESSON ID CHANGED. This
+  // is a regrouping: the same lessons, the same sequence, the same lock
+  // chain. Ids are storage here and are never renamed.
+  //
+  // THE GENERATED CHECKPOINT IDS DID CHANGE, because expandUnit keys them
+  // to the unit they sit in (`chk-<unit>-<n>`). js/state.js carries a
+  // versioned migration that maps the old ones across by position, so no
+  // completed checkpoint is lost.
   {
-    id: 'rp-intro',
-    title: 'Stage 1 · Orientation',
+    id: 'rp-meet',
+    title: 'Stage 1 · Meet the Accent',
     color: '#6b7fa3',
     icon: '📍',
-    blurb: 'What RP is, and where it lives in classical theatre.',
+    blurb: 'What Traditional RP is, and the two shifts that mark it.',
     lessons: [
       { id: 'rp-0', title: 'Meet the accent', accent: 'rp', guide: 'Traditional RP is the historical prestige accent associated with twentieth-century British broadcasting, upper- and upper-middle-class speech, and classical stage performance — including the later performance traditions that grew up around writers such as Shakespeare, Wilde and Shaw. (Shakespeare himself spoke nothing like it; RP is how his plays came to be performed centuries later.) Its signature moves: the written r goes silent unless a vowel follows (car /kɑː/), BATH words broaden to /ɑː/, LOT stays rounded /ɒ/, and GOAT starts at the neutral schwa: /əʊ/. Where an r vanished, a long vowel or centring diphthong stands in its place. This lesson is the guided tour; the stages after it build the accent piece by piece.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ', 'əʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+      { id: 'rp-1', title: 'Where did the R go?', accent: 'rp', guide: 'RP is non-rhotic: /r/ is only pronounced before a vowel. Everywhere else it vanished, leaving a long vowel or centring diphthong behind — car /kɑː/, north /nɔːθ/, word /wɜːd/, here /hɪə/. But the r is only sleeping: before a vowel it wakes as linking R — “far away” /fɑːr əˈweɪ/ — and speakers even insert an intrusive R where no r is written: “law and order” often gains one between law and and.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['accentFact', 'build', 'soundToSymbol'] },
+      { id: 'rp-2', title: 'The BATH split', accent: 'rp', guide: 'In RP, a set of words spelled with \'a\' — bath, dance, grass, ask — take long /ɑː/ instead of flat /æ/. This BATH split is one of the sharpest dividers between RP and most other accents.', phonemes: ['ɑː', 'æ'], types: ['accentFact', 'build', 'minimalPair'] },
     ],
   },
   {
-    id: 'rp',
+    id: 'rp-sounds',
     title: 'Stage 2 · The Sounds',
     color: '#6b7fa3',
     icon: '🎩',
     accent: true,
-    blurb: 'The historical prestige accent of twentieth-century broadcasting and the classical stage — non-rhoticity, the BATH split, full transcriptions.',
+    blurb: 'Every vowel and consonant of the accent, swept through in order.',
     lessons: [
-      { id: 'rp-1', title: 'Where did the R go?', accent: 'rp', guide: 'RP is non-rhotic: /r/ is only pronounced before a vowel. Everywhere else it vanished, leaving a long vowel or centring diphthong behind — car /kɑː/, north /nɔːθ/, word /wɜːd/, here /hɪə/. But the r is only sleeping: before a vowel it wakes as linking R — “far away” /fɑːr əˈweɪ/ — and speakers even insert an intrusive R where no r is written: “law and order” often gains one between law and and.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə'], types: ['accentFact', 'build', 'soundToSymbol'] },
-      { id: 'rp-2', title: 'The BATH split', accent: 'rp', guide: 'In RP, a set of words spelled with \'a\' — bath, dance, grass, ask — take long /ɑː/ instead of flat /æ/. This BATH split is one of the sharpest dividers between RP and most other accents.', phonemes: ['ɑː', 'æ'], types: ['accentFact', 'build', 'minimalPair'] },
       { id: 'rp-v1', title: 'The vowels · short & central', accent: 'rp', guide: 'The short vowels of RP, one at a time: /ɪ/ (kit), /e/ (dress), /æ/ (trap — but not BATH), /ʌ/ (but), /ʊ/ (foot), the rounded /ɒ/ (lot) that American unrounds, and the ever-present schwa /ə/. Open each diagram to see the tongue position that defines it.', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'symbolToWord', 'description'] },
       { id: 'rp-v2', title: 'The vowels · the long five', accent: 'rp', guide: 'RP’s long vowels carry the accent’s shape: /iː/ (fleece), /uː/ (goose), /ɑː/ (palm — and every BATH word), /ɔː/ (thought, north), and /ɜː/ (nurse). Three of them stand where an /r/ used to be, which is why they matter so much in a non-rhotic accent.', phonemes: ['iː', 'uː', 'ɑː', 'ɔː', 'ɜː'], types: ['soundToSymbol', 'symbolToWord', 'minimalPair'] },
       { id: 'rp-v3', title: 'The diphthongs', accent: 'rp', guide: 'Eight glides. The closing ones — /eɪ/ (face), /aɪ/ (price), /ɔɪ/ (choice), /əʊ/ (goat, starting at schwa), /aʊ/ (mouth) — and the centring three that glide toward schwa where an r vanished: /ɪə/ (near), /eə/ (square), /ʊə/ (cure).', phonemes: ['eɪ', 'aɪ', 'ɔɪ', 'əʊ', 'aʊ', 'ɪə', 'eə', 'ʊə'], types: ['soundToSymbol', 'symbolToWord', 'match'] },
       { id: 'rp-c1', title: 'The consonants · stops & nasals', accent: 'rp', guide: 'The plosives /p b t d k g/ and nasals /m n ŋ/. RP aspirates its voiceless plosives crisply at the start of stressed syllables — that clean release is part of the accent’s precision. The diagrams show where each closure is made.', phonemes: ['p', 'b', 't', 'd', 'k', 'g', 'm', 'n', 'ŋ'], types: ['description', 'soundToSymbol', 'match'] },
       { id: 'rp-c2', title: 'The consonants · fricatives & the rest', accent: 'rp', guide: 'The fricatives /f v θ ð s z ʃ ʒ h/, affricates /tʃ dʒ/, and approximants /l r w j/. The one to watch is /r/: in RP it only survives before a vowel, so “car” has none but “carry” does. /l/ has two faces — clear [l] before vowels (leg, yellow), dark [ɫ] at the ends (feel, little). RP keeps its yods: tune /tjuːn/ and duty /ˈdjuːtɪ/ hold /tj dj/ as two crisp sounds, and the voiceless plosives keep their careful, fully articulated /t/ — no glottal replacement in this target.', phonemes: ['f', 'v', 'θ', 'ð', 's', 'z', 'ʃ', 'ʒ', 'h', 'tʃ', 'dʒ', 'l', 'r', 'w', 'j'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'rp-3', title: 'Transcribe Traditional RP', accent: 'rp', guide: 'Everything together: transcribe full words the way a Traditional RP speaker says them. Remember — no /r/ unless a vowel follows, BATH words take /ɑː/, happY words end conservative and lax /ɪ/ (happy /ˈhæpɪ/), and unstressed syllables collapse to schwa. In connected speech the function words weaken — “can” /kən/, “of” /əv/ — and the rhythm carries measured, evenly weighted stresses with wide, controlled intonation falls.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'accentFact', 'soundToSymbol'] },
     ],
   },
   {
-    id: 'rp-shift',
-    title: 'Stage 3 · Shift Work',
+    id: 'rp-use',
+    title: 'Stage 3 · Putting It to Work',
     color: '#6b7fa3',
-    icon: '🔧',
-    blurb: 'Arriving at RP from American forms — the transformation drilled both ways.',
+    icon: '🎯',
+    blurb: 'Transcribe it, arrive at it from American forms, and prove it at speed.',
     lessons: [
+      { id: 'rp-3', title: 'Transcribe Traditional RP', accent: 'rp', guide: 'Everything together: transcribe full words the way a Traditional RP speaker says them. Remember — no /r/ unless a vowel follows, BATH words take /ɑː/, happY words end conservative and lax /ɪ/ (happy /ˈhæpɪ/), and unstressed syllables collapse to schwa. In connected speech the function words weaken — “can” /kən/, “of” /əv/ — and the rhythm carries measured, evenly weighted stresses with wide, controlled intonation falls.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɪə', 'eə'], types: ['build', 'accentFact', 'soundToSymbol'] },
       { id: 'rp-s1', title: 'Into RP I', shiftTo: 'rp', guide: 'Given the American form, produce the RP one: delete the r unless a vowel follows and let the vowel lengthen or centre in its place, broaden BATH to /ɑː/, round LOT to /ɒ/. Watch for the trap answers — they’re the American habits you’re leaving behind.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ'], types: ['shiftChoice', 'shiftBuild'] },
       { id: 'rp-s2', title: 'Into RP II', shiftTo: 'rp', guide: 'Heavier building work, plus ear checks: hear a word cold and know instantly whether it’s RP. The hooks come off the r-colored vowels — /ɝ/ becomes /ɜː/, /ɚ/ becomes plain schwa.', phonemes: ['ɑː', 'ɜː', 'ə', 'əʊ', 'ɪə'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
-    ],
-  },
-  {
-    id: 'rp-mastery',
-    title: 'Stage 4 · Mastery',
-    color: '#6b7fa3',
-    icon: '🏆',
-    blurb: 'The final: the whole accent, mixed and at speed.',
-    lessons: [
       { id: 'rp-final', title: 'RP final', accent: 'rp', shiftTo: 'rp', count: 12, guide: 'Twelve questions across every exercise type: silent r’s, broad BATH, rounded LOT, centring diphthongs, full transcriptions, shifts from American forms, and ear checks. Pass it and the course is complete — RP earned, not worn.', phonemes: ['ɑː', 'ɔː', 'ɜː', 'ɒ', 'əʊ', 'ɪə'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
     ],
   },
 
   // ── Contemporary British (SSBE) ─────────────────────────────
+  // ── THREE STAGES, NOT FOUR (owner order, 2026-11-06) ──────────
+  //
+  // Every accent ran Orientation (1 lesson) / The Sounds (9) / Shift Work
+  // (2) / Mastery (1). Two of those four held a single lesson, which is
+  // not a unit, and the third held most of the course — invisible while
+  // the Learn page was one long scroll, and impossible to miss the moment
+  // it became a grid of unit cards.
+  //
+  // THE LESSONS DID NOT MOVE IN ORDER and NOT ONE LESSON ID CHANGED. This
+  // is a regrouping: the same lessons, the same sequence, the same lock
+  // chain. Ids are storage here and are never renamed.
+  //
+  // THE GENERATED CHECKPOINT IDS DID CHANGE, because expandUnit keys them
+  // to the unit they sit in (`chk-<unit>-<n>`). js/state.js carries a
+  // versioned migration that maps the old ones across by position, so no
+  // completed checkpoint is lost.
   {
-    id: 'ssbe-intro',
-    title: 'Stage 1 · Orientation',
+    id: 'ssbe-meet',
+    title: 'Stage 1 · Meet the Accent',
     color: '#7d6b9e',
     icon: '📍',
-    blurb: 'What Standard British is, and how it differs from Traditional RP.',
+    blurb: 'What Standard British is, and the three features you hear first.',
     lessons: [
       { id: 'ssbe-0', title: 'Hear Standard British', accent: 'ssbe', guide: 'Standard British is a modern pronunciation target for present-day British roles and conversation. Its CORE TARGET keeps the classic skeleton — non-rhotic, broad BATH /ɑː/, rounded LOT /ɒ/. On top of that sit COMMON CONTEMPORARY FEATURES many speakers use — /t/ realized as a glottal stop [ʔ] in relaxed speech, a steady SQUARE vowel /ɛː/, fused yods in tune and duty. Real speakers vary by age, region and setting, so this course labels what is core, what is common, and what is a relaxed-speech option — and trains your ear to hear the difference from Traditional RP.', phonemes: ['ɛː', 'ʔ', 'ɑː', 'ɒ', 'əʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+      { id: 'ssbe-1', title: 'The glottal stop', accent: 'ssbe', guide: 'COMMON CONTEMPORARY FEATURE. The glottal stop [ʔ] is not an extra English consonant — it is a way of SAYING the phoneme /t/. The words still have /t/ in them; many speakers realize it as [ʔ] — the vocal folds shut and release — before consonants, at word ends and before unstressed syllables: /ˈbetə/ → [ˈbeʔə], /ˈwɔːtə/ → [ˈwɔːʔə], /gɒt/ → [gɒʔ]. That is why this lesson writes those forms in square brackets: [ ] marks a spoken realization, / / marks the phonemes underneath. Its use varies by speaker, setting, region and position — careful or formal speech often keeps [t] — and word-initial /t/ stays [t]: tea is /tiː/.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'ssbe-2', title: 'SQUARE goes steady', accent: 'ssbe', guide: 'CORE TARGET. Where Traditional RP glides /eə/, the modern target holds one long open-mid front vowel: /ɛː/. Square /skwɛː/, fair /fɛː/, there /ðɛː/, care /kɛː/. Hold the position — drifting toward schwa reads as a generation older. NEAR is a VARIABLE FEATURE: some speakers smooth /ɪə/ toward a long /ɪː/, others keep the glide.', phonemes: ['ɛː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'build'] },
+      { id: 'ssbe-3', title: 'Yod coalescence: tune and duty', accent: 'ssbe', guide: 'COMMON CONTEMPORARY FEATURE. /tj/ and /dj/ fuse into /tʃ/ and /dʒ/ for most present-day speakers: tune /tʃuːn/ (a listening cue: “choon”), Tuesday /tʃuːzdeɪ/, duty /dʒuːti/, due /dʒuː/. Traditional RP keeps the sounds separate — /tjuːn/ — which now reads as notably formal. Both are real; this course drills the fused form as its target.', phonemes: ['tʃ', 'dʒ', 'uː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank', 'idiom'] },
     ],
   },
   {
-    id: 'ssbe',
+    id: 'ssbe-sounds',
     title: 'Stage 2 · The Sounds',
     color: '#7d6b9e',
     icon: '🇬🇧',
     accent: true,
-    blurb: 'The modern sound system — glottal stops, coalesced yods, fronted vowels — with variation labelled honestly.',
+    blurb: 'The vowels that moved, what stayed classic, and reading the accent.',
     lessons: [
-      { id: 'ssbe-1', title: 'The glottal stop', accent: 'ssbe', guide: 'COMMON CONTEMPORARY FEATURE. The glottal stop [ʔ] is not an extra English consonant — it is a way of SAYING the phoneme /t/. The words still have /t/ in them; many speakers realize it as [ʔ] — the vocal folds shut and release — before consonants, at word ends and before unstressed syllables: /ˈbetə/ → [ˈbeʔə], /ˈwɔːtə/ → [ˈwɔːʔə], /gɒt/ → [gɒʔ]. That is why this lesson writes those forms in square brackets: [ ] marks a spoken realization, / / marks the phonemes underneath. Its use varies by speaker, setting, region and position — careful or formal speech often keeps [t] — and word-initial /t/ stays [t]: tea is /tiː/.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
-      { id: 'ssbe-2', title: 'SQUARE goes steady', accent: 'ssbe', guide: 'CORE TARGET. Where Traditional RP glides /eə/, the modern target holds one long open-mid front vowel: /ɛː/. Square /skwɛː/, fair /fɛː/, there /ðɛː/, care /kɛː/. Hold the position — drifting toward schwa reads as a generation older. NEAR is a VARIABLE FEATURE: some speakers smooth /ɪə/ toward a long /ɪː/, others keep the glide.', phonemes: ['ɛː', 'ɪə'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'build'] },
-      { id: 'ssbe-3', title: 'Yod coalescence: tune and duty', accent: 'ssbe', guide: 'COMMON CONTEMPORARY FEATURE. /tj/ and /dj/ fuse into /tʃ/ and /dʒ/ for most present-day speakers: tune /tʃuːn/ (a listening cue: “choon”), Tuesday /tʃuːzdeɪ/, duty /dʒuːti/, due /dʒuː/. Traditional RP keeps the sounds separate — /tjuːn/ — which now reads as notably formal. Both are real; this course drills the fused form as its target.', phonemes: ['tʃ', 'dʒ', 'uː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank', 'idiom'] },
       { id: 'ssbe-4', title: 'The moving vowels', accent: 'ssbe', guide: 'CORE TARGET, all three. GOOSE keeps its broad symbol /uː/, but the modern tongue position sits far forward — closer to [ʉː], lips barely rounded; the symbol names the phoneme, not the exact position. TRAP /æ/ is open and lowered, close to [a]. And the final vowel of happy, city, coffee is the tense happY /i/ — a WEAK vowel of unstressed endings, not an extra full vowel phoneme — where classic RP taught lax /ɪ/. These are the quiet tells that separate a modern speaker from a period one.', phonemes: ['uː', 'æ', 'i', 'ɪ'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'minimalPair'] },
       { id: 'ssbe-5', title: 'What stayed classic', accent: 'ssbe', guide: 'CORE TARGET — the stable skeleton. No /r/ unless a vowel follows (car /kɑː/), with linking R before vowels (“far away”) and frequent intrusive R (“law-r-and order”). BATH words broaden to /ɑː/, LOT stays rounded /ɒ/, GOAT starts at schwa /əʊ/ — though before /l/ (goal, gold) both GOAT and GOOSE take on backer, rounder qualities, and dark final /l/ itself may vocalize toward [o] in relaxed speech (“milk” ≈ [mɪok]) — a RELAXED-SPEECH OPTION, not a requirement. If you already carry Traditional RP, keep all of this: Standard British is a set of updates on that base, not a new operating system.', phonemes: ['ɑː', 'ɒ', 'əʊ', 'ɔː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
       { id: 'ssbe-6', title: 'Reading the accent', accent: 'ssbe', guide: 'Full Standard British transcriptions — glottal stops, steady SQUARE, coalesced yods and all. Read them cold, type the words, transcribe back the other way, and handle the conversational expressions that carry the accent in real speech. This is where it stops being a list of features and becomes a system.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'əʊ'], types: ['typeWord', 'symbolToWord', 'gapBuild', 'fillBlank', 'idiomSituation'] },
     ],
   },
   {
-    id: 'ssbe-shift',
-    title: 'Stage 3 · Shift Work',
+    id: 'ssbe-use',
+    title: 'Stage 3 · Putting It to Work',
     color: '#7d6b9e',
-    icon: '🔧',
-    blurb: 'Traditional RP to Standard British and back — one generation of change, drilled both ways.',
+    icon: '🎯',
+    blurb: 'Place the speaker, hear a generation on, and prove it at speed.',
     lessons: [
       { id: 'ssbe-s1', title: 'One generation on', shiftTo: 'ssbe', guide: 'Given the Traditional RP form, produce the Standard British one: realize the non-initial /t/ as [ʔ], flatten SQUARE to /ɛː/, fuse the yods. The traps are RP habits — /betə/, /skweə/ and /tjuːn/ are each one feature outside this course’s contemporary target.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ'], types: ['shiftChoice', 'shiftBuild'] },
       { id: 'ssbe-s2', title: 'Placing the speaker', shiftTo: 'ssbe', guide: 'Ear work: hear a form cold and place it — Traditional RP or Standard British? The tells are small and reliable: one glottal stop, one steady /ɛː/, one fused yod. An actor who hears the difference can dial a character’s age and formality by degrees. A register question rides along — knowing WHEN an expression lands rude matters as much as the vowels.', phonemes: ['ʔ', 'ɛː', 'ɪə', 'uː'], types: ['shiftBuild', 'shiftChoice', 'accentEar', 'idiomRegister'] },
-    ],
-  },
-  {
-    id: 'ssbe-mastery',
-    title: 'Stage 4 · Mastery',
-    color: '#7d6b9e',
-    icon: '🏆',
-    blurb: 'The final: the whole contemporary accent, mixed and at speed.',
-    lessons: [
       { id: 'ssbe-final', title: 'Standard British final', accent: 'ssbe', shiftTo: 'ssbe', count: 12, guide: 'Twelve questions across everything: glottal stops, steady SQUARE, coalesced yods, fronted GOOSE, happY tensing, the classic skeleton underneath, shifts from Traditional RP forms, ear checks — and the conversational expressions in short exchanges, because an accent lives in dialogue, not word lists.', phonemes: ['ʔ', 'ɛː', 'tʃ', 'dʒ', 'ɑː', 'ɒ', 'əʊ', 'uː'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar', 'idiomDialogue', 'idiomLiteral'] },
     ],
   },
 
   // ── Cockney ─────────────────────────────────────────────────
+  // ── THREE STAGES, NOT FOUR (owner order, 2026-11-06) ──────────
+  //
+  // Every accent ran Orientation (1 lesson) / The Sounds (9) / Shift Work
+  // (2) / Mastery (1). Two of those four held a single lesson, which is
+  // not a unit, and the third held most of the course — invisible while
+  // the Learn page was one long scroll, and impossible to miss the moment
+  // it became a grid of unit cards.
+  //
+  // THE LESSONS DID NOT MOVE IN ORDER and NOT ONE LESSON ID CHANGED. This
+  // is a regrouping: the same lessons, the same sequence, the same lock
+  // chain. Ids are storage here and are never renamed.
+  //
+  // THE GENERATED CHECKPOINT IDS DID CHANGE, because expandUnit keys them
+  // to the unit they sit in (`chk-<unit>-<n>`). js/state.js carries a
+  // versioned migration that maps the old ones across by position, so no
+  // completed checkpoint is lost.
   {
-    id: 'ck-intro',
-    title: 'Stage 1 · Orientation',
+    id: 'ck-meet',
+    title: 'Stage 1 · Meet the Accent',
     color: '#a8825a',
     icon: '📍',
-    blurb: 'What Cockney is, what it is not, and why actors train it.',
+    blurb: 'What Cockney is, and the three features you hear first.',
     lessons: [
       { id: 'ck-0', title: 'Hear Cockney', accent: 'cockney', guide: 'Cockney is broad working-class London speech: the East End market, the black cab, a century of London stage and screen. It is a rule-governed accent, not careless English, and this course teaches it with the same respect as any other. Its CORE TARGET features are big and hearable: TH-fronting (think spoken [fɪŋk]), the glottal stop as the normal /t/ between vowels and at word ends, h-dropping (house spoken [aʊs]), and a diphthong shift that moves FACE toward [æɪ] and PRICE toward [ɑɪ]. Underneath sits the same London skeleton as Standard British: non-rhotic, broad BATH /ɑː/. The notation contract holds throughout: / / marks the phonemes underneath, [ ] marks how Cockney says them.', phonemes: ['f', 'v', 'ʔ', 'ɑː', 'aʊ'], types: ['accentFact', 'soundToSymbol', 'fillBlank'] },
+      { id: 'ck-1', title: 'TH becomes F and V', accent: 'cockney', guide: 'CORE TARGET. Cockney fronts the TH sounds: /θ/ is spoken [f] and non-initial /ð/ is spoken [v]. Think is [fɪŋk], three sounds like free, brother is [ˈbrʌvə], with is [wɪv]. The phonemes underneath do not change, which is why these forms sit in square brackets: think is still /θɪŋk/ under the accent. One boundary matters: word-initial /ð/ in the, this and that usually stays [ð] or becomes [d], not [v]. Fronting everything is the give-away of an actor who learned the rule but not the boundary.', phonemes: ['f', 'v', 'θ', 'ð'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
+      { id: 'ck-2', title: 'The glottal stop, everywhere', accent: 'cockney', guide: 'CORE TARGET. Standard British treats the glottal stop as a relaxed-speech option; Cockney treats it as the norm. Between vowels and at word ends, /t/ closes to [ʔ]: butter [ˈbʌʔə], water [ˈwɔːʔə], what [wɒʔ], market [ˈmɑːkɪʔ]. The vocal folds shut and release where the tongue tip would have tapped. Word-initial /t/ stays [t]: tea is still /tiː/. If you already carry the Standard British glottal habit, Cockney simply removes the hesitation: where Standard British might glottal, Cockney does.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
+      { id: 'ck-3', title: 'Dropping the aitch', accent: 'cockney', guide: 'CORE TARGET. In content words the /h/ goes: house [aʊs], hammer [ˈæmə], horse [ɔːs], hair [ɛː]. The word keeps its /h/ phonemically, and the accent leaves it silent, which is why these forms sit in brackets. Two honest notes. First, h-dropping carries social freight in Britain, and a character who drops aitches is telling the audience something; that is exactly why the feature matters to actors. Second, real Cockney speakers sometimes INSERT an h in careful speech where none belongs, a VARIABLE FEATURE called hypercorrection, and a script may ask you for it.', phonemes: ['h', 'aʊ', 'ɔː', 'ɛː'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'fillBlank'] },
     ],
   },
   {
-    id: 'ck',
+    id: 'ck-sounds',
     title: 'Stage 2 · The Sounds',
     color: '#a8825a',
     icon: '🚕',
     accent: true,
-    blurb: 'TH-fronting, the glottal stop, dropped aitches and the vowel shift — the full feature set, labelled honestly.',
+    blurb: 'The vowel shift, the fused yods, and reading the accent.',
     lessons: [
-      { id: 'ck-1', title: 'TH becomes F and V', accent: 'cockney', guide: 'CORE TARGET. Cockney fronts the TH sounds: /θ/ is spoken [f] and non-initial /ð/ is spoken [v]. Think is [fɪŋk], three sounds like free, brother is [ˈbrʌvə], with is [wɪv]. The phonemes underneath do not change, which is why these forms sit in square brackets: think is still /θɪŋk/ under the accent. One boundary matters: word-initial /ð/ in the, this and that usually stays [ð] or becomes [d], not [v]. Fronting everything is the give-away of an actor who learned the rule but not the boundary.', phonemes: ['f', 'v', 'θ', 'ð'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
-      { id: 'ck-2', title: 'The glottal stop, everywhere', accent: 'cockney', guide: 'CORE TARGET. Standard British treats the glottal stop as a relaxed-speech option; Cockney treats it as the norm. Between vowels and at word ends, /t/ closes to [ʔ]: butter [ˈbʌʔə], water [ˈwɔːʔə], what [wɒʔ], market [ˈmɑːkɪʔ]. The vocal folds shut and release where the tongue tip would have tapped. Word-initial /t/ stays [t]: tea is still /tiː/. If you already carry the Standard British glottal habit, Cockney simply removes the hesitation: where Standard British might glottal, Cockney does.', phonemes: ['ʔ', 'ə', 'ɒ'], types: ['accentFact', 'soundToSymbol', 'build'] },
-      { id: 'ck-3', title: 'Dropping the aitch', accent: 'cockney', guide: 'CORE TARGET. In content words the /h/ goes: house [aʊs], hammer [ˈæmə], horse [ɔːs], hair [ɛː]. The word keeps its /h/ phonemically, and the accent leaves it silent, which is why these forms sit in brackets. Two honest notes. First, h-dropping carries social freight in Britain, and a character who drops aitches is telling the audience something; that is exactly why the feature matters to actors. Second, real Cockney speakers sometimes INSERT an h in careful speech where none belongs, a VARIABLE FEATURE called hypercorrection, and a script may ask you for it.', phonemes: ['h', 'aʊ', 'ɔː', 'ɛː'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'fillBlank'] },
       { id: 'ck-4', title: 'The vowel shift', accent: 'cockney', guide: 'CORE TARGET. The Cockney diphthongs have rotated one position around the mouth. FACE starts open: /eɪ/ is spoken [æɪ], so day leans toward the sound of dye. PRICE starts back: /aɪ/ is spoken [ɑɪ], so price leans toward the sound of poise without reaching it. GOAT starts front: /əʊ/ is spoken [æʊ]. And MOUTH flattens toward a long [æː] in broad speakers: mouth toward [mæːf]. The broad symbols stay put because the phonemes underneath are the same ones; the symbol names the phoneme, not the exact journey. How far the shift travels is a VARIABLE FEATURE: broad older speakers go furthest, young Estuary-leaning speakers less far.', phonemes: ['eɪ', 'aɪ', 'əʊ', 'aʊ'], types: ['accentFact', 'soundToSymbol', 'symbolToWord', 'minimalPair'] },
       { id: 'ck-5', title: 'Chewsday: the fused yods', accent: 'cockney', guide: 'CORE TARGET, shared with Standard British. /tj/ and /dj/ fuse: tune [tʃuːn], Tuesday [ˈtʃuːzdeɪ], duty [ˈdʒuːʔi] with the glottal riding along. A listening cue: Chewsday. Cockney also vocalizes dark /l/: milk toward [mɪok], well toward [weo], little ending in a vowel where the tongue tip never rises. The l-vocalization is taught here by ear and in lesson copy rather than in symbols, because the broad transcription keeps /l/ in place.', phonemes: ['tʃ', 'dʒ', 'uː'], types: ['accentFact', 'soundToSymbol', 'build', 'fillBlank'] },
       { id: 'ck-6', title: 'Reading the accent', accent: 'cockney', guide: 'Full Cockney forms, mixed: fronted TH, glottal stops, dropped aitches, shifted vowels, fused yods. Read them cold, type the words, transcribe back the other way. This is where the features stop being a list and become one voice. Keep the register honest: the same speaker fronts and glottals more at the market than in a job interview, so an actor needs the dial, not just the extreme.', phonemes: ['f', 'v', 'ʔ', 'ɛː', 'ɑː', 'eɪ'], types: ['typeWord', 'symbolToWord', 'gapBuild', 'fillBlank'] },
     ],
   },
   {
-    id: 'ck-shift',
-    title: 'Stage 3 · Shift Work',
+    id: 'ck-use',
+    title: 'Stage 3 · Putting It to Work',
     color: '#a8825a',
-    icon: '🔧',
-    blurb: 'Reference forms to Cockney and back — the classic actor transformation, drilled both ways.',
+    icon: '🎯',
+    blurb: 'Arrive at it, place the speaker, and prove it at speed.',
     lessons: [
       { id: 'ck-s1', title: 'Into Cockney', shiftTo: 'cockney', guide: 'Given the reference form, produce the Cockney one: front the TH, close the /t/ to [ʔ], drop the aitch. The traps are the careful habits: /θɪŋk/, /bʌtə/ and /haʊs/ are each one feature short of the accent. Work feature by feature until the transformation runs whole words at a time.', phonemes: ['f', 'v', 'ʔ', 'ɑː'], types: ['shiftChoice', 'shiftBuild'] },
       { id: 'ck-s2', title: 'Placing the speaker', shiftTo: 'cockney', guide: 'Ear work: hear a form cold and place it. The tells are reliable: one fronted TH, one glottal stop, one dropped aitch, one shifted FACE vowel. An actor who hears the strength of each feature can dial a character from mild Estuary to full broad Cockney by degrees, and hear at once when a fellow performer overshoots.', phonemes: ['ʔ', 'f', 'v', 'eɪ'], types: ['shiftBuild', 'shiftChoice', 'accentEar'] },
-    ],
-  },
-  {
-    id: 'ck-mastery',
-    title: 'Stage 4 · Mastery',
-    color: '#a8825a',
-    icon: '🏆',
-    blurb: 'The final: the whole accent, mixed and at speed.',
-    lessons: [
       { id: 'ck-final', title: 'Cockney final', accent: 'cockney', shiftTo: 'cockney', count: 12, guide: 'Twelve questions across everything: fronted TH, glottal stops, dropped aitches, the vowel shift, fused yods, the London skeleton underneath, shifts from reference forms and ear checks. An accent lives in whole speech, not word lists, so the mix comes fast and unlabelled, the way a script does.', phonemes: ['f', 'v', 'ʔ', 'ɛː', 'ɑː', 'eɪ', 'aɪ', 'tʃ'], types: ['accentFact', 'build', 'soundToSymbol', 'shiftChoice', 'shiftBuild', 'fillBlank', 'accentEar'] },
     ],
   },
@@ -357,7 +392,7 @@ export const TRACKS = [
     color: '#b05f4d',
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
-    unitIds: ['nam-intro', 'nam', 'nam-shift', 'nam-mastery'],
+    unitIds: ['nam-meet', 'nam-sounds', 'nam-use'],
   },
   {
     id: 'rp',
@@ -366,7 +401,7 @@ export const TRACKS = [
     color: '#6b7fa3',
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
-    unitIds: ['rp-intro', 'rp', 'rp-shift', 'rp-mastery'],
+    unitIds: ['rp-meet', 'rp-sounds', 'rp-use'],
   },
   {
     id: 'aus',
@@ -375,7 +410,7 @@ export const TRACKS = [
     color: '#5f8a86',
     accent: true,
     blurb: 'A complete course: orientation → the sounds → shift work → mastery final.',
-    unitIds: ['aus-intro', 'aus', 'aus-shift', 'aus-mastery'],
+    unitIds: ['aus-meet', 'aus-sounds', 'aus-use'],
   },
   {
     id: 'ssbe',
@@ -384,7 +419,7 @@ export const TRACKS = [
     color: '#7d6b9e',
     accent: true,
     blurb: 'A modern British target for contemporary characters, conversation, film and TV.',
-    unitIds: ['ssbe-intro', 'ssbe', 'ssbe-shift', 'ssbe-mastery'],
+    unitIds: ['ssbe-meet', 'ssbe-sounds', 'ssbe-use'],
   },
   {
     id: 'cockney',
@@ -393,7 +428,7 @@ export const TRACKS = [
     color: '#a8825a',
     accent: true,
     blurb: 'Broad working-class London — a first-class audition dialect with its full feature set.',
-    unitIds: ['ck-intro', 'ck', 'ck-shift', 'ck-mastery'],
+    unitIds: ['ck-meet', 'ck-sounds', 'ck-use'],
   },
   {
     id: 'shift',

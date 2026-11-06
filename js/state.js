@@ -2,19 +2,69 @@
 
 const KEY = 'ipa-trainer-v1';
 
+// ── v2 → v3: the accent unit regroup (owner order, 2026-11-06) ──
+//
+// The five accent courses went from four stages to three. Not one LESSON
+// id moved — ids are storage here and are never renamed — but the
+// checkpoint games are GENERATED, and expandUnit keys them to the unit
+// they sit in (`chk-<unit>-<n>`). Regrouping the units therefore renamed
+// all 23 of them.
+//
+// THE MAP IS BY POSITION IN THE TRACK, which is exact rather than
+// approximate: the lesson order did not change, so the nth checkpoint of
+// a course before is the nth checkpoint of the same course after. Every
+// old id has a new home — derived from the data, not written by hand, and
+// checked both ways: 23 old ids, 23 destinations, no collisions.
+//
+// It is additive and idempotent. It never deletes: a renamed id is ADDED
+// alongside whatever is there, so running it twice changes nothing and a
+// device that somehow sees it after a rollback still holds its old ids.
+const CHK_V3 = {
+  'chk-nam-1': 'chk-nam-meet-1', 'chk-nam-2': 'chk-nam-meet-2',
+  'chk-nam-3': 'chk-nam-sounds-1', 'chk-nam-4': 'chk-nam-sounds-2',
+  'chk-nam-shift-1': 'chk-nam-use-1',
+  'chk-rp-1': 'chk-rp-meet-1', 'chk-rp-2': 'chk-rp-sounds-1',
+  'chk-rp-3': 'chk-rp-sounds-2', 'chk-rp-4': 'chk-rp-use-1',
+  'chk-rp-shift-1': 'chk-rp-use-2',
+  'chk-aus-1': 'chk-aus-meet-1', 'chk-aus-2': 'chk-aus-meet-2',
+  'chk-aus-3': 'chk-aus-sounds-1', 'chk-aus-4': 'chk-aus-sounds-2',
+  'chk-aus-shift-1': 'chk-aus-use-1',
+  'chk-ssbe-1': 'chk-ssbe-meet-1', 'chk-ssbe-2': 'chk-ssbe-meet-2',
+  'chk-ssbe-3': 'chk-ssbe-sounds-1', 'chk-ssbe-shift-1': 'chk-ssbe-use-1',
+  'chk-ck-1': 'chk-ck-meet-1', 'chk-ck-2': 'chk-ck-meet-2',
+  'chk-ck-3': 'chk-ck-sounds-1', 'chk-ck-shift-1': 'chk-ck-use-1',
+};
+
 function load() {
   try {
     const s = JSON.parse(localStorage.getItem(KEY)) ?? {};
     // v1 (unversioned) data is fully forward-compatible — every reader
     // defaults missing fields. Never wipe on unknown versions; newer data
     // from a future build is read best-effort.
+    //
+    // THE ONE MIGRATION THAT REWRITES ANYTHING runs here, and only
+    // forwards: `(s.v ?? 1) < 3`. Data already at 3 or beyond is left
+    // exactly as found, which is the same promise the line above makes.
+    if ((s.v ?? 1) < 3 && Array.isArray(s.completed)) {
+      const have = new Set(s.completed);
+      for (const [from, to] of Object.entries(CHK_V3)) {
+        if (have.has(from)) have.add(to);
+      }
+      if (have.size !== s.completed.length) {
+        s.completed = [...have];
+        // Written back immediately so the work is done once rather than on
+        // every read. A device that refuses storage simply migrates again
+        // next time, which costs nothing and breaks nothing.
+        try { localStorage.setItem(KEY, JSON.stringify({ ...s, v: SCHEMA_VERSION })); } catch { /* best effort */ }
+      }
+    }
     return s;
   } catch {
     return {};
   }
 }
 
-const SCHEMA_VERSION = 2;   // bump only with a matching migration in load()
+const SCHEMA_VERSION = 3;   // bump only with a matching migration in load()
 
 let warnedStorage = false;
 
