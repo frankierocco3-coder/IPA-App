@@ -557,10 +557,27 @@ export const LEARN_SCENES = {
   // been since the course was opened to learners; an early note in the
   // vault said eight and was out of date.
   //
-  // THE BANDS ARE CINEMASCOPE-SHALLOW, about 7.8:1, and that is the
-  // design rather than a bad crop: the owner's mockup draws this course
-  // as a row of thin letterboxed strips, which is the one place in this
-  // app where the picture is shaped like the medium it teaches.
+  // THE BANDS ARE CINEMASCOPE-SHALLOW, and that is the design rather
+  // than a bad crop: the owner's mockup draws this course as a row of
+  // thin letterboxed strips, which is the one place in this app where
+  // the picture is shaped like the medium it teaches.
+  //
+  // EVERY CARD CARRIES ITS OWN ASPECT, and this course is why the field
+  // exists. The nine bands are NOT one shape: the mockup compresses its
+  // cards down the page, so they run 7.13:1 at the top through 8.43:1
+  // lower down to 13.79:1 at the last. Averaging them at 7.8 cropped
+  // every single one, between 5.9% and 8.6% — and on the four that are
+  // relatively TALLER than the average the loss came out of the HEIGHT,
+  // half of it off the top, which is where the faces are. The owner saw
+  // it at once: heads cut on 7, 8 and 9.
+  //
+  // Each is written as the FILE'S OWN PIXELS rather than a decimal, so
+  // the number is checkable against the image and nothing is ever
+  // cropped. artAspect below is now only the fallback for a card that
+  // somehow carries none.
+  //
+  // The ASSET-MAP asked for exactly this: keep their wide aspect ratios,
+  // and do not stretch them into tall thumbnails.
   //
   // MODULE 9 HAS NO CARD. The supplied strip for it is 455x33, cut off
   // by the bottom edge of the mockup it was taken from rather than drawn
@@ -575,21 +592,21 @@ export const LEARN_SCENES = {
     artAspect: '7.8 / 1',
     done: 'filmed',
     moduleCard: {
-      'sc-start': { src: 'img/ui/screen-band-sc-start.jpg',
+      'sc-start': { src: 'img/ui/screen-band-sc-start.jpg', aspect: '455 / 62',
         alt: 'Two people talking across a table in a warmly lit room, one gesturing as she explains, framed photographs on the wall behind them.' },
-      'sc-presence': { src: 'img/ui/screen-band-sc-presence.jpg',
+      'sc-presence': { src: 'img/ui/screen-band-sc-presence.jpg', aspect: '449 / 63',
         alt: 'An actor standing in front of a lit film camera on a tripod while an operator watches the monitor beside it.' },
-      'sc-craft': { src: 'img/ui/screen-band-sc-craft.jpg',
+      'sc-craft': { src: 'img/ui/screen-band-sc-craft.jpg', aspect: '455 / 62',
         alt: 'A crew member crouching to lay a tape mark on the floor while a camera operator lines up the shot behind them.' },
-      'sc-reacting': { src: 'img/ui/screen-band-sc-reacting.jpg',
+      'sc-reacting': { src: 'img/ui/screen-band-sc-reacting.jpg', aspect: '449 / 62',
         alt: 'Two actors in close conversation under a practical lamp, one listening with her attention entirely on the other.' },
-      'sc-preparation': { src: 'img/ui/screen-band-sc-preparation.jpg',
+      'sc-preparation': { src: 'img/ui/screen-band-sc-preparation.jpg', aspect: '455 / 54',
         alt: 'Two people leaning over a marked-up script on a table, a coffee cup beside it, working through the scene line by line.' },
-      'sc-onset': { src: 'img/ui/screen-band-sc-onset.jpg',
+      'sc-onset': { src: 'img/ui/screen-band-sc-onset.jpg', aspect: '449 / 54',
         alt: 'A film set seen wide: a boom operator with the microphone raised, two actors mid-scene, and lamps and a black flag around them.' },
-      'sc-tape': { src: 'img/ui/screen-band-sc-tape.jpg',
+      'sc-tape': { src: 'img/ui/screen-band-sc-tape.jpg', aspect: '455 / 54',
         alt: 'A woman performing to a phone mounted on a small tripod in a plain room lit by a window, recording a self-tape.' },
-      'sc-address': { src: 'img/ui/screen-band-sc-address.jpg',
+      'sc-address': { src: 'img/ui/screen-band-sc-address.jpg', aspect: '449 / 54',
         alt: 'A man looking straight down the lens, lit by a lamp at one side, speaking directly to the camera.' },
       // THE ONE CARD THAT SETS ITS OWN SHAPE. Its band is 455x33 where the
       // other eight are about 455x58, because the owner's mockup
@@ -607,7 +624,7 @@ export const LEARN_SCENES = {
       //
       // A redraw at the other eight's shape is still the better answer;
       // see docs/SCREEN_LEARN_ART_BRIEF.md.
-      'sc-root': { src: 'img/ui/screen-band-sc-root.jpg', aspect: '13.8 / 1',
+      'sc-root': { src: 'img/ui/screen-band-sc-root.jpg', aspect: '455 / 33',
         alt: 'A hand holding a clapperboard at the edge of a lit set, two actors standing apart mid-scene, with lamps and a ladder behind them.' },
     },
     palette: {
