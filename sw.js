@@ -110,7 +110,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v95';                     // 2026-11-06: Screen Acting module 9 gets its band. The image is a NEW path, but js/main.js and js/data/learn-scenes.js are staleWhileRevalidate and an installed copy would keep the one card in the app with no picture
+const VERSION = 'sc-v96';                     // 2026-11-06: Screen Acting's bands stop being cropped. js/data/learn-scenes.js is staleWhileRevalidate, so an installed copy would keep cutting the faces off modules 7, 8 and 9
 const SHELL = `${VERSION}-shell`;
 const MEDIA = `${VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
