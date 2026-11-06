@@ -3012,13 +3012,22 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   font-weight: 700; color: var(--ink); line-height: 1.1; }
 .sm-blurb { margin: 0 0 16px; padding-left: 52px; font-size: 13.5px;
   line-height: 1.5; color: var(--muted); }
-/* Maroon, full width, at the top — the page's one loud control. */
+/* Full width, at the top — the rail's one loud control.
+   GREEN SINCE 2026-11-06 (owner: "change the start module button to
+   green"). It was maroon, which was the only red fill on a learner
+   surface outside .btn-red, and the banded Learn pages put it beside a
+   column of sage bands and an olive Start learning button where it read
+   as a warning rather than as the way in.
+   var(--green-dark) is the same fill .btn-primary uses, and for the
+   reason recorded there: the lighter sage holds white at only 4.02:1,
+   so filled buttons sit on the darker end of the hue. */
 .sm-start { display: flex; align-items: center; justify-content: space-between;
   width: 100%; margin: 0 0 16px; padding: 12px 16px; border: 0;
-  border-radius: 10px; background: #7b2430; color: #fff; cursor: pointer;
+  border-radius: 10px; background: var(--green-dark); color: #fdfcf7;
+  cursor: pointer;
   font-family: var(--serif, Georgia, serif); font-size: 15.5px; font-weight: 700;
-  box-shadow: 0 2px 6px rgba(70, 18, 25, .3); }
-.sm-start:hover { background: #8c2b38; }
+  box-shadow: 0 2px 6px rgba(45, 62, 32, .3); }
+.sm-start:hover { background: #46593a; }
 .sm-start:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
 .sm-go { opacity: .8; font-size: 17px; }
 .sm-eyebrow { margin: 16px 0 8px; padding-top: 12px;
