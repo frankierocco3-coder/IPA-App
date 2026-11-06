@@ -51,9 +51,26 @@
  * specifically to repair something a user is actively hitting, the old cache
  * is the bug, and dropping it wholesale is the repair.
  *
- * The cost is real and worth naming: this also drops the MEDIA cache, so an
- * installed device re-downloads its audio clips. That is the price of the
- * next load being correct rather than the one after it.
+ * The cost WAS real and is now gone, and the history is worth keeping.
+ * Until 2026-11-06 SHELL and MEDIA shared one VERSION, so every bump —
+ * including a one-line CSS fix — dropped the media cache too and an
+ * installed device re-downloaded all its audio. That was a deliberate
+ * trade, written down right here: the price of the next load being correct
+ * rather than the one after it.
+ *
+ * WHAT CHANGED IS THE PRICE, NOT THE REASONING. The trade assumed bumps
+ * are rare. An audit on 2026-11-06 counted EIGHTEEN between 2026-11-02 and
+ * that morning, six of them in one session, and priced one eviction for a
+ * Standard British learner at 26 MB of clips plus 12 MB of diagrams. At
+ * that rate the shell's correctness was being bought with the learner's
+ * whole offline library, several times a day.
+ *
+ * So the two caches version independently now. MEDIA_VERSION is FROZEN at
+ * the value the shared scheme last used, which is what lets the split cost
+ * nobody anything: a device holding 'sc-v97-media' keeps it. Media is
+ * cacheFirst and never revalidates, so MEDIA_VERSION moves for exactly one
+ * reason — a file REPLACED AT AN EXISTING PATH under img/ or in the audio
+ * repo. A new file at a new path needs nothing.
  *
  * sc-v26 BREAKS IT THE SAME WAY, AND FOR THE SAME REASON (2026-10-13). The
  * Practice and Character icon batches changed no module graph, so by the
@@ -110,9 +127,14 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v97';                     // 2026-11-06: Rhetoric and Theatre History move to the end of the workspace switcher. js/views/context.js is staleWhileRevalidate, so an installed copy would keep the old order
+const VERSION = 'sc-v98';                     // 2026-11-06: the idiom shelf stops drawing speaker buttons for clips that do not exist, and SHELL and MEDIA stop sharing a version
+// FROZEN ON PURPOSE. Not a stale constant — see the long note above. It
+// holds the value the shared scheme last used so that splitting the two
+// caches evicts nobody, and it moves ONLY when a media file is replaced at
+// a path it already occupied.
+const MEDIA_VERSION = 'sc-v97';
 const SHELL = `${VERSION}-shell`;
-const MEDIA = `${VERSION}-media`;
+const MEDIA = `${MEDIA_VERSION}-media`;
 const PRECACHE = ['./', 'index.html', 'css/style.css', 'manifest.json',
                   'favicon.svg', 'icon-180.png', 'icon-512.png'];
 
@@ -125,7 +147,12 @@ self.addEventListener('install', e => {
 self.addEventListener('activate', e => {
   e.waitUntil((async () => {
     for (const k of await caches.keys()) {
-      if (!k.startsWith(VERSION)) await caches.delete(k);
+      // EXACT NAMES, NOT A VERSION PREFIX. The prefix test was what tied
+      // the two caches together: `startsWith(VERSION)` kept the media
+      // cache only while it happened to carry the same version string, so
+      // the moment the shell moved, the media went with it. Naming both
+      // live caches keeps each until its own version changes.
+      if (k !== SHELL && k !== MEDIA) await caches.delete(k);
     }
     await self.clients.claim();
   })());

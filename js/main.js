@@ -10171,11 +10171,36 @@ function hubIdiom(hub, d, track) {
         <p class="idiom-meaning">${esc(e.meaning)}</p>
         ${e.example ? `<p class="idiom-example">“${esc(e.example)}”</p>` : ''}
         ${e.note ? `<p class="idiom-note">${esc(e.note)}</p>` : ''}
+        ${(() => {
+          // THE SAME DEAD-CONTROL RULE THIS FUNCTION ALREADY FOLLOWS for
+          // its Period filter, twenty lines up — applied at last to the
+          // thing that was actually breaking it.
+          //
+          // These two buttons rendered UNCONDITIONALLY until 2026-11-06,
+          // and on the American library that meant 436 controls that do
+          // nothing: 440 of its 699 speakable texts have no clip in
+          // either voice, all of them the contemporary idioms added on
+          // 2026-09-27 without a generation run. speak() is strict, so
+          // every one of them was silence with no explanation.
+          //
+          // The app's rule is that an unplayable word renders as PLAIN
+          // TEXT — never a faded control, never a promise. The term and
+          // the example are still on the card above; only the button goes.
+          //
+          // speakableWord(), not hasWordClip(), because it answers TRUE
+          // while the clip index is still loading. Gating on the raw
+          // predicate would blink every button out and back in on first
+          // paint, which looks like a bug of its own.
+          const canTerm = speakableWord(e.term, d);
+          const canEg = !!e.example && speakableWord(e.example, d);
+          if (!canTerm && !canEg && !CAPABILITIES.learnerSpeaking) return '';
+          return `
         <div class="idiom-listen">
-          <button class="word-chip" data-say="${esc(e.term)}" type="button" aria-label="Hear “${esc(e.term)}”">🔊 Hear it</button>
-          ${e.example ? `<button class="word-chip" data-say="${esc(e.example)}" type="button" aria-label="Hear the example sentence">🔊 In a sentence</button>` : ''}
+          ${canTerm ? `<button class="word-chip" data-say="${esc(e.term)}" type="button" aria-label="Hear “${esc(e.term)}”">🔊 Hear it</button>` : ''}
+          ${canEg ? `<button class="word-chip" data-say="${esc(e.example)}" type="button" aria-label="Hear the example sentence">🔊 In a sentence</button>` : ''}
           ${CAPABILITIES.learnerSpeaking ? `<button class="word-chip" data-tryterm="${esc(e.term)}" type="button" aria-label="Record yourself saying “${esc(e.term)}”">🎙 Try it</button>` : ''}
-        </div>
+        </div>`;
+        })()}
       </div>`).join('')
       : '<p class="pane-note">Nothing matches that filter.</p>';
   };

@@ -115,14 +115,52 @@ def main():
     # 6: STRICT course coverage — a strict course promises real clips for
     # everything its controls can speak, so every speakable text must exist
     # in BOTH of its voices. This keeps the no-TTS rule honest forever.
+    #
+    # IT READ ONLY ssbe AND cockney UNTIL 2026-11-06, and that is how 440
+    # missing American clips passed this gate green for forty days. The two
+    # it did read were the two launched through the ear-gated pipeline, so
+    # the omission was a habit rather than a decision: nobody ever added
+    # the other three. rp and aus were measured at EXACTLY ZERO missing
+    # when they were added here, so they cost nothing and now cannot
+    # regress.
     sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
     from generate_voices import words as all_words, idiom_texts, clip_name
-    STRICT = {"ssbe": ("alyx", "peach"), "cockney": ("bob", "lizzie")}
+    STRICT = {
+        "ssbe": ("alyx", "peach"),
+        "cockney": ("bob", "lizzie"),
+        "rp": ("f", "m"),
+        "aus": ("f", "m"),
+        "nam": ("f", "m"),
+    }
+    # nam IS NOT COMPLETE AND IS NOT BLOCKED ON BEING COMPLETE. The 440 are
+    # the contemporary idioms added on 2026-09-27 without a generation run,
+    # and generating them spends real money, which is the owner's call and
+    # not a thing a deploy gate may force at 3am. The page that exposed
+    # them no longer offers a dead control (js/main.js, hubIdiom), so the
+    # app is honest today whether or not the clips ever land.
+    #
+    # SO IT IS A RATCHET, NOT A WAIVER. The number may not grow, and it may
+    # not shrink without being written down — a pin that silently drifts
+    # down is how a gate stops describing the thing it guards. Close the
+    # gap and this gate tells you the new number to record.
+    SHORTFALL = {"nam": 440}
     for course, voices in STRICT.items():
         speakable = set(all_words(course)) | set(idiom_texts().get(course, []))
+        allowed = SHORTFALL.get(course, 0)
         for v in voices:
             have = set(index.get(course, {}).get(v, []))
             missing = sorted(t for t in speakable if clip_name(t) not in have)
+            if allowed:
+                if len(missing) > allowed:
+                    fail("strict %s coverage REGRESSED: %d missing for %s, "
+                         "recorded shortfall is %d — %d new gap(s), first: %s"
+                         % (course, len(missing), v, allowed,
+                            len(missing) - allowed, ", ".join(missing[:5])))
+                elif len(missing) < allowed:
+                    fail("strict %s coverage IMPROVED to %d missing for %s "
+                         "(recorded %d) — lower SHORTFALL in this file to %d"
+                         % (course, len(missing), v, allowed, len(missing)))
+                continue
             for t in missing[:10]:
                 fail("strict %s coverage: no %s clip for '%s'" % (course, v, t))
             if len(missing) > 10:
