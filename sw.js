@@ -127,7 +127,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v99';                     // 2026-11-06: IPA Foundations splits into unit cards and a per-unit trail. js/main.js and css/style.css are staleWhileRevalidate, so an installed copy would keep the single scroll
+const VERSION = 'sc-v100';                    // 2026-11-06: the five accent courses join the two-screen Learn page. js/main.js is staleWhileRevalidate, so an installed copy would keep the single scroll
 // FROZEN ON PURPOSE. Not a stale constant — see the long note above. It
 // holds the value the shared scheme last used so that splitting the two
 // caches evicts nobody, and it moves ONLY when a media file is replaced at
