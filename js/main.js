@@ -9944,6 +9944,14 @@ function renderIdioms(d) {
 
 // ── Progress: quests, weak sounds, achievements ──────────────
 
+// Small counts read better as words in a sentence; anything larger is rare
+// enough here that the digit is fine and honest.
+const COUNT_WORDS = ['no', 'one', 'two', 'three', 'four', 'five', 'six'];
+const countWord = n => {
+  const w = COUNT_WORDS[n] ?? String(n);
+  return w.charAt(0).toUpperCase() + w.slice(1);
+};
+
 function achievementRows() {
   const t = totals();
   return [
@@ -9951,8 +9959,15 @@ function achievementRows() {
     { icon: '🗣', name: 'Wordsmith', what: 'days practised', tiers: [3, 10, 30], value: t.daysPractised },
   ].map(a => {
     const level = a.tiers.filter(x => a.value >= x).length;
-    const next = a.tiers[level] ?? a.tiers[a.tiers.length - 1];
-    return { ...a, level, next, pct: Math.min(100, Math.round(a.value / next * 100)) };
+    // PAST THE LAST TIER THERE IS NO NEXT ONE (audit, 2026-11-09). This
+    // fell back to the final tier, so the row went on printing a fraction
+    // against a target already passed — "113/77 lessons completed", which
+    // reads as a bug to anyone who gets there, and the bar had been pinned
+    // at 100% for the last 36 of them. `done` says so instead.
+    const done = level === a.tiers.length;
+    const next = a.tiers[level] ?? null;
+    return { ...a, level, next, done,
+      pct: done ? 100 : Math.min(100, Math.round(a.value / next * 100)) };
   });
 }
 
@@ -10053,7 +10068,7 @@ function progressMain(el) {
       </section>
       <h2 class="chart-h">What will appear here</h2>
       ${[
-        ['🏆', 'Daily quests', 'three small targets that reset at midnight'],
+        ['🏆', 'Daily quests', `${countWord(questRows().length)} small targets that reset at midnight`],
         ['📊', 'Weak sounds', 'the symbols that keep slipping, ranked from your real answers'],
         ['🎓', 'Achievements', 'long-run milestones'],
       ].map(([icon, t, blurb]) => `
@@ -10090,7 +10105,12 @@ function progressMain(el) {
         </div>
         ${r.complete ? '<span class="quest-done" title="Done">✓</span>' : ''}
       </div>`).join('')}
-    <p class="pane-note">Three targets a day. They mark what you have done — nothing is awarded, and nothing is lost by ignoring them.</p>
+    ${/* COUNTED, NOT ASSERTED (audit, 2026-11-09). This said "Three targets
+         a day" and rendered two: the third went with XP on 2026-10-05
+         (js/quests.js:14-16) and the sentence stayed behind. Reading the
+         same array the rows are built from is what stops it drifting
+         again the next time a quest is added or retired. */''}
+    <p class="pane-note">${countWord(rows.length)} target${rows.length === 1 ? '' : 's'} a day. They mark what you have done — nothing is awarded, and nothing is lost by ignoring them.</p>
     <h2 class="chart-h">Weak Sounds</h2>
     ${weak.length ? weak.map(r => `
       <div class="stat-row">
@@ -10113,9 +10133,12 @@ function progressMain(el) {
       <div class="ach-row">
         <span class="ach-icon ${a.level ? '' : 'is-locked'}">${a.icon}</span>
         <div class="ach-info">
-          <span class="ach-name">${a.name} <span class="tag">${a.level ? `Level ${a.level}` : 'Locked'}</span></span>
+          <span class="ach-name">${a.name} <span class="tag">${a.done
+            ? 'Complete' : a.level ? `Level ${a.level}` : 'Locked'}</span></span>
           <div class="quest-bar"><div style="width:${a.pct}%"></div>
-            <span class="quest-count">${a.value}/${a.next} ${a.what}</span></div>
+            <span class="quest-count">${a.done
+              ? `${a.value} ${a.what}`
+              : `${a.value}/${a.next} ${a.what}`}</span></div>
         </div>
       </div>`).join('')}`;
   el.querySelector('#prog-weak-full').addEventListener('click', renderWeakSounds);
