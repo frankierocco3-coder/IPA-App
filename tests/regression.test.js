@@ -3758,6 +3758,18 @@ export async function run({ navDoc = document } = {}) {
         && ['incontrovertible facts', 'says about themselves', 'says about others',
           'What others say about your character', 'What the lists are not']
           .every(h => doc.body.textContent.includes(h)));
+      // AND IT READS AS A SEQUENCE (owner mockup, 2026-11-09). Five readings,
+      // each with the reading number as an eyebrow and the list number in the
+      // heading — they used to share one numeral, so List 1 was headed "2."
+      // The takeaway of each section is a `key` block in final position.
+      check('acting: the Four Lists shows five numbered readings, each with its takeaway',
+        ['First reading', 'Second reading', 'Third reading', 'Fourth reading', 'Fifth reading']
+          .every(e => [...doc.querySelectorAll('.block-eyebrow')]
+            .some(n => n.textContent.trim() === e))
+        && doc.querySelectorAll('.lx-body .guide-key').length >= 5
+        && !!doc.querySelector('.lx-claim'),
+        `${doc.querySelectorAll('.block-eyebrow').length} eyebrows, `
+        + `${doc.querySelectorAll('.lx-body .guide-key').length} key lines`);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       // A chapter with figures: both render with their alt text and

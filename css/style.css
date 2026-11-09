@@ -5538,3 +5538,45 @@ body.page-wide #app { max-width: 1180px; }
   .lesson-top { gap: 10px; padding-left: 14px; padding-right: 14px; }
   .lesson-bar { padding-left: 14px; padding-right: 14px; }
 }
+
+/* ── The lesson reading, restructured (owner mockup, 2026-11-09) ──
+   The body was uniform 17px prose under 13px uppercase labels, so a
+   lesson of five parallel sections read as one undifferentiated column.
+   Three things carry the structure now: the claim, the eyebrow, and a
+   heading that looks like a heading. Scoped to .lx-main so no other
+   surface using .guide-heading moves. */
+
+/* The lesson's own `objective`, as its opening thesis. */
+.lx-claim {
+  font-family: var(--serif); font-size: 25px; line-height: 1.22; font-weight: 700;
+  color: var(--green-dark); margin: 14px 0 18px;
+}
+@media (min-width: 700px) { .lx-claim { font-size: 28px; } }
+
+/* Where you are in a sequence. Sits tight above its heading, and the
+   pair must never be split across a column or page break. */
+.block-eyebrow {
+  font-size: 12.5px; font-weight: 700; letter-spacing: 1.3px; text-transform: uppercase;
+  color: var(--green-dark); margin: 30px 0 1px;
+}
+.block-eyebrow + .guide-heading { margin-top: 0; break-after: avoid; }
+
+.lx-main .lx-body .guide-heading {
+  font-family: var(--serif); font-size: 26px; line-height: 1.18; font-weight: 700;
+  color: var(--green-dark); text-transform: none; letter-spacing: normal;
+  margin: 30px 0 10px;
+}
+.lx-main .lx-body .block-eyebrow + .guide-heading { margin-top: 0; }
+.lx-main .lx-body .guide-text { font-size: 18px; line-height: 1.62; margin-bottom: 14px; }
+/* The takeaway, last in its section. Heavier than the prose it follows,
+   quieter than the heading above it. */
+.lx-main .lx-body .guide-key {
+  font-size: 18px; line-height: 1.55; font-weight: 600;
+  margin: 14px 0 6px; padding: 2px 0 2px 16px;
+  border-left: 3px solid var(--accent-tint);
+}
+@media (max-width: 560px) {
+  .lx-claim { font-size: 22px; }
+  .lx-main .lx-body .guide-heading { font-size: 22px; margin-top: 24px; }
+  .block-eyebrow { margin-top: 24px; }
+}

@@ -5775,7 +5775,8 @@ function blockHtml(b, opts) {
     // A section heading in the study layout carries the owner's leaf
     // spray beside it, as his rendering sets one next to "How this
     // course uses them". Other surfaces get the plain heading.
-    b.h ? `<h2 class="guide-heading">${esc(b.h)}${opts?.sprig ? SPRIG('is-beside') : ''}</h2>`
+    b.h ? `${b.eyebrow ? `<p class="block-eyebrow">${esc(b.eyebrow)}</p>` : ''}
+        <h2 class="guide-heading">${esc(b.h)}${opts?.sprig ? SPRIG('is-beside') : ''}</h2>`
     : b.p ? `<p class="guide-text">${esc(b.p)}</p>`
     : b.list ? `<ul class="th-list">${b.list.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`
     // ── EIGHT BLOCKS FROM THE 2026-11-03 HANDOFF ──────────────
@@ -6398,6 +6399,12 @@ function renderActingLesson(id) {
           ${picker}
           <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
           ${l.orientation ? `<p class="lx-lead">${esc(l.orientation)}</p>` : ''}
+          ${/* THE CLAIM (owner mockup, 2026-11-09). `objective` is the one
+               sentence saying what this lesson is FOR, it is authored on
+               every record, and this page never rendered it — it only ever
+               appeared on the shelf. Opening the reading on the thesis is
+               the whole point of his rendering, and it costs no new copy. */''}
+          ${l.objective ? `<p class="lx-claim">${esc(l.objective)}</p>` : ''}
           ${inMod.length > 1 ? `
           <div class="lx-prog">
             <div class="lm-bar" role="img"
@@ -12108,28 +12115,47 @@ function renderProvidedScene(id) {
 // lesson states why the work exists and then carries the whole thing, the
 // page is the lists themselves. It was HTML inside one render function
 // until now, which is why it could only ever appear in one place.
+// The framing, and then the readings. The middle sentence of the original
+// three WAS the first reading — "The first reading is just reading" — but
+// it sat in a run of five unbroken paragraphs, so the one reading that has
+// no list attached to it was the only one without a heading. It is a
+// section below, like the four that follow it, and the sequence is whole.
 const FOUR_LISTS_INTRO = [
   'You read the whole play five times. Not the scene, the play. A character is built from everything the text knows about them, and most of that sits outside the pages you happen to be in.',
-  'The first reading is just reading. No pen, no marking, no decisions. You are finding out what happens. Every choice you make before you know the story is a choice made in the dark, and you will defend it later out of pride rather than sense.',
   'Each reading after that has exactly one job. One list at a time, because the four are genuinely different kinds of evidence, and mixing them is how an assumption ends up filed as a fact.',
 ];
+// ── STRUCTURE, NOT REWRITING (owner mockup, 2026-11-09) ──────
+// Every sentence below is the owner's, unchanged. What moved is the shape:
+//
+// 1. THE NUMBER COLLIDED WITH ITSELF. These were headed "2." to "5." —
+//    numbered by READING — so the first list was headed 2 and the fourth
+//    was headed 5. A learner counting lists and a learner counting
+//    readings read the same digit as two different things. The reading
+//    number is the eyebrow now and the list number is the heading, so both
+//    are stated and neither has to carry the other's meaning.
+// 2. THE TAKEAWAY MOVED LAST. Each section already ended on the sentence
+//    worth remembering — "that gap is often the part worth playing" — but
+//    it sat mid-paragraph where it reads as an aside. As a `key` block in
+//    final position it lands. The block type already existed.
+//
+// Nothing is added and nothing is cut: every `ps` string here is the
+// original, split at a sentence boundary where the takeaway was lifted.
 const FOUR_LISTS_SECTIONS = [
-  { h: '2. The incontrovertible facts about your character', ps: [
+  { eyebrow: 'First reading', h: 'Just read', ps: [
+    'The first reading is just reading. No pen, no marking, no decisions. You are finding out what happens.',
+  ], key: 'Every choice you make before you know the story is a choice made in the dark, and you will defend it later out of pride rather than sense.' },
+  { eyebrow: 'Second reading', h: 'List 1 · The incontrovertible facts about your character', ps: [
     'Only what the text states outright. Age, job, where they live, who they are related to, what they did. Not what you infer, not what you would like to be true: what could be read aloud in court without argument.',
-    'This list is usually shorter than actors expect, and that is the point. Everything not on it is interpretation, and knowing which is which is what lets you change your mind later without losing your footing.',
-  ] },
-  { h: '3. What your character says about themselves', ps: [
+  ], key: 'This list is usually shorter than actors expect, and that is the point. Everything not on it is interpretation, and knowing which is which is what lets you change your mind later without losing your footing.' },
+  { eyebrow: 'Third reading', h: 'List 2 · What your character says about themselves', ps: [
     'Their own account of who they are. Write it down whether or not you believe it. A character lying about themselves is telling you something exact, about what they need other people to think, and about what they cannot afford to say.',
-    'Watch for the gap between this list and the first one. That gap is often the part worth playing.',
-  ] },
-  { h: '4. What your character says about others', ps: [
+  ], key: 'Watch for the gap between this list and the first one. That gap is often the part worth playing.' },
+  { eyebrow: 'Fourth reading', h: 'List 3 · What your character says about others', ps: [
     'How they describe everyone else. What they notice first, what they never mention, whether the description changes depending on who is listening.',
-    'People reveal themselves most carelessly when they are talking about someone else. This list is frequently the richest of the four.',
-  ] },
-  { h: '5. What others say about your character', ps: [
+  ], key: 'People reveal themselves most carelessly when they are talking about someone else. This list is frequently the richest of the four.' },
+  { eyebrow: 'Fifth reading', h: 'List 4 · What others say about your character', ps: [
     'Everything said about you, to your face and behind your back. Again: record it, do not yet settle whether it is fair. Who says it matters as much as what is said.',
-    'When the last list contradicts the second, you have found the argument the play is actually having about this person.',
-  ] },
+  ], key: 'When the last list contradicts the second, you have found the argument the play is actually having about this person.' },
   { h: 'What the lists are not', ps: [
     'They are not a character biography, and finishing them does not finish the work. They are evidence, gathered before interpretation, so that the choices you make later are made against the text rather than against your first impression of it.',
   ] },
@@ -12137,8 +12163,10 @@ const FOUR_LISTS_SECTIONS = [
 const fourListsHtml = () => `
   ${FOUR_LISTS_INTRO.map(p => `<p class="guide-text">${esc(p)}</p>`).join('')}
   ${FOUR_LISTS_SECTIONS.map(s => `
+    ${s.eyebrow ? `<p class="block-eyebrow">${esc(s.eyebrow)}</p>` : ''}
     <h2 class="guide-heading">${esc(s.h)}</h2>
-    ${s.ps.map(p => `<p class="guide-text">${esc(p)}</p>`).join('')}`).join('')}`;
+    ${s.ps.map(p => `<p class="guide-text">${esc(p)}</p>`).join('')}
+    ${s.key ? `<p class="guide-key">${esc(s.key)}</p>` : ''}`).join('')}`;
 
 function renderFourListsLesson() {
   record(renderFourListsLesson);
