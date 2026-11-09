@@ -6262,22 +6262,31 @@ function renderActingLesson(id) {
     // on, which says nothing about where you are.
     const modAt = atMod >= 0 ? atMod + 1 : 0;
     const modPct = inMod.length ? Math.round(modAt / inMod.length * 100) : 0;
-    // The hero and the notes thumbnail are the MODULE's card art. There
-    // is no per-lesson art in this repo and inventing a slot for one
-    // would render nothing; this is the picture the learner just came
-    // from, which is also the honest answer to "where am I".
-    const art = m ? learnScene(B.ws)?.moduleCard?.[m.id] ?? null : null;
-    // THE LESSON'S OWN HERO IF IT HAS ONE, else the module's card art.
-    // A lesson that has been illustrated gets its picture; one that has
-    // not falls back to the painting the learner just came from, which
-    // is still a true answer to "where am I" rather than a blank.
-    const hero = (l.hero && characterFigure(l.hero)) || art;
-    const thumb = (l.thumb && characterFigure(l.thumb)) || art;
+    // NO DEFAULT PICTURE ON A LESSON PAGE (owner order, 2026-11-09).
+    // This used to fall back to the MODULE's card art, so opening The
+    // Four Lists or Where Behavior Comes From put the shelf's painting at
+    // the top of the reading — the same image on every lesson in the
+    // module, carrying no information about the lesson you opened.
+    //
+    // Art appears where the owner asks for it and nowhere else: a lesson
+    // with its own `hero` or `thumb` gets that, and one without gets
+    // none. Both render sites are already guarded, so an absent picture
+    // draws nothing rather than a gap.
+    const hero = l.hero ? characterFigure(l.hero) : null;
+    const thumb = l.thumb ? characterFigure(l.thumb) : null;
     // THE OPENING PARAGRAPH MOVES BESIDE THE HERO (owner's rendering).
     // It is lifted, not copied: the body renderer is told to skip it so
     // it cannot appear twice. Only a leading { p } qualifies — a lesson
     // that opens on a heading or a figure keeps its body intact.
-    const lead = l.body?.[0]?.p && Object.keys(l.body[0]).length === 1
+    //
+    // AND IT IS ONLY LIFTED WHEN THERE IS A PICTURE TO SIT BESIDE. .lx-open
+    // is a two-column grid (css/style.css:4289-4292): hero on the left at
+    // 1.65fr, this paragraph on the right at 1fr. With the hero gone the
+    // paragraph took the WIDE column and left the narrow one empty — one
+    // orphaned paragraph, a column of dead space, and the rest of the
+    // chapter starting below it. Unlifted, the body simply opens with its
+    // own first paragraph and reads as one column, which is the point.
+    const lead = hero && l.body?.[0]?.p && Object.keys(l.body[0]).length === 1
       ? l.body[0].p : null;
     // ── THE PAIR AT THE FOOT (owner's rendering, 2026-11-02) ────────
     // His page ends on two boxes side by side: Try it on the left and
@@ -6396,13 +6405,14 @@ function renderActingLesson(id) {
               <i style="width:${modPct}%"></i></div>
             <p class="lx-prog-t">${modAt} of ${inMod.length} lessons</p>
           </div>` : ''}
+          ${hero || lead ? `
           <div class="lx-open">
             ${hero ? `
             <figure class="lx-hero">
               <img src="${esc(hero.src)}" alt="${esc(hero.alt)}" loading="lazy" decoding="async">
             </figure>` : ''}
             ${lead ? `<p class="guide-text lx-open-p">${esc(lead)}</p>` : ''}
-          </div>
+          </div>` : ''}
           <section class="sp-chapter lx-body" aria-label="The chapter">
             ${actingChapterBlocks(l, { skipFirst: !!lead, dropLast: !!tailPanel, sprig: true })}
             ${extras}
