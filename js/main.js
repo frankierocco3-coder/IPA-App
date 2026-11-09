@@ -7750,7 +7750,15 @@ function actorStudioPane(el) {
         <button class="btn btn-primary sec-card-go" id="ac-practice" type="button">Practice this text \u2192</button>
         <div class="sec-card-more">
           ${ref?.source === 'studio' ? '<button class="btn-lite" id="ac-open" type="button">Open project</button>' : ''}
-          <button class="btn-lite" id="ac-scene" type="button">Continue scene study</button>
+          ${/* GATED, which it never was (audit, 2026-11-09). Scene Study is
+               withdrawn behind SCENE_STUDY_LIVE and the Practice page has
+               honoured that since it was withdrawn (js/main.js:7299), but
+               this button opened it regardless. I carried it forward
+               unguarded in the 2026-11-09 rebuild while being careful not
+               to drop the action; keeping the action and hiding the door
+               are different things, and this is the door. */''}
+          ${SCENE_STUDY_LIVE ? `
+          <button class="btn-lite" id="ac-scene" type="button">Continue scene study</button>` : ''}
           <button class="btn-lite" id="ac-change" type="button">Change text</button>
         </div>
       </section>`
@@ -11571,15 +11579,27 @@ function studioMain(el) {
   if (activeWorkspace() === 'shakespeare') return shakespeareStudioPane(el);
   if (activeWorkspace() === 'rhetoric') return rhetoricStudioPane(el);
   const inSpeech = activeWorkspace() === 'speech';
+  // THE PERSONAL DICTIONARY IS ACCENT WORK (audit, 2026-11-09). The comment
+  // above says exactly that, and it is why Shakespeare was given a pane of
+  // its own — but Commedia, Theatre History, Musical Theatre and Screen
+  // Acting have no branch and fall through to here, so all four offered a
+  // Personal Dictionary of IPA transcription corrections inside a course
+  // that teaches no IPA.
+  //
+  // Gated on "is this a book course" rather than listed by name, so the
+  // next course added cannot inherit the same card by forgetting a branch —
+  // which is how these four got it. Every other card here is a TEXT, and a
+  // text surface is defensible in any of them.
+  const B = BOOKS[activeWorkspace()] ?? null;
   // Playable Actions is acting work — it shelves in the Acting Library
   // now, not in the IPA and Accents Studio (owner order, 2026-08-20).
   const cards = [
     { icon: '📜', img: 'img/ui/scripts.png', title: 'Scripts & Speeches', go: renderTextsPage },
     { icon: '🎭', img: 'img/ui/scenes.png', title: 'Scenes', go: renderScenesShelf },
     { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
-    { icon: '📕', img: 'img/ui/dictionary.png', title: 'Personal Dictionary', go: renderDictionary },
+    ...(B ? [] : [{ icon: '📕', img: 'img/ui/dictionary.png', title: 'Personal Dictionary', go: renderDictionary }]),
   ];
-  el.innerHTML = `<h1 class="page-h">Studio</h1>`
+  el.innerHTML = `<h1 class="page-h">${esc(B ? `${B.title} Studio` : 'Studio')}</h1>`
     + (inSpeech ? workingTextCardHtml(workingText()) : '')
     + cards.map((c, i) => `
     <button class="track-card hub-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
