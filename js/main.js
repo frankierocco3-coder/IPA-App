@@ -1823,11 +1823,24 @@ function speechLibraryPane(el) {
   const cards = [
     { key: 'textbook', tone: 'is-sage', emoji: '📗', title: 'Speechcraft Textbook',
       count: textbookOrder().length, unit: 'chapter',
-      keywords: 'principles instrument meaning presence chapters parts',
+      // A SHELF CARRIES ITS OWN CHAPTER TITLES — the Acting Library fix
+      // (js/main.js:6516-6522). BOTH names go in, because a chapter has
+      // two: renderTextbook and the module rows show chapterTitle(), and
+      // renderSpeechCollection shows the record's own title, so a reader
+      // may have met either one.
+      keywords: [textbookOrder().map(id => chapterTitle(id)).join(' '),
+        textbookOrder().map(id => speechLessonById(id)?.title ?? '').join(' '),
+        'principles instrument meaning presence chapters parts'].join(' '),
       go: renderTextbook },
     { key: 'texts', tone: 'is-terracotta', emoji: '📜', title: 'Scripts & Speeches',
       count: SONNETS.length + Object.values(LIBRARIES).reduce((n, l) => n + l.data.length, 0),
-      unit: 'text', keywords: 'sonnets scenes monologues speeches shakespeare',
+      // A REFERENCE SHELF CARRIES ITS ENTRY NAMES. The entries here are
+      // the collections textSpeechPane() lists, so the five monologue
+      // libraries come from their own `title` field. 'oneill' is spelled
+      // out because that title uses a curly apostrophe (O’Neill) and a
+      // learner types a straight one — or none.
+      unit: 'text', keywords: [Object.values(LIBRARIES).map(l => l.title).join(' '),
+        'oneill sonnets scenes monologues speeches shakespeare dictionary lexicon custom work'].join(' '),
       go: renderTextsPage },
     { key: 'rhetoric', tone: 'is-gold', emoji: '🏛', img: 'img/ui/rhetoric.png', title: 'Rhetoric & Oratory',
       count: 3, unit: 'dialogue', keywords: 'plato gorgias phaedrus republic jowett persuasion',
@@ -1836,7 +1849,15 @@ function speechLibraryPane(el) {
     // label on an unfinished thing, but not a top-level shelf.
     { key: 'ipa', tone: 'is-blue', emoji: 'ʃə', title: 'IPA, Sound & Dialect Reference',
       count: 4, unit: 'reference',
-      keywords: 'ipa chart instrument dialects in speech accent',
+      // The four doors behind this card are standalone PAGES in no lesson
+      // list — exactly the trap the Acting Library comment records. Their
+      // names stay hand-written because there is no record to read them
+      // off: 'What Is IPA?' and 'Your Instrument' both returned nothing
+      // before this line, while 'ipa chart' and 'dialects in speech'
+      // already worked.
+      keywords: 'ipa chart instrument dialects in speech accent what is ipa '
+        + 'your instrument vocal tract symbol symbols sound sounds vowel '
+        + 'consonant diphthong phoneme alphabet',
       go: renderSpeechIpaReference },
   ];
   workspaceLibrary(el, { workspace: 'Speech', cards, state: libState.speech });
@@ -3659,20 +3680,38 @@ const TILE_TONES = ['is-sage', 'is-terracotta', 'is-blue', 'is-lavender', 'is-go
 // does, so the click handler below needed no change at all.
 function workspaceLibrary(el, { workspace, subject, cards, state, panels, subtitle, resume }) {
   const q = (state.query ?? '').trim().toLowerCase();
-  // THE DESCRIPTION IS SEARCHABLE TOO. The panel layout is the first to put
-  // a sentence on the page beside each title, and a reader who can see
-  // "given circumstances" has every right to expect searching it to work.
-  const match = c => !q
-    || c.title.toLowerCase().includes(q)
-    || (c.desc ?? '').toLowerCase().includes(q)
-    || (c.keywords ?? '').toLowerCase().includes(q);
-  const shown = cards.filter(match);
-
   // Plural by appending 's' was fine while every unit was chapter, scene,
   // monologue and drill. "fallacy" broke it into "fallacys" the day Rhetoric
   // reached the Library, so the -y case is handled rather than the unit being
   // bent to fit the pluraliser.
+  // DECLARED HERE, ABOVE THE MATCHER, because the matcher now calls it. Left
+  // below, `plural` is in its temporal dead zone when `cards.filter(match)`
+  // runs, and that is a ReferenceError rather than a quiet fallback.
   const plural = u => u.endsWith('y') && !/[aeiou]y$/.test(u) ? `${u.slice(0, -1)}ies` : `${u}s`;
+  // A SINGULAR QUERY HAS TO REACH A PLURAL TITLE. The test below is a plain
+  // substring, so "fallacy" found nothing at all while two shelves of the
+  // Rhetoric Library are titled Fallacies and the page prints "13 fallacies"
+  // under one of them. ONE alternate form, built with the same pluraliser
+  // the counts use, plus its inverse: no stemmer, no fuzziness, and nothing
+  // that shortens a word by more than its plural ending. Under four letters
+  // it is skipped, because the forms are matched as SUBSTRINGS and a stem
+  // that short reaches half the shelf; a query ending in 'ss' keeps it,
+  // because 'ss' is never a plural, so "press" must not become "pres". The
+  // -es plurals are deliberately NOT bridged: stripping those turns "canes"
+  // into "can", which is the loose matching this is trying to avoid.
+  const forms = q.length < 4 ? [q]
+    : q.endsWith('ies') ? [q, `${q.slice(0, -3)}y`]
+    : q.endsWith('s') && !q.endsWith('ss') ? [q, q.slice(0, -1)]
+    : [q, plural(q)];
+  // THE DESCRIPTION IS SEARCHABLE TOO. The panel layout is the first to put
+  // a sentence on the page beside each title, and a reader who can see
+  // "given circumstances" has every right to expect searching it to work.
+  const match = c => !q || forms.some(f =>
+    c.title.toLowerCase().includes(f)
+    || (c.desc ?? '').toLowerCase().includes(f)
+    || (c.keywords ?? '').toLowerCase().includes(f));
+  const shown = cards.filter(match);
+
   const countLabel = c => c.count == null ? ''
     : `${c.count} ${c.count === 1 ? c.unit : plural(c.unit)}`;
 
@@ -8868,6 +8907,19 @@ function characterLibraryPane(el) { return bookLibraryPane(el, BOOKS.character);
 // Everything you READ in this course is now in one place, which is what a
 // library is for. It uses the Acting Library's searchable card pane rather
 // than the plain book pane, because four shelves want a search box.
+//
+// EVERY CARD CARRIES WHAT IS ON IT, which is what makes the search work.
+// Shelf cards built from the module blurb alone left 31 of the 36 chapter
+// titles returning nothing — "Ethos, Pathos, Logos", "The Five Canons" and
+// "Metaphor Is an Argument" among them — so each reading shelf carries its
+// own lessons' titles, exactly as the Acting Library has since 2026-09-25
+// (see the comment at the top of actingLibraryPane for what that fixed).
+// The reference shelves hold ENTRIES rather than lessons, so they carry
+// their entries' `term`, which is the same idea one level down: a reader
+// hunting "besiege wei" or "the relative made absolute" is hunting the
+// entry, not the shelf, and should not have to guess the shelf first.
+// The hand-written strings stay — they are the words a reader uses that
+// the data never says: "schopenhauer", "dirty", "modern families".
 function rhetoricLibraryPane(el) {
   // ARISTOTLE'S OWN SPLIT (owner decision 2026-10-12). The references
   // used to sit under one heading, and four of the five were not about
@@ -8880,6 +8932,8 @@ function rhetoricLibraryPane(el) {
   // families make: a distinction beats a longer list.
   const G1 = 'The reading', G2 = 'Speaking', G3 = 'Arguing';
   const written = RHETORIC_COLLECTIONS.length;
+  // Entry terms, then the hand-written words the data never says.
+  const termsOf = (rows, extra) => [rows.map(r => r.term).join(' '), extra].join(' ');
   const cards = [
     // First, and before the course: the condition on using any of it. This
     // is the permanent door to the overlay shown once on a first visit.
@@ -8890,7 +8944,9 @@ function rhetoricLibraryPane(el) {
     ...RHETORIC_COLLECTIONS.map(c => ({
       key: `col:${c.id}`, tone: 'is-sage', emoji: c.icon, title: c.title,
       group: G1, count: c.lessons.length, unit: 'chapter',
-      keywords: `${c.note} rhetoric course lesson`,
+      // Its own chapter titles first: see the note above this function.
+      keywords: [c.lessons.map(lid => bookLessonById(BOOKS.rhetoric, lid)?.title ?? '').join(' '),
+        c.note, 'rhetoric course lesson'].join(' '),
       // renderActingCollection is the SHARED collection renderer despite the
       // name; it resolves the book through bookOfCollection, which has known
       // about Rhetoric since the workspace was added.
@@ -8898,38 +8954,38 @@ function rhetoricLibraryPane(el) {
     })),
     { key: 'col:rh-figures', tone: 'is-terracotta', emoji: '⚖️', title: 'The Shapes of Argument',
       group: G2, count: RHETORIC.length, unit: 'figure',
-      keywords: 'antithesis anaphora chiasmus tricolon device shape of thought repetition',
+      keywords: termsOf(RHETORIC, 'antithesis anaphora chiasmus tricolon device shape of thought repetition'),
       go: renderRhetoricShelf },
     // Leads the Arguing group on purpose: the honest method before the
     // four shelves of things going wrong.
     { key: 'col:rh-socratic', tone: 'is-sage', emoji: '🏺', title: 'The Socratic Method',
       group: G3, count: SOCRATIC_STEPS.length, unit: 'move',
-      keywords: 'socrates plato elenchus dialectic definition question aporia euthyphro meno '
-        + 'cross-examination honest argument',
+      keywords: termsOf(SOCRATIC_STEPS, 'socrates plato elenchus dialectic definition question aporia '
+        + 'euthyphro meno cross-examination honest argument'),
       go: renderSocraticShelf },
     { key: 'col:rh-thirteen', tone: 'is-lavender', emoji: '🧩', title: 'The 13 Fallacies',
       group: G3, count: FALLACIES.length, unit: 'fallacy',
-      keywords: 'aristotle sophistical refutations equivocation amphiboly accident consequent classical',
+      keywords: termsOf(FALLACIES, 'aristotle sophistical refutations equivocation amphiboly accident consequent classical'),
       go: renderFallacyShelf },
     { key: 'col:rh-all', tone: 'is-gold', emoji: '🧭', title: 'All Fallacies',
       group: G3, count: MODERN_FALLACIES.length, unit: 'fallacy',
-      keywords: 'straw man red herring ad hominem whataboutism cherry picking slippery slope modern families',
+      keywords: termsOf(MODERN_FALLACIES, 'straw man red herring ad hominem whataboutism cherry picking slippery slope modern families'),
       go: renderFamilyShelf },
     // Not a fourth fallacy shelf: these are tactics rather than errors,
     // which is why the keywords lead on what somebody DOES rather than on
     // what they got wrong.
     { key: 'col:rh-stratagems', tone: 'is-blue', emoji: '🗡', title: 'The Art of Controversy',
       group: G3, count: STRATAGEMS.length, unit: 'stratagem',
-      keywords: 'schopenhauer art of controversy trick tactic dirty winning argument bad faith '
-        + 'extension homonymy diversion ad personam ad verecundiam retorsio turning the tables',
+      keywords: termsOf(STRATAGEMS, 'schopenhauer art of controversy stratagem trick tactic dirty winning '
+        + 'argument bad faith diversion ad personam ad verecundiam retorsio turning the tables'),
       go: renderStratagemShelf },
     // The second tactics shelf, and the one that is not about argument at
     // all. Owner decision 2026-10-12 to file it here rather than beside
     // Playable Actions, which is where its contents point.
     { key: 'col:rh-thirtysix', tone: 'is-sage', emoji: '☯', title: 'The Thirty-Six Stratagems',
       group: G3, count: THIRTY_SIX.length, unit: 'stratagem',
-      keywords: 'chinese military deception borrowed knife empty fort besiege wei tiger mountain '
-        + 'burning house smile knife cicada shell retreat sun tzu strategy tactic',
+      keywords: termsOf(THIRTY_SIX, 'chinese military deception borrowed knife empty fort besiege wei '
+        + 'tiger mountain burning house smile knife cicada shell retreat sun tzu strategy tactic'),
       go: renderThirtySixShelf },
   ];
   workspaceLibrary(el, { workspace: 'Rhetoric', cards, state: libState.rhetoric });
@@ -8943,6 +8999,28 @@ function rhetoricLibraryPane(el) {
 function shakespeareLibraryPane(el) {
   const B = BOOKS.shakespeare;
   const G1 = 'The reading', G2 = 'The references';
+  // SEARCH KEYWORDS ARE THE SHELF'S OWN LESSON TITLES, the Acting Library's
+  // pattern — see the comment above its EXTRA_KEYWORDS. A shelf carrying
+  // only its module blurb is findable by almost nothing a learner types: 36
+  // of this course's 37 lesson titles returned zero results here, 'Caesura',
+  // 'Enjambment and End-Stopping', 'What a Soliloquy Is', 'Quartos and the
+  // Folio' and 'Stage Directions' among them. The one that matched,
+  // 'Why He Moves Between Them', matched by accident: it is a clause of the
+  // Verse and Prose blurb.
+  //
+  // EXTRA_KEYWORDS carries craft vocabulary the titles do not spell out, and
+  // 'scansion' is the case that proves it is needed. The metre module teaches
+  // it end to end and no lesson is TITLED with the word, so harvesting titles
+  // alone still leaves it returning nothing. Keyed by module id, like the
+  // collections are.
+  const EXTRA_KEYWORDS = {
+    metre: 'scansion scanning stress stressed unstressed foot feet trochee '
+      + 'trochaic spondee pyrrhic syllable',
+    folio: 'capitalisation capitalization lineation printing house compositor '
+      + 'edition editions',
+    soliloquy: 'aside direct address fourth wall',
+    language: 'archaic paraphrase translate modernise modernize',
+  };
   const cards = [
     ...B.collections.map(c => {
       const m = B.modules.find(x => x.id === c.id) ?? { id: c.id, title: c.title };
@@ -8952,7 +9030,9 @@ function shakespeareLibraryPane(el) {
         // because 160 entries is the fact a reader wants before opening it.
         key: `col:${c.id}`, tone: 'is-terracotta', emoji: c.icon, img: c.img,
         title: moduleTitle(B, m), group: G1,
-        keywords: `${m.blurb ?? ''} shakespeare chapter lesson`,
+        keywords: [c.lessons.map(lid => bookLessonById(B, lid)?.title ?? '').join(' '),
+          EXTRA_KEYWORDS[c.id] ?? '', m.blurb ?? '', 'shakespeare chapter lesson']
+          .join(' ').trim(),
         go: () => renderActingCollection(c.id),
       };
     }),
@@ -8986,7 +9066,16 @@ function shakespeareLibraryPane(el) {
       img: 'img/ui/shakespeare-dictionary.png',
       title: 'The Shakespeare Dictionary',
       group: G2, count: SHAKESPEARE_LEXICON.length, unit: 'entry',
-      keywords: 'lexicon vocabulary false friends obsolete elision grammar words meaning glossary',
+      // A REFERENCE SHELF HOLDS ENTRIES, NOT LESSONS, so its keywords are the
+      // entries' own `term` field — the word as it appears in the text. 272 of
+      // the 277 terms returned zero results in this Library before this line,
+      // and the five that matched ('let', 'wit', 'tell', 'ere', 'ay') matched
+      // as substrings of a module blurb rather than as words. An actor who
+      // stops dead at 'presently' or 'asinego' can now find the shelf that
+      // explains it. Built once per pane render, beside the count already
+      // read off the same array on the line above.
+      keywords: `${SHAKESPEARE_LEXICON.map(e => e.term).join(' ')} `
+        + 'lexicon vocabulary false friends obsolete elision grammar words meaning glossary',
       go: renderShakespeareLexicon },
   ].filter(c => c.live !== false);
   workspaceLibrary(el, { workspace: 'Shakespeare', subject: 'Shakespeare',
@@ -9539,7 +9628,14 @@ function libraryMain(el, course, ws = activeWorkspace()) {
   const d = course.id === 'core' ? null : course.id;
   const cards = (d ? [
     { key: 'ipa', tone: 'is-lavender', emoji: '📖', img: 'img/ui/ipa.png', title: 'IPA for This Accent',
-      keywords: 'phoneme chart transcription',
+      // A REFERENCE SHELF CARRIES ITS ENTRY TERMS. The entries are this
+      // accent's inventory — the SAME phonemesForAccent(d) list
+      // hubHandbook() renders (js/main.js:10499) — each symbol with its
+      // PHONEMES name, so 'ʃ', 'schwa' and 'KIT vowel' all reach it. The
+      // category words are spelled out because no PHONEMES name contains
+      // 'consonant'.
+      keywords: [phonemesForAccent(d).map(s => `${s} ${PHONEMES[s]?.name ?? ''}`).join(' '),
+        'phoneme chart transcription inventory sound symbol vowel consonant diphthong'].join(' '),
       go: () => renderInventory(d) },
     { key: 'words', tone: 'is-terracotta', emoji: '🗣', img: 'img/ui/words.png', title: 'Words & Expressions',
       count: idiomFor(d).length, unit: 'expression',
@@ -9565,14 +9661,26 @@ function libraryMain(el, course, ws = activeWorkspace()) {
     { key: 'what', tone: 'is-sage', emoji: 'ʃə', title: 'What Is IPA?',
       keywords: 'alphabet sounds introduction', go: renderChart },
     { key: 'chart', tone: 'is-blue', emoji: '📖', img: 'img/ui/ipa.png', title: 'IPA Chart',
-      keywords: 'phoneme consonant vowel', go: renderChart },
+      // renderChart() (js/views/reference.js:290) renders every
+      // Object.entries(PHONEMES) entry, so the chart's entry terms are
+      // every symbol and every `name` — not the course inventory, which
+      // is the card in the branch above.
+      keywords: [Object.entries(PHONEMES).map(([s, p]) => `${s} ${p.name}`).join(' '),
+        'phoneme symbol sound inventory vowel consonant diphthong'].join(' '),
+      go: renderChart },
     // The Voice & Speech workspace is the instrument's home (owner order,
     // 2026-09-03): the seven Speaking Instrument chapters shelve here as
     // Shared cards over the ONE set of speech records — linked, never
     // copied. Bodies show under the owner-approved badge policy.
     { key: 'speaking-instrument', tone: 'is-sage', emoji: '🫁', title: 'Your Speaking Instrument',
       badge: { cls: '', label: 'Shared' },
-      keywords: 'anatomy breath larynx vocal folds jaw tongue articulation vocal health tension',
+      // THE ONE LESSON SHELF ON THIS LIBRARY. renderInstrumentCollection()
+      // walks speechLessonsFor('foundation'), so the keywords read the
+      // same list and cannot drift from the page. Both names again: the
+      // page shows chapterTitle(), the record carries its own title.
+      keywords: [speechLessonsFor('foundation').map(l => chapterTitle(l.id)).join(' '),
+        speechLessonsFor('foundation').map(l => l.title).join(' '),
+        'anatomy breath larynx vocal folds jaw tongue articulation vocal health tension'].join(' '),
       go: renderInstrumentCollection },
     { key: 'instrument', tone: 'is-terracotta', emoji: '🎭', img: 'img/ui/instrument.png', title: 'Your Instrument',
       keywords: 'vocal tract anatomy diagram body diaphragm folds resonance tension', go: renderInstrument },

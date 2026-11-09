@@ -3118,7 +3118,7 @@ export async function run({ navDoc = document } = {}) {
       (() => {
         const sf = doc.getElementById('lib-search');
         if (!sf) return;
-        sf.value = 'alphabet';
+        sf.value = 'no-such-topic';
         sf.dispatchEvent(new (frame.contentWindow.Event)('input', { bubbles: true }));
       })();
       await sleep(300);
