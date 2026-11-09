@@ -6794,20 +6794,7 @@ function renderActingCollection(collectionId, entryId = null) {
        ${entries.map((e, i) => itemTileHtml({
          ...e, seq: String(i + 1).padStart(2, '0'),
        })).join('')}
-     </div>
-     ${collectionId === 'scene' ? `
-       <h2 class="sec-h">Acting Glossary</h2>
-       <p class="pane-note">${Object.keys(ACTING_GLOSSARY).length} terms used across the acting chapters.</p>
-       <dl class="anat-list sp-terms" id="ac-glossary-inline"></dl>` : ''}`);
-  if (collectionId === 'scene') {
-    const gl = app.querySelector('#ac-glossary-inline');
-    for (const t of Object.values(ACTING_GLOSSARY)) {
-      const row = document.createElement('div');
-      const dt = document.createElement('dt'); dt.textContent = t.term;
-      const dd = document.createElement('dd'); dd.textContent = t.def;
-      row.append(dt, dd); gl.appendChild(row);
-    }
-  }
+     </div>`);
   // Lines & Memory is a standalone page, not a lesson record, so it is
   // routed here rather than through the chapter opener.
   //
