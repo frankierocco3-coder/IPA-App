@@ -127,7 +127,7 @@
  * blank-screen trap above. 'no-cache' is a conditional request: an
  * unchanged file costs a 304, not a download.
  */
-const VERSION = 'sc-v101';                    // 2026-11-06: the accent courses split into three stages and js/state.js gained the CHK_V3 migration. A cached state.js would never run it, so the checkpoint carry-over would silently not happen
+const VERSION = 'sc-v102';                    // 2026-11-09: the Acting Glossary comes off the Script Analysis page. js/main.js is staleWhileRevalidate, so an installed copy would keep drawing it
 // FROZEN ON PURPOSE. Not a stale constant — see the long note above. It
 // holds the value the shared scheme last used so that splitting the two
 // caches evicts nobody, and it moves ONLY when a media file is replaced at
