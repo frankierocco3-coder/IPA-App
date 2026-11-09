@@ -9284,6 +9284,22 @@ function rhetoricProgressPane(el) {
   return bookProgressPane(el, BOOKS.rhetoric, 'Rhetoric Progress',
     'What you have studied. Nothing here is scored: whether an argument persuaded somebody is not a thing this app can see.');
 }
+function commediaProgressPane(el) {
+  return bookProgressPane(el, BOOKS.commedia, 'Commedia Progress',
+    'What you have studied. Nothing here is scored: a mask is played well or badly in a room, which is not something a browser can mark.');
+}
+function theatreProgressPane(el) {
+  return bookProgressPane(el, BOOKS.theatre, 'Theatre History Progress',
+    'What you have read. Nothing here is scored: this is history, and knowing it is not a thing with a percentage.');
+}
+function musicalProgressPane(el) {
+  return bookProgressPane(el, BOOKS.musical, 'Musical Theatre Progress',
+    'What you have studied. Nothing here is scored: a song lands or it does not, and that is a judgement made in performance.');
+}
+function screenProgressPane(el) {
+  return bookProgressPane(el, BOOKS.screen, 'Screen Acting Progress',
+    'What you have studied. Nothing here is scored: the exercises in this course are filmed and watched back, never marked.');
+}
 // Parameterised 2026-09-25 alongside the Library pane, same reason.
 function bookProgressPane(el, B, heading, blurb) {
   const avail = pathLessons(B).filter(B.visible);
@@ -10001,6 +10017,22 @@ function progressMain(el) {
   // Same defect learnMain had when this workspace was added: a new course
   // has to be routed at every section, not just the obvious ones.
   if (activeWorkspace() === 'rhetoric') return rhetoricProgressPane(el);
+  // AND THE SAME DEFECT, FOUR MORE TIMES (audit, 2026-11-09). Commedia,
+  // Theatre History, Musical Theatre and Screen Acting all fell through to
+  // the accent pane, exactly as Rhetoric did. A learner who had read three
+  // Theatre History chapters was shown Daily Quests ("Score 100% in a
+  // lesson"), a Weak Sounds panel for IPA symbols from a course they are
+  // not in, and a locked Scholar badge — or, before anything was earned,
+  // "Complete your first lesson to activate Progress" however many
+  // chapters they had actually read.
+  //
+  // bookProgressPane is already generic and already reads speechLessonDone,
+  // so these are four lines and one honest sentence each. The blurb says
+  // what this course does NOT measure, which is the point of the pane.
+  if (activeWorkspace() === 'commedia') return commediaProgressPane(el);
+  if (activeWorkspace() === 'theatre') return theatreProgressPane(el);
+  if (activeWorkspace() === 'musical') return musicalProgressPane(el);
+  if (activeWorkspace() === 'screen') return screenProgressPane(el);
   if (activeWorkspace() === 'speech') return speechProgressPane(el);
   // Before anything is earned there is nothing to chart — say so on purpose
   // instead of showing a dashboard of zeroes.
