@@ -156,6 +156,31 @@ export const store = {
   },
 
 
+  // ── Chapters opened but not finished ────────────────────────
+  // A reading chapter has only ever had two states here: in `completed`
+  // or not. That makes a chapter you are halfway through look identical
+  // to one you have never touched, which is exactly the thing the Script
+  // Analysis shelf needs to tell apart.
+  //
+  // ADDITIVE AND UNVERSIONED ON PURPOSE. A missing `opened` reads as the
+  // empty set, so older stored data needs no migration and a device that
+  // never writes one loses nothing but the "In progress" label. Nothing
+  // here gates anything: it is a label, never a lock.
+  get opened() { return new Set(load().opened ?? []); },
+
+  // "In progress" is opened AND not finished. Completion always wins, so
+  // re-reading a finished chapter never demotes it.
+  isInProgress(lessonId) {
+    return this.opened.has(lessonId) && !this.completed.has(lessonId);
+  },
+
+  markOpened(lessonId) {
+    const s = load();
+    if ((s.opened ?? []).includes(lessonId)) return;   // no write on re-open
+    s.opened = [...new Set([...(s.opened ?? []), lessonId])];
+    save(s);
+  },
+
   // Last text pasted into "Train Any Text" — { title, body, accent }.
   get customText() { return load().customText ?? null; },
   saveCustomText(v) { const s = load(); s.customText = v; save(s); },

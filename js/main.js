@@ -5901,7 +5901,24 @@ const MASK_PROFILE = [
 //
 // It also covers the gap the chart cannot: the chart draws twelve figures
 // and Tartaglia, Scaramuccia and Pasquariello are not among them.
-const maskChapterId = id => CHARACTER_LESSONS.find(l => l.body.some(b => b.profile === id))?.id ?? null;
+// IT MUST SEARCH COMMEDIA TOO, AND SINCE 2026-11-02 THAT IS WHERE THEY ALL
+// LIVE. Commedia left Building a Character that day and became its own
+// course; the 21 ch-cm-* records stay in character-course.js but
+// CHARACTER_LESSONS filters them out by module
+// (js/data/character/character-course.js:2190), while COMMEDIA_LESSONS
+// takes its slice straight from CHARACTER_LESSONS_ALL. So this lookup was
+// searching the one array those 13 profiles had been removed from: every
+// mask resolved to null, castChartHtml emitted '' for all twelve hotspots
+// and maskRosterHtml drew thirteen inert cards — on a page whose own text
+// says "any figure on it opens that character".
+//
+// Commedia first, because that is the course that owns them now; Character
+// stays as the fallback so a profile moved back would still resolve.
+// bookOf() checks COMMEDIA_IDS before CHARACTER_IDS, so the chapter opens
+// in the right book.
+const maskChapterId = id =>
+  (COMMEDIA_LESSONS.find(l => l.body?.some(b => b.profile === id))
+    ?? CHARACTER_LESSONS.find(l => l.body?.some(b => b.profile === id)))?.id ?? null;
 function wireMaskLinks() {
   app.querySelectorAll('[data-mask]').forEach(b => b.addEventListener('click', () => {
     const to = maskChapterId(b.dataset.mask);
@@ -6040,11 +6057,16 @@ function renderActingChapter(id) {
   const nxt = at >= 0 && at < sibs.length - 1 ? sibs[at + 1] : null;
 
   app.innerHTML = `
-    ${pageTopbar('📖 ' + esc(l.title), '#8a6d3b')}
-    <main class="guide sp-chapter">
-      <p class="pane-note">${esc(col?.title ?? (bookModuleFor(B, l) ? moduleTitle(B, bookModuleFor(B, l)) : B.libraryName))}</p>
+    ${pageTopbar(readSizeHtml(), '#8a6d3b')}
+    <main class="guide sp-chapter is-reading">
+      ${readCrumbHtml([B.libraryName,
+        col?.title ?? (bookModuleFor(B, l) ? moduleTitle(B, bookModuleFor(B, l)) : null),
+        l.title])}
       ${chapterListHtml(sibs, at)}
       <h1 tabindex="-1" id="ac-h">${esc(l.title)}</h1>
+      ${/* The chapter's own stated aim, as the standfirst — the same line
+           the shelf shows under its title, so the two cannot disagree. */
+        l.objective ? `<p class="read-deck">${esc(l.objective)}</p>` : ''}
       ${actingChapterBlocks(l)}
       ${l.sharedFrom ? `<p class="pane-note">${esc(l.sharedNote ?? '')}
         <button class="linkish" data-shared="${esc(l.sharedFrom.id)}" data-shared-ws="${esc(l.sharedFrom.workspace)}" type="button">Open ${esc(l.sharedFrom.label)}</button></p>` : ''}
@@ -6063,6 +6085,7 @@ function renderActingChapter(id) {
       </nav>
     </main>`;
   wireBrandHome();
+  wireReadSize(app.querySelector('.sp-chapter'));
   wireGlossary(app);
   wireMaskLinks();
   app.querySelector('#ac-h').focus();
@@ -6737,8 +6760,187 @@ const SHELF_PAGES = {
   ],
 };
 
-function renderActingCollection(collectionId, entryId = null) {
-  record(() => renderActingCollection(collectionId, entryId));
+// ── The chapter-preview shelf (owner mockup, 2026-11-09) ─────
+// Script Analysis stops being a grid of tiles and becomes a reading desk:
+// the chapters down the left with where you stand in each, one of them
+// previewed on the right. Selecting in the rail only MOVES THE PREVIEW —
+// it never navigates and never records, so a learner can read around the
+// shelf without pushing six pages onto the back stack. Only the button in
+// the preview opens a chapter.
+//
+// OPT-IN, one collection at a time. Every other Acting collection keeps
+// the tile grid, so this cannot change a page nobody asked to change.
+const COLLECTION_PANE = { scene: true };
+
+// Per-chapter hero art. EMPTY ON PURPOSE until Frankie's images land —
+// docs/SCRIPT_ANALYSIS_ART_BRIEF.md has the brief. A missing entry
+// collapses the frame rather than drawing a broken box, so the page is
+// correct now and better later without another code change.
+const CHAPTER_ART = {};
+
+// What a chapter looks like on the shelf. Completion always wins over
+// "opened", so re-reading a finished chapter never demotes it.
+function chapterStanding(key) {
+  if (store.isCompleted(key)) return { cls: 'is-read', mark: '✓', label: 'Read' };
+  if (store.isInProgress(key)) return { cls: 'is-doing', mark: '◌', label: 'In progress' };
+  return { cls: '', mark: '\u{1F4D6}', label: 'Unread' };
+}
+
+// The verb on the preview's button, which is the one place the page tells
+// you what opening it will actually do.
+function chapterVerb(key) {
+  if (store.isCompleted(key)) return 'Reread chapter';
+  if (store.isInProgress(key)) return 'Resume chapter';
+  return 'Start chapter';
+}
+
+// The reference strip under the preview. This is where the acting glossary
+// lives now: off the page body, where it buried the chapters, and into an
+// optional panel you open when you want it. Search shows on Key terms
+// only, because it is the only tab with a list to narrow.
+function chapterReferenceHtml(terms) {
+  return `
+    <div class="cp-ref">
+      <div class="cp-ref-head">
+        <h2 class="cp-ref-h"><span aria-hidden="true">\u{1F4D6}</span> Glossary
+          <i>(optional reference)</i></h2>
+        <label class="cp-search" hidden>
+          <span class="vis-hidden">Search the glossary</span>
+          <input type="search" id="cp-term-search" placeholder="Search ${terms.length} terms…">
+        </label>
+      </div>
+      <div class="cp-tabs" role="tablist">
+        <button class="cp-tab on" role="tab" aria-selected="true"  data-tab="overview">Overview</button>
+        <button class="cp-tab"    role="tab" aria-selected="false" data-tab="terms">Key terms</button>
+        <button class="cp-tab"    role="tab" aria-selected="false" data-tab="notes">My notes</button>
+      </div>
+      <div class="cp-panel" id="cp-panel"></div>
+    </div>`;
+}
+
+// The shelf itself. `entries` arrives already built and already ordered by
+// renderActingCollection, so the rail, the count and the preview can never
+// disagree about what is on this shelf — there is one list, read three ways.
+function renderCollectionPane(B, c, entries, pages, selectedKey) {
+  const terms = Object.values(ACTING_GLOSSARY);
+  const read = entries.filter(e => store.isCompleted(e.key)).length;
+  // Land the learner where they actually are: the chapter in progress,
+  // else the first one unread, else the first on the shelf.
+  const sel = entries.find(e => e.key === selectedKey)
+    ?? entries.find(e => store.isInProgress(e.key))
+    ?? entries.find(e => !store.isCompleted(e.key))
+    ?? entries[0];
+  const seqOf = e => String(entries.indexOf(e) + 1).padStart(2, '0');
+  const lesson = sel ? bookLessonById(B, sel.key) : null;
+  const art = sel ? CHAPTER_ART[sel.key] : null;
+
+  workspacePage(
+    pageTopbar(`\u{1F4DA} ${B.libraryName} / ${esc(c.title)}`, '#8a6d3b'),
+    `<div class="ws-head cp-head">
+       <h1 class="page-h">${esc(c.title)}</h1>
+       <p class="ws-sub">${esc(c.blurb ?? 'Find the evidence. Make playable choices.')}</p>
+       <p class="cp-prog"><span aria-hidden="true">\u{1F4D6}</span>
+         ${read} of ${entries.length} read</p>
+     </div>`,
+    `<div class="cp-wrap">
+       <ol class="cp-rail">
+         ${entries.map(e => {
+           const st = chapterStanding(e.key);
+           return `
+           <li><button class="cp-row${st.cls ? ' ' + st.cls : ''}${e.key === sel?.key ? ' on' : ''}"
+                 data-chapter="${esc(e.key)}" type="button"
+                 aria-current="${e.key === sel?.key ? 'true' : 'false'}">
+             <span class="cp-seq">${seqOf(e)}</span>
+             <span class="cp-row-main">
+               <b>${esc(e.title)}</b>
+               ${e.blurb ? `<i>${esc(e.blurb)}</i>` : ''}
+             </span>
+             <span class="cp-state">
+               <span class="cp-mark" aria-hidden="true">${st.mark}</span>${st.label}</span>
+             <span class="cp-chev" aria-hidden="true">›</span>
+           </button></li>`;
+         }).join('')}
+       </ol>
+       <section class="cp-view" aria-live="polite">
+         ${art ? `<div class="cp-art">
+           <img src="${esc(art.src)}" alt="${esc(art.alt ?? '')}"></div>` : ''}
+         <div class="cp-view-body">
+           <h2 class="cp-title"><span class="cp-title-seq">${sel ? seqOf(sel) : ''}</span>
+             ${esc(sel?.title ?? '')}</h2>
+           ${lesson?.objective ? `<p class="cp-aim">${esc(lesson.objective)}</p>` : ''}
+           ${lesson?.orientation ? `
+             <h3 class="cp-sub-h">In this chapter</h3>
+             <p class="cp-orient">${esc(lesson.orientation)}</p>` : ''}
+           ${sel ? `<button class="btn cp-go" data-open="${esc(sel.key)}" type="button">
+             ${esc(chapterVerb(sel.key))} →</button>` : ''}
+         </div>
+         ${chapterReferenceHtml(terms)}
+       </section>
+     </div>`);
+
+  // The shelf is an index, not prose: two columns need more than the
+  // app's 640px reading measure. Set immediately after the paint that
+  // cleared it, so the flag lives exactly as long as this page does.
+  document.body.classList.add('page-wide');
+
+  // ── Wiring ──
+  // The rail re-renders the page in place. navTo would stack a copy per
+  // click, so this calls the renderer directly and leaves the back stack
+  // pointing at the Library, which is where Back should go from a shelf.
+  app.querySelectorAll('[data-chapter]').forEach(b => b.addEventListener('click', () =>
+    renderActingCollection(c.id, null, b.dataset.chapter)));
+
+  // The one door that actually opens a chapter, and the only place
+  // "opened" is recorded — selecting in the rail must not mark anything.
+  app.querySelector('[data-open]')?.addEventListener('click', e => {
+    const key = e.currentTarget.dataset.open;
+    const page = pages.find(x => x.key === key);
+    store.markOpened(key);
+    return page ? navTo(page.go) : renderActingChapter(key);
+  });
+
+  // The reference strip.
+  const panel = app.querySelector('#cp-panel');
+  const search = app.querySelector('#cp-term-search');
+  const termsHtml = q => {
+    const hit = terms.filter(t =>
+      !q || (t.term + ' ' + t.def).toLowerCase().includes(q.toLowerCase()));
+    if (!hit.length) return `<p class="pane-note">No term matches “${esc(q)}”.</p>`;
+    return `<dl class="anat-list sp-terms">${hit.map(t =>
+      `<div><dt>${esc(t.term)}</dt><dd>${esc(t.def)}</dd></div>`).join('')}</dl>`;
+  };
+  const draw = tab => {
+    search?.closest('.cp-search')?.toggleAttribute('hidden', tab !== 'terms');
+    if (tab === 'terms') { panel.innerHTML = termsHtml(search?.value ?? ''); return; }
+    if (tab === 'notes') {
+      panel.innerHTML = `<p class="pane-note">Your notes for this work live in the
+        notebook, where they stay with you across the whole course.</p>
+        <button class="btn-lite" id="cp-notes" type="button">\u{1F4D3} Open the notebook</button>`;
+      // The notebook has no exported opener — it mounts its own launcher
+      // outside #app and owns its state. Clicking that is the supported
+      // door; anything else here would be a second, drifting copy of it.
+      app.querySelector('#cp-notes')?.addEventListener('click', () =>
+        document.getElementById('nb-fab')?.click());
+      return;
+    }
+    panel.innerHTML = lesson?.reflection
+      ? `<p class="pane-note">Something to carry in:</p><p class="cp-reflect">${esc(lesson.reflection)}</p>`
+      : '<p class="pane-note">Open the chapter to read it in full.</p>';
+  };
+  app.querySelectorAll('.cp-tab').forEach(t => t.addEventListener('click', () => {
+    app.querySelectorAll('.cp-tab').forEach(o => {
+      o.classList.toggle('on', o === t);
+      o.setAttribute('aria-selected', String(o === t));
+    });
+    draw(t.dataset.tab);
+  }));
+  search?.addEventListener('input', () => { panel.innerHTML = termsHtml(search.value); });
+  draw('overview');
+}
+
+function renderActingCollection(collectionId, entryId = null, selectedKey = null) {
+  record(() => renderActingCollection(collectionId, entryId),
+    `collection:${collectionId}:${entryId ?? ''}`);
   stopSpeech();
   const B = bookOfCollection(collectionId);
   const c = B.collections.find(x => x.id === collectionId);
@@ -6764,9 +6966,19 @@ function renderActingCollection(collectionId, entryId = null) {
     ...lessons.map(l => swapped.get(l.id)
       ? { key: swapped.get(l.id).key, title: swapped.get(l.id).title }
       : { key: l.id, title: l.title,
+          // The rail's one-line description. `objective` is the line the
+          // chapter already carries to say what it gets you, so the shelf
+          // and the chapter can never describe it differently.
+          blurb: l.objective ?? '',
           note: B.visible(l) ? '' : draftBadgeFor(l),
           state: B.visible(l) ? '' : 'is-pending' }),
   ];
+  // The chapter-preview shelf, for the collections that opt in. It is given
+  // the SAME `entries` the tile grid would have drawn, so the two layouts
+  // cannot disagree about what is on the shelf or in what order.
+  if (COLLECTION_PANE[collectionId] && !pick) {
+    return renderCollectionPane(B, c, entries, pages, selectedKey);
+  }
   workspacePage(
     pageTopbar(`📚 ${B.libraryName}`, '#8a6d3b'),
     `<div class="ws-head">
@@ -7019,40 +7231,61 @@ function renderWarmupRun(id) {
 
 function actingPracticePane(el) {
   const proj = actingProject();
+  // ── THE SHARED LANDING SHAPE (owner request, 2026-11-09) ────
+  // Eyebrow, title, purpose, scale — then the one "where you are" card.
+  // Practice used to state the same fact Studio states (which text you are
+  // working on) as an inline link inside a sentence, while Studio gave it a
+  // bar and Learn gave it a full card. One fact, three designs. It is the
+  // card now, in the same slot, with the same single green button.
+  //
+  // The title is "Practice", not "Acting Practice": the course is named in
+  // the eyebrow, so repeating it in every section title only made the four
+  // sections read as four different places.
+  const items = SCENE_STUDY_LIVE ? 6 : 5;
   el.innerHTML = `
-    <h1 class="page-h">Acting Practice</h1>
-    <p class="pane-note sp-wt-line">${proj
-      ? `Working on: <b>${esc(proj.title)}</b> <button class="linkish" id="ac-change" type="button">change</button>`
-      : 'No scene or monologue selected — exercises will ask, or <button class="linkish" id="ac-pick" type="button">choose one now</button>.'}</p>
+    <p class="pg-eyebrow">Acting &amp; Scene Work</p>
+    <h1 class="page-h">Practice</h1>
+    <p class="pg-purpose">Drill the craft against a text you are working on.</p>
+    <p class="pg-scale">${items} kinds of practice</p>
+    <div class="sec-card">
+      <p class="sec-card-lbl">Working on</p>
+      <p class="sec-card-hd">${proj ? esc(proj.title) : 'No scene or monologue selected'}</p>
+      <p class="sec-card-meta">${proj
+        ? 'Exercises will load against this text.'
+        : 'Exercises will ask for one, or pick it here and they will all use it.'}</p>
+      ${proj
+        ? `<button class="btn btn-primary sec-card-go" id="ac-change" type="button">Change the text \u2192</button>`
+        : `<button class="btn btn-primary sec-card-go" id="ac-pick" type="button">Choose a text \u2192</button>`}
+    </div>
     ${SCENE_STUDY_LIVE ? `
     <button class="track-card hub-card" id="acp-scene" type="button">
       <div class="track-glyph">🎬</div>
-      <div class="track-info"><h2>Scene Study</h2></div>
+      <div class="track-info"><h2>Scene Study</h2><p class="row-blurb">Work a scene from first read to playable choices.</p></div>
       <div class="track-arrow">›</div>
     </button>` : ''}
     <button class="track-card hub-card" id="acp-warmup" type="button">
       ${cardGlyph({ icon: '🔥', img: 'img/ui/warmup.png' })}
-      <div class="track-info"><h2>Warmup</h2></div>
+      <div class="track-info"><h2>Warmup</h2><p class="row-blurb">Wake the voice and body before you work.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-arcade" type="button">
       ${cardGlyph({ icon: '🕹', img: 'img/ui/arcade.png' })}
-      <div class="track-info"><h2>Acting Arcade</h2></div>
+      <div class="track-info"><h2>Acting Arcade</h2><p class="row-blurb">Short games that drill one skill at a time.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-cards" type="button">
       ${cardGlyph({ icon: '🃏', img: 'img/ui/flash-cards.png' })}
-      <div class="track-info"><h2>Flash Cards</h2></div>
+      <div class="track-info"><h2>Flash Cards</h2><p class="row-blurb">Quick recall on the vocabulary of the craft.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-rhythm" type="button">
       ${cardGlyph({ icon: '🎼', img: 'img/ui/rhythm.png' })}
-      <div class="track-info"><h2>Rhythm Cards</h2></div>
+      <div class="track-info"><h2>Rhythm Cards</h2><p class="row-blurb">Hear and hold the tempo of a line.</p></div>
       <div class="track-arrow">›</div>
     </button>
     <button class="track-card hub-card" id="acp-mytext" type="button">
       ${cardGlyph({ icon: '📄', img: 'img/ui/scripts.png' })}
-      <div class="track-info"><h2>Practice My Text</h2></div>
+      <div class="track-info"><h2>Practice My Text</h2><p class="row-blurb">Run the exercises against your own scene.</p></div>
       <div class="track-arrow">›</div>
     </button>`;
   el.querySelector('#acp-rhythm')?.addEventListener('click', () =>
@@ -7449,36 +7682,57 @@ function actorStudioPane(el) {
     { icon: '🎭', img: 'img/ui/scenes.png', title: 'Scenes', go: renderScenesShelf },
     { icon: '🎬', img: 'img/ui/custom-work.png', title: 'Custom Work', go: renderCustomWork },
   ];
+  // ── THE SHARED LANDING SHAPE (owner request, 2026-11-09) ────
+  // Same four lines and the same one card as Practice. The card already
+  // existed here, as .sp-wt-card — it just looked nothing like Practice's
+  // version of the identical fact. It is .sec-card now; .sp-wt-* STAYS in
+  // the stylesheet because the Speech working-text card still wears it.
+  //
+  // EVERY ACTION SURVIVES. The one change is which is primary: "Practice
+  // this text" was .btn-practice, a LAVENDER third action colour on a page
+  // that already had green. Green is the only action colour, so it becomes
+  // the green one and the rest stay quiet. Nothing is removed, and
+  // ac-scene in particular is left exactly where it was.
+  const BLURB = {
+    Monologues: 'Speeches to work on, with the text in full.',
+    Scenes: 'Two-handers you can rehearse with a partner.',
+    'Custom Work': 'Bring your own text and work it like the rest.',
+  };
   el.innerHTML = `
-    <h1 class="page-h">Actor’s Studio</h1>
+    <p class="pg-eyebrow">Acting &amp; Scene Work</p>
+    <h1 class="page-h">Studio</h1>
+    <p class="pg-purpose">Find the scene or monologue you are working on — ours or your own.</p>
+    <p class="pg-scale">${cards.length} ways in</p>
     ${proj ? `
-      <section class="sp-wt-card" aria-label="Current acting project">
-        <div class="sp-wt-info">
-          <span class="cc-stage">Current acting project</span>
-          <h2>${esc(proj.title)}</h2>
-          <p class="cc-meta">${esc(proj.scene || String(proj.id).startsWith('scene:') ? 'Scene' : 'Monologue or speech')}${proj.source === 'studio' ? ' · from my Studio projects' : ' · provided Speechcraft text'}${proj.scene ? ` · ${esc(proj.scene.characters.join(', '))}` : ''}</p>
-        </div>
-        <div class="sp-wt-actions">
+      <section class="sec-card" aria-label="Current acting project">
+        <p class="sec-card-lbl">Working on</p>
+        <p class="sec-card-hd">${esc(proj.title)}</p>
+        <p class="sec-card-meta">${esc(proj.scene || String(proj.id).startsWith('scene:') ? 'Scene' : 'Monologue or speech')}${proj.source === 'studio' ? ' · from my Studio projects' : ' · provided Speechcraft text'}${proj.scene ? ` · ${esc(proj.scene.characters.join(', '))}` : ''}</p>
+        <button class="btn btn-primary sec-card-go" id="ac-practice" type="button">Practice this text \u2192</button>
+        <div class="sec-card-more">
           ${ref?.source === 'studio' ? '<button class="btn-lite" id="ac-open" type="button">Open project</button>' : ''}
-          <button class="btn-lite" id="ac-change" type="button">Change text</button>
           <button class="btn-lite" id="ac-scene" type="button">Continue scene study</button>
-          <button class="btn btn-practice" id="ac-practice" type="button">Practice this text</button>
+          <button class="btn-lite" id="ac-change" type="button">Change text</button>
         </div>
       </section>`
     : `
-      <section class="sp-wt-card is-empty" aria-label="Current acting project">
-        <div class="sp-wt-info">
-          <span class="cc-stage">Current acting project</span>
-          <h2>No acting project selected</h2>
-        </div>
-        <div class="sp-wt-actions">
-          <button class="btn btn-primary" id="ac-choose" type="button">Choose a scene or monologue</button>
-        </div>
+      <section class="sec-card" aria-label="Current acting project">
+        <p class="sec-card-lbl">Working on</p>
+        <p class="sec-card-hd">No scene or monologue selected</p>
+        <p class="sec-card-meta">Pick one here and the Studio, Practice and the exercises all use it.</p>
+        <button class="btn btn-primary sec-card-go" id="ac-choose" type="button">Choose a scene or monologue \u2192</button>
       </section>`}
+    ${/* THE GOLD LEFT EDGE GOES. It came from one inline custom property,
+          `style="--track-color:#8a6d3b"`, feeding .track-card's
+          `border-left: 6px solid var(--track-color)`. Gold is a sequence
+          colour and these three rows have no sequence. Removing it HERE
+          and not in .track-card is the whole point: that rule is shared
+          with seven other panes that do want their colour. */''}
     ${cards.map((c, i) => `
-      <button class="track-card hub-card" data-i="${i}" type="button" style="--track-color:#8a6d3b">
+      <button class="track-card hub-card is-plain" data-i="${i}" type="button">
         ${cardGlyph(c)}
-        <div class="track-info"><h2>${esc(c.title)}</h2></div>
+        <div class="track-info"><h2>${esc(c.title)}</h2>
+          ${BLURB[c.title] ? `<p class="row-blurb">${esc(BLURB[c.title])}</p>` : ''}</div>
         <div class="track-arrow">›</div>
       </button>`).join('')}`;
   el.querySelector('#ac-open')?.addEventListener('click', () => renderScript(ref.id));
@@ -12455,6 +12709,56 @@ function wireAutosave(stateEl, collect) {
 // Question Everything textbook pattern: no controls, no storage, Back
 // returns to the Library. The draft's own **bold** and *italic* markers
 // render as emphasis, applied AFTER esc() so the text stays inert.
+// ── The reading page (owner mockup, 2026-11-09) ──────────────
+// A breadcrumb, a text-size control and the `is-reading` class are the
+// whole of it: the content was already right, it was typeset as a pane
+// rather than as a document. See the CSS for why the heading mattered.
+
+// Where this chapter sits, so the reader can see the shelf they came
+// from without going back to look. Escaped here, never interpolated raw.
+function readCrumbHtml(trail) {
+  return `<p class="read-crumb">${trail.filter(Boolean).map((t, i, a) =>
+    (i === a.length - 1 ? `<b>${esc(t)}</b>` : esc(t))
+    + (i < a.length - 1 ? ' <span aria-hidden="true">/</span>' : '')).join(' ')}</p>`;
+}
+
+const READ_SIZE_KEY = 'speechcraft-read-size';
+
+// A PER-VIEWER CONVENIENCE, so localStorage is the right home and a
+// throwing read must not take the page with it. An unknown stored value
+// falls back to 'm' rather than writing a class nothing styles.
+function readSize() {
+  try {
+    const v = localStorage.getItem(READ_SIZE_KEY);
+    return v === 'l' || v === 'xl' ? v : 'm';
+  } catch { return 'm'; }
+}
+
+function readSizeHtml() {
+  const cur = readSize();
+  const btn = (v, cls, label) =>
+    `<button class="${cls}" data-size="${v}" type="button"
+      aria-pressed="${cur === v}" aria-label="${label}" title="${label}">A</button>`;
+  return `<div class="read-size" role="group" aria-label="Text size">
+    ${btn('m', 'rs-s', 'Normal text')}${btn('l', 'rs-m', 'Larger text')}${btn('xl', 'rs-l', 'Largest text')}</div>`;
+}
+
+// Applied to the page element itself, so nothing else on screen resizes.
+function wireReadSize(el) {
+  const apply = v => {
+    el.classList.remove('sz-l', 'sz-xl');
+    if (v !== 'm') el.classList.add(`sz-${v}`);
+    app.querySelectorAll('[data-size]').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.size === v)));
+  };
+  apply(readSize());
+  app.querySelectorAll('[data-size]').forEach(b => b.addEventListener('click', () => {
+    const v = b.dataset.size;
+    try { localStorage.setItem(READ_SIZE_KEY, v); } catch { /* nothing to remember, still applies */ }
+    apply(v);
+  }));
+}
+
 function renderLineLesson() {
   record(renderLineLesson);
   stopSpeech();
@@ -12465,10 +12769,11 @@ function renderLineLesson() {
     : b.li ? `<ul class="sd-asks">${b.li.map(x => `<li class="guide-text">${fmt(x)}</li>`).join('')}</ul>`
     : `<p class="guide-text">${fmt(b.p)}</p>`;
   app.innerHTML = `
-    ${pageTopbar('🧠 Lines & Memory', '#8a6d3b')}
-    <main class="guide" id="line-lesson">
+    ${pageTopbar(readSizeHtml(), '#8a6d3b')}
+    <main class="guide is-reading" id="line-lesson">
+      ${readCrumbHtml(['Acting Library', 'Script Analysis', 'Lines & Memory'])}
       <h1>${esc(LINE_LESSON.title)}</h1>
-      <p class="pane-note"><i>${esc(LINE_LESSON.subtitle)}</i></p>
+      <p class="read-deck">${esc(LINE_LESSON.subtitle)}</p>
       ${LINE_LESSON.sections.map(s => `
       <h2 class="guide-heading">${esc(s.h)}</h2>
       ${s.blocks.map(block).join('')}`).join('')}
@@ -12476,6 +12781,7 @@ function renderLineLesson() {
       <ol class="sd-asks">${LINE_LESSON.practice.steps.map(x => `<li class="guide-text">${fmt(x)}</li>`).join('')}</ol>
     </main>`;
   wireBrandHome();
+  wireReadSize(app.querySelector('#line-lesson'));
 }
 
 // QUESTIONS ONLY (owner order 2026-09-25). The page was the questions
@@ -14493,12 +14799,56 @@ function progressPct(s) {
   return Math.round((s.index / s.queue.length) * 100);
 }
 
+// ── WHERE AM I, MID-LESSON (audit, 2026-11-09) ──────────────
+// This is the ONE screen a learner is actually working on — 113 of them
+// across the six Voice & Speech courses — and its entire chrome was a ✕
+// and a bare bar. No lesson name, no unit, no course, no step count, and
+// nothing saying what pressing ✕ would cost. 34 of those are checkpoint
+// games that skip the teaching page, so they never showed a title at all.
+//
+// Every field here already existed: context.js:46 attaches `unit` and
+// `track` to each path lesson, and a generated practice lesson carries
+// `track`. Nothing new is computed and no id is touched.
+// Two spans, not one string: at 375px "Neutral American · Stage 1 · Meet
+// the Accent" is wider than the header and ellipsised mid-phrase, which
+// eats the stage name and looks broken. The phone keeps the COURSE and
+// drops the unit (the lesson name is on the next line anyway); both show
+// from 420px up.
+function lessonKickerHtml(l) {
+  const course = l.track?.title;
+  const unit = l.unit?.title;
+  if (!course && !unit) return '';
+  return [
+    course ? `<span class="lk-course">${esc(course)}</span>` : '',
+    unit ? `<span class="lk-unit">${course ? ' · ' : ''}${esc(unit)}</span>` : '',
+  ].join('');
+}
+// A practice lesson is titled "<track> — practice", so beside a kicker
+// that already names the track it would read "Cockney · Cockney — practice".
+function lessonHeading(l) {
+  const t = l.title ?? '';
+  const pre = l.track?.title ? `${l.track.title} — ` : '';
+  return pre && t.startsWith(pre) ? t.slice(pre.length) : t;
+}
+
 function lessonChrome(s, body) {
+  const kick = lessonKickerHtml(s.lesson);
+  const head = lessonHeading(s.lesson);
+  const step = `${Math.min(s.index + 1, s.queue.length)} of ${s.queue.length}`;
   app.innerHTML = `
     <header class="lesson-top">
-      <button class="quit" id="quit">✕</button>
-      <div class="progress"><div class="progress-fill" style="width:${progressPct(s)}%"></div></div>
+      <button class="quit" id="quit" type="button" aria-label="Exit lesson" title="Exit lesson">✕</button>
+      <div class="lesson-where">
+        ${kick ? `<span class="lesson-kick">${kick}</span>` : ''}
+        ${head ? `<span class="lesson-name">${esc(head)}</span>` : ''}
+      </div>
+      <span class="lesson-step">${esc(step)}</span>
     </header>
+    <div class="lesson-bar">
+      <div class="progress" role="progressbar"
+           aria-valuemin="0" aria-valuemax="${s.queue.length}" aria-valuenow="${s.index}"
+           aria-label="Lesson progress"><div class="progress-fill" style="width:${progressPct(s)}%"></div></div>
+    </div>
     <main class="exercise" data-accent="${s.lesson.accent ?? ''}">${body}</main>
     <footer class="feedback" id="feedback" aria-live="polite"></footer>`;
   document.getElementById('quit').addEventListener('click', () => exitLesson(s.lesson));

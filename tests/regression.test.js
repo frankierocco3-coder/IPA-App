@@ -2346,7 +2346,9 @@ export async function run({ navDoc = document } = {}) {
       check('textbook: the LESSON of the same name is in the Script Analysis order',
         (await (async () => {
           clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
-          const inShelf = !!doc.querySelector('[data-item="ac-question"]');
+          // Script Analysis is the chapter-preview shelf now, so its
+          // chapters are rail rows keyed by data-chapter, not tiles.
+          const inShelf = !!doc.querySelector('[data-chapter="ac-question"]');
           clickIn(doc.getElementById('nav-back')); await sleep(350);
           return inShelf;
         })()));
@@ -3701,20 +3703,37 @@ export async function run({ navDoc = document } = {}) {
       // shelf tile was retired, so the page could not be reached at all.
       // Clicking it is the check; a source pin would not have caught it.
       clickIn(doc.querySelector('[data-tile="col:scene"]')); await sleep(400);
-      const scTiles = [...doc.querySelectorAll('.item-tile')].map(b => b.dataset.item);
+      // SCRIPT ANALYSIS IS THE CHAPTER-PREVIEW SHELF (owner mockup,
+      // 2026-11-09), not the tile grid, so it is driven in two steps:
+      // the rail SELECTS a chapter and only the preview's button opens
+      // one. That separation is the point of the layout — a reader can
+      // look around the shelf without pushing six pages onto the back
+      // stack — so the drive asserts both halves rather than treating a
+      // rail click as a door. Every other collection keeps the grid and
+      // is still driven by [data-item] below.
+      const scKeys = [...doc.querySelectorAll('[data-chapter]')].map(b => b.dataset.chapter);
       // Lines & Memory leads, then the owner's five lessons. The two that
       // were briefly swapped for their full pages are LESSONS again: the
       // full text lives inside the lesson record now, which is what the
       // order actually asked for.
-      check('acting: Script Analysis leads with Lines & Memory and every tile carries a key',
-        scTiles[0] === 'col:lines' && scTiles.every(Boolean)
-        && scTiles.length === 6
-        && scTiles.includes('ac-fourlists') && scTiles.includes('ac-question')
-        && !scTiles.includes('col:lists') && !scTiles.includes('col:question'),
-        scTiles.join(' '));
-      clickIn(doc.querySelector('[data-item="col:lines"]')); await sleep(450);
-      check('acting: the Lines & Memory tile actually opens Lines & Memory',
-        doc.querySelector('.track-title')?.textContent.includes('Lines & Memory')
+      check('acting: Script Analysis leads with Lines & Memory and every chapter carries a key',
+        scKeys[0] === 'col:lines' && scKeys.every(Boolean)
+        && scKeys.length === 6
+        && scKeys.includes('ac-fourlists') && scKeys.includes('ac-question')
+        && !scKeys.includes('col:lists') && !scKeys.includes('col:question'),
+        scKeys.join(' '));
+      // The rail moves the preview and MUST NOT navigate.
+      clickIn(doc.querySelector('[data-chapter="col:lines"]')); await sleep(350);
+      check('acting: selecting in the rail previews the chapter without opening it',
+        !!doc.querySelector('[data-chapter]')
+        && (doc.querySelector('.cp-title')?.textContent ?? '').includes('Lines & Memory')
+        && doc.querySelector('.cp-go')?.dataset.open === 'col:lines',
+        doc.querySelector('.cp-title')?.textContent ?? 'no preview');
+      clickIn(doc.querySelector('.cp-go')); await sleep(450);
+      // The topbar no longer repeats the title — the breadcrumb carries it,
+      // which is what the owner's rendering shows.
+      check('acting: the preview button actually opens Lines & Memory',
+        /Lines & Memory/.test(doc.querySelector('.read-crumb')?.textContent ?? '')
         && /The Line You Know/.test(doc.querySelector('#line-lesson h1')?.textContent ?? ''),
         doc.querySelector('#line-lesson h1')?.textContent ?? 'no heading');
       clickIn(doc.getElementById('nav-back')); await sleep(350);
@@ -3724,14 +3743,16 @@ export async function run({ navDoc = document } = {}) {
       // of step with it. Clicking is the check: the block types are
       // resolved at render time and a source pin would not catch a
       // misspelled key silently producing an empty string.
-      clickIn(doc.querySelector('[data-item="ac-question"]')); await sleep(500);
+      clickIn(doc.querySelector('[data-chapter="ac-question"]')); await sleep(300);
+      clickIn(doc.querySelector('.cp-go')); await sleep(500);
       check('acting: the Question Everything LESSON states why, then asks every question',
         doc.body.textContent.includes('A script gives you the words')
         && doc.querySelectorAll('.sd-asks li').length >= 80
         && DISSECT_SECTIONS.every(s => doc.body.textContent.includes(s.h)),
         `${doc.querySelectorAll('.sd-asks li').length} questions`);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
-      clickIn(doc.querySelector('[data-item="ac-fourlists"]')); await sleep(500);
+      clickIn(doc.querySelector('[data-chapter="ac-fourlists"]')); await sleep(300);
+      clickIn(doc.querySelector('.cp-go')); await sleep(500);
       check('acting: the Four Lists LESSON states why, then gives all four lists',
         doc.body.textContent.includes('evidence rather than biography')
         && ['incontrovertible facts', 'says about themselves', 'says about others',

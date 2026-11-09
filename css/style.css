@@ -5252,3 +5252,289 @@ body.nb-full #app { display: none; }
   margin: 14px 0;
 }
 .fr-entry .guide-text { margin-bottom: 2px; }
+
+/* ── The chapter-preview shelf (Script Analysis, 2026-11-09) ──
+   Two columns on a desk: the chapters down the left with where you stand
+   in each, one of them previewed on the right. Single column below 980px,
+   where the preview follows the rail rather than sitting beside it. */
+.cp-head { margin-bottom: 4px; }
+.cp-prog {
+  display: flex; align-items: center; gap: 8px;
+  margin: 10px 0 0; color: var(--muted); font-weight: 600;
+}
+.cp-wrap {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.08fr);
+  gap: 26px; align-items: start; margin-top: 18px;
+}
+
+/* ── the rail ── */
+.cp-rail { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cp-row {
+  width: 100%; display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center; gap: 14px;
+  padding: 14px 16px; text-align: left; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px;
+  color: inherit; font: inherit;
+}
+.cp-row:hover { background: var(--panel-2); }
+.cp-row.on {
+  background: var(--accent-tint); border-color: var(--green);
+  box-shadow: inset 0 0 0 1px var(--green);
+}
+.cp-seq {
+  font-variant-numeric: tabular-nums; font-weight: 700;
+  color: var(--muted); font-size: 0.95rem;
+}
+.cp-row-main { min-width: 0; display: grid; gap: 3px; }
+.cp-row-main b { font-size: 1.04rem; }
+.cp-row-main i {
+  font-style: normal; color: var(--muted); font-size: 0.9rem; line-height: 1.4;
+}
+.cp-state {
+  display: inline-flex; align-items: center; gap: 6px;
+  color: var(--muted); font-size: 0.86rem; font-weight: 600; white-space: nowrap;
+}
+.cp-row.is-read .cp-state { color: var(--green-dark); }
+.cp-mark { font-size: 0.95rem; }
+.cp-chev { color: var(--muted); font-size: 1.2rem; line-height: 1; }
+
+/* ── the preview ── */
+.cp-view {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 18px; overflow: hidden; position: sticky; top: 16px;
+}
+/* The frame only exists when there is art for this chapter, so a shelf
+   with no images yet shows a clean panel rather than an empty box. */
+.cp-art { margin: 0; background: var(--panel-2); }
+.cp-art img { display: block; width: 100%; height: auto; }
+.cp-view-body { padding: 20px 22px 22px; }
+.cp-title {
+  display: flex; align-items: baseline; gap: 14px;
+  margin: 0 0 6px; font-size: 1.55rem; line-height: 1.2;
+}
+.cp-title-seq {
+  font-variant-numeric: tabular-nums; color: var(--gold);
+  font-weight: 700; font-size: 1.5rem;
+}
+.cp-aim { margin: 0 0 14px; color: var(--muted); font-style: italic; line-height: 1.5; }
+.cp-sub-h { margin: 0 0 6px; font-size: 1.02rem; }
+.cp-orient { margin: 0 0 18px; line-height: 1.55; }
+.cp-go { width: 100%; justify-content: center; }
+
+/* ── the reference strip ── */
+.cp-ref { border-top: 1px solid var(--line); padding: 16px 22px 20px; }
+.cp-ref-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.cp-ref-h { margin: 0; font-size: 1.02rem; display: flex; align-items: center; gap: 8px; }
+.cp-ref-h i { font-style: normal; font-weight: 400; color: var(--muted); font-size: 0.88rem; }
+.cp-search input {
+  padding: 7px 12px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--bg); font: inherit; font-size: 0.9rem; min-width: 190px;
+}
+.cp-tabs { display: flex; gap: 6px; margin: 12px 0 14px; flex-wrap: wrap; }
+.cp-tab {
+  padding: 8px 15px; border-radius: 999px; cursor: pointer; font: inherit;
+  font-size: 0.92rem; font-weight: 600;
+  background: var(--panel-2); border: 1px solid var(--line); color: var(--muted);
+}
+.cp-tab:hover { color: var(--ink); }
+.cp-tab.on { background: var(--green); border-color: var(--green); color: #fff; }
+.cp-panel .anat-list { margin: 0; }
+.cp-reflect { margin: 4px 0 0; line-height: 1.55; }
+
+@media (max-width: 980px) {
+  .cp-wrap { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+  .cp-view { position: static; }
+  .cp-row { grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; }
+  .cp-chev { display: none; }
+}
+@media (max-width: 560px) {
+  .cp-row-main i { display: none; }
+  .cp-state { font-size: 0.8rem; }
+  .cp-search input { min-width: 0; width: 100%; }
+  .cp-search { width: 100%; }
+}
+
+/* The chapter-preview shelf is the one page that outgrows the 640px
+   reading measure — it is an index of chapters beside a preview, not
+   prose. Cleared on every paint (see workspacePage), so it cannot leak
+   onto the next page. */
+body.page-wide #app { max-width: 1180px; }
+@media (max-width: 1220px) {
+  body.page-wide #app { max-width: 100%; }
+}
+
+/* ── The reading page (owner mockup, 2026-11-09) ─────────────
+   "Make the content easier to follow and read."
+
+   THE ACTUAL DEFECT WAS HIERARCHY, NOT SIZE. `.guide-heading` is
+   13px uppercase letterspaced muted grey — that is a LABEL, and it is
+   correct where a short pane needs one. On a long numbered lesson it
+   flattens the document: "1. The couch test" came out quieter than the
+   body under it, so there was nothing to scan by and every section
+   looked like more paragraph.
+
+   SCOPED TO `.is-reading` ON PURPOSE. `.guide-heading` has 78 call
+   sites across every book course. Restyling it globally would redesign
+   pages nobody asked about, so the reading treatment is opt-in and the
+   label styling stays exactly as it is everywhere else. */
+.guide.is-reading { max-width: 680px; padding-bottom: 72px; }
+
+.guide.is-reading .read-crumb {
+  font-size: 14px; color: var(--muted); margin: 0 0 18px;
+  display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline;
+}
+.guide.is-reading .read-crumb span { color: var(--line); }
+.guide.is-reading .read-crumb b { font-weight: 600; color: var(--ink); }
+
+.guide.is-reading h1 {
+  font-family: var(--serif); font-size: 44px; font-weight: 700;
+  line-height: 1.08; letter-spacing: -0.01em;
+  color: var(--ink); margin: 0 0 14px;
+}
+.guide.is-reading .read-deck {
+  font-family: var(--serif); font-style: italic; font-size: 20px;
+  line-height: 1.45; color: var(--muted);
+  margin: 0 0 8px; padding-bottom: 22px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The heading becomes a heading: serif, sized, in the brand green, with
+   air above it so a new section reads as a new section. */
+.guide.is-reading .guide-heading {
+  font-family: var(--serif); font-size: 29px; font-weight: 700;
+  line-height: 1.2; color: var(--green-dark);
+  text-transform: none; letter-spacing: normal;
+  margin: 38px 0 12px;
+}
+.guide.is-reading .guide-subhead,
+.guide.is-reading .guide-subheading {
+  font-family: var(--serif); font-size: 21px; font-weight: 700;
+  color: var(--ink); text-transform: none; letter-spacing: normal;
+  margin: 26px 0 8px;
+}
+.guide.is-reading .guide-text { font-size: 18px; line-height: 1.75; margin-bottom: 18px; }
+/* A paragraph that opens with a bold run is a definition in disguise —
+   the owner's rendering sets the term in serif so it reads as the thing
+   being named rather than as emphasis inside the sentence. */
+.guide.is-reading .guide-text > b:first-child {
+  font-family: var(--serif); font-weight: 700; color: var(--ink);
+}
+.guide.is-reading .sd-asks { font-size: 18px; line-height: 1.75; }
+.guide.is-reading .sd-asks li { margin-bottom: 10px; }
+
+/* Reader text size. A per-viewer convenience, so it lives in
+   localStorage and the page renders correctly when that read throws. */
+.guide.is-reading.sz-l  .guide-text,
+.guide.is-reading.sz-l  .sd-asks { font-size: 19.5px; }
+.guide.is-reading.sz-l  h1 { font-size: 48px; }
+.guide.is-reading.sz-xl .guide-text,
+.guide.is-reading.sz-xl .sd-asks { font-size: 21px; line-height: 1.8; }
+.guide.is-reading.sz-xl h1 { font-size: 52px; }
+
+.read-size { display: inline-flex; align-items: center; gap: 2px; }
+.read-size button {
+  font-family: var(--serif); background: none; border: 0; cursor: pointer;
+  color: var(--muted); padding: 2px 7px; border-radius: 8px; line-height: 1;
+}
+.read-size button:hover { color: var(--ink); background: var(--panel-2); }
+.read-size button[aria-pressed="true"] { color: var(--ink); background: var(--panel-2); }
+.read-size .rs-s { font-size: 14px; }
+.read-size .rs-m { font-size: 18px; }
+.read-size .rs-l { font-size: 22px; }
+
+@media (max-width: 560px) {
+  .guide.is-reading h1 { font-size: 34px; }
+  .guide.is-reading.sz-l h1 { font-size: 37px; }
+  .guide.is-reading.sz-xl h1 { font-size: 40px; }
+  .guide.is-reading .read-deck { font-size: 18px; }
+  .guide.is-reading .guide-heading { font-size: 24px; margin-top: 30px; }
+}
+
+/* ── The shared landing shape (owner request, 2026-11-09) ────
+   Eyebrow, title, purpose, scale, then one "where you are" card.
+   The four Acting sections each invented their own version of these;
+   these are the one version. See the design system note for why. */
+.pg-eyebrow {
+  font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); margin: 0 0 6px;
+}
+.pg-purpose { font-size: 14px; line-height: 20px; color: var(--muted); margin: 4px 0 6px; }
+.pg-scale { font-size: 13px; line-height: 18px; font-weight: 600; color: var(--muted); margin: 0 0 16px; }
+
+/* ONE card for "where you are", in the same slot on every section, with
+   the one filled button on the page above the fold. The empty state is
+   this same card — never a hidden card — because its absence on some
+   pages is what made the sections feel unrelated. */
+.sec-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+  padding: 18px 20px; margin: 0 0 18px; display: grid; gap: 4px;
+}
+.sec-card-lbl {
+  font-size: 12px; line-height: 16px; font-weight: 700; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--muted); margin: 0;
+}
+.sec-card-hd {
+  font-family: var(--serif); font-size: 23px; line-height: 29px;
+  font-weight: 700; color: var(--ink); margin: 0;
+}
+.sec-card-meta { font-size: 13px; line-height: 18px; color: var(--muted); margin: 0 0 12px; }
+.sec-card-go { width: 100%; justify-content: center; }
+
+/* A row that says only "Warmup" makes you open it to find out what it is.
+   NOT `.track-blurb`: that name was already taken by the CENTRED blurb
+   under a track page's title (line ~296). Reusing it inherited that
+   centring here and silently restyled the other surface at the same time. */
+.row-blurb {
+  font-size: 13.5px; line-height: 19px; color: var(--muted);
+  margin: 3px 0 0; font-weight: 400; text-align: left;
+}
+@media (max-width: 560px) {
+  .sec-card-hd { font-size: 20px; line-height: 26px; }
+}
+
+/* Secondary actions under the one green button in a .sec-card. Quiet on
+   purpose: green is the only action colour, so these stay .btn-lite. */
+.sec-card-more { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.sec-card-more .btn-lite { font-size: 14px; }
+/* A row with no sequence has no colour edge. .track-card draws its left
+   border from --track-color, which seven other panes DO set; this opts
+   one page out without touching the shared rule. */
+.track-card.is-plain { border-left: 2px solid var(--line); }
+
+/* ── Mid-lesson context (audit, 2026-11-09) ──────────────────
+   The exercise screen now says what you are in and how far through.
+   The progress bar moves to its own row because the header line it used
+   to share is now carrying three things. `.progress` keeps its existing
+   rule (css/style.css:477) — only its container is new. */
+.lesson-where { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.lesson-kick {
+  font-size: 11px; font-weight: 700; letter-spacing: 0.8px;
+  text-transform: uppercase; color: var(--muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lesson-name {
+  font-family: var(--serif); font-weight: 700; font-size: 16px; line-height: 1.2;
+  color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.lesson-step {
+  flex: none; font-size: 12px; font-weight: 700; color: var(--green-dark);
+  background: var(--accent-tint); border-radius: 999px; padding: 4px 10px;
+  font-variant-numeric: tabular-nums; white-space: nowrap;
+}
+.lesson-bar {
+  position: sticky; top: 58px; z-index: 5; background: var(--bg);
+  padding: 0 20px 10px;
+}
+.lesson-top { padding-bottom: 8px; }
+@media (max-width: 420px) {
+  /* The course survives; the unit goes. An ellipsis through the middle of
+     "Stage 1 · Meet the Accent" tells a learner less than dropping it. */
+  .lk-unit { display: none; }
+  .lesson-name { font-size: 15px; }
+  .lesson-top { gap: 10px; padding-left: 14px; padding-right: 14px; }
+  .lesson-bar { padding-left: 14px; padding-right: 14px; }
+}

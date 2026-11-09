@@ -64,6 +64,14 @@ export const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<':
 export function record(thunk, key) {
   stopSpeech();                                  // leaving/entering a page stops any reading
   tearDownPage();                                // practice recordings + live capture die with the page
+  // THE WIDE PAGE FLAG DIES WITH THE PAGE TOO. It was cleared in
+  // workspacePage first, which looked like "every paint clears it" and is
+  // not: renderActingChapter and many others write app.innerHTML straight
+  // out and never call it, so opening a chapter from the wide shelf left
+  // its prose running at an 1180px measure. record() is the one function
+  // all 101 page renderers do call, so it is the only honest chokepoint.
+  // The page that wants it sets it again straight after its own paint.
+  document.body.classList.remove('page-wide');
   if (navRestoring) { navRestoring = false; return; }
   const top = navStack[navStack.length - 1];
   if (top === thunk) return;                     // ignore same-page re-render
