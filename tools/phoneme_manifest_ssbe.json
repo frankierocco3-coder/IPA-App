@@ -1,0 +1,493 @@
+{
+  "_readme": [
+    "Standard British isolated phonemes - HUMAN recordings, one consistent",
+    "reference voice. This manifest is production tooling only; it never ships",
+    "(tools/ is excluded from the deployed artifact). It is also the file",
+    "tools/prep_phonemes.py reads to know the order and the names, so a session",
+    "cannot be prepped without it.",
+    "Workflow: record each entry -> name the file <slug>.mp3 -> run",
+    "  python3 tools/prep_phonemes.py <folder> --manifest tools/phoneme_manifest_ssbe.json --out prepped/",
+    "  python3 tools/import_phonemes.py prepped/ --dialect ssbe --voice reference --dry-run",
+    "then again without --dry-run, listen at #audit, mark Good, export the",
+    "flags file and commit it. Nothing plays for a learner until the exact",
+    "dialect/voice/slug id is in APPROVED_PHONEMES.",
+    "General guidance: quiet room, consistent mic distance, no added vowel",
+    "after consonants, no trailing breath. A syllable demonstration must",
+    "sound like a syllable ON PURPOSE - it is labelled as one in the app.",
+    "Entry order follows docs/PHONEME_RECORDING_LIST.md, because",
+    "tools/prep_phonemes.py --split names files BY THIS ORDER when it cuts one",
+    "continuous take - recording in a different order misnames every clip.",
+    "Syllable-demo frame: /ɑː/ - the aCa frame is /ɑːCɑː/, the nam manifest's",
+    "/ɑCɑ/ in the only /ɑ/-quality this accent has. The spec's core list gives",
+    "it as \"broad BATH /ɑː/\" and the entries file carries it as",
+    "palm_bath_vowel, so it is in the inventory. It is long and BACK, so it",
+    "does colour neighbours: listen for a darkened /l/ or a backed /k/ and re-",
+    "take.",
+    "Cast a present-day Standard British speaker (professional register,",
+    "contemporary - not a trained RP stage voice). The spec calls this target",
+    "\"the British English of present-day film, TV and everyday professional",
+    "life\".",
+    "They must own all five core markers as their own speech, not as imitation:",
+    "the non-rhotic skeleton (broad BATH, rounded LOT, GOAT), steady SQUARE",
+    "/ɛː/, GOOSE far forward, tense happY /i/, open lowered TRAP.",
+    "Biggest thing to avoid in the booth: booth-careful articulation sliding",
+    "into Traditional RP - SQUARE regliding to [eə] and happY going lax [ɪ].",
+    "Spot-check those two takes first.",
+    "Second-biggest: register drift the other way. Keep [t] fully articulated",
+    "in t_syllable; the glottal is a realization of /t/ and has its own clip.",
+    "SHARE RULE. Most of these sounds are the same in every course, so one take",
+    "is recorded and copied into each. That is NOT safe for every entry: where an",
+    "accent's own published spec names a departure, that accent records its own.",
+    "Each entry carries \"take\": \"shared\" or \"accent-specific\" - never reuse",
+    "another course's file for an accent-specific one.",
+    "Accent-specific in Standard British (3): trap_vowel, goose_vowel, near_diphthong"
+  ],
+  "dialect": "ssbe",
+  "voice": "reference",
+  "entries": [
+    {
+      "symbol": "f",
+      "slug": "f",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/f.mp3",
+      "guidance": "Controlled voiceless sustain /fff/, ~1s, lower lip to upper teeth. No vowel before or after.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "v",
+      "slug": "v",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/v.mp3",
+      "guidance": "Voiced sustain /vvv/, ~1s, buzz audible throughout. No added vowel.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "θ",
+      "slug": "theta",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/theta.mp3",
+      "guidance": "Voiceless dental sustain /θθθ/, ~1s, tongue against the top teeth. No vowel before or after.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "ð",
+      "slug": "eth",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/eth.mp3",
+      "guidance": "Voiced dental sustain /ððð/, ~1s - tongue against the top teeth, voicing on throughout. No added vowel.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "s",
+      "slug": "s",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/s.mp3",
+      "guidance": "Controlled voiceless sustain /sss/, ~1s. No vowel before or after.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "z",
+      "slug": "z",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/z.mp3",
+      "guidance": "Voiced sustain /zzz/, ~1s, buzz audible throughout. No added vowel.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "ʃ",
+      "slug": "esh",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/esh.mp3",
+      "guidance": "Voiceless sustain /ʃʃʃ/, ~1s, postalveolar with light lip rounding. No vowel before or after.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "ʒ",
+      "slug": "ezh",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/ezh.mp3",
+      "guidance": "Voiced sustain /ʒʒʒ/, ~1s - the sound in the middle of measure, buzz throughout. No added vowel.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "h",
+      "slug": "h",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/h.mp3",
+      "guidance": "Voiceless glottal breath /h/, ~1s of audible airflow, no voicing. Nothing after it - no 'huh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "m",
+      "slug": "m",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/m.mp3",
+      "guidance": "Hummed /mmm/, ~1s, lips closed the whole time. No vowel before or after.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "n",
+      "slug": "n",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/n.mp3",
+      "guidance": "Sustained /nnn/, ~1s, tongue tip on the alveolar ridge throughout. No added vowel.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "ŋ",
+      "slug": "eng",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/eng.mp3",
+      "guidance": "Sustained velar /ŋ/, ~1s - back of the tongue up, no [g] release at the end and no added vowel.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "l",
+      "slug": "l",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/l.mp3",
+      "guidance": "Clear [l] sustained ~1s, tongue tip on the ridge, air round the sides. Do not vocalise toward [o] - that is a variable, not the target.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "r",
+      "slug": "r",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/r.mp3",
+      "guidance": "Sustain the approximant [ɹ], ~1s, no tap and no trill. Non-rhotic accent: /r/ sounds only before a vowel, so use that onset quality.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "ɪ",
+      "slug": "kit_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/kit_vowel.mp3",
+      "guidance": "Steady /ɪ/ as in kit, ~0.7-1s at stable pitch. Lax and stressed - no drift toward /iː/, and not the tense happY /i/.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "KIT"
+    },
+    {
+      "symbol": "e",
+      "slug": "dress_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/dress_vowel.mp3",
+      "guidance": "Steady /e/ as in dress, ~0.7-1s. Keep it a monophthong - no FACE glide, and clear of the longer, opener SQUARE /ɛː/.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "DRESS"
+    },
+    {
+      "symbol": "æ",
+      "slug": "trap_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/trap_vowel.mp3",
+      "guidance": "Open, lowered /æ/ as in trap, ~0.7-1s, close to [a] but kept front and short - not a clipped back PALM /ɑː/. Stay low: do not raise it toward /e/.",
+      "status": "awaiting recording",
+      "take": "accent-specific",
+      "takeWhy": "ssbe core: Open, lowered TRAP, close to [a]",
+      "lexicalSet": "TRAP"
+    },
+    {
+      "symbol": "ʌ",
+      "slug": "strut_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/strut_vowel.mp3",
+      "guidance": "Relaxed /ʌ/ as in but, ~0.7-1s on one position. Stressed and fuller than schwa - no drift.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "STRUT"
+    },
+    {
+      "symbol": "ʊ",
+      "slug": "foot_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/foot_vowel.mp3",
+      "guidance": "Short lax rounded /ʊ/ as in foot, ~0.7-1s. Light rounding, and no drift toward the long GOOSE /uː/.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "FOOT"
+    },
+    {
+      "symbol": "ɒ",
+      "slug": "lot_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/lot_vowel.mp3",
+      "guidance": "Short rounded /ɒ/ as in lot, ~0.7-1s. The rounding is the point - keep the lips rounded throughout, never a flat unrounded 'ah'.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "LOT"
+    },
+    {
+      "symbol": "ə",
+      "slug": "schwa",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/schwa.mp3",
+      "guidance": "Neutral unstressed schwa, short side of ~0.7s, low energy - the colourless 'uh'. Keep it central, no stress colour.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "commA (weak)"
+    },
+    {
+      "symbol": "i",
+      "slug": "happy_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/happy_vowel.mp3",
+      "guidance": "Tense but weak /i/ as in happy, city - short, ~0.5s, low energy. FLEECE quality at half FLEECE length; run it to 1s and it is just /iː/. Never the lax /ɪ/.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "happY (weak)"
+    },
+    {
+      "symbol": "iː",
+      "slug": "fleece_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/fleece_vowel.mp3",
+      "guidance": "Tense /iː/ as in fleece, ~1s, steady - resist any onglide. Give it full length: happY /i/ is this quality without it.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "takeNote": "General Australian records its own take of this sound; this one is the shared take",
+      "lexicalSet": "FLEECE"
+    },
+    {
+      "symbol": "ɑː",
+      "slug": "palm_bath_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/palm_bath_vowel.mp3",
+      "guidance": "Long open unrounded /ɑː/ as in palm, ~1s, steady - the broad BATH words take it too. No rounding toward /ɔː/.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "PALM/BATH"
+    },
+    {
+      "symbol": "ɔː",
+      "slug": "thought_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/thought_vowel.mp3",
+      "guidance": "Long rounded /ɔː/ as in thought, ~1s, steady rounding - a monophthong, no glide, and no drift toward the short /ɒ/.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "THOUGHT"
+    },
+    {
+      "symbol": "uː",
+      "slug": "goose_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/goose_vowel.mp3",
+      "guidance": "Broad /uː/ as in goose but spoken far forward, closer to [ʉː], ~1s. Lips rounded, tongue central - forward of a back 'oo', never a fully front rounded vowel.",
+      "status": "awaiting recording",
+      "take": "accent-specific",
+      "takeWhy": "ssbe core: Fronted GOOSE, broad /uː/ spoken far forward, closer to [ʉː]",
+      "lexicalSet": "GOOSE"
+    },
+    {
+      "symbol": "ɜː",
+      "slug": "nurse_vowel",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/nurse_vowel.mp3",
+      "guidance": "Long stressed /ɜː/ as in nurse, ~1s, steady and central. Non-rhotic: no r-colour, no final r. Must read clearly longer and stronger than schwa, not a stretched schwa.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "NURSE"
+    },
+    {
+      "symbol": "ɛː",
+      "slug": "contemporary_square",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/contemporary_square.mp3",
+      "guidance": "Long steady /ɛː/ as in square, ~1s held on one position. SQUARE is a monophthong in this accent - no glide to schwa at all.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "contemporary SQUARE"
+    },
+    {
+      "symbol": "eɪ",
+      "slug": "face_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/face_diphthong.mp3",
+      "guidance": "Full audible glide /eɪ/ as in face, ~1s - start near DRESS height and land near /ɪ/. Do not flatten it into one steady vowel.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "takeNote": "Cockney records its own take of this sound; this one is the shared take",
+      "lexicalSet": "FACE"
+    },
+    {
+      "symbol": "aɪ",
+      "slug": "price_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/price_diphthong.mp3",
+      "guidance": "Complete audible glide /aɪ/ as in price - start open, land near /ɪ/. The whole journey, ~1s, with the landing not clipped.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "takeNote": "Cockney records its own take of this sound; this one is the shared take",
+      "lexicalSet": "PRICE"
+    },
+    {
+      "symbol": "ɔɪ",
+      "slug": "choice_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/choice_diphthong.mp3",
+      "guidance": "Full glide /ɔɪ/ as in choice, ~1s - start rounded and back, land near /ɪ/. Rounding on the start only.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "lexicalSet": "CHOICE"
+    },
+    {
+      "symbol": "əʊ",
+      "slug": "goat_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/goat_diphthong.mp3",
+      "guidance": "Full glide /əʊ/ as in goat, ~1s - start on central schwa, not a rounded back vowel, then glide to /ʊ/. No pre-/l/ backing here.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "takeNote": "Cockney records its own take of this sound; this one is the shared take",
+      "lexicalSet": "GOAT"
+    },
+    {
+      "symbol": "aʊ",
+      "slug": "mouth_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/mouth_diphthong.mp3",
+      "guidance": "Full glide /aʊ/ as in mouth, ~1s - open start, land rounded near /ʊ/. One smooth journey, no break in the middle.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "takeNote": "Cockney records its own take of this sound; this one is the shared take",
+      "lexicalSet": "MOUTH"
+    },
+    {
+      "symbol": "ɪə",
+      "slug": "near_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/near_diphthong.mp3",
+      "guidance": "Centring glide /ɪə/ as in near, ~1s - /ɪ/ into schwa, but lighter and shorter than RP's. Let it lean toward smoothing without arriving at a long [ɪː].",
+      "status": "awaiting recording",
+      "take": "accent-specific",
+      "takeWhy": "ssbe variable: NEAR smoothing toward a long [ɪː] for some speakers",
+      "lexicalSet": "NEAR"
+    },
+    {
+      "symbol": "ʊə",
+      "slug": "cure_diphthong",
+      "type": "isolated",
+      "path": "audio/phonemes/ssbe/reference/cure_diphthong.mp3",
+      "guidance": "Full centring glide /ʊə/ as in cure, ~1s - rounded /ʊ/ into schwa. Keep both targets audible, not one long vowel.",
+      "status": "awaiting recording",
+      "take": "shared",
+      "takeNote": "General Australian records its own take of this sound; this one is the shared take",
+      "lexicalSet": "CURE"
+    },
+    {
+      "symbol": "p",
+      "slug": "p_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/p_syllable.mp3",
+      "guidance": "Syllable demo (stops and affricates cannot be sustained): a clean /ɑːpɑː/ - full closure and crisp release, never a standalone 'puh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "b",
+      "slug": "b_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/b_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːbɑː/ with voicing right through the closure - a true voiced /b/, never 'buh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "t",
+      "slug": "t_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/t_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːtɑː/ with a fully articulated alveolar [t]. The glottal [ʔ] is a realization of /t/ and has its own clip - keep this one [t].",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "d",
+      "slug": "d_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/d_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːdɑː/ - voiced alveolar /d/, closure then clean release, no 'duh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "k",
+      "slug": "k_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/k_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːkɑː/ - clean velar closure and release, no 'kuh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "g",
+      "slug": "g_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/g_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːgɑː/ - voiced velar closure with an audible release, no 'guh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "tʃ",
+      "slug": "ch_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/ch_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːtʃɑː/ - one affricate unit, closure into friction, not /t/ plus /ʃ/ and never 'chuh'. This is the sound in tune /tʃuːn/.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "dʒ",
+      "slug": "j_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/j_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːdʒɑː/ - one voiced affricate unit, never 'juh'. This is the sound yod coalescence gives duty /ˈdʒuːti/.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "w",
+      "slug": "w_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/w_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːwɑː/ - rounded lips gliding through, a moving approximant, never a standalone 'wuh'.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "j",
+      "slug": "yod_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/yod_syllable.mp3",
+      "guidance": "Syllable demo: /ɑːjɑː/ - a clean palatal glide into the vowel, never 'yuh'. Coalescence belongs in tune and duty, not here.",
+      "status": "awaiting recording",
+      "take": "shared"
+    },
+    {
+      "symbol": "ʔ",
+      "slug": "glottal_stop_syllable",
+      "type": "syllable",
+      "path": "audio/phonemes/ssbe/reference/glottal_stop_syllable.mp3",
+      "guidance": "Syllable demo of a realization, not a phoneme: [ʔ] is /t/ here. Frame shifts to /ˈɑːtə/ spoken [ˈɑːʔə] - glottalling needs an unstressed next syllable. No isolated click.",
+      "status": "awaiting recording",
+      "take": "shared"
+    }
+  ]
+}

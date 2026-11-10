@@ -49,7 +49,7 @@ export async function renderAudioAudit(filters = { d: 'all', v: 'all', kind: 'al
       }
     }
   }
-  for (const d of ['nam', 'rp', 'aus', 'ssbe']) {
+  for (const d of ['nam', 'rp', 'aus', 'ssbe', 'cockney']) {
     // Voice keys come from the candidate index itself (so a human
     // 'reference' voice shows up the moment its files are imported); with
     // no candidates on disk yet, fall back to the expected keys so the

@@ -178,7 +178,7 @@ def main():
             continue
         d = man.get("dialect")
         v = man.get("voice", "reference")
-        if d not in ("nam", "rp", "ssbe", "aus"):
+        if d not in ("nam", "rp", "ssbe", "aus", "cockney"):
             fail("%s: unknown dialect %r" % (mp.name, d))
             continue
         seen = set()

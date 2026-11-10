@@ -2,8 +2,14 @@
 
 Sixteen recordings: ten vowels, three sustained consonants, three syllable
 demonstrations. Frankie records these himself; this page is the script to
-read from. Generated from `tools/phoneme_manifest_nam.json` — if the two
-ever disagree, the manifest wins.
+read from.
+
+This page is HAND-WRITTEN, and deliberately so. `tools/phoneme_script.py`
+generates the other four accents' scripts from their manifests, but it
+REFUSES this one: `tools/phoneme_manifest_nam.json` holds only the pilot's
+sixteen, while this page also carries Batch 2's twenty-six below. Generating
+it would throw those away. Change this file by hand; if the pilot section
+and the manifest ever disagree, the manifest wins.
 
 ## Before you start
 

@@ -15,6 +15,59 @@ off-axis, same distance every clip, quiet appliance-free room.
 
 Grouped by recording session so you only wear one accent hat at a time.
 
+## This sheet plans; the per-accent scripts are what you read from
+
+This page is the union across all five courses, which makes it the right
+place to plan a session and the wrong place to stand at a microphone with.
+Each accent has its own read-from script, generated from its manifest:
+
+| Accent | Script |
+|---|---|
+| Traditional RP | `docs/PHONEME_RECORDING_SCRIPT_RP.md` |
+| Standard British | `docs/PHONEME_RECORDING_SCRIPT_SSBE.md` |
+| General Australian | `docs/PHONEME_RECORDING_SCRIPT_AUS.md` |
+| Cockney | `docs/PHONEME_RECORDING_SCRIPT_COCKNEY.md` |
+| Neutral American | `docs/PHONEME_RECORDING_SCRIPT_NAM.md` (hand-written) |
+
+**The per-accent counts live in the scripts, not here.** Each one prints
+how many takes that course needs at the top of its own page, computed from
+its manifest and `APPROVED_PHONEMES` when the script is generated. A copy
+of those numbers on this page would be a hand-maintained count beside a
+generated one — which is exactly how this sheet spent seven weeks telling
+you to drop 62 files in a folder, 42 of them already recorded and approved.
+
+Those four are generated — do not hand-edit them:
+
+```bash
+python3 tools/phoneme_script.py --all          # rewrite all four
+python3 tools/phoneme_script.py --all --check  # fail if one is stale
+```
+
+Change a manifest, then regenerate. The nam script is hand-written and the
+tool refuses it, because the nam manifest covers only the pilot's sixteen
+while that page carries all forty-two.
+
+There is an HTML version of the same four scripts for reading from in the
+room — all four accents on one page, with a filter that hides the
+already-covered sounds and a tick-list for the session:
+
+```bash
+python3 tools/phoneme_booth_page.py --out booth.html
+```
+
+It takes its facts from `tools/phoneme_booth_data.py`, which reads the
+manifests through the same functions the markdown uses, so the page cannot
+disagree with the scripts. It emits pure ASCII on purpose: an em dash served
+without a declared charset prints as mojibake, and the generator refuses to
+write a non-ASCII byte.
+
+**Do not add the four scripts together.** Each counts the takes its own
+course needs, and a shared sound is counted by every course that wants it
+while being recorded once, so the sum comes out well above the real session
+total below. Each script says so on its own page, gives the session total,
+and names which other accents each of its new shared sounds also serves —
+so finishing one accent shortens the rest.
+
 ---
 
 ## Session 1 — Sustained consonants (14) · say it and HOLD it 2–3 seconds
@@ -123,12 +176,57 @@ demos, never as pure sounds. Say the frame word exactly as written.
 
 ## Handoff
 
-Drop the 62 files in one folder anywhere (AirDrop to the Mac works) and
+Drop the files in one folder anywhere (AirDrop to the Mac works) and
 tell Tess where. Pipeline from there: polish (trim, high-pass, noise
 floor, level-match) → best-of-three take selection with you → import via
 tools/import_phonemes.py (shared sounds copied into every course that
 uses them, dialect-specific ones only where they belong) → your ear at
 #audit → APPROVED_PHONEMES flips the sound-page heroes live.
+
+## Nine sounds must NOT be copied between courses
+
+Copying one take into every course that uses a slug is right for most of
+this sheet, and wrong for nine entries: the accents' own published specs in
+`js/data/dialects.js` name a departure, so an RP or American take copied
+across would teach the wrong sound. Each of the nine has exactly ONE
+divergent accent; every other course that uses the slug still shares a take.
+
+| slug | its own take | why (dialects.js) |
+|---|---|---|
+| `face_diphthong` | **Cockney** | core — the diphthong shift, FACE realized [æɪ] |
+| `price_diphthong` | **Cockney** | core — the diphthong shift, PRICE realized [ɑɪ] |
+| `goat_diphthong` | **Cockney** | core — the diphthong shift, GOAT realized [æʊ] |
+| `mouth_diphthong` | **Cockney** | common — MOUTH flattened toward a long [æː] |
+| `goose_vowel` | **Standard British** | core — fronted GOOSE, spoken far forward, toward [ʉː] |
+| `trap_vowel` | **Standard British** | core — open, lowered TRAP, close to [a] |
+| `near_diphthong` | **Standard British** | variable — NEAR smoothing toward a long [ɪː] |
+| `fleece_vowel` | **Australian** | common — FLEECE with a small onglide, [ɪi] |
+| `cure_diphthong` | **Australian** | variable — CURE rare and receding, merging toward /oː/ |
+
+Cockney 4, Standard British 3, Australian 2. The per-accent manifests carry
+this as `"take": "shared"` or `"take": "accent-specific"` on every entry,
+with the reason in `takeWhy`, so the rule travels with the session rather
+than living only here.
+
+**Not on this list, deliberately.** Cockney GOOSE: `ʉː` is *Australian*
+GOOSE and the cockney block says nothing about GOOSE — fronting it would
+invent a feature. SQUARE, LOT and THOUGHT: their big differences already
+have their own symbols and slugs (`square_diphthong` / `contemporary_square`
+/ `australian_square`, `american_lot_palm` / `australian_lot`,
+`australian_thought`), so there is nothing left to split.
+
+## How many takes that is
+
+- 62 slugs in the union of all five courses
+- … of which 42 are already recorded and approved (Neutral American, 2026-09-22)
+- 20 slugs have no take at all yet
+- plus the 9 accent-specific takes above
+
+**29 takes outstanding** (20 + 9). Reusing the existing 42 as the shared takes
+is sound because the same person records every course — for a genuinely
+identical sound, "the nam take" and "the RP take" are the same performance.
+Re-recording all five courses separately would be 71 takes, or 180 if every
+course gets its own complete private set.
 
 Where the AI pilot's survivors overlap this list, your take and the AI
 take can both sit at #audit and your ear picks per sound.

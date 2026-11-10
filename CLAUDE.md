@@ -92,7 +92,12 @@ python3 tools/build_artifact.py _site              # exactly what Pages publishe
 python3 tools/generate_sonnets.py --source ibsen --dialect rp --all --dry-run
 python3 tools/generate_voices.py --idioms --dry-run  # idiom clips, ~21k credits pending
 
-# owner phoneme recordings (offline, free) — prep then import
+# owner phoneme recordings (offline, free) — script, prep, then import
+python3 tools/phoneme_script.py --all              # booth scripts from the manifests
+python3 tools/phoneme_script.py --all --check      # fail if a script is stale
+python3 tools/phoneme_booth_page.py --out <f.html> # same data as one HTML page
+#   nam is REFUSED on purpose: its manifest is the 16-sound pilot, but
+#   docs/PHONEME_RECORDING_SCRIPT_NAM.md carries all 42 by hand
 python3 tools/prep_phonemes.py takes/ --out prepped/ --dry-run   # trim, level, → mp3
 #   ONE take per file (owner rule 2026-09-21): a file with a second sound is refused
 python3 tools/import_phonemes.py prepped/ --dialect nam --voice reference --dry-run
@@ -435,9 +440,9 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                15627 lines
+- js/main.js                15658 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  872
+- regression check() sites  887
 
 ### Review
 

@@ -1543,7 +1543,7 @@ function renderGuidebook(unit, track) {
       // The slug was resolved at render time, alongside the label that
       // promises it. No clip means no recording, which is exactly when the
       // example word is the right thing to say.
-      if (b.dataset.clip && playPhoneme(b.dataset.clip, 'nam')) return;
+      if (b.dataset.clip && playPhoneme(b.dataset.clip, gbAcc ?? 'nam')) return;
       speak(b.dataset.say, { lang, accent: gbAcc });
     });
   });
@@ -15099,7 +15099,7 @@ function lessonChrome(s, body) {
   // Wired here rather than in each renderer: this is the one place
   // every exercise's markup lands, and the slug rides on the element.
   app.querySelector('.display-say')?.addEventListener('click', e =>
-    playPhoneme(e.currentTarget.dataset.phoneme, 'nam'));
+    playPhoneme(e.currentTarget.dataset.phoneme, e.currentTarget.dataset.accent ?? 'nam'));
 }
 
 function renderExercise(s) {
@@ -15153,14 +15153,20 @@ function audioButton(ex) {
 // added later then stays silent until somebody records it, instead of
 // quietly teaching an American vowel under a British heading.
 // Shared by the exercise display below and the guidebook chips above.
-const phonemeClipOk = accent => accent == null || accent === 'nam';
+// An accent is listed here only once its own isolated clips exist, so a
+// course can never borrow another accent's vowel while it waits for its
+// own recordings. Resolution below uses the real accent, so this is the
+// second lock, not the only one.
+const PHONEME_CLIP_ACCENTS = new Set(['nam', 'cockney']);
+const phonemeClipOk = accent => accent == null || PHONEME_CLIP_ACCENTS.has(accent);
 
-// TEN OF THE FORTY-TWO RECORDINGS ARE SYLLABLES, and resolving only the
+// SOME OF EVERY ACCENT'S RECORDINGS ARE SYLLABLES, and resolving only the
 // isolated name silently loses every one of them. /p/ is stored as
 // `p_syllable`, not `p`, because a plosive cannot be spoken alone — and
-// that is true of exactly p b t d k g tʃ dʒ w j. Matching only the plain
-// slug reaches 32 of the 42 and drops the ten the owner recorded BECAUSE
-// they are the hard ones.
+// that is true of exactly p b t d k g tʃ dʒ w j, plus [ʔ] in the accents
+// that have it. In Neutral American that is ten of the forty-two: matching
+// only the plain slug reaches 32 and drops the ten the owner recorded
+// BECAUSE they are the hard ones.
 //
 // A SYLLABLE DEMO IS NEVER PRESENTED AS THE ISOLATED SOUND. The sound page
 // has said so in its own hero label since it was built, and the callers
@@ -15175,9 +15181,10 @@ function phonemeClip(sym, accent) {
   if (!p || typeof p.name !== 'string') return null;
   const slug = phonemeSlug(sym);
   if (!slug) return null;
-  if (hasPhonemeClip(slug, 'nam')) return { slug, syllable: false };
+  const acc = accent ?? 'nam';
+  if (hasPhonemeClip(slug, acc)) return { slug, syllable: false };
   const syl = `${slug}_syllable`;
-  return hasPhonemeClip(syl, 'nam') ? { slug: syl, syllable: true } : null;
+  return hasPhonemeClip(syl, acc) ? { slug: syl, syllable: true } : null;
 }
 
 /** How to announce a clip, in the sound page's own words. */
@@ -15196,6 +15203,7 @@ function displayHtml(s, ex) {
   const clip = displayClip(s, ex);
   return clip
     ? `<button class="display-say" type="button" data-phoneme="${esc(clip.slug)}"
+         data-accent="${esc(exAccent(s, ex) ?? 'nam')}"
          aria-label="${esc(clipLabel(clip, ex.display))}" title="${clipTitle(clip)}">${esc(ex.display)}</button>`
     : `<span>${esc(ex.display)}</span>`;
 }

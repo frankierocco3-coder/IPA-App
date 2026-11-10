@@ -35,7 +35,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 from audio_root import AUDIO   # the IPA-Audio checkout beside this repo
 DATA = ROOT / "js" / "data"
 
-DIALECTS = ("nam", "rp", "aus", "ssbe")
+DIALECTS = ("nam", "rp", "aus", "ssbe", "cockney")
 VOICE_RE = re.compile(r"^[a-z][a-z0-9_-]{0,23}$")
 MIN_BYTES = 2048          # a real recording is never this small
 
