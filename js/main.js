@@ -103,7 +103,7 @@ import { IBSEN } from './data/ibsen.js';
 import { IDIOM, idiomFor, AUS_PATTERNS, U_NON_U, FALSE_FRIENDS, MLE } from './data/idiom.js';
 import { scanLine } from './scan.js';
 import { PENTAMETER, metreOfSonnet } from './data/sonnet-metre.js';
-import { loadPron, ipaFor } from './pron.js';
+import { loadPron, ipaFor, pronReady, stressOf } from './pron.js';
 import { migrateLegacyCustomText, listProjects, getProject, saveProject, createProject,
          duplicateProject, deleteProject, emptyProject, touchRehearsed, sortProjects,
          searchProjects, STATUSES, CONTENT_TYPES, contentTypeLabel, splitLines } from './projects.js';
@@ -12859,7 +12859,11 @@ async function renderProject(id, tab = 'text') {
 
   if (tab === 'text') paneText(pane, p, id);
   else if (tab === 'cards') paneFlashCards(pane, p);
-  else if (tab === 'scan') pane.innerHTML = p.lines.length ? scanPane(p.lines, false) : emptyText();
+  else if (tab === 'scan') {
+    const drawScan = () => { pane.innerHTML = p.lines.length ? scanPane(p.lines, false) : emptyText(); };
+    drawScan();
+    if (p.lines.length && !pronReady()) loadPron().then(drawScan).catch(() => { /* marks stay off */ });
+  }
   else if (tab === 'ipa') {
     if (!p.lines.length) pane.innerHTML = emptyText();
     else { pane.innerHTML = `<p class="pane-note">Loading the pronunciation dictionary…</p>`; fillSound(p.lines, p.accent, pane, { projectId: id }); }
@@ -13698,7 +13702,14 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
     mode = m;
     app.querySelectorAll('.son-tab').forEach(t => t.classList.toggle('on', t.dataset.mode === m));
     if (m === 'speak') { pane.innerHTML = speakPane(lines, cur, narrated); wireSpeak(lines, cur, pane, clip); }
-    else if (m === 'scan') { pane.innerHTML = scanPane(lines, verse, metre); }
+    else if (m === 'scan') {
+      const drawScan = () => { pane.innerHTML = scanPane(lines, verse, metre); };
+      drawScan();
+      // The dictionary is a big lazy fetch, so Scan paints the metre at once
+      // and the word-stress layer arrives when it can.
+      if (!pronReady()) loadPron().then(() => { if (mode === 'scan') drawScan(); })
+        .catch(() => { /* metre alone is still a usable scan */ });
+    }
     else if (m === 'perform') { renderPerformPane(pane, { lines, accent: cur, clip, scopeId, projectId }); }
     else if (m === 'plain') { pane.innerHTML = plainPane(recast); }
     else if (m === 'both') { pane.innerHTML = sideBySidePane(lines, recast, pairedVoice(lines, today, cur)); wireSideBySide(pane); }
@@ -14478,11 +14489,23 @@ function wireSpeak(lines, accent, pane, clip) {
 // One scanned line. `verse` decides only whether a count that is not ten
 // is FLAGGED: in prose there is no expected count, so nothing is off.
 function scanLineHtml(ln, verse, expected = 10) {
-  const { words, count, regular } = scanLine(stripStage(ln), expected);
+  // Word stress comes from the dictionary when it is loaded; until then this
+  // renders exactly as it always did, and the caller redraws once it lands.
+  const { words, count, regular } = scanLine(stripStage(ln), expected,
+    { stressOf: pronReady() ? stressOf : null, verse });
+  const MARK = { strong: '´', weak: '˘' };
   const syls = words.map(w => {
     if (w.space) return '<span class="scan-sp"> </span>';
-    return `<span class="scan-word">${w.syllables.map(sy =>
-      `<span class="syl ${sy.stress}"><span class="syl-mark">${sy.stress === 'strong' ? '´' : '˘'}</span><span class="syl-txt">${esc(sy.text)}</span></span>`).join('')}</span>`;
+    return `<span class="scan-word">${w.syllables.map(sy => {
+      // In verse the mark is the BEAT and a clash is where the word refuses
+      // it. In prose there is no beat, so an unknown syllable shows nothing
+      // rather than a guess.
+      const cls = `syl ${sy.stress}${sy.clash ? ' is-clash' : ''}`;
+      const tip = sy.clash
+        ? ` title="the metre wants ${sy.stress === 'strong' ? 'stress' : 'no stress'} here; the word says otherwise"`
+        : '';
+      return `<span class="${cls}"${tip}><span class="syl-mark">${MARK[sy.stress] ?? '·'}</span><span class="syl-txt">${esc(sy.text)}</span></span>`;
+    }).join('')}</span>`;
   }).join('');
   return `<div class="scan-line">
     <div class="scan-syls">${syls}</div>
@@ -14496,9 +14519,9 @@ function scanLineHtml(ln, verse, expected = 10) {
 function scanPane(lines, verse = true, metre = PENTAMETER) {
   const linesHtml = lines.map(ln => scanLineHtml(ln, verse, metre.expected)).join('');
   const intro = verse
-    ? `<p class="pane-note"><b>${esc(metre.name)}</b> is ${esc(metre.feetWord)} beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×${metre.feet}) — ${esc(metre.syllables)} syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that isn’t ${metre.expected} (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>
+    ? `<p class="pane-note"><b>${esc(metre.name)}</b> is ${esc(metre.feetWord)} beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×${metre.feet}) — ${esc(metre.syllables)} syllables a line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A syllable is <span class="syl is-clash"><span class="syl-txt">underlined</span></span> where the word refuses the beat — a word whose own stress falls the other way. Those are the inversions and spondees, and they are the choices worth making deliberately. A count that isn’t ${metre.expected} (⚠) is where the metre bends — a feminine ending, an extra foot, a headless line. Those are moments to notice, not fix.</p>
        ${metre.note ? `<p class="pane-note pane-caveat">${esc(metre.note)}</p>` : ''}`
-    : `<p class="pane-note">This is <b>prose</b>, so there’s no fixed metre to hit — nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
+    : `<p class="pane-note">This is <b>prose</b>, so there’s no fixed metre to hit — nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count. Stress is read from the pronunciation dictionary, so a one-syllable word is left unmarked (·) — in running speech it takes the weight you give it, and guessing for you would be a lie. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
   return `
     ${intro}
     <p class="pane-note pane-caveat">The splits are computed, not perfect — the map, not the territory. Trust your ear where they disagree.</p>
@@ -14554,7 +14577,7 @@ function sceneScanPane(sc) {
     ? `<p class="pane-note">📐 <b>Scan</b>. This scene moves between <b>verse</b> and <b>prose</b>, and each speech is marked with the form it is in. Over verse, <span class="mk-strong">´</span> and <span class="mk-weak">˘</span> lay the iambic pulse across the line and the number is the syllable count, so a count that is not ten (⚠) is where the metre bends. Over prose there is no count to hit and nothing is flagged: the marks show where natural word stress falls, and the unit is the sentence rather than the line.</p>
        <p class="pane-note">Where the form changes, the change is called out. That is worth more than any single line here: a character crossing from verse into prose, or back, has changed how they are thinking.</p>`
     : forms.has('verse')
-      ? `<p class="pane-note">📐 <b>Scan</b>. <b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5), ten syllables to the line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A count that is not ten (⚠) is where the metre bends: a feminine ending, an extra foot, a headless line, or a line shared between two speakers. Those are moments to notice, not to fix.</p>`
+      ? `<p class="pane-note">📐 <b>Scan</b>. <b>Iambic pentameter</b> is five beats of <i>weak–<b>STRONG</b></i> (di-<b>DUM</b> ×5), ten syllables to the line. <span class="mk-strong">´</span> marks where the beat wants stress, <span class="mk-weak">˘</span> where it falls away. A syllable is <span class="syl is-clash"><span class="syl-txt">underlined</span></span> where the word refuses the beat — a word whose own stress falls the other way. Those are the inversions and spondees, and they are the choices worth making deliberately. A count that is not ten (⚠) is where the metre bends: a feminine ending, an extra foot, a headless line, or a line shared between two speakers. Those are moments to notice, not to fix.</p>`
       : `<p class="pane-note">📐 <b>Scan</b>. This scene is <b>prose</b> from end to end, so there is no metre to hit and nothing here is a mistake. <span class="mk-strong">´</span> marks the syllables that carry natural word stress, <span class="mk-weak">˘</span> the ones that fall away, and the number is the syllable count of the sentence. Use it to find the shape of a thought: where the weight lands, and how long a breath has to last.</p>`;
 
   return `${intro}

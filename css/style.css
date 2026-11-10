@@ -723,6 +723,19 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .syl.strong .syl-txt { color: var(--ink); font-weight: 600; }
 .syl.weak .syl-mark { color: var(--muted); }
 .syl.weak .syl-txt { color: var(--muted); }
+/* A syllable with no mark: prose, where the dictionary does not settle a
+   one-syllable word. Shown as a quiet dot rather than a guessed stress. */
+.syl .syl-mark { color: var(--line); }
+/* WHERE THE WORD FIGHTS THE METRE — the inversions and spondees. Underlined
+   rather than recoloured, because the mark above still has to read as the
+   beat: the clash is a second fact about the same syllable, not a third
+   state of the first one. */
+.syl.is-clash .syl-txt {
+  text-decoration: underline wavy #b4632a;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+.syl.is-clash .syl-txt { color: var(--ink); }
 .scan-count { flex: none; font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; align-self: flex-end; padding-bottom: 4px; }
 .scan-count.off { color: #b06a2c; font-weight: 800; }
 

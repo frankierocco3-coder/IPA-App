@@ -12,7 +12,7 @@
 // deliberately NOT exercised here for that reason; their isolation guarantee
 // is covered by the per-project delete test, which asserts the same thing.
 
-import { loadPron, ipaFor } from '../js/pron.js';
+import { loadPron, ipaFor, stressOf } from '../js/pron.js';
 import { rehearsalTargets } from '../js/analytics.js';
 import { PHONEMES, WORDS } from '../js/data/phonemes.js';
 import { createProject, getProject, deleteProject, listProjects } from '../js/projects.js';
@@ -46,7 +46,7 @@ import { DIALECT_ACTION, actionFor } from '../js/data/dialect-in-action.js';
 import { RECASTS, TRANSPOSITION_REVIEW, approvedTranspositions } from '../js/data/recasts.js';
 import { SONNETS } from '../js/data/sonnets.js';
 import { PENTAMETER, metreOfSonnet } from '../js/data/sonnet-metre.js';
-import { scanLine } from '../js/scan.js';
+import { scanLine, syllabify } from '../js/scan.js';
 import { editionFor, allEditions, editionStatus, alignedLines, EDITION_CHUNKS,
          EDITION_CATALOG_COMPLETE, LEGACY_SONNETS } from '../js/data/editions/index.js';
 import { EDITION_REVIEWS } from '../js/data/edition-reviews.js';
@@ -290,7 +290,7 @@ export async function run({ navDoc = document } = {}) {
     ['rp', 'not', 'nɒt'], ['rp', 'lot', 'lɒt'], ['rp', 'stop', 'stɒp'],
     ['rp', 'palm', 'pɑːm'], ['rp', 'bath', 'bɑːθ'], ['rp', 'dance', 'dɑːns'],
     ['rp', 'car', 'kɑː'], ['rp', 'near', 'nɪə'], ['rp', 'square', 'skweə'],
-    ['rp', 'cure', 'kjʊə'], ['rp', 'sorry', 'sɒɹi'], ['rp', 'water', 'wɔːtə'],
+    ['rp', 'cure', 'kjʊə'], ['rp', 'sorry', 'ˈsɒɹɪ'], ['rp', 'water', 'ˈwɔːtə'],
     ['rp', 'law', 'lɔː'], ['rp', 'caught', 'kɔːt'],
     // Standard British: RP skeleton, steady SQUARE
     ['ssbe', 'not', 'nɒt'], ['ssbe', 'square', 'skwɛː'],
@@ -306,6 +306,40 @@ export async function run({ navDoc = document } = {}) {
   const exact = ipaFor('not', 'nam');
   check('nam stays dictionary-exact', exact?.ipa === 'nɑt' && exact.approx === false,
     `got /${exact?.ipa}/ approx=${exact?.approx}`);
+
+  // ── 2b. Length marks and happY, straight from the Accuracy Standard ──
+  // pron.json is CMUdict-derived and the conversion dropped the stress
+  // digits, so FLEECE/GOOSE arrived unmarked and happY was indistinguishable
+  // from FLEECE. The marks were restored from the source (IY1/IY2 → /iː/,
+  // IY0 → /i/; UW1/UW2 → /uː/, UW0 → /u/; AO → /ɔː/), which is the only way
+  // to tell influence /ˈɪnfluəns/ from fluent /ˈfluːənt/. Every string below
+  // is quoted from js/data/dialects.js, so the engine and the published
+  // standard cannot drift apart again.
+  const ipa = (w, a) => ipaFor(w, a)?.ipa;
+  check('length marks: GOOSE and FLEECE carry /ː/, per the Accuracy Standard',
+    ipa('tune', 'nam') === 'tuːn' && ipa('duty', 'nam') === 'ˈduːti'
+    && ipa('new', 'nam') === 'nuː'                       // dialects.js nam.common
+    && ipa('tune', 'rp') === 'tjuːn'                     // dialects.js rp.core
+    && ipa('tune', 'cockney') === 'tʃuːn'                // dialects.js cockney.core
+    && ipa('teacher', 'nam') === 'ˈtiːtʃɚ'               // phonemes.js WORDS, nam
+    && ipa('see', 'nam') === 'siː' && ipa('two', 'nam') === 'tuː',
+    `${ipa('tune', 'nam')} ${ipa('duty', 'nam')} ${ipa('tune', 'cockney')}`);
+  check('happY is accent-specific: lax /ɪ/ in RP, tense /i/ in SSBE, /iː/ in Australian',
+    ipa('happy', 'rp') === 'ˈhæpɪ' && ipa('duty', 'rp') === 'ˈdjuːtɪ'  // dialects.js rp.core
+    && ipa('happy', 'ssbe') === 'ˈhæpi' && ipa('duty', 'ssbe') === 'ˈdjuːti'
+    && ipa('duty', 'cockney') === 'ˈdʒuːʔi'              // dialects.js cockney.core
+    && ipa('duty', 'aus') === 'ˈdjʉːtiː'                 // dialects.js aus.common
+    && ipa('city', 'rp') === 'ˈsɪtɪ' && ipa('cities', 'rp') === 'ˈsɪtɪz',
+    `rp ${ipa('happy', 'rp')}/${ipa('duty', 'rp')} aus ${ipa('duty', 'aus')}`);
+  check('weak vowels survive: a bare /i u/ before a vowel is NOT lengthened',
+    ipa('material', 'rp') === 'məˈtɪɹiəl' && ipa('influence', 'rp') === 'ˈɪnfluəns'
+    && ipa('fluent', 'rp') === 'ˈfluːənt'                // UW1 — the one a rule cannot get
+    && ipa('being', 'rp') === 'ˈbiːɪŋ' && ipa('agree', 'rp') === 'əˈɡɹiː',
+    `influence=${ipa('influence', 'rp')} fluent=${ipa('fluent', 'rp')}`);
+  check('australian never emits /uː/, which engine.js marks foreign to it',
+    !['tune', 'two', 'fluent', 'influence', 'duty', 'goose', 'blue']
+      .some(w => (ipa(w, 'aus') ?? '').includes('uː')),
+    ['tune', 'two', 'fluent'].map(w => `${w}=${ipa(w, 'aus')}`).join(' '));
 
   // ── 3. Recording persistence contract ───────────────────────
   if (!dbSupported()) {
@@ -3766,10 +3800,16 @@ export async function run({ navDoc = document } = {}) {
         ['First reading', 'Second reading', 'Third reading', 'Fourth reading', 'Fifth reading']
           .every(e => [...doc.querySelectorAll('.block-eyebrow')]
             .some(n => n.textContent.trim() === e))
-        && doc.querySelectorAll('.lx-body .guide-key').length >= 5
-        && !!doc.querySelector('.lx-claim'),
+        && doc.querySelectorAll('.guide-key').length >= 5
+        // The standfirst, by whichever name this door renders it. A lesson
+        // record opens through TWO renderers — renderActingChapter from the
+        // collection pane (.read-deck) and renderActingLesson from the module
+        // grid (.lx-claim) — and the blocks are shared, so pinning one door's
+        // wrapper made this check fail on a page that was entirely correct.
+        && !!doc.querySelector('.read-deck, .lx-claim'),
         `${doc.querySelectorAll('.block-eyebrow').length} eyebrows, `
-        + `${doc.querySelectorAll('.lx-body .guide-key').length} key lines`);
+        + `${doc.querySelectorAll('.guide-key').length} key lines, `
+        + `main=${doc.querySelector('main')?.className ?? 'none'}`);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       // A chapter with figures: both render with their alt text and
@@ -4018,11 +4058,23 @@ export async function run({ navDoc = document } = {}) {
 
       clickIn(doc.getElementById('brand-home')); await sleep(300);
       clickIn(side('Studio')); await sleep(400);
+      // THE SHARED LANDING SHAPE (2026-11-09). The page name is the page's
+      // own ("Studio") with the course in the eyebrow, and the
+      // current-project card is .sec-card — the same card Practice shows
+      // for the same fact. It used to be .sp-wt-card and an "Actor's
+      // Studio" h1; .sp-wt-* is still the Speech working-text card's class,
+      // so this asserts the card by what it MUST contain, not by the
+      // wrapper that moved.
+      const sCard = doc.querySelector('.sec-card[aria-label="Current acting project"]');
       check('acting: the Actor’s Studio leads with the current-project card and its three ways in',
-        doc.querySelector('.page-h')?.textContent === 'Actor’s Studio'
-        && !!doc.querySelector('.sp-wt-card')
+        doc.querySelector('.pg-eyebrow')?.textContent === 'Acting & Scene Work'
+        && doc.querySelector('.page-h')?.textContent === 'Studio'
+        && !!sCard
+        && sCard.querySelector('.sec-card-lbl')?.textContent === 'Working on'
+        && !!sCard.querySelector('.sec-card-go')
         && String([...doc.querySelectorAll('.hub-card h2')].map(h => h.textContent))
-           === 'Monologues,Scenes,Custom Work');
+           === 'Monologues,Scenes,Custom Work',
+        `${doc.querySelector('.page-h')?.textContent ?? 'no h1'} | card=${!!sCard}`);
       check('acting: opening the workspace duplicated no Studio project',
         (await listProjects()).length === projectsBefore);
 
@@ -4609,9 +4661,26 @@ export async function run({ navDoc = document } = {}) {
       && cockneyIdioms.find(e => e.term === 'bent')?.flag === 'dated-offensive');
     check('cockney: toCockney derivation — fronting, glottal, h-drop; initial ð survives',
       ipaFor('think', 'cockney')?.ipa === 'fɪŋk'
-      && ipaFor('butter', 'cockney')?.ipa.includes('ʔ')
+      && ipaFor('butter', 'cockney')?.ipa === 'ˈbʌʔə'
       && ipaFor('house', 'cockney')?.ipa[0] !== 'h'
       && ipaFor('the', 'cockney')?.ipa.includes('ð'));
+
+    // The American dictionary has no yod, so coalescence needs it restored
+    // first; and a bare /tj/ matcher fires on compounds instead (courtyard).
+    const yod = w => ipaFor(w, 'cockney')?.ipa;
+    check('cockney: yod coalescence fires on GOOSE/CURE and nowhere else',
+      yod('tuesday') === 'ˈtʃuːzdi' && yod('duke') === 'dʒuːk'
+      && yod('tune') === 'tʃuːn' && yod('during') === 'ˈdʒʊɹɪŋ'
+      && yod('endure') === 'ɛnˈdʒʊə' && yod('immature') === 'ˌɪməˈtʃʊə'
+      && ipaFor('tuesday', 'rp')?.ipa === 'ˈtjuːzdɪ'
+      && ipaFor('new', 'rp')?.ipa === 'njuː' && yod('new') === 'njuː'
+      // morpheme boundaries and yodless GOOSE must stay put
+      && yod('courtyard') === 'ˈkɔːˌtjɑːd' && yod('goodyear') === 'ˈɡʊdjɪə'
+      && yod('katya') === 'ˈkɑːtjə' && yod('bustier') === 'ˈbʌstjə'
+      && yod('two') === 'tuː' && yod('noon') === 'nuːn' && yod('soon') === 'suːn'
+      && yod('true') === 'tɹuː' && yod('blue') === 'bluː' && yod('chew') === 'tʃuː',
+      [...'tuesday duke courtyard goodyear two true'.split(' ')]
+        .map(w => `${w}=${yod(w)}`).join(' '));
     const idx = await fetch(audioUrl('index.json')).then(r => r.json());
     const bob = idx.cockney?.bob ?? [], lizzie = idx.cockney?.lizzie ?? [];
     check('cockney: strict audio parity — Bob and Lizzie carry identical clip sets, 300+ each',
@@ -4861,6 +4930,142 @@ export async function run({ navDoc = document } = {}) {
       && !PENTAMETER.note
       && metreOfSonnet(18).expected === 10 && metreOfSonnet(1).expected === 10
       && scanLine('Shall I compare thee to a summer’s day?').expected === 10);
+
+    // ── The syllabifier, measured against the dictionary ─────
+    // Comparing syllabify() to pron.json turned it into a tested component
+    // rather than a guess. Three real bugs came out, each pinned below.
+    await loadPron();
+    const syl = w => syllabify(w).join('|');
+
+    check('syllabify: a syllabic -le keeps its vowel through the plural',
+      // `wrinkles` scanned as ONE syllable: the -es rule dropped the vowel
+      // that the singular keeps. candle/candles, table/tables, wrinkle/wrinkles.
+      syl('wrinkles') === 'wrin|kles' && syl('candles') === 'can|dles'
+      && syl('tables') === 'tab|les'
+      // and a silent -e plural is still silent
+      && syllabify('holes').length === 1 && syllabify('miles').length === 1
+      && syllabify('rules').length === 1,
+      `wrinkles=${syl('wrinkles')} holes=${syl('holes')}`);
+
+    check('syllabify: the sounded -ed of ragged, wicked, hatred',
+      syl('ragged') === 'rag|ged' && syl('wicked') === 'wick|ed'
+      && syllabify('hatred').length === 2 && syllabify('naked').length === 2
+      // NOT blessed/learned/aged: this dictionary gives them one syllable,
+      // and claiming two would create the mismatch that suppresses stress
+      && syllabify('blessed').length === 1 && syllabify('learned').length === 1
+      && syllabify('aged').length === 1
+      // the ordinary rule is untouched
+      && syllabify('wanted').length === 2 && syllabify('wished').length === 1,
+      `ragged=${syl('ragged')} blessed=${syl('blessed')}`);
+
+    check('syllabify: hiatus after /i u/ splits, but not where the glide fuses',
+      // ra-di-o, ac-tu-al, a-ca-de-mi-a — the largest source of undercounting
+      syllabify('academia').length === 5 && syllabify('accordion').length === 4
+      && syl('actual') === 'ac|tu|al' && syllabify('radio').length === 3
+      && syllabify('various').length === 3
+      // ci/ti/si → /ʃ/, ni/li → /j/, gu/qu → /ɡw kw/: all stay one syllable
+      && syllabify('special').length === 2 && syllabify('action').length === 2
+      && syllabify('union').length === 2 && syllabify('million').length === 2
+      && syllabify('quality').length === 3,
+      `academia=${syl('academia')} special=${syl('special')}`);
+
+    check('syllabify: /ck/ and /ng/ close a syllable, they never open one',
+      syl('wicked') === 'wick|ed' && syl('singer') === 'sing|er'
+      && syl('pocket') === 'pock|et' && syl('chicken') === 'chick|en'
+      // the digraphs that CAN open one still travel forward
+      && syl('father') === 'fa|ther' && syl('nephew') === 'ne|phew'
+      && syl('winter') === 'win|ter',
+      `singer=${syl('singer')} father=${syl('father')}`);
+
+    // THE REGRESSION GUARD. The speller and the dictionary are independent,
+    // so their agreement is a real measurement and not a tautology. It was
+    // 94.9% before these fixes; anything that drops it is a regression.
+    {
+      const NUC = ['eɪ', 'aɪ', 'ɔɪ', 'oʊ', 'aʊ'], SING = 'ɑæʌɔɛɪiʊuəɝɚ';
+      const ipaSyl = str => {
+        let n = 0;
+        for (let i = 0; i < str.length; i++) {
+          const c = str[i];
+          if (c === 'ˈ' || c === 'ˌ') continue;
+          if (NUC.includes(str.slice(i, i + 2))) { n++; i++; continue; }
+          if (SING.includes(c)) { n++; if (str[i + 1] === 'ː') i++; }
+        }
+        return n;
+      };
+      const vocab = new Set();
+      for (const s2 of SONNETS) for (const ln of s2.lines)
+        for (const t of ln.split(/\s+/)) {
+          const k = t.toLowerCase().replace(/[^a-z']/g, '');
+          if (k && ipaFor(k, 'nam')) vocab.add(k);
+        }
+      let hit = 0;
+      for (const w of vocab) {
+        if (syllabify(w).length === ipaSyl(ipaFor(w, 'nam').ipa)) hit++;
+      }
+      const rate = hit / vocab.size;
+      check('syllabify: still agrees with the dictionary on the sonnet vocabulary',
+        rate >= 0.96 && vocab.size > 2000,
+        `${hit}/${vocab.size} = ${(rate * 100).toFixed(2)}%`);
+    }
+
+    // ── Scansion reads real stress (2026-11-10) ──────────────
+    // The Scan tab used to lay a mechanical weak–STRONG alternation over
+    // every line and call it stress, and the PROSE copy claimed those marks
+    // were "natural word stress" when prose got the identical alternation.
+    // The dictionary carries ˈ/ˌ now, so the marks can be true.
+    await loadPron();
+    check('scan: stressOf reads the dictionary’s own marks, per syllable',
+      String(stressOf('duty')) === '1,0' && String(stressOf('agree')) === '0,1'
+      && String(stressOf('ability')) === '0,1,0,0'
+      // the stress shift that makes the pair worth teaching
+      && String(stressOf('photograph')) === '1,0,2'
+      && String(stressOf('photography')) === '0,1,0,0'
+      // monosyllables carry no mark and get no claim: in a line they take
+      // whatever the metre hands them
+      && stressOf('tune') === null && stressOf('the') === null,
+      `duty=${stressOf('duty')} photography=${stressOf('photography')}`);
+
+    const pr = scanLine('The quality of mercy is not strained.', 10,
+      { stressOf, verse: false });
+    const prSyl = pr.words.filter(w => !w.space).flatMap(w => w.syllables);
+    check('scan: prose shows word stress, and leaves one-syllable words unmarked',
+      prSyl.filter(x => x.stress === '').length > 0           // the monosyllables
+      && String(pr.words.filter(w => !w.space)[1].syllables.map(x => x.stress))
+         === 'strong,weak,weak'                                // QUA-li-ty
+      && pr.words.filter(w => !w.space)[0].syllables[0].stress === '',   // "The"
+      prSyl.map(x => x.text + (x.stress || '·')).join(' '));
+
+    // A real trochaic inversion: the line opens MAK-ing against a weak first
+    // beat, so both syllables of "Making" fight the metre.
+    const inv = scanLine('Making a famine where abundance lies,', 10,
+      { stressOf, verse: true });
+    const invWord = inv.words.filter(w => !w.space)[0];
+    check('scan: verse keeps the BEAT and flags where the word refuses it',
+      invWord.syllables.length === 2
+      && invWord.syllables.every(x => x.clash)
+      && invWord.syllables[0].stress === 'weak'      // the beat is unchanged
+      && invWord.syllables[1].stress === 'strong',
+      invWord.syllables.map(x => `${x.text}:${x.stress}${x.clash ? '!' : ''}`).join(' '));
+
+    // THE GUARD THAT MATTERS. The speller and the dictionary disagree about
+    // 5% of words, and a pattern laid over the wrong number of chunks would
+    // mark the wrong syllable with total confidence. A mismatch is "unknown".
+    // `fire` is the stable example: the dictionary hears two nuclei (ˈfaɪɚ)
+    // where the speller sees one vowel group, and in verse the SPELLER is
+    // usually the one the metre agrees with — Shakespeare takes "fire" as a
+    // single syllable constantly. Neither is wrong, so neither gets to claim
+    // the stress. (`wrinkles` used to sit here and no longer mismatches.)
+    const mism = scanLine('fire', 10, { stressOf, verse: true });
+    check('scan: a syllable-count mismatch claims no word stress at all',
+      syllabify('fire').length === 1 && stressOf('fire').length === 2
+      && mism.words[0].known === false
+      && mism.words[0].syllables.every(x => x.word === null && !x.clash),
+      `syllabify=${syllabify('fire').length} dict=${stressOf('fire').length}`);
+
+    check('scan: without a dictionary it behaves exactly as it always did',
+      scanLine('Shall I compare thee to a summer’s day?', 10).words
+        .filter(w => !w.space).flatMap(w => w.syllables)
+        .every(x => (x.stress === 'strong' || x.stress === 'weak') && !x.clash));
 
     // The fix itself: 145 stops crying wolf, and the residual misses are
     // ordinary heuristic noise, not the old fourteen-for-fourteen.
