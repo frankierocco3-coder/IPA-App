@@ -1316,6 +1316,9 @@ function ipaLearnPane(el, course) {
   // nothing rather than something false.
   const allOpen = chain.every(isUnlocked);
   const started = store.hasEarnedAnything || done > 0;
+  // ON A FINISHED COURSE there is no resume lesson, and the panel should
+  // say so rather than silently previewing the last lesson again.
+  const allDone = !resume && total > 0 && done === total;
   let selectedId = resume ? resume.id : (chain[chain.length - 1] || {}).id;
 
   const lessonAt = id => chain.findIndex(l => l.id === id);
@@ -1325,7 +1328,7 @@ function ipaLearnPane(el, course) {
   const unitOf = id => (byId(id) || {}).unit || {};
 
   function focusHtml() {
-    const l = byId(selectedId);
+    const l = allDone ? null : byId(selectedId);
     if (!l) {
       return `
         <p class="vp-focus-eyebrow">Your course</p>
@@ -1350,8 +1353,8 @@ function ipaLearnPane(el, course) {
         <h2 class="vp-focus-title">${esc(l.title)}</h2>
         <p class="vp-focus-meta">Lesson ${i + 1} of ${total} · ${esc(lessonKindName(l))} · ~${estMinutes(l)} min</p>
         <img class="vp-focus-art" src="img/voice-path/headphones-script.png" alt="" aria-hidden="true">
-        <p class="vp-focus-copy">This one opens when you finish${before ? ` <b>${esc(before.title)}</b>` : ' the lesson before it'}. You can read ahead in the stage guidebook any time.</p>
-        <button class="btn-lite vp-guide" id="vp-guide" type="button">Open the stage guidebook</button>`;
+        <p class="vp-focus-copy">This one opens when you finish${before ? ` <b>${esc(before.title)}</b>` : ' the lesson before it'}. You can read ahead in the ${noun} guidebook any time.</p>
+        <button class="btn-lite vp-guide" id="vp-guide" type="button">Open the ${noun} guidebook</button>`;
     }
     return `
       <p class="vp-focus-eyebrow">${esc(eyebrow)}</p>
@@ -1360,7 +1363,7 @@ function ipaLearnPane(el, course) {
       <img class="vp-focus-art" src="img/voice-path/headphones-script.png" alt="" aria-hidden="true">
       <p class="vp-focus-copy">Listen closely. Notice the sound. Try it in speech.</p>
       <button class="btn btn-primary vp-go" id="vp-go" type="button">${esc(label)} <i aria-hidden="true">&rarr;</i></button>
-      <button class="btn-lite vp-guide" id="vp-guide" type="button">Open the stage guidebook</button>`;
+      <button class="btn-lite vp-guide" id="vp-guide" type="button">Open the ${noun} guidebook</button>`;
   }
 
   function wireFocus() {
@@ -1391,6 +1394,11 @@ function ipaLearnPane(el, course) {
   // One stage node. Open stages list their lessons; closed ones state
   // their count. Upcoming is NOT locked - it is simply further on - so the
   // state is spelled out in words as well as colour.
+  // IPA FOUNDATIONS CALLS THEM UNITS, and renderUnitTrail and
+  // renderGuidebook already do. Only the accent courses number their units
+  // "Stage 1 · ...", so the noun follows the data, not the layout.
+  const noun = /^Stage\s+\d/.test(unitById[track.unitIds[0]]?.title ?? '') ? 'stage' : 'unit';
+  const nounCap = noun === 'stage' ? 'Stage' : 'Unit';
   const openUnit = unitOf(selectedId).id;
   const stages = track.unitIds.map((uid, ui) => {
     const unit = unitById[uid];
@@ -1398,6 +1406,11 @@ function ipaLearnPane(el, course) {
     const open = uid === openUnit;
     const lessons = chain.filter(l => l.unit.id === uid);
     const n = String(ui + 1).padStart(2, '0');
+    // THE NUMBER IS THE FALLBACK, not a separate test. Reading `st.done`
+    // for truthiness suppressed it on any STARTED but unfinished closed
+    // stage and drew an empty circle — reachable as soon as free play lets
+    // a reader work out of order.
+    const dotMark = st.total && st.done === st.total ? '&#10003;' : (open ? '&#9654;' : '');
     // Titles are authored as "Stage 1 · Meet the Accent"; the node already
     // prints the number, so printing it twice is what the unit-card pass
     // fixed on 2026-11-06. Keep that fix.
@@ -1427,11 +1440,13 @@ function ipaLearnPane(el, course) {
         </li>`;
     }).join('');
     return `
-      <li class="vp-stage is-${st.state}${open ? ' is-open' : ''}">
+      <li class="vp-stage is-${st.state}${open ? ' is-expanded' : ''}">
         <button class="vp-stage-head" type="button" data-stage="${esc(uid)}"
                 aria-expanded="${open}" aria-controls="vp-stage-${esc(uid)}"
+                data-ord="${n}"
+                aria-label="${esc(nounCap)} ${ui + 1}, ${esc(shortTitle)}, ${st.done} of ${st.total} complete"
                 style="--unit-color:${unit.color}">
-          <span class="vp-dot" aria-hidden="true">${open || st.done ? '' : n}${st.done === st.total && st.total ? '&#10003;' : (open ? '&#9654;' : '')}</span>
+          <span class="vp-dot" aria-hidden="true">${dotMark || n}</span>
           <span class="vp-stage-text">
             <span class="vp-stage-title">${esc(shortTitle)}</span>
             <span class="vp-stage-count">${st.done} / ${st.total} complete</span>
@@ -1439,7 +1454,7 @@ function ipaLearnPane(el, course) {
         </button>
         <div class="vp-stage-body" id="vp-stage-${esc(uid)}" ${open ? '' : 'hidden'}>
           <ol class="vp-lessons">${rows}</ol>
-          <button class="btn-lite vp-trail-link" type="button" data-trail="${esc(uid)}">Open the stage trail &rarr;</button>
+          <button class="btn-lite vp-trail-link" type="button" data-trail="${esc(uid)}">Open the ${noun} trail &rarr;</button>
         </div>
       </li>`;
   }).join('');
@@ -1448,6 +1463,7 @@ function ipaLearnPane(el, course) {
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
     <img class="vp-corner vp-corner-blossom" src="img/voice-path/corner-blossom-top-right.png" alt="" aria-hidden="true">
+    <img class="vp-corner vp-corner-ivy" src="img/voice-path/corner-ivy-bottom-left.png" alt="" aria-hidden="true">
     <div class="vp-head">
       <p class="vp-course-name">${esc(course.label)}</p>
       <div class="vp-progress">
@@ -1457,6 +1473,7 @@ function ipaLearnPane(el, course) {
       </div>
     </div>
     <div class="vp-grid">
+      <aside class="vp-focus" aria-live="polite" aria-label="Selected lesson"></aside>
       <section class="vp-path" aria-label="Course outline">
         <div class="vp-path-head">
           <h2>Your course</h2>
@@ -1464,7 +1481,6 @@ function ipaLearnPane(el, course) {
         </div>
         <ol class="vp-stages">${stages}</ol>
       </section>
-      <aside class="vp-focus" aria-live="polite" aria-label="Selected lesson"></aside>
     </div>`;
 
   paintFocus();
@@ -1475,7 +1491,9 @@ function ipaLearnPane(el, course) {
     const nowOpen = body.hidden;
     body.hidden = !nowOpen;
     b.setAttribute('aria-expanded', String(nowOpen));
-    b.closest('.vp-stage')?.classList.toggle('is-open', nowOpen);
+    b.closest('.vp-stage')?.classList.toggle('is-expanded', nowOpen);
+    const dot = b.querySelector('.vp-dot');
+    if (dot && dot.textContent.trim() !== '\u2713') dot.textContent = nowOpen ? '\u25b6' : b.dataset.ord;
   }));
 
   // Selecting moves the preview and nothing else. Focus stays on the row

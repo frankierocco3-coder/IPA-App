@@ -21,8 +21,9 @@ const TRACK_FINAL_UNITS = new Set(TRACKS.map(t => t.unitIds[t.unitIds.length - 1
 // every even-numbered lesson with no sense of where it is, so a unit with
 // an EVEN lesson count got a review game after its final one. Where that
 // unit ended a track, the course ended on a generated game sitting after
-// its own mastery exam - whose copy reads "Pass this and Neutral American
-// is yours - the course is complete." It then wasn't.
+// its own last lesson - the mastery final in nam, rp and aus, the round-up
+// in core (r-4) and shift (sh-4). nam-final's copy reads "Pass this and
+// Neutral American is yours - the course is complete." It then wasn't.
 //
 // It read worse than it looked: `mastered` is done === total over the whole
 // chain, so passing the final exam showed "Lesson complete!" and the

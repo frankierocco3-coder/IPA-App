@@ -645,11 +645,20 @@ function genIdiomDialogue() {
 
 const GENERATORS = {
   // READ shiftTo WHEN THERE IS NO accent (2026-11-10). A "Placing the
-  // speaker" lesson carries shiftTo and no accent, so these fell through to
-  // the default and served that default's register. ssbe-s2 defaulted to
-  // 'ssbe' and was accidentally right, which is why it went unseen; ck-s2
-  // would have drilled Standard British expressions — lass, chav — inside
-  // the Cockney course. Same `accent ?? shiftTo` the checkpoint rule uses.
+  // speaker" lesson, and every checkpoint generated inside a shift unit,
+  // carries shiftTo and no accent — so these fell through to their default
+  // and served that default's register regardless of the course.
+  //
+  // THAT WAS TWO LIVE BUGS, not one. idiomRegister defaulted to 'ssbe', so
+  // ck-s2 drilled Standard British expressions (lass, chav) inside the
+  // Cockney course. idiom defaulted to 'rp', so the checkpoint in Standard
+  // British's own shift unit served TRADITIONAL RP idioms — a course
+  // serving another course's register with nothing in the UI to say so.
+  // Neither was visible, because each default is a real accent and the
+  // questions look correct until you check which set they came from.
+  //
+  // Same `accent ?? shiftTo` the checkpoint rule in js/views/context.js
+  // already used; the defaults stay only as a last resort.
   idiom: l => genIdiom(l.accent ?? l.shiftTo ?? 'rp'),
   idiomSituation: () => genIdiomSituation(),
   idiomRegister: l => genIdiomRegister(l.accent ?? l.shiftTo ?? 'ssbe'),

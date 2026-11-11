@@ -5641,6 +5641,11 @@ progress.vp-progress-bar::-webkit-progress-value { background: var(--green); bor
 progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-radius: 999px; }
 
 .vp-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+/* The panel is FIRST in the DOM because below 980px it reads first. Here it
+   is placed back on the right by column, so visual order and focus order
+   agree at both widths and no `order` is needed. */
+.vp-path { grid-column: 1; grid-row: 1; }
+.vp-focus { grid-column: 2; grid-row: 1; }
 
 /* ---- the path ---- */
 .vp-path { min-width: 0; }
@@ -5711,8 +5716,16 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .vp-focus .vp-guide { display: block; width: 100%; margin-top: 10px; text-align: center; }
 
 /* ---- botanical corners, decorative only ---- */
+/* THE PANE MUST BE THE CONTAINING BLOCK or the corner art resolves against
+   the initial containing block: measured offsetParent BODY, the blossom
+   pinned to the page's top-right corner 88px above and 98px right of the
+   pane, sliced by the sticky .statsbar (z-index 20) while the pane's own
+   corner stayed bare. #shell-main hosts every section's pane, so this is
+   scoped the way the shell's own width rules are. */
+#shell-main:has(.vp-grid) { position: relative; }
 .vp-corner { position: absolute; pointer-events: none; user-select: none; z-index: 0; }
 .vp-corner-blossom { top: 0; right: 0; width: 230px; opacity: .85; }
+.vp-corner-ivy { bottom: 0; left: 0; width: 210px; opacity: .7; }
 .vp-head, .vp-grid { position: relative; z-index: 1; }
 
 @media (max-width: 979px) {
@@ -5721,7 +5734,8 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
      there would leave one 1160px column. The next step comes before the
      long outline. */
   .vp-grid { grid-template-columns: minmax(0, 1fr); }
-  .vp-focus { position: static; order: -1; }
+  .vp-path, .vp-focus { grid-column: auto; grid-row: auto; }
+  .vp-focus { position: static; }
   .vp-corner-blossom { width: 160px; opacity: .6; }
 }
 @media (max-width: 680px) {

@@ -412,22 +412,22 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 ### Every X_LIVE switch
 
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
-- CHARACTER_LIVE           true   js/views/context.js:260
-- COCKNEY_LIVE             true   js/views/context.js:100
+- CHARACTER_LIVE           true   js/views/context.js:261
+- COCKNEY_LIVE             true   js/views/context.js:101
 - COINAGE_LIVE             false  js/main.js:311
-- COMMEDIA_LIVE            true   js/views/context.js:296
+- COMMEDIA_LIVE            true   js/views/context.js:297
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
-- MUSICAL_LIVE             true   js/views/context.js:354
+- MUSICAL_LIVE             true   js/views/context.js:355
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
-- RHETORIC_COURSE_LIVE     true   js/views/context.js:401
+- RHETORIC_COURSE_LIVE     true   js/views/context.js:402
 - RHETORIC_LIVE            false  js/main.js:284
-- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:413
+- RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:414
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:12420
-- SCREEN_LIVE              true   js/views/context.js:379
-- SHAKESPEARE_LIVE         true   js/views/context.js:387
-- SPEECH_LIVE              false  js/views/context.js:252
-- THEATRE_LIVE             true   js/views/context.js:330
+- SCENE_STUDY_LIVE         false  js/main.js:12438
+- SCREEN_LIVE              true   js/views/context.js:380
+- SHAKESPEARE_LIVE         true   js/views/context.js:388
+- SPEECH_LIVE              false  js/views/context.js:253
+- THEATRE_LIVE             true   js/views/context.js:331
 
 ### Reference shelves
 
@@ -440,7 +440,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                15777 lines
+- js/main.js                15795 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
 - regression check() sites  887
 
