@@ -121,8 +121,36 @@ same-origin iframe (allowed by the clickjacking guard) and prints one
 PASSED/FAILED verdict for all three suites. tests/ never ships (artifact
 excludes it).
 
-**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is **879**
-(measured 2026-11-04; 867 before the 2026-11-04 work, 858 before Screen
+**THE SUITE RUNS CLEAN AGAIN — 2026-11-11.** Three consecutive runs of
+**896 checks, 0 failures** (Security 20/20, Audio 20/20, Launch regression
+**856/856**), including a second and third run on an already-used origin,
+which everything below says always cascaded. Read this before the history
+that follows it: most of that history describes a bug that currently does
+not reproduce, and it is kept because the REASONING is worth having, not
+because the symptoms are current.
+
+**NOBODY FIXED IT, AND THAT IS THE HONEST STATE.** Measured on one tree,
+fresh origins: 856/856 with the new navTo guard and 856/856 WITHOUT it,
+with the guard's own counter recording zero firings. The same morning, the
+pre-redesign tree gave 756/817 with 61 failures as its baseline. Something
+between those two trees ended it and it is not established what.
+
+**THE FIRST LEAD WITH A NUMBER.** The runner now prints "N of M
+navigations rendered without a frame", and M is **three** for a whole run.
+The Learn pane replaced on 2026-11-10 navigated for every unit card and
+every trail open; Path + Focus expands a stage and selects a lesson in
+place. If the cascade was driven navigation silently not happening, a
+redesign that stopped navigating would end it without anyone aiming at it.
+Unproven: proving it means running the old tree in a worktree and
+comparing its navigation count against three.
+
+**AND THE SUITE IMMEDIATELY EARNED ITS KEEP.** The first clean run failed
+exactly one check — a selector renamed by the review fixes hours earlier
+and not updated. Browser verification had passed it.
+
+**THE CHECK COUNT IS THE TELL, NOT THE FAILURE COUNT.** A full run is
+**896** (measured 2026-11-11, of which the regression suite is 856; it was
+879 on 2026-11-04; 867 before the 2026-11-04 work, 858 before Screen
 Acting was covered on 2026-11-03, 841 before Theatre History and Musical
 Theatre were, 835 before 2026-11-03, 824 before 2026-10-25). A short run skipped sections and is not
 comparable even if its failure count looks small — a green run with a short
