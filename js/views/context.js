@@ -55,9 +55,24 @@ export function expandUnit(unit) {
       const shiftTo = covered.find(x => x.shiftTo)?.shiftTo;
       // sprinkle in extra game-y types that fit the material
       const extras = accent || shiftTo ? ['fillBlank'] : ['match', 'fillBlank', 'gapBuild'];
-      // Standard British checkpoints always carry idiom material — meaning
-      // questions early, register questions too (deterministic via rotation).
-      if ((accent ?? shiftTo) === 'ssbe') extras.push('idiom', 'idiomRegister');
+      // Standard British and Cockney checkpoints always carry idiom material
+      // — meaning questions early, register questions too (deterministic via
+      // rotation).
+      //
+      // COCKNEY JOINED ON 2026-11-10 and should have been here from the
+      // start. docs/BUILD_COCKNEY_COURSE.md §6 shipped a 60-entry Cockney
+      // set in Phase B and its Stage 3 plan asks for "expressions in
+      // sentences, register" — then no cockney lesson or checkpoint ever
+      // asked for one, so all 60 reviewed entries sat unread.
+      //
+      // Both generators are accent-driven: genIdiom reads idiomPool(accent)
+      // and genIdiomRegister reads idiomFor(accent), so each course draws
+      // its OWN register. The sets are never pooled, because a Cockney clip
+      // must be Bob or Lizzie — the same voice-bound reason §6 gives for
+      // re-authoring the overlapping terms instead of cross-referencing them.
+      if ((accent ?? shiftTo) === 'ssbe' || (accent ?? shiftTo) === 'cockney') {
+        extras.push('idiom', 'idiomRegister');
+      }
       out.push({
         id: `chk-${unit.id}-${(i + 1) / 2}`,
         title: 'Checkpoint game',

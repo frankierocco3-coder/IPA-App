@@ -644,9 +644,15 @@ function genIdiomDialogue() {
 }
 
 const GENERATORS = {
-  idiom: l => genIdiom(l.accent ?? 'rp'),
+  // READ shiftTo WHEN THERE IS NO accent (2026-11-10). A "Placing the
+  // speaker" lesson carries shiftTo and no accent, so these fell through to
+  // the default and served that default's register. ssbe-s2 defaulted to
+  // 'ssbe' and was accidentally right, which is why it went unseen; ck-s2
+  // would have drilled Standard British expressions — lass, chav — inside
+  // the Cockney course. Same `accent ?? shiftTo` the checkpoint rule uses.
+  idiom: l => genIdiom(l.accent ?? l.shiftTo ?? 'rp'),
   idiomSituation: () => genIdiomSituation(),
-  idiomRegister: l => genIdiomRegister(l.accent ?? 'ssbe'),
+  idiomRegister: l => genIdiomRegister(l.accent ?? l.shiftTo ?? 'ssbe'),
   idiomLiteral: () => genIdiomLiteral(),
   idiomDialogue: () => genIdiomDialogue(),
   symbolToWord: l => genSymbolToWord(pick(l.phonemes), l.accent),
