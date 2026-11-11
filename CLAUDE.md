@@ -129,20 +129,55 @@ that follows it: most of that history describes a bug that currently does
 not reproduce, and it is kept because the REASONING is worth having, not
 because the symptoms are current.
 
-**NOBODY FIXED IT, AND THAT IS THE HONEST STATE.** Measured on one tree,
-fresh origins: 856/856 with the new navTo guard and 856/856 WITHOUT it,
-with the guard's own counter recording zero firings. The same morning, the
-pre-redesign tree gave 756/817 with 61 failures as its baseline. Something
-between those two trees ended it and it is not established what.
+**THE CAUSE IS PROVEN — IT IS CPU CONTENTION, 2026-11-11.** Not the
+profile, not the browser, not the tree. The machine being busy.
 
-**THE FIRST LEAD WITH A NUMBER.** The runner now prints "N of M
-navigations rendered without a frame", and M is **three** for a whole run.
-The Learn pane replaced on 2026-11-10 navigated for every unit card and
-every trail open; Path + Focus expands a stage and selects a lesson in
-place. If the cascade was driven navigation silently not happening, a
-redesign that stopped navigating would end it without anyone aiming at it.
-Unproven: proving it means running the old tree in a worktree and
-comparing its navigation count against three.
+The experiment: ONE tree (86e9050, pre-redesign) on ONE fresh origin, with
+a counter that observed navigations and never fixed them. Only the load
+differed.
+
+| machine | checks | failures | regression | navigations stalled |
+|---|---|---|---|---|
+| quiet | 896 | 0 | **856/856** | 0 of 44 |
+| 8 busy loops | 881 | 31 | **810/841** | 3 of 6 (sampled mid-run) |
+
+The loaded run carried the recorded signature exactly: `TypeError: Cannot
+read properties of null (reading 'querySelector')`.
+
+THE MECHANISM, END TO END. CPU contention starves the pane of compositing
+frames. `startViewTransition` defers its update callback to the next
+rendering opportunity, which does not arrive. The driven check's 300-500ms
+sleep elapses against a page that never changed. The check fails, driven
+navigation desynchronises, and the run truncates. It is the same mechanism
+as the 2026-10-14 blank screen, one navigation later and under load.
+
+THIS RETIRES FOUR RECORDED HYPOTHESES BELOW, so read them as history:
+"about half the time" was whatever else was running on the Mac;
+"deterministic per profile" was coincidence; "a fresh profile passes,
+a reused one cascades" was a quiet machine and a busy one; and the 400ms
+bail "not helping" was almost certainly measured under load, where the
+check had already looked.
+
+**SO: DO NOT RUN THE SUITE WHILE AGENTS ARE WORKING.** A workflow fanning
+out twenty subagents beside the runner will cascade it. A short count means
+"the machine was busy" before it means anything about the tree.
+
+**AND 817 WAS NEVER A TOTAL.** The old tree's real full count is 856; 817
+was a truncated run. Comparing counts across runs only works when BOTH ran
+to completion — which is what "the check count is the tell" has always
+meant and is easy to forget when both numbers look plausible.
+
+**ONE OF MINE WAS REFUTED THE SAME DAY.** I proposed that the 2026-11-10
+Learn redesign ended it, because the suite now makes 3 navTo calls where
+the old pane made 44. The old tree runs 856/856 on a quiet machine, so it
+did not. What the 44-to-3 drop does is cut EXPOSURE about fifteenfold: far
+fewer chances to be caught by a busy moment. Real, and not a fix.
+
+**THE GUARD IS WELL-MOTIVATED, NOT YET CAUGHT WORKING.** navTo now renders
+directly if the callback has not run in 100ms. Old tree + guard + load came
+back 856/856, but the rescue counter read zero at the end (it resets when
+the suite reloads the frame) and the load may have eased mid-run. The
+failure it prevents is measured; the prevention is not.
 
 **AND THE SUITE IMMEDIATELY EARNED ITS KEEP.** The first clean run failed
 exactly one check — a selector renamed by the review fixes hours earlier
