@@ -1288,91 +1288,210 @@ function learnMain(el, course, ws = activeWorkspace()) {
   ipaLearnPane(el, course);
 }
 
+// ── VOICE & SPEECH LEARN: PATH + FOCUS (owner handoff, 2026-11-10) ──
+//
+// His words: "lets implement this vibe for the voice and speech course",
+// with an approved mockup. This SUPERSEDES the unit-card grid shipped on
+// 2026-11-06 for the same pane. What that change established still holds
+// and is kept: you meet the course a stage at a time, not as one long
+// scroll, and each stage's trail is still one tap away.
+//
+// The shape is two columns. LEFT is the course as a path: one node per
+// stage, the current one expanded to its lessons. RIGHT is a focus panel
+// for ONE lesson - the resume lesson by default, or whichever the reader
+// taps on the path.
+//
+// SELECTING IS NOT STARTING, and the three ideas stay distinct: the
+// SELECTED lesson is a preview and lives only in this pane; the RESUME
+// lesson is wherever the chain says you are; COMPLETED comes from the
+// store. Tapping a lesson on the path moves the preview and writes
+// nothing. Only the panel's own button opens a lesson.
 function ipaLearnPane(el, course) {
   const track = trackFor(course.id);
   const { done, total } = trackProgress(track);
-  // On an UNSTARTED course the path's own Stage 1 · Orientation start node
-  // is the single clear entry — a continue card here would duplicate
-  // "Meet the accent" above Unit 1. It appears once real progress exists.
-  const cc = done > 0 ? continueCard(track, course) : null;
-  const path = buildTrackPath(track, { guidebook: true, labels: true });
-  // One-time invitation for grandfathered users (verbatim copy — it must
-  // not block), and the diagnostic offer, which retires only when the
-  // diagnostic has been taken or declined. This offer
-  // card is the diagnostic's ONLY doorway — the Practice-page shortcut
-  // was removed by owner order 2026-08-12.
-  // No optional offer cards (owner order, 2026-08-20). Learn opens on the
-  // course, not on things to decline. The preface lives permanently in
-  // More → Why Speech Matters; the diagnostic in More → Preferences.
+  const chain = TRACK_LESSONS[track.id];
+  const resume = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l)) || null;
+  // "All lessons available" is a CLAIM, so it is measured, never printed
+  // because the mockup has it. A course with any locked lesson says
+  // nothing rather than something false.
+  const allOpen = chain.every(isUnlocked);
+  const started = store.hasEarnedAnything || done > 0;
+  let selectedId = resume ? resume.id : (chain[chain.length - 1] || {}).id;
 
-  // ── THE TWO-SCREEN COURSE, IPA FOUNDATIONS ONLY ───────────────
-  // Owner handoff, 2026-11-06. The units become cards and each one opens
-  // its own trail; the trail itself is unchanged. Scoped to 'core' because
-  // the handoff says so in terms — the five accent tracks keep the single
-  // scroll, and extending it later is this condition and nothing else.
-  // EVERY COURSE IN THIS WORKSPACE (owner order 2026-11-06: "now do the
-  // same thing for the individual dialects"). It shipped for 'core' alone
-  // an hour earlier because that handoff said not to touch other courses;
-  // this supersedes that for the five accents.
-  const twoScreen = true;
-  // THE UP-NEXT CARD NOW SHOWS FROM LESSON ONE, and the reasoning it used
-  // to fail is recorded above: a continue card duplicated the path's own
-  // start node, which sat right below it. On this screen the path is not
-  // here — it is one tap away inside a unit — so the duplication is gone
-  // and the card is the one obvious way in. The old rule still holds for
-  // the five accent courses, which still show the path.
-  const upNext = twoScreen ? continueCard(track, course) : cc;
-  const unitCards = !twoScreen ? '' : track.unitIds.map((uid, ui) => {
+  const lessonAt = id => chain.findIndex(l => l.id === id);
+  const byId = id => chain.find(l => l.id === id);
+
+  // The stage a lesson belongs to, used to decide which stage opens.
+  const unitOf = id => (byId(id) || {}).unit || {};
+
+  function focusHtml() {
+    const l = byId(selectedId);
+    if (!l) {
+      return `
+        <p class="vp-focus-eyebrow">Your course</p>
+        <h2 class="vp-focus-title">Every lesson complete</h2>
+        <p class="vp-focus-meta">Keep it sharp with mixed review.</p>
+        <img class="vp-focus-art" src="img/voice-path/headphones-script.png" alt="" aria-hidden="true">
+        <button class="btn btn-primary vp-go" id="vp-go" type="button">Practice</button>`;
+    }
+    const isDone = store.isCompleted(l.id);
+    const locked = !isUnlocked(l);
+    const label = isDone ? 'Review lesson' : (started ? 'Continue lesson' : 'Start lesson');
+    const eyebrow = isDone ? 'Completed lesson'
+      : (locked ? 'Later in the course'
+      : (resume && l.id === resume.id ? 'Your next lesson' : 'Selected lesson'));
+    // A locked lesson is previewed, never offered. The course opens one
+    // lesson at a time, so the panel says which one opens this.
+    if (locked) {
+      const i = lessonAt(l.id);
+      const before = i > 0 ? chain[i - 1] : null;
+      return `
+        <p class="vp-focus-eyebrow">${esc(eyebrow)}</p>
+        <h2 class="vp-focus-title">${esc(l.title)}</h2>
+        <p class="vp-focus-meta">Lesson ${i + 1} of ${total} · ${esc(lessonKindName(l))} · ~${estMinutes(l)} min</p>
+        <img class="vp-focus-art" src="img/voice-path/headphones-script.png" alt="" aria-hidden="true">
+        <p class="vp-focus-copy">This one opens when you finish${before ? ` <b>${esc(before.title)}</b>` : ' the lesson before it'}. You can read ahead in the stage guidebook any time.</p>
+        <button class="btn-lite vp-guide" id="vp-guide" type="button">Open the stage guidebook</button>`;
+    }
+    return `
+      <p class="vp-focus-eyebrow">${esc(eyebrow)}</p>
+      <h2 class="vp-focus-title">${esc(l.title)}</h2>
+      <p class="vp-focus-meta">Lesson ${lessonAt(l.id) + 1} of ${total} · ${esc(lessonKindName(l))} · ~${estMinutes(l)} min</p>
+      <img class="vp-focus-art" src="img/voice-path/headphones-script.png" alt="" aria-hidden="true">
+      <p class="vp-focus-copy">Listen closely. Notice the sound. Try it in speech.</p>
+      <button class="btn btn-primary vp-go" id="vp-go" type="button">${esc(label)} <i aria-hidden="true">&rarr;</i></button>
+      <button class="btn-lite vp-guide" id="vp-guide" type="button">Open the stage guidebook</button>`;
+  }
+
+  function wireFocus() {
+    const panel = el.querySelector('.vp-focus');
+    if (!panel) return;
+    panel.querySelector('#vp-go')?.addEventListener('click', () => {
+      const l = byId(selectedId);
+      if (!l) return startLesson(practiceLesson(track));
+      return l.checkpoint ? startLesson(l) : renderGuide(l);
+    });
+    // THE MOCKUP SAYS "course guidebook" AND THE APP HAS NO SUCH THING.
+    // renderGuidebook is per UNIT, so this opens the guidebook for the
+    // stage the previewed lesson sits in, and the button says that rather
+    // than promising a course-wide page that does not exist.
+    panel.querySelector('#vp-guide')?.addEventListener('click', () => {
+      const u = unitById[unitOf(selectedId).id];
+      if (u) renderGuidebook(u, track);
+    });
+  }
+
+  function paintFocus() {
+    const panel = el.querySelector('.vp-focus');
+    if (!panel) return;
+    panel.innerHTML = focusHtml();
+    wireFocus();
+  }
+
+  // One stage node. Open stages list their lessons; closed ones state
+  // their count. Upcoming is NOT locked - it is simply further on - so the
+  // state is spelled out in words as well as colour.
+  const openUnit = unitOf(selectedId).id;
+  const stages = track.unitIds.map((uid, ui) => {
     const unit = unitById[uid];
     const st = unitState(uid, track);
-    const stones = unitStones(uid);
-    // NO "Unit 1" PILL BESIDE "Stage 1 · Orientation". The five accent
-    // courses number their units inside the title; IPA Foundations does
-    // not. Printing both gave "Unit 1 | Stage 1 · Orientation", which
-    // numbers the same thing twice and in two vocabularies.
-    const stageTitled = /^Stage\s+\d/.test(unit.title);
-    // The locked state is drawn, not hidden: a learner should see the
-    // shape of the course ahead of them. Tapping a locked unit still opens
-    // its trail, where each node explains its own lock — the same promise
-    // the Library makes, that reading is never gated.
+    const open = uid === openUnit;
+    const lessons = chain.filter(l => l.unit.id === uid);
+    const n = String(ui + 1).padStart(2, '0');
+    // Titles are authored as "Stage 1 · Meet the Accent"; the node already
+    // prints the number, so printing it twice is what the unit-card pass
+    // fixed on 2026-11-06. Keep that fix.
+    const shortTitle = unit.title.replace(/^Stage\s+\d+\s*·\s*/, '');
+    const rows = lessons.map(l => {
+      const d = store.isCompleted(l.id);
+      const cur = resume && l.id === resume.id;
+      const sel = l.id === selectedId;
+      // THE CHAIN IS STRICT, so most rows ahead are LOCKED, not merely
+      // unvisited. Calling them "Not started" would invite a tap that
+      // cannot work. Same four words the stage map already uses.
+      const locked = !isUnlocked(l);
+      const state = d ? 'done' : (cur ? 'current' : (locked ? 'locked' : 'open'));
+      const word = d ? 'Done' : (cur ? 'Current' : (locked ? 'Locked' : 'Open'));
+      return `
+        <li>
+          <button class="vp-lesson is-${state}${sel ? ' is-selected' : ''}" type="button"
+                  data-lesson="${esc(l.id)}" ${sel ? 'aria-current="true"' : ''}
+                  aria-label="${esc(l.title)} — ${word}">
+            <span class="vp-lesson-mark" aria-hidden="true">${d ? '&#10003;' : (cur ? '&#9654;' : '')}</span>
+            <span class="vp-lesson-text">
+              <span class="vp-lesson-title">${esc(l.title)}</span>
+              ${cur ? `<span class="vp-lesson-meta">Lesson ${lessonAt(l.id) + 1} of ${total} · ${esc(lessonKindName(l))} · ~${estMinutes(l)} min</span>` : ''}
+            </span>
+            <span class="vp-lesson-state">${word}</span>
+          </button>
+        </li>`;
+    }).join('');
     return `
-      <button class="unit-card is-${st.state}" data-unit-card="${esc(uid)}" type="button"
-              style="--unit-color:${unit.color}"
-              aria-label="Unit ${ui + 1}, ${esc(unit.title)}, ${st.done} of ${st.total} done">
-        <span class="uc-head">
-          ${stageTitled ? '' : `<span class="uc-n">Unit ${ui + 1}</span>`}
-          <span class="uc-title">${esc(unit.title)}</span>
-        </span>
-        <span class="uc-stones" aria-hidden="true">${stones
-          .map(ph => `<span class="uc-stone">${esc(ph)}</span>`).join('')}</span>
-        <span class="uc-foot">
-          <span class="uc-count">${st.done} / ${st.total}</span>
-          <span class="uc-go">Explore unit <i aria-hidden="true">&rarr;</i></span>
-        </span>
-      </button>`;
+      <li class="vp-stage is-${st.state}${open ? ' is-open' : ''}">
+        <button class="vp-stage-head" type="button" data-stage="${esc(uid)}"
+                aria-expanded="${open}" aria-controls="vp-stage-${esc(uid)}"
+                style="--unit-color:${unit.color}">
+          <span class="vp-dot" aria-hidden="true">${open || st.done ? '' : n}${st.done === st.total && st.total ? '&#10003;' : (open ? '&#9654;' : '')}</span>
+          <span class="vp-stage-text">
+            <span class="vp-stage-title">${esc(shortTitle)}</span>
+            <span class="vp-stage-count">${st.done} / ${st.total} complete</span>
+          </span>
+        </button>
+        <div class="vp-stage-body" id="vp-stage-${esc(uid)}" ${open ? '' : 'hidden'}>
+          <ol class="vp-lessons">${rows}</ol>
+          <button class="btn-lite vp-trail-link" type="button" data-trail="${esc(uid)}">Open the stage trail &rarr;</button>
+        </div>
+      </li>`;
   }).join('');
 
+  const pct = total ? Math.round(done / total * 100) : 0;
   el.innerHTML = `
     <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
-    ${upNext ? upNext.html : ''}
-    ${course.id === 'core' ? whatIsIpaCard() : ''}
-    <div class="hub-progress">
-      <div class="track-progress">
-        <div class="track-progress-bar"><div style="width:${total ? Math.round(done / total * 100) : 0}%"></div></div>
-        <span>${done}/${total}${done === total && total ? ' · 🎓 mastered' : ''}</span>
+    <img class="vp-corner vp-corner-blossom" src="img/voice-path/corner-blossom-top-right.png" alt="" aria-hidden="true">
+    <div class="vp-head">
+      <p class="vp-course-name">${esc(course.label)}</p>
+      <div class="vp-progress">
+        <span class="vp-progress-label" id="vp-prog-label">${done} of ${total} lessons complete</span>
+        <progress class="vp-progress-bar" max="${total}" value="${done}"
+                  aria-labelledby="vp-prog-label">${pct}%</progress>
       </div>
     </div>
-    ${twoScreen
-      ? `<div class="unit-grid">${unitCards}</div>`
-      : `<div class="track-scroll hub-scroll">${path.html}</div>`}`;
-  upNext?.wire(el);
-  wireWhatIsIpaCard(el);
-  if (twoScreen) {
-    el.querySelectorAll('[data-unit-card]').forEach(b => b.addEventListener('click',
-      () => navTo(() => renderUnitTrail(b.dataset.unitCard, track, course))));
-  } else {
-    path.wire(el);
-  }
+    <div class="vp-grid">
+      <section class="vp-path" aria-label="Course outline">
+        <div class="vp-path-head">
+          <h2>Your course</h2>
+          ${allOpen ? '<span class="vp-path-note">All lessons available</span>' : ''}
+        </div>
+        <ol class="vp-stages">${stages}</ol>
+      </section>
+      <aside class="vp-focus" aria-live="polite" aria-label="Selected lesson"></aside>
+    </div>`;
+
+  paintFocus();
+
+  el.querySelectorAll('[data-stage]').forEach(b => b.addEventListener('click', () => {
+    const body = el.querySelector(`#vp-stage-${CSS.escape(b.dataset.stage)}`);
+    if (!body) return;
+    const nowOpen = body.hidden;
+    body.hidden = !nowOpen;
+    b.setAttribute('aria-expanded', String(nowOpen));
+    b.closest('.vp-stage')?.classList.toggle('is-open', nowOpen);
+  }));
+
+  // Selecting moves the preview and nothing else. Focus stays on the row
+  // the reader pressed, so a keyboard user is not thrown to the panel.
+  el.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
+    selectedId = b.dataset.lesson;
+    el.querySelectorAll('[data-lesson]').forEach(o => {
+      o.classList.toggle('is-selected', o === b);
+      if (o === b) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
+    });
+    paintFocus();
+  }));
+
+  el.querySelectorAll('[data-trail]').forEach(b => b.addEventListener('click',
+    () => navTo(() => renderUnitTrail(b.dataset.trail, track, course))));
+
   if (course.id === 'ssbe' && !store.introsSeen.ssbe && !skipCourseIntroOnce) showSsbeIntro(course);
 }
 

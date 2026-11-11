@@ -2638,18 +2638,25 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Australian')));
       await sleep(500);
-      const doneNow = parseInt(doc.querySelector('.hub-progress .track-progress span')?.textContent ?? '', 10);
-      const ccNow = !!doc.querySelector('.continue-card[aria-label="Continue learning"], .continue-card[aria-label="Course complete"]');
-      check('IA: the Up next card names the lesson the course opens on',
-        ccNow && (doc.querySelector('.continue-card h2')?.textContent ?? '').includes('Meet the accent'),
-        `done=${doneNow} card=${ccNow} says="${doc.querySelector('.continue-card h2')?.textContent ?? ''}"`);
-      // 'Stage 1 · Meet the Accent' since the 2026-11-06 regroup; it was
-      // 'Stage 1 · Orientation' when every accent ran four stages.
+      // READS THE FOCUS PANEL SINCE 2026-11-10, not '.continue-card h2'.
+      // Path + Focus replaced the up-next card with a panel that previews
+      // one lesson; what these two checks protect is unchanged — the course
+      // names the lesson it opens on, and Stage 1 is the obvious start.
+      const doneNow = parseInt(doc.querySelector('.vp-progress-label')?.textContent ?? '', 10);
+      const ccNow = !!doc.querySelector('.vp-focus');
+      check('IA: the focus panel names the lesson the course opens on',
+        ccNow && (doc.querySelector('.vp-focus-title')?.textContent ?? '').includes('Meet the accent'),
+        `done=${doneNow} panel=${ccNow} says="${doc.querySelector('.vp-focus-title')?.textContent ?? ''}"`);
+      // THE TITLE LOST ITS 'Stage 1 · ' PREFIX on 2026-11-10 and that is
+      // the point: the stage node prints the number in its own circle, so
+      // carrying it in the title too numbered the same thing twice in two
+      // vocabularies — the duplication the 2026-11-06 pass already removed
+      // from the unit cards. The stage is still identifiable, by its node.
       check('IA: Stage 1 and Meet the accent stay the clear start',
-        doc.body.textContent.includes('Stage 1 · Meet the Accent')
+        doc.body.textContent.includes('Meet the Accent')
         && doc.body.textContent.includes('Meet the accent')
-        && !!doc.querySelector('.unit-card.is-current'),
-        `units=${doc.querySelectorAll('.unit-card').length} current=${!!doc.querySelector('.unit-card.is-current')}`);
+        && !!doc.querySelector('.vp-stage.is-open'),
+        `stages=${doc.querySelectorAll('.vp-stage').length} open=${!!doc.querySelector('.vp-stage.is-open')}`);
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American')));
       await sleep(500);
@@ -2875,7 +2882,8 @@ export async function run({ navDoc = document } = {}) {
       check('workspaces: Voice & Speech keeps its course selector and course',
         !!doc.getElementById('course-chip')
         && statsbarText().includes('Neutral American')
-        && doc.body.textContent.includes('Stage 1 · Meet the Accent'));
+        && doc.body.textContent.includes('Meet the Accent')
+        && !!doc.querySelector('.vp-stage'));
       clickIn(doc.getElementById('course-chip')); await sleep(200);
       check('workspaces: the course menu offers all six, IPA Foundations included',
         ['IPA Foundations', 'Neutral American', 'Traditional RP',

@@ -1235,6 +1235,29 @@ body.modal-open { overflow: hidden; }
   .shell:has(.lm-path.is-cards) { grid-template-columns: 216px minmax(0, 1fr); }
 }
 
+/* VOICE & SPEECH LEARN TAKES THE RAIL'S COLUMN, for the third time and the
+   same reasons (owner's mockup, 2026-11-10). Path + Focus is already two
+   columns, so the 620px reading measure gave it 316 and 282 — measured —
+   which wraps every lesson title and shrinks the panel art to a thumbnail.
+   The rail is empty on this page: measured `.right-rail` with no text at
+   all, so nothing is lost by dropping it, and the mockup draws none.
+
+   KEYED ON THE LAYOUT, NOT THE COURSE. `.vp-grid` is emitted by this pane
+   for every course in the workspace, so all six get the width and no edit
+   here. Same `:has()` and the same min-width guard as the rules above: the
+   guard is load-bearing, because without it this outranks the shell's own
+   mobile collapse and squeezes the middle column with no overflow to show
+   for it. Where `:has()` is unsupported the page keeps the rail and the
+   620px measure — cramped, never broken, and the pane stacks to one column
+   there anyway. */
+@media (min-width: 980px) {
+  .shell:has(.vp-grid) { grid-template-columns: 216px minmax(0, 1160px); }
+  .shell:has(.vp-grid) .right-rail { display: none; }
+}
+@media (min-width: 980px) and (max-width: 1500px) {
+  .shell:has(.vp-grid) { grid-template-columns: 216px minmax(0, 1fr); }
+}
+
 /* Sidebar */
 .side-nav {
   position: sticky; top: 0; align-self: start; height: 100vh; height: 100dvh;
@@ -5593,3 +5616,125 @@ body.page-wide #app { max-width: 1180px; }
   .lx-main .lx-body .guide-heading { font-size: 22px; margin-top: 24px; }
   .block-eyebrow { margin-top: 24px; }
 }
+
+/* ── VOICE & SPEECH LEARN: PATH + FOCUS (owner handoff, 2026-11-10) ──
+   Two columns: the course as a stage path on the left, one lesson in
+   focus on the right. Built on the existing tokens — no new palette and
+   no second design system. Supersedes the .unit-grid pass of 2026-11-06,
+   whose .unit-card rules still serve renderUnitTrail and stay. */
+.vp-head {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 10px 24px; margin: 0 0 18px;
+}
+.vp-course-name {
+  font-family: var(--serif); font-size: 34px; font-weight: 700; color: var(--ink);
+  margin: 0; line-height: 1.1;
+}
+.vp-progress { min-width: 0; flex: 0 1 320px; }
+.vp-progress-label { display: block; font-size: 14px; color: var(--muted); margin-bottom: 6px; text-align: right; }
+progress.vp-progress-bar {
+  display: block; width: 100%; height: 10px; border: none; border-radius: 999px;
+  background: var(--panel-2); appearance: none; -webkit-appearance: none;
+}
+progress.vp-progress-bar::-webkit-progress-bar { background: var(--panel-2); border-radius: 999px; }
+progress.vp-progress-bar::-webkit-progress-value { background: var(--green); border-radius: 999px; }
+progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-radius: 999px; }
+
+.vp-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+
+/* ---- the path ---- */
+.vp-path { min-width: 0; }
+.vp-path-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 16px; margin-bottom: 12px; }
+.vp-path-head h2 { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); margin: 0; }
+.vp-path-note { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--muted); }
+.vp-stages { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; position: relative; }
+/* the trail: one line down the node column, behind the cards */
+.vp-stages::before {
+  content: ""; position: absolute; left: 31px; top: 28px; bottom: 28px; width: 2px;
+  background: linear-gradient(180deg, var(--green) 0%, var(--sage) 60%, transparent 100%);
+  opacity: .5; pointer-events: none;
+}
+.vp-stage { position: relative; }
+.vp-stage-head {
+  display: flex; align-items: center; gap: 14px; width: 100%; text-align: left;
+  font: inherit; cursor: pointer; background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px;
+}
+.vp-stage.is-open > .vp-stage-head { border-color: var(--gold); background: var(--panel); }
+.vp-stage-head:hover { border-color: var(--green); }
+.vp-dot {
+  flex: 0 0 auto; width: 34px; height: 34px; border-radius: 50%;
+  display: grid; place-items: center; font-family: var(--serif); font-size: 15px; font-weight: 700;
+  background: var(--panel-2); color: var(--muted); border: 2px solid var(--line);
+  position: relative; z-index: 1;
+}
+.vp-stage.is-open .vp-dot { background: var(--green); color: var(--panel); border-color: var(--green-dark); }
+.vp-stage.is-done .vp-dot { background: var(--sage); color: var(--panel); border-color: var(--green); }
+.vp-stage-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.vp-stage-title { font-family: var(--serif); font-size: 20px; font-weight: 700; }
+.vp-stage-count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.vp-stage-body { padding: 10px 0 2px 48px; }
+.vp-lessons { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.vp-lesson {
+  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
+  font: inherit; cursor: pointer; background: transparent; color: var(--ink);
+  border: 1px solid transparent; border-radius: 10px; padding: 8px 10px;
+}
+.vp-lesson:hover { background: var(--panel); border-color: var(--line); }
+.vp-lesson.is-selected { background: var(--panel); border-color: var(--gold); }
+.vp-lesson-mark { flex: 0 0 1.2em; color: var(--green); font-size: 14px; line-height: 1.5; }
+.vp-lesson.is-done .vp-lesson-mark { color: var(--sage); }
+.vp-lesson-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.vp-lesson-title { font-weight: 600; }
+.vp-lesson.is-done .vp-lesson-title { color: var(--muted); }
+.vp-lesson-meta { font-size: 13px; color: var(--muted); }
+.vp-lesson-state { flex: 0 0 auto; font-size: 12px; color: var(--muted); letter-spacing: .03em; align-self: center; white-space: nowrap; }
+.vp-trail-link { font-size: 14px; }
+
+/* ---- the focus panel ---- */
+.vp-focus {
+  background: var(--panel); border: 1px solid var(--gold); border-radius: 16px;
+  padding: 20px; position: sticky; top: 16px; min-width: 0;
+}
+.vp-focus-eyebrow {
+  margin: 0 0 6px; font-size: 12px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: var(--green-dark);
+}
+.vp-focus-title { font-family: var(--serif); font-size: 30px; font-weight: 700; color: var(--ink); margin: 0 0 6px; line-height: 1.15; }
+.vp-focus-meta { font-size: 14px; color: var(--muted); margin: 0 0 14px; }
+.vp-focus-art {
+  display: block; width: 100%; max-width: 520px; aspect-ratio: 3 / 2;
+  object-fit: contain; margin: 0 auto 14px;
+}
+.vp-focus-copy { font-size: 16px; color: var(--ink); margin: 0 0 14px; }
+.vp-focus .vp-go { width: 100%; justify-content: center; }
+.vp-focus .vp-guide { display: block; width: 100%; margin-top: 10px; text-align: center; }
+
+/* ---- botanical corners, decorative only ---- */
+.vp-corner { position: absolute; pointer-events: none; user-select: none; z-index: 0; }
+.vp-corner-blossom { top: 0; right: 0; width: 230px; opacity: .85; }
+.vp-head, .vp-grid { position: relative; z-index: 1; }
+
+@media (max-width: 979px) {
+  /* Aligned with the shell's own collapse, not the kit's proposed 1100:
+     between 980 and 1100 the shell is still multi-column, so stacking
+     there would leave one 1160px column. The next step comes before the
+     long outline. */
+  .vp-grid { grid-template-columns: minmax(0, 1fr); }
+  .vp-focus { position: static; order: -1; }
+  .vp-corner-blossom { width: 160px; opacity: .6; }
+}
+@media (max-width: 680px) {
+  .vp-corner { display: none; }
+  .vp-course-name { font-size: 26px; }
+  .vp-progress-label { text-align: left; }
+  .vp-stage-body { padding-left: 16px; }
+  .vp-stages::before { display: none; }
+  .vp-lesson-state { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .vp-stage-head, .vp-lesson { transition: none !important; }
+}
+.vp-lesson.is-locked { cursor: pointer; }
+.vp-lesson.is-locked .vp-lesson-title { color: var(--muted); }
+.vp-lesson.is-locked .vp-lesson-mark { color: var(--muted); font-size: 12px; }
