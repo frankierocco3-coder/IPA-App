@@ -2,6 +2,37 @@
 // and the exercise mix; the engine generates concrete exercises from that.
 
 export const COURSE = [
+  // ── THE INSTRUMENT (owner handoff, 2026-11-10) ────────────────
+  // Built from his sourced brief, docs/ORAL_POSTURE_AND_ARTICULATION.md,
+  // which carries the citations. The links live there because they cannot
+  // live here: security_audit.py allows exactly ONE external origin in
+  // shipped code and fails the deploy on any other, so sources are named
+  // in words and the document holds the URLs.
+  //
+  // IT IS IN IPA FOUNDATIONS, NOT THE FIVE ACCENT COURSES, and the brief
+  // is why: "not a placement prescription for every speaker", and on
+  // accent work, "don't assume everyone who speaks an accent uses the same
+  // tongue position." The instrument is the same instrument in every
+  // accent. Five per-accent posture lessons would be five copies of one
+  // thing and the one framing the source warns against.
+  //
+  // A NEW UNIT RENAMES NOTHING. Generated checkpoint ids are
+  // `chk-<unitId>-<n>`, keyed on the unit and the index WITHIN it, so a
+  // unit added at the head of a track leaves every existing id alone.
+  // Owner-editorial like the rest of the app; no speech-language
+  // pathologist has read it, and the badges say so.
+  {
+    id: 'instrument',
+    title: 'The Instrument',
+    color: '#a8766a',
+    icon: 'ə',
+    blurb: 'The mouth that makes the sounds — what moves, and what it changes.',
+    lessons: [
+      { id: 'in-1', title: 'What moves when you speak', guide: 'The vocal folds supply the buzz; the throat, mouth and nose shape it. The tongue, jaw, lips and soft palate make the closures and narrow gaps that tell consonants apart. Tongue tip and blade work near the teeth and the ridge behind them (tea, sea); the tongue body makes the back closures (key, sing); the lips close for /p b m/ and round for /uː/; the soft palate decides how much goes through the nose — bad and mad both start with closed lips, and only one lets air out the nose. These are typical English examples, not a prescription: in one jaw-perturbation experiment speakers compensated with the lips for /b/ but with the tongue for /z/. The parts coordinate to get a sound; they do not have to move identically from speaker to speaker.', phonemes: ['s', 'k', 'm', 'f', 'θ'], types: ['description', 'soundToSymbol', 'match'] },
+      { id: 'in-2', title: 'Shape, not pitch', guide: 'Say ee–ah–oo gently on roughly one note. Three vowels, no change of pitch — because the folds are the source and the changing mouth is the filter. Pitch has its own correlate (the fundamental); vowels are told apart by the first two vocal-tract resonances, the formants. More open vowels generally carry a higher first formant, more front vowels a higher second, though rounding moves the second as well, so a formant is not a direct readout of tongue position. Nasal resonance is a separate matter from brightness: /m n ŋ/ need it, a little on neighbouring vowels is normal, and a buzz felt in the face diagnoses nothing.', phonemes: ['iː', 'ɑː', 'uː', 'm', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
+      { id: 'in-3', title: 'Clear without sounding mechanical', guide: 'Enunciation is helping a listener tell words apart — articulation, timing, emphasis, phrasing and audibility together. Speech gestures overlap: the lips can begin rounding for a vowel before the consonant before it has finished. That is coarticulation, not sloppiness, and you do not reset the mouth between sounds. Make the meaningful contrast audible (coat, not goat), keep endings distinct (she packs, she packed) without forcing a puff of air onto every final consonant, and pause between ideas rather than between words. Clear speech is possible at a normal rate; brief exaggeration can find a contrast, then it comes back into the line.', phonemes: ['p', 'b', 't', 'd', 'k'], types: ['minimalPair', 'description', 'soundToSymbol'] },
+    ],
+  },
   {
     id: 'vowels-1',
     title: 'Short Vowels',
@@ -383,7 +414,7 @@ export const TRACKS = [
     icon: 'ʃə',
     color: '#6f8657',
     blurb: 'The alphabet itself — every English sound, then reading and writing it fluently.',
-    unitIds: ['vowels-1', 'vowels-2', 'diphthongs', 'consonants-1', 'consonants-2', 'reading'],
+    unitIds: ['instrument', 'vowels-1', 'vowels-2', 'diphthongs', 'consonants-1', 'consonants-2', 'reading'],
   },
   {
     id: 'nam',
