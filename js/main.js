@@ -15038,7 +15038,15 @@ function guideStepHtml(lesson, s, st) {
     const p = PHONEMES[s.ph];
     const acc = lesson.accent ?? lesson.shiftTo ?? null;
     const chips = p.examples.map(w => wordChip(w, acc)).join('');
-    const diagram = articulationSVG(s.ph);
+    // A HAND-DRAWN ILLUSTRATION REPLACES THE GENERATED DIAGRAM, the same
+    // rule the sound page has followed since the artwork landed: the
+    // generated one was only ever a stand-in for a drawing that had not
+    // been made yet. This step never asked the registry, so it kept
+    // showing the abstract vowel trapezoid for all 62 sounds that have a
+    // real mouth drawn for them — the owner caught it on /ɑː/, which has
+    // had 018-vowel-long-script-a.jpg all along.
+    const art = artFor(s.ph);
+    const diagram = art ? null : articulationSVG(s.ph);
     const isVowel = p.type !== 'consonant';
     // One-tap check so the step ends with doing, not just reading. Distractor
     // symbols come from this lesson where possible, so the check reinforces
@@ -15065,11 +15073,16 @@ function guideStepHtml(lesson, s, st) {
         <div class="guide-info">
           <p>${esc(p.hint)}</p>
           <div class="chips">${chips}</div>
-          ${diagram ? `<button class="diagram-toggle" data-target="dia-step" aria-expanded="false" type="button">📐 See tongue placement</button>` : ''}
+          ${art || diagram ? `<button class="diagram-toggle" data-target="dia-step" aria-expanded="false" type="button">📐 See tongue placement</button>` : ''}
         </div>
       </div>
-      ${diagram ? `<div class="guide-diagram" id="dia-step" hidden>
-        <div class="artic-wrap">${diagram}<p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>
+      ${art || diagram ? `<div class="guide-diagram" id="dia-step" hidden>
+        ${art
+          ? `<figure class="artic-wrap artic-figure">
+               <img class="artic-art" src="${esc(art)}"
+                    alt="How the mouth makes ${esc(s.ph)}" decoding="async">
+             </figure>`
+          : `<div class="artic-wrap">${diagram}<p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>`}
       </div>` : ''}
       ${wiiQuestion(st, 'gq-' + s.ph, `Quick check — which symbol is the sound in “<b>${esc(p.examples[0])}</b>”?`, opts)}`;
   }
