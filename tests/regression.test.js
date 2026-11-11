@@ -2655,8 +2655,8 @@ export async function run({ navDoc = document } = {}) {
       check('IA: Stage 1 and Meet the accent stay the clear start',
         doc.body.textContent.includes('Meet the Accent')
         && doc.body.textContent.includes('Meet the accent')
-        && !!doc.querySelector('.vp-stage.is-open'),
-        `stages=${doc.querySelectorAll('.vp-stage').length} open=${!!doc.querySelector('.vp-stage.is-open')}`);
+        && !!doc.querySelector('.vp-stage.is-expanded'),
+        `stages=${doc.querySelectorAll('.vp-stage').length} open=${!!doc.querySelector('.vp-stage.is-expanded')}`);
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American')));
       await sleep(500);

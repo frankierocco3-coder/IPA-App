@@ -143,10 +143,25 @@ async function shedServiceWorker() {
     catch (e) { suites.push(['Launch regression', { total: 1, failed: 1, results: [{ name: 'suite crashed', pass: false, detail: String(e) }] }]); }
   }
 
+  // HOW MANY NAVIGATIONS RENDERED WITHOUT A FRAME. navTo defers its render
+  // to startViewTransition, which defers to the next rendering opportunity;
+  // in an uncomposited frame that opportunity may never come, and before
+  // 2026-11-11 the render was simply lost. It now bails to a direct render
+  // after 100ms, and this reports how often that happened — the number this
+  // flake was missing every time it was diagnosed from its symptoms.
+  let navNote = '';
+  try {
+    const ds = frame.contentDocument?.documentElement?.dataset ?? {};
+    const started = Number(ds.navStarted || 0);
+    const bailed = Number(ds.navBailed || 0);
+    if (started) navNote = `${bailed} of ${started} navigations rendered without a frame`;
+  } catch { /* older build, or the frame is gone; the suites still stand */ }
+
   const total = suites.reduce((n, [, o]) => n + o.total, 0);
   const failed = suites.reduce((n, [, o]) => n + o.failed, 0);
   suites.forEach(([name, out]) => drawSuite(name, out));
-  statusEl.textContent = `${suites.length} suites · ${total} checks · ${failed} failure${failed === 1 ? '' : 's'}`;
+  statusEl.textContent = `${suites.length} suites · ${total} checks · ${failed} failure${failed === 1 ? '' : 's'}`
+    + (navNote ? ` · ${navNote}` : '');
   verdictEl.hidden = false;
   verdictEl.textContent = failed === 0 ? 'PASSED' : 'FAILED';
   verdictEl.className = failed === 0 ? 'pass' : 'fail';

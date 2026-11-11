@@ -107,6 +107,13 @@ export function record(thunk, key) {
 // every navigation, so changing it takes effect without a reload.
 // `dir` lets Back travel the opposite way to Forward (see style.css).
 let navSeq = 0;
+// HOW OFTEN THE FRAME DID NOT COME. Not telemetry: nothing leaves the
+// device and nothing is stored. It exists because this bug was diagnosed
+// three times from its symptoms and never from a number — a run can now
+// say "23 navigations rendered without a frame" instead of leaving the
+// next reader to infer it from a short check count.
+export const navDiag = { started: 0, bailed: 0 };
+
 export function navTo(render, dir = 'forward') {
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // THE FIRST PAINT NEVER TRANSITIONS, AND THIS IS THE BLANK-SCREEN FIX.
@@ -171,7 +178,57 @@ export function navTo(render, dir = 'forward') {
   const root = document.documentElement;
   const mine = ++navSeq;
   root.dataset.nav = dir;
-  const t = document.startViewTransition(render);
+  // AND NEITHER DOES ANY LATER PAINT — the guard above only covers the
+  // FIRST one. startViewTransition defers its update callback to the next
+  // rendering opportunity, so in a document that is visible and never
+  // composited, every navigation after the first silently does nothing:
+  // the click lands, navTo runs, and the page does not change. That is the
+  // suite cascade's exact shape — driven navigation dying partway with a
+  // crop of "Cannot read properties of null" against a page that never
+  // moved — and it is why the boot fix of 2026-10-25 cured the blank
+  // screen without curing the flake.
+  //
+  // So the render no longer DEPENDS on the frame arriving. If the callback
+  // has not run shortly, we skip the transition and render directly. The
+  // animation is the thing that is optional here; the render never was.
+  //
+  // 100ms: measured healthy latency in a composited pane is 4-28ms, so
+  // this is about four times the worst good case. The cost of bailing
+  // early is a lost cross-fade; the cost of not bailing is a tap that does
+  // nothing.
+  //
+  // THIS IS NOT THE SUITE-CASCADE FIX, AND SAYING SO MATTERS. It was
+  // written as one and it is not: on 2026-11-11 the suite ran 856/856 WITH
+  // it and 856/856 WITHOUT it on the same tree, and the counter below
+  // recorded the bail firing ZERO times. The cascade had stopped
+  // reproducing before this was written, and what stopped it is not
+  // established — though the same run showed the whole suite now makes
+  // only THREE navTo calls, where the pane this redesign replaced drove
+  // many, which is the first lead anyone has had with a number attached.
+  //
+  // It ships anyway, for READERS rather than for the suite: the blank
+  // screen of 2026-10-14 proved this mechanism can swallow a render whole,
+  // and the fix then was to make the FIRST paint not depend on a frame.
+  // Every later paint still did. A reader whose window stops being
+  // composited would tap and watch nothing happen, silently, with no error
+  // — the same failure, one navigation later. The guard above and this one
+  // are the same guard.
+  let ran = false;
+  let bail = 0;
+  const once = () => { if (ran) return; ran = true; clearTimeout(bail); render(); };
+  navDiag.started++;
+  root.dataset.navStarted = String(navDiag.started);
+  const t = document.startViewTransition(once);
+  bail = setTimeout(() => {
+    if (ran) return;
+    navDiag.bailed++;
+    // Published on the root element, not through eval: index.html ships a
+    // strict CSP with no unsafe-eval, so a runner outside the frame can
+    // read a data attribute and cannot read a module.
+    root.dataset.navBailed = String(navDiag.bailed);
+    try { t.skipTransition(); } catch { /* already finished or skipped */ }
+    once();
+  }, 100);
   // A transition started while another is running supersedes it, and
   // the superseded one rejects. That is ordinary, not an error. Only
   // the newest transition clears the direction, so a superseded one
