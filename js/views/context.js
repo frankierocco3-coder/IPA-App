@@ -8,15 +8,47 @@ import { speechPublished } from '../data/speech/reviews.js';
 import { app, record } from '../ui.js';
 
 export const unitById = Object.fromEntries(COURSE.map(u => [u.id, u]));
+
+// THE LAST UNIT OF EACH TRACK, so a course can end on its own final.
+// No unit belongs to two tracks - checked - so "last unit of its track"
+// is a property of the unit and this map can hold it.
+const TRACK_FINAL_UNITS = new Set(TRACKS.map(t => t.unitIds[t.unitIds.length - 1]));
+
 // Mini-game checkpoints woven between lessons: after every 2 lessons in
 // a unit, a short review game covering everything the unit taught so far.
+//
+// EXCEPT AFTER THE LAST LESSON OF A COURSE (2026-11-10). The rule fires on
+// every even-numbered lesson with no sense of where it is, so a unit with
+// an EVEN lesson count got a review game after its final one. Where that
+// unit ended a track, the course ended on a generated game sitting after
+// its own mastery exam - whose copy reads "Pass this and Neutral American
+// is yours - the course is complete." It then wasn't.
+//
+// It read worse than it looked: `mastered` is done === total over the whole
+// chain, so passing the final exam showed "Lesson complete!" and the
+// trailing game got "Course complete!". Five tracks ended this way - nam,
+// rp, aus, core and shift. ssbe and cockney never did, purely because their
+// last unit holds three lessons and the even rule never fired.
+//
+// A REGRESSION FROM THE 2026-11-06 REGROUP, not an old bug. Mastery used to
+// be a unit of ONE lesson, so `unit.lessons.length > 1` was false and no
+// accent course could end on a game. Folding Mastery into "Putting It to
+// Work" made that unit four lessons and tripped the rule.
+//
+// SCOPED TO THE TRACK-ENDING CASE ON PURPOSE (owner's call). A checkpoint
+// after an even-numbered unit MID-course is a stage review and still fires;
+// only the one that would follow a course's last lesson is suppressed.
+// Because it only ever removes a track's final node, no lesson's unlock
+// dependency moves: isUnlocked keys on the PREVIOUS node, and nothing
+// follows this one.
 export function expandUnit(unit) {
   const out = [];
   const covered = [];
   unit.lessons.forEach((l, i) => {
     out.push(l);
     covered.push(l);
-    if ((i + 1) % 2 === 0 && unit.lessons.length > 1) {
+    const endsTheCourse = i === unit.lessons.length - 1 && TRACK_FINAL_UNITS.has(unit.id);
+    if ((i + 1) % 2 === 0 && unit.lessons.length > 1 && !endsTheCourse) {
       const phonemes = [...new Set(covered.flatMap(x => x.phonemes ?? []))];
       const types = [...new Set(covered.flatMap(x => x.types ?? []))];
       const accent = covered.find(x => x.accent)?.accent;

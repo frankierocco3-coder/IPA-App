@@ -19,6 +19,12 @@ const KEY = 'ipa-trainer-v1';
 // It is additive and idempotent. It never deletes: a renamed id is ADDED
 // alongside whatever is there, so running it twice changes nothing and a
 // device that somehow sees it after a rollback still holds its old ids.
+// ONE TARGET IS NO LONGER READ: 'chk-rp-use-2'. The 2026-11-10 change that
+// stops a course ending on a generated game removed that node from RP's
+// chain. The entry stays exactly as it is - this map is additive and never
+// deletes, so it writes a key nothing looks at, which is harmless and keeps
+// the map honest about what the rename WAS. Do not prune it: it is keyed on
+// retired ids and is the one migration that rewrites anything.
 const CHK_V3 = {
   'chk-nam-1': 'chk-nam-meet-1', 'chk-nam-2': 'chk-nam-meet-2',
   'chk-nam-3': 'chk-nam-sounds-1', 'chk-nam-4': 'chk-nam-sounds-2',
