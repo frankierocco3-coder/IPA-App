@@ -4,6 +4,7 @@
 import { PHONEMES, WORDS, MINIMAL_PAIRS, SENTENCES } from './data/phonemes.js';
 import { EXERCISES_PER_LESSON } from './data/dialect-course.js';
 import { IDIOM, idiomFor, IDIOM_DIALOGUES, IDIOM_SITUATIONS, IDIOM_LITERAL } from './data/idiom.js';
+import { PROSODY } from './data/prosody.js';
 import { voicesWith, clipIndexLoaded } from './audio.js';
 
 // Exercises that promise audio only use words with a real, playable
@@ -544,6 +545,30 @@ function idiomPool(accent) {
   return idiomFor(accent).filter(e => !e.flag);
 }
 
+// WHAT RHYTHM THIS ACCENT KEEPS. The four distractors are the other
+// accents' own published descriptions, so every option is a true statement
+// about SOME accent and only one is true about this one - which is the
+// discrimination an actor actually has to make. Text only: there is no
+// per-accent sentence audio to hear a rhythm in, and inventing one would
+// be worse than asking in words.
+function genAccentRhythm(accent) {
+  const mine = PROSODY[accent];
+  if (!mine) return null;
+  const others = Object.keys(PROSODY).filter(a => a !== accent);
+  if (others.length < 2) return null;
+  const wrong = shuffle(others).slice(0, 3).map(a => ({ label: cap(PROSODY[a].clause) + '.' }));
+  const name = ACCENT_NAMES[accent];
+  return {
+    type: 'choice',
+    prompt: `Which of these is the rhythm of ${name}?`,
+    smallDisplay: true,
+    choices: shuffle([{ label: cap(mine.clause) + '.', ok: true }, ...wrong]),
+    explain: `${name}: ${mine.tell}`,
+  };
+}
+
+const cap = str => str.charAt(0).toUpperCase() + str.slice(1);
+
 function genIdiom(accent) {
   const pool = idiomPool(accent);
   if (pool.length < 4) return null;
@@ -659,6 +684,7 @@ const GENERATORS = {
   //
   // Same `accent ?? shiftTo` the checkpoint rule in js/views/context.js
   // already used; the defaults stay only as a last resort.
+  accentRhythm: l => genAccentRhythm(l.accent ?? l.shiftTo ?? 'nam'),
   idiom: l => genIdiom(l.accent ?? l.shiftTo ?? 'rp'),
   idiomSituation: () => genIdiomSituation(),
   idiomRegister: l => genIdiomRegister(l.accent ?? l.shiftTo ?? 'ssbe'),
