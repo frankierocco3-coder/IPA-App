@@ -173,11 +173,25 @@ the old pane made 44. The old tree runs 856/856 on a quiet machine, so it
 did not. What the 44-to-3 drop does is cut EXPOSURE about fifteenfold: far
 fewer chances to be caught by a busy moment. Real, and not a fix.
 
-**THE GUARD IS WELL-MOTIVATED, NOT YET CAUGHT WORKING.** navTo now renders
-directly if the callback has not run in 100ms. Old tree + guard + load came
-back 856/856, but the rescue counter read zero at the end (it resets when
-the suite reloads the frame) and the load may have eased mid-run. The
-failure it prevents is measured; the prevention is not.
+**THE GUARD IS PROVEN, 2026-11-12.** navTo renders directly if the callback
+has not run in 100ms. Measured head to head in the running app, fourteen
+trials each, in the 300ms window the shortest driven check uses:
+
+| machine | unguarded | guarded | bails fired | render latency |
+|---|---|---|---|---|
+| idle | never late (2-15ms) | **14/14** | **0** | 2-15ms |
+| under CPU load | **5/14** | **14/14** | **14** | — |
+
+Unguarded, nine of fourteen navigations silently did nothing. Guarded, all
+fourteen rendered. On an idle machine it fires zero times and the callback
+arrives in 2-15ms, so it is not eating animations to buy that.
+
+A NEAR-MISS WORTH KEEPING. The first "idle" control showed 11 of 14 bails
+and latency pinned at exactly 102ms, which reads as a guard set far too
+aggressive. It was not idle: `pkill -f "x=(x\*x+1)%999983"` never matched
+because of shell escaping and sixteen load loops were still running. Check
+that a control is actually controlled — `ps aux | grep` the load, do not
+trust that the kill worked.
 
 **AND THE SUITE IMMEDIATELY EARNED ITS KEEP.** The first clean run failed
 exactly one check — a selector renamed by the review fixes hours earlier
