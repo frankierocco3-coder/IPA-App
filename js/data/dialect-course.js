@@ -232,7 +232,59 @@ export const COURSE = [
           },
         },
         guide: 'Say ee–ah–oo gently on roughly one note. Three vowels, no change of pitch — because the folds are the source and the changing mouth is the filter. Pitch has its own correlate (the fundamental); vowels are told apart by the first two vocal-tract resonances, the formants. More open vowels generally carry a higher first formant, more front vowels a higher second, though rounding moves the second as well, so a formant is not a direct readout of tongue position. Nasal resonance is a separate matter from brightness: /m n ŋ/ need it, a little on neighbouring vowels is normal, and a buzz felt in the face diagnoses nothing.', phonemes: ['iː', 'ɑː', 'uː', 'm', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
-      { id: 'in-3', title: 'Clear without sounding mechanical', guide: 'Enunciation is helping a listener tell words apart — articulation, timing, emphasis, phrasing and audibility together. Speech gestures overlap: the lips can begin rounding for a vowel before the consonant before it has finished. That is coarticulation, not sloppiness, and you do not reset the mouth between sounds. Make the meaningful contrast audible (coat, not goat), keep endings distinct (she packs, she packed) without forcing a puff of air onto every final consonant, and pause between ideas rather than between words. Clear speech is possible at a normal rate; brief exaggeration can find a contrast, then it comes back into the line.', phonemes: ['p', 'b', 't', 'd', 'k'], types: ['minimalPair', 'description', 'soundToSymbol'] },
+      { id: 'in-3', title: 'Clear without sounding mechanical',
+        // ── THE DELIVERY PANE (owner handoff, 2026-11-13) ────────────────
+        // The third `explore.kind` in this unit: a listening contrast, then
+        // an emphasis switch. Same step and same `st` as the other two.
+        //
+        // THE TEACHING IS ALREADY IN THE GUIDE BELOW. "Brief exaggeration can
+        // find a contrast, then it comes back into the line" is the two
+        // deliveries, and emphasis is named in its first sentence. The only
+        // new writing is the demonstration line itself, which is the owner's.
+        //
+        // THE TWO RECORDINGS DO NOT EXIST AND THERE IS NO PLACE TO PUT THEM
+        // YET. Two DELIVERIES of one line is a performance contrast, not a
+        // pronunciation one: the same speaker reading the same words twice,
+        // which no generated voice can be trusted to fake and which the
+        // handoff explicitly says not to simulate. It also has nowhere to
+        // live — a word-tree clip is keyed on its text, so two performances
+        // of one sentence collide on one slug, and inventing a convention
+        // before the files exist would be guessing at the shape of something
+        // nobody has recorded. So the cards are flagged as assets needed,
+        // by name, and the storage question waits for the audio.
+        //
+        // MAKE IT LAND NEEDS NO AUDIO AT ALL, so the exercise the lesson is
+        // actually built around is whole: the learner moves the emphasis and
+        // says the line. Neither choice is wrong, and the pane says so.
+        explore: {
+          kind: 'delivery',
+          lead: 'Same words. Two deliveries.',
+          line: 'Leave the keys by the door.',
+          deliveries: [
+            { label: 'Over-enunciated',
+              hint: 'Every consonant struck, every word given its own space.' },
+            { label: 'Clear and conversational',
+              hint: 'The same words, the same consonants, at the rate you would actually say them.' },
+          ],
+          missing: 'Both deliveries are recordings that have not been made: one speaker reading this line twice, over-enunciated and then conversational. They are named here as assets needed rather than faked with a generated voice, which could not be trusted to tell the two apart.',
+          make: {
+            heading: 'Make it land',
+            open: 'Make it land',
+            bullets: [
+              'Say the line to someone who needs to know what to leave.',
+              'Now make the other word the important one. What changes?',
+            ],
+            // Both are right, and the prompt says which question each answers
+            // rather than which is correct.
+            words: [
+              { word: 'keys', prompt: 'Stressing keys answers what to leave.' },
+              { word: 'door', prompt: 'Stressing door answers where to leave it.' },
+            ],
+            note: 'Neither is wrong. The emphasis follows what the listener needs to know.',
+            close: 'Let the meaning guide the emphasis.',
+          },
+        },
+        guide: 'Enunciation is helping a listener tell words apart — articulation, timing, emphasis, phrasing and audibility together. Speech gestures overlap: the lips can begin rounding for a vowel before the consonant before it has finished. That is coarticulation, not sloppiness, and you do not reset the mouth between sounds. Make the meaningful contrast audible (coat, not goat), keep endings distinct (she packs, she packed) without forcing a puff of air onto every final consonant, and pause between ideas rather than between words. Clear speech is possible at a normal rate; brief exaggeration can find a contrast, then it comes back into the line.', phonemes: ['p', 'b', 't', 'd', 'k'], types: ['minimalPair', 'description', 'soundToSymbol'] },
     ],
   },
   {

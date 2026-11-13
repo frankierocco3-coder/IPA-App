@@ -15157,7 +15157,7 @@ function contrastCheckHtml(lesson, st) {
   const picked = st.checkPick ?? null;
   const chosen = picked == null ? null : c.options[picked];
   return `
-    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back to ${esc(lesson.title)}</button>
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
     <h1>${esc(c.heading)}</h1>
     <p class="guide-text">${esc(c.lead)}</p>
     <p class="lx-cta"><button class="btn btn-primary ct-play" data-compare type="button">▶ ${esc(c.play)}</button></p>
@@ -15176,6 +15176,62 @@ function contrastCheckHtml(lesson, st) {
     </div>`;
 }
 
+// ── THE DELIVERY PANE (owner handoff, 2026-11-13) ─────────────
+// Lesson 3's shape: two deliveries of one line, then an emphasis switch.
+// The deliveries have no recordings and no agreed home, so the cards name
+// what is needed instead of offering a control that cannot play.
+function emphasisedLineHtml(line, word) {
+  // Split on the word so the emphasis can be marked without building the
+  // sentence from fragments. esc() on every piece, as ever — and if the word
+  // is not in the line the sentence still renders, unmarked, rather than
+  // silently losing half of itself.
+  const i = word ? line.toLowerCase().indexOf(word.toLowerCase()) : -1;
+  if (i < 0) return esc(line);
+  return `${esc(line.slice(0, i))}<b class="dl-stress">${esc(line.slice(i, i + word.length))}</b>${esc(line.slice(i + word.length))}`;
+}
+
+function deliveryPaneHtml(lesson, st) {
+  const ex = lesson.explore;
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="dl-lead">${esc(ex.lead)}</p>
+    <p class="dl-line">&ldquo;${esc(ex.line)}&rdquo;</p>
+    <div class="dl-pair">
+      ${ex.deliveries.map(d => `
+        <div class="dl-card">
+          <p class="dl-card-label">${esc(d.label)}</p>
+          <p class="dl-card-hint">${esc(d.hint)}</p>
+        </div>`).join('')}
+    </div>
+    <p class="audio-avail dl-missing">${esc(ex.missing)}</p>
+    <p class="lx-cta"><button class="btn" data-explore="make" type="button">${esc(ex.make.open)} ›</button></p>`;
+}
+
+function makeItLandHtml(lesson, st) {
+  const ex = lesson.explore;
+  const m = ex.make;
+  // Nothing is chosen on arrival; the mockup shows one picked, which is a
+  // later state. The sentence reads plainly until the learner moves it.
+  const picked = st.stress ?? null;
+  const chosen = m.words.find(w => w.word === picked) ?? null;
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(m.heading)}</h1>
+    <p class="dl-line">&ldquo;${emphasisedLineHtml(ex.line, picked)}&rdquo;</p>
+    <ul class="th-list">${m.bullets.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    <div class="dl-stress-pick">
+      ${m.words.map(w => {
+        const on = w.word === picked;
+        return `<button class="dl-word${on ? ' is-picked' : ''}" data-stress="${esc(w.word)}" type="button"
+            aria-pressed="${on}" aria-label="Stress the word “${esc(w.word)}”">
+            <span class="dl-word-mark" aria-hidden="true">${on ? '✓' : ''}</span>${esc(w.word)}
+          </button>`;
+      }).join('')}
+    </div>
+    <p class="pane-note" role="status" aria-live="polite">${esc(chosen ? chosen.prompt : m.note)}</p>
+    <p class="guide-key">${esc(m.close)}</p>`;
+}
+
 function guideStepHtml(lesson, s, st) {
   // The opening and its detail states are ONE step. Which of them shows is
   // st.explore, carried in the same object the guide already threads for
@@ -15183,6 +15239,9 @@ function guideStepHtml(lesson, s, st) {
   if (s.kind === 'explore') {
     // TWO LAYOUTS, ONE STEP. `kind` decides; a lesson without one is lesson
     // 1's row list, which is the shape that existed first.
+    if (lesson.explore.kind === 'delivery') {
+      return st.explore === 'make' ? makeItLandHtml(lesson, st) : deliveryPaneHtml(lesson, st);
+    }
     if (lesson.explore.kind === 'contrast') {
       return st.explore === 'check' && contrastReady(lesson.explore)
         ? contrastCheckHtml(lesson, st)
@@ -15325,14 +15384,14 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
     // Back re-rendered the same step and looked broken. Measured going
     // step 1 -> check -> Continue -> Back and landing on step 2 twice.
     if (st.explore && steps[step]?.kind === 'explore') {
-      st.explore = null; st.checkPick = null; renderGuide(lesson, step, st); return;
+      st.explore = null; st.checkPick = null; st.stress = null; renderGuide(lesson, step, st); return;
     }
     renderGuide(lesson, step - 1, st);
   });
   // Moving off the step drops its sub-state, so coming back to it opens on
   // the lesson opening — which is the contract the handoff states for Back.
   document.getElementById('g-next')?.addEventListener('click', () => {
-    st.explore = null; st.checkPick = null;
+    st.explore = null; st.checkPick = null; st.stress = null;
     renderGuide(lesson, step + 1, st);
   });
   document.getElementById('start')?.addEventListener('click', () => startLesson(lesson));
@@ -15345,7 +15404,7 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
     btn.addEventListener('click', () => {
       // Leaving the check forgets the answer, so coming back to it asks again
       // rather than reopening on a verdict the learner has already read.
-      st.explore = null; st.checkPick = null; renderGuide(lesson, step, st);
+      st.explore = null; st.checkPick = null; st.stress = null; renderGuide(lesson, step, st);
     }));
   // ── The contrast pane's controls ────────────────────────────
   // An isolated vowel, played on its own. playPhoneme returns false and stays
@@ -15371,6 +15430,8 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
   // than through the shared [data-say] wiring because this handler re-renders:
   // relying on two listeners firing in registration order on an element this
   // one is about to replace is the kind of thing that works until it doesn't.
+  app.querySelectorAll('[data-stress]').forEach(btn =>
+    btn.addEventListener('click', () => { st.stress = btn.dataset.stress; renderGuide(lesson, step, st); }));
   app.querySelectorAll('[data-pick]').forEach(btn =>
     btn.addEventListener('click', () => {
       const w = btn.dataset.pick;
