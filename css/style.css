@@ -899,8 +899,20 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .btn-danger:hover { background: rgba(164,80,60,0.10); }
 
 /* Keyboard focus is visible everywhere new */
+/* EVERY CONTROL THAT IS NOT A .btn HAS TO BE NAMED HERE, which is easy to
+   forget: .choice only gets a ring because it is written `class="btn choice"`.
+   The illustrated lessons (2026-11-13) added five standalone controls and
+   none of them had a focus ring until they were listed — the checkpoint
+   handoff asks for visible focus in as many words.
+   .track-card joins them at the same time. It had none either, so every
+   course, shelf and explore row in the app has been keyboard-focusable with
+   nothing to show for it; a ring where there was none is a fix, and it is
+   the only way the explore rows can have one, since they ARE track-cards. */
 .btn:focus-visible, .btn-lite:focus-visible, .son-tab:focus-visible,
-.chip-pick:focus-visible, .proj-open:focus-visible, .tw-word:focus-visible {
+.chip-pick:focus-visible, .proj-open:focus-visible, .tw-word:focus-visible,
+.track-card:focus-visible, .word-chip:focus-visible, .guide-symbol:focus-visible,
+.ck-pick:focus-visible, .ck-say:focus-visible, .ck-opt:focus-visible,
+.exp-word:focus-visible, .ct-opt:focus-visible {
   outline: 3px solid rgba(138,109,59,0.5); outline-offset: 2px;
 }
 
