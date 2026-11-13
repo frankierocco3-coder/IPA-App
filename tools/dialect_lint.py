@@ -92,17 +92,50 @@ def main():
     if len(words) < 100:
         fail("phonemes.js: parsed suspiciously few WORDS entries (%d)" % len(words))
 
-    # 1 + 2: lesson symbol checks (lessons are one line each in course.js)
+    # 1 + 2: lesson symbol checks.
+    #
+    # LESSONS USED TO BE ONE LINE EACH AND ARE NOT ANY MORE. This read the
+    # file a line at a time and needed `{ id:` and `phonemes: [...]` on the
+    # SAME line; the illustrated lessons (2026-11-13) carry a multi-line
+    # `explore` block between them, so both dropped straight out of the
+    # check and the gate went on PASSING — 84 lessons where there are 86,
+    # with no complaint, because the only floor was a < 40 catastrophe
+    # guard. A gate that quietly covers less than it did is the exact
+    # failure this repo keeps paying for, so the count is now asserted.
+    #
+    # Records are split on INDENTATION: a lesson sits at exactly six spaces
+    # in this file, where the objects nested inside an `explore` block sit
+    # deeper. That is structural rather than a guess — measured 86 at six
+    # spaces against the 86 this check parsed before the blocks landed.
+    def strip_explore(rec):
+        """Drop any explore: { ... } so its innards cannot answer a property
+        lookup meant for the lesson — a row's id, or a nested accent."""
+        i = rec.find('explore: {')
+        if i < 0:
+            return rec
+        depth, j = 0, rec.index('{', i)
+        for j in range(j, len(rec)):
+            if rec[j] == '{':
+                depth += 1
+            elif rec[j] == '}':
+                depth -= 1
+                if depth == 0:
+                    return rec[:i] + rec[j + 1:]
+        return rec[:i]          # unbalanced: drop the tail rather than guess
+
+    starts = [m.start() for m in re.finditer(r"^      \{ id: '", course_src, re.M)]
+    records = [course_src[a:b] for a, b in zip(starts, starts[1:] + [len(course_src)])]
     lessons_seen = 0
-    for line in course_src.splitlines():
-        m = re.search(r"\{ id: '([^']+)'", line)
-        phs = re.search(r"phonemes: \[([^\]]*)\]", line)
+    for rec in records:
+        rec = strip_explore(rec)
+        m = re.search(r"\{ id: '([^']+)'", rec)
+        phs = re.search(r"phonemes: \[([^\]]*)\]", rec)
         if not m or not phs:
             continue
         lessons_seen += 1
         lid = m.group(1)
-        acc = re.search(r"accent: '(\w+)'", line)
-        shift = re.search(r"shiftTo: '(\w+)'", line)
+        acc = re.search(r"accent: '(\w+)'", rec)
+        shift = re.search(r"shiftTo: '(\w+)'", rec)
         target = (acc or shift).group(1) if (acc or shift) else None
         for sym in re.findall(r"'([^']+)'", phs.group(1)):
             if sym not in phonemes:
@@ -111,6 +144,15 @@ def main():
             elif target and sym in foreign.get(target, set()):
                 fail("course %s / lesson %s: symbol %r belongs to another "
                      "accent's transcription system" % (target, lid, sym))
+    # EVERY RECORD MUST BE CHECKED, not merely enough of them. A lesson that
+    # stops matching the parser is silently exempted from the symbol checks
+    # above, which is how 84 of 86 passed for a while.
+    if lessons_seen != len(records):
+        missed = [re.search(r"\{ id: '([^']+)'", r).group(1) for r in records
+                  if not re.search(r"phonemes: \[([^\]]*)\]", strip_explore(r))]
+        fail("dialect-course.js: %d lesson records found but only %d carried a "
+             "phonemes list and were checked — unparsed: %s"
+             % (len(records), lessons_seen, ", ".join(missed) or "unknown"))
     if lessons_seen < 40:
         fail("dialect-course.js: parsed suspiciously few lessons (%d)" % lessons_seen)
 

@@ -16,6 +16,7 @@ This cannot judge whether a clip SOUNDS right — only the owner's ear can
 """
 
 import json
+import os
 import pathlib
 import re
 import sys
@@ -68,7 +69,7 @@ def main():
                     fail("index lists a phoneme-like path as a word: %s/%s/%s" % (d, v, clip))
                 p = AUDIO / d / v / (clip + ".mp3")
                 if not p.is_file():
-                    fail("index lists missing file: %s" % p.relative_to(ROOT))
+                    fail("index lists missing file: %s" % os.path.relpath(p, ROOT))
 
     # 2: on-disk word clips are all indexed
     for d in WORD_DIALECTS:
@@ -81,7 +82,7 @@ def main():
             listed = set(index.get(d, {}).get(sub.name, []))
             for mp3 in sub.glob("*.mp3"):
                 if mp3.stem not in listed:
-                    fail("file on disk missing from index: %s" % mp3.relative_to(ROOT))
+                    fail("file on disk missing from index: %s" % os.path.relpath(mp3, ROOT))
 
     # 3: quarantine entries are real files (word tree or phoneme tree)
     for entry in known_bad:
@@ -102,7 +103,7 @@ def main():
         for f in (AUDIO / "phonemes").rglob("*.mp3") if (AUDIO / "phonemes").is_dir() else []:
             d, v = f.parts[-3], f.parts[-2]
             if f.stem not in set(pidx.get(d, {}).get(v, [])):
-                fail("phoneme file on disk missing from phonemes-index: %s" % f.relative_to(ROOT))
+                fail("phoneme file on disk missing from phonemes-index: %s" % os.path.relpath(f, ROOT))
 
     # 4 + 5: approved phonemes exist under audio/phonemes/ only
     for entry in approved:
