@@ -5764,3 +5764,181 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .vp-lesson.is-locked { cursor: pointer; }
 .vp-lesson.is-locked .vp-lesson-title { color: var(--muted); }
 .vp-lesson.is-locked .vp-lesson-mark { color: var(--muted); font-size: 12px; }
+
+/* ── The illustrated lesson opening (owner handoff, 2026-11-13) ──
+   IPA Foundations lesson 1. The rows reuse .track-card wholesale, glyph
+   image slot and all, so the only new work here is the word pair, the
+   reveal and two text treatments. Every colour is an existing token.
+
+   APPENDED AT THE END ON PURPOSE: a stray brace in this file silently
+   swallows the NEXT rule, and at the end there is no next rule. */
+.exp-rows { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.exp-row { width: 100%; text-align: left; }
+/* THE ROW THUMBNAIL IS A CROP, NOT THE WHOLE PLATE. These are full
+   articulation drawings — 1122x1402, with the symbol set in a black bar
+   across the top — and `contain` in a 46px box fitted all of that in,
+   title bar included, which read as a smudge with a dark stripe over it.
+   Covering and framing low throws away the bar and the empty upper head
+   and keeps the mouth, which is the part that distinguishes one row from
+   the next. Scoped to .exp-row so the shelves that use purpose-drawn
+   icons in the same glyph slot keep fitting theirs whole. */
+.exp-row .track-glyph.has-img { overflow: hidden; }
+.exp-row .track-glyph.has-img img {
+  width: 100%; height: 100%; object-fit: cover; object-position: 50% 78%;
+}
+.exp-row-title { font-size: 17px; color: var(--ink); font-weight: 700; }
+.exp-row-pair { color: var(--muted); font-weight: 600; }
+.exp-back { margin-bottom: 10px; }
+
+/* The listening pair. Two cards, side by side, no right-or-wrong: this is a
+   comparison, not a question, so it deliberately does NOT reuse .choice and
+   inherit that green-is-correct reading. */
+.exp-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+.exp-word {
+  font: inherit; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 14px; cursor: pointer; min-width: 0;
+}
+.exp-word:active { transform: translateY(2px); border-bottom-width: 2px; }
+/* SELECTED IS NOT COLOUR ALONE: the tick in the markup carries it, the tint
+   and the heavier border only reinforce it, and aria-pressed states it. */
+.exp-word.is-picked { border-color: var(--green); background: var(--accent-tint); }
+.exp-word.is-plain { cursor: default; border-style: dashed; border-bottom-width: 2px; background: none; }
+.exp-word-text { font-family: var(--serif); font-size: 21px; font-style: italic; color: var(--ink); min-width: 0; }
+.exp-word-mark { font-size: 15px; flex: none; }
+.exp-word.is-picked .exp-word-mark { color: var(--green-dark); font-weight: 800; }
+
+/* What the chosen word reveals: its articulation plate and one sentence. */
+.exp-reveal {
+  display: flex; gap: 14px; align-items: center;
+  background: var(--accent-tint); border: 1px solid var(--line);
+  border-radius: 14px; padding: 12px 14px; margin: 0 0 14px;
+}
+.exp-reveal img { width: 92px; height: auto; flex: none; border-radius: 8px; background: var(--panel); }
+.exp-reveal p { font-size: 15px; line-height: 1.55; color: var(--ink); margin: 0; min-width: 0; }
+@media (max-width: 420px) {
+  .exp-reveal { flex-direction: column; align-items: flex-start; }
+  .exp-reveal img { width: 100%; max-width: 160px; align-self: center; }
+}
+
+/* ── The contrast pane: IPA Foundations lesson 2 ──────────────
+   Two vowel cards side by side, and the check after them. Tokens only. */
+.ct-pair { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0; }
+.ct-card {
+  display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center;
+  background: var(--panel); border: 2px solid var(--line); border-radius: 14px; padding: 12px; min-width: 0;
+}
+.ct-art { width: 100%; height: auto; border-radius: 8px; }
+.ct-label { font-family: var(--serif); font-size: 22px; font-weight: 700; color: var(--ink); margin: 0; }
+.ct-cap { font-size: 13px; line-height: 1.45; color: var(--muted); margin: 0; }
+.btn-hear { width: 100%; font-size: 14px; padding: 8px 10px; }
+/* THE CUE IS A LABEL, NOT A MEASUREMENT, and it only appears when matched
+   recordings back it — see `needs` in js/data/dialect-course.js. */
+.ct-cue {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 999px;
+  padding: 3px 12px; font-size: 13px; font-weight: 700; color: var(--ink); margin: 0; white-space: nowrap;
+}
+.ct-missing { margin: 0 0 14px; }
+
+/* The check. Options are full-width rows: nothing preselected, and the
+   chosen one is marked with a glyph as well as a tint. */
+.ct-opts { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.ct-opt {
+  font: inherit; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 14px; cursor: pointer; text-align: left;
+  font-size: 17px; font-weight: 700; color: var(--ink);
+}
+.ct-opt:active { transform: translateY(2px); border-bottom-width: 2px; }
+.ct-opt.is-right { border-color: var(--green); background: var(--accent-tint); }
+.ct-opt.is-wrong { border-color: var(--red); background: var(--bad-tint); }
+.ct-opt-mark { font-size: 18px; font-weight: 800; flex: none; }
+.ct-verdict:empty { display: none; }
+.ct-verdict p {
+  background: var(--accent-tint); border: 1px solid var(--line); border-radius: 14px;
+  padding: 12px 14px; font-size: 15.5px; line-height: 1.55; color: var(--ink); margin: 0;
+}
+@media (max-width: 420px) {
+  .ct-label { font-size: 19px; }
+  .ct-cue { font-size: 12px; padding: 2px 9px; }
+}
+
+/* ── The checkpoint game: IPA Foundations, The Instrument ─────
+   Select, then Check answer — so the marks below stay empty until the
+   learner submits. Tokens only, and every state carries a glyph as well
+   as a colour. */
+.ck-band {
+  font-size: 12.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 0 0 6px;
+}
+/* WIDTH IS NOT OPTIONAL HERE. main.exercise is `display:flex; flex-direction:
+   column; align-items:center`, so a grid child shrinks to its content and
+   `1fr 1fr` resolves against that — the cards collapsed to 73px once the art
+   became a small circle. .choices carries the same two lines for the same
+   reason; this matches it rather than inventing a second answer. */
+.ck-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;
+  width: 100%; max-width: 440px; }
+/* The wrapper only LOOKS like one control: the pick and the speaker are
+   siblings, because a button inside a button is invalid and unreachable. */
+.ck-card { position: relative; min-width: 0; }
+.ck-pick {
+  font: inherit; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 14px 12px 40px; cursor: pointer;
+}
+.ck-pick:active { transform: translateY(2px); border-bottom-width: 2px; }
+.ck-pick.is-picked { border-color: var(--green); background: var(--accent-tint); }
+.ck-pick.is-right { border-color: var(--green); background: var(--accent-tint); }
+.ck-pick.is-wrong { border-color: var(--red); background: var(--bad-tint); }
+.ck-word { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); }
+/* ── MATCHING CLOSED LIPS, CROPPED OUT OF THE FULL PLATE ──────
+   The handoff asks for "matching closed-lip sketches", and the point of
+   matching is that the picture must NOT answer the question. The whole
+   articulation plates do answer it: /m/ draws a red arrow out through the
+   nose and /b/ draws one out of the mouth, so a learner could pick the
+   right card without hearing or knowing anything.
+   Both plates happen to carry a closed-lip inset circle in nearly the same
+   place — /b/'s upper one, /m/'s only one — so the box crops to that and
+   the two cards show the same gesture, which is the truth: at the start of
+   both words the lips do exactly the same thing.
+   The numbers are geometry, not taste. The inset is ~44% of the plate's
+   width, centred near (77.5%, 31.5%) of a 1122x1402 image: scaling to
+   100/44 = 227.3% and offsetting by the circle's distance from the centre
+   puts it in the middle of a square box. */
+.ck-artbox {
+  position: relative; display: block; width: 100%; aspect-ratio: 1 / 1;
+  overflow: hidden; border-radius: 999px;
+  border: 1px solid var(--line); background: var(--panel);
+}
+.ck-artbox img { position: absolute; width: 227.3%; max-width: none; left: -126.2%; top: -39.5%; }
+.ck-mark { font-size: 17px; font-weight: 800; min-height: 1em; }
+/* Sits over the card's reserved bottom padding, so it never overlaps the art. */
+.ck-say {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  font: inherit; font-size: 15px; line-height: 1;
+  background: var(--accent-tint); border: 2px solid var(--green); border-radius: 999px;
+  padding: 6px 14px; cursor: pointer;
+}
+.ck-opts { display: flex; flex-direction: column; gap: 10px; margin: 16px 0;
+  width: 100%; max-width: 440px; }
+.ck-opt {
+  font: inherit; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 14px; cursor: pointer; text-align: left;
+  font-size: 17px; font-weight: 700; color: var(--ink);
+}
+.ck-opt:active { transform: translateY(2px); border-bottom-width: 2px; }
+.ck-opt.is-picked { border-color: var(--green); background: var(--accent-tint); }
+.ck-opt.is-right { border-color: var(--green); background: var(--accent-tint); }
+.ck-opt.is-wrong { border-color: var(--red); background: var(--bad-tint); }
+.ck-actions { display: flex; justify-content: center; margin: 18px 0 8px;
+  width: 100%; max-width: 440px; }
+.ck-actions .btn { min-width: 220px; padding: 13px 28px; font-size: 16px; }
+.ck-actions .btn[disabled] { opacity: .5; cursor: default; }
+.ck-review { font-size: 16.5px; line-height: 1.6; color: var(--ink); margin: 0 0 12px; }
+.ck-notice { margin: 0 0 8px; }
+@media (max-width: 420px) {
+  .ck-word { font-size: 22px; }
+  .ck-actions .btn { min-width: 0; width: 100%; }
+}

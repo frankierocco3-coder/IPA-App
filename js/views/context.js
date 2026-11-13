@@ -74,8 +74,21 @@ export function expandUnit(unit) {
       if ((accent ?? shiftTo) === 'ssbe' || (accent ?? shiftTo) === 'cockney') {
         extras.push('idiom', 'idiomRegister');
       }
+      // AN AUTHORED QUEUE WINS OVER THE GENERATED ONE (owner handoff,
+      // 2026-11-13). A unit may carry `checkpointGame`: hand-written rounds
+      // for its FIRST checkpoint, passed through as the `fixedQueue` the
+      // engine already honours for the Accent Bridge. Everything else about
+      // the node is untouched — same id, same `checkpoint: true`, same
+      // phonemes and types — so completion, unlocking and the results screen
+      // behave identically whether the queue was written or generated.
+      //
+      // Only checkpoint 1, deliberately: a unit with four lessons has a
+      // second checkpoint that nothing has authored, and it should keep
+      // generating rather than silently replay the first one's two rounds.
+      const n = (i + 1) / 2;
+      const authored = n === 1 ? unit.checkpointGame : null;
       out.push({
-        id: `chk-${unit.id}-${(i + 1) / 2}`,
+        id: `chk-${unit.id}-${n}`,
         title: 'Checkpoint game',
         checkpoint: true,
         phonemes,
@@ -83,6 +96,7 @@ export function expandUnit(unit) {
         accent,
         shiftTo,
         count: 5,
+        ...(authored ? { fixedQueue: authored.map(r => ({ type: 'checkround', ...r })) } : {}),
       });
     }
   });

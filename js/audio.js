@@ -49,6 +49,21 @@ export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-
 // mapping is only the fallback.
 const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
 
+// WHICH DIRECTORY A CALLER'S AUDIO ACTUALLY COMES FROM. resolveAudio() has
+// always resolved a null accent this way; naming it lets a caller ask the
+// availability question about the SAME directory playback will use. An
+// accent-neutral course (IPA Foundations) has no accent and langFor() gives
+// it 'en-GB', so its words come from rp — which is what it already plays.
+//
+// NOTE FOR WHOEVER FIXES THE WIDER BUG: hasWordClip() below still passes the
+// raw accent to voicesWith(), where clipIndex[null] is undefined. So in an
+// accent-neutral course speak() plays a word that hasWordClip() reports as
+// missing, and the control renders as plain text beside audio that exists.
+// Routing hasWordClip through clipDir fixes it everywhere at once, and it
+// changes what every course believes about its own coverage — so it wants
+// the audio suite run beside it, not a drive-by edit.
+export const clipDir = (accent, lang = 'en-GB') => accent ?? LANG_DIR[lang] ?? 'rp';
+
 // (An earlier build stored a per-course voice preference under
 // 'speechcraft-voice-prefs'. It is deliberately ignored now — playback is
 // random across a course's approved voices — and a stale key is harmless.)
@@ -221,7 +236,7 @@ export function resolveAudio({ kind = 'word', accent = null, lang = 'en-GB', tex
   // word | expression | sentence — all resolve by EXACT displayed text;
   // the filename derives from that text, so cross-content substitution is
   // structurally impossible.
-  const dir = accent ?? LANG_DIR[lang] ?? 'rp';
+  const dir = clipDir(accent, lang);
   if (!isWordText(text)) return { status: 'unavailable', kind, dir, voice: null, path: null, text };
   const options = voicesWith(dir, text);
   if (!options.length) return { status: 'unavailable', kind, dir, voice: null, path: null, text };

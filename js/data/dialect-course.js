@@ -27,9 +27,211 @@ export const COURSE = [
     color: '#a8766a',
     icon: 'ə',
     blurb: 'The mouth that makes the sounds — what moves, and what it changes.',
+    // ── THE CHECKPOINT GAME (owner handoff, 2026-11-13) ──────────────────
+    // Two authored rounds in place of the five generated questions this
+    // checkpoint drew from the unit's accumulated phonemes. `expandUnit`
+    // hands them to the engine as a `fixedQueue`, the same escape hatch the
+    // Accent Bridge uses, so scoring, the feedback band, requeue-on-miss and
+    // completion all stay exactly as they are.
+    //
+    // THE ID DOES NOT MOVE. The checkpoint is still generated, still
+    // `chk-instrument-1`, still the node after lesson 2. Only its queue
+    // changes, so nobody's completion goes anywhere.
+    //
+    // IT IS A REAL REDUCTION IN PRACTICE — five mixed questions across
+    // everything the unit has covered, down to two specific ones. That is
+    // what the handoff asks for ("Two untimed rounds") and it is the owner's
+    // call, but it is worth having written down rather than discovered.
+    //
+    // ROUND 2'S WORDING IS THE HANDOFF'S, NOT THE MOCKUP'S. The pixel
+    // reference prints "The note stays the same. What changes?", which hands
+    // over the answer before the learner has chosen; START-HERE.md names that
+    // and asks for "What changed between the two sounds?" instead. Where the
+    // two documents disagree the instruction wins over the picture.
+    checkpointGame: [
+      { round: 'Airflow',
+        prompt: 'Which word starts with air flowing through the nose?',
+        submit: 'Check answer',
+        // Closed lips in both plates, which is the point of the pair: the
+        // lips do the same thing and the soft palate does not.
+        cards: [
+          { label: 'bad', say: 'bad', art: 'b' },
+          { label: 'mad', say: 'mad', art: 'm', ok: true },
+        ],
+        explain: 'Both words start with the lips closed. For the /m/ at the start of mad the soft palate lowers, and the air leaves through the nose instead of the mouth.' },
+
+      { round: 'Vowel shape',
+        prompt: 'What changed between the two sounds?',
+        submit: 'Check answer',
+        // THE SAME MATCHED PAIR LESSON 2 IS WAITING ON, and the same gate.
+        // Scoring a listening question on clips that are 2.1 semitones apart
+        // would mark "The pitch" wrong when the pitch is exactly what moved.
+        // With the clips absent this round becomes the text review the
+        // handoff asks for — stated, not scored.
+        compare: { voice: 'nam', label: 'Play comparison', gapMs: 1100,
+          needs: ['fleece_vowel_monotone', 'goose_vowel_monotone'] },
+        pair: [
+          { label: 'ee', sym: 'i\u02d0', art: 'i\u02d0' },
+          { label: 'oo', sym: 'u\u02d0', art: 'u\u02d0' },
+        ],
+        options: [
+          { label: 'The vowel', ok: true },
+          { label: 'The pitch' },
+        ],
+        explain: 'The vowel changed, not the pitch. The note stayed where it was \u2014 what moved was the shape of your mouth.',
+        // Shown instead of the question when the matched pair is missing.
+        review: {
+          // The band already says 'Vowel shape', so the heading said it twice.
+          // The mockup's own line works here BECAUSE nothing is being asked:
+          // in the review there is no answer left to give away.
+          heading: 'The note stays the same',
+          text: 'On one note, ee and oo are the same pitch and different vowels: the folds are the source, and the changing mouth is the filter. Say them both on one comfortable note and you can hear it in your own voice.',
+          notice: 'This round is a listening comparison, and the matched recordings it needs have not been made yet \u2014 so it is given to read rather than scored on audio that would contradict it.',
+        } },
+    ],
     lessons: [
-      { id: 'in-1', title: 'What moves when you speak', guide: 'The vocal folds supply the buzz; the throat, mouth and nose shape it. The tongue, jaw, lips and soft palate make the closures and narrow gaps that tell consonants apart. Tongue tip and blade work near the teeth and the ridge behind them (tea, sea); the tongue body makes the back closures (key, sing); the lips close for /p b m/ and round for /uː/; the soft palate decides how much goes through the nose — bad and mad both start with closed lips, and only one lets air out the nose. These are typical English examples, not a prescription: in one jaw-perturbation experiment speakers compensated with the lips for /b/ but with the tongue for /z/. The parts coordinate to get a sound; they do not have to move identically from speaker to speaker.', phonemes: ['s', 'k', 'm', 'f', 'θ'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'in-2', title: 'Shape, not pitch', guide: 'Say ee–ah–oo gently on roughly one note. Three vowels, no change of pitch — because the folds are the source and the changing mouth is the filter. Pitch has its own correlate (the fundamental); vowels are told apart by the first two vocal-tract resonances, the formants. More open vowels generally carry a higher first formant, more front vowels a higher second, though rounding moves the second as well, so a formant is not a direct readout of tongue position. Nasal resonance is a separate matter from brightness: /m n ŋ/ need it, a little on neighbouring vowels is normal, and a buzz felt in the face diagnoses nothing.', phonemes: ['iː', 'ɑː', 'uː', 'm', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
+      { id: 'in-1', title: 'What moves when you speak',
+        // ── THE ILLUSTRATED OPENING (owner handoff, 2026-11-13) ──────────
+        // `explore` turns this lesson's overview step into the two states the
+        // handoff mocks up: an illustrated opening, and one detail state per
+        // row that the opening opens. It is DATA, not a second renderer —
+        // guideStepHtml dispatches on it, the detail state lives in `st`
+        // beside the answers the guide already threads, and a lesson without
+        // `explore` renders exactly as it did. Continue still leads into the
+        // existing sound steps and Start lesson still reaches the exercises,
+        // so nothing about progress or completion moves.
+        //
+        // NOTHING HERE IS NEW WRITING. Every line is lifted from this lesson's
+        // own `guide` below, which is already through editorial review. The
+        // three rows ARE its three clauses: the lips close for /p b m/; the
+        // tongue tip and blade work near the ridge behind the upper teeth
+        // (tea) while the body makes the back closures (key); and the soft
+        // palate decides how much goes through the nose, where bad and mad
+        // both start with closed lips and only one lets air out the nose.
+        //
+        // THE ART ALL EXISTS. The opening figure is the labelled cross-section
+        // already registered in js/data/voice-art.js — the same labelled side
+        // view docs/ORAL_POSTURE_AND_ARTICULATION.md asks for, which turns out
+        // to have been drawn in the 2026-09-04 intake. Every word study is a
+        // hand-drawn plate already in img/articulation/, resolved by symbol
+        // through artFor(), and /m/'s plate already draws the nasal airflow
+        // arrow this lesson needs. No slot here waits on a drawing.
+        //
+        // 'mad' HAS NO CLIP IN ANY ACCENT as of 2026-11-13, so its control
+        // renders as plain text and the pair says so, per the strict audio
+        // rule. The word is declared here rather than avoided because the
+        // approved prose names it; the lesson completes itself the moment the
+        // clip lands, with no further change.
+        explore: {
+          lead: 'Your vocal folds make the buzz. Your mouth and nose shape it.',
+          fig: 'mouth-articulators',
+          title: 'Explore the instrument',
+          // Observations, not instructions — the same qualification the guide
+          // makes with its jaw-perturbation example. It renders once, under
+          // the rows, so the three detail states do not each have to hedge.
+          note: 'These are typical English examples, not a prescription. Speakers reach the same sound by different routes.',
+          rows: [
+            { id: 'lips', label: 'Lips', pair: 'bad / mad', art: 'b',
+              heading: 'Same lips. Different airflow.',
+              lead: 'Say bad, then mad. Notice how both start with your lips closed.',
+              words: [
+                { word: 'bad', art: 'b',
+                  note: 'Lips closed, pressure behind them, and the release goes out through your mouth.' },
+                { word: 'mad', art: 'm',
+                  note: 'Lips closed exactly the same way \u2014 but the soft palate lowers, and for /m/ the air flows out through your nose.' },
+              ],
+              tryIt: 'Hum mmm. Notice where you feel the buzz.' },
+
+            { id: 'tongue', label: 'Tongue', pair: 'tea / key', art: 't',
+              heading: 'Two closures. Two ends of the tongue.',
+              lead: 'Say tea, then key. Both begin by stopping the air with the tongue \u2014 in different places.',
+              words: [
+                { word: 'tea', art: 't',
+                  note: 'The tip or blade works near the ridge behind your upper teeth.' },
+                { word: 'key', art: 'k',
+                  note: 'The body of the tongue rises at the back, toward the soft palate.' },
+              ],
+              tryIt: 'Say tea, key, tea, key. Feel the contact travel back and forward.' },
+
+            { id: 'airflow', label: 'Airflow', pair: 'mouth / nose', art: 'm',
+              heading: 'Where the air comes out.',
+              lead: 'Replay bad and mad, and listen for where each one sends the air.',
+              words: [
+                { word: 'bad', art: 'b',
+                  note: 'The soft palate is raised, closing the way to the nose, so the air leaves through your mouth.' },
+                { word: 'mad', art: 'm',
+                  note: 'The soft palate lowers and opens the way to the nose, so the air leaves there instead.' },
+              ],
+              tryIt: 'Say mad and pinch your nose halfway through. The sound changes, because that is where the air was going.' },
+          ],
+        },
+        guide: 'The vocal folds supply the buzz; the throat, mouth and nose shape it. The tongue, jaw, lips and soft palate make the closures and narrow gaps that tell consonants apart. Tongue tip and blade work near the teeth and the ridge behind them (tea, sea); the tongue body makes the back closures (key, sing); the lips close for /p b m/ and round for /uː/; the soft palate decides how much goes through the nose — bad and mad both start with closed lips, and only one lets air out the nose. These are typical English examples, not a prescription: in one jaw-perturbation experiment speakers compensated with the lips for /b/ but with the tongue for /z/. The parts coordinate to get a sound; they do not have to move identically from speaker to speaker.', phonemes: ['s', 'k', 'm', 'f', 'θ'], types: ['description', 'soundToSymbol', 'match'] },
+      { id: 'in-2', title: 'Shape, not pitch',
+        // ── THE CONTRAST PANE (owner handoff, 2026-11-13) ────────────────
+        // Lesson 1's `explore` is a list of rows that open; this one is a
+        // single comparison with a check after it, so it rides the same step
+        // and the same `st`, and `kind` picks the layout. One mechanism, two
+        // shapes — the way the Learn renderer already works.
+        //
+        // THE DEMONSTRATION IS GATED ON AUDIO THAT DOES NOT EXIST, AND THAT
+        // IS THE WHOLE POINT OF `needs`. This lesson's claim is that the
+        // vowel changes while the note does not. The two approved clips were
+        // measured on 2026-11-13 and they cannot carry it:
+        //
+        //   fleece_vowel  starts 190 Hz and FALLS to 129 Hz — a glide of
+        //                 nearly seven semitones, not a note
+        //   goose_vowel   sits steady around 114-122 Hz
+        //   medians       2.1 semitones apart
+        //
+        // Neither was recorded to be compared, and a learner with a working
+        // ear would hear 'ee' fall, answer "The pitch", and be told they were
+        // wrong — in an ear-training app. So the 'Same pitch' cue and the
+        // check render ONLY when both slugs in `needs` are approved, and
+        // until then the lesson says what is missing.
+        //
+        // THE TWO 'Hear' BUTTONS STILL WORK. Individually the clips are fine:
+        // they are approved recordings of /iː/ and /uː/ by the reference
+        // voice. It is only the comparison between them that is unsupported,
+        // so only the comparison is withheld. Try it needs no audio at all —
+        // the learner makes the sound — so it is always there, which leaves
+        // the actual exercise intact on the way to the recordings.
+        explore: {
+          kind: 'contrast',
+          voice: 'nam',          // the only accent with approved isolated phonemes
+          lead: 'You can change the vowel without changing the note.',
+          cue: 'Same pitch',
+          pair: [
+            { label: '\u201cee\u201d', sym: 'i\u02d0', art: 'i\u02d0',
+              hear: 'Hear ee', caption: 'Lips slightly spread, tongue high and forward.' },
+            { label: '\u201coo\u201d', sym: 'u\u02d0', art: 'u\u02d0',
+              hear: 'Hear oo', caption: 'Lips rounded, tongue high and back.' },
+          ],
+          // The matched pair this demonstration needs: both vowels sustained
+          // on ONE steady comfortable note, in a single take, at one level.
+          // Recorded, prepped and approved like any other phoneme clip, at
+          // which point everything below turns on with no code change.
+          needs: ['fleece_vowel_monotone', 'goose_vowel_monotone'],
+          missing: 'The same-pitch comparison needs a matched pair: both vowels held on one steady note, in a single take. The recordings here are the sounds themselves, made separately, and they do not share a note \u2014 so the comparison is not offered rather than shown misleadingly.',
+          tryIt: { title: 'Try it',
+            text: 'On one comfortable note, glide from ee to oo. Notice what changes.' },
+          check: {
+            open: 'Quick check',
+            heading: 'What changed?',
+            lead: 'Listen to both sounds.',
+            play: 'Play comparison',
+            gapMs: 1100,
+            // NOTHING IS PRESELECTED and the answer is not revealed, per the
+            // handoff. A wrong answer offers the comparison again rather than
+            // correcting the learner and moving on.
+            options: [
+              { label: 'The vowel', ok: true },
+              { label: 'The pitch', ok: false },
+            ],
+            right: 'The vowel changed. The note stayed the same.',
+            wrong: 'Listen again. Both sounds sit on the same note \u2014 what moved was the shape of your mouth.',
+          },
+        },
+        guide: 'Say ee–ah–oo gently on roughly one note. Three vowels, no change of pitch — because the folds are the source and the changing mouth is the filter. Pitch has its own correlate (the fundamental); vowels are told apart by the first two vocal-tract resonances, the formants. More open vowels generally carry a higher first formant, more front vowels a higher second, though rounding moves the second as well, so a formant is not a direct readout of tongue position. Nasal resonance is a separate matter from brightness: /m n ŋ/ need it, a little on neighbouring vowels is normal, and a buzz felt in the face diagnoses nothing.', phonemes: ['iː', 'ɑː', 'uː', 'm', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
       { id: 'in-3', title: 'Clear without sounding mechanical', guide: 'Enunciation is helping a listener tell words apart — articulation, timing, emphasis, phrasing and audibility together. Speech gestures overlap: the lips can begin rounding for a vowel before the consonant before it has finished. That is coarticulation, not sloppiness, and you do not reset the mouth between sounds. Make the meaningful contrast audible (coat, not goat), keep endings distinct (she packs, she packed) without forcing a puff of air onto every final consonant, and pause between ideas rather than between words. Clear speech is possible at a normal rate; brief exaggeration can find a contrast, then it comes back into the line.', phonemes: ['p', 'b', 't', 'd', 'k'], types: ['minimalPair', 'description', 'soundToSymbol'] },
     ],
   },
