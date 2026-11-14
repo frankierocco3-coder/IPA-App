@@ -300,7 +300,64 @@ export const COURSE = [
     icon: 'ɪ',
     blurb: 'The six short vowels of English, plus the humble schwa.',
     lessons: [
-      { id: 'v1-1', title: 'KIT, DRESS & TRAP', guide: 'Three front vowels, stacked by how open your mouth is: /ɪ/ is nearly closed (kit), /e/ is halfway (dress), /æ/ is nearly open (trap). Say them in a row and feel your jaw drop.', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'v1-1', title: 'KIT, DRESS & TRAP',
+        // ── Illustrated opening (owner handoff, 2026-11-13) ──────────
+        // THE HANDOFF ASKED FOR sit / set / sat, AND THEY DO NOT EXIST.
+        // Zero clips across all ten accent-voice pairs; declaring them
+        // would owe audit_audio thirty recordings. The brief's own reason
+        // for that triplet is "the same surrounding consonants so the
+        // learner can focus on the vowel" — so the frame is what matters,
+        // not those three words. bid / bed / bad is the only other full
+        // minimal triplet in the library and it is complete in all ten
+        // voices, so the listening check is real and scored today.
+        // Owner chose it over kit/dress/trap, which are recorded but share
+        // no frame. The course already leans on "bid vs bed" in v1-4.
+        //
+        // /e/ NOT /ɛ/: the mockup writes DRESS as /ɛ/, and the handoff
+        // says to follow the app's convention where they differ. This
+        // course has always written /e/ — in this lesson's own guide text,
+        // in `phonemes` below, and in articulation-art — so /ɛ/ here would
+        // be the one place in the app that disagrees with itself.
+        explore: {
+          kind: 'vowels',
+          lead: 'Hear the vowel in the middle.',
+          frame: 'Same consonants either side. Only the vowel moves.',
+          // The plates are the ones articulation-art already maps for
+          // these three symbols, so the rows are illustrated today. They
+          // are diagrams, not the ink-and-wash vignettes the handoff
+          // pictures; swapping those in later is a data change here.
+          rows: [
+            { set: 'KIT', ipa: 'ɪ', word: 'bid', hint: 'Jaw nearly closed.' },
+            { set: 'DRESS', ipa: 'e', word: 'bed', hint: 'Jaw halfway.' },
+            { set: 'TRAP', ipa: 'æ', word: 'bad', hint: 'Jaw nearly open.' },
+          ],
+          // Shown INSTEAD of the check when the recordings are not there.
+          // Unreachable while bid/bed/bad are complete, which is the point:
+          // it is the state the lesson falls back to, not a disclaimer.
+          missing: 'These three recordings are missing in this voice, so the words are printed rather than offered and there is no listening check — a check you cannot hear would score nothing. The contrast above still teaches without listening credit.',
+          check: {
+            open: 'Try a listening check',
+            heading: 'Which vowel did you hear?',
+            play: 'Play mystery word',
+            replay: 'Replay as often as you like.',
+            // ONE OF THE THREE TAUGHT WORDS, as the handoff specifies for a
+            // first round. Fixed rather than random: a random word would
+            // make the suite non-deterministic, and Math.random is banned
+            // in workflow scripts for the same reason. The correct answer
+            // is DERIVED from whichever row holds this word, so the two
+            // cannot drift apart.
+            mystery: 'bed',
+            submit: 'Check answer',
+            retry: 'Try again',
+            right: 'Yes — that was the DRESS vowel.',
+            wrong: 'Not quite — listen again for how far the jaw drops.',
+            // PLAIN TEXT, because every lesson string goes through esc().
+            // Markup here would have to travel an un-escaped path, and a
+            // lesson field is not worth opening one.
+            reveal: 'The word was “bed” — DRESS /e/, the jaw halfway between “bid” and “bad”.',
+          },
+        },
+        guide: 'Three front vowels, stacked by how open your mouth is: /ɪ/ is nearly closed (kit), /e/ is halfway (dress), /æ/ is nearly open (trap). Say them in a row and feel your jaw drop.', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
       { id: 'v1-2', title: 'STRUT, FOOT & LOT', guide: 'Three more short vowels, made further back in the mouth: /ʌ/ is open and relaxed (but), /ʊ/ is high with rounded lips (foot), /ɒ/ is low with rounded lips (lot).', phonemes: ['ʌ', 'ʊ', 'ɒ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
       { id: 'v1-3', title: 'Meet the schwa', guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
       { id: 'v1-4', title: 'Short vowels round-up', guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },

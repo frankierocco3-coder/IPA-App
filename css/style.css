@@ -912,7 +912,8 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .chip-pick:focus-visible, .proj-open:focus-visible, .tw-word:focus-visible,
 .track-card:focus-visible, .word-chip:focus-visible, .guide-symbol:focus-visible,
 .ck-pick:focus-visible, .ck-say:focus-visible, .ck-opt:focus-visible,
-.exp-word:focus-visible, .ct-opt:focus-visible, .dl-word:focus-visible {
+.exp-word:focus-visible, .ct-opt:focus-visible, .dl-word:focus-visible,
+.vq-opt:focus-visible, .vq-say:focus-visible {
   outline: 3px solid rgba(138,109,59,0.5); outline-offset: 2px;
 }
 
@@ -5987,3 +5988,65 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   .dl-pair { grid-template-columns: 1fr; }
   .dl-line { font-size: 19px; }
 }
+
+/* ── KIT, DRESS & TRAP: sound cards and listening check ───────
+   IPA Foundations lesson 5. The cards carry the articulation plate the app
+   already maps for each symbol. The QUIZ rows deliberately carry nothing
+   but the symbol and the set name — a picture beside an option would
+   answer the question before it was asked. */
+.vq-frame { font-size: 15px; color: var(--muted); margin: 0 0 14px; }
+.vq-rows { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 10px; }
+.vq-row {
+  display: flex; align-items: center; gap: 12px; min-width: 0;
+  background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px;
+}
+/* THE PLATE IS CROPPED TO THE TONGUE, and that is the whole point of it.
+   These are 1122x1402 cross-sections of the entire head, with a lip inset
+   and a black symbol bar. `cover` in a 46px box fits nearly all of that in,
+   and all three rows then render as the SAME grey smudge — implying a
+   difference the eye cannot find. What actually separates /ɪ/, /e/ and /æ/
+   is how high the tongue sits, so the crop frames the vocal tract alone:
+   region x 80-680, y 780-1360 of the source. Percentages, so one set of
+   numbers holds at both box sizes below. */
+.vq-art {
+  position: relative; flex: none; width: 54px; height: 54px; display: block; overflow: hidden;
+  border-radius: 10px; border: 1px solid var(--line); background: var(--panel-2);
+}
+.vq-art img { position: absolute; display: block; width: 187%; max-width: none; height: auto; left: -13.3%; top: -130%; }
+.vq-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.vq-set { font-family: var(--serif); font-size: 17px; font-weight: 700; color: var(--ink); }
+.vq-ipa { font-weight: 800; }
+.vq-hint { font-size: 13px; color: var(--muted); }
+.vq-say { flex: none; font-family: var(--serif); font-size: 16px; }
+/* An unplayable word is PRINTED, never offered as a faded control. */
+.vq-plain { flex: none; font-family: var(--serif); font-size: 16px; font-style: italic; color: var(--muted); }
+.vq-missing { margin: 0 0 8px; }
+.vq-replay { margin: -4px 0 14px; }
+
+/* The options: uniform rows, same width, same type, nothing to tell them
+   apart until one is marked. */
+.vq-opts { display: flex; flex-direction: column; gap: 10px; margin: 14px 0; }
+.vq-opt {
+  font: inherit; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 13px 16px; cursor: pointer;
+}
+.vq-opt:active { transform: translateY(2px); border-bottom-width: 2px; }
+.vq-opt[disabled] { cursor: default; }
+.vq-opt-ipa { font-family: var(--serif); font-size: 21px; font-weight: 800; color: var(--ink); flex: none; min-width: 2.4em; }
+.vq-opt-set { font-size: 15px; font-weight: 700; color: var(--muted); flex: 1 1 auto; }
+.vq-opt-mark { font-size: 18px; font-weight: 800; flex: none; }
+/* Chosen, right and wrong are never colour alone: the glyph in the markup
+   carries each one and aria-pressed states the selection. */
+.vq-opt.is-picked { border-color: var(--green); background: var(--accent-tint); }
+.vq-opt.is-right { border-color: var(--green); background: var(--accent-tint); }
+.vq-opt.is-right .vq-opt-mark { color: var(--green-dark); }
+.vq-opt.is-wrong { border-color: var(--red); background: var(--bad-tint); }
+.vq-line { font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.vq-reveal { font-size: 15px; line-height: 1.55; color: var(--ink); margin: 0; }
+@media (max-width: 420px) {
+  .vq-art { width: 46px; height: 46px; }
+  .vq-say, .vq-plain { font-size: 15px; }
+  .vq-opt { padding: 12px 13px; gap: 10px; }
+}
+
