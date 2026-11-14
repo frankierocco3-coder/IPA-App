@@ -15171,7 +15171,7 @@ function contrastCheckHtml(lesson, st) {
           </button>`;
       }).join('')}
     </div>
-    <div class="ct-verdict" role="status" aria-live="polite">
+    <div class="ct-verdict"${chosen ? ` data-announce="${esc(chosen.ok ? c.right : c.wrong)}"` : ''}>
       ${chosen ? `<p>${esc(chosen.ok ? c.right : c.wrong)}</p>` : ''}
     </div>`;
 }
@@ -15228,7 +15228,7 @@ function makeItLandHtml(lesson, st) {
           </button>`;
       }).join('')}
     </div>
-    <p class="pane-note" role="status" aria-live="polite">${esc(chosen ? chosen.prompt : m.note)}</p>
+    <p class="pane-note"${chosen ? ` data-announce="${esc(chosen.prompt)}"` : ''}>${esc(chosen ? chosen.prompt : m.note)}</p>
     <p class="guide-key">${esc(m.close)}</p>`;
 }
 
@@ -15304,7 +15304,7 @@ function roundupRoundHtml(lesson, st) {
             <button class="btn-lite ru-play" data-ru-slot="${n}" type="button"
               aria-label="Play ${letter(n)}"><span aria-hidden="true">▶</span> Play ${letter(n)}</button>
             <button class="ru-pick" data-ru-pick="${n}" type="button"
-              aria-pressed="${on}" aria-label="Choose ${letter(n)}"${shown ? ' disabled' : ''}>
+              aria-pressed="${on}" aria-label="${shown ? `${esc(w)}${isRight ? ', correct' : (on ? ', incorrect' : '')}` : `Choose ${letter(n)}`}"${shown ? ' disabled' : ''}>
               <span class="ru-letter">${letter(n)}</span>
               <span class="ru-word">${shown ? esc(w) : ''}</span>
               <span class="ru-mark" aria-hidden="true">${mark}</span>
@@ -15313,7 +15313,7 @@ function roundupRoundHtml(lesson, st) {
       }).join('')}
     </div>
     <p class="pane-note ru-replay">${esc(ex.replay)}</p>
-    <div class="ru-verdict" role="status" aria-live="polite">${
+    <div class="ru-verdict"${shown ? ` data-announce="${esc(`${correct ? ex.right : ex.wrong} The target was “${r.target}”.`)}"` : ''}>${
       shown ? `<p class="ru-line">${esc(correct ? ex.right : ex.wrong)} The target was “${esc(r.target)}”.</p>` : ''}</div>
     ${shown
       ? `<p class="lx-cta"><button class="btn btn-primary" data-ru-next type="button">${esc(last ? ex.toReview : ex.nextRound)} ›</button></p>`
@@ -15429,7 +15429,7 @@ function schwaCheckHtml(lesson, st) {
           </button>`;
       }).join('')}
     </div>
-    <div class="sw-verdict" role="status" aria-live="polite">${
+    <div class="sw-verdict"${picked == null ? '' : ` data-announce="${esc(right ? r.reveal : c.wrong)}"`}>${
       right ? `<p class="sw-reveal">${esc(r.reveal)}</p>`
       : picked != null ? `<p class="sw-wrong">${esc(c.wrong)}</p>` : ''}</div>
     ${right
@@ -15520,7 +15520,7 @@ function vowelCheckHtml(lesson, st) {
           </button>`;
       }).join('')}
     </div>
-    <div class="vq-verdict" role="status" aria-live="polite">${shown
+    <div class="vq-verdict"${shown ? ` data-announce="${esc(`${correct ? c.right : c.wrong} ${c.reveal}`)}"` : ''}>${shown
       ? `<p class="vq-line">${esc(correct ? c.right : c.wrong)}</p><p class="vq-reveal">${esc(c.reveal)}</p>`
       : ''}</div>
     ${shown
@@ -15666,11 +15666,23 @@ function guideStepHtml(lesson, s, st) {
       You can reopen this guide from the path any time.</p>`;
 }
 
+let lastGuideFocus = null;
+
 function renderGuide(lesson, step = 0, st = { answered: {} }) {
   const unit = lesson.unit;
   const steps = guideSteps(lesson);
   const n = steps.length;
   const last = step === n - 1;
+  // WHERE THE KEYBOARD USER WAS. app.innerHTML destroys the control they
+  // just activated, which drops focus to <body> and loses their place in
+  // the pane entirely. Every control in these panes carries a data-* hook,
+  // so the same one can be found again afterwards.
+  const prior = document.activeElement;
+  let focusSel = null;
+  if (prior && app.contains(prior)) {
+    const d = [...prior.attributes].find(a => a.name.startsWith('data-') && a.name !== 'data-announce');
+    if (d) focusSel = `[${d.name}="${d.value.replace(/["\\]/g, '\\$&')}"]`;
+  }
   app.innerHTML = `
     <header class="lesson-top">
       <button class="quit" id="quit" aria-label="Exit guide">✕</button>
@@ -15679,6 +15691,12 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
       <span class="step-count">${step + 1} of ${n}</span>
     </header>
     <main class="guide guide-stepped">
+      <!-- SHIPPED EMPTY, FILLED AFTER THE RENDER. A region inserted with its
+           text already inside is never announced: assistive technology fires
+           on a CHANGE to a region that already exists. renderGuide rewrites
+           the whole pane, so every pane that carried its own role="status"
+           announced nothing at all. Same pattern as #perform-live. -->
+      <p class="sr-only" id="g-live" role="status" aria-live="polite"></p>
       <div class="guide-title-bar" style="--unit-color:${unit.color}">${esc(unit.title)} · ${esc(lesson.title)}</div>
       <section class="guide-step">${guideStepHtml(lesson, steps[step], st)}</section>
       <div class="guide-nav">
@@ -15846,9 +15864,35 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
       btn.textContent = open ? '📐 Hide tongue placement' : '📐 See tongue placement';
     })
   );
-  // Land keyboard and screen-reader focus on the step's heading.
-  const h = app.querySelector('.guide-step h1');
-  if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
+  // ANNOUNCE AFTER THE REGION EXISTS. One frame later the region is in the
+  // document and setting its text is a change AT can fire on.
+  const live = app.querySelector('#g-live');
+  const src = app.querySelector('[data-announce]');
+  if (live && src?.dataset.announce) {
+    // setTimeout, NOT requestAnimationFrame. A hidden or backgrounded page
+    // gets no rendering opportunity, so an rAF callback may never run — the
+    // same trap that made navTo lose its first paint (see its 100ms bail).
+    // A timer fires either way, and the region only has to exist first.
+    const msg = src.dataset.announce;
+    setTimeout(() => { if (live.isConnected) live.textContent = msg; }, 60);
+  }
+  // FOCUS MOVES ONLY WHEN THE STEP DOES. These panes re-render on every tap,
+  // and focusing the heading each time threw the keyboard user back to an
+  // unchanged title and lost their place in the options.
+  const here = `${lesson.id}#${step}`;
+  if (here !== lastGuideFocus) {
+    lastGuideFocus = here;
+    const h = app.querySelector('.guide-step h1');
+    if (h) { h.setAttribute('tabindex', '-1'); h.focus(); }
+  } else if (focusSel) {
+    // Same step, so the pane only changed state: put the user back on the
+    // control they used. If it is gone or now disabled — a chosen answer
+    // locks — fall back to the pane's primary action rather than <body>.
+    const same = app.querySelector(focusSel);
+    const next = (same && !same.disabled) ? same
+      : (app.querySelector('.lx-cta button:not([disabled])') ?? app.querySelector('.guide-nav .btn-primary'));
+    next?.focus();
+  }
 }
 
 // ── Lesson session ────────────────────────────────────────────

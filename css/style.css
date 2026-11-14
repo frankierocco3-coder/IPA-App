@@ -915,7 +915,10 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .exp-word:focus-visible, .ct-opt:focus-visible, .dl-word:focus-visible,
 .vq-opt:focus-visible, .vq-say:focus-visible, .sw-syl:focus-visible,
 .ru-pick:focus-visible, .ru-play:focus-visible, .ru-hear:focus-visible {
-  outline: 3px solid rgba(138,109,59,0.5); outline-offset: 2px;
+  /* OPAQUE, not 50% alpha. Blended onto parchment the old ring measured
+     1.83:1 against the page — under the 3:1 WCAG minimum for a non-text
+     indicator. Solid gold is 3.89:1. */
+  outline: 3px solid #8a6d3b; outline-offset: 2px;
 }
 
 /* ── Perform ── */
