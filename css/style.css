@@ -913,7 +913,8 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .track-card:focus-visible, .word-chip:focus-visible, .guide-symbol:focus-visible,
 .ck-pick:focus-visible, .ck-say:focus-visible, .ck-opt:focus-visible,
 .exp-word:focus-visible, .ct-opt:focus-visible, .dl-word:focus-visible,
-.vq-opt:focus-visible, .vq-say:focus-visible, .sw-syl:focus-visible {
+.vq-opt:focus-visible, .vq-say:focus-visible, .sw-syl:focus-visible,
+.ru-pick:focus-visible, .ru-play:focus-visible, .ru-hear:focus-visible {
   outline: 3px solid rgba(138,109,59,0.5); outline-offset: 2px;
 }
 
@@ -6098,5 +6099,47 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   .sw-demo { font-size: 24px; }
   .sw-syl-text { font-size: 21px; }
 }
+
+/* ── Short vowels round-up: the listening round and the review ─
+   IPA Foundations lesson 9. Each option is a PAIR of controls — one plays,
+   one chooses — because the handoff requires that replaying a clip never
+   selects it. The word itself is absent from the markup until an answer is
+   submitted, so there is nothing to read ahead. */
+.ru-count { font-size: 12px; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted); margin: 12px 0 2px; }
+.ru-opts { display: flex; flex-direction: column; gap: 12px; margin: 16px 0 10px; }
+.ru-opt { display: flex; align-items: stretch; gap: 10px; min-width: 0; }
+.ru-play { flex: none; font-size: 14px; white-space: nowrap; }
+.ru-pick {
+  font: inherit; flex: 1 1 auto; display: flex; align-items: center; gap: 10px; min-width: 0;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 12px 14px; cursor: pointer; text-align: left;
+}
+.ru-pick:active { transform: translateY(2px); border-bottom-width: 2px; }
+.ru-pick[disabled] { cursor: default; }
+.ru-letter { font-family: var(--serif); font-size: 20px; font-weight: 800; color: var(--ink); flex: none; }
+/* Empty until the answer is in — it carries no text to leak. */
+.ru-word { font-family: var(--serif); font-size: 18px; font-style: italic; color: var(--ink); min-width: 0; flex: 1 1 auto; }
+.ru-word:empty { display: none; }
+.ru-mark { font-size: 17px; font-weight: 800; flex: none; }
+.ru-opt.is-picked .ru-pick { border-color: var(--green); background: var(--accent-tint); }
+.ru-opt.is-right .ru-pick { border-color: var(--green); background: var(--accent-tint); }
+.ru-opt.is-right .ru-mark { color: var(--green-dark); }
+.ru-opt.is-wrong .ru-pick { border-color: var(--red); background: var(--bad-tint); }
+.ru-replay { margin: 0 0 12px; }
+.ru-line { font-weight: 700; color: var(--ink); margin: 0 0 6px; }
+.ru-missing { margin: 10px 0 0; }
+
+/* The review. A contrast to go back over, or nothing to correct. */
+.ru-contrast { font-family: var(--serif); font-size: 24px; font-weight: 700; color: var(--ink); margin: 8px 0 12px; }
+.ru-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 0 0 14px; }
+.ru-hear { font-family: var(--serif); font-size: 16px; padding: 12px 10px; }
+@media (max-width: 420px) {
+  .ru-opt { flex-direction: column; gap: 8px; }
+  .ru-play { width: 100%; }
+  .ru-pair { grid-template-columns: 1fr; }
+  .ru-contrast { font-size: 21px; }
+}
+
 
 

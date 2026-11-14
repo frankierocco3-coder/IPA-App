@@ -15245,7 +15245,117 @@ function clearExplore(st) {
   st.vqShown = false;
   st.schwaRound = 0;
   st.schwaPick = null;
+  st.ruRound = 0;
+  st.ruPick = null;
+  st.ruShown = false;
+  st.ruMiss = [];
   stopSpeech();
+}
+
+// ── IPA Foundations lesson 9: Short vowels round-up ──────────
+// Rounds, then a review of what was missed. The round names its three
+// clips by POSITION only — target, A, B — because the handoff requires
+// that spellings and revealing labels stay hidden until an answer is in.
+function roundupRounds(lesson) {
+  const acc = vowelsAcc(lesson);
+  return lesson.explore.rounds.filter(r =>
+    speakableWord(r.target, acc) && r.options.every(w => speakableWord(w, acc)));
+}
+
+function roundupReady(lesson) {
+  return roundupRounds(lesson).length > 0;
+}
+
+function roundupMissingHtml(lesson) {
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="audio-avail ru-missing">${esc(lesson.explore.missing)}</p>`;
+}
+
+function roundupRoundHtml(lesson, st) {
+  const ex = lesson.explore;
+  const rounds = roundupRounds(lesson);
+  const i = Math.min(st.ruRound ?? 0, rounds.length - 1);
+  const r = rounds[i];
+  const picked = st.ruPick ?? null;
+  const shown = !!st.ruShown;
+  const correct = shown && picked === r.answer;
+  const last = i >= rounds.length - 1;
+  const letter = n => (n === 0 ? 'A' : 'B');
+  // NO sub-state Back here: the round IS this step's opening state, so the
+  // only way out is the guide's own Back, which the nav already renders.
+  return `
+    <p class="ru-count">Round ${i + 1} of ${rounds.length}</p>
+    <h1>${esc(ex.lead)}</h1>
+    <p class="lx-cta"><button class="btn btn-primary" data-ru-slot="t" type="button">
+      <span aria-hidden="true">▶</span> ${esc(ex.playTarget)}</button></p>
+    <div class="ru-opts">
+      ${r.options.map((w, n) => {
+        const on = picked === n;
+        const isRight = n === r.answer;
+        // PLAY AND CHOOSE ARE SEPARATE CONTROLS. The handoff is explicit
+        // that replaying a clip must not select it, and the only way to
+        // guarantee that is two buttons that share no handler.
+        const cls = !shown ? (on ? ' is-picked' : '')
+          : isRight ? ' is-right' : (on ? ' is-wrong' : '');
+        const mark = !shown ? (on ? '✓' : '') : (isRight ? '✓' : (on ? '✗' : ''));
+        return `
+          <div class="ru-opt${cls}">
+            <button class="btn-lite ru-play" data-ru-slot="${n}" type="button"
+              aria-label="Play ${letter(n)}"><span aria-hidden="true">▶</span> Play ${letter(n)}</button>
+            <button class="ru-pick" data-ru-pick="${n}" type="button"
+              aria-pressed="${on}" aria-label="Choose ${letter(n)}"${shown ? ' disabled' : ''}>
+              <span class="ru-letter">${letter(n)}</span>
+              <span class="ru-word">${shown ? esc(w) : ''}</span>
+              <span class="ru-mark" aria-hidden="true">${mark}</span>
+            </button>
+          </div>`;
+      }).join('')}
+    </div>
+    <p class="pane-note ru-replay">${esc(ex.replay)}</p>
+    <div class="ru-verdict" role="status" aria-live="polite">${
+      shown ? `<p class="ru-line">${esc(correct ? ex.right : ex.wrong)} The target was “${esc(r.target)}”.</p>` : ''}</div>
+    ${shown
+      ? `<p class="lx-cta"><button class="btn btn-primary" data-ru-next type="button">${esc(last ? ex.toReview : ex.nextRound)} ›</button></p>`
+      : `<p class="lx-cta"><button class="btn btn-primary" data-ru-submit type="button"${picked == null ? ' disabled' : ''}>${esc(ex.submit)}</button></p>`}`;
+}
+
+function roundupReviewHtml(lesson, st) {
+  const ex = lesson.explore;
+  const rv = ex.review;
+  const rounds = roundupRounds(lesson);
+  const missed = (st.ruMiss ?? []).map(n => rounds[n]).filter(Boolean);
+  // ONE relevant pair, as the handoff asks — the first contrast missed.
+  const show = missed[0] ?? null;
+  return `
+    <h1>${esc(rv.heading)}</h1>
+    <p class="guide-text">${esc(show ? rv.missed : rv.clean)}</p>
+    ${show ? `
+      <p class="ru-contrast">${esc(show.contrast)}</p>
+      <div class="ru-pair">
+        ${show.pair.map(w => `
+          <button class="btn-lite ru-hear" data-ru-play="${esc(w)}" type="button"
+            aria-label="Hear ${esc(w)}"><span aria-hidden="true">▶</span> Hear ${esc(w)}</button>`).join('')}
+      </div>
+      <p class="lx-cta"><button class="btn" data-ru-practice type="button">${esc(rv.practice)} ›</button></p>` : ''}
+    <p class="lx-cta"><button class="btn btn-primary" data-ru-finish type="button">${esc(rv.finish)} ›</button></p>`;
+}
+
+function roundupPracticeHtml(lesson, st) {
+  const rv = lesson.explore.review;
+  const rounds = roundupRounds(lesson);
+  const show = (st.ruMiss ?? []).map(n => rounds[n]).filter(Boolean)[0];
+  if (!show) return roundupReviewHtml(lesson, st);
+  return `
+    <button class="btn-lite exp-back" data-ru-unpractice type="button">‹ ${esc(rv.back)}</button>
+    <h1>${esc(rv.practice)}</h1>
+    <p class="ru-contrast">${esc(show.contrast)}</p>
+    <div class="ru-pair">
+      ${show.pair.map(w => `
+        <button class="btn-lite ru-hear" data-ru-play="${esc(w)}" type="button"
+          aria-label="Hear ${esc(w)}"><span aria-hidden="true">▶</span> Hear ${esc(w)}</button>`).join('')}
+    </div>
+    <p class="pane-note">${esc(rv.practiceNote)}</p>`;
 }
 
 // ── IPA Foundations lesson 8: Meet the schwa ─────────────────
@@ -15429,6 +15539,12 @@ function guideStepHtml(lesson, s, st) {
     // for: if the recordings went away while the learner sat in the
     // sub-state, this lands them back on the cards rather than on a quiz
     // with nothing to hear.
+    if (lesson.explore.kind === 'roundup') {
+      if (!roundupReady(lesson)) return roundupMissingHtml(lesson);
+      if (st.explore === 'practice') return roundupPracticeHtml(lesson, st);
+      if (st.explore === 'review') return roundupReviewHtml(lesson, st);
+      return roundupRoundHtml(lesson, st);
+    }
     if (lesson.explore.kind === 'schwa') {
       return st.explore === 'check' && schwaReady(lesson)
         ? schwaCheckHtml(lesson, st)
@@ -15630,6 +15746,56 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
   // than through the shared [data-say] wiring because this handler re-renders:
   // relying on two listeners firing in registration order on an element this
   // one is about to replace is the kind of thing that works until it doesn't.
+  // ── The round-up's controls (lesson 9) ──────────────────────
+  // PLAYING NEVER SELECTS. Separate handlers on separate elements is the
+  // only way to promise that; sharing one and branching on a flag is how
+  // a replay quietly becomes an answer.
+  app.querySelectorAll('[data-ru-play]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      speak(btn.dataset.ruPlay, { lang: langFor(lesson), accent: vowelsAcc(lesson) })));
+  // THE WORD IS NOT IN THE MARKUP BEFORE SUBMISSION. These buttons name a
+  // slot — target, 0, 1 — and the word is resolved here, so there is
+  // nothing to read ahead in the DOM, not merely nothing to read on screen.
+  app.querySelectorAll('[data-ru-slot]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const rounds = roundupRounds(lesson);
+      const r = rounds[Math.min(st.ruRound ?? 0, rounds.length - 1)];
+      const slot = btn.dataset.ruSlot;
+      const word = slot === 't' ? r.target : r.options[Number(slot)];
+      speak(word, { lang: langFor(lesson), accent: vowelsAcc(lesson) });
+    }));
+  app.querySelectorAll('[data-ru-pick]').forEach(btn =>
+    btn.addEventListener('click', () => { st.ruPick = Number(btn.dataset.ruPick); renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-ru-submit]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const rounds = roundupRounds(lesson);
+      const i = Math.min(st.ruRound ?? 0, rounds.length - 1);
+      // The miss is recorded ONCE, here, where the answer is actually
+      // judged — so the review cannot disagree with the feedback.
+      if (st.ruPick !== rounds[i].answer) {
+        st.ruMiss = [...(st.ruMiss ?? []), i].filter((v, n, a) => a.indexOf(v) === n);
+      }
+      st.ruShown = true;
+      renderGuide(lesson, step, st);
+    }));
+  app.querySelectorAll('[data-ru-next]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const rounds = roundupRounds(lesson);
+      const i = st.ruRound ?? 0;
+      if (i >= rounds.length - 1) { st.explore = 'review'; }
+      else { st.ruRound = i + 1; }
+      st.ruPick = null; st.ruShown = false;
+      renderGuide(lesson, step, st);
+    }));
+  app.querySelectorAll('[data-ru-practice]').forEach(btn =>
+    btn.addEventListener('click', () => { st.explore = 'practice'; renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-ru-unpractice]').forEach(btn =>
+    btn.addEventListener('click', () => { stopSpeech(); st.explore = 'review'; renderGuide(lesson, step, st); }));
+  // Finish does exactly what Continue does — the handoff asks that it
+  // preserve the existing completion and return behaviour, so it reuses it
+  // rather than inventing a second way to end a lesson.
+  app.querySelectorAll('[data-ru-finish]').forEach(btn =>
+    btn.addEventListener('click', () => { clearExplore(st); renderGuide(lesson, step + 1, st); }));
   // ── The schwa tap exercise's controls (lesson 8) ────────────
   // REPLAY MUST NOT RE-RENDER. The handoff asks that replaying leave the
   // learner's selection alone, and the cheapest way to guarantee that is a

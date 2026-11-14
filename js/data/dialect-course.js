@@ -402,7 +402,62 @@ export const COURSE = [
           },
         },
         guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
-      { id: 'v1-4', title: 'Short vowels round-up', guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
+      { id: 'v1-4', title: 'Short vowels round-up',
+        // ── Illustrated opening (owner handoff, 2026-11-13) ──────────
+        // THE HANDOFF'S EXAMPLE IS UNRECORDED AGAIN: it offers target pin,
+        // A sit, B set, and none of those three exists in any of the ten
+        // accent-voice pairs. Same shape of problem as lesson 5, same
+        // answer — keep the task, verify the words.
+        //
+        // ROUND COUNT COMES FROM THE RECORDINGS, NOT A ROUND NUMBER. The
+        // handoff says to use the course's existing item pool; that pool
+        // (MINIMAL_PAIRS in js/data/phonemes.js) holds six pairs, of which
+        // exactly TWO are fully-recorded short-vowel contrasts. Extending
+        // it with genuine minimal pairs drawn from the recorded vocabulary
+        // gives four: bid/bed, bad/bed, cat/cut, hat/hot. Four contrasts,
+        // four rounds. /ʊ/ has no recorded minimal-pair partner at all,
+        // which is why it is taught here but not contrasted.
+        //
+        // The correct answer alternates A, B, A, B — the handoff asks that
+        // its position vary, and a fixed side is the first thing a learner
+        // notices.
+        explore: {
+          kind: 'roundup',
+          lead: 'Which word has the same vowel?',
+          // Spellings stay hidden until an answer is submitted, so the
+          // controls can only be named by position, never by word.
+          playTarget: 'Play target',
+          replay: 'Replay any of them as often as you like — it will not choose for you.',
+          submit: 'Check answer',
+          nextRound: 'Next round',
+          toReview: 'See your review',
+          right: 'Yes — same vowel.',
+          wrong: 'Not that one.',
+          missing: 'These words are not recorded in this voice, so there is no listening round — a listening question with nothing to hear cannot be scored. The vowels are still laid out in the lesson below, without listening credit.',
+          rounds: [
+            { target: 'bid', options: ['ship', 'bed'], answer: 0,
+              pair: ['bid', 'bed'], contrast: '/ɪ/ and /e/' },
+            { target: 'bad', options: ['bed', 'hat'], answer: 1,
+              pair: ['bad', 'bed'], contrast: '/æ/ and /e/' },
+            { target: 'cut', options: ['bus', 'cat'], answer: 0,
+              pair: ['cat', 'cut'], contrast: '/æ/ and /ʌ/' },
+            { target: 'hot', options: ['hat', 'stop'], answer: 1,
+              pair: ['hat', 'hot'], contrast: '/æ/ and /ɒ/' },
+          ],
+          review: {
+            heading: 'Your listening review',
+            // NO PAIR IS SHOWN IN THIS STATE, so this line must not offer
+            // one. It said "replay any pair below" while rendering nothing
+            // below it — a promise the pane could not keep.
+            clean: 'Nothing to go back over — you matched every vowel in the round-up. Go back a step if you want to hear any of them again.',
+            missed: 'One contrast to go back over.',
+            practice: 'Practice this pair',
+            practiceNote: 'Replay these as often as you like. This is practice — it does not change the score you just earned.',
+            back: 'Back to the review',
+            finish: 'Finish round-up',
+          },
+        },
+        guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
     ],
   },
   {
