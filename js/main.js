@@ -1496,15 +1496,32 @@ function ipaLearnPane(el, course) {
     if (dot && dot.textContent.trim() !== '\u2713') dot.textContent = nowOpen ? '\u25b6' : b.dataset.ord;
   }));
 
-  // Selecting moves the preview and nothing else. Focus stays on the row
-  // the reader pressed, so a keyboard user is not thrown to the panel.
+  // A LESSON CARD OPENS THE LESSON (owner, 2026-11-14). It used to only
+  // move the preview, so opening a lesson took a tap on the card, a scroll
+  // back up past everything the reader had just walked down, and a second
+  // tap on "Start lesson". The unit trail has always opened on one tap —
+  // this makes the two agree. A locked row still explains itself rather
+  // than doing nothing, which is what the preview used to say for it.
   el.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
-    selectedId = b.dataset.lesson;
-    el.querySelectorAll('[data-lesson]').forEach(o => {
-      o.classList.toggle('is-selected', o === b);
-      if (o === b) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
-    });
-    paintFocus();
+    const lesson = byId(b.dataset.lesson);
+    if (!lesson) return;
+    // A LOCKED ROW KEEPS THE OLD BEHAVIOUR, deliberately. The preview panel
+    // above already explains a locked lesson ("This one opens when you
+    // finish …"), which is better placed than a popup. The trail's
+    // showLockPop is NOT reusable here: it appends into `.path-row`, which
+    // a list row has no ancestor of, so it throws.
+    if (!isUnlocked(lesson)) {
+      selectedId = b.dataset.lesson;
+      el.querySelectorAll('[data-lesson]').forEach(o => {
+        o.classList.toggle('is-selected', o === b);
+        if (o === b) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
+      });
+      paintFocus();
+      return;
+    }
+    // Checkpoint games jump straight in — they have no guide page.
+    if (lesson.checkpoint) startLesson(lesson);
+    else renderGuide(lesson);
   }));
 
   el.querySelectorAll('[data-trail]').forEach(b => b.addEventListener('click',
