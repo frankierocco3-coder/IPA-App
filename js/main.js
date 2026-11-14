@@ -31,7 +31,7 @@ import { app, navStack, setHomeHandler, setTeardownHooks, esc, record, goBack, n
          groupStatus, workspacePage, shellBack, deliverFile } from './ui.js';
 import { generateLesson, phonemesForAccent } from './engine.js';
 import { store } from './state.js';
-import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady, audioUrl } from './audio.js';
+import { speak, speakLine, speakSequence, stopSpeech, pauseSpeech, resumeSpeech, setSpeechListener, ACCENT_LANG, playPhoneme, hasPhonemeClip, hasWordClip, clipIndexLoaded, indexReady, audioUrl, clipDir} from './audio.js';
 import { KNOWN_BAD as KNOWN_BAD_LIST } from './data/audio-flags.js';
 import { voicesForCourse } from './data/voices.js';
 import { LONGFORM_COVERAGE } from './data/audio-coverage.js';
@@ -15015,6 +15015,15 @@ function renderTrack(track) {
 // content, dosed.
 function guideSteps(lesson) {
   const steps = [];
+  // ── THE ILLUSTRATED OPENING (owner handoff, 2026-11-13) ─────
+  // A lesson carrying `explore` gets one extra step IN FRONT OF its prose
+  // overview, not instead of it. The handoff asks for Continue to lead into
+  // the existing guide, so the detailed explanation stays exactly where it
+  // was and stays reachable; this only puts an illustrated way in before it.
+  // Everything downstream follows on its own — the sound steps, the words
+  // step, Start lesson, and the progress bar, which is computed from
+  // steps.length rather than a hardcoded total.
+  if (lesson.explore) steps.push({ kind: 'explore' });
   if (lesson.guide) steps.push({ kind: 'overview' });
   (lesson.phonemes ?? []).forEach(ph => { if (PHONEMES[ph]) steps.push({ kind: 'phoneme', ph }); });
   const words = lesson.accent
@@ -15025,7 +15034,538 @@ function guideSteps(lesson) {
   return steps;
 }
 
+// ── The illustrated opening, and one detail state per row ─────
+// Both read js/data/dialect-course.js; neither invents content. The row
+// thumbnails and the word studies are hand-drawn articulation plates
+// resolved by SYMBOL through artFor(), so a row names a sound rather than
+// a file and a sound with no plate drops its picture instead of breaking.
+function exploreOpeningHtml(lesson) {
+  const ex = lesson.explore;
+  const f = ex.fig && voiceFigure(ex.fig);
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="guide-text">${esc(ex.lead)}</p>
+    ${f ? `<figure class="sp-fig">
+        <img src="${f.src}" alt="${esc(f.alt)}" loading="lazy">
+      </figure>` : ''}
+    <h2 class="guide-heading">${esc(ex.title)}</h2>
+    <div class="exp-rows">
+      ${ex.rows.map(r => {
+        const art = artFor(r.art);
+        return `<button class="track-card exp-row" data-explore="${esc(r.id)}" type="button">
+            <div class="track-glyph${art ? ' has-img' : ''}" aria-hidden="true">${
+              art ? `<img src="${esc(art)}" alt="" loading="lazy">` : '·'}</div>
+            <div class="track-info">
+              <h3 class="exp-row-title">${esc(r.label)} <span class="exp-row-pair">${esc(r.pair)}</span></h3>
+            </div>
+            <div class="track-arrow" aria-hidden="true">›</div>
+          </button>`;
+      }).join('')}
+    </div>
+    ${ex.note ? `<p class="pane-note">${esc(ex.note)}</p>` : ''}`;
+}
+
+// THE WORD CONTROLS ARE REAL OR THEY ARE TEXT. speakableWord() decides, the
+// same test wordChip() uses everywhere else, so an unrecorded word is never a
+// faded control and never a promise. When one is missing the pair says which,
+// as a plain statement of fact rather than a "coming soon".
+function exploreDetailHtml(lesson, row, st) {
+  // THE SAME DIRECTORY PLAYBACK WILL USE, so the control's availability and
+  // what pressing it does cannot disagree. Asking with a bare null said no
+  // recording for 'bad', which has a clip in all five accents.
+  const acc = clipDir(lesson.accent ?? lesson.shiftTo ?? null, langFor(lesson));
+  const picked = st.pick?.[row.id] ?? null;
+  const chosen = row.words.find(w => w.word === picked) ?? null;
+  const art = chosen && artFor(chosen.art);
+  const silent = row.words.filter(w => !speakableWord(w.word, acc)).map(w => w.word);
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(row.heading)}</h1>
+    <p class="guide-text">${esc(row.lead)}</p>
+    <div class="exp-pair">
+      ${row.words.map(w => {
+        const on = w.word === picked;
+        return speakableWord(w.word, acc)
+          ? `<button class="exp-word${on ? ' is-picked' : ''}" data-pick="${esc(w.word)}" type="button"
+               aria-pressed="${on}" aria-label="Hear the word “${esc(w.word)}”">
+               <span class="exp-word-text">${esc(w.word)}</span>
+               <span class="exp-word-mark" aria-hidden="true">${on ? '✓' : '🔊'}</span>
+             </button>`
+          : `<div class="exp-word is-plain"><span class="exp-word-text">${esc(w.word)}</span></div>`;
+      }).join('')}
+    </div>
+    ${silent.length ? `<p class="audio-avail">No recording for <b>${silent.map(esc).join('</b>, <b>')}</b> in this voice, so it is printed rather than offered. Say it yourself and compare.</p>` : ''}
+    ${chosen ? `<div class="exp-reveal">
+        ${art ? `<img src="${esc(art)}" alt="${esc(articulationFor(chosen.art)?.summary ?? '')}" loading="lazy">` : ''}
+        <p>${esc(chosen.note)}</p>
+      </div>` : `<p class="pane-note">Choose a word to hear it and see what moves.</p>`}
+    <h2 class="guide-heading">Try it</h2>
+    <p class="guide-text">${esc(row.tryIt)}</p>`;
+}
+
+// ── THE CONTRAST PANE (owner handoff, 2026-11-13) ─────────────
+// Lesson 2's shape: one comparison and a check, rather than lesson 1's rows.
+// It shares the step and the `st` object; `kind` picks between them.
+//
+// `ready` IS THE HONESTY GATE. The demonstration claims the two vowels sit
+// on the same note. Until a matched pair of recordings exists to support
+// that, the claim, the cue and the check are all withheld and the lesson
+// says so. The per-vowel Hear buttons are a separate question and stay.
+function contrastReady(ex) {
+  return (ex.needs ?? []).every(slug => hasPhonemeClip(slug, ex.voice));
+}
+
+function vowelCardHtml(v, ex) {
+  const art = artFor(v.art);
+  const slug = phonemeSlug(v.sym);
+  const can = slug && hasPhonemeClip(slug, ex.voice);
+  return `
+    <div class="ct-card">
+      ${art ? `<img class="ct-art" src="${esc(art)}" alt="${esc(articulationFor(v.sym)?.summary ?? '')}" loading="lazy">` : ''}
+      <p class="ct-label">${esc(v.label)}</p>
+      <p class="ct-cap">${esc(v.caption)}</p>
+      ${can
+        ? `<button class="btn btn-hear" data-phoneme="${esc(slug)}" type="button"
+             aria-label="${esc(v.hear)} — the ${esc(v.sym)} sound on its own">▶ ${esc(v.hear)}</button>`
+        : `<p class="audio-avail">No recording for /${esc(v.sym)}/ in this voice.</p>`}
+    </div>`;
+}
+
+function contrastPaneHtml(lesson, st) {
+  const ex = lesson.explore;
+  const ready = contrastReady(ex);
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="guide-text">${esc(ex.lead)}</p>
+    <div class="ct-pair${ready ? ' is-cued' : ''}">
+      ${ex.pair.map(v => vowelCardHtml(v, ex)).join('')}
+      ${ready ? `<p class="ct-cue">${esc(ex.cue)}</p>` : ''}
+    </div>
+    ${ready ? '' : `<p class="audio-avail ct-missing">${esc(ex.missing)}</p>`}
+    <h2 class="guide-heading">${esc(ex.tryIt.title)}</h2>
+    <p class="guide-text">${esc(ex.tryIt.text)}</p>
+    ${ready ? `<p class="lx-cta"><button class="btn" data-explore="check" type="button">${esc(ex.check.open)} ›</button></p>` : ''}`;
+}
+
+// The check. Nothing is preselected, the answer is never revealed, and a
+// wrong answer offers the comparison again instead of correcting and moving
+// on. The verdict goes in an aria-live region so it is announced rather than
+// only seen, and it is carried by words plus a mark, never by colour.
+function contrastCheckHtml(lesson, st) {
+  const ex = lesson.explore;
+  const c = ex.check;
+  const picked = st.checkPick ?? null;
+  const chosen = picked == null ? null : c.options[picked];
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(c.heading)}</h1>
+    <p class="guide-text">${esc(c.lead)}</p>
+    <p class="lx-cta"><button class="btn btn-primary ct-play" data-compare type="button">▶ ${esc(c.play)}</button></p>
+    <div class="ct-opts">
+      ${c.options.map((o, i) => {
+        const on = picked === i;
+        const mark = !on ? '' : (o.ok ? '✓' : '✗');
+        return `<button class="ct-opt${on ? (o.ok ? ' is-right' : ' is-wrong') : ''}" data-answer="${i}"
+            type="button" aria-pressed="${on}">
+            <span>${esc(o.label)}</span><span class="ct-opt-mark" aria-hidden="true">${mark}</span>
+          </button>`;
+      }).join('')}
+    </div>
+    <div class="ct-verdict" role="status" aria-live="polite">
+      ${chosen ? `<p>${esc(chosen.ok ? c.right : c.wrong)}</p>` : ''}
+    </div>`;
+}
+
+// ── THE DELIVERY PANE (owner handoff, 2026-11-13) ─────────────
+// Lesson 3's shape: two deliveries of one line, then an emphasis switch.
+// The deliveries have no recordings and no agreed home, so the cards name
+// what is needed instead of offering a control that cannot play.
+function emphasisedLineHtml(line, word) {
+  // Split on the word so the emphasis can be marked without building the
+  // sentence from fragments. esc() on every piece, as ever — and if the word
+  // is not in the line the sentence still renders, unmarked, rather than
+  // silently losing half of itself.
+  const i = word ? line.toLowerCase().indexOf(word.toLowerCase()) : -1;
+  if (i < 0) return esc(line);
+  return `${esc(line.slice(0, i))}<b class="dl-stress">${esc(line.slice(i, i + word.length))}</b>${esc(line.slice(i + word.length))}`;
+}
+
+function deliveryPaneHtml(lesson, st) {
+  const ex = lesson.explore;
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="dl-lead">${esc(ex.lead)}</p>
+    <p class="dl-line">&ldquo;${esc(ex.line)}&rdquo;</p>
+    <div class="dl-pair">
+      ${ex.deliveries.map(d => `
+        <div class="dl-card">
+          <p class="dl-card-label">${esc(d.label)}</p>
+          <p class="dl-card-hint">${esc(d.hint)}</p>
+        </div>`).join('')}
+    </div>
+    <p class="audio-avail dl-missing">${esc(ex.missing)}</p>
+    <p class="lx-cta"><button class="btn" data-explore="make" type="button">${esc(ex.make.open)} ›</button></p>`;
+}
+
+function makeItLandHtml(lesson, st) {
+  const ex = lesson.explore;
+  const m = ex.make;
+  // Nothing is chosen on arrival; the mockup shows one picked, which is a
+  // later state. The sentence reads plainly until the learner moves it.
+  const picked = st.stress ?? null;
+  const chosen = m.words.find(w => w.word === picked) ?? null;
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(m.heading)}</h1>
+    <p class="dl-line">&ldquo;${emphasisedLineHtml(ex.line, picked)}&rdquo;</p>
+    <p class="dl-brief">${esc(m.brief)}</p>
+    <div class="dl-stress-pick">
+      ${m.words.map(w => {
+        const on = w.word === picked;
+        return `<button class="dl-word${on ? ' is-picked' : ''}" data-stress="${esc(w.word)}" type="button"
+            aria-pressed="${on}" aria-label="Stress the word “${esc(w.word)}”">
+            <span class="dl-word-mark" aria-hidden="true">${on ? '✓' : ''}</span>${esc(w.word)}
+          </button>`;
+      }).join('')}
+    </div>
+    <p class="pane-note" role="status" aria-live="polite">${esc(chosen ? chosen.prompt : m.note)}</p>
+    <p class="guide-key">${esc(m.close)}</p>`;
+}
+
+// EVERY SUB-STATE THE ILLUSTRATED OPENINGS CARRY, dropped in ONE place.
+// This was three identical copies of the same assignments at three exit
+// points, and the listening check's submitted flag would have made it three
+// more chances to miss one — which is exactly the bug that left Back
+// re-rendering the same step in lessons 1 and 2. Leaving a pane also stops
+// any clip still playing, which the lesson 5 handoff asks for by name.
+function clearExplore(st) {
+  st.explore = null;
+  st.checkPick = null;
+  st.stress = null;
+  st.vqShown = false;
+  st.schwaRound = 0;
+  st.schwaPick = null;
+  st.ruRound = 0;
+  st.ruPick = null;
+  st.ruShown = false;
+  st.ruMiss = [];
+  stopSpeech();
+}
+
+// ── IPA Foundations lesson 9: Short vowels round-up ──────────
+// Rounds, then a review of what was missed. The round names its three
+// clips by POSITION only — target, A, B — because the handoff requires
+// that spellings and revealing labels stay hidden until an answer is in.
+function roundupRounds(lesson) {
+  const acc = vowelsAcc(lesson);
+  return lesson.explore.rounds.filter(r =>
+    speakableWord(r.target, acc) && r.options.every(w => speakableWord(w, acc)));
+}
+
+function roundupReady(lesson) {
+  return roundupRounds(lesson).length > 0;
+}
+
+function roundupMissingHtml(lesson) {
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="audio-avail ru-missing">${esc(lesson.explore.missing)}</p>`;
+}
+
+function roundupRoundHtml(lesson, st) {
+  const ex = lesson.explore;
+  const rounds = roundupRounds(lesson);
+  const i = Math.min(st.ruRound ?? 0, rounds.length - 1);
+  const r = rounds[i];
+  const picked = st.ruPick ?? null;
+  const shown = !!st.ruShown;
+  const correct = shown && picked === r.answer;
+  const last = i >= rounds.length - 1;
+  const letter = n => (n === 0 ? 'A' : 'B');
+  // NO sub-state Back here: the round IS this step's opening state, so the
+  // only way out is the guide's own Back, which the nav already renders.
+  return `
+    <p class="ru-count">Round ${i + 1} of ${rounds.length}</p>
+    <h1>${esc(ex.lead)}</h1>
+    <p class="lx-cta"><button class="btn btn-primary" data-ru-slot="t" type="button">
+      <span aria-hidden="true">▶</span> ${esc(ex.playTarget)}</button></p>
+    <div class="ru-opts">
+      ${r.options.map((w, n) => {
+        const on = picked === n;
+        const isRight = n === r.answer;
+        // PLAY AND CHOOSE ARE SEPARATE CONTROLS. The handoff is explicit
+        // that replaying a clip must not select it, and the only way to
+        // guarantee that is two buttons that share no handler.
+        const cls = !shown ? (on ? ' is-picked' : '')
+          : isRight ? ' is-right' : (on ? ' is-wrong' : '');
+        const mark = !shown ? (on ? '✓' : '') : (isRight ? '✓' : (on ? '✗' : ''));
+        return `
+          <div class="ru-opt${cls}">
+            <button class="btn-lite ru-play" data-ru-slot="${n}" type="button"
+              aria-label="Play ${letter(n)}"><span aria-hidden="true">▶</span> Play ${letter(n)}</button>
+            <button class="ru-pick" data-ru-pick="${n}" type="button"
+              aria-pressed="${on}" aria-label="Choose ${letter(n)}"${shown ? ' disabled' : ''}>
+              <span class="ru-letter">${letter(n)}</span>
+              <span class="ru-word">${shown ? esc(w) : ''}</span>
+              <span class="ru-mark" aria-hidden="true">${mark}</span>
+            </button>
+          </div>`;
+      }).join('')}
+    </div>
+    <p class="pane-note ru-replay">${esc(ex.replay)}</p>
+    <div class="ru-verdict" role="status" aria-live="polite">${
+      shown ? `<p class="ru-line">${esc(correct ? ex.right : ex.wrong)} The target was “${esc(r.target)}”.</p>` : ''}</div>
+    ${shown
+      ? `<p class="lx-cta"><button class="btn btn-primary" data-ru-next type="button">${esc(last ? ex.toReview : ex.nextRound)} ›</button></p>`
+      : `<p class="lx-cta"><button class="btn btn-primary" data-ru-submit type="button"${picked == null ? ' disabled' : ''}>${esc(ex.submit)}</button></p>`}`;
+}
+
+function roundupReviewHtml(lesson, st) {
+  const ex = lesson.explore;
+  const rv = ex.review;
+  const rounds = roundupRounds(lesson);
+  const missed = (st.ruMiss ?? []).map(n => rounds[n]).filter(Boolean);
+  // ONE relevant pair, as the handoff asks — the first contrast missed.
+  const show = missed[0] ?? null;
+  return `
+    <h1>${esc(rv.heading)}</h1>
+    <p class="guide-text">${esc(show ? rv.missed : rv.clean)}</p>
+    ${show ? `
+      <p class="ru-contrast">${esc(show.contrast)}</p>
+      <div class="ru-pair">
+        ${show.pair.map(w => `
+          <button class="btn-lite ru-hear" data-ru-play="${esc(w)}" type="button"
+            aria-label="Hear ${esc(w)}"><span aria-hidden="true">▶</span> Hear ${esc(w)}</button>`).join('')}
+      </div>
+      <p class="lx-cta"><button class="btn" data-ru-practice type="button">${esc(rv.practice)} ›</button></p>` : ''}
+    <p class="lx-cta"><button class="btn btn-primary" data-ru-finish type="button">${esc(rv.finish)} ›</button></p>`;
+}
+
+function roundupPracticeHtml(lesson, st) {
+  const rv = lesson.explore.review;
+  const rounds = roundupRounds(lesson);
+  const show = (st.ruMiss ?? []).map(n => rounds[n]).filter(Boolean)[0];
+  if (!show) return roundupReviewHtml(lesson, st);
+  return `
+    <button class="btn-lite exp-back" data-ru-unpractice type="button">‹ ${esc(rv.back)}</button>
+    <h1>${esc(rv.practice)}</h1>
+    <p class="ru-contrast">${esc(show.contrast)}</p>
+    <div class="ru-pair">
+      ${show.pair.map(w => `
+        <button class="btn-lite ru-hear" data-ru-play="${esc(w)}" type="button"
+          aria-label="Hear ${esc(w)}"><span aria-hidden="true">▶</span> Hear ${esc(w)}</button>`).join('')}
+    </div>
+    <p class="pane-note">${esc(rv.practiceNote)}</p>`;
+}
+
+// ── IPA Foundations lesson 8: Meet the schwa ─────────────────
+// A sound card, then a tap exercise over several words. Tapping a syllable
+// IS the answer here — there is no separate submit, because the handoff
+// describes choosing and revealing as one move.
+function schwaRounds(lesson) {
+  // ONLY THE ROUNDS THAT CAN ACTUALLY BE HEARD. A missing clip drops its
+  // round instead of breaking the exercise, so the words on offer are
+  // always "verified against the course recordings" by construction.
+  const acc = vowelsAcc(lesson);
+  return lesson.explore.check.rounds.filter(r => speakableWord(r.word, acc));
+}
+
+function schwaReady(lesson) {
+  const acc = vowelsAcc(lesson);
+  return speakableWord(lesson.explore.demo.word, acc) && schwaRounds(lesson).length > 0;
+}
+
+function schwaCardHtml(lesson, st) {
+  const ex = lesson.explore;
+  const acc = vowelsAcc(lesson);
+  const art = artFor(ex.symbol);
+  const alt = articulationFor(ex.symbol)?.summary ?? '';
+  const d = ex.demo;
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <div class="sw-head">
+      <p class="sw-symbol">/${esc(ex.symbol)}/</p>
+      ${art ? `<span class="sw-art"><img src="${esc(art)}" alt="${esc(alt)}" loading="lazy"></span>` : ''}
+    </div>
+    <p class="guide-text">${esc(ex.lead)}</p>
+    <p class="sw-demo">${d.parts.map((part, i) =>
+      `<span class="sw-part${i === d.stress ? ' is-stressed' : ''}">${esc(part)}</span>`
+    ).join('<span class="sw-split" aria-hidden="true">|</span>')}</p>
+    ${speakableWord(d.word, acc)
+      ? `<p class="lx-cta"><button class="btn btn-primary" data-say="${esc(d.word)}" type="button">
+           <span aria-hidden="true">▶</span> ${esc(d.play)}</button></p>`
+      : ''}
+    ${schwaReady(lesson)
+      ? `<p class="lx-cta"><button class="btn" data-explore="check" type="button">${esc(ex.open)} ›</button></p>`
+      : `<p class="audio-avail sw-missing">${esc(ex.missing)}</p>`}`;
+}
+
+function schwaCheckHtml(lesson, st) {
+  const c = lesson.explore.check;
+  const rounds = schwaRounds(lesson);
+  const i = Math.min(st.schwaRound ?? 0, rounds.length - 1);
+  const r = rounds[i];
+  const picked = st.schwaPick ?? null;
+  const right = picked != null && picked === r.answer;
+  const last = i >= rounds.length - 1;
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(c.heading)}</h1>
+    <p class="lx-cta"><button class="btn btn-primary" data-schwa-play="${esc(r.word)}" type="button">
+      <span aria-hidden="true">▶</span> Play ${esc(r.word)}</button></p>
+    <p class="pane-note sw-replay">${esc(c.replay)}</p>
+    <div class="sw-parts">
+      ${r.parts.map((part, n) => {
+        const on = picked === n;
+        // EQUAL SIZE, SAME CASE, SAME WEIGHT until an answer is given —
+        // the handoff is explicit that the display must not hint. Nothing
+        // distinguishes the right syllable before it is chosen.
+        const cls = !on ? '' : (right ? ' is-right' : ' is-wrong');
+        const mark = !on ? '' : (right ? '✓' : '✗');
+        return `<button class="sw-syl${cls}" data-schwa="${n}" type="button"
+            aria-pressed="${on}"${right ? ' disabled' : ''}>
+            <span class="sw-syl-text">${esc(part)}</span>
+            <span class="sw-syl-mark" aria-hidden="true">${mark}</span>
+          </button>`;
+      }).join('')}
+    </div>
+    <div class="sw-verdict" role="status" aria-live="polite">${
+      right ? `<p class="sw-reveal">${esc(r.reveal)}</p>`
+      : picked != null ? `<p class="sw-wrong">${esc(c.wrong)}</p>` : ''}</div>
+    ${right
+      ? (last ? `<p class="pane-note sw-done">${esc(c.done)}</p>`
+              : `<p class="lx-cta"><button class="btn" data-schwa-next type="button">${esc(c.next)} ›</button></p>`)
+      : picked != null ? `<p class="lx-cta"><button class="btn" data-schwa-retry type="button">${esc(c.retry)}</button></p>` : ''}`;
+}
+
+// ── IPA Foundations lesson 5: KIT, DRESS & TRAP ──────────────
+// Three words in ONE consonant frame, then a listening check. The check is
+// only offered when every word in it can actually be heard: a listening
+// check you cannot listen to scores nothing, so the lesson falls back to
+// teaching the contrast in print rather than rendering a dead quiz.
+function vowelsAcc(lesson) {
+  // The directory playback will really use, so availability and what the
+  // button does cannot disagree. See clipDir() in js/audio.js.
+  return clipDir(lesson.accent ?? lesson.shiftTo ?? null, langFor(lesson));
+}
+
+function vowelsReady(lesson) {
+  const acc = vowelsAcc(lesson);
+  return lesson.explore.rows.every(r => speakableWord(r.word, acc));
+}
+
+// THE RIGHT ANSWER IS DERIVED, never authored twice: it is whichever row
+// holds the mystery word, so the two cannot drift apart in the data.
+function vowelAnswerIpa(ex) {
+  return ex.rows.find(r => r.word === ex.check.mystery)?.ipa ?? null;
+}
+
+function vowelRowHtml(r, acc) {
+  const art = artFor(r.ipa);
+  const alt = articulationFor(r.ipa)?.summary ?? '';
+  return `
+    <li class="vq-row">
+      <span class="vq-art">${art ? `<img src="${esc(art)}" alt="${esc(alt)}" loading="lazy">` : ''}</span>
+      <span class="vq-text">
+        <span class="vq-set">${esc(r.set)} <b class="vq-ipa">/${esc(r.ipa)}/</b></span>
+        <span class="vq-hint">${esc(r.hint)}</span>
+      </span>
+      ${speakableWord(r.word, acc)
+        ? `<button class="btn-lite vq-say" data-say="${esc(r.word)}" type="button"
+             aria-label="Play ${esc(r.word)}"><span aria-hidden="true">▶</span> ${esc(r.word)}</button>`
+        : `<span class="vq-plain">${esc(r.word)}</span>`}
+    </li>`;
+}
+
+function vowelRowsHtml(lesson, st) {
+  const ex = lesson.explore;
+  const acc = vowelsAcc(lesson);
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <p class="guide-text">${esc(ex.lead)}</p>
+    <p class="vq-frame">${esc(ex.frame)}</p>
+    <ul class="vq-rows">${ex.rows.map(r => vowelRowHtml(r, acc)).join('')}</ul>
+    ${vowelsReady(lesson)
+      ? `<p class="lx-cta"><button class="btn" data-explore="check" type="button">${esc(ex.check.open)} ›</button></p>`
+      : `<p class="audio-avail vq-missing">${esc(ex.missing)}</p>`}`;
+}
+
+function vowelCheckHtml(lesson, st) {
+  const ex = lesson.explore;
+  const c = ex.check;
+  const answer = vowelAnswerIpa(ex);
+  const picked = st.checkPick ?? null;
+  const shown = !!st.vqShown;
+  const correct = shown && picked != null && ex.rows[picked]?.ipa === answer;
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(c.heading)}</h1>
+    <p class="lx-cta"><button class="btn btn-primary vq-play" data-mystery type="button">
+      <span aria-hidden="true">▶</span> ${esc(c.play)}</button></p>
+    <p class="pane-note vq-replay">${esc(c.replay)}</p>
+    <div class="vq-opts">
+      ${ex.rows.map((r, i) => {
+        const on = picked === i;
+        const right = r.ipa === answer;
+        // BEFORE SUBMISSION nothing is right or wrong, only chosen. After it,
+        // the right row is marked whether or not it was the one picked —
+        // that is the reveal the handoff asks for.
+        const cls = !shown ? (on ? ' is-picked' : '') : (right ? ' is-right' : (on ? ' is-wrong' : ''));
+        const mark = !shown ? (on ? '✓' : '') : (right ? '✓' : (on ? '✗' : ''));
+        return `<button class="vq-opt${cls}" data-answer="${i}" type="button"
+            aria-pressed="${on}"${shown ? ' disabled' : ''}>
+            <span class="vq-opt-ipa">/${esc(r.ipa)}/</span>
+            <span class="vq-opt-set">${esc(r.set)}</span>
+            <span class="vq-opt-mark" aria-hidden="true">${mark}</span>
+          </button>`;
+      }).join('')}
+    </div>
+    <div class="vq-verdict" role="status" aria-live="polite">${shown
+      ? `<p class="vq-line">${esc(correct ? c.right : c.wrong)}</p><p class="vq-reveal">${esc(c.reveal)}</p>`
+      : ''}</div>
+    ${shown
+      ? (correct ? '' : `<p class="lx-cta"><button class="btn" data-retry type="button">${esc(c.retry)}</button></p>`)
+      : `<p class="lx-cta"><button class="btn btn-primary" data-submit type="button"${picked == null ? ' disabled' : ''}>${esc(c.submit)}</button></p>`}`;
+}
+
 function guideStepHtml(lesson, s, st) {
+  // The opening and its detail states are ONE step. Which of them shows is
+  // st.explore, carried in the same object the guide already threads for
+  // answers, so Continue/Back keep counting steps and nothing new routes.
+  if (s.kind === 'explore') {
+    // TWO LAYOUTS, ONE STEP. `kind` decides; a lesson without one is lesson
+    // 1's row list, which is the shape that existed first.
+    // The check is gated on the audio EXISTING, not just on being asked
+    // for: if the recordings went away while the learner sat in the
+    // sub-state, this lands them back on the cards rather than on a quiz
+    // with nothing to hear.
+    if (lesson.explore.kind === 'roundup') {
+      if (!roundupReady(lesson)) return roundupMissingHtml(lesson);
+      if (st.explore === 'practice') return roundupPracticeHtml(lesson, st);
+      if (st.explore === 'review') return roundupReviewHtml(lesson, st);
+      return roundupRoundHtml(lesson, st);
+    }
+    if (lesson.explore.kind === 'schwa') {
+      return st.explore === 'check' && schwaReady(lesson)
+        ? schwaCheckHtml(lesson, st)
+        : schwaCardHtml(lesson, st);
+    }
+    if (lesson.explore.kind === 'vowels') {
+      return st.explore === 'check' && vowelsReady(lesson)
+        ? vowelCheckHtml(lesson, st)
+        : vowelRowsHtml(lesson, st);
+    }
+    if (lesson.explore.kind === 'delivery') {
+      return st.explore === 'make' ? makeItLandHtml(lesson, st) : deliveryPaneHtml(lesson, st);
+    }
+    if (lesson.explore.kind === 'contrast') {
+      return st.explore === 'check' && contrastReady(lesson.explore)
+        ? contrastCheckHtml(lesson, st)
+        : contrastPaneHtml(lesson, st);
+    }
+    const row = lesson.explore.rows.find(r => r.id === st.explore);
+    return row ? exploreDetailHtml(lesson, row, st) : exploreOpeningHtml(lesson);
+  }
   if (s.kind === 'overview') {
     const n = (lesson.phonemes ?? []).filter(ph => PHONEMES[ph]).length;
     return `
@@ -15142,18 +15682,158 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
       <div class="guide-title-bar" style="--unit-color:${unit.color}">${esc(unit.title)} · ${esc(lesson.title)}</div>
       <section class="guide-step">${guideStepHtml(lesson, steps[step], st)}</section>
       <div class="guide-nav">
-        ${step > 0 ? '<button class="btn" id="g-back" type="button">‹ Back</button>' : '<span></span>'}
+        ${step > 0 || st.explore ? '<button class="btn" id="g-back" type="button">‹ Back</button>' : '<span></span>'}
         ${last ? '<button class="btn btn-primary" id="start" type="button">Start lesson</button>'
                : '<button class="btn btn-primary" id="g-next" type="button">Continue</button>'}
       </div>
     </main>`;
 
-  document.getElementById('quit').addEventListener('click', () => renderTrack(lesson.track));
-  document.getElementById('g-back')?.addEventListener('click', () => renderGuide(lesson, step - 1, st));
-  document.getElementById('g-next')?.addEventListener('click', () => renderGuide(lesson, step + 1, st));
+  document.getElementById('quit').addEventListener('click', () => { stopSpeech(); renderTrack(lesson.track); });
+  // BACK CLOSES THE DETAIL FIRST. The handoff asks that back from a detail
+  // state return to the lesson opening, and the detail is a state of this
+  // step rather than a step of its own — so the step index only moves once
+  // there is no detail left to close.
+  document.getElementById('g-back')?.addEventListener('click', () => {
+    // ONLY WHILE WE ARE STILL ON THE STEP THAT OWNS THE SUB-STATE. Leaving
+    // the illustrated step forwards used to carry st.explore along, and the
+    // next Back then "closed" a sub-state the learner had already left — so
+    // Back re-rendered the same step and looked broken. Measured going
+    // step 1 -> check -> Continue -> Back and landing on step 2 twice.
+    if (st.explore && steps[step]?.kind === 'explore') {
+      clearExplore(st); renderGuide(lesson, step, st); return;
+    }
+    renderGuide(lesson, step - 1, st);
+  });
+  // Moving off the step drops its sub-state, so coming back to it opens on
+  // the lesson opening — which is the contract the handoff states for Back.
+  document.getElementById('g-next')?.addEventListener('click', () => {
+    clearExplore(st);
+    renderGuide(lesson, step + 1, st);
+  });
   document.getElementById('start')?.addEventListener('click', () => startLesson(lesson));
   document.getElementById('wii-link')?.addEventListener('click', openWhatIsIpa);
   wireWiiQuestions(app, st);
+  // ── The illustrated opening's controls ──────────────────────
+  app.querySelectorAll('[data-explore]').forEach(btn =>
+    btn.addEventListener('click', () => { st.explore = btn.dataset.explore; renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-explore-back]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      // Leaving the check forgets the answer, so coming back to it asks again
+      // rather than reopening on a verdict the learner has already read.
+      clearExplore(st); renderGuide(lesson, step, st);
+    }));
+  // ── The contrast pane's controls ────────────────────────────
+  // An isolated vowel, played on its own. playPhoneme returns false and stays
+  // silent when nothing is approved, and the button is not rendered in that
+  // case anyway, so there is no path to a dead control.
+  app.querySelectorAll('[data-phoneme]').forEach(btn =>
+    btn.addEventListener('click', () => playPhoneme(btn.dataset.phoneme, lesson.explore?.voice)));
+  // The comparison: both matched clips, one after the other. Only reachable
+  // when contrastReady() is true, so both slugs are approved by construction.
+  app.querySelectorAll('[data-compare]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const ex = lesson.explore;
+      const [a, b] = ex.needs;
+      playPhoneme(a, ex.voice);
+      setTimeout(() => playPhoneme(b, ex.voice), ex.check.gapMs ?? 1100);
+    }));
+  app.querySelectorAll('[data-answer]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      st.checkPick = Number(btn.dataset.answer);
+      renderGuide(lesson, step, st);
+    }));
+  // A word card PLAYS AND SELECTS on one press. speak() is called here rather
+  // than through the shared [data-say] wiring because this handler re-renders:
+  // relying on two listeners firing in registration order on an element this
+  // one is about to replace is the kind of thing that works until it doesn't.
+  // ── The round-up's controls (lesson 9) ──────────────────────
+  // PLAYING NEVER SELECTS. Separate handlers on separate elements is the
+  // only way to promise that; sharing one and branching on a flag is how
+  // a replay quietly becomes an answer.
+  app.querySelectorAll('[data-ru-play]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      speak(btn.dataset.ruPlay, { lang: langFor(lesson), accent: vowelsAcc(lesson) })));
+  // THE WORD IS NOT IN THE MARKUP BEFORE SUBMISSION. These buttons name a
+  // slot — target, 0, 1 — and the word is resolved here, so there is
+  // nothing to read ahead in the DOM, not merely nothing to read on screen.
+  app.querySelectorAll('[data-ru-slot]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const rounds = roundupRounds(lesson);
+      const r = rounds[Math.min(st.ruRound ?? 0, rounds.length - 1)];
+      const slot = btn.dataset.ruSlot;
+      const word = slot === 't' ? r.target : r.options[Number(slot)];
+      speak(word, { lang: langFor(lesson), accent: vowelsAcc(lesson) });
+    }));
+  app.querySelectorAll('[data-ru-pick]').forEach(btn =>
+    btn.addEventListener('click', () => { st.ruPick = Number(btn.dataset.ruPick); renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-ru-submit]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const rounds = roundupRounds(lesson);
+      const i = Math.min(st.ruRound ?? 0, rounds.length - 1);
+      // The miss is recorded ONCE, here, where the answer is actually
+      // judged — so the review cannot disagree with the feedback.
+      if (st.ruPick !== rounds[i].answer) {
+        st.ruMiss = [...(st.ruMiss ?? []), i].filter((v, n, a) => a.indexOf(v) === n);
+      }
+      st.ruShown = true;
+      renderGuide(lesson, step, st);
+    }));
+  app.querySelectorAll('[data-ru-next]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const rounds = roundupRounds(lesson);
+      const i = st.ruRound ?? 0;
+      if (i >= rounds.length - 1) { st.explore = 'review'; }
+      else { st.ruRound = i + 1; }
+      st.ruPick = null; st.ruShown = false;
+      renderGuide(lesson, step, st);
+    }));
+  app.querySelectorAll('[data-ru-practice]').forEach(btn =>
+    btn.addEventListener('click', () => { st.explore = 'practice'; renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-ru-unpractice]').forEach(btn =>
+    btn.addEventListener('click', () => { stopSpeech(); st.explore = 'review'; renderGuide(lesson, step, st); }));
+  // Finish does exactly what Continue does — the handoff asks that it
+  // preserve the existing completion and return behaviour, so it reuses it
+  // rather than inventing a second way to end a lesson.
+  app.querySelectorAll('[data-ru-finish]').forEach(btn =>
+    btn.addEventListener('click', () => { clearExplore(st); renderGuide(lesson, step + 1, st); }));
+  // ── The schwa tap exercise's controls (lesson 8) ────────────
+  // REPLAY MUST NOT RE-RENDER. The handoff asks that replaying leave the
+  // learner's selection alone, and the cheapest way to guarantee that is a
+  // handler that touches no state at all.
+  app.querySelectorAll('[data-schwa-play]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      speak(btn.dataset.schwaPlay, { lang: langFor(lesson), accent: vowelsAcc(lesson) })));
+  app.querySelectorAll('[data-schwa]').forEach(btn =>
+    btn.addEventListener('click', () => { st.schwaPick = Number(btn.dataset.schwa); renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-schwa-retry]').forEach(btn =>
+    btn.addEventListener('click', () => { st.schwaPick = null; renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-schwa-next]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      st.schwaRound = (st.schwaRound ?? 0) + 1; st.schwaPick = null; renderGuide(lesson, step, st);
+    }));
+  // ── The listening check's controls (lesson 5) ───────────────
+  // The mystery word is played through the SAME directory the row buttons
+  // use, so the quiz cannot be asking about a voice the cards never played.
+  app.querySelectorAll('[data-mystery]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      speak(lesson.explore.check.mystery, { lang: langFor(lesson), accent: vowelsAcc(lesson) })));
+  app.querySelectorAll('[data-submit]').forEach(btn =>
+    btn.addEventListener('click', () => { st.vqShown = true; renderGuide(lesson, step, st); }));
+  // Retry forgets the answer as well as the verdict, so the question is
+  // asked again rather than reopening on the row already marked wrong.
+  app.querySelectorAll('[data-retry]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      st.vqShown = false; st.checkPick = null; renderGuide(lesson, step, st);
+    }));
+  app.querySelectorAll('[data-stress]').forEach(btn =>
+    btn.addEventListener('click', () => { st.stress = btn.dataset.stress; renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-pick]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      const w = btn.dataset.pick;
+      speak(w, { lang: langFor(lesson), accent: clipDir(lesson.accent ?? lesson.shiftTo ?? null, langFor(lesson)) });
+      st.pick = { ...(st.pick ?? {}), [st.explore]: w };
+      renderGuide(lesson, step, st);
+    }));
   app.querySelectorAll('[data-say]').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson), accent: lesson.accent ?? lesson.shiftTo ?? null }))
   );
@@ -15261,6 +15941,7 @@ function renderExercise(s) {
   else if (ex.type === 'gapbuild') renderGapBuild(s, ex);
   else if (ex.type === 'typein') renderTypein(s, ex);
   else if (ex.type === 'bridge') renderBridgeRound(s, ex);
+  else if (ex.type === 'checkround') renderCheckRound(s, ex);
   else renderChoice(s, ex);
 }
 
@@ -15409,6 +16090,120 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null 
   document.getElementById('continue').addEventListener('click', () => {
     s.index++;
     renderExercise(s);
+  });
+}
+
+// ── THE CHECKPOINT GAME (owner handoff, 2026-11-13) ───────────
+// Two authored rounds, written in js/data/dialect-course.js and handed over
+// as a fixedQueue. It renders through lessonChrome and finishes through
+// showFeedback like every other exercise, so the verdict band, the
+// requeue-on-miss that IS the retry, the progress bar and completion are the
+// engine's, not a second copy of them.
+//
+// WHY IT IS NOT renderChoice: that one scores the instant a choice is
+// tapped. The handoff asks for select, then Check answer, then feedback —
+// and for per-option playback that does NOT select. Those are different
+// interactions, so this is a different renderer rather than three flags on
+// the old one.
+function checkRoundReady(ex) {
+  return !ex.compare || (ex.compare.needs ?? []).every(sl => hasPhonemeClip(sl, ex.compare.voice));
+}
+
+// The unscored variant. A listening round whose audio does not exist is not
+// marked — the handoff asks for "a text-based review without presenting it as
+// a scored listening task", so it states the point and moves on. Advancing
+// without showFeedback means no verdict, no mistake and no requeue.
+function renderCheckReview(s, ex) {
+  const r = ex.review;
+  lessonChrome(s, `
+    <p class="ck-band">${esc(ex.round)}</p>
+    <h1 class="prompt">${esc(r.heading)}</h1>
+    <p class="ck-review">${esc(r.text)}</p>
+    <p class="audio-avail ck-notice">${esc(r.notice)}</p>
+    <div class="ck-actions"><button class="btn btn-primary" id="ck-go" type="button">Continue</button></div>`);
+  document.getElementById('ck-go').addEventListener('click', () => { s.index++; renderExercise(s); });
+}
+
+function renderCheckRound(s, ex) {
+  if (!checkRoundReady(ex) && ex.review) return renderCheckReview(s, ex);
+  const acc = clipDir(s.lesson.accent ?? s.lesson.shiftTo ?? null, langFor(s.lesson));
+  const opts = ex.cards ?? ex.options;
+  const silent = (ex.cards ?? []).filter(c => c.say && !speakableWord(c.say, acc)).map(c => c.say);
+
+  // A CARD IS TWO BUTTONS, NOT ONE INSIDE ANOTHER. The speaker has to be
+  // independently operable and must not answer the question, and a <button>
+  // nested in a <button> is invalid and unreachable by keyboard — so they are
+  // siblings in a wrapper that only looks like one control.
+  const cardHtml = (c, i) => {
+    const art = c.art && artFor(c.art);
+    const can = c.say && speakableWord(c.say, acc);
+    return `
+      <div class="ck-card">
+        <button class="ck-pick" data-pick="${i}" type="button" aria-pressed="false">
+          <span class="ck-word">${esc(c.label)}</span>
+          ${art ? `<span class="ck-artbox"><img src="${esc(art)}" alt="${esc(c.artAlt ?? 'The lips, closed.')}" loading="lazy"></span>` : ''}
+          <span class="ck-mark" aria-hidden="true"></span>
+        </button>
+        ${can ? `<button class="ck-say" data-say-word="${esc(c.say)}" type="button"
+             aria-label="Hear the word “${esc(c.say)}”">🔊</button>` : ''}
+      </div>`;
+  };
+  const optHtml = (o, i) => `
+    <button class="ck-opt" data-pick="${i}" type="button" aria-pressed="false">
+      <span>${esc(o.label)}</span><span class="ck-mark" aria-hidden="true"></span>
+    </button>`;
+
+  lessonChrome(s, `
+    <p class="ck-band">${esc(ex.round)}</p>
+    <h1 class="prompt">${esc(ex.prompt)}</h1>
+    ${ex.compare ? `<p class="lx-cta"><button class="btn ck-compare" id="ck-compare" type="button">▶ ${esc(ex.compare.label)}</button></p>` : ''}
+    ${ex.cards ? `<div class="ck-cards">${ex.cards.map(cardHtml).join('')}</div>` : ''}
+    ${silent.length ? `<p class="audio-avail">No recording for <b>${silent.map(esc).join('</b>, <b>')}</b> in this voice, so it is printed rather than offered.</p>` : ''}
+    ${ex.options ? `<div class="ck-opts">${ex.options.map(optHtml).join('')}</div>` : ''}
+    <div class="ck-actions">
+      <button class="btn btn-primary" id="ck-submit" type="button" disabled>${esc(ex.submit)}</button>
+    </div>`);
+
+  // Playback never answers. These are separate controls from the picks, and
+  // nothing here touches the selection.
+  app.querySelectorAll('[data-say-word]').forEach(btn =>
+    btn.addEventListener('click', () => speak(btn.dataset.sayWord, { lang: langFor(s.lesson), accent: acc })));
+  document.getElementById('ck-compare')?.addEventListener('click', () => {
+    const [x, y] = ex.compare.needs;
+    playPhoneme(x, ex.compare.voice);
+    setTimeout(() => playPhoneme(y, ex.compare.voice), ex.compare.gapMs ?? 1100);
+  });
+
+  let picked = null;
+  const submit = document.getElementById('ck-submit');
+  app.querySelectorAll('[data-pick]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      picked = Number(btn.dataset.pick);
+      app.querySelectorAll('[data-pick]').forEach(b => {
+        const on = Number(b.dataset.pick) === picked;
+        b.classList.toggle('is-picked', on);
+        b.setAttribute('aria-pressed', String(on));
+        const mk = b.querySelector('.ck-mark');
+        if (mk) mk.textContent = on ? '●' : '';
+      });
+      submit.disabled = false;
+    }));
+
+  // SUBMISSION IS WHERE THE ANSWER APPEARS, never before it. Then the marks
+  // become ✓ and ✗ — glyphs as well as colour — and showFeedback takes over.
+  submit.addEventListener('click', () => {
+    if (picked == null) return;
+    const ok = !!opts[picked].ok;
+    app.querySelectorAll('[data-pick]').forEach(b => {
+      const i = Number(b.dataset.pick);
+      b.disabled = true;
+      if (opts[i].ok) b.classList.add('is-right');
+      else if (i === picked) b.classList.add('is-wrong');
+      const mk = b.querySelector('.ck-mark');
+      if (mk) mk.textContent = opts[i].ok ? '✓' : (i === picked ? '✗' : '');
+    });
+    submit.disabled = true;
+    showFeedback(s, ok, ex, { chose: opts[picked].label });
   });
 }
 

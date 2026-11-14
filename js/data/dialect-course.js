@@ -27,10 +27,270 @@ export const COURSE = [
     color: '#a8766a',
     icon: 'ə',
     blurb: 'The mouth that makes the sounds — what moves, and what it changes.',
+    // ── THE CHECKPOINT GAME (owner handoff, 2026-11-13) ──────────────────
+    // Two authored rounds in place of the five generated questions this
+    // checkpoint drew from the unit's accumulated phonemes. `expandUnit`
+    // hands them to the engine as a `fixedQueue`, the same escape hatch the
+    // Accent Bridge uses, so scoring, the feedback band, requeue-on-miss and
+    // completion all stay exactly as they are.
+    //
+    // THE ID DOES NOT MOVE. The checkpoint is still generated, still
+    // `chk-instrument-1`, still the node after lesson 2. Only its queue
+    // changes, so nobody's completion goes anywhere.
+    //
+    // IT IS A REAL REDUCTION IN PRACTICE — five mixed questions across
+    // everything the unit has covered, down to two specific ones. That is
+    // what the handoff asks for ("Two untimed rounds") and it is the owner's
+    // call, but it is worth having written down rather than discovered.
+    //
+    // ROUND 2'S WORDING IS THE HANDOFF'S, NOT THE MOCKUP'S. The pixel
+    // reference prints "The note stays the same. What changes?", which hands
+    // over the answer before the learner has chosen; START-HERE.md names that
+    // and asks for "What changed between the two sounds?" instead. Where the
+    // two documents disagree the instruction wins over the picture.
+    checkpointGame: [
+      { round: 'Airflow',
+        prompt: 'Which word starts with air flowing through the nose?',
+        submit: 'Check answer',
+        // Closed lips in both plates, which is the point of the pair: the
+        // lips do the same thing and the soft palate does not.
+        cards: [
+          { label: 'bad', say: 'bad', art: 'b' },
+          { label: 'mad', say: 'mad', art: 'm', ok: true },
+        ],
+        explain: 'Both words start with the lips closed. For the /m/ at the start of mad the soft palate lowers, and the air leaves through the nose instead of the mouth.' },
+
+      { round: 'Vowel shape',
+        prompt: 'What changed between the two sounds?',
+        submit: 'Check answer',
+        // THE SAME MATCHED PAIR LESSON 2 IS WAITING ON, and the same gate.
+        // Scoring a listening question on clips that are 2.1 semitones apart
+        // would mark "The pitch" wrong when the pitch is exactly what moved.
+        // With the clips absent this round becomes the text review the
+        // handoff asks for — stated, not scored.
+        compare: { voice: 'nam', label: 'Play comparison', gapMs: 1100,
+          needs: ['fleece_vowel_monotone', 'goose_vowel_monotone'] },
+        pair: [
+          { label: 'ee', sym: 'i\u02d0', art: 'i\u02d0' },
+          { label: 'oo', sym: 'u\u02d0', art: 'u\u02d0' },
+        ],
+        options: [
+          { label: 'The vowel', ok: true },
+          { label: 'The pitch' },
+        ],
+        explain: 'The vowel changed, not the pitch. The note stayed where it was \u2014 what moved was the shape of your mouth.',
+        // Shown instead of the question when the matched pair is missing.
+        review: {
+          // The band already says 'Vowel shape', so the heading said it twice.
+          // The mockup's own line works here BECAUSE nothing is being asked:
+          // in the review there is no answer left to give away.
+          heading: 'The note stays the same',
+          text: 'On one note, ee and oo are the same pitch and different vowels: the folds are the source, and the changing mouth is the filter. Say them both on one comfortable note and you can hear it in your own voice.',
+          notice: 'This round is a listening comparison, and the matched recordings it needs have not been made yet \u2014 so it is given to read rather than scored on audio that would contradict it.',
+        } },
+    ],
     lessons: [
-      { id: 'in-1', title: 'What moves when you speak', guide: 'The vocal folds supply the buzz; the throat, mouth and nose shape it. The tongue, jaw, lips and soft palate make the closures and narrow gaps that tell consonants apart. Tongue tip and blade work near the teeth and the ridge behind them (tea, sea); the tongue body makes the back closures (key, sing); the lips close for /p b m/ and round for /uː/; the soft palate decides how much goes through the nose — bad and mad both start with closed lips, and only one lets air out the nose. These are typical English examples, not a prescription: in one jaw-perturbation experiment speakers compensated with the lips for /b/ but with the tongue for /z/. The parts coordinate to get a sound; they do not have to move identically from speaker to speaker.', phonemes: ['s', 'k', 'm', 'f', 'θ'], types: ['description', 'soundToSymbol', 'match'] },
-      { id: 'in-2', title: 'Shape, not pitch', guide: 'Say ee–ah–oo gently on roughly one note. Three vowels, no change of pitch — because the folds are the source and the changing mouth is the filter. Pitch has its own correlate (the fundamental); vowels are told apart by the first two vocal-tract resonances, the formants. More open vowels generally carry a higher first formant, more front vowels a higher second, though rounding moves the second as well, so a formant is not a direct readout of tongue position. Nasal resonance is a separate matter from brightness: /m n ŋ/ need it, a little on neighbouring vowels is normal, and a buzz felt in the face diagnoses nothing.', phonemes: ['iː', 'ɑː', 'uː', 'm', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
-      { id: 'in-3', title: 'Clear without sounding mechanical', guide: 'Enunciation is helping a listener tell words apart — articulation, timing, emphasis, phrasing and audibility together. Speech gestures overlap: the lips can begin rounding for a vowel before the consonant before it has finished. That is coarticulation, not sloppiness, and you do not reset the mouth between sounds. Make the meaningful contrast audible (coat, not goat), keep endings distinct (she packs, she packed) without forcing a puff of air onto every final consonant, and pause between ideas rather than between words. Clear speech is possible at a normal rate; brief exaggeration can find a contrast, then it comes back into the line.', phonemes: ['p', 'b', 't', 'd', 'k'], types: ['minimalPair', 'description', 'soundToSymbol'] },
+      { id: 'in-1', title: 'What moves when you speak',
+        // ── THE ILLUSTRATED OPENING (owner handoff, 2026-11-13) ──────────
+        // `explore` turns this lesson's overview step into the two states the
+        // handoff mocks up: an illustrated opening, and one detail state per
+        // row that the opening opens. It is DATA, not a second renderer —
+        // guideStepHtml dispatches on it, the detail state lives in `st`
+        // beside the answers the guide already threads, and a lesson without
+        // `explore` renders exactly as it did. Continue still leads into the
+        // existing sound steps and Start lesson still reaches the exercises,
+        // so nothing about progress or completion moves.
+        //
+        // NOTHING HERE IS NEW WRITING. Every line is lifted from this lesson's
+        // own `guide` below, which is already through editorial review. The
+        // three rows ARE its three clauses: the lips close for /p b m/; the
+        // tongue tip and blade work near the ridge behind the upper teeth
+        // (tea) while the body makes the back closures (key); and the soft
+        // palate decides how much goes through the nose, where bad and mad
+        // both start with closed lips and only one lets air out the nose.
+        //
+        // THE ART ALL EXISTS. The opening figure is the labelled cross-section
+        // already registered in js/data/voice-art.js — the same labelled side
+        // view docs/ORAL_POSTURE_AND_ARTICULATION.md asks for, which turns out
+        // to have been drawn in the 2026-09-04 intake. Every word study is a
+        // hand-drawn plate already in img/articulation/, resolved by symbol
+        // through artFor(), and /m/'s plate already draws the nasal airflow
+        // arrow this lesson needs. No slot here waits on a drawing.
+        //
+        // 'mad' HAS NO CLIP IN ANY ACCENT as of 2026-11-13, so its control
+        // renders as plain text and the pair says so, per the strict audio
+        // rule. The word is declared here rather than avoided because the
+        // approved prose names it; the lesson completes itself the moment the
+        // clip lands, with no further change.
+        explore: {
+          lead: 'Your vocal folds make the buzz. Your mouth and nose shape it.',
+          fig: 'mouth-articulators',
+          title: 'Explore the instrument',
+          // Observations, not instructions — the same qualification the guide
+          // makes with its jaw-perturbation example. It renders once, under
+          // the rows, so the three detail states do not each have to hedge.
+          note: 'These are typical English examples, not a prescription. Speakers reach the same sound by different routes.',
+          rows: [
+            { id: 'lips', label: 'Lips', pair: 'bad / mad', art: 'b',
+              heading: 'Same lips. Different airflow.',
+              lead: 'Say bad, then mad. Notice how both start with your lips closed.',
+              words: [
+                { word: 'bad', art: 'b',
+                  note: 'Lips closed, pressure behind them, and the release goes out through your mouth.' },
+                { word: 'mad', art: 'm',
+                  note: 'Lips closed exactly the same way \u2014 but the soft palate lowers, and for /m/ the air flows out through your nose.' },
+              ],
+              tryIt: 'Hum mmm. Notice where you feel the buzz.' },
+
+            { id: 'tongue', label: 'Tongue', pair: 'tea / key', art: 't',
+              heading: 'Two closures. Two ends of the tongue.',
+              lead: 'Say tea, then key. Both begin by stopping the air with the tongue \u2014 in different places.',
+              words: [
+                { word: 'tea', art: 't',
+                  note: 'The tip or blade works near the ridge behind your upper teeth.' },
+                { word: 'key', art: 'k',
+                  note: 'The body of the tongue rises at the back, toward the soft palate.' },
+              ],
+              tryIt: 'Say tea, key, tea, key. Feel the contact travel back and forward.' },
+
+            { id: 'airflow', label: 'Airflow', pair: 'mouth / nose', art: 'm',
+              heading: 'Where the air comes out.',
+              lead: 'Replay bad and mad, and listen for where each one sends the air.',
+              words: [
+                { word: 'bad', art: 'b',
+                  note: 'The soft palate is raised, closing the way to the nose, so the air leaves through your mouth.' },
+                { word: 'mad', art: 'm',
+                  note: 'The soft palate lowers and opens the way to the nose, so the air leaves there instead.' },
+              ],
+              tryIt: 'Say mad and pinch your nose halfway through. The sound changes, because that is where the air was going.' },
+          ],
+        },
+        guide: 'The vocal folds supply the buzz; the throat, mouth and nose shape it. The tongue, jaw, lips and soft palate make the closures and narrow gaps that tell consonants apart. Tongue tip and blade work near the teeth and the ridge behind them (tea, sea); the tongue body makes the back closures (key, sing); the lips close for /p b m/ and round for /uː/; the soft palate decides how much goes through the nose — bad and mad both start with closed lips, and only one lets air out the nose. These are typical English examples, not a prescription: in one jaw-perturbation experiment speakers compensated with the lips for /b/ but with the tongue for /z/. The parts coordinate to get a sound; they do not have to move identically from speaker to speaker.', phonemes: ['s', 'k', 'm', 'f', 'θ'], types: ['description', 'soundToSymbol', 'match'] },
+      { id: 'in-2', title: 'Shape, not pitch',
+        // ── THE CONTRAST PANE (owner handoff, 2026-11-13) ────────────────
+        // Lesson 1's `explore` is a list of rows that open; this one is a
+        // single comparison with a check after it, so it rides the same step
+        // and the same `st`, and `kind` picks the layout. One mechanism, two
+        // shapes — the way the Learn renderer already works.
+        //
+        // THE DEMONSTRATION IS GATED ON AUDIO THAT DOES NOT EXIST, AND THAT
+        // IS THE WHOLE POINT OF `needs`. This lesson's claim is that the
+        // vowel changes while the note does not. The two approved clips were
+        // measured on 2026-11-13 and they cannot carry it:
+        //
+        //   fleece_vowel  starts 190 Hz and FALLS to 129 Hz — a glide of
+        //                 nearly seven semitones, not a note
+        //   goose_vowel   sits steady around 114-122 Hz
+        //   medians       2.1 semitones apart
+        //
+        // Neither was recorded to be compared, and a learner with a working
+        // ear would hear 'ee' fall, answer "The pitch", and be told they were
+        // wrong — in an ear-training app. So the 'Same pitch' cue and the
+        // check render ONLY when both slugs in `needs` are approved, and
+        // until then the lesson says what is missing.
+        //
+        // THE TWO 'Hear' BUTTONS STILL WORK. Individually the clips are fine:
+        // they are approved recordings of /iː/ and /uː/ by the reference
+        // voice. It is only the comparison between them that is unsupported,
+        // so only the comparison is withheld. Try it needs no audio at all —
+        // the learner makes the sound — so it is always there, which leaves
+        // the actual exercise intact on the way to the recordings.
+        explore: {
+          kind: 'contrast',
+          voice: 'nam',          // the only accent with approved isolated phonemes
+          lead: 'You can change the vowel without changing the note.',
+          cue: 'Same pitch',
+          pair: [
+            { label: '\u201cee\u201d', sym: 'i\u02d0', art: 'i\u02d0',
+              hear: 'Hear ee', caption: 'Lips slightly spread, tongue high and forward.' },
+            { label: '\u201coo\u201d', sym: 'u\u02d0', art: 'u\u02d0',
+              hear: 'Hear oo', caption: 'Lips rounded, tongue high and back.' },
+          ],
+          // The matched pair this demonstration needs: both vowels sustained
+          // on ONE steady comfortable note, in a single take, at one level.
+          // Recorded, prepped and approved like any other phoneme clip, at
+          // which point everything below turns on with no code change.
+          needs: ['fleece_vowel_monotone', 'goose_vowel_monotone'],
+          missing: 'The same-pitch comparison needs a matched pair: both vowels held on one steady note, in a single take. The recordings here are the sounds themselves, made separately, and they do not share a note \u2014 so the comparison is not offered rather than shown misleadingly.',
+          tryIt: { title: 'Try it',
+            text: 'On one comfortable note, glide from ee to oo. Notice what changes.' },
+          check: {
+            open: 'Quick check',
+            heading: 'What changed?',
+            lead: 'Listen to both sounds.',
+            play: 'Play comparison',
+            gapMs: 1100,
+            // NOTHING IS PRESELECTED and the answer is not revealed, per the
+            // handoff. A wrong answer offers the comparison again rather than
+            // correcting the learner and moving on.
+            options: [
+              { label: 'The vowel', ok: true },
+              { label: 'The pitch', ok: false },
+            ],
+            right: 'The vowel changed. The note stayed the same.',
+            wrong: 'Listen again. Both sounds sit on the same note \u2014 what moved was the shape of your mouth.',
+          },
+        },
+        guide: 'Say ee–ah–oo gently on roughly one note. Three vowels, no change of pitch — because the folds are the source and the changing mouth is the filter. Pitch has its own correlate (the fundamental); vowels are told apart by the first two vocal-tract resonances, the formants. More open vowels generally carry a higher first formant, more front vowels a higher second, though rounding moves the second as well, so a formant is not a direct readout of tongue position. Nasal resonance is a separate matter from brightness: /m n ŋ/ need it, a little on neighbouring vowels is normal, and a buzz felt in the face diagnoses nothing.', phonemes: ['iː', 'ɑː', 'uː', 'm', 'ŋ'], types: ['description', 'symbolToWord', 'soundToSymbol'] },
+      { id: 'in-3', title: 'Clear without sounding mechanical',
+        // ── THE DELIVERY PANE (owner handoff, 2026-11-13) ────────────────
+        // The third `explore.kind` in this unit: a listening contrast, then
+        // an emphasis switch. Same step and same `st` as the other two.
+        //
+        // THE TEACHING IS ALREADY IN THE GUIDE BELOW. "Brief exaggeration can
+        // find a contrast, then it comes back into the line" is the two
+        // deliveries, and emphasis is named in its first sentence. The only
+        // new writing is the demonstration line itself, which is the owner's.
+        //
+        // THE TWO RECORDINGS DO NOT EXIST AND THERE IS NO PLACE TO PUT THEM
+        // YET. Two DELIVERIES of one line is a performance contrast, not a
+        // pronunciation one: the same speaker reading the same words twice,
+        // which no generated voice can be trusted to fake and which the
+        // handoff explicitly says not to simulate. It also has nowhere to
+        // live — a word-tree clip is keyed on its text, so two performances
+        // of one sentence collide on one slug, and inventing a convention
+        // before the files exist would be guessing at the shape of something
+        // nobody has recorded. So the cards are flagged as assets needed,
+        // by name, and the storage question waits for the audio.
+        //
+        // MAKE IT LAND NEEDS NO AUDIO AT ALL, so the exercise the lesson is
+        // actually built around is whole: the learner moves the emphasis and
+        // says the line. Neither choice is wrong, and the pane says so.
+        explore: {
+          kind: 'delivery',
+          lead: 'Same words. Two deliveries.',
+          line: 'Leave the keys by the door.',
+          deliveries: [
+            { label: 'Over-enunciated',
+              hint: 'Every consonant struck, every word given its own space.' },
+            { label: 'Clear and conversational',
+              hint: 'The same words, the same consonants, at the rate you would actually say them.' },
+          ],
+          missing: 'Both deliveries are recordings that have not been made: one speaker reading this line twice, over-enunciated and then conversational. They are named here as assets needed rather than faked with a generated voice, which could not be trusted to tell the two apart.',
+          make: {
+            heading: 'Make it land',
+            open: 'Make it land',
+            // ONE line, not a two-item list (owner's call, 2026-11-13).
+            // The pair it replaces told the learner what the prompt under
+            // the chips tells them again as soon as they pick, and cost four
+            // wrapped rows to do it: measured at 375 wide, dropping them
+            // lifts the foot of the pane from 576px to 532px. That 44px is
+            // what puts the takeaway line on screen on a short phone — an
+            // iPhone SE leaves about 553px once browser chrome is off.
+            // What survives is the part nothing else carries: pick one,
+            // say it out loud, try both.
+            brief: 'Pick a word, say the line aloud, then try the other.',
+            // Both are right, and the prompt says which question each answers
+            // rather than which is correct.
+            words: [
+              { word: 'keys', prompt: 'Stressing keys answers what to leave.' },
+              { word: 'door', prompt: 'Stressing door answers where to leave it.' },
+            ],
+            note: 'Neither is wrong. The emphasis follows what the listener needs to know.',
+            close: 'Let the meaning guide the emphasis.',
+          },
+        },
+        guide: 'Enunciation is helping a listener tell words apart — articulation, timing, emphasis, phrasing and audibility together. Speech gestures overlap: the lips can begin rounding for a vowel before the consonant before it has finished. That is coarticulation, not sloppiness, and you do not reset the mouth between sounds. Make the meaningful contrast audible (coat, not goat), keep endings distinct (she packs, she packed) without forcing a puff of air onto every final consonant, and pause between ideas rather than between words. Clear speech is possible at a normal rate; brief exaggeration can find a contrast, then it comes back into the line.', phonemes: ['p', 'b', 't', 'd', 'k'], types: ['minimalPair', 'description', 'soundToSymbol'] },
     ],
   },
   {
@@ -40,10 +300,164 @@ export const COURSE = [
     icon: 'ɪ',
     blurb: 'The six short vowels of English, plus the humble schwa.',
     lessons: [
-      { id: 'v1-1', title: 'KIT, DRESS & TRAP', guide: 'Three front vowels, stacked by how open your mouth is: /ɪ/ is nearly closed (kit), /e/ is halfway (dress), /æ/ is nearly open (trap). Say them in a row and feel your jaw drop.', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
+      { id: 'v1-1', title: 'KIT, DRESS & TRAP',
+        // ── Illustrated opening (owner handoff, 2026-11-13) ──────────
+        // THE HANDOFF ASKED FOR sit / set / sat, AND THEY DO NOT EXIST.
+        // Zero clips across all ten accent-voice pairs; declaring them
+        // would owe audit_audio thirty recordings. The brief's own reason
+        // for that triplet is "the same surrounding consonants so the
+        // learner can focus on the vowel" — so the frame is what matters,
+        // not those three words. bid / bed / bad is the only other full
+        // minimal triplet in the library and it is complete in all ten
+        // voices, so the listening check is real and scored today.
+        // Owner chose it over kit/dress/trap, which are recorded but share
+        // no frame. The course already leans on "bid vs bed" in v1-4.
+        //
+        // /e/ NOT /ɛ/: the mockup writes DRESS as /ɛ/, and the handoff
+        // says to follow the app's convention where they differ. This
+        // course has always written /e/ — in this lesson's own guide text,
+        // in `phonemes` below, and in articulation-art — so /ɛ/ here would
+        // be the one place in the app that disagrees with itself.
+        explore: {
+          kind: 'vowels',
+          lead: 'Hear the vowel in the middle.',
+          frame: 'Same consonants either side. Only the vowel moves.',
+          // The plates are the ones articulation-art already maps for
+          // these three symbols, so the rows are illustrated today. They
+          // are diagrams, not the ink-and-wash vignettes the handoff
+          // pictures; swapping those in later is a data change here.
+          rows: [
+            { set: 'KIT', ipa: 'ɪ', word: 'bid', hint: 'Jaw nearly closed.' },
+            { set: 'DRESS', ipa: 'e', word: 'bed', hint: 'Jaw halfway.' },
+            { set: 'TRAP', ipa: 'æ', word: 'bad', hint: 'Jaw nearly open.' },
+          ],
+          // Shown INSTEAD of the check when the recordings are not there.
+          // Unreachable while bid/bed/bad are complete, which is the point:
+          // it is the state the lesson falls back to, not a disclaimer.
+          missing: 'These three recordings are missing in this voice, so the words are printed rather than offered and there is no listening check — a check you cannot hear would score nothing. The contrast above still teaches without listening credit.',
+          check: {
+            open: 'Try a listening check',
+            heading: 'Which vowel did you hear?',
+            play: 'Play mystery word',
+            replay: 'Replay as often as you like.',
+            // ONE OF THE THREE TAUGHT WORDS, as the handoff specifies for a
+            // first round. Fixed rather than random: a random word would
+            // make the suite non-deterministic, and Math.random is banned
+            // in workflow scripts for the same reason. The correct answer
+            // is DERIVED from whichever row holds this word, so the two
+            // cannot drift apart.
+            mystery: 'bed',
+            submit: 'Check answer',
+            retry: 'Try again',
+            right: 'Yes — that was the DRESS vowel.',
+            wrong: 'Not quite — listen again for how far the jaw drops.',
+            // PLAIN TEXT, because every lesson string goes through esc().
+            // Markup here would have to travel an un-escaped path, and a
+            // lesson field is not worth opening one.
+            reveal: 'The word was “bed” — DRESS /e/, the jaw halfway between “bid” and “bad”.',
+          },
+        },
+        guide: 'Three front vowels, stacked by how open your mouth is: /ɪ/ is nearly closed (kit), /e/ is halfway (dress), /æ/ is nearly open (trap). Say them in a row and feel your jaw drop.', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
       { id: 'v1-2', title: 'STRUT, FOOT & LOT', guide: 'Three more short vowels, made further back in the mouth: /ʌ/ is open and relaxed (but), /ʊ/ is high with rounded lips (foot), /ɒ/ is low with rounded lips (lot).', phonemes: ['ʌ', 'ʊ', 'ɒ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
-      { id: 'v1-3', title: 'Meet the schwa', guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
-      { id: 'v1-4', title: 'Short vowels round-up', guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
+      { id: 'v1-3', title: 'Meet the schwa',
+        // ── Illustrated opening (owner handoff, 2026-11-13) ──────────
+        // THIS HANDOFF'S OWN WORDS WORK, unlike lesson 5's. `about` and
+        // `sofa` are both recorded in all ten accent-voice pairs, and the
+        // dictionary confirms the positions the handoff claims:
+        // about = əˈbaʊt (schwa first, stress second) and sofa = ˈsoʊfə
+        // (schwa last). Nothing had to be substituted.
+        //
+        // The transfer rounds are the handoff's "vary the position of
+        // schwa using examples verified against the course recordings".
+        // Verified is the operative word: of the 197 words recorded in
+        // every voice, exactly ELEVEN carry a single schwa, and these are
+        // the two-syllable ones. They alternate which syllable holds it,
+        // which is the only thing the exercise is asking about.
+        explore: {
+          kind: 'schwa',
+          symbol: 'ə',
+          lead: 'Schwa often shows up in unstressed syllables.',
+          // The stressed syllable is the one the schwa is NOT in. Marking
+          // it is the whole demonstration: the colourless vowel is what is
+          // left over when the stress goes elsewhere.
+          demo: { word: 'about', parts: ['a', 'bout'], stress: 1, play: 'Hear about' },
+          open: 'Find the schwa',
+          missing: 'None of these words is recorded in this voice, so they are printed rather than offered and there is no tap exercise — an ear exercise you cannot hear teaches nothing. The sound above is still described without listening credit.',
+          check: {
+            heading: 'Where’s the schwa?',
+            replay: 'Replay as often as you like — it will not change your answer.',
+            wrong: 'Not that one. Play it again and listen for the colourless syllable.',
+            retry: 'Try again',
+            next: 'Try another word',
+            done: 'That is schwa in every position it takes in a two-syllable word.',
+            // ROUNDS ARE FILTERED BY WHAT IS ACTUALLY RECORDED before any
+            // of this renders, so a clip going missing drops its round
+            // rather than breaking the exercise.
+            rounds: [
+              { word: 'sofa', parts: ['so', 'fa'], answer: 1, reveal: 'You heard /ə/ at the end of sofa.' },
+              { word: 'machine', parts: ['ma', 'chine'], answer: 0, reveal: 'You heard /ə/ at the start of machine.' },
+              { word: 'station', parts: ['sta', 'tion'], answer: 1, reveal: 'You heard /ə/ at the end of station.' },
+              { word: 'away', parts: ['a', 'way'], answer: 0, reveal: 'You heard /ə/ at the start of away.' },
+            ],
+          },
+        },
+        guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
+      { id: 'v1-4', title: 'Short vowels round-up',
+        // ── Illustrated opening (owner handoff, 2026-11-13) ──────────
+        // THE HANDOFF'S EXAMPLE IS UNRECORDED AGAIN: it offers target pin,
+        // A sit, B set, and none of those three exists in any of the ten
+        // accent-voice pairs. Same shape of problem as lesson 5, same
+        // answer — keep the task, verify the words.
+        //
+        // ROUND COUNT COMES FROM THE RECORDINGS, NOT A ROUND NUMBER. The
+        // handoff says to use the course's existing item pool; that pool
+        // (MINIMAL_PAIRS in js/data/phonemes.js) holds six pairs, of which
+        // exactly TWO are fully-recorded short-vowel contrasts. Extending
+        // it with genuine minimal pairs drawn from the recorded vocabulary
+        // gives four: bid/bed, bad/bed, cat/cut, hat/hot. Four contrasts,
+        // four rounds. /ʊ/ has no recorded minimal-pair partner at all,
+        // which is why it is taught here but not contrasted.
+        //
+        // The correct answer alternates A, B, A, B — the handoff asks that
+        // its position vary, and a fixed side is the first thing a learner
+        // notices.
+        explore: {
+          kind: 'roundup',
+          lead: 'Which word has the same vowel?',
+          // Spellings stay hidden until an answer is submitted, so the
+          // controls can only be named by position, never by word.
+          playTarget: 'Play target',
+          replay: 'Replay any of them as often as you like — it will not choose for you.',
+          submit: 'Check answer',
+          nextRound: 'Next round',
+          toReview: 'See your review',
+          right: 'Yes — same vowel.',
+          wrong: 'Not that one.',
+          missing: 'These words are not recorded in this voice, so there is no listening round — a listening question with nothing to hear cannot be scored. The vowels are still laid out in the lesson below, without listening credit.',
+          rounds: [
+            { target: 'bid', options: ['ship', 'bed'], answer: 0,
+              pair: ['bid', 'bed'], contrast: '/ɪ/ and /e/' },
+            { target: 'bad', options: ['bed', 'hat'], answer: 1,
+              pair: ['bad', 'bed'], contrast: '/æ/ and /e/' },
+            { target: 'cut', options: ['bus', 'cat'], answer: 0,
+              pair: ['cat', 'cut'], contrast: '/æ/ and /ʌ/' },
+            { target: 'hot', options: ['hat', 'stop'], answer: 1,
+              pair: ['hat', 'hot'], contrast: '/æ/ and /ɒ/' },
+          ],
+          review: {
+            heading: 'Your listening review',
+            // NO PAIR IS SHOWN IN THIS STATE, so this line must not offer
+            // one. It said "replay any pair below" while rendering nothing
+            // below it — a promise the pane could not keep.
+            clean: 'Nothing to go back over — you matched every vowel in the round-up. Go back a step if you want to hear any of them again.',
+            missed: 'One contrast to go back over.',
+            practice: 'Practice this pair',
+            practiceNote: 'Replay these as often as you like. This is practice — it does not change the score you just earned.',
+            back: 'Back to the review',
+            finish: 'Finish round-up',
+          },
+        },
+        guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
     ],
   },
   {

@@ -426,7 +426,22 @@ def main() -> None:
                 print(f"{accent}/{vkey}: {len(todo)} clip(s) to make, {chars} characters")
                 continue
             folder.mkdir(parents=True, exist_ok=True)
-            print(f"\n{accent}/{vkey}: {len(texts)} clip(s) → {folder.relative_to(ROOT)}")
+            # THE HEADER COUNTS WHAT IT WILL ACTUALLY MAKE, not len(texts).
+            # It printed the whole inventory — "rp/m: 207 clip(s)" for three
+            # missing words — while the loop below skipped every file that
+            # already existed. Nothing was ever over-generated, but the number
+            # contradicted the dry run's and read as a runaway batch about to
+            # spend 207 clips' worth of credits. The dry run's own filter,
+            # reused here so the two can never disagree again.
+            todo = [t for t in texts
+                    if args.force or not (folder / f"{clip_name(t)}.mp3").exists()]
+            # os.path.relpath, NOT Path.relative_to: the audio is a SIBLING
+            # repo (../IPA-Audio since 2026-09-21), and relative_to raises
+            # ValueError for any path outside ROOT rather than returning a
+            # ".." path. It crashed here on the first folder of every real
+            # run, after the dry run had reported the cost cleanly — so the
+            # default word path could be priced and never generated.
+            print(f"\n{accent}/{vkey}: {len(todo)} clip(s) → {os.path.relpath(folder, ROOT)}")
             respell = respell_map(accent, vkey)
             for text in texts:
                 if args.limit is not None and made >= args.limit:

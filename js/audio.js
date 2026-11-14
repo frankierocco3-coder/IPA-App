@@ -49,6 +49,22 @@ export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-
 // mapping is only the fallback.
 const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
 
+// WHICH DIRECTORY A CALLER'S AUDIO ACTUALLY COMES FROM. resolveAudio() has
+// always resolved a null accent this way; naming it lets a caller ask the
+// availability question about the SAME directory playback will use. An
+// accent-neutral course (IPA Foundations) has no accent and langFor() gives
+// it 'en-GB', so its words come from rp — which is what it already plays.
+//
+// FIXED 2026-11-13: hasWordClip() now asks about this same directory. It
+// used to pass the raw accent to voicesWith(), where clipIndex[null] is
+// undefined, so in an accent-neutral course speak() played a word that
+// hasWordClip() called missing and the control rendered as plain text
+// beside audio that exists — every word control in IPA Foundations.
+// clipDir() is the identity for a real accent, so no accent-bearing course
+// changes its mind about coverage; only the null case moves, and it moves
+// to agree with playback.
+export const clipDir = (accent, lang = 'en-GB') => accent ?? LANG_DIR[lang] ?? 'rp';
+
 // (An earlier build stored a per-course voice preference under
 // 'speechcraft-voice-prefs'. It is deliberately ignored now — playback is
 // random across a course's approved voices — and a stale key is harmless.)
@@ -221,7 +237,7 @@ export function resolveAudio({ kind = 'word', accent = null, lang = 'en-GB', tex
   // word | expression | sentence — all resolve by EXACT displayed text;
   // the filename derives from that text, so cross-content substitution is
   // structurally impossible.
-  const dir = accent ?? LANG_DIR[lang] ?? 'rp';
+  const dir = clipDir(accent, lang);
   if (!isWordText(text)) return { status: 'unavailable', kind, dir, voice: null, path: null, text };
   const options = voicesWith(dir, text);
   if (!options.length) return { status: 'unavailable', kind, dir, voice: null, path: null, text };
@@ -230,7 +246,10 @@ export function resolveAudio({ kind = 'word', accent = null, lang = 'en-GB', tex
 }
 
 // True when a real, playable recording exists for this text in this course.
-export const hasWordClip = (text, accent) => voicesWith(accent, text).length > 0;
+// Resolves the directory the SAME way resolveAudio() does, so availability
+// and playback can never disagree. See clipDir() above.
+export const hasWordClip = (text, accent, lang = 'en-GB') =>
+  voicesWith(clipDir(accent, lang), text).length > 0;
 
 // Returns what actually happened: 'clip' | 'tts' | 'silent' — the tests
 // assert on this; app callers are free to ignore it.
