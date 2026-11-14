@@ -55,13 +55,14 @@ const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };
 // accent-neutral course (IPA Foundations) has no accent and langFor() gives
 // it 'en-GB', so its words come from rp — which is what it already plays.
 //
-// NOTE FOR WHOEVER FIXES THE WIDER BUG: hasWordClip() below still passes the
-// raw accent to voicesWith(), where clipIndex[null] is undefined. So in an
-// accent-neutral course speak() plays a word that hasWordClip() reports as
-// missing, and the control renders as plain text beside audio that exists.
-// Routing hasWordClip through clipDir fixes it everywhere at once, and it
-// changes what every course believes about its own coverage — so it wants
-// the audio suite run beside it, not a drive-by edit.
+// FIXED 2026-11-13: hasWordClip() now asks about this same directory. It
+// used to pass the raw accent to voicesWith(), where clipIndex[null] is
+// undefined, so in an accent-neutral course speak() played a word that
+// hasWordClip() called missing and the control rendered as plain text
+// beside audio that exists — every word control in IPA Foundations.
+// clipDir() is the identity for a real accent, so no accent-bearing course
+// changes its mind about coverage; only the null case moves, and it moves
+// to agree with playback.
 export const clipDir = (accent, lang = 'en-GB') => accent ?? LANG_DIR[lang] ?? 'rp';
 
 // (An earlier build stored a per-course voice preference under
@@ -245,7 +246,10 @@ export function resolveAudio({ kind = 'word', accent = null, lang = 'en-GB', tex
 }
 
 // True when a real, playable recording exists for this text in this course.
-export const hasWordClip = (text, accent) => voicesWith(accent, text).length > 0;
+// Resolves the directory the SAME way resolveAudio() does, so availability
+// and playback can never disagree. See clipDir() above.
+export const hasWordClip = (text, accent, lang = 'en-GB') =>
+  voicesWith(clipDir(accent, lang), text).length > 0;
 
 // Returns what actually happened: 'clip' | 'tts' | 'silent' — the tests
 // assert on this; app callers are free to ignore it.
