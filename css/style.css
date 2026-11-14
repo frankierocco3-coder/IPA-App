@@ -913,7 +913,7 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .track-card:focus-visible, .word-chip:focus-visible, .guide-symbol:focus-visible,
 .ck-pick:focus-visible, .ck-say:focus-visible, .ck-opt:focus-visible,
 .exp-word:focus-visible, .ct-opt:focus-visible, .dl-word:focus-visible,
-.vq-opt:focus-visible, .vq-say:focus-visible {
+.vq-opt:focus-visible, .vq-say:focus-visible, .sw-syl:focus-visible {
   outline: 3px solid rgba(138,109,59,0.5); outline-offset: 2px;
 }
 
@@ -6049,4 +6049,54 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   .vq-say, .vq-plain { font-size: 15px; }
   .vq-opt { padding: 12px 13px; gap: 10px; }
 }
+
+/* ── Meet the schwa: the sound card and the tap exercise ──────
+   IPA Foundations lesson 8. The card shows the symbol large with its
+   articulation plate; the exercise shows two syllables that must look
+   IDENTICAL until one is chosen. */
+.sw-head { display: flex; align-items: center; gap: 14px; margin: 10px 0 12px; }
+.sw-symbol {
+  font-family: var(--serif); font-size: 46px; font-weight: 700; line-height: 1;
+  color: var(--ink); margin: 0;
+}
+.sw-art {
+  position: relative; flex: none; width: 64px; height: 64px; display: block; overflow: hidden;
+  border-radius: 12px; border: 1px solid var(--line); background: var(--panel-2);
+}
+/* Same tongue crop as the KIT/DRESS/TRAP rows — see .vq-art for why. */
+.sw-art img { position: absolute; display: block; width: 187%; max-width: none; height: auto; left: -13.3%; top: -130%; }
+/* The demonstration word, split at the syllable with the stress marked.
+   The stressed half is the one the schwa is NOT in. */
+.sw-demo { font-family: var(--serif); font-size: 28px; color: var(--ink); margin: 4px 0 16px; letter-spacing: .01em; }
+.sw-part { font-weight: 400; }
+.sw-part.is-stressed { font-weight: 800; text-transform: uppercase; }
+.sw-split { color: var(--muted); margin: 0 10px; font-weight: 400; }
+.sw-missing { margin: 0 0 8px; }
+.sw-replay { margin: -4px 0 16px; }
+
+/* Two syllables, equal width, same case and weight. NOTHING may tell them
+   apart before one is tapped — the handoff says so outright, and a wider
+   or heavier button would answer the question for the learner. */
+.sw-parts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 14px 0; }
+.sw-syl {
+  font: inherit; display: flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--panel); border: 2px solid var(--line); border-bottom-width: 4px;
+  border-radius: 14px; padding: 16px 12px; cursor: pointer; min-width: 0;
+}
+.sw-syl:active { transform: translateY(2px); border-bottom-width: 2px; }
+.sw-syl[disabled] { cursor: default; }
+.sw-syl-text { font-family: var(--serif); font-size: 24px; font-weight: 700; color: var(--ink); }
+.sw-syl-mark { font-size: 17px; font-weight: 800; flex: none; }
+.sw-syl.is-right { border-color: var(--green); background: var(--accent-tint); }
+.sw-syl.is-right .sw-syl-mark { color: var(--green-dark); }
+.sw-syl.is-wrong { border-color: var(--red); background: var(--bad-tint); }
+.sw-reveal { font-size: 17px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.sw-wrong { font-size: 15px; line-height: 1.55; color: var(--ink); margin: 0 0 4px; }
+.sw-done { margin: 8px 0 0; }
+@media (max-width: 420px) {
+  .sw-symbol { font-size: 40px; }
+  .sw-demo { font-size: 24px; }
+  .sw-syl-text { font-size: 21px; }
+}
+
 

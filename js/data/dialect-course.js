@@ -359,7 +359,49 @@ export const COURSE = [
         },
         guide: 'Three front vowels, stacked by how open your mouth is: /ɪ/ is nearly closed (kit), /e/ is halfway (dress), /æ/ is nearly open (trap). Say them in a row and feel your jaw drop.', phonemes: ['ɪ', 'e', 'æ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
       { id: 'v1-2', title: 'STRUT, FOOT & LOT', guide: 'Three more short vowels, made further back in the mouth: /ʌ/ is open and relaxed (but), /ʊ/ is high with rounded lips (foot), /ɒ/ is low with rounded lips (lot).', phonemes: ['ʌ', 'ʊ', 'ɒ'], types: ['symbolToWord', 'soundToSymbol', 'match'] },
-      { id: 'v1-3', title: 'Meet the schwa', guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
+      { id: 'v1-3', title: 'Meet the schwa',
+        // ── Illustrated opening (owner handoff, 2026-11-13) ──────────
+        // THIS HANDOFF'S OWN WORDS WORK, unlike lesson 5's. `about` and
+        // `sofa` are both recorded in all ten accent-voice pairs, and the
+        // dictionary confirms the positions the handoff claims:
+        // about = əˈbaʊt (schwa first, stress second) and sofa = ˈsoʊfə
+        // (schwa last). Nothing had to be substituted.
+        //
+        // The transfer rounds are the handoff's "vary the position of
+        // schwa using examples verified against the course recordings".
+        // Verified is the operative word: of the 197 words recorded in
+        // every voice, exactly ELEVEN carry a single schwa, and these are
+        // the two-syllable ones. They alternate which syllable holds it,
+        // which is the only thing the exercise is asking about.
+        explore: {
+          kind: 'schwa',
+          symbol: 'ə',
+          lead: 'Schwa often shows up in unstressed syllables.',
+          // The stressed syllable is the one the schwa is NOT in. Marking
+          // it is the whole demonstration: the colourless vowel is what is
+          // left over when the stress goes elsewhere.
+          demo: { word: 'about', parts: ['a', 'bout'], stress: 1, play: 'Hear about' },
+          open: 'Find the schwa',
+          missing: 'None of these words is recorded in this voice, so they are printed rather than offered and there is no tap exercise — an ear exercise you cannot hear teaches nothing. The sound above is still described without listening credit.',
+          check: {
+            heading: 'Where’s the schwa?',
+            replay: 'Replay as often as you like — it will not change your answer.',
+            wrong: 'Not that one. Play it again and listen for the colourless syllable.',
+            retry: 'Try again',
+            next: 'Try another word',
+            done: 'That is schwa in every position it takes in a two-syllable word.',
+            // ROUNDS ARE FILTERED BY WHAT IS ACTUALLY RECORDED before any
+            // of this renders, so a clip going missing drops its round
+            // rather than breaking the exercise.
+            rounds: [
+              { word: 'sofa', parts: ['so', 'fa'], answer: 1, reveal: 'You heard /ə/ at the end of sofa.' },
+              { word: 'machine', parts: ['ma', 'chine'], answer: 0, reveal: 'You heard /ə/ at the start of machine.' },
+              { word: 'station', parts: ['sta', 'tion'], answer: 1, reveal: 'You heard /ə/ at the end of station.' },
+              { word: 'away', parts: ['a', 'way'], answer: 0, reveal: 'You heard /ə/ at the start of away.' },
+            ],
+          },
+        },
+        guide: 'The schwa /ə/ is the most common sound in English — the colourless \'uh\' in every unstressed syllable: a-bout, so-fa, ba-na-na. If a vowel is unstressed, it\'s probably a schwa.', phonemes: ['ə', 'ɪ', 'ʌ'], types: ['symbolToWord', 'soundToSymbol', 'description'] },
       { id: 'v1-4', title: 'Short vowels round-up', guide: 'All seven short vowels together: /ɪ e æ ʌ ʊ ɒ ə/. This round-up mixes them so you can tell neighbours apart — especially /æ/ vs /ʌ/ (cat vs cut) and /ɪ/ vs /e/ (bid vs bed).', phonemes: ['ɪ', 'e', 'æ', 'ʌ', 'ʊ', 'ɒ', 'ə'], types: ['soundToSymbol', 'match', 'minimalPair'] },
     ],
   },

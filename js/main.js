@@ -15243,7 +15243,89 @@ function clearExplore(st) {
   st.checkPick = null;
   st.stress = null;
   st.vqShown = false;
+  st.schwaRound = 0;
+  st.schwaPick = null;
   stopSpeech();
+}
+
+// ── IPA Foundations lesson 8: Meet the schwa ─────────────────
+// A sound card, then a tap exercise over several words. Tapping a syllable
+// IS the answer here — there is no separate submit, because the handoff
+// describes choosing and revealing as one move.
+function schwaRounds(lesson) {
+  // ONLY THE ROUNDS THAT CAN ACTUALLY BE HEARD. A missing clip drops its
+  // round instead of breaking the exercise, so the words on offer are
+  // always "verified against the course recordings" by construction.
+  const acc = vowelsAcc(lesson);
+  return lesson.explore.check.rounds.filter(r => speakableWord(r.word, acc));
+}
+
+function schwaReady(lesson) {
+  const acc = vowelsAcc(lesson);
+  return speakableWord(lesson.explore.demo.word, acc) && schwaRounds(lesson).length > 0;
+}
+
+function schwaCardHtml(lesson, st) {
+  const ex = lesson.explore;
+  const acc = vowelsAcc(lesson);
+  const art = artFor(ex.symbol);
+  const alt = articulationFor(ex.symbol)?.summary ?? '';
+  const d = ex.demo;
+  return `
+    <h1>${esc(lesson.title)}</h1>
+    <div class="sw-head">
+      <p class="sw-symbol">/${esc(ex.symbol)}/</p>
+      ${art ? `<span class="sw-art"><img src="${esc(art)}" alt="${esc(alt)}" loading="lazy"></span>` : ''}
+    </div>
+    <p class="guide-text">${esc(ex.lead)}</p>
+    <p class="sw-demo">${d.parts.map((part, i) =>
+      `<span class="sw-part${i === d.stress ? ' is-stressed' : ''}">${esc(part)}</span>`
+    ).join('<span class="sw-split" aria-hidden="true">|</span>')}</p>
+    ${speakableWord(d.word, acc)
+      ? `<p class="lx-cta"><button class="btn btn-primary" data-say="${esc(d.word)}" type="button">
+           <span aria-hidden="true">▶</span> ${esc(d.play)}</button></p>`
+      : ''}
+    ${schwaReady(lesson)
+      ? `<p class="lx-cta"><button class="btn" data-explore="check" type="button">${esc(ex.open)} ›</button></p>`
+      : `<p class="audio-avail sw-missing">${esc(ex.missing)}</p>`}`;
+}
+
+function schwaCheckHtml(lesson, st) {
+  const c = lesson.explore.check;
+  const rounds = schwaRounds(lesson);
+  const i = Math.min(st.schwaRound ?? 0, rounds.length - 1);
+  const r = rounds[i];
+  const picked = st.schwaPick ?? null;
+  const right = picked != null && picked === r.answer;
+  const last = i >= rounds.length - 1;
+  return `
+    <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
+    <h1>${esc(c.heading)}</h1>
+    <p class="lx-cta"><button class="btn btn-primary" data-schwa-play="${esc(r.word)}" type="button">
+      <span aria-hidden="true">▶</span> Play ${esc(r.word)}</button></p>
+    <p class="pane-note sw-replay">${esc(c.replay)}</p>
+    <div class="sw-parts">
+      ${r.parts.map((part, n) => {
+        const on = picked === n;
+        // EQUAL SIZE, SAME CASE, SAME WEIGHT until an answer is given —
+        // the handoff is explicit that the display must not hint. Nothing
+        // distinguishes the right syllable before it is chosen.
+        const cls = !on ? '' : (right ? ' is-right' : ' is-wrong');
+        const mark = !on ? '' : (right ? '✓' : '✗');
+        return `<button class="sw-syl${cls}" data-schwa="${n}" type="button"
+            aria-pressed="${on}"${right ? ' disabled' : ''}>
+            <span class="sw-syl-text">${esc(part)}</span>
+            <span class="sw-syl-mark" aria-hidden="true">${mark}</span>
+          </button>`;
+      }).join('')}
+    </div>
+    <div class="sw-verdict" role="status" aria-live="polite">${
+      right ? `<p class="sw-reveal">${esc(r.reveal)}</p>`
+      : picked != null ? `<p class="sw-wrong">${esc(c.wrong)}</p>` : ''}</div>
+    ${right
+      ? (last ? `<p class="pane-note sw-done">${esc(c.done)}</p>`
+              : `<p class="lx-cta"><button class="btn" data-schwa-next type="button">${esc(c.next)} ›</button></p>`)
+      : picked != null ? `<p class="lx-cta"><button class="btn" data-schwa-retry type="button">${esc(c.retry)}</button></p>` : ''}`;
 }
 
 // ── IPA Foundations lesson 5: KIT, DRESS & TRAP ──────────────
@@ -15347,6 +15429,11 @@ function guideStepHtml(lesson, s, st) {
     // for: if the recordings went away while the learner sat in the
     // sub-state, this lands them back on the cards rather than on a quiz
     // with nothing to hear.
+    if (lesson.explore.kind === 'schwa') {
+      return st.explore === 'check' && schwaReady(lesson)
+        ? schwaCheckHtml(lesson, st)
+        : schwaCardHtml(lesson, st);
+    }
     if (lesson.explore.kind === 'vowels') {
       return st.explore === 'check' && vowelsReady(lesson)
         ? vowelCheckHtml(lesson, st)
@@ -15543,6 +15630,21 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
   // than through the shared [data-say] wiring because this handler re-renders:
   // relying on two listeners firing in registration order on an element this
   // one is about to replace is the kind of thing that works until it doesn't.
+  // ── The schwa tap exercise's controls (lesson 8) ────────────
+  // REPLAY MUST NOT RE-RENDER. The handoff asks that replaying leave the
+  // learner's selection alone, and the cheapest way to guarantee that is a
+  // handler that touches no state at all.
+  app.querySelectorAll('[data-schwa-play]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      speak(btn.dataset.schwaPlay, { lang: langFor(lesson), accent: vowelsAcc(lesson) })));
+  app.querySelectorAll('[data-schwa]').forEach(btn =>
+    btn.addEventListener('click', () => { st.schwaPick = Number(btn.dataset.schwa); renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-schwa-retry]').forEach(btn =>
+    btn.addEventListener('click', () => { st.schwaPick = null; renderGuide(lesson, step, st); }));
+  app.querySelectorAll('[data-schwa-next]').forEach(btn =>
+    btn.addEventListener('click', () => {
+      st.schwaRound = (st.schwaRound ?? 0) + 1; st.schwaPick = null; renderGuide(lesson, step, st);
+    }));
   // ── The listening check's controls (lesson 5) ───────────────
   // The mystery word is played through the SAME directory the row buttons
   // use, so the quiz cannot be asking about a voice the cards never played.
