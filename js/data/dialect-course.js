@@ -155,7 +155,11 @@ export const COURSE = [
 
             { id: 'airflow', label: 'Airflow', pair: 'mouth / nose', art: 'm',
               heading: 'Where the air comes out.',
-              lead: 'Replay bad and mad, and listen for where each one sends the air.',
+              // NOT "replay": `mad` has no clip in any accent-voice pair, so
+              // telling the reader to replay it contradicts the notice printed
+              // directly beneath. "Compare" is true whether the word is played
+              // or said, and stays true the day the clip lands.
+              lead: 'Compare bad and mad, and notice where each one sends the air.',
               words: [
                 { word: 'bad', art: 'b',
                   note: 'The soft palate is raised, closing the way to the nose, so the air leaves through your mouth.' },

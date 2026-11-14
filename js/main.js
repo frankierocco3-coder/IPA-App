@@ -15259,6 +15259,10 @@ function clearExplore(st) {
   st.explore = null;
   st.checkPick = null;
   st.stress = null;
+  // The per-row word study, lesson 1. It was the one sub-state this did
+  // not drop, so a row re-opened on the reveal the reader had already
+  // read — against the contract the rest of these exits keep.
+  st.pick = null;
   st.vqShown = false;
   st.schwaRound = 0;
   st.schwaPick = null;
@@ -16186,7 +16190,13 @@ function renderCheckReview(s, ex) {
     <p class="ck-review">${esc(r.text)}</p>
     <p class="audio-avail ck-notice">${esc(r.notice)}</p>
     <div class="ck-actions"><button class="btn btn-primary" id="ck-go" type="button">Continue</button></div>`);
-  document.getElementById('ck-go').addEventListener('click', () => { s.index++; renderExercise(s); });
+  document.getElementById('ck-go').addEventListener('click', () => {
+    // Counted, so the summary can leave it out of the score. This round was
+    // read, not answered.
+    s.unscored = (s.unscored ?? 0) + 1;
+    s.index++;
+    renderExercise(s);
+  });
 }
 
 function renderCheckRound(s, ex) {
@@ -16488,7 +16498,7 @@ function renderGapBuild(s, ex) {
 // ── End screens ───────────────────────────────────────────────
 
 function renderResults(s) {
-  const perfect = s.mistakes === 0;
+  const perfect = s.mistakes === 0 && (s.index - (s.unscored ?? 0)) > 0;
   if (s.lesson.challenge) { s.lesson.onResult(perfect); return; }
   if (s.lesson.practice) {
     try { onLessonFinished({ perfect, isGame: true }); } catch { /* quests are best-effort */ }
@@ -16516,7 +16526,11 @@ function renderResults(s) {
 
   // Completion summary: what this covered, how it went, what to look at
   // again, and the one obvious next step.
-  const answered = Math.max(s.index, 1);
+  // UNSCORED ROUNDS ARE NOT ANSWERS. A review round advances the queue
+  // without ever being scored, so counting it in the denominator reported
+  // a question answered correctly that was never asked.
+  const scored = s.index - (s.unscored ?? 0);
+  const answered = Math.max(scored, 1);
   const accuracy = Math.max(0, Math.round((answered - s.mistakes) / answered * 100));
   const learned = (s.lesson.phonemes ?? []).filter(ph => PHONEMES[ph]).slice(0, 8);
   const review = [...(s.missedSyms ?? [])].filter(sy => PHONEMES[sy]).slice(0, 4);
@@ -16530,7 +16544,7 @@ function renderResults(s) {
       ${mastered ? `<p>${esc(s.lesson.track.title)} — mastered, start to finish.</p>` : ''}
       ${perfect ? '<p class="end-xp">Perfect round.</p>' : ''}
       <div class="end-summary" role="status">
-        <div class="end-block"><span class="end-block-l">Accuracy</span><span class="end-block-v">${accuracy}%</span></div>
+        <div class="end-block"><span class="end-block-l">Accuracy</span><span class="end-block-v">${scored > 0 ? `${accuracy}%` : '&mdash;'}</span></div>
         ${learned.length ? `<div class="end-block"><span class="end-block-l">Covered</span>
           <span class="end-block-v end-syms">${learned.map(ph => `/${esc(ph)}/`).join(' ')}</span></div>` : ''}
         ${review.length ? `<div class="end-block"><span class="end-block-l">Worth another look</span>

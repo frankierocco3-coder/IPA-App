@@ -5808,7 +5808,16 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 /* SELECTED IS NOT COLOUR ALONE: the tick in the markup carries it, the tint
    and the heavier border only reinforce it, and aria-pressed states it. */
 .exp-word.is-picked { border-color: var(--green); background: var(--accent-tint); }
-.exp-word.is-plain { cursor: default; border-style: dashed; border-bottom-width: 2px; background: none; }
+/* PRINTED, NOT OFFERED. This kept every bit of .exp-word's chrome — the
+   2px border, the radius, the padding, the footprint — and only dashed
+   the outline, so an unrecorded word read as a greyed-out twin of the
+   live button beside it. The house rule is that it renders as plain
+   text, so it does: no border, no box, no pretending to be pressable. */
+.exp-word.is-plain {
+  cursor: default; border: none; background: none; box-shadow: none;
+  padding: 14px 2px; justify-content: flex-start;
+}
+.exp-word.is-plain .exp-word-text { color: var(--muted); }
 .exp-word-text { font-family: var(--serif); font-size: 21px; font-style: italic; color: var(--ink); min-width: 0; }
 .exp-word-mark { font-size: 15px; flex: none; }
 .exp-word.is-picked .exp-word-mark { color: var(--green-dark); font-weight: 800; }
