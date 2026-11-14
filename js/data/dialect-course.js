@@ -270,10 +270,16 @@ export const COURSE = [
           make: {
             heading: 'Make it land',
             open: 'Make it land',
-            bullets: [
-              'Say the line to someone who needs to know what to leave.',
-              'Now make the other word the important one. What changes?',
-            ],
+            // ONE line, not a two-item list (owner's call, 2026-11-13).
+            // The pair it replaces told the learner what the prompt under
+            // the chips tells them again as soon as they pick, and cost four
+            // wrapped rows to do it: measured at 375 wide, dropping them
+            // lifts the foot of the pane from 576px to 532px. That 44px is
+            // what puts the takeaway line on screen on a short phone — an
+            // iPhone SE leaves about 553px once browser chrome is off.
+            // What survives is the part nothing else carries: pick one,
+            // say it out loud, try both.
+            brief: 'Pick a word, say the line aloud, then try the other.',
             // Both are right, and the prompt says which question each answers
             // rather than which is correct.
             words: [

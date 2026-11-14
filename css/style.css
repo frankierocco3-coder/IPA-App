@@ -5965,6 +5965,10 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .dl-card-label { font-family: var(--serif); font-size: 16px; font-weight: 700; color: var(--ink); margin: 0 0 6px; }
 .dl-card-hint { font-size: 13px; line-height: 1.5; color: var(--muted); margin: 0; }
 .dl-missing { margin: 0 0 16px; }
+/* The one instruction line above the switch. Deliberately NOT .th-list:
+   a single <li> sets a lone dot and a 22px indent against left-aligned
+   chips, and reads as a list with an item missing. */
+.dl-brief { font-size: 16px; line-height: 1.5; color: var(--ink); margin: 10px 0 0; }
 /* The switch. Both answers are right, so neither reads as correct or
    incorrect — the picked one is simply the one in force, marked with a tick
    as well as the tint. */

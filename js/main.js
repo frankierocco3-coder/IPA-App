@@ -15218,7 +15218,7 @@ function makeItLandHtml(lesson, st) {
     <button class="btn-lite exp-back" data-explore-back type="button">‹ Back</button>
     <h1>${esc(m.heading)}</h1>
     <p class="dl-line">&ldquo;${emphasisedLineHtml(ex.line, picked)}&rdquo;</p>
-    <ul class="th-list">${m.bullets.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    <p class="dl-brief">${esc(m.brief)}</p>
     <div class="dl-stress-pick">
       ${m.words.map(w => {
         const on = w.word === picked;
