@@ -299,6 +299,67 @@ export const COURSE = [
     color: '#6f8657',
     icon: 'ɪ',
     blurb: 'The six short vowels of English, plus the humble schwa.',
+    // ── The unit's FINAL checkpoint (owner handoff, 2026-11-14) ──────
+    // THE HANDOFF'S MECHANIC HAS NO AUDIO. It asks for "Play sentence"
+    // playing "The word is snack." There is no carrier-sentence recording
+    // for ANY word — not one key in the index begins "the_word_is" — and
+    // snack, snuck, sock and sat are unrecorded in all ten accent-voice
+    // pairs. The only sentence audio in the library is 83 RP idiom clips
+    // belonging to another course: voice-bound, and wrong in tone here.
+    //
+    // OWNER'S CHOICE: play the WORD and show the carrier as written
+    // context. The sentence frames what you are listening for, the blank
+    // is the thing you hear, and the button says so. If "The word is ___."
+    // is ever recorded, this becomes the briefed design by swapping `say`
+    // for a sentence clip — data, not code.
+    //
+    // Every word here is recorded in all ten voices, and each pair is a
+    // true minimal pair: one vowel apart in an identical consonant frame,
+    // drawn from the thirteen the library actually supports. Five rounds,
+    // the count the engine already uses. All six short vowels appear;
+    // five are the target and /ɒ/ is the one that only distracts.
+    checkpointFinal: [
+      { round: 'Round 1 of 5',
+        carrier: 'The word is ___.',
+        prompt: 'Which word did you hear?',
+        say: { word: 'get', label: 'Play the word' },
+        options: [{ label: 'get', ok: true }, { label: 'got' }],
+        submit: 'Check answer',
+        explain: 'You heard “get” — DRESS /e/. Get and red share the same vowel.',
+        review: { heading: 'Read it instead', text: 'Get has the DRESS vowel /e/; got has the LOT vowel /ɒ/. Same consonants either side, so the vowel is the only difference.', notice: 'This round is unscored: the recording it needs is missing in this voice, so there is nothing to listen to.' } },
+      { round: 'Round 2 of 5',
+        carrier: 'The word is ___.',
+        prompt: 'Which word did you hear?',
+        say: { word: 'wish', label: 'Play the word' },
+        options: [{ label: 'wash' }, { label: 'wish', ok: true }],
+        submit: 'Check answer',
+        explain: 'You heard “wish” — KIT /ɪ/. Wish and ship share the same vowel.',
+        review: { heading: 'Read it instead', text: 'Wish has the KIT vowel /ɪ/; wash has the LOT vowel /ɒ/.', notice: 'This round is unscored: the recording it needs is missing in this voice.' } },
+      { round: 'Round 3 of 5',
+        carrier: 'The word is ___.',
+        prompt: 'Which word did you hear?',
+        say: { word: 'foot', label: 'Play the word' },
+        options: [{ label: 'foot', ok: true }, { label: 'fat' }],
+        submit: 'Check answer',
+        explain: 'You heard “foot” — FOOT /ʊ/. Foot and good share the same vowel.',
+        review: { heading: 'Read it instead', text: 'Foot has the FOOT vowel /ʊ/, made with rounded lips; fat has the TRAP vowel /æ/, nearly open.', notice: 'This round is unscored: the recording it needs is missing in this voice.' } },
+      { round: 'Round 4 of 5',
+        carrier: 'The word is ___.',
+        prompt: 'Which word did you hear?',
+        say: { word: 'cut', label: 'Play the word' },
+        options: [{ label: 'kit' }, { label: 'cut', ok: true }],
+        submit: 'Check answer',
+        explain: 'You heard “cut” — STRUT /ʌ/. Cut and but share the same vowel.',
+        review: { heading: 'Read it instead', text: 'Cut has the STRUT vowel /ʌ/; kit has the KIT vowel /ɪ/.', notice: 'This round is unscored: the recording it needs is missing in this voice.' } },
+      { round: 'Round 5 of 5',
+        carrier: 'The word is ___.',
+        prompt: 'Which word did you hear?',
+        say: { word: 'hat', label: 'Play the word' },
+        options: [{ label: 'hat', ok: true }, { label: 'hot' }],
+        submit: 'Check answer',
+        explain: 'You heard “hat” — TRAP /æ/. Hat and jam share the same vowel.',
+        review: { heading: 'Read it instead', text: 'Hat has the TRAP vowel /æ/; hot has the LOT vowel /ɒ/, rounded at the back.', notice: 'This round is unscored: the recording it needs is missing in this voice.' } },
+    ],
     lessons: [
       { id: 'v1-1', title: 'KIT, DRESS & TRAP',
         // ── Illustrated opening (owner handoff, 2026-11-13) ──────────

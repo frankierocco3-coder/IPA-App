@@ -86,7 +86,12 @@ export function expandUnit(unit) {
       // second checkpoint that nothing has authored, and it should keep
       // generating rather than silently replay the first one's two rounds.
       const n = (i + 1) / 2;
-      const authored = n === 1 ? unit.checkpointGame : null;
+      // A unit may author BOTH of its checkpoints. The first is the
+      // mid-unit game; the second is the final checkpoint. Named rather
+      // than indexed so the generated ids — which are saved progress keys
+      // — keep their meaning if a unit's lesson count ever changes.
+      const authored = n === 1 ? unit.checkpointGame
+        : n === 2 ? unit.checkpointFinal : null;
       out.push({
         id: `chk-${unit.id}-${n}`,
         title: 'Checkpoint game',

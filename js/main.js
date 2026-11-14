@@ -16166,7 +16166,11 @@ function showFeedback(s, ok, ex, { requeue = true, penalty = true, chose = null 
 // and for per-option playback that does NOT select. Those are different
 // interactions, so this is a different renderer rather than three flags on
 // the old one.
-function checkRoundReady(ex) {
+function checkRoundReady(ex, acc = null) {
+  // A round that plays a WORD is only answerable if that word exists. Asked
+  // about the same directory playback resolves, so availability and what
+  // the button does cannot disagree.
+  if (ex.say && !speakableWord(ex.say.word, acc)) return false;
   return !ex.compare || (ex.compare.needs ?? []).every(sl => hasPhonemeClip(sl, ex.compare.voice));
 }
 
@@ -16186,8 +16190,8 @@ function renderCheckReview(s, ex) {
 }
 
 function renderCheckRound(s, ex) {
-  if (!checkRoundReady(ex) && ex.review) return renderCheckReview(s, ex);
   const acc = clipDir(s.lesson.accent ?? s.lesson.shiftTo ?? null, langFor(s.lesson));
+  if (!checkRoundReady(ex, acc) && ex.review) return renderCheckReview(s, ex);
   const opts = ex.cards ?? ex.options;
   const silent = (ex.cards ?? []).filter(c => c.say && !speakableWord(c.say, acc)).map(c => c.say);
 
@@ -16217,7 +16221,10 @@ function renderCheckRound(s, ex) {
   lessonChrome(s, `
     <p class="ck-band">${esc(ex.round)}</p>
     <h1 class="prompt">${esc(ex.prompt)}</h1>
+    ${ex.carrier ? `<p class="ck-carrier">${esc(ex.carrier)}</p>` : ''}
     ${ex.compare ? `<p class="lx-cta"><button class="btn ck-compare" id="ck-compare" type="button">▶ ${esc(ex.compare.label)}</button></p>` : ''}
+    ${ex.say ? `<p class="lx-cta"><button class="btn btn-primary" id="ck-word" type="button">
+      <span aria-hidden="true">▶</span> ${esc(ex.say.label)}</button></p>` : ''}
     ${ex.cards ? `<div class="ck-cards">${ex.cards.map(cardHtml).join('')}</div>` : ''}
     ${silent.length ? `<p class="audio-avail">No recording for <b>${silent.map(esc).join('</b>, <b>')}</b> in this voice, so it is printed rather than offered.</p>` : ''}
     ${ex.options ? `<div class="ck-opts">${ex.options.map(optHtml).join('')}</div>` : ''}
@@ -16229,6 +16236,10 @@ function renderCheckRound(s, ex) {
   // nothing here touches the selection.
   app.querySelectorAll('[data-say-word]').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.sayWord, { lang: langFor(s.lesson), accent: acc })));
+  // Replaying is its own control and touches no selection, which is what
+  // the handoff requires of it.
+  document.getElementById('ck-word')?.addEventListener('click', () =>
+    speak(ex.say.word, { lang: langFor(s.lesson), accent: acc }));
   document.getElementById('ck-compare')?.addEventListener('click', () => {
     const [x, y] = ex.compare.needs;
     playPhoneme(x, ex.compare.voice);

@@ -5943,6 +5943,13 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .ck-actions .btn[disabled] { opacity: .5; cursor: default; }
 .ck-review { font-size: 16.5px; line-height: 1.6; color: var(--ink); margin: 0 0 12px; }
 .ck-notice { margin: 0 0 8px; }
+/* The carrier sentence: the frame the heard word sits in. The blank is
+   what you are listening for, so it is never filled in before an answer. */
+.ck-carrier {
+  font-family: var(--serif); font-size: 21px; font-style: italic; color: var(--ink);
+  text-align: center; background: var(--accent-tint); border-radius: 12px;
+  padding: 12px 14px; margin: 4px 0 14px;
+}
 @media (max-width: 420px) {
   .ck-word { font-size: 22px; }
   .ck-actions .btn { min-width: 0; width: 100%; }
