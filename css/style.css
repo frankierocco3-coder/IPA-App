@@ -5696,22 +5696,44 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .vp-stage-title { font-family: var(--serif); font-size: 20px; font-weight: 700; }
 .vp-stage-count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
 .vp-stage-body { padding: 10px 0 2px 48px; }
-.vp-lessons { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
-.vp-lesson {
-  display: flex; align-items: flex-start; gap: 10px; width: 100%; text-align: left;
-  font: inherit; cursor: pointer; background: transparent; color: var(--ink);
-  border: 1px solid transparent; border-radius: 10px; padding: 8px 10px;
+/* TILES, NOT ROWS (owner, 2026-11-14). The stages used to be dropdowns
+   and the lessons a hidden list; both are now on show, and a lesson is a
+   card you press straight into. A grid rather than a column so a stage of
+   six or seven does not become six or seven full-width bars. */
+.vp-lessons {
+  list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 10px;
+  /* 148px, not 165: at 375px the pane is ~331 wide, and two 165s plus the
+     gap came to 340 — one column, which reads as bars again. */
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
 }
-.vp-lesson:hover { background: var(--panel); border-color: var(--line); }
-.vp-lesson.is-selected { background: var(--panel); border-color: var(--gold); }
-.vp-lesson-mark { flex: 0 0 1.2em; color: var(--green); font-size: 14px; line-height: 1.5; }
+.vp-lesson {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  width: 100%; height: 100%; text-align: left; min-width: 0;
+  font: inherit; cursor: pointer; background: var(--panel); color: var(--ink);
+  border: 1px solid var(--line); border-bottom-width: 3px; border-radius: 14px;
+  padding: 12px 13px;
+}
+.vp-lesson:hover { border-color: var(--gold); }
+.vp-lesson:active { transform: translateY(1px); border-bottom-width: 2px; }
+.vp-lesson.is-selected { background: var(--accent-tint); border-color: var(--gold); }
+.vp-lesson-mark { color: var(--green); font-size: 14px; line-height: 1.3; }
+.vp-lesson-mark:empty { display: none; }
 .vp-lesson.is-done .vp-lesson-mark { color: var(--sage); }
-.vp-lesson-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
-.vp-lesson-title { font-weight: 600; }
+.vp-lesson-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; width: 100%; }
+.vp-lesson-title { font-weight: 700; line-height: 1.3; overflow-wrap: anywhere; }
 .vp-lesson.is-done .vp-lesson-title { color: var(--muted); }
 .vp-lesson-meta { font-size: 13px; color: var(--muted); }
-.vp-lesson-state { flex: 0 0 auto; font-size: 12px; color: var(--muted); letter-spacing: .03em; align-self: center; white-space: nowrap; }
+/* The state sits at the foot of the tile, so tiles of different title
+   lengths still line their labels up. */
+.vp-lesson-state {
+  margin-top: auto; font-size: 11px; color: var(--muted);
+  letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+}
 .vp-trail-link { font-size: 14px; }
+/* The stage head stopped being a button, so it no longer wants a pointer
+   or a press state; it is a heading over its tiles. */
+.vp-stage-head { cursor: default; }
+.vp-stage-title { font-size: inherit; margin: 0; }
 
 /* ---- the focus panel ---- */
 .vp-focus {
@@ -5761,7 +5783,10 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   .vp-progress-label { text-align: left; }
   .vp-stage-body { padding-left: 16px; }
   .vp-stages::before { display: none; }
-  .vp-lesson-state { display: none; }
+  /* The state word used to be hidden here because, in the old full-width
+     ROW, it competed for the same line as the title. In a tile it has a
+     line of its own at the foot — and on a phone, with most lessons
+     locked, "Locked" is the thing worth saying. */
 }
 @media (prefers-reduced-motion: reduce) {
   .vp-stage-head, .vp-lesson { transition: none !important; }

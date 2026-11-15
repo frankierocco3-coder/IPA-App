@@ -1439,20 +1439,21 @@ function ipaLearnPane(el, course) {
           </button>
         </li>`;
     }).join('');
+    // NO LONGER A DROPDOWN (owner, 2026-11-14): "these should not be drop
+    // downs, the lessons should be clickable tiles". The head is a heading
+    // now rather than a toggle, and every stage's lessons are on show as
+    // tiles that open on one press. is-expanded stays on all of them
+    // because it is still true: their lessons are showing.
     return `
-      <li class="vp-stage is-${st.state}${open ? ' is-expanded' : ''}">
-        <button class="vp-stage-head" type="button" data-stage="${esc(uid)}"
-                aria-expanded="${open}" aria-controls="vp-stage-${esc(uid)}"
-                data-ord="${n}"
-                aria-label="${esc(nounCap)} ${ui + 1}, ${esc(shortTitle)}, ${st.done} of ${st.total} complete"
-                style="--unit-color:${unit.color}">
+      <li class="vp-stage is-${st.state} is-expanded">
+        <div class="vp-stage-head" style="--unit-color:${unit.color}">
           <span class="vp-dot" aria-hidden="true">${dotMark || n}</span>
           <span class="vp-stage-text">
-            <span class="vp-stage-title">${esc(shortTitle)}</span>
+            <h3 class="vp-stage-title">${esc(shortTitle)}</h3>
             <span class="vp-stage-count">${st.done} / ${st.total} complete</span>
           </span>
-        </button>
-        <div class="vp-stage-body" id="vp-stage-${esc(uid)}" ${open ? '' : 'hidden'}>
+        </div>
+        <div class="vp-stage-body" id="vp-stage-${esc(uid)}">
           <ol class="vp-lessons">${rows}</ol>
           <button class="btn-lite vp-trail-link" type="button" data-trail="${esc(uid)}">Open the ${noun} trail &rarr;</button>
         </div>
@@ -1484,17 +1485,6 @@ function ipaLearnPane(el, course) {
     </div>`;
 
   paintFocus();
-
-  el.querySelectorAll('[data-stage]').forEach(b => b.addEventListener('click', () => {
-    const body = el.querySelector(`#vp-stage-${CSS.escape(b.dataset.stage)}`);
-    if (!body) return;
-    const nowOpen = body.hidden;
-    body.hidden = !nowOpen;
-    b.setAttribute('aria-expanded', String(nowOpen));
-    b.closest('.vp-stage')?.classList.toggle('is-expanded', nowOpen);
-    const dot = b.querySelector('.vp-dot');
-    if (dot && dot.textContent.trim() !== '\u2713') dot.textContent = nowOpen ? '\u25b6' : b.dataset.ord;
-  }));
 
   // A LESSON CARD OPENS THE LESSON (owner, 2026-11-14). It used to only
   // move the preview, so opening a lesson took a tap on the card, a scroll
