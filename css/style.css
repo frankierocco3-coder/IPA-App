@@ -6271,15 +6271,15 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   outline: 3px solid #8a6d3b; outline-offset: 2px;
 }
 
-@media (max-width: 900px) {
-  .ci-grid { grid-template-columns: 1fr; }
-  /* The preview is moved into the selected row's <li>, so it needs to sit
-     clear of the row above it rather than float beside anything. */
-  .ci-rows li > .ci-preview { margin: 8px 2px 10px; }
-  .ci-title { font-size: 28px; }
-  .ci-row-side { flex-direction: column; align-items: flex-end; gap: 3px; }
-}
-@media (max-width: 560px) {
-  .ci-kind { display: none; }
-  .ci-row { gap: 8px; padding: 10px 8px; }
-}
+/* KEYED TO THE PANE, NOT THE WINDOW. These were viewport media queries,
+   which left a 390px-wide pane in a 1024px window rendering two columns of
+   244 and 124. courseIndexPane measures its own element and sets these. */
+.ci-narrow .ci-grid { grid-template-columns: 1fr; }
+/* The preview is moved into the selected row's <li>, so it needs to sit
+   clear of the row above it rather than float beside anything. */
+.ci-narrow .ci-rows li > .ci-preview { margin: 8px 2px 10px; }
+.ci-narrow .ci-title { font-size: 28px; }
+.ci-narrow .ci-row-side { flex-direction: column; align-items: flex-end; gap: 3px; }
+.ci-tight .ci-kind { display: none; }
+.ci-tight .ci-row { gap: 8px; padding: 10px 8px; }
+.ci-tight .ci-unit-head { gap: 8px; padding: 12px 12px; }

@@ -183,9 +183,25 @@ function trackProgress(track) {
   return { done: chain.filter(l => store.isCompleted(l.id)).length, total: chain.length };
 }
 
+// THE SAME RETURN, FOR THE EXITS OUTSIDE THE GUIDE'S OWN STATE. The guide
+// carries its destination in `st.onExit` (see openLearnGuide), which covers
+// its own ✕ but not the two screens you can also leave from: the checkpoint
+// page, and the exercise runner, which both go through exitLesson(). Those
+// were still landing on the winding path — a screen the reader had never
+// been on if they came from Learn (owner, 2026-11-14).
+//
+// Null means "no Learn page to go back to", which is how a lesson opened
+// FROM the path keeps returning there.
+let learnExit = null;
+const returnToLearn = () => {
+  const y = window.scrollY;
+  return () => { goSection('learn'); window.scrollTo(0, y); };
+};
+
 // Where a finished/quit lesson returns to.
 function exitLesson(lesson) {
   if (lesson.arcade) return goSection('practice');
+  if (learnExit) return learnExit();
   if (lesson.track) return renderTrack(lesson.track);
   return renderHome();
 }
@@ -1444,16 +1460,30 @@ function courseIndexPane(el, course) {
   // THE PREVIEW MOVES, it is not duplicated. On a narrow screen the
   // handoff wants it directly under the row it describes; on a wide one it
   // is the right-hand column. One element, two homes.
+  // THE BREAKPOINT IS THIS PANE'S WIDTH, NOT THE WINDOW'S. At a 1024px
+  // window this pane had 390px to work with — the sidebar and chrome take
+  // the rest — so a viewport media query still called it "wide" and split
+  // 390 into columns of 244 and 124, wrapping titles one letter per line.
+  // One measurement drives the layout class AND the preview's home, so
+  // they can never disagree.
+  const NARROW_AT = 760;
+  const TIGHT_AT = 520;
+
+  function applyWidth() {
+    const w = el.clientWidth;
+    el.classList.toggle('ci-narrow', w < NARROW_AT);
+    el.classList.toggle('ci-tight', w < TIGHT_AT);
+  }
+
   function placePreview() {
     const pv = el.querySelector('.ci-preview');
     if (!pv) return;
-    const narrow = window.matchMedia('(max-width: 900px)').matches;
-    if (narrow === courseIndexPlace && pv.isConnected && (!narrow || pv.previousElementSibling)) { /* fall through */ }
+    applyWidth();
+    const narrow = el.classList.contains('ci-narrow');
     courseIndexPlace = narrow;
     if (narrow) {
       const row = el.querySelector('.ci-row.is-selected')?.closest('li');
       if (row && pv.parentElement !== row) row.appendChild(pv);
-      else if (row && pv.parentElement === row) row.appendChild(pv);
     } else {
       const slot = el.querySelector('.ci-aside');
       if (slot && pv.parentElement !== slot) slot.appendChild(pv);
@@ -1469,7 +1499,8 @@ function courseIndexPane(el, course) {
       const l = byId(selectedId);
       if (!l) return;
       remember();
-      if (l.checkpoint) renderCheckpointOpening(l); else renderGuide(l);
+      if (l.checkpoint) { learnExit = returnToLearn(); renderCheckpointOpening(l); }
+      else openLearnGuide(l);
     });
     pv.querySelector('#ci-guide')?.addEventListener('click', () => {
       const u = unitById[byId(selectedId)?.unit?.id];
@@ -1525,7 +1556,12 @@ function courseIndexPane(el, course) {
     paintPreview();
   }));
 
-  window.matchMedia('(max-width: 900px)').onchange = () => placePreview();
+  // The pane can change width without the window doing so — opening a side
+  // panel does it — so watch the element, not the viewport.
+  try {
+    const ro = new ResizeObserver(() => placePreview());
+    ro.observe(el);
+  } catch { window.addEventListener('resize', placePreview); }
 }
 
 function ipaLearnPane(el, course) {
@@ -1596,7 +1632,8 @@ function ipaLearnPane(el, course) {
       if (!l) return startLesson(practiceLesson(track));
       // Third way into a checkpoint, and it was still skipping the opening
       // page the other two now show.
-      return l.checkpoint ? renderCheckpointOpening(l) : renderGuide(l);
+      if (l.checkpoint) { learnExit = returnToLearn(); return renderCheckpointOpening(l); }
+      return openLearnGuide(l);
     });
     // THE MOCKUP SAYS "course guidebook" AND THE APP HAS NO SUCH THING.
     // renderGuidebook is per UNIT, so this opens the guidebook for the
@@ -1735,8 +1772,8 @@ function ipaLearnPane(el, course) {
     }
     // A checkpoint has no prose guide, but it still gets a page of its own
     // before the exercise runner — see renderCheckpointOpening.
-    if (lesson.checkpoint) renderCheckpointOpening(lesson);
-    else renderGuide(lesson);
+    if (lesson.checkpoint) { learnExit = returnToLearn(); renderCheckpointOpening(lesson); }
+    else openLearnGuide(lesson);
   }));
 
   el.querySelectorAll('[data-trail]').forEach(b => b.addEventListener('click',
@@ -15212,6 +15249,8 @@ function buildTrackPath(track, opts = {}) {
         const i = chain.findIndex(l => l.id === btn.dataset.lesson);
         const lesson = chain[i];
         if (!isUnlocked(lesson)) return showLockPop(btn, lesson, chain[i - 1]);
+        // Opened from the path, so every exit belongs back on the path.
+        learnExit = null;
         // Same as the list tiles: a checkpoint opens on its own page first.
         if (lesson.checkpoint) renderCheckpointOpening(lesson);
         else renderGuide(lesson);
@@ -15931,7 +15970,11 @@ function renderCheckpointOpening(lesson) {
         <button class="btn btn-primary" id="start" type="button">Start checkpoint</button>
       </div>
     </main>`;
-  document.getElementById('quit').addEventListener('click', () => { stopSpeech(); renderTrack(lesson.track); });
+  document.getElementById('quit').addEventListener('click', () => {
+    stopSpeech();
+    if (learnExit) return learnExit();
+    renderTrack(lesson.track);
+  });
   document.getElementById('start').addEventListener('click', () => startLesson(lesson));
   app.querySelectorAll('[data-say]').forEach(btn =>
     btn.addEventListener('click', () =>
@@ -15939,6 +15982,21 @@ function renderCheckpointOpening(lesson) {
 }
 
 let lastGuideFocus = null;
+
+// A guide launched from Learn returns there, not to the legacy track.
+// Keep the callback in the guide state so it survives every step.
+function openLearnGuide(lesson) {
+  const scrollY = window.scrollY;
+  learnExit = returnToLearn();
+  lastGuideFocus = null;
+  renderGuide(lesson, 0, {
+    answered: {},
+    onExit: () => {
+      goSection('learn');
+      window.scrollTo(0, scrollY);
+    },
+  });
+}
 
 function renderGuide(lesson, step = 0, st = { answered: {} }) {
   const unit = lesson.unit;
@@ -15978,7 +16036,11 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
       </div>
     </main>`;
 
-  document.getElementById('quit').addEventListener('click', () => { stopSpeech(); renderTrack(lesson.track); });
+  document.getElementById('quit').addEventListener('click', () => {
+    stopSpeech();
+    if (st.onExit) return st.onExit();
+    return renderTrack(lesson.track);
+  });
   // BACK CLOSES THE DETAIL FIRST. The handoff asks that back from a detail
   // state return to the lesson opening, and the detail is a state of this
   // step rather than a step of its own — so the step index only moves once
