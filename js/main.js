@@ -1509,8 +1509,9 @@ function ipaLearnPane(el, course) {
       paintFocus();
       return;
     }
-    // Checkpoint games jump straight in — they have no guide page.
-    if (lesson.checkpoint) startLesson(lesson);
+    // A checkpoint has no prose guide, but it still gets a page of its own
+    // before the exercise runner — see renderCheckpointOpening.
+    if (lesson.checkpoint) renderCheckpointOpening(lesson);
     else renderGuide(lesson);
   }));
 
@@ -14987,8 +14988,8 @@ function buildTrackPath(track, opts = {}) {
         const i = chain.findIndex(l => l.id === btn.dataset.lesson);
         const lesson = chain[i];
         if (!isUnlocked(lesson)) return showLockPop(btn, lesson, chain[i - 1]);
-        // Checkpoint games jump straight in — no guide page.
-        if (lesson.checkpoint) startLesson(lesson);
+        // Same as the list tiles: a checkpoint opens on its own page first.
+        if (lesson.checkpoint) renderCheckpointOpening(lesson);
         else renderGuide(lesson);
       })
     );
@@ -15675,6 +15676,42 @@ function guideStepHtml(lesson, s, st) {
       `<button class="word-chip" data-say="${esc(PHONEMES[ph].examples[0])}" type="button">/${esc(ph)}/</button>`).join('')}</div>` : ''}
     <p class="pane-note">${esc(lessonKindName(lesson))} · ~${estMinutes(lesson)} min.
       You can reopen this guide from the path any time.</p>`;
+}
+
+// A CHECKPOINT IS MET BEFORE IT IS DRILLED (owner, 2026-11-14): "it
+// shouldnt lead to the duo lingo game it should go right to the lesson".
+// Every other lesson opens on a page that says what it is; a checkpoint
+// dropped the reader straight into the exercise runner, which is the one
+// screen in the app that looks like a quiz app. This is the short page it
+// was missing — what it covers, how long it runs, then Start.
+function renderCheckpointOpening(lesson) {
+  const unit = lesson.unit;
+  const syms = (lesson.phonemes ?? []).filter(ph => PHONEMES[ph]);
+  const rounds = lesson.fixedQueue?.length ?? lesson.count ?? 5;
+  app.innerHTML = `
+    <header class="lesson-top">
+      <button class="quit" id="quit" aria-label="Exit checkpoint">&#10005;</button>
+      <span class="step-count">Checkpoint</span>
+    </header>
+    <main class="guide guide-stepped">
+      ${unit ? `<div class="guide-title-bar" style="--unit-color:${unit.color}">${esc(unit.title)} &middot; ${esc(lesson.title)}</div>` : ''}
+      <section class="guide-step">
+        <h1>${esc(lesson.title)}</h1>
+        <p class="guide-text">A short round on what you have met so far. Nothing new &mdash; just your ear.</p>
+        ${syms.length ? `<div class="chips">${syms.map(ph =>
+          `<button class="word-chip" data-say="${esc(PHONEMES[ph].examples[0])}" type="button">/${esc(ph)}/</button>`).join('')}</div>` : ''}
+        <p class="pane-note">${rounds} ${rounds === 1 ? 'round' : 'rounds'} &middot; ~${estMinutes(lesson)} min.</p>
+      </section>
+      <div class="guide-nav">
+        <span></span>
+        <button class="btn btn-primary" id="start" type="button">Start checkpoint</button>
+      </div>
+    </main>`;
+  document.getElementById('quit').addEventListener('click', () => { stopSpeech(); renderTrack(lesson.track); });
+  document.getElementById('start').addEventListener('click', () => startLesson(lesson));
+  app.querySelectorAll('[data-say]').forEach(btn =>
+    btn.addEventListener('click', () =>
+      speak(btn.dataset.say, { lang: langFor(lesson), accent: lesson.accent ?? lesson.shiftTo ?? null })));
 }
 
 let lastGuideFocus = null;
