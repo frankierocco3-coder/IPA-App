@@ -1285,6 +1285,10 @@ function learnMain(el, course, ws = activeWorkspace()) {
     return;
   }
   if (ws === 'speech') return speechLearnPane(el);
+  // IPA Foundations has its own landing page (the Course Index, 2026-11-14).
+  // The accent courses keep the path-and-tiles pane below — the handoff is
+  // explicit that other Learn pages do not change.
+  if (course.id === 'core') return courseIndexPane(el, course);
   ipaLearnPane(el, course);
 }
 
@@ -1306,6 +1310,224 @@ function learnMain(el, course, ws = activeWorkspace()) {
 // lesson is wherever the chain says you are; COMPLETED comes from the
 // store. Tapping a lesson on the path moves the preview and writes
 // nothing. Only the panel's own button opens a lesson.
+// ── THE COURSE INDEX: IPA Foundations Learn (owner handoff, 2026-11-14)
+//
+// A three-part landing page: the course as a list of collapsible units,
+// and a preview of ONE lesson beside it. IPA FOUNDATIONS ONLY — the
+// handoff says so outright ("Do not change other Learn pages"), so the
+// accent courses keep ipaLearnPane and its tiles below.
+//
+// WHAT THE MOCKUP SHOWS THAT THE DATA DOES NOT HAVE, and is therefore not
+// here: a Difficulty row, a per-lesson progress percentage, and a drawn
+// thumbnail per lesson. The handoff is explicit — "Hide missing metadata
+// instead of inventing difficulty, duration, activity types, or
+// progress", and "If artwork is missing, use the existing icon or omit
+// it". Every field below comes from the course objects.
+//
+// SELECTING IS NOT STARTING. Tapping a row moves the preview and writes
+// nothing; only the preview's own button opens the lesson, and the resume
+// target stays wherever the chain says it is.
+let courseIndexPlace = null;        // which layout the preview is placed for
+let courseIndexState = {};          // the open unit and selected row, across a visit
+
+function courseIndexPane(el, course) {
+  const track = trackFor(course.id);
+  const { done, total } = trackProgress(track);
+  const chain = TRACK_LESSONS[track.id];
+  const resume = chain.find(l => !store.isCompleted(l.id) && isUnlocked(l)) || null;
+  const started = store.hasEarnedAnything || done > 0;
+  const units = track.unitIds.map(id => unitById[id]).filter(Boolean);
+  const lessonsOf = u => chain.filter(l => l.unit?.id === u.id);
+  const byId = id => chain.find(l => l.id === id);
+
+  // WHERE THE READER WAS, kept across a lesson or guidebook and back. The
+  // handoff asks that returning restores the open unit and the selected
+  // row; this module-level note is what survives the re-render.
+  const remembered = courseIndexState.courseId === course.id ? courseIndexState : null;
+  let selectedId = (remembered && byId(remembered.lessonId)?.id)
+    || resume?.id || chain[chain.length - 1]?.id || null;
+  let openUnitId = (remembered && units.some(u => u.id === remembered.unitId) && remembered.unitId)
+    || byId(selectedId)?.unit?.id || units[0]?.id;
+
+  const remember = () => { courseIndexState = { courseId: course.id, unitId: openUnitId, lessonId: selectedId }; };
+
+  // The number a reader sees: unit position, then position within it.
+  const numberOf = l => {
+    const u = units.findIndex(x => x.id === l.unit?.id);
+    const i = lessonsOf(l.unit ?? {}).findIndex(x => x.id === l.id);
+    return u < 0 || i < 0 ? '' : `${u + 1}.${i + 1}`;
+  };
+  // One line about the lesson, taken from the first sentence of its own
+  // guide. Checkpoints have no guide and simply go without.
+  const oneLine = l => {
+    const first = String(l.guide ?? '').split('. ')[0];
+    return first ? (first.endsWith('.') ? first : first + '.') : '';
+  };
+  const symbolsOf = l => (l.phonemes ?? []).filter(ph => PHONEMES[ph]);
+
+  function rowHtml(l) {
+    const isDone = store.isCompleted(l.id);
+    const locked = !isUnlocked(l);
+    const sel = l.id === selectedId;
+    const desc = oneLine(l);
+    const state = isDone ? 'Done' : locked ? 'Locked' : (resume && l.id === resume.id ? 'Next' : '');
+    return `
+      <li>
+        <button class="ci-row${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}${isDone ? ' is-done' : ''}"
+                type="button" data-lesson="${esc(l.id)}"${sel ? ' aria-current="true"' : ''}
+                aria-label="${esc(l.title)}${state ? ` — ${state}` : ''}">
+          <span class="ci-row-n" aria-hidden="true">${esc(numberOf(l))}</span>
+          <span class="ci-row-text">
+            <span class="ci-row-title">${esc(l.title)}</span>
+            ${desc ? `<span class="ci-row-desc">${esc(desc)}</span>` : ''}
+          </span>
+          <span class="ci-row-side">
+            <span class="ci-kind">${esc(lessonKindName(l))}</span>
+            ${state ? `<span class="ci-row-state">${esc(state)}</span>` : ''}
+          </span>
+          <span class="ci-chev" aria-hidden="true">&rsaquo;</span>
+        </button>
+      </li>`;
+  }
+
+  function unitHtml(u, n) {
+    const ls = lessonsOf(u);
+    const uDone = ls.filter(l => store.isCompleted(l.id)).length;
+    const open = u.id === openUnitId;
+    return `
+      <li class="ci-unit${open ? ' is-open' : ''}" style="--unit-color:${u.color}">
+        <h3 class="ci-unit-h">
+          <button class="ci-unit-head" type="button" data-unit="${esc(u.id)}"
+                  aria-expanded="${open}" aria-controls="ci-u-${esc(u.id)}">
+            <span class="ci-chev ci-chev-unit" aria-hidden="true">&rsaquo;</span>
+            <span class="ci-unit-n">${n}.</span>
+            <span class="ci-unit-title">${esc(u.title)}</span>
+            <span class="ci-unit-count">${uDone ? `${uDone} / ${ls.length} done` : `${ls.length} lesson${ls.length === 1 ? '' : 's'}`}</span>
+          </button>
+        </h3>
+        <div class="ci-unit-body" id="ci-u-${esc(u.id)}"${open ? '' : ' hidden'}>
+          ${u.blurb ? `<p class="ci-unit-blurb">${esc(u.blurb)}</p>` : ''}
+          <ol class="ci-rows">${ls.map(rowHtml).join('')}</ol>
+        </div>
+      </li>`;
+  }
+
+  function previewHtml() {
+    const l = byId(selectedId);
+    if (!l) return '';
+    const u = l.unit ?? {};
+    const uN = units.findIndex(x => x.id === u.id) + 1;
+    const isDone = store.isCompleted(l.id);
+    const locked = !isUnlocked(l);
+    const syms = symbolsOf(l);
+    const desc = oneLine(l);
+    const label = isDone ? 'Review lesson' : (started ? 'Resume lesson' : 'Start lesson');
+    const before = locked ? chain[chain.findIndex(x => x.id === l.id) - 1] : null;
+    return `
+      <p class="ci-pv-unit">${uN ? `Unit ${uN} &middot; ` : ''}${esc(u.title ?? '')}</p>
+      <p class="ci-pv-n">Lesson ${esc(numberOf(l))}</p>
+      <h2 class="ci-pv-title">${esc(l.title)}</h2>
+      ${syms.length ? `<p class="ci-pv-syms">${syms.map(ph => `/${esc(ph)}/`).join(' ')}</p>` : ''}
+      <img class="ci-pv-art" src="img/voice-path/headphones-script.png" alt="" aria-hidden="true">
+      ${desc ? `<p class="ci-pv-copy">${esc(desc)}</p>` : ''}
+      <dl class="ci-meta">
+        <div class="ci-meta-row"><dt>Estimated time</dt><dd>~${estMinutes(l)} min</dd></div>
+        <div class="ci-meta-row"><dt>Activity</dt><dd>${esc(lessonKindName(l))}</dd></div>
+        ${isDone ? '<div class="ci-meta-row"><dt>Your progress</dt><dd>Completed</dd></div>' : ''}
+      </dl>
+      ${locked
+        ? `<p class="ci-pv-locked">This one opens when you finish${before ? ` <b>${esc(before.title)}</b>` : ' the lesson before it'}.</p>`
+        : `<button class="btn btn-primary ci-go" id="ci-go" type="button">${esc(label)} <i aria-hidden="true">&rarr;</i></button>`}
+      <button class="btn-lite ci-guide" id="ci-guide" type="button">Unit guidebook</button>`;
+  }
+
+  // THE PREVIEW MOVES, it is not duplicated. On a narrow screen the
+  // handoff wants it directly under the row it describes; on a wide one it
+  // is the right-hand column. One element, two homes.
+  function placePreview() {
+    const pv = el.querySelector('.ci-preview');
+    if (!pv) return;
+    const narrow = window.matchMedia('(max-width: 900px)').matches;
+    if (narrow === courseIndexPlace && pv.isConnected && (!narrow || pv.previousElementSibling)) { /* fall through */ }
+    courseIndexPlace = narrow;
+    if (narrow) {
+      const row = el.querySelector('.ci-row.is-selected')?.closest('li');
+      if (row && pv.parentElement !== row) row.appendChild(pv);
+      else if (row && pv.parentElement === row) row.appendChild(pv);
+    } else {
+      const slot = el.querySelector('.ci-aside');
+      if (slot && pv.parentElement !== slot) slot.appendChild(pv);
+    }
+  }
+
+  function paintPreview() {
+    const pv = el.querySelector('.ci-preview');
+    if (!pv) return;
+    pv.innerHTML = previewHtml();
+    placePreview();
+    pv.querySelector('#ci-go')?.addEventListener('click', () => {
+      const l = byId(selectedId);
+      if (!l) return;
+      remember();
+      if (l.checkpoint) renderCheckpointOpening(l); else renderGuide(l);
+    });
+    pv.querySelector('#ci-guide')?.addEventListener('click', () => {
+      const u = unitById[byId(selectedId)?.unit?.id];
+      if (!u) return;
+      remember();
+      renderGuidebook(u, track);
+    });
+  }
+
+  const pct = total ? Math.round(done / total * 100) : 0;
+  el.innerHTML = `
+    <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
+    <div class="ci-head">
+      <h2 class="ci-title">The Course Index</h2>
+      ${track.blurb ? `<p class="ci-sub">${esc(track.blurb)}</p>` : ''}
+      <div class="ci-progress">
+        <span id="ci-prog-label">${done} of ${total} lessons complete</span>
+        <progress class="vp-progress-bar" max="${total}" value="${done}" aria-labelledby="ci-prog-label">${pct}%</progress>
+      </div>
+    </div>
+    <div class="ci-grid">
+      <section class="ci-index" aria-label="Course index">
+        <ol class="ci-units">${units.map((u, i) => unitHtml(u, i + 1)).join('')}</ol>
+      </section>
+      <aside class="ci-aside"><div class="ci-preview" aria-live="polite" aria-label="Selected lesson"></div></aside>
+    </div>`;
+
+  paintPreview();
+
+  el.querySelectorAll('[data-unit]').forEach(b => b.addEventListener('click', () => {
+    const id = b.dataset.unit;
+    openUnitId = openUnitId === id ? null : id;
+    remember();
+    el.querySelectorAll('.ci-unit').forEach(li => {
+      const head = li.querySelector('[data-unit]');
+      const body = li.querySelector('.ci-unit-body');
+      const on = head?.dataset.unit === openUnitId;
+      li.classList.toggle('is-open', on);
+      head?.setAttribute('aria-expanded', String(on));
+      if (body) body.hidden = !on;
+    });
+    placePreview();
+  }));
+
+  el.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
+    selectedId = b.dataset.lesson;
+    remember();
+    el.querySelectorAll('[data-lesson]').forEach(o => {
+      const on = o === b;
+      o.classList.toggle('is-selected', on);
+      if (on) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
+    });
+    paintPreview();
+  }));
+
+  window.matchMedia('(max-width: 900px)').onchange = () => placePreview();
+}
+
 function ipaLearnPane(el, course) {
   const track = trackFor(course.id);
   const { done, total } = trackProgress(track);
@@ -1372,7 +1594,9 @@ function ipaLearnPane(el, course) {
     panel.querySelector('#vp-go')?.addEventListener('click', () => {
       const l = byId(selectedId);
       if (!l) return startLesson(practiceLesson(track));
-      return l.checkpoint ? startLesson(l) : renderGuide(l);
+      // Third way into a checkpoint, and it was still skipping the opening
+      // page the other two now show.
+      return l.checkpoint ? renderCheckpointOpening(l) : renderGuide(l);
     });
     // THE MOCKUP SAYS "course guidebook" AND THE APP HAS NO SUCH THING.
     // renderGuidebook is per UNIT, so this opens the guidebook for the

@@ -6185,5 +6185,101 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   .ru-contrast { font-size: 21px; }
 }
 
+/* ══ THE COURSE INDEX: IPA Foundations Learn (owner handoff, 2026-11-14)
+   Two columns on a wide screen — the index, then a narrower preview, the
+   proportions the handoff gives (about 830 to the index, the rest to the
+   preview). One column below 900px, where the preview is MOVED in the DOM
+   to sit under the row it describes rather than being duplicated. No
+   sticky positioning: the handoff warns against it clipping. ══ */
+.ci-head { margin: 4px 0 18px; }
+.ci-title { font-family: var(--serif); font-size: 34px; font-weight: 700; color: var(--ink); margin: 0 0 4px; }
+.ci-sub { font-size: 15px; color: var(--muted); margin: 0 0 10px; max-width: 62ch; }
+.ci-progress { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+.ci-grid { display: grid; grid-template-columns: minmax(0, 830fr) minmax(0, 420fr); gap: 22px; align-items: start; }
+.ci-index { min-width: 0; }
+.ci-aside { min-width: 0; }
 
+/* ── the units ── */
+.ci-units { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.ci-unit { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); overflow: hidden; }
+.ci-unit.is-open { border-color: var(--gold); }
+.ci-unit-h { margin: 0; font-size: inherit; font-weight: inherit; }
+.ci-unit-head {
+  font: inherit; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  background: none; border: none; cursor: pointer; padding: 14px 16px; color: var(--ink);
+}
+.ci-unit.is-open .ci-unit-head { background: var(--accent-tint); }
+.ci-chev { flex: none; color: var(--muted); font-size: 18px; transition: transform .15s ease; }
+.ci-unit.is-open .ci-chev-unit { transform: rotate(90deg); }
+.ci-unit-n { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--unit-color, var(--green)); flex: none; }
+.ci-unit-title { font-family: var(--serif); font-size: 19px; font-weight: 700; flex: 1 1 auto; min-width: 0; }
+.ci-unit-count { flex: none; font-size: 13px; color: var(--muted); white-space: nowrap; }
+.ci-unit-blurb { font-size: 14px; color: var(--muted); margin: 0 16px 8px; }
 
+/* ── the rows ── */
+.ci-rows { list-style: none; margin: 0; padding: 0 8px 10px; display: grid; gap: 4px; }
+.ci-row {
+  font: inherit; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  background: none; border: 1px solid transparent; border-radius: 12px; padding: 10px 10px;
+  cursor: pointer; color: var(--ink);
+}
+.ci-row:hover { background: var(--panel-2); }
+/* SELECTED IS NOT COLOUR ALONE: aria-current states it, and the rule
+   below draws a marker in the gutter as well as the sage fill. */
+.ci-row.is-selected { background: var(--accent-tint); border-color: var(--green); }
+.ci-row.is-selected .ci-row-n::before { content: "\25B8"; margin-right: 4px; color: var(--green-dark); }
+.ci-row-n { flex: none; min-width: 2.6em; font-family: var(--serif); font-weight: 700; color: var(--muted); }
+.ci-row.is-selected .ci-row-n { color: var(--green-dark); }
+.ci-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
+.ci-row-title { font-weight: 700; overflow-wrap: anywhere; }
+.ci-row.is-done .ci-row-title, .ci-row.is-locked .ci-row-title { color: var(--muted); }
+.ci-row-desc { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.ci-row-side { flex: none; display: flex; align-items: center; gap: 8px; }
+.ci-kind {
+  font-size: 12px; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
+  border-radius: 999px; padding: 3px 10px; white-space: nowrap;
+}
+.ci-row-state { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+
+/* ── the preview ── */
+.ci-preview {
+  background: var(--panel); border: 1px solid var(--gold); border-radius: 16px; padding: 18px 20px;
+}
+.ci-pv-unit {
+  display: inline-block; font-size: 12px; color: var(--ink); background: var(--accent-tint);
+  border-radius: 999px; padding: 3px 10px; margin: 0 0 8px;
+}
+.ci-pv-n { font-size: 13px; color: var(--muted); margin: 0; }
+.ci-pv-title { font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); margin: 2px 0 8px; overflow-wrap: anywhere; }
+.ci-pv-syms {
+  display: inline-block; font-size: 17px; font-weight: 700; color: var(--ink);
+  background: var(--panel-2); border-radius: 8px; padding: 4px 10px; margin: 0 0 12px;
+}
+/* The art is quiet and must not push the button off a desktop screen —
+   the handoff asks for the CTA to stay visible. */
+.ci-pv-art { display: block; width: 100%; max-width: 230px; height: auto; margin: 0 auto 12px; }
+.ci-pv-copy { font-size: 14px; line-height: 1.55; color: var(--ink); margin: 0 0 14px; }
+.ci-meta { margin: 0 0 14px; display: grid; gap: 6px; }
+.ci-meta-row { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 6px; }
+.ci-meta dt { font-size: 13px; color: var(--muted); margin: 0; }
+.ci-meta dd { font-size: 13px; color: var(--ink); margin: 0; text-align: right; }
+.ci-pv-locked { font-size: 14px; line-height: 1.55; color: var(--ink); margin: 0 0 10px; }
+.ci-go { width: 100%; margin-bottom: 8px; }
+.ci-guide { width: 100%; }
+
+.ci-row:focus-visible, .ci-unit-head:focus-visible {
+  outline: 3px solid #8a6d3b; outline-offset: 2px;
+}
+
+@media (max-width: 900px) {
+  .ci-grid { grid-template-columns: 1fr; }
+  /* The preview is moved into the selected row's <li>, so it needs to sit
+     clear of the row above it rather than float beside anything. */
+  .ci-rows li > .ci-preview { margin: 8px 2px 10px; }
+  .ci-title { font-size: 28px; }
+  .ci-row-side { flex-direction: column; align-items: flex-end; gap: 3px; }
+}
+@media (max-width: 560px) {
+  .ci-kind { display: none; }
+  .ci-row { gap: 8px; padding: 10px 8px; }
+}
