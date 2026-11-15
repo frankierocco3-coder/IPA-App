@@ -473,7 +473,16 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   display: flex; align-items: center; gap: 14px; padding: 16px 20px;
   position: sticky; top: 0; z-index: 5; background: var(--bg);
 }
-.quit { font-size: 18px; border: none; background: none; color: var(--muted); cursor: pointer; }
+/* A BACK ARROW, NOT A CLOSE BOX (owner, 2026-11-14). It always returned to
+   the screen you came from; it just looked like a control that throws the
+   lesson away. Sized up because a chevron reads smaller than a cross, and
+   .lesson-top is already sticky so it stays in the top-left while you
+   scroll. */
+.quit {
+  font-size: 30px; line-height: 1; border: none; background: none; color: var(--muted);
+  cursor: pointer; padding: 0 6px 4px 0; font-weight: 600;
+}
+.quit:hover { color: var(--ink); }
 .progress { flex: 1; height: 14px; background: var(--line); border-radius: 7px; overflow: hidden; }
 .progress-fill { height: 100%; background: var(--green); border-radius: 7px; transition: width 0.3s; }
 .hearts { letter-spacing: 1px; }

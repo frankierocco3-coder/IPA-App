@@ -1545,6 +1545,16 @@ function courseIndexPane(el, course) {
     placePreview();
   }));
 
+  // A ROW OPENS ITS LESSON (owner, 2026-11-14): "if i click 'what moves
+  // when you speak' or any other lesson, that it brings me to the page".
+  //
+  // THIS OVERRIDES THE HANDOFF, deliberately. Its rule was that a click
+  // "updates the preview without starting the lesson ... starting it is a
+  // separate action", and the preview's button was that action. The owner
+  // has now asked for the opposite twice — once for the tiles, once here —
+  // so a lesson in a list behaves like a link to the lesson. The preview
+  // stays as the card for whatever is selected, and a LOCKED row still
+  // only selects, because the preview is where it explains itself.
   el.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
     selectedId = b.dataset.lesson;
     remember();
@@ -1554,6 +1564,10 @@ function courseIndexPane(el, course) {
       if (on) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
     });
     paintPreview();
+    const l = byId(selectedId);
+    if (!l || !isUnlocked(l)) return;          // locked: the preview explains it
+    learnExit = returnToLearn();
+    if (l.checkpoint) renderCheckpointOpening(l); else openLearnGuide(l);
   }));
 
   // The pane can change width without the window doing so — opening a side
@@ -15953,7 +15967,7 @@ function renderCheckpointOpening(lesson) {
   const rounds = lesson.fixedQueue?.length ?? lesson.count ?? 5;
   app.innerHTML = `
     <header class="lesson-top">
-      <button class="quit" id="quit" aria-label="Exit checkpoint">&#10005;</button>
+      <button class="quit" id="quit" aria-label="Back" title="Back">&lsaquo;</button>
       <span class="step-count">Checkpoint</span>
     </header>
     <main class="guide guide-stepped">
@@ -16015,7 +16029,7 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
   }
   app.innerHTML = `
     <header class="lesson-top">
-      <button class="quit" id="quit" aria-label="Exit guide">✕</button>
+      <button class="quit" id="quit" aria-label="Back" title="Back">&lsaquo;</button>
       <div class="progress" role="progressbar" aria-valuemin="1" aria-valuemax="${n}" aria-valuenow="${step + 1}"
            aria-label="Guide step ${step + 1} of ${n}"><div class="progress-fill" style="width:${Math.round((step + 1) / n * 100)}%"></div></div>
       <span class="step-count">${step + 1} of ${n}</span>
@@ -16289,7 +16303,7 @@ function lessonChrome(s, body) {
   const step = `${Math.min(s.index + 1, s.queue.length)} of ${s.queue.length}`;
   app.innerHTML = `
     <header class="lesson-top">
-      <button class="quit" id="quit" type="button" aria-label="Exit lesson" title="Exit lesson">✕</button>
+      <button class="quit" id="quit" type="button" aria-label="Back" title="Back">&lsaquo;</button>
       <div class="lesson-where">
         ${kick ? `<span class="lesson-kick">${kick}</span>` : ''}
         ${head ? `<span class="lesson-name">${esc(head)}</span>` : ''}
