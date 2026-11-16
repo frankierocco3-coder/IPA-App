@@ -91,7 +91,8 @@ import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_CO
 import { ACTING_GAMES, ACTING_DECKS, actingGameById,
          SCENE_STUDY_AREAS } from './data/acting/practice.js';
 import { sceneStudyNotes, saveSceneStudyNote } from './data/acting/store.js';
-import { articulationSVG, guideSVG, vocalTractSVG } from './diagram.js';
+import { articulationSVG, guideSVG, shMotionHtml, stopShMotion, vocalTractSVG,
+         wireShMotion } from './diagram.js';
 import { articulationFor } from './data/articulation.js';
 import { artFor, chartFor } from './data/articulation-art.js';
 import { SONNETS } from './data/sonnets.js';
@@ -163,6 +164,11 @@ function teardownAV() {
   releaseNarrationUrls();                        // stored-reading blob URLs, same lifetime as takes
   try { performCleanup?.(); } catch { /* pane already gone */ }
   performCleanup = null;
+  // The /ʃ/ movement loop, if one is running. Idempotent like
+  // cancelRecording() above, so this never has to ask first. Without it a
+  // loop started on a sound page keeps requesting frames after Prev/Next
+  // or Back has replaced the page under it.
+  stopShMotion(document);
 }
 
 
@@ -15874,8 +15880,13 @@ function guideStepHtml(lesson, s, st) {
     // showing the abstract vowel trapezoid for all 62 sounds that have a
     // real mouth drawn for them — the owner caught it on /ɑː/, which has
     // had 018-vowel-long-script-a.jpg all along.
-    const art = artFor(s.ph);
-    const diagram = art ? null : articulationSVG(s.ph);
+    // AND THE MOVEMENT OUTRANKS THE STILL, where one has been drawn. Only
+    // /ʃ/ has so far; every other sound gets '' back and keeps its plate.
+    // The question this panel answers is how the mouth MOVES, and a thing
+    // that moves answers it better than a thing that does not.
+    const motion = shMotionHtml(s.ph);
+    const art = motion ? null : artFor(s.ph);
+    const diagram = motion || art ? null : articulationSVG(s.ph);
     const isVowel = p.type !== 'consonant';
     // One-tap check so the step ends with doing, not just reading. Distractor
     // symbols come from this lesson where possible, so the check reinforces
@@ -15902,16 +15913,16 @@ function guideStepHtml(lesson, s, st) {
         <div class="guide-info">
           <p>${esc(p.hint)}</p>
           <div class="chips">${chips}</div>
-          ${art || diagram ? `<button class="diagram-toggle" data-target="dia-step" aria-expanded="false" type="button">📐 See tongue placement</button>` : ''}
+          ${motion || art || diagram ? `<button class="diagram-toggle" data-target="dia-step" aria-expanded="false" type="button">📐 See tongue placement</button>` : ''}
         </div>
       </div>
-      ${art || diagram ? `<div class="guide-diagram" id="dia-step" hidden>
-        ${art
+      ${motion || art || diagram ? `<div class="guide-diagram" id="dia-step" hidden>
+        ${motion || (art
           ? `<figure class="artic-wrap artic-figure">
                <img class="artic-art" src="${esc(art)}"
                     alt="How the mouth makes ${esc(s.ph)}" decoding="async">
              </figure>`
-          : `<div class="artic-wrap">${diagram}<p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>`}
+          : `<div class="artic-wrap">${diagram}<p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>`)}
       </div>` : ''}
       ${wiiQuestion(st, 'gq-' + s.ph, `Quick check — which symbol is the sound in “<b>${esc(p.examples[0])}</b>”?`, opts)}`;
   }
@@ -16203,6 +16214,7 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
   app.querySelectorAll('[data-say]').forEach(btn =>
     btn.addEventListener('click', () => speak(btn.dataset.say, { lang: langFor(lesson), accent: lesson.accent ?? lesson.shiftTo ?? null }))
   );
+  wireShMotion(app);
   app.querySelectorAll('.diagram-toggle').forEach(btn =>
     btn.addEventListener('click', () => {
       const panel = document.getElementById(btn.dataset.target);
@@ -16210,6 +16222,11 @@ function renderGuide(lesson, step = 0, st = { answered: {} }) {
       panel.hidden = !open;
       btn.setAttribute('aria-expanded', String(open));
       btn.textContent = open ? '📐 Hide tongue placement' : '📐 See tongue placement';
+      // Collapsing the panel stops the movement. `hidden` does not: an
+      // animation loop keeps being served frames while its element is
+      // display:none, so the reader would close the panel and leave it
+      // running out of sight.
+      if (!open) stopShMotion(panel);
     })
   );
   // ANNOUNCE AFTER THE REGION EXISTS. One frame later the region is in the

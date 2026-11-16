@@ -8,7 +8,7 @@ import { artFor, chartFor } from '../data/articulation-art.js';
 import { articulationFor } from '../data/articulation.js';
 import { videoFor } from '../data/media-videos.js';
 import { PHONEMES } from '../data/phonemes.js';
-import { articulationSVG, guideSVG } from '../diagram.js';
+import { articulationSVG, guideSVG, shMotionHtml, wireShMotion } from '../diagram.js';
 import { phonemesForAccent } from '../engine.js';
 import { startRecording, stopRecording } from '../perform.js';
 import { tryItHtml } from '../record-ui.js';
@@ -531,7 +531,11 @@ export function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
         // showing both would just be two answers to the same question.
         const art = artFor(sym);
         const g = articulationFor(sym);
-        const picture = art
+        // A DRAWING THAT MOVES OUTRANKS A STILL ONE, by the same argument
+        // that puts the still one ahead of the generated diagram: it is a
+        // better answer to "how is this sound made". Only /ʃ/ has one;
+        // every other symbol gets '' and falls through unchanged.
+        const picture = shMotionHtml(sym) || (art
           ? `<figure class="artic-wrap artic-figure">
                <img class="artic-art" src="${esc(art)}"
                     alt="How the mouth makes ${esc(sym)}" decoding="async">
@@ -540,7 +544,7 @@ export function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
           // cues on leader lines when there is written guidance to hang.
           : (g ? `<div class="artic-wrap">${guideSVG(sym, g.cues)}</div>`
                : (diagram ? `<div class="artic-wrap">${diagram}
-                   <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : ''));
+                   <p class="artic-cap">${isVowel ? 'Tongue position in the mouth' : 'Where the sound is made (side view)'}</p></div>` : '')));
         if (!g) return picture;
         return `
         <section class="sp-step guide-block" aria-label="How to make this sound">
@@ -567,6 +571,7 @@ export function renderSoundDetail(sym, accent, { focusHeading = false } = {}) {
 
   wireBrandHome();
   wireArticulationVideos(app);
+  wireShMotion(app);
   // A phoneme request plays the phoneme or nothing — no word stand-in.
   document.getElementById('say-sym')?.addEventListener('click', () => playPhoneme(slug, phonAcc));
   document.getElementById('say-syl')?.addEventListener('click', () => playPhoneme(slug + '_syllable', phonAcc));

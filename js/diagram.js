@@ -383,3 +383,271 @@ export function vocalTractSVG() {
 }
 
 // All the vowels plotted on the quadrilateral — the classic reference.
+
+// ── /ʃ/ in motion ───────────────────────────────────────────────
+// Two synchronised views of one English /ʃ/ — the tongue in side cutaway,
+// the lips from the front — scrubbable through rest, shape, hold, release.
+// A schematic of one possible configuration, not a tracing of a speaker.
+//
+// IDS ARE SEQUENTIAL HERE, NOT phonemeSlugSafe(). The house idiom above
+// derives the suffix from the symbol, which is exactly wrong for this
+// component: it draws TWO svgs for the SAME symbol, so every gradient and
+// clip id would be emitted twice in one document and `url(#…)` would
+// resolve both to whichever rendered first. A counter is the only
+// discriminator that separates them, and it separates two instances of
+// the whole component as well.
+let shSeq = 0;
+
+// Where the four positions sit on the 4.2s timeline, in ms.
+const SH_POSES = [0, 850, 1950, 3800];
+const SH_POSE_NAMES = ['Rest', 'Shape', 'Hold SH', 'Release'];
+const SH_LABELS = [
+  'Rest: the tongue is lower and the lips are relaxed.',
+  'Shape: the tongue blade lifts toward the roof of the mouth. From the front, watch the lips round slightly.',
+  'Hold SH: air passes through a narrow gap just behind the ridge. The voice stays off.',
+  'Release: the tongue lowers and the lips relax.',
+];
+
+const shMix = (a, b, t) => a + (b - a) * t;
+const shSmooth = t => t * t * (3 - 2 * t);        // ease in and out of a phase
+
+/** The tongue outline at `t` — 0 at rest, 1 at the /ʃ/ posture. */
+const shTongueD = t =>
+  `M106 ${shMix(159, 152, t)} C114 ${shMix(151, 141, t)} 116 ${shMix(141, 116, t)} 133 ${shMix(136, 113, t)} `
+  + `C165 ${shMix(129, 97, t)} 228 ${shMix(138, 121, t)} 250 177 Q257 199 253 220 Q225 197 163 179Z`;
+
+/** The lips face on, narrowing and rounding as `t` rises. */
+const shLipsD = t => {
+  const w = shMix(40, 26, t), left = 175 - w, right = 175 + w;
+  return `M${left - 6} 150 Q${left + 8} ${133 - 5 * t} 163 ${138 - 4 * t} Q170 ${133 - 5 * t} 175 ${140 - 4 * t} `
+    + `Q180 ${133 - 5 * t} 187 ${138 - 4 * t} Q${right - 8} ${133 - 5 * t} ${right + 6} 150 Q175 ${181 + 10 * t} ${left - 6} 150Z`;
+};
+
+/** The highlight along the lower lip. */
+const shLightD = t =>
+  `M${175 - shMix(40, 26, t) * 0.42} ${160 + 6 * t} Q175 ${165 + 7 * t} ${175 + shMix(40, 26, t) * 0.32} ${160 + 6 * t}`;
+
+/**
+ * The /ʃ/ motion figure, or '' for every other sound. The caller decides
+ * nothing: asking for any other symbol gets an empty string back, so a
+ * call site can simply prefer this over whatever it drew before.
+ *
+ * THE STILL IS AUTHORED IN THE MARKUP, NOT PAINTED ON LOAD. Every animated
+ * attribute carries its Hold SH value, so this is already a correct
+ * illustration before a single frame runs — with script dead, under
+ * reduced motion, and inside the lesson panel, which starts `hidden` and
+ * therefore may get no rendering opportunity at all. The reference mockup
+ * left `d` empty and filled it from script on load, which draws a mouth
+ * with no tongue in it anywhere that has not happened yet.
+ */
+export function shMotionHtml(sym) {
+  if (sym !== 'ʃ') return '';
+  // `sym` can only be 'ʃ' past that guard, so nothing here is interpolated
+  // from data and this module stays import-free.
+  const u = `shm${++shSeq}`;
+  const id = name => `${name}-${u}`;
+  const t = 1, flow = 1;                              // authored at Hold SH
+  const offset = (SH_POSES[2] / 1000 - 1.3) * 42;
+  const w = shMix(40, 26, t), h = shMix(5, 11, t);
+  return `<div class="artic-wrap shm" data-shm>
+    <p class="shm-lede">Watch the tongue blade rise just behind the ridge. It leaves a narrow gap for the air.</p>
+    <div class="shm-views">
+      <figure class="shm-view">
+        <figcaption>Front view · lip rounding</figcaption>
+        <svg viewBox="0 0 350 270" role="img" aria-label="The lower face from the front, showing the lips rounding slightly">
+          <defs>
+            <radialGradient id="${id('skin')}" cx="44%" cy="40%" r="64%"><stop stop-color="#f8dbc0"/><stop offset=".56" stop-color="#eac0a3"/><stop offset="1" stop-color="#b4826b"/></radialGradient>
+            <linearGradient id="${id('neck')}" x2="15%" y2="100%"><stop stop-color="#936450"/><stop offset="1" stop-color="#dab297"/></linearGradient>
+            <linearGradient id="${id('lip-shade')}" x2="0%" y2="100%"><stop stop-color="#aa605b"/><stop offset=".28" stop-color="#c17972"/><stop offset=".49" stop-color="#95504d"/><stop offset=".62" stop-color="#d89187"/><stop offset=".83" stop-color="#c77a72"/><stop offset="1" stop-color="#a45f57"/></linearGradient>
+            <radialGradient id="${id('cheek')}"><stop stop-color="#d98f80" stop-opacity=".38"/><stop offset="1" stop-color="#d98f80" stop-opacity="0"/></radialGradient>
+            <clipPath id="${id('opening')}"><ellipse data-shm-aperture cx="175" cy="150" rx="${w}" ry="${h}"/></clipPath>
+          </defs>
+          <path d="M102 178Q96 227 71 270H279Q254 225 248 178Z" fill="url(#${id('neck')})"/>
+          <path d="M53 0H297L291 77Q287 155 257 194Q224 238 175 246Q126 238 93 194Q63 155 59 77Z" fill="url(#${id('skin')})" stroke="#90705b" stroke-width="2"/>
+          <ellipse cx="102" cy="110" rx="39" ry="47" fill="url(#${id('cheek')})"/><ellipse cx="248" cy="110" rx="39" ry="47" fill="url(#${id('cheek')})"/>
+          <path d="M157 29Q156 62 143 85Q137 99 148 104Q158 101 168 108Q175 112 182 108Q193 101 202 104Q213 99 207 85Q194 62 192 29Q176 50 157 29Z" fill="#c9947b" opacity=".25"/>
+          <path d="M148 102q8-6 16 0m22 0q8-6 16 0" fill="none" stroke="#845846" stroke-width="3" stroke-linecap="round"/>
+          <path d="M170 111q1 12-5 20m15-20q-1 12 5 20" fill="none" stroke="#b88570" opacity=".48" stroke-linecap="round"/>
+          <path data-shm-frontlips d="${shLipsD(t)}" fill="url(#${id('lip-shade')})" stroke="#9f5c55" stroke-width="1.2"/>
+          <path data-shm-liplight d="${shLightD(t)}" fill="none" stroke="#f6beb0" stroke-width="1.7" stroke-linecap="round" opacity=".48"/>
+          <ellipse data-shm-aperture cx="175" cy="150" rx="${w}" ry="${h}" fill="#48262d"/>
+          <g clip-path="url(#${id('opening')})">
+            <path d="M132 135H218V145Q175 152 132 145Z" fill="#fff4de"/>
+            <path d="M158 137v12m17-12v13m17-13v12" stroke="#d1bead" stroke-width="1"/>
+          </g>
+          <path d="M148 194Q175 207 202 194" fill="none" stroke="#ac7d66" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </figure>
+      <figure class="shm-view">
+        <figcaption>Side cutaway · tongue and airflow</figcaption>
+        <svg viewBox="0 0 350 270" role="img" aria-label="Side cutaway of the vocal tract, showing the tongue raised behind the ridge and the air moving through the gap">
+          <defs>
+            <linearGradient id="${id('tongue-ink')}" x2="0%" y2="100%"><stop stop-color="#e5a09b"/><stop offset=".42" stop-color="#c97b7b"/><stop offset="1" stop-color="#944d58"/></linearGradient>
+            <linearGradient id="${id('side-tissue')}" x2="74%" y2="95%"><stop stop-color="#f2d8bb"/><stop offset=".47" stop-color="#dfb99e"/><stop offset="1" stop-color="#aa7668"/></linearGradient>
+            <linearGradient id="${id('airway-depth')}" x2="78%" y2="100%"><stop stop-color="#fff8ea"/><stop offset=".67" stop-color="#ecd3bb"/><stop offset="1" stop-color="#c29182"/></linearGradient>
+          </defs>
+          <path d="M128 6C114 34 112 55 94 69C81 83 58 90 48 101Q35 113 54 118L90 117Q69 126 67 142L62 160Q65 198 105 212Q157 232 239 218L251 264H325Q338 195 333 120L326 6Z" fill="url(#${id('side-tissue')})" stroke="#987d67" stroke-width="2"/>
+          <path d="M68 110q10-8 19-1m18-25q-7 13-3 22" fill="none" stroke="#a37260" stroke-width="2" stroke-linecap="round"/>
+          <path d="M67 142Q90 137 105 121Q114 117 126 104C158 76 217 72 254 96C282 116 294 172 286 264H250C249 213 209 190 160 175L77 161Z" fill="url(#${id('airway-depth')})" stroke="#987365" stroke-width="2"/>
+          <path d="M106 120Q114 117 126 104C151 82 193 75 224 84" fill="none" stroke="#b78975" stroke-width="3" opacity=".65"/>
+          <g data-shm-air opacity="${flow}" fill="none" stroke-linecap="round">
+            <path d="M269 248C278 165 259 109 208 95C173 85 147 94 127 110Q108 132 89 144L35 150" stroke="#23728a" stroke-width="6" opacity=".22"/>
+            <path data-shm-dots d="M269 248C278 165 259 109 208 95C173 85 147 94 127 110Q108 132 89 144L35 150" stroke="#26778a" stroke-width="3.5" stroke-dasharray="2 10" stroke-dashoffset="${-offset}"/>
+          </g>
+          <path data-shm-tongue d="${shTongueD(t)}" fill="url(#${id('tongue-ink')})" stroke="#823e46" stroke-width="2"/>
+          <path d="M94 126L106 120L105 135Q103 144 98 142Z M91 159L96 149Q100 145 103 151L105 164Z" fill="#fffdf6" stroke="#987d67"/>
+          <path data-shm-lip transform="translate(${-4 * t} 0)" d="M91 125Q70 122 66 139Q73 147 91 137Z" fill="#b96869" stroke="#823e46"/>
+          <path data-shm-lip transform="translate(${-4 * t} 0)" d="M92 163Q70 170 65 155Q71 148 92 153Z" fill="#b96869" stroke="#823e46"/>
+          <g data-shm-air opacity="${flow}" fill="none" stroke="#8de4f1" stroke-linecap="round" stroke-width="3"><path d="M45 143L34 150L46 156"/></g>
+          <g data-shm-air opacity="${flow}"><circle cx="132" cy="108" r="12" fill="none" stroke="#a26720" stroke-width="2"/><path d="M127 97L103 66H62" fill="none" stroke="#edc77f"/><text x="20" y="61" fill="#ffe4ae" font-size="12">Narrow gap</text></g>
+        </svg>
+      </figure>
+    </div>
+    <div class="shm-timeline">
+      <label class="shm-label" for="${id('scrub')}">Movement timeline</label>
+      <input id="${id('scrub')}" class="shm-scrub" data-shm-scrub type="range" min="0" max="4200" step="20"
+             value="${SH_POSES[2]}" aria-valuetext="2.0 seconds, hold sh">
+      <div class="shm-ticks" aria-hidden="true"><span>Rest</span><span>Shape</span><span>Hold</span><span>Release</span></div>
+    </div>
+    <div class="shm-transport">
+      <button class="btn-lite shm-play" data-shm-play type="button" aria-pressed="false">▶ Play movement</button>
+      <button class="btn-lite" data-shm-slow type="button" aria-pressed="true">½× speed</button>
+    </div>
+    <fieldset class="shm-poses">
+      <legend class="shm-label">Jump to a position</legend>
+      ${SH_POSE_NAMES.map((name, i) =>
+        `<button class="btn-lite" data-shm-pose="${i}" type="button" aria-pressed="${i === 2}">${i + 1} · ${name}</button>`).join('')}
+    </fieldset>
+    <p class="shm-caption" data-shm-caption aria-live="polite">${SH_LABELS[2]}</p>
+    <p class="artic-cap">Silent, simplified illustration. One possible English /ʃ/ shape; speakers vary.</p>
+  </div>`;
+}
+
+/**
+ * Brings every /ʃ/ figure under `root` to life. Safe on any root: with no
+ * figure in it, it does nothing, and a second call on the same figure is
+ * ignored rather than binding everything twice.
+ *
+ * NOTHING HERE LOOKS UP AN ID. Every query is scoped to one figure, so two
+ * instances in a document cannot drive each other's drawings.
+ *
+ * ON requestAnimationFrame, WHICH THIS APP OTHERWISE DOES NOT USE. The two
+ * removals recorded in main.js took REQUIRED WORK out of a frame — a scroll
+ * position and a live-region announcement that silently never happened in
+ * an uncomposited pane. Nothing required is in this loop: the still, the
+ * caption, the scrubber value and all four pressed states are authored in
+ * the markup or set synchronously on click, and the loop only advances a
+ * decorative animation. Where a frame never arrives the figure simply
+ * stays at its still, which is the correct picture either way. rAF is also
+ * the only timer that stops when the reader cannot see the drawing.
+ */
+export function wireShMotion(root) {
+  root.querySelectorAll('[data-shm]').forEach(fig => {
+    if (fig.dataset.shmWired) return;              // a re-render must not double-bind
+    fig.dataset.shmWired = '1';
+
+    const q = sel => fig.querySelector(sel);
+    const all = sel => [...fig.querySelectorAll(sel)];
+    const scrub = q('[data-shm-scrub]');
+    const play = q('[data-shm-play]');
+    const slow = q('[data-shm-slow]');
+    const caption = q('[data-shm-caption]');
+    const tongue = q('[data-shm-tongue]');
+    const frontLips = q('[data-shm-frontlips]');
+    const lipLight = q('[data-shm-liplight]');
+    const dots = q('[data-shm-dots]');
+    const poses = all('[data-shm-pose]');
+    const apertures = all('[data-shm-aperture]');
+    const sideLips = all('[data-shm-lip]');
+    const flows = all('[data-shm-air]');
+    if (!scrub || !play || !tongue || !frontLips) return;   // markup moved under us
+
+    let frame = 0, phase = 2, position = SH_POSES[2], fromStart = true;
+
+    const draw = (t, flow, offset) => {
+      tongue.setAttribute('d', shTongueD(t));
+      frontLips.setAttribute('d', shLipsD(t));
+      lipLight.setAttribute('d', shLightD(t));
+      const w = shMix(40, 26, t), h = shMix(5, 11, t);
+      apertures.forEach(e => { e.setAttribute('rx', w); e.setAttribute('ry', h); });
+      sideLips.forEach(e => e.setAttribute('transform', `translate(${-4 * t} 0)`));
+      flows.forEach(e => e.setAttribute('opacity', flow));
+      dots.setAttribute('stroke-dashoffset', -offset);
+    };
+
+    // The caption is a live region, so it is written only when the phase
+    // actually changes. Writing it every frame would have a screen reader
+    // read the same sentence sixty times a second.
+    const say = p => {
+      if (phase === p) return;
+      phase = p;
+      caption.textContent = SH_LABELS[p];
+      poses.forEach((b, i) => b.setAttribute('aria-pressed', String(i === p)));
+    };
+
+    const seek = ms => {
+      position = Math.max(0, Math.min(4200, ms));
+      scrub.value = position;
+      const t = position / 1000;
+      if (t < 0.25) { say(0); draw(0, 0, 0); }
+      else if (t < 1.3) { say(1); draw(shSmooth((t - 0.25) / 1.05), 0, 0); }
+      else if (t < 3.1) { say(2); draw(1, Math.min(1, (t - 1.3) * 8), (t - 1.3) * 42); }
+      else { say(3); draw(1 - shSmooth(Math.min(1, (t - 3.1) / 0.85)), Math.max(0, 1 - (t - 3.1) * 10), 0); }
+      scrub.setAttribute('aria-valuetext',
+        `${(position / 1000).toFixed(1)} seconds, ${SH_POSE_NAMES[phase].toLowerCase()}`);
+    };
+
+    const stop = () => {
+      if (frame) cancelAnimationFrame(frame);
+      frame = 0;
+      play.textContent = '▶ Play movement';
+      play.setAttribute('aria-pressed', 'false');
+    };
+    // How the lesson panel and the page teardown shut this down.
+    fig.addEventListener('shm:stop', stop);
+
+    const still = p => { stop(); fromStart = false; seek(SH_POSES[p]); };
+    poses.forEach((b, i) => b.addEventListener('click', () => still(i)));
+    scrub.addEventListener('input', e => { stop(); fromStart = false; seek(Number(e.target.value)); });
+    slow.addEventListener('click', () =>
+      slow.setAttribute('aria-pressed', String(slow.getAttribute('aria-pressed') !== 'true')));
+
+    play.addEventListener('click', () => {
+      // Read the preference fresh, the way navTo does, so a reader who
+      // changes it mid-session is obeyed without a reload.
+      if (matchMedia('(prefers-reduced-motion: reduce)').matches) return still(2);
+      if (frame) return stop();
+      if (position >= 4200 || fromStart) seek(0);
+      fromStart = false;
+      let last = performance.now();
+      play.textContent = '❚❚ Pause';
+      play.setAttribute('aria-pressed', 'true');
+      const tick = now => {
+        // Navigated away from: this app replaces #app.innerHTML and tells
+        // nobody, so the loop has to notice on its own or run forever
+        // against nodes that are no longer anywhere.
+        if (!fig.isConnected) return stop();
+        // CLAMP THE STEP. A backgrounded tab gets no frames, so `now - last`
+        // can be the whole time the reader was away; unclamped, the first
+        // frame back teleports past the end and the movement they came back
+        // for has silently already finished. Measured: rAF stops dead while
+        // document.hidden is true.
+        const rate = slow.getAttribute('aria-pressed') === 'true' ? 0.5 : 1;
+        seek(position + Math.min(now - last, 100) * rate);
+        last = now;
+        if (position >= 4200) return stop();
+        frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    });
+  });
+}
+
+/**
+ * Stops any /ʃ/ movement under `root`. Idempotent, like cancelRecording():
+ * the page teardown calls it on every navigation without first asking
+ * whether anything is playing.
+ */
+export function stopShMotion(root) {
+  root?.querySelectorAll?.('[data-shm]').forEach(fig => fig.dispatchEvent(new Event('shm:stop')));
+}

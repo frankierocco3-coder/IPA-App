@@ -6292,3 +6292,60 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .ci-tight .ci-kind { display: none; }
 .ci-tight .ci-row { gap: 8px; padding: 10px 8px; }
 .ci-tight .ci-unit-head { gap: 8px; padding: 12px 12px; }
+
+/* ── /ʃ/ in motion ──────────────────────────────────────────────
+   Two synchronised drawings with a scrubber, sitting inside .artic-wrap
+   so they inherit that card's border and padding. The approved palette:
+   cream figure grounds, olive controls, dark diagram panels.
+
+   THE TWO VIEWS WRAP ON THE CONTAINER'S WIDTH, NOT THE VIEWPORT'S. A
+   viewport media query is the wrong instrument: this renders inside a
+   panel whose width has little to do with the window's — measured at
+   384px of usable width in a 1024px window. flex-wrap with a flex-basis
+   puts the drawings side by side exactly when two of them fit, and
+   stacks them when they do not, which is the rule we actually want. */
+.shm { text-align: left; }
+.shm-lede { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--ink); }
+
+.shm-views { display: flex; flex-wrap: wrap; gap: 10px; }
+.shm-view {
+  flex: 1 1 250px; min-width: 0; margin: 0;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 8px;
+}
+.shm-view figcaption {
+  font-size: 12px; font-weight: 700; color: var(--muted); margin: 0 0 6px;
+}
+/* The dark ground is what makes the pale tissue and the cyan airflow read.
+   aspect-ratio holds the box before the drawing has laid out, so the
+   controls below do not jump as it arrives. */
+.shm-view svg {
+  width: 100%; height: auto; display: block;
+  aspect-ratio: 350 / 270; background: var(--ink); border-radius: 8px;
+}
+
+.shm-timeline { margin: 12px 0 2px; }
+.shm-label { display: block; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 4px; padding: 0; }
+.shm-scrub { width: 100%; min-height: 32px; accent-color: var(--green); }
+.shm-ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); }
+
+/* MOTION CONTROLS ARE OPT-IN, the way new animation is gated everywhere
+   else in this file. A reader who has asked for reduced motion keeps the
+   still, the scrubber and the four positions — all of which they drive
+   themselves — and never sees a control that would start something. */
+.shm-transport { display: none; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; }
+@media (prefers-reduced-motion: no-preference) {
+  .shm-transport { display: flex; }
+}
+.shm-transport .btn-lite, .shm-poses .btn-lite { min-height: 44px; }
+.shm-play { min-width: 10.5em; }
+.shm [aria-pressed="true"] { background: var(--green); border-color: var(--green-dark); color: #fff; }
+
+.shm-poses { border: 0; padding: 0; margin: 12px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+
+.shm-caption {
+  margin: 12px 0 6px; min-height: 3.2em; font-size: 14px; line-height: 1.5;
+  background: var(--panel-2); border-left: 4px solid var(--gold);
+  border-radius: 5px; padding: 10px 12px; color: var(--ink);
+}
+.shm .artic-cap { text-align: left; margin-top: 0; }
