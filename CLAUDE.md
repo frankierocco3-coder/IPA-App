@@ -162,6 +162,44 @@ check had already looked.
 out twenty subagents beside the runner will cascade it. A short count means
 "the machine was busy" before it means anything about the tree.
 
+**THERE ARE TWO DIFFERENT FAILURES AND THE NOTES BELOW CONFLATE THEM
+(2026-11-15). Read the COUNT to tell them apart.**
+
+| what you see | cause | fix |
+|---|---|---|
+| **short count**, cascading nulls | CPU contention | quiet machine |
+| **full count** (856/856 attempted), a few state-dependent checks failing | **dirty profile** | **fresh ORIGIN** |
+
+The 2026-11-11 entry says the profile theory was refuted. It was refuted
+*for the cascade*, and the note then over-generalised. Profile pollution is
+real and alive; it just produces a different signature. Measured 2026-11-15,
+one tree, five runs, same Chrome:
+
+| run in profile | result |
+|---|---|
+| 1st | 853/856 — 3 × `dissect UI` |
+| 2nd | **856/856** |
+| 3rd | 854/856 — 2 × practice, one a literal `timeout` |
+| 5th | 852/856 — 4 × `dissect UI`, answers came back `blank` |
+| **1st on a fresh origin** | **856/856, 0 failures** |
+
+Failures tracked the RUN ORDINAL, not the tree, and run duration climbed
+9 → 17 → 24 → 35 minutes as IndexedDB filled with seeded projects. The
+`dissect UI` checks are the canaries: they allow a fixed 1100ms for an
+800ms-debounced write, so a slow store loses the race and the answers read
+back `blank`. Nothing was wrong with the code.
+
+**THE FIX IS A NEW PORT, NOT A WIPE.** Storage is per ORIGIN, so a second
+dev server is a brand-new profile with nothing of the owner's destroyed:
+
+```bash
+python3 serve.py 4174      # then run tests/run-all.html on :4174
+```
+
+Use a port that has not been used before in that browser, run ONCE, then
+kill the server. This is strictly better than clearing site data, which
+CLAUDE.md elsewhere warns is destructive to real per-device progress.
+
 **AND 817 WAS NEVER A TOTAL.** The old tree's real full count is 856; 817
 was a truncated run. Comparing counts across runs only works when BOTH ran
 to completion — which is what "the check count is the tell" has always
