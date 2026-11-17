@@ -2658,8 +2658,12 @@ export async function run({ navDoc = document } = {}) {
       check('IA: Stage 1 and Meet the accent stay the clear start',
         doc.body.textContent.includes('Meet the Accent')
         && doc.body.textContent.includes('Meet the accent')
-        && !!doc.querySelector('.ci-unit.is-open'),
-        `units=${doc.querySelectorAll('.ci-unit').length} open=${!!doc.querySelector('.ci-unit.is-open')}`);
+        // The accordion became a stage picker on 2026-11-17, so "Stage 1 is
+        // open" is now "the picker is showing the first stage and its
+        // lessons are on the page". Same rule, third markup.
+        && doc.querySelector('#ci-stage')?.selectedIndex === 0
+        && doc.querySelectorAll('.ci-card').length > 0,
+        `stages=${doc.querySelectorAll('#ci-stage option').length} idx=${doc.querySelector('#ci-stage')?.selectedIndex} cards=${doc.querySelectorAll('.ci-card').length}`);
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American')));
       await sleep(500);

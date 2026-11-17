@@ -6207,48 +6207,16 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .ci-grid { display: grid; grid-template-columns: minmax(0, 830fr) minmax(0, 420fr); gap: 22px; align-items: start; }
 .ci-index { min-width: 0; }
 .ci-aside { min-width: 0; }
-
-/* ── the units ── */
-.ci-units { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.ci-unit { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); overflow: hidden; }
 .ci-unit.is-open { border-color: var(--gold); }
-.ci-unit-h { margin: 0; font-size: inherit; font-weight: inherit; }
-.ci-unit-head {
-  font: inherit; display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-  background: none; border: none; cursor: pointer; padding: 14px 16px; color: var(--ink);
-}
 .ci-unit.is-open .ci-unit-head { background: var(--accent-tint); }
-.ci-chev { flex: none; color: var(--muted); font-size: 18px; transition: transform .15s ease; }
 .ci-unit.is-open .ci-chev-unit { transform: rotate(90deg); }
-.ci-unit-n { font-family: var(--serif); font-size: 19px; font-weight: 700; color: var(--unit-color, var(--green)); flex: none; }
-.ci-unit-title { font-family: var(--serif); font-size: 19px; font-weight: 700; flex: 1 1 auto; min-width: 0; }
-.ci-unit-count { flex: none; font-size: 13px; color: var(--muted); white-space: nowrap; }
 .ci-unit-blurb { font-size: 14px; color: var(--muted); margin: 0 16px 8px; }
-
-/* ── the rows ── */
-.ci-rows { list-style: none; margin: 0; padding: 0 8px 10px; display: grid; gap: 4px; }
-.ci-row {
-  font: inherit; display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-  background: none; border: 1px solid transparent; border-radius: 12px; padding: 10px 10px;
-  cursor: pointer; color: var(--ink);
-}
-.ci-row:hover { background: var(--panel-2); }
 /* SELECTED IS NOT COLOUR ALONE: aria-current states it, and the rule
    below draws a marker in the gutter as well as the sage fill. */
 .ci-row.is-selected { background: var(--accent-tint); border-color: var(--green); }
 .ci-row.is-selected .ci-row-n::before { content: "\25B8"; margin-right: 4px; color: var(--green-dark); }
-.ci-row-n { flex: none; min-width: 2.6em; font-family: var(--serif); font-weight: 700; color: var(--muted); }
 .ci-row.is-selected .ci-row-n { color: var(--green-dark); }
-.ci-row-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 auto; }
-.ci-row-title { font-weight: 700; overflow-wrap: anywhere; }
 .ci-row.is-done .ci-row-title, .ci-row.is-locked .ci-row-title { color: var(--muted); }
-.ci-row-desc { font-size: 13px; color: var(--muted); line-height: 1.45; }
-.ci-row-side { flex: none; display: flex; align-items: center; gap: 8px; }
-.ci-kind {
-  font-size: 12px; color: var(--ink); background: var(--panel); border: 1px solid var(--line);
-  border-radius: 999px; padding: 3px 10px; white-space: nowrap;
-}
-.ci-row-state { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 
 /* ── the preview ── */
 .ci-preview {
@@ -6274,9 +6242,8 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .ci-meta dd { font-size: 13px; color: var(--ink); margin: 0; text-align: right; }
 .ci-pv-locked { font-size: 14px; line-height: 1.55; color: var(--ink); margin: 0 0 10px; }
 .ci-go { width: 100%; margin-bottom: 8px; }
-.ci-guide { width: 100%; }
 
-.ci-row:focus-visible, .ci-unit-head:focus-visible {
+.ci-card:focus-visible, .ci-stage-select:focus-visible, .ci-go:focus-visible {
   outline: 3px solid #8a6d3b; outline-offset: 2px;
 }
 
@@ -6286,7 +6253,6 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
 .ci-narrow .ci-grid { grid-template-columns: 1fr; }
 /* The preview is moved into the selected row's <li>, so it needs to sit
    clear of the row above it rather than float beside anything. */
-.ci-narrow .ci-rows li > .ci-preview { margin: 8px 2px 10px; }
 .ci-narrow .ci-title { font-size: 28px; }
 .ci-narrow .ci-row-side { flex-direction: column; align-items: flex-end; gap: 3px; }
 .ci-tight .ci-kind { display: none; }
@@ -6349,3 +6315,68 @@ progress.vp-progress-bar::-moz-progress-bar { background: var(--green); border-r
   border-radius: 5px; padding: 10px 12px; color: var(--ink);
 }
 .shm .artic-cap { text-align: left; margin-top: 0; }
+
+/* ── Field Guide Plus: the Voice & Speech Learn page ─────────────
+   Course heading and progress, a stage picker with its guidebook, then
+   lesson cards grouped at the real checkpoint boundaries on the left and
+   the selected lesson's preview on the right. The handoff's palette is
+   the app's own, so these take the existing tokens rather than new hexes:
+   parchment --bg, cream --panel-2, sage --accent-tint, ink --ink, olive
+   --green, brass --gold. */
+.ci-cap {
+  font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+  font-weight: 750; color: var(--gold); margin: 0 0 2px;
+}
+
+/* The stage picker. A select, not a row of tabs: a course can run to
+   seven stages and tabs would wrap into a second and third line on a
+   phone, which is where most of this is read. */
+.ci-stagebar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 10px; padding: 10px 12px; margin: 10px 0 14px;
+}
+.ci-stage-label { font-size: 13px; font-weight: 700; color: var(--ink); }
+.ci-stage-select {
+  font: inherit; font-size: 14px; color: var(--ink); background: var(--panel);
+  border: 1px solid var(--line); border-radius: 7px; padding: 8px 10px;
+  min-height: 40px; max-width: 100%; flex: 1 1 12rem; min-width: 0;
+}
+.ci-stagebar .btn-lite { min-height: 40px; }
+.ci-stage-cap {
+  font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+  font-weight: 750; color: var(--gold); margin: 0 0 6px;
+}
+
+/* A group is a run of lessons closing on a checkpoint. It is drawn as a
+   box rather than titled, because the course data carries no group names
+   and inventing them would put words in the owner's mouth. */
+.ci-groupbox {
+  list-style: none; display: grid; gap: 6px; margin: 0 0 10px;
+  padding: 9px; border: 1px solid var(--line);
+  border-radius: 10px; background: var(--panel);
+}
+
+.ci-card {
+  display: grid; grid-template-columns: 2.6rem minmax(0, 1fr); align-items: center;
+  gap: 10px; width: 100%; text-align: left; cursor: pointer;
+  font: inherit; color: var(--ink); min-height: 44px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 8px; padding: 9px 11px;
+}
+.ci-card:hover { background: var(--accent-tint); }
+.ci-card.is-selected { background: var(--accent-tint); border-color: var(--green); }
+.ci-card-sym {
+  font-family: var(--serif); font-size: 15px; font-weight: 600;
+  color: var(--green-dark); text-align: center;
+}
+.ci-card-body { min-width: 0; }
+.ci-card-title { display: block; font-weight: 700; font-size: 15px; }
+.ci-card-status { display: block; font-size: 12px; color: var(--muted); margin-top: 1px; }
+/* THE CHECKPOINT IS DASHED *AND* SAYS "Checkpoint" in its status line.
+   A border alone is a difference some readers cannot see, and the handoff
+   asks for a label precisely so the meaning does not rest on colour. */
+.ci-card.is-checkpoint { border-style: dashed; border-left: 4px solid var(--gold); }
+.ci-card.is-done .ci-card-sym { color: var(--green); }
+.ci-card.is-locked { opacity: 0.72; }
+.ci-card.is-locked .ci-card-sym { color: var(--muted); }

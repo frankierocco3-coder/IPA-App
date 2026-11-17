@@ -201,9 +201,31 @@ function trackProgress(track) {
 let learnExit = null;
 const returnToLearn = () => {
   const y = window.scrollY;
-  return () => { goSection('learn'); window.scrollTo(0, y); };
+  return () => {
+    goSection('learn');
+    // SCROLL RESTORE IS BEST-EFFORT AND CURRENTLY LOSES. Measured by
+    // logging every scrollTo across a return: ours fires with (0, 40) one
+    // millisecond in, the page is not yet tall enough to hold it so it
+    // clamps to 0, and three milliseconds later the shell itself fires
+    // (0, 0). The retries below are supposed to land after that and did
+    // not in testing — why they do not fire is NOT understood, so this is
+    // written as a known gap rather than a fix that works.
+    //
+    // It is harmless where it fails: the reader lands at the top of the
+    // Learn page with their stage, lesson and preview intact, which is
+    // the rest of what the handoff asks for and is verified.
+    //
+    // setTimeout, never requestAnimationFrame — a page the browser is not
+    // compositing gets no frame, and this would then never run at all.
+    if (!y) return;
+    for (const delay of [0, 80, 180, 320, 500]) {
+      setTimeout(() => {
+        if (Math.abs(window.scrollY - y) <= 2) return;
+        window.scrollTo(0, y);
+      }, delay);
+    }
+  };
 };
-
 // Where a finished/quit lesson returns to.
 function exitLesson(lesson) {
   if (lesson.arcade) return goSection('practice');
@@ -1359,7 +1381,6 @@ function learnMain(el, course, ws = activeWorkspace()) {
 // SELECTING IS NOT STARTING. Tapping a row moves the preview and writes
 // nothing; only the preview's own button opens the lesson, and the resume
 // target stays wherever the chain says it is.
-let courseIndexPlace = null;        // which layout the preview is placed for
 let courseIndexState = {};          // the open unit and selected row, across a visit
 
 function courseIndexPane(el, course) {
@@ -1378,10 +1399,13 @@ function courseIndexPane(el, course) {
   const remembered = courseIndexState.courseId === course.id ? courseIndexState : null;
   let selectedId = (remembered && byId(remembered.lessonId)?.id)
     || resume?.id || chain[chain.length - 1]?.id || null;
-  let openUnitId = (remembered && units.some(u => u.id === remembered.unitId) && remembered.unitId)
+  // The stage the picker is showing. It follows the remembered one, else
+  // the stage the selected lesson lives in, so returning from a lesson
+  // lands where the reader left rather than at the top of the course.
+  let stageId = (remembered && units.some(u => u.id === remembered.unitId) && remembered.unitId)
     || byId(selectedId)?.unit?.id || units[0]?.id;
 
-  const remember = () => { courseIndexState = { courseId: course.id, unitId: openUnitId, lessonId: selectedId }; };
+  const remember = () => { courseIndexState = { courseId: course.id, unitId: stageId, lessonId: selectedId }; };
 
   // The number a reader sees: unit position, then position within it.
   const numberOf = l => {
@@ -1397,51 +1421,66 @@ function courseIndexPane(el, course) {
   };
   const symbolsOf = l => (l.phonemes ?? []).filter(ph => PHONEMES[ph]);
 
-  function rowHtml(l) {
+  // GROUPS COME FROM THE CHECKPOINTS THE COURSE ACTUALLY HAS. The handoff
+  // draws two groups of three and says so itself: use the real boundaries
+  // rather than assuming every stage has two. Measured across the six
+  // courses, only Neutral American's first stage is 3+3 — the rest run
+  // 3+3+1, 3+1 and 3+2, and a stage can end without a checkpoint at all.
+  // So: a group closes on a checkpoint, and whatever is left over is a
+  // group too, never dropped.
+  const groupsOf = u => {
+    const groups = [];
+    let run = [];
+    for (const l of lessonsOf(u)) {
+      run.push(l);
+      if (l.checkpoint) { groups.push(run); run = []; }
+    }
+    if (run.length) groups.push(run);
+    return groups;
+  };
+
+  // The glyph on a card: the first sound the lesson teaches, or a tick for
+  // a checkpoint, which teaches none.
+  const cardSym = l => (l.checkpoint ? '✓' : (symbolsOf(l)[0] ? `/${symbolsOf(l)[0]}/` : '•'));
+
+  function cardHtml(l) {
     const isDone = store.isCompleted(l.id);
     const locked = !isUnlocked(l);
     const sel = l.id === selectedId;
-    const desc = oneLine(l);
-    const state = isDone ? 'Done' : locked ? 'Locked' : (resume && l.id === resume.id ? 'Next' : '');
+    const state = isDone ? 'Done' : locked ? 'Locked' : (resume && l.id === resume.id ? 'Up next' : 'Open');
+    // A CHECKPOINT SAYS SO IN WORDS. Its dashed border carries the same
+    // meaning, and a border alone is a difference some readers cannot see.
+    const kind = l.checkpoint ? 'Checkpoint' : lessonKindName(l);
     return `
       <li>
-        <button class="ci-row${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}${isDone ? ' is-done' : ''}"
+        <button class="ci-card${sel ? ' is-selected' : ''}${locked ? ' is-locked' : ''}${isDone ? ' is-done' : ''}${l.checkpoint ? ' is-checkpoint' : ''}"
                 type="button" data-lesson="${esc(l.id)}"${sel ? ' aria-current="true"' : ''}
-                aria-label="${esc(l.title)}${state ? ` — ${state}` : ''}">
-          <span class="ci-row-n" aria-hidden="true">${esc(numberOf(l))}</span>
-          <span class="ci-row-text">
-            <span class="ci-row-title">${esc(l.title)}</span>
-            ${desc ? `<span class="ci-row-desc">${esc(desc)}</span>` : ''}
+                aria-label="${esc(l.title)} — ${esc(kind)}, ${esc(state)}">
+          <span class="ci-card-sym" aria-hidden="true">${esc(cardSym(l))}</span>
+          <span class="ci-card-body">
+            <span class="ci-card-title">${esc(l.title)}</span>
+            <span class="ci-card-status">${esc(kind)} &middot; ${esc(state)}</span>
           </span>
-          <span class="ci-row-side">
-            <span class="ci-kind">${esc(lessonKindName(l))}</span>
-            ${state ? `<span class="ci-row-state">${esc(state)}</span>` : ''}
-          </span>
-          <span class="ci-chev" aria-hidden="true">&rsaquo;</span>
         </button>
       </li>`;
   }
 
-  function unitHtml(u, n) {
+  // Groups are UNNAMED for now (owner, 2026-11-17). The handoff titles them
+  // "Hear the accent" and "Compare the vowels"; nothing in the course data
+  // carries such a name and none can be derived, since every checkpoint is
+  // titled "Checkpoint game". Rather than invent forty of them, the grouping
+  // and the checkpoint's own card carry the meaning, and real titles are a
+  // content pass — see docs/ART_BRIEF_GROUP_TITLES.md.
+  const groupHtml = g => `<ol class="ci-groupbox">${g.map(cardHtml).join('')}</ol>`;
+
+  function stageHtml(u) {
+    const gs = groupsOf(u);
     const ls = lessonsOf(u);
     const uDone = ls.filter(l => store.isCompleted(l.id)).length;
-    const open = u.id === openUnitId;
     return `
-      <li class="ci-unit${open ? ' is-open' : ''}" style="--unit-color:${u.color}">
-        <h3 class="ci-unit-h">
-          <button class="ci-unit-head" type="button" data-unit="${esc(u.id)}"
-                  aria-expanded="${open}" aria-controls="ci-u-${esc(u.id)}">
-            <span class="ci-chev ci-chev-unit" aria-hidden="true">&rsaquo;</span>
-            <span class="ci-unit-n">${n}.</span>
-            <span class="ci-unit-title">${esc(u.title)}</span>
-            <span class="ci-unit-count">${uDone ? `${uDone} / ${ls.length} done` : `${ls.length} lesson${ls.length === 1 ? '' : 's'}`}</span>
-          </button>
-        </h3>
-        <div class="ci-unit-body" id="ci-u-${esc(u.id)}"${open ? '' : ' hidden'}>
-          ${u.blurb ? `<p class="ci-unit-blurb">${esc(u.blurb)}</p>` : ''}
-          <ol class="ci-rows">${ls.map(rowHtml).join('')}</ol>
-        </div>
-      </li>`;
+      <p class="ci-stage-cap">${esc(u.title)} &middot; ${uDone ? `${uDone} of ${ls.length} done` : `${ls.length} lesson${ls.length === 1 ? '' : 's'}`}</p>
+      ${u.blurb ? `<p class="ci-unit-blurb">${esc(u.blurb)}</p>` : ''}
+      ${gs.map(groupHtml).join('')}`;
   }
 
   function previewHtml() {
@@ -1469,8 +1508,16 @@ function courseIndexPane(el, course) {
       </dl>
       ${locked
         ? `<p class="ci-pv-locked">This one opens when you finish${before ? ` <b>${esc(before.title)}</b>` : ' the lesson before it'}.</p>`
-        : `<button class="btn btn-primary ci-go" id="ci-go" type="button">${esc(label)} <i aria-hidden="true">&rarr;</i></button>`}
-      <button class="btn-lite ci-guide" id="ci-guide" type="button">Unit guidebook</button>`;
+        : `<button class="btn-lite ci-go" id="ci-go" type="button">${esc(label)} <i aria-hidden="true">&rarr;</i></button>`}`;
+      // Secondary, not primary: the card above is the way into a lesson
+      // (owner, three times over). This stays for the selected lesson —
+      // useful for resuming a part-done one and for reaching a lesson you
+      // selected with the keyboard — but it no longer competes with the
+      // card for the olive fill, which would say "start here" twice.
+      // No guidebook button here any more: the handoff ties the guidebook
+      // to the SELECTED STAGE, and it now sits beside the stage picker.
+      // Two buttons for one reference, disagreeing about which stage they
+      // meant, is worse than one in the right place.
   }
 
   // THE PREVIEW MOVES, it is not duplicated. On a narrow screen the
@@ -1492,99 +1539,140 @@ function courseIndexPane(el, course) {
   }
 
   function placePreview() {
-    const pv = el.querySelector('.ci-preview');
-    if (!pv) return;
     applyWidth();
-    const narrow = el.classList.contains('ci-narrow');
-    courseIndexPlace = narrow;
-    if (narrow) {
-      const row = el.querySelector('.ci-row.is-selected')?.closest('li');
-      if (row && pv.parentElement !== row) row.appendChild(pv);
-    } else {
-      const slot = el.querySelector('.ci-aside');
-      if (slot && pv.parentElement !== slot) slot.appendChild(pv);
-    }
-  }
-
-  function paintPreview() {
+    // THE PREVIEW STAYS IN ITS COLUMN. The Course Index used to park it
+    // inside the selected row's <li> on a narrow pane so it sat under the
+    // row it described. With lessons now drawn as grouped cards that reads
+    // as a broken group — the panel lands between card one and card two of
+    // a box of three — and the handoff asks for the panels to STACK on a
+    // narrow screen, not to interleave. Stacking is also what makes the
+    // preview safe: the stage picker rewrites the list, and anything
+    // living inside it was destroyed by that rewrite.
+    //
+    // It stays easy to reach because the page now shows ONE stage, so the
+    // list above it is at most seven cards.
     const pv = el.querySelector('.ci-preview');
-    if (!pv) return;
+    const slot = el.querySelector('.ci-aside');
+    if (pv && slot && pv.parentElement !== slot) slot.appendChild(pv);
+  }
+  function paintPreview() {
+    // Belt to the rescue above: if anything has taken the preview out of
+    // the document, put a fresh one back rather than quietly rendering no
+    // preview at all. A missing panel is invisible in testing and obvious
+    // to a reader.
+    let pv = el.querySelector('.ci-preview');
+    if (!pv) {
+      const aside = el.querySelector('.ci-aside');
+      if (!aside) return;
+      pv = document.createElement('div');
+      pv.className = 'ci-preview';
+      pv.setAttribute('aria-live', 'polite');
+      pv.setAttribute('aria-label', 'Selected lesson');
+      aside.appendChild(pv);
+    }
     pv.innerHTML = previewHtml();
     placePreview();
     pv.querySelector('#ci-go')?.addEventListener('click', () => {
       const l = byId(selectedId);
       if (!l) return;
       remember();
-      if (l.checkpoint) { learnExit = returnToLearn(); renderCheckpointOpening(l); }
+      // BOTH BRANCHES RECORD WHERE TO COME BACK TO. This set learnExit for
+      // a checkpoint only, so starting an ordinary lesson from the preview
+      // left no return point and exitLesson() fell through to the track —
+      // which lands on Learn by luck, at the top, having lost the scroll.
+      // That is what made the scroll restore look broken: it was never
+      // being called.
+      learnExit = returnToLearn();
+      if (l.checkpoint) renderCheckpointOpening(l);
       else openLearnGuide(l);
-    });
-    pv.querySelector('#ci-guide')?.addEventListener('click', () => {
-      const u = unitById[byId(selectedId)?.unit?.id];
-      if (!u) return;
-      remember();
-      renderGuidebook(u, track);
     });
   }
 
   const pct = total ? Math.round(done / total * 100) : 0;
   el.innerHTML = `
-    <h1 class="sr-only">Learn — ${esc(course.label)}</h1>
     <div class="ci-head">
-      <h2 class="ci-title">The Course Index</h2>
+      <p class="ci-cap">Voice &amp; Speech &middot; Learn</p>
+      <h1 class="ci-title">${esc(course.label)}</h1>
       ${track.blurb ? `<p class="ci-sub">${esc(track.blurb)}</p>` : ''}
       <div class="ci-progress">
         <span id="ci-prog-label">${done} of ${total} lessons complete</span>
         <progress class="vp-progress-bar" max="${total}" value="${done}" aria-labelledby="ci-prog-label">${pct}%</progress>
       </div>
     </div>
+    <div class="ci-stagebar">
+      <label class="ci-stage-label" for="ci-stage">Course stage</label>
+      <select class="ci-stage-select" id="ci-stage">
+        ${units.map((u, i) => `<option value="${esc(u.id)}"${u.id === stageId ? ' selected' : ''}>${String(i + 1).padStart(2, '0')} &middot; ${esc(u.title.replace(/^Stage \d+ · /, ''))}</option>`).join('')}
+      </select>
+      <button class="btn-lite ci-stage-guide" id="ci-stage-guide" type="button">Stage guidebook</button>
+    </div>
     <div class="ci-grid">
-      <section class="ci-index" aria-label="Course index">
-        <ol class="ci-units">${units.map((u, i) => unitHtml(u, i + 1)).join('')}</ol>
+      <section class="ci-index" id="ci-stage-body" aria-label="Lessons in this stage">
+        ${stageHtml(unitById[stageId] ?? units[0])}
       </section>
       <aside class="ci-aside"><div class="ci-preview" aria-live="polite" aria-label="Selected lesson"></div></aside>
     </div>`;
 
   paintPreview();
 
-  el.querySelectorAll('[data-unit]').forEach(b => b.addEventListener('click', () => {
-    const id = b.dataset.unit;
-    openUnitId = openUnitId === id ? null : id;
+  // THE STAGE PICKER REDRAWS ONE STAGE. Changing stage moves the selection
+  // to that stage's first lesson, because a preview describing a lesson the
+  // reader can no longer see is worse than no preview.
+  const stageSel = el.querySelector('#ci-stage');
+  stageSel?.addEventListener('change', () => {
+    stageId = stageSel.value;
+    const first = lessonsOf(unitById[stageId] ?? {})[0];
+    if (first) selectedId = first.id;
     remember();
-    el.querySelectorAll('.ci-unit').forEach(li => {
-      const head = li.querySelector('[data-unit]');
-      const body = li.querySelector('.ci-unit-body');
-      const on = head?.dataset.unit === openUnitId;
-      li.classList.toggle('is-open', on);
-      head?.setAttribute('aria-expanded', String(on));
-      if (body) body.hidden = !on;
-    });
-    placePreview();
-  }));
-
-  // A ROW OPENS ITS LESSON (owner, 2026-11-14): "if i click 'what moves
-  // when you speak' or any other lesson, that it brings me to the page".
-  //
-  // THIS OVERRIDES THE HANDOFF, deliberately. Its rule was that a click
-  // "updates the preview without starting the lesson ... starting it is a
-  // separate action", and the preview's button was that action. The owner
-  // has now asked for the opposite twice — once for the tiles, once here —
-  // so a lesson in a list behaves like a link to the lesson. The preview
-  // stays as the card for whatever is selected, and a LOCKED row still
-  // only selects, because the preview is where it explains itself.
-  el.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
-    selectedId = b.dataset.lesson;
-    remember();
-    el.querySelectorAll('[data-lesson]').forEach(o => {
-      const on = o === b;
-      o.classList.toggle('is-selected', on);
-      if (on) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
-    });
+    const body = el.querySelector('#ci-stage-body');
+    if (body) body.innerHTML = stageHtml(unitById[stageId] ?? units[0]);
+    wireCards();
     paintPreview();
-    const l = byId(selectedId);
-    if (!l || !isUnlocked(l)) return;          // locked: the preview explains it
-    learnExit = returnToLearn();
-    if (l.checkpoint) renderCheckpointOpening(l); else openLearnGuide(l);
-  }));
+    stageSel.focus();        // the picker keeps focus; the preview announces
+  });
+
+  el.querySelector('#ci-stage-guide')?.addEventListener('click', () => {
+    const u = unitById[stageId];
+    if (!u) return;
+    remember();
+    renderGuidebook(u, track);
+  });
+
+  // A CARD OPENS ITS LESSON. THE OWNER HAS NOW ASKED FOR THIS THREE TIMES
+  // — 2026-11-14 for the tiles, 2026-11-14 again for the index rows, and
+  // 2026-11-17 here: "i want when you click the lesson card it leads you
+  // to the lesson, and for the 'continue lesson' to be supplementary".
+  //
+  // EVERY HANDOFF SO FAR HAS SPECIFIED THE OPPOSITE, that selecting only
+  // previews and starting is a separate action. It keeps coming back
+  // because a card that looks like a link and does not follow is the thing
+  // he actually hits. The owner's rule wins; a future handoff saying
+  // otherwise does not reopen it without him.
+  //
+  // So the preview's button is SUPPLEMENTARY now, not the way in: it is a
+  // secondary control for the lesson already selected, which still matters
+  // for a locked card, for the guidebook, and for picking up where a
+  // part-done lesson left off.
+  //
+  // A LOCKED CARD STILL ONLY SELECTS, because the preview is where it
+  // explains what unlocks it.
+  function wireCards() {
+    el.querySelectorAll('[data-lesson]').forEach(b => b.addEventListener('click', () => {
+      selectedId = b.dataset.lesson;
+      remember();
+      el.querySelectorAll('[data-lesson]').forEach(o => {
+        const on = o === b;
+        o.classList.toggle('is-selected', on);
+        if (on) o.setAttribute('aria-current', 'true'); else o.removeAttribute('aria-current');
+      });
+      paintPreview();
+      const l = byId(selectedId);
+      if (!l || !isUnlocked(l)) return;
+      learnExit = returnToLearn();
+      if (l.checkpoint) renderCheckpointOpening(l); else openLearnGuide(l);
+    }));
+  }
+  wireCards();
 
   // The pane can change width without the window doing so — opening a side
   // panel does it — so watch the element, not the viewport.
