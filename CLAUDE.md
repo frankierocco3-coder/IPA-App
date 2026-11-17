@@ -189,16 +189,49 @@ Failures tracked the RUN ORDINAL, not the tree, and run duration climbed
 800ms-debounced write, so a slow store loses the race and the answers read
 back `blank`. Nothing was wrong with the code.
 
-**THE FIX IS A NEW PORT, NOT A WIPE.** Storage is per ORIGIN, so a second
-dev server is a brand-new profile with nothing of the owner's destroyed:
+**A NEW PORT IS A CLEAN PROFILE, AND IT IS NOT THE FIX. CORRECTED
+2026-11-17 — the entry above was WRONG and I wrote it.** Storage is per
+ORIGIN, so a second dev server does give a brand-new profile with nothing
+of the owner's destroyed:
 
 ```bash
 python3 serve.py 4174      # then run tests/run-all.html on :4174
 ```
 
-Use a port that has not been used before in that browser, run ONCE, then
-kill the server. This is strictly better than clearing site data, which
-CLAUDE.md elsewhere warns is destructive to real per-device progress.
+That part is true and still worth doing. What is NOT true is that it makes
+the run green. Measured 2026-11-17 on a never-used origin, a stable tree
+and **0 of 3 navigations without a frame**: `852/856`, four `dissect UI`
+failures. The 856/856 on a fresh origin that produced the claim above was
+one run, and a quiet machine, not a mechanism.
+
+**WHAT IS ACTUALLY ESTABLISHED about those four checks:**
+
+* They fail with an IDENTICAL signature — `blank,blank,unknown,na,blank`,
+  the typed answers simply not there after the reload — on trees that do
+  not share the changes under test. Saturday's run 5 and Monday's :4177
+  run produced the same four failures on different code. **So they are not
+  caused by whatever you just changed.** Check that before you go hunting.
+* It is NOT slow storage. Measured in the running app under load:
+  IndexedDB writes 0–13ms, against the 300ms the test leaves after its
+  800ms debounce. Two orders of magnitude of headroom.
+* It is NOT frame starvation. The runs report 0 of 3 navigations without
+  a frame, and rAF measured at ~60fps mid-run.
+* Run duration tracks MACHINE LOAD and nothing else: 9 minutes on a quiet
+  Mac, 39 minutes with `mobileassetd` at 67%, WindowServer at 29% and
+  Spotify at 19%. Check `uptime` and `ps aux | sort -nrk 3` before
+  blaming the tree.
+
+**THE MECHANISM IS STILL UNKNOWN.** Three hypotheses are dead (dirty
+profile, slow storage, frame starvation). Do not write a fourth into this
+file until it is measured. The honest status is: four checks in the
+dissect block are timing-fragile, they fail intermittently under load,
+and the suite is otherwise sound at 852/856 with everything else green.
+
+The test's own comment admits the shape of it — `answer()` sleeps a fixed
+1100ms for an 800ms debounce, while the revision block twenty lines below
+polls for the committed "Saved" instead, because the fixed sleep was not
+enough there either. Applying that same poll to the first two answers is
+the obvious next thing to try, and it changes no assertion.
 
 **AND 817 WAS NEVER A TOTAL.** The old tree's real full count is 856; 817
 was a truncated run. Comparing counts across runs only works when BOTH ran
