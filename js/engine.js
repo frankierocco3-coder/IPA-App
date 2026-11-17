@@ -60,6 +60,36 @@ const poolFor = accent => {
 // exercises at the right inventory when practising that dialect.
 export const phonemesForAccent = accent =>
   [...new Set(poolFor(accent).flatMap(w => w.ipa))];
+// EVERY DISTRACTOR COMES FROM THE INVENTORY BEING TAUGHT (2026-11-17).
+// poolFor() above already drops shared words carrying symbols a dialect
+// lacks — "rather than taught wrong" — and then, until this change, every
+// distractor list was drawn from Object.keys(PHONEMES): all 62 symbols
+// across all five accents. The symbols poolFor() had just excluded came
+// straight back in as tiles and choices.
+//
+// Measured on IPA Foundations (44 symbols, 18 foreign) before the fix,
+// 320 generated exercises per type, per lesson size:
+//
+//            3-sound lesson   6-sound lesson
+//   fillBlank      92%             18%
+//   gapBuild       72%             66%
+//   build          71%             65%
+//   soundToSymbol  58%              0%
+//   description    52%              0%
+//
+// soundToSymbol and description fill their three slots from the lesson's
+// own sounds FIRST and only reach for filler when the lesson is small —
+// which is why a six-sound probe reports them clean and most real lessons
+// (three sounds) are not. Do not re-measure with a large lesson and
+// conclude they are fine.
+//
+// Memoised because WORDS is static; the clip index never feeds this.
+const inventoryCache = new Map();
+const inventoryFor = accent => {
+  const key = accent ?? '';
+  if (!inventoryCache.has(key)) inventoryCache.set(key, phonemesForAccent(accent));
+  return inventoryCache.get(key);
+};
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
@@ -115,7 +145,7 @@ function genSoundToSymbol(target, lessonPhonemes, accent) {
   if (!wordPool.length) return null;
   const word = pick(wordPool);
   const wrong = shuffle(lessonPhonemes.filter(p => p !== target && !contains(word, p)));
-  const filler = shuffle(Object.keys(PHONEMES).filter(p => !lessonPhonemes.includes(p) && !contains(word, p) && PHONEMES[p].type === PHONEMES[target].type));
+  const filler = shuffle(inventoryFor(accent).filter(p => !lessonPhonemes.includes(p) && !contains(word, p) && PHONEMES[p].type === PHONEMES[target].type));
   const distractors = [...wrong, ...filler].slice(0, 3);
   if (distractors.length < 3) return null;
   const choices = shuffle([{ label: `/${target}/`, ok: true }, ...distractors.map(d => ({ label: `/${d}/` }))]);
@@ -129,10 +159,10 @@ function genSoundToSymbol(target, lessonPhonemes, accent) {
   };
 }
 
-function genDescription(target, lessonPhonemes) {
+function genDescription(target, lessonPhonemes, accent) {
   const sameType = p => PHONEMES[p].type === PHONEMES[target].type;
   const wrong = shuffle(lessonPhonemes.filter(p => p !== target && sameType(p)));
-  const filler = shuffle(Object.keys(PHONEMES).filter(p => !lessonPhonemes.includes(p) && sameType(p)));
+  const filler = shuffle(inventoryFor(accent).filter(p => !lessonPhonemes.includes(p) && sameType(p)));
   const distractors = [...wrong, ...filler].slice(0, 3);
   if (distractors.length < 3) return null;
   const choices = shuffle([{ label: `/${target}/`, ok: true }, ...distractors.map(d => ({ label: `/${d}/` }))]);
@@ -177,7 +207,7 @@ function genBuild(lessonPhonemes, { accent = null } = {}) {
   );
   if (!pool.length) return null;
   const entry = pick(pool);
-  const distractorTiles = shuffle(Object.keys(PHONEMES).filter(p => !entry.ipa.includes(p))).slice(0, 3);
+  const distractorTiles = shuffle(inventoryFor(accent).filter(p => !entry.ipa.includes(p))).slice(0, 3);
   return {
     type: 'build',
     prompt: `Build the transcription of “${entry.word}”.`,
@@ -298,7 +328,7 @@ function genFillBlank(lessonPhonemes, accent) {
     : { p: entry.ipa[0], i: 0 };
   const pattern = entry.ipa.map((p, i) => (i === blankAt ? ' _ ' : p)).join('');
   const sameType = q => PHONEMES[q]?.type === PHONEMES[target]?.type;
-  const distractors = shuffle(Object.keys(PHONEMES).filter(q =>
+  const distractors = shuffle(inventoryFor(accent).filter(q =>
     q !== target && sameType(q) &&
     entry.ipa.map((p, i) => (i === blankAt ? q : p)).join('') !== entry.ipa.join('')
   )).slice(0, 3);
@@ -374,7 +404,7 @@ function genGapBuild(lessonPhonemes, accent = null) {
   const gapCount = Math.min(2, entry.ipa.length - 1);
   const gaps = [...new Set([...preferred, ...idxs])].slice(0, gapCount).sort((a, b) => a - b);
   const answers = gaps.map(i => entry.ipa[i]);
-  const distractorTiles = shuffle(Object.keys(PHONEMES).filter(p => !entry.ipa.includes(p))).slice(0, 3);
+  const distractorTiles = shuffle(inventoryFor(accent).filter(p => !entry.ipa.includes(p))).slice(0, 3);
   return {
     type: 'gapbuild',
     prompt: `Fill the gaps in the transcription of “${entry.word}”.`,
@@ -493,7 +523,7 @@ function genShiftBuild(to, fromAccent) {
   // distractor tiles: segments from the source form the learner must NOT
   // carry over, plus a couple of random others
   const sourceOnly = pair[from].ipa.filter(p => !target.includes(p));
-  const filler = shuffle(Object.keys(PHONEMES).filter(p => !target.includes(p) && !sourceOnly.includes(p))).slice(0, 2);
+  const filler = shuffle(inventoryFor(to).filter(p => !target.includes(p) && !sourceOnly.includes(p))).slice(0, 2);
   return {
     type: 'build',
     prompt: `“${pair.word}” is ${wrapIpa(pair[from], pair[from].ipa)} in ${ACCENT_NAMES[from]}. Build it in ${ACCENT_NAMES[to]}.`,
@@ -692,7 +722,7 @@ const GENERATORS = {
   idiomDialogue: () => genIdiomDialogue(),
   symbolToWord: l => genSymbolToWord(pick(l.phonemes), l.accent),
   soundToSymbol: l => genSoundToSymbol(pick(l.phonemes), l.phonemes, l.accent),
-  description: l => genDescription(pick(l.phonemes), l.phonemes),
+  description: l => genDescription(pick(l.phonemes), l.phonemes, l.accent),
   match: l => genMatch(l.phonemes, l.accent),
   build: l => genBuild(l.phonemes, { accent: l.accent }),
   minimalPair: l => genMinimalPair(l.accent ?? l.shiftTo ?? null),
