@@ -1307,11 +1307,21 @@ function learnMain(el, course, ws = activeWorkspace()) {
     return;
   }
   if (ws === 'speech') return speechLearnPane(el);
-  // IPA Foundations has its own landing page (the Course Index, 2026-11-14).
-  // The accent courses keep the path-and-tiles pane below — the handoff is
-  // explicit that other Learn pages do not change.
-  if (course.id === 'core') return courseIndexPane(el, course);
-  ipaLearnPane(el, course);
+  // EVERY Voice & Speech course gets the Course Index (owner, 2026-11-17:
+  // "we have to fix voice and speech u.i. it looks terrible").
+  //
+  // It landed for IPA Foundations alone on 2026-11-14 because that handoff
+  // said other Learn pages do not change. Keeping that line made the five
+  // accent courses the odd ones out in their own workspace: the same
+  // sidebar and chrome, then a two-column grid of identical pale tiles
+  // where fifteen of seventeen read LOCKED, against numbered rows with a
+  // line of description each. The pane is already course-agnostic — it
+  // reads the track, its units and their colours — so this is the gate
+  // coming off, not a rewrite.
+  //
+  // ipaLearnPane() is left intact directly below rather than deleted, the
+  // way this project withdraws things, so restoring it is one line.
+  return courseIndexPane(el, course);
 }
 
 // ── VOICE & SPEECH LEARN: PATH + FOCUS (owner handoff, 2026-11-10) ──

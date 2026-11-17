@@ -2638,15 +2638,18 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Australian')));
       await sleep(500);
-      // READS THE FOCUS PANEL SINCE 2026-11-10, not '.continue-card h2'.
-      // Path + Focus replaced the up-next card with a panel that previews
-      // one lesson; what these two checks protect is unchanged — the course
-      // names the lesson it opens on, and Stage 1 is the obvious start.
-      const doneNow = parseInt(doc.querySelector('.vp-progress-label')?.textContent ?? '', 10);
-      const ccNow = !!doc.querySelector('.vp-focus');
-      check('IA: the focus panel names the lesson the course opens on',
-        ccNow && (doc.querySelector('.vp-focus-title')?.textContent ?? '').includes('Meet the accent'),
-        `done=${doneNow} panel=${ccNow} says="${doc.querySelector('.vp-focus-title')?.textContent ?? ''}"`);
+      // READS THE COURSE INDEX SINCE 2026-11-17, the focus panel since
+      // 2026-11-10, and '.continue-card h2' before that. Three markups,
+      // one rule, and the rule is what these two checks protect: the
+      // course names the lesson it opens on, and Stage 1 is the obvious
+      // start. The accent courses moved off Path + Focus onto the Course
+      // Index when the gate that kept it to IPA Foundations came off, so
+      // '.vp-focus' is no longer rendered anywhere here.
+      const doneNow = parseInt(doc.getElementById('ci-prog-label')?.textContent ?? '', 10);
+      const ccNow = !!doc.querySelector('.ci-preview');
+      check('IA: the preview names the lesson the course opens on',
+        ccNow && (doc.querySelector('.ci-pv-title')?.textContent ?? '').includes('Meet the accent'),
+        `done=${doneNow} panel=${ccNow} says="${doc.querySelector('.ci-pv-title')?.textContent ?? ''}"`);
       // THE TITLE LOST ITS 'Stage 1 · ' PREFIX on 2026-11-10 and that is
       // the point: the stage node prints the number in its own circle, so
       // carrying it in the title too numbered the same thing twice in two
@@ -2655,8 +2658,8 @@ export async function run({ navDoc = document } = {}) {
       check('IA: Stage 1 and Meet the accent stay the clear start',
         doc.body.textContent.includes('Meet the Accent')
         && doc.body.textContent.includes('Meet the accent')
-        && !!doc.querySelector('.vp-stage.is-expanded'),
-        `stages=${doc.querySelectorAll('.vp-stage').length} open=${!!doc.querySelector('.vp-stage.is-expanded')}`);
+        && !!doc.querySelector('.ci-unit.is-open'),
+        `units=${doc.querySelectorAll('.ci-unit').length} open=${!!doc.querySelector('.ci-unit.is-open')}`);
       clickIn(doc.querySelector('[aria-label^="Change course"]')); await sleep(250);
       clickIn([...doc.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American')));
       await sleep(500);
