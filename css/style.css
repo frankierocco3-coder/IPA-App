@@ -552,6 +552,39 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .tile-bank { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; max-width: 440px; }
 .tile { font-size: 22px; min-width: 54px; }
 .tile.placed { background: var(--accent-tint); border-color: var(--green); }
+/* AN EXERCISE TILE IS A CHIP, NOT A MODULE CARD.
+   Two different things share the class name `.tile`: this one — a symbol
+   you tap, rendered as `btn tile` inside #bank / #answer — and the
+   collection card further down this file, added in the 2026-09-15 UI
+   pass. The card is defined LATER at equal specificity, so it was
+   winning, handing every symbol `width: 100%` and `min-height: 104px`.
+
+   Measured 2026-11-17, before this rule existed:
+
+                     375x812 phone   desktop pane
+     Build a Word       +549px          +386px      <- off-screen
+     Fill the Gaps      +456px          +441px      <- off-screen
+     the other twelve      0               0
+
+   OWNER RULE (2026-11-17): in any game or exercise, nothing may require
+   scrolling to reach. The question and every choice sit on one screen.
+   Keep that true when adding tiles — a wrapped row of chips is what
+   makes a full 44-symbol palette possible at phone width at all.
+
+   Scoped rather than renamed: class names are selectors the regression
+   suite reads, so a rename is a second failure mode for no extra gain. */
+.tile-bank .tile,
+.answer-row .tile {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: auto; min-width: 54px; min-height: 48px;
+  padding: 8px 14px; text-align: center;
+  border-left-width: 1px; box-shadow: none;
+  /* A two-character symbol (əʊ ʊə dʒ aʊ eə, widest 18.6px) sits in a
+     24px content box. That fits, but `white-space: normal` would break
+     it onto TWO LINES rather than clip if a font fallback ever ate the
+     margin — silent, and it would push the bank past one screen. */
+  white-space: nowrap;
+}
 
 /* ── Type-in & gap-fill ── */
 .type-input {

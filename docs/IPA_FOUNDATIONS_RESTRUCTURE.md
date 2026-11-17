@@ -251,15 +251,44 @@ in `renderBuild`, and CSS for the tile bank. The tile markup is already
 an unbounded `ex.tiles.map(...)`, so nothing structural changes. **No
 audio, no new corpus, no new renderer.**
 
-**The CSS is more than a pass, and I only know that because I looked.**
-`.tile-bank` currently renders each tile as a full-width stacked block —
-six tiles already run off the bottom of a 768px-tall viewport on the
-*ship* exercise above. Forty-four of them in that layout would be a very
-long scroll. The palette wants a compact wrapped grid, which is a real
-layout change rather than a tweak.
+**On the CSS — superseded 2026-11-17, and the news is mixed.**
 
-This is the single highest-value change in the document and it is the
-cheapest. If only one thing happens, make it this.
+What I first reported here was that `.tile-bank` stacks tiles full-width
+and the palette would need a new wrapped grid. The real cause was a class
+collision: `.tile` names both the exercise chip and the module card, and
+the card is defined later in the file at equal specificity, so it won and
+handed every symbol `width: 100%` and `min-height: 104px`. That is fixed
+(`.tile-bank .tile, .answer-row .tile`), and the bank is now the centred
+wrapped row it always intended to be.
+
+So the palette needs **no new layout**. But it still does not fit.
+Measured at 375x812, where the bank is 327px wide:
+
+| tiles | bank height at the standard chip | fits on one screen |
+|---|---|---|
+| 8 — the worst real exercise today | 106px | yes |
+| 20 | 222px | yes |
+| 32 | 396px | **no**, 128px over |
+| **44 — the full inventory** | **512px** | **no, 244px over** |
+
+Two ways out, both measured:
+
+* a **tight chip variant** — 36x34 with a 5px gap gives 8 per row and a
+  229px bank, which fits with room to spare. The cost is a 34px tap
+  target, under the 44px guideline.
+* **better: the palette holds only the sounds taught so far.** That stays
+  under 20 for most of the course — comfortably inside the standard chip
+  — and only reaches 44 in the final stage, where the tight variant can
+  take over. It is also the better teaching: a learner three stages in
+  should not be choosing from symbols they have never met.
+
+I would do the second. It costs one filter on the symbol list and removes
+the accessibility trade entirely for all but the last stage.
+
+This matters because of the standing rule it sits under: **in any game or
+exercise, nothing may require scrolling to reach** (owner, 2026-11-17).
+Verify it by measuring `scrollHeight - innerHeight` at 375x812, not by
+looking at a desktop pane — the pane is 832px tall and hides it.
 
 ### B. Triple the corpus, for free
 
