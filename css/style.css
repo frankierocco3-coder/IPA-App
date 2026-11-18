@@ -568,8 +568,12 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 
    OWNER RULE (2026-11-17): in any game or exercise, nothing may require
    scrolling to reach. The question and every choice sit on one screen.
-   Keep that true when adding tiles — a wrapped row of chips is what
-   makes a full 44-symbol palette possible at phone width at all.
+   Keep that true when adding tiles. Measured headroom at 375x812, where
+   the bank is 327px wide: 8 tiles (the worst real exercise) 106px, 20
+   tiles 222px, 32 tiles 396px, 44 tiles 512px. The last two do NOT fit,
+   so this chip size does NOT by itself make a full 44-symbol palette
+   possible — that needs a tighter chip (36x34 fits at 229px, but a 34px
+   tap target) or a palette holding only the sounds taught so far.
 
    Scoped rather than renamed: class names are selectors the regression
    suite reads, so a rename is a second failure mode for no extra gain. */
