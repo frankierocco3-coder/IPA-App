@@ -2505,23 +2505,6 @@ function renderSpeechCollection(collectionId) {
       : renderSpeechChapter(b.dataset.item)));
 }
 
-function renderSpeechFurtherStudy() {
-  record(renderSpeechFurtherStudy);
-  stopSpeech();
-  workspacePage(
-    pageTopbar('📚 Speech Library', '#6f8657'),
-    `<div class="ws-head">
-       <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">📚</span>Further Study</h1>
-       <p class="ws-sub">1 topic · Speech Library</p>
-     </div>`,
-    `<div class="item-grid">
-       ${itemTileHtml({ key: 'dialects', title: 'Dialects in Speech',
-         note: 'How dialect shapes rhythm, register and use' })}
-     </div>`);
-  app.querySelectorAll('[data-item]').forEach(b =>
-    b.addEventListener('click', renderDialectsInSpeech));
-}
-
 // ── The review area: inventory first, then one draft at a time ──
 // Prepared material is never described as missing. Counts derive from
 // the records. Nothing here approves anything.
@@ -7254,35 +7237,6 @@ function actingLibraryPane(el) {
     subtitle: 'Find the tools, texts and ideas for your next rehearsal.',
     resume: next ? { label: 'Continue learning', go: () => renderActingLesson(next.id) } : null,
   });
-}
-
-function renderSpeechForActors() {
-  record(renderSpeechForActors);
-  stopSpeech();
-  const picks = [
-    ['sp-f-instrument', 'The physical chain your performance runs on'],
-    ['sp-f-breath', 'Breath that supports the scene without taking attention'],
-    ['sp-f-voice', 'Range and freedom for performance demands'],
-    ['sp-f-articulation', 'Clarity the back row can follow'],
-    ['sp-start-fluency', 'Why fluency frees you to listen and respond'],
-    ['sp-m-pace', 'Pace and phrasing as behavior, not delivery rules'],
-    ['sp-w-movement', 'Keeping speech available while the body works'],
-    ['sp-w-applying', 'Letting technique run in the background'],
-  ].map(([id, note]) => ({ l: speechLessonById(id), note })).filter(x => x.l);
-  workspacePage(
-    pageTopbar('🗣 Speech for Actors', '#8a6d3b'),
-    `<div class="ws-head">
-       <h1 class="page-h">Speech for Actors</h1>
-       <p class="ws-sub">${picks.length} shared Speech chapters · opened from the Speech Library’s own records.</p>
-     </div>`,
-    `<div class="item-grid">
-       ${picks.map(({ l, note }) => itemTileHtml({
-         key: l.id, title: l.title,
-         note: speechBodyVisible(l) ? note : 'Prepared draft — awaiting professional review',
-         state: speechBodyVisible(l) ? '' : 'is-pending' })).join('')}
-     </div>`);
-  app.querySelectorAll('[data-item]').forEach(b =>
-    b.addEventListener('click', () => { if (SPEECH_LIVE) setWorkspace('speech'); renderSpeechChapter(b.dataset.item); }));
 }
 
 // STANDALONE PAGES THAT SHELVE INSIDE A COLLECTION, rather than lesson
