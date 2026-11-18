@@ -2,7 +2,7 @@
 // the catalog rules. ALL TEXTS ARE DRAFTS pending human literary and
 // dialect review (js/data/edition-reviews.js); original Speechcraft
 // writing throughout — no commercial guide consulted or reproduced; no
-// claim of meter or rhyme; no Traditional RP adaptation by design.
+// claim of meter or rhyme; no Upper Class (RP) adaptation by design.
 
 export const EDITIONS = {
 

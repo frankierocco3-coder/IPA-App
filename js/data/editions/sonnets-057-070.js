@@ -1,6 +1,6 @@
 // Sonnet editions — batch 5 (sonnets 57–70). See editions/index.js. ALL
 // DRAFTS pending human literary and dialect review; original Speechcraft
-// writing; no meter/rhyme claims; no Traditional RP adaptation.
+// writing; no meter/rhyme claims; no Upper Class (RP) adaptation.
 
 export const EDITIONS = {
 

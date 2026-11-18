@@ -120,9 +120,9 @@ export const ALL_LESSONS = Object.values(TRACK_LESSONS).flat();
 export const COCKNEY_LIVE = true;
 export const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
-  { id: 'rp', icon: '🎩', label: 'Traditional RP' },
+  { id: 'rp', icon: '🎩', label: 'Upper Class (RP)' },
   { id: 'ssbe', icon: '🇬🇧', label: 'General British' },
-  { id: 'cockney', icon: '🚕', label: 'East London' },
+  { id: 'cockney', icon: '🚕', label: 'East London (Cockney)' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
@@ -574,11 +574,11 @@ export const rhetoricVisible = l => rhetoricPreview() || speechPublished(l.id);
 // Dialects you can read/scan/transcribe any text in.
 export const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
-  { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🎩' },
+  { id: 'rp', label: 'Upper Class (RP)', lang: 'en-GB', flag: '🎩' },
   { id: 'ssbe', label: 'General British', lang: 'en-GB', flag: '🇬🇧' },
   // Cockney joins the Studio dialect pickers only when its course is live —
   // a hidden course must never leak through a project screen.
-  ...(COCKNEY_LIVE ? [{ id: 'cockney', label: 'East London', lang: 'en-GB', flag: '🚕' }] : []),
+  ...(COCKNEY_LIVE ? [{ id: 'cockney', label: 'East London (Cockney)', lang: 'en-GB', flag: '🚕' }] : []),
   { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 export const dialectName = id => (TEXT_DIALECTS.find(d => d.id === id) || {}).label || '';

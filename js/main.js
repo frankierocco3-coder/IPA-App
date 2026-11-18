@@ -1263,7 +1263,7 @@ function ssbeIntroBody() {
     <div class="guide-word"><span class="wii-who">Core target</span><span class="guide-note">non-rhotic, broad BATH /ɑː/, rounded LOT /ɒ/, steady SQUARE /ɛː/, fronted GOOSE, happY /i/</span></div>
     <div class="guide-word"><span class="wii-who">Common contemporary</span><span class="guide-note">glottal stop for non-initial /t/ (better /beʔə/), fused yods (tune /tʃuːn/)</span></div>
     <div class="guide-word"><span class="wii-who">Variable / relaxed</span><span class="guide-note">NEAR smoothing, heavier glottalling in casual speech — options, not rules</span></div>
-    <p class="guide-text">Where Traditional RP glides, holds its /t/ and keeps its yods, this course targets the modern forms — and trains your ear to tell the two apart.</p>`;
+    <p class="guide-text">Where Upper Class (RP) glides, holds its /t/ and keeps its yods, this course targets the modern forms — and trains your ear to tell the two apart.</p>`;
 }
 
 function showSsbeIntro(course) {
@@ -7298,7 +7298,7 @@ function renderActorIpaTools() {
      </div>`,
     `<div class="item-grid">
        ${itemTileHtml({ key: 'chart', title: 'IPA Chart', note: 'Every sound across the courses' })}
-       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Traditional RP, General British, Australian' })}
+       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Upper Class (RP), General British, Australian' })}
        ${itemTileHtml({ key: 'dialects', title: 'Dialects in Speech', note: 'How dialect shapes rhythm, register and use' })}
      </div>`);
   app.querySelectorAll('[data-item]').forEach(b =>

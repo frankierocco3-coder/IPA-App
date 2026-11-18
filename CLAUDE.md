@@ -536,9 +536,9 @@ script instead and paste its block.
 ### Accent courses
 
 - Neutral American (nam)     live
-- Traditional RP (rp)        live
+- Upper Class (RP) (rp)      live
 - General British (ssbe)     live
-- East London (cockney)      live
+- East London (Cockney) (cockney) live
 - Australian (aus)           live
 - IPA Foundations (core)     live
 

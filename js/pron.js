@@ -93,7 +93,7 @@ const RE_CURE = new RegExp('ʊɹ(?![' + V + '])', 'g');
 // happY — the weak final vowel of happy, city, duty. The dictionary now
 // carries it as a bare /i/ (CMUdict IY0) and FLEECE as /iː/ (IY1/IY2), so
 // the two are finally distinguishable. The Accuracy Standard sets happY per
-// accent (dialects.js): Traditional RP keeps it lax /ɪ/, General British
+// accent (dialects.js): Upper Class (RP) keeps it lax /ɪ/, General British
 // and Cockney tense it to /i/, Australian takes it to /iː/. A bare /i/ that
 // is followed by a vowel is NOT happY — it is the neutralised prevocalic
 // vowel of material, radio, various — so it is left alone.
@@ -129,7 +129,7 @@ function toBritish(s, word) {
     .replace(/ɑ(?!ː)/g, 'ɑː');       // PALM/START default for what remains
 }
 
-// Traditional RP: the shared skeleton with the conservative lax happY
+// Upper Class (RP): the shared skeleton with the conservative lax happY
 // ("Conservative lax happY endings: happy /ˈhæpɪ/" — dialects.js, rp.core).
 function toRP(s, word) {
   return toBritish(s, word).replace(RE_HAPPY, 'ɪ');

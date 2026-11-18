@@ -1,7 +1,7 @@
 // Sonnet editions — batch 6 (sonnets 71–84; 73 lives in recasts.js as a
 // pilot and is deliberately absent here). See editions/index.js. ALL
 // DRAFTS pending human literary and dialect review; original Speechcraft
-// writing; no meter/rhyme claims; no Traditional RP adaptation.
+// writing; no meter/rhyme claims; no Upper Class (RP) adaptation.
 
 export const EDITIONS = {
 

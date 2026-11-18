@@ -2,7 +2,7 @@
 // this file the written catalog covers all 154 sonnets (149 new + the
 // five pilots in recasts.js). See editions/index.js. ALL DRAFTS pending
 // human literary and dialect review; original Speechcraft writing; no
-// meter/rhyme claims; no Traditional RP adaptation.
+// meter/rhyme claims; no Upper Class (RP) adaptation.
 
 export const EDITIONS = {
 

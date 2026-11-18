@@ -95,7 +95,7 @@ export const DIALECT_ACTION = [
     reviewNotes: 'Original Speechcraft draft, ~140 words (~60s spoken). Check pacing and that the expressions read as natural speech.',
   },
 
-  // ── Traditional RP ──────────────────────────────────────────
+  // ── Upper Class (RP) ──────────────────────────────────────────
   {
     id: 'rp-exchange-garden',
     courseId: 'rp',

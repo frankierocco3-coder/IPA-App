@@ -35,7 +35,7 @@ const noteKey = id => `notebook:${id}`;
 export const IPA_BOOKS = [
   { id: 'ipa', label: 'General IPA' },
   { id: 'nam', label: 'Neutral American' },
-  { id: 'rp', label: 'Traditional RP' },
+  { id: 'rp', label: 'Upper Class (RP)' },
   { id: 'ssbe', label: 'General British' },
   { id: 'aus', label: 'Australian' },
 ];

@@ -2,7 +2,7 @@
 // as a pilot and is deliberately absent here). The Dark Lady sequence
 // begins at 127. See editions/index.js. ALL DRAFTS pending human
 // literary and dialect review; original Speechcraft writing; no
-// meter/rhyme claims; no Traditional RP adaptation.
+// meter/rhyme claims; no Upper Class (RP) adaptation.
 
 export const EDITIONS = {
 

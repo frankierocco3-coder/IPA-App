@@ -93,7 +93,7 @@ const inventoryFor = accent => {
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
-const ACCENT_NAMES = { rp: 'Traditional RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'General British', cockney: 'East London' };
+const ACCENT_NAMES = { rp: 'Upper Class (RP)', nam: 'Neutral American', aus: 'Australian', ssbe: 'General British', cockney: 'East London (Cockney)' };
 
 // Word pairs that exist in both accents: the raw material for shift
 // drills. The RP form is the rp-tagged entry, or the untagged one

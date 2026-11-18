@@ -1,7 +1,7 @@
 // Sonnet editions — batch 8 (sonnets 99–112; note 99 has fifteen lines
 // in the original). See editions/index.js. ALL DRAFTS pending human
 // literary and dialect review; original Speechcraft writing; no
-// meter/rhyme claims; no Traditional RP adaptation.
+// meter/rhyme claims; no Upper Class (RP) adaptation.
 
 export const EDITIONS = {
 

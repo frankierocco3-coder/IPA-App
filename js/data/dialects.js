@@ -37,7 +37,7 @@ export const DIALECT_INFO = {
     ],
     convention: 'Broad transcription with learner-friendly symbols: /iː uː ɔː/ keep their length marks by convention, not because American English has a contrastive length system — duration varies with context. /r/ is written per dictionary practice; realizations like [ɾ] and [ɫ] appear in square brackets only.',
     rhythm: 'Stress-timed: stressed syllables anchor the rhythm while function words compress and weaken. Intonation moves in smaller steps than British varieties, with a characteristic mid-fall on statements.',
-    differsFrom: { id: 'rp', label: 'Traditional RP', how: 'Neutral American keeps every /r/ and flat BATH /æ/ where RP drops post-vocalic /r/ and broadens BATH to /ɑː/; American GOAT starts back and rounded /oʊ/ vs RP’s schwa-start /əʊ/; American taps its /t/ where RP articulates it carefully.' },
+    differsFrom: { id: 'rp', label: 'Upper Class (RP)', how: 'Neutral American keeps every /r/ and flat BATH /æ/ where RP drops post-vocalic /r/ and broadens BATH to /ɑː/; American GOAT starts back and rounded /oʊ/ vs RP’s schwa-start /əʊ/; American taps its /t/ where RP articulates it carefully.' },
     sources: [
       'Hillenbrand, J. — “American English: Southern Michigan”, Journal of the International Phonetic Association (Cambridge University Press): an illustrative regionally-unmarked American variety.',
       'Wells, J. C. — Accents of English (Cambridge University Press): lexical sets and cross-accent comparison.',
@@ -72,7 +72,7 @@ export const DIALECT_INFO = {
     ],
     convention: 'The traditional Gimson-style inventory and symbols, matching classic dictionaries and stage-speech manuals. Broad transcription throughout; realizations such as [ɫ] appear in square brackets.',
     rhythm: 'Measured, evenly weighted stresses; wide controlled intonation falls; precision of articulation carries the accent’s authority.',
-    differsFrom: { id: 'ssbe', label: 'General British', how: 'Traditional RP glides SQUARE /eə/, holds a careful /t/, keeps its yods and ends happY words lax /ɪ/ — General British holds SQUARE steady at /ɛː/, often realizes /t/ as [ʔ], fuses yods (tune /tʃuːn/) and tenses happY to /i/. RP reads one generation older, more formal, more classed.' },
+    differsFrom: { id: 'ssbe', label: 'General British', how: 'Upper Class (RP) glides SQUARE /eə/, holds a careful /t/, keeps its yods and ends happY words lax /ɪ/ — General British holds SQUARE steady at /ɛː/, often realizes /t/ as [ʔ], fuses yods (tune /tʃuːn/) and tenses happY to /i/. RP reads one generation older, more formal, more classed.' },
     sources: [
       'Roach, P. — “British English: Received Pronunciation”, Journal of the International Phonetic Association (Cambridge University Press).',
       'Cruttenden, A. (ed.) — Gimson’s Pronunciation of English (Routledge): the traditional inventory this course follows.',
@@ -82,10 +82,10 @@ export const DIALECT_INFO = {
   ssbe: {
     icon: '🇬🇧',
     color: '#7d6b9e',
-    target: 'A modern pronunciation target for present-day British roles and conversation — the mainstream, present-day counterpart to Traditional RP. It keeps the classic non-rhotic skeleton while including the pronunciation patterns most of today’s speakers actually use.',
+    target: 'A modern pronunciation target for present-day British roles and conversation — the mainstream, present-day counterpart to Upper Class (RP). It keeps the classic non-rhotic skeleton while including the pronunciation patterns most of today’s speakers actually use.',
     period: 'Contemporary — the British English of present-day film, TV and everyday professional life.',
     context: 'The natural target for characters living now. Real speakers vary by age, region and setting, so this course labels every feature honestly: core target, common contemporary, or variable.',
-    notClaim: 'It does not claim to be a single accent every British person shares, and it is deliberately separate from Traditional RP — playing a period drama in this target is as anachronistic as the reverse.',
+    notClaim: 'It does not claim to be a single accent every British person shares, and it is deliberately separate from Upper Class (RP) — playing a period drama in this target is as anachronistic as the reverse.',
     core: [
       'Non-rhotic with the classic skeleton: broad BATH /ɑː/, rounded LOT /ɒ/, GOAT /əʊ/',
       'Steady SQUARE /ɛː/ — a long monophthong where RP glided /eə/',
@@ -106,8 +106,8 @@ export const DIALECT_INFO = {
       'Heavier glottalling in casual registers; careful speech keeps [t]',
     ],
     convention: 'RP-derived broad symbols updated where the contemporary sound has genuinely moved (/ɛː/), with realizations in square brackets. Broad /uː/ is kept for GOOSE — the symbol names the phoneme, not the exact modern tongue position.',
-    rhythm: 'Lighter and quicker than Traditional RP: smaller intonation falls, more level tails, and heavy reduction of function words in connected speech. Register matters — the same speaker glottals more at the pub than in a job interview.',
-    differsFrom: { id: 'rp', label: 'Traditional RP', how: 'General British is Traditional RP one generation on: SQUARE steadies to /ɛː/, non-initial /t/ commonly becomes [ʔ], yods fuse, happY tenses to /i/, GOOSE fronts. The skeleton — non-rhoticity, BATH, LOT, GOAT — is shared, which is why the course drills the two side by side.' },
+    rhythm: 'Lighter and quicker than Upper Class (RP): smaller intonation falls, more level tails, and heavy reduction of function words in connected speech. Register matters — the same speaker glottals more at the pub than in a job interview.',
+    differsFrom: { id: 'rp', label: 'Upper Class (RP)', how: 'General British is Upper Class (RP) one generation on: SQUARE steadies to /ɛː/, non-initial /t/ commonly becomes [ʔ], yods fuse, happY tenses to /i/, GOOSE fronts. The skeleton — non-rhoticity, BATH, LOT, GOAT — is shared, which is why the course drills the two side by side.' },
     sources: [
       'Lindsey, G. — English After RP: Standard British Pronunciation Today (Palgrave Macmillan): the contemporary description this course follows.',
       'Wells, J. C. — Accents of English (Cambridge University Press): lexical sets and the RP baseline.',
@@ -184,7 +184,7 @@ export const DIALECT_INFO = {
     ],
     convention: 'The revised Australian (HCE-style) symbol set: /ɔ oː eː ɑe oɪ/ replace the RP-based LOT/THOUGHT/SQUARE/PRICE/CHOICE symbols, because the Australian vowels genuinely sit elsewhere. Realizations like [ɾ] and [ɪi] appear in square brackets.',
     rhythm: 'Rides its long open vowels; statements frequently carry a rising contour (uptalk) without becoming questions; overall delivery flatter and more level than RP’s wide falls.',
-    differsFrom: { id: 'rp', label: 'Traditional RP', how: 'Both are non-rhotic with a BATH split, but Australian centralises STRUT and PALM (/ɐ ɐː/), fronts GOOSE (/ʉː/), raises LOT and THOUGHT (/ɔ oː/), flattens SQUARE to /eː/ and re-aims every closing diphthong — the shared skeleton wears entirely different vowels.' },
+    differsFrom: { id: 'rp', label: 'Upper Class (RP)', how: 'Both are non-rhotic with a BATH split, but Australian centralises STRUT and PALM (/ɐ ɐː/), fronts GOOSE (/ʉː/), raises LOT and THOUGHT (/ɔ oː/), flattens SQUARE to /eː/ and re-aims every closing diphthong — the shared skeleton wears entirely different vowels.' },
     sources: [
       'Macquarie University, Department of Linguistics — Phonemic (broad) transcription of Australian English: the revised transcription system this course uses.',
       'Macquarie University, Australian Voices — The Australian Accent: variation, and the Broad–General–Cultivated spectrum.',

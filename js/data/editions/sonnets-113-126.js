@@ -2,7 +2,7 @@
 // a pilot and is deliberately absent here; 126 keeps its twelve lines).
 // See editions/index.js. ALL DRAFTS pending human literary and dialect
 // review; original Speechcraft writing; no meter/rhyme claims; no
-// Traditional RP adaptation.
+// Upper Class (RP) adaptation.
 
 export const EDITIONS = {
 

@@ -245,7 +245,7 @@ export const WORDS = [
   { word: 'yes', ipa: ['j', 'e', 's'], accent: 'aus' },
   { word: 'teacher', ipa: ['t', 'iː', 'tʃ', 'ə'], accent: 'aus', note: 'non-rhotic: plain schwa ending' },
 
-  // ── Traditional RP forms of the contemporary-shift words ────
+  // ── Upper Class (RP) forms of the contemporary-shift words ────
   // The "from" side of RP ↔ Contemporary British drills: true /t/, glided
   // SQUARE /eə/, separate yods, lax happY /ɪ/.
   { word: 'square', ipa: ['s', 'k', 'w', 'eə'], accent: 'rp', note: 'RP glides SQUARE: /eə/' },

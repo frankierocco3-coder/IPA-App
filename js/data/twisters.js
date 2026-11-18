@@ -42,7 +42,7 @@ export const SPEAK_DRILLS = [
   { accent: 'nam', kind: 'sentence', text: 'The officer thought the law was all wrong.',
     focus: 'THOUGHT /ɔː/ in thought, law, all, wrong against LOT /ɑ/ in officer.' },
 
-  // ── Traditional RP ───────────────────────────────────────────
+  // ── Upper Class (RP) ───────────────────────────────────────────
   { accent: 'rp', kind: 'twister', text: 'Aunt Frances can’t dance past the grass path after class.',
     focus: 'The BATH split: aunt, can’t, dance, past, grass, path, after, class all take broad /ɑː/.' },
   { accent: 'rp', kind: 'twister', text: 'Far away, four more cars are parked in order.',
@@ -94,7 +94,7 @@ export const SPEAK_DRILLS = [
   { accent: 'ssbe', kind: 'sentence', text: 'No, don’t go home alone over the snow.',
     focus: 'GOAT /əʊ/ carried through no, don’t, go, home, alone, over, snow.' },
   { accent: 'ssbe', kind: 'sentence', text: 'It’s Tuesday, isn’t it? The tutor is due at two.',
-    focus: 'Yod coalescence, the course target: Tuesday lands as “chewsday”, tutor as “chooter”, due as “Jew”. Two keeps plain /t/, so the line sets the fused sound against the one place it cannot happen. Traditional RP holds /tj dj/ apart and now reads as formal.' },
+    focus: 'Yod coalescence, the course target: Tuesday lands as “chewsday”, tutor as “chooter”, due as “Jew”. Two keeps plain /t/, so the line sets the fused sound against the one place it cannot happen. Upper Class (RP) holds /tj dj/ apart and now reads as formal.' },
 
   // ── Australian ───────────────────────────────────────────────
   { accent: 'aus', kind: 'twister', text: 'They say the rain came late again today, mate.',

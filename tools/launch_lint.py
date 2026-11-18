@@ -6,7 +6,7 @@ Zero-dependency static checks that fail the deploy when:
   2. A forbidden course name appears in shipped JS/HTML strings
      (Contemporary British / Standard Southern / SSBE-as-display /
      "educated southern" / No Fear Shakespeare).
-  3. Traditional RP does not use 🎩, or General British does not use 🇬🇧,
+  3. Upper Class (RP) does not use 🎩, or General British does not use 🇬🇧,
      or both courses share an icon.
   4. General British checkpoints lose their deterministic Words &
      Expressions material (the expandUnit extras line).
@@ -75,11 +75,11 @@ def main():
 
     # 3: icons
     if not re.search(r"id: 'rp', icon: '🎩'", views_js):
-        fail("Traditional RP course icon is not 🎩 in COURSES")
+        fail("Upper Class (RP) course icon is not 🎩 in COURSES")
     if not re.search(r"id: 'ssbe', icon: '🇬🇧'", views_js):
         fail("General British course icon is not 🇬🇧 in COURSES")
-    if "title: 'Traditional RP',\n    icon: '🎩'" not in course_js:
-        fail("Traditional RP track icon is not 🎩")
+    if "title: 'Upper Class (RP)',\n    icon: '🎩'" not in course_js:
+        fail("Upper Class (RP) track icon is not 🎩")
     if "title: 'General British',\n    icon: '🇬🇧'" not in course_js:
         fail("General British track icon is not 🇬🇧")
 
@@ -711,7 +711,7 @@ def main():
                 fail("editions/%s.js has %d %r entries, manifest expects %s"
                      % (fname, cnt, key.split(':')[0], expect))
         if "rp: `" in src:
-            fail("a Traditional RP vocabulary adaptation appeared in editions/%s.js — "
+            fail("an Upper Class (RP) vocabulary adaptation appeared in editions/%s.js — "
                  "RP is a pronunciation target; its course shows Original + Plain "
                  "Meaning only (documented decision)" % fname)
         if "No Fear" in src:

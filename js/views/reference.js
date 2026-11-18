@@ -161,7 +161,7 @@ function wiiStepHtml(step, st) {
       </div>
       <div class="guide-word">
         <button class="word-chip" data-say="bar" data-lang="en-GB" data-acc="rp" type="button">🔊 bar 🎩</button>
-        <span class="guide-ipa">/bɑː/</span><span class="guide-note">Traditional RP — the r becomes vowel length</span>
+        <span class="guide-ipa">/bɑː/</span><span class="guide-note">Upper Class (RP) — the r becomes vowel length</span>
       </div>
       <details class="idiom-extra"><summary>Advanced detail — narrow transcription</summary>
         <p class="pane-note">Square brackets [ ] mark a <i>narrow</i> transcription: exactly what a speaker did, with diacritics for fine detail — [kʰɑːˑ] notes aspiration and length. Speechcraft teaches broad transcription; narrow can wait.</p>

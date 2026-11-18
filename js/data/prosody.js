@@ -39,7 +39,7 @@ export const PROSODY = {
   },
   ssbe: {
     clause: 'the falls are smaller and the ends of phrases run flatter, on more level tails',
-    tell: 'Smaller falls than Traditional RP, with level tails.',
+    tell: 'Smaller falls than Upper Class (RP), with level tails.',
   },
   cockney: {
     clause: 'speech runs quick, forward and heavily linked, with the glottal stop carrying much of the consonant rhythm',

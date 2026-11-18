@@ -8,10 +8,10 @@
 //           the emotional progression, the volta, and the couplet.
 //   nam   — In Today's Voice, Neutral American
 //   ssbe  — In Today's Voice, General British (class-neutral,
-//           deliberately distinct from Traditional RP)
+//           deliberately distinct from Upper Class (RP))
 //   aus   — In Today's Voice, Australian
 //
-// DELIBERATE DECISION — NO TRADITIONAL RP ADAPTATION: Traditional RP is
+// DELIBERATE DECISION — NO TRADITIONAL RP ADAPTATION: Upper Class (RP) is
 // principally a pronunciation target, not a fixed modern slang register;
 // a "period slang" version would be a costume, not a voice. The RP
 // course offers Original + Plain Meaning only. launch_lint fails the

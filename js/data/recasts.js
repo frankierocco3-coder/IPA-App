@@ -13,7 +13,7 @@
 //                      reviewed.
 //
 // All content is original to Speechcraft. No third-party modern study
-// guides or translations were consulted or reproduced. Traditional RP
+// guides or translations were consulted or reproduced. Upper Class (RP)
 // deliberately offers Original + Plain Meaning only — a slang RP
 // "translation" would be a costume, not a register.
 //
@@ -30,7 +30,7 @@ export const TRANSPOSITION_LABELS = {
   nam: 'Neutral American Transposition',
   ssbe: 'General British Transposition',
   aus: 'Australian Transposition',
-  rp: 'Traditional RP Transposition',
+  rp: 'Upper Class (RP) Transposition',
 };
 
 // HISTORY, NOT A GATE (frozen 2026-09-25). This map WAS the pilots'

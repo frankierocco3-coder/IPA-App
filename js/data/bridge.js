@@ -33,7 +33,7 @@ export const BRIDGE_ROUTES = [
     id: 'nam-rp',
     from: 'nam',
     to: 'rp',
-    title: 'Neutral American → Traditional RP',
+    title: 'Neutral American → Upper Class (RP)',
     intro: 'You already have most of this accent. These are the changes that typically carry the distance — worked through sounds you use every day.',
     comparisons: [
       {
@@ -170,7 +170,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'tuːn',
         targetIPA: 'tjuːn',
         stays: 'The long GOOSE vowel itself.',
-        changes: 'After /t d n/, Traditional RP typically keeps a /j/ your accent dropped: tune /tjuːn/, duty /ˈdjuːtɪ/, new /njuː/ — two crisp sounds, never fused into “choon”.',
+        changes: 'After /t d n/, Upper Class (RP) typically keeps a /j/ your accent dropped: tune /tjuːn/, duty /ˈdjuːtɪ/, new /njuː/ — two crisp sounds, never fused into “choon”.',
         guidance: {
           lips: 'Neutral into rounded as the /uː/ arrives.',
           tongue: 'Tip makes the /t/, then the FRONT glides through /j/ before the vowel.',
@@ -297,7 +297,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'kɛr',
         targetIPA: 'kɛː',
         stays: 'The open-mid front starting position.',
-        changes: 'Where you say vowel-plus-r, General British typically holds one long steady vowel: /ɛː/ — care, air, there. No r, and (unlike Traditional RP) no glide either: the vowel simply lasts.',
+        changes: 'Where you say vowel-plus-r, General British typically holds one long steady vowel: /ɛː/ — care, air, there. No r, and (unlike Upper Class (RP)) no glide either: the vowel simply lasts.',
         guidance: {
           lips: 'Relaxed, slightly spread, unmoving.',
           tongue: 'Mid-front and STILL — resist both the r and any drift to schwa.',
@@ -315,7 +315,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'tuːn',
         targetIPA: 'tʃuːn',
         stays: 'The long GOOSE vowel (spoken well forward in this accent).',
-        changes: 'Where your accent dropped the yod, General British typically fused it: tune /tʃuːn/, duty /ˈdʒuːti/. This is the modern habit — Traditional RP keeps /tj dj/ separate instead.',
+        changes: 'Where your accent dropped the yod, General British typically fused it: tune /tʃuːn/, duty /ˈdʒuːti/. This is the modern habit — Upper Class (RP) keeps /tj dj/ separate instead.',
         guidance: {
           lips: 'Slight rounding through the affricate into the vowel.',
           tongue: 'Blade makes the /tʃ/ in one gesture — no separate t-then-y.',
@@ -469,9 +469,9 @@ export const BRIDGE_ROUTES = [
     id: 'rp-nam',
     from: 'rp',
     to: 'nam',
-    title: 'Traditional RP → Neutral American',
+    title: 'Upper Class (RP) → Neutral American',
     intro: 'Mostly the RP journey run backwards: every written r returns and colours its vowel, BATH flattens, LOT unrounds — and the careful /t/ learns to relax between vowels.',
-    sourceNote: 'Restates the Traditional RP and Neutral American course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the Upper Class (RP) and Neutral American course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -606,9 +606,9 @@ export const BRIDGE_ROUTES = [
     id: 'rp-ssbe',
     from: 'rp',
     to: 'ssbe',
-    title: 'Traditional RP → General British',
+    title: 'Upper Class (RP) → General British',
     intro: 'The shortest route in the app: the skeleton — non-rhoticity, BATH, LOT, GOAT — is shared. What changes is a generation of habits: SQUARE steadies, happY tenses, yods fuse, and the /t/ relaxes when off duty.',
-    sourceNote: 'Restates the Traditional RP and General British course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the Upper Class (RP) and General British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'square',
@@ -707,9 +707,9 @@ export const BRIDGE_ROUTES = [
     id: 'rp-aus',
     from: 'rp',
     to: 'aus',
-    title: 'Traditional RP → Australian',
+    title: 'Upper Class (RP) → Australian',
     intro: 'Keep the skeleton — both accents are non-rhotic with a BATH split — and re-aim the vowels: every closing diphthong launches from somewhere new, GOOSE moves to the front, and the open vowels centralise.',
-    sourceNote: 'Restates the Traditional RP and General Australian course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the Upper Class (RP) and General Australian course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',
@@ -981,9 +981,9 @@ export const BRIDGE_ROUTES = [
     id: 'ssbe-rp',
     from: 'ssbe',
     to: 'rp',
-    title: 'General British → Traditional RP',
+    title: 'General British → Upper Class (RP)',
     intro: 'One generation back. The skeleton you already have is RP’s — what changes is discipline: the /t/ goes back on duty everywhere, the yods separate, SQUARE learns to glide, and happY relaxes.',
-    sourceNote: 'Restates the General British and Traditional RP course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the General British and Upper Class (RP) course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'square',
@@ -1356,9 +1356,9 @@ export const BRIDGE_ROUTES = [
     id: 'aus-rp',
     from: 'aus',
     to: 'rp',
-    title: 'Australian → Traditional RP',
+    title: 'Australian → Upper Class (RP)',
     intro: 'Stay non-rhotic — that instinct transfers whole — and move the vowels back and up: the diphthongs return to their conservative launches, GOOSE retreats, and the yods separate into period precision.',
-    sourceNote: 'Restates the General Australian and Traditional RP course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the General Australian and Upper Class (RP) course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',

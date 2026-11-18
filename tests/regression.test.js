@@ -1829,7 +1829,7 @@ export async function run({ navDoc = document } = {}) {
       BRIDGE_ROUTES.filter(r => r.from === 'ssbe' || r.to === 'ssbe')
         .every(r => r.title.includes('General British'))
       && BRIDGE_ROUTES.filter(r => r.from === 'rp' || r.to === 'rp')
-        .every(r => r.title.includes('Traditional RP'))
+        .every(r => r.title.includes('Upper Class (RP)'))
       && BRIDGE_ROUTES.every(r => !/SSBE|Educated Southern|Contemporary British/.test(r.title))
       && routeStatus('rp', 'ssbe') === 'draft' && routeStatus('ssbe', 'rp') === 'draft');
 
@@ -2056,16 +2056,16 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('mode-bridge')
         && String(listeningTitles()) === 'Listen & Choose,Minimal Pairs');
 
-      // Traditional RP — the ONE course that had a playable route in.
+      // Upper Class (RP) — the ONE course that had a playable route in.
       // Withdrawn 2026-08-17 behind BRIDGE_LIVE: the card must be ABSENT
       // here too, with the two Listening games intact, no bridge copy or
       // setup ids anywhere, and Practice state untouched. The full-session
       // drive (setup, 8 rounds, XP, Replay) is retired with the card; the
       // data checks above keep the un-withdrawal path tested.
       const completedBefore14 = store.completed.size;
-      await switchCourse('Traditional RP');
+      await switchCourse('Upper Class (RP)');
       clickIn(side('Practice')); await sleep(400);
-      check('bridge UI: withdrawn — no Accent Bridge card even on Traditional RP, both games intact',
+      check('bridge UI: withdrawn — no Accent Bridge card even on Upper Class (RP), both games intact',
         !doc.getElementById('mode-bridge')
         && String(listeningTitles()) === 'Listen & Choose,Minimal Pairs');
       check('bridge UI: withdrawn — no bridge copy, setup ids or session husks anywhere on Practice',
@@ -2295,7 +2295,7 @@ export async function run({ navDoc = document } = {}) {
         && dchip().getAttribute('aria-expanded') === 'false');
       check('dialect: the audio line speaks about the CHOSEN dialect only',
         /Neutral American/.test(doc.getElementById('rd-audio')?.textContent ?? '')
-        && !/East London|Australian|Traditional RP/.test(doc.getElementById('rd-audio')?.textContent ?? ''),
+        && !/East London|Australian|Upper Class \(RP\)/.test(doc.getElementById('rd-audio')?.textContent ?? ''),
         doc.getElementById('rd-audio')?.textContent);
       clickIn(dchip()); await sleep(200);
       const rows = [...(dmenu()?.querySelectorAll('.course-row') ?? [])];
@@ -2893,8 +2893,8 @@ export async function run({ navDoc = document } = {}) {
         && !!doc.querySelector('.vp-stage'));
       clickIn(doc.getElementById('course-chip')); await sleep(200);
       check('workspaces: the course menu offers all six, IPA Foundations included',
-        ['IPA Foundations', 'Neutral American', 'Traditional RP',
-         'General British', 'East London', 'Australian']
+        ['IPA Foundations', 'Neutral American', 'Upper Class (RP)',
+         'General British', 'East London (Cockney)', 'Australian']
           .every(n => [...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes(n))));
       clickIn(doc.body); await sleep(150);
       check('workspaces: the pinned IPA-Foundations label is gone with the merge',
@@ -4134,8 +4134,8 @@ export async function run({ navDoc = document } = {}) {
       check('acting: Voice & Speech carries one selector offering all six courses',
         !!doc.getElementById('course-chip')
         && !doc.getElementById('ipa-context')
-        && ['IPA Foundations', 'Neutral American', 'Traditional RP',
-            'General British', 'East London', 'Australian']
+        && ['IPA Foundations', 'Neutral American', 'Upper Class (RP)',
+            'General British', 'East London (Cockney)', 'Australian']
           .every(n => mergedRows.some(r => r.includes(n))),
         `rows=${mergedRows.length}`);
       check('acting: the course list is the course chip’s, never the workspace menu’s',
@@ -4600,7 +4600,7 @@ export async function run({ navDoc = document } = {}) {
       !/renders: 'about-/.test(facetSrc));
     check('about removal: no learner-facing copy points at an About page',
       ![src, facetSrc, bridgeSrc].some(t =>
-        /Library → About|About the Accent|About page|About Neutral American|About Traditional RP|About General British|About General Australian/.test(t)));
+        /Library → About|About the Accent|About page|About Neutral American|About Upper Class \(RP\)|About General British|About General Australian/.test(t)));
     check('ssbe intro: says it appears only on the first visit',
       /This introduction appears only on your first visit\./.test(src)
       && !/reread this any time/.test(src));
@@ -7207,7 +7207,7 @@ export async function run({ navDoc = document } = {}) {
         .every(x => /option/.test(x.focus)));
     // The coalesced yod is the feature a British actor is heard on first,
     // so both British courses carry a Tuesday sentence, not only a twister.
-    check('drills: General British and East London each drill Tuesday in a sentence',
+    check('drills: General British and East London (Cockney) each drill Tuesday in a sentence',
       ['ssbe', 'cockney'].every(a => SPEAK_DRILLS.some(x =>
         x.accent === a && x.kind === 'sentence' && /Tuesday/.test(x.text)
         && /coalescence/.test(x.focus))));
