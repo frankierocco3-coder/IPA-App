@@ -7611,25 +7611,6 @@ function renderMusicalWorkbook() {
   wireBrandHome();
 }
 
-function renderActingGlossary() {
-  record(renderActingGlossary);
-  stopSpeech();
-  workspacePage(
-    pageTopbar('📕 Acting Glossary', '#8a6d3b'),
-    `<div class="ws-head">
-       <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">📕</span>Acting Glossary</h1>
-       <p class="ws-sub">${Object.keys(ACTING_GLOSSARY).length} terms · Acting Library</p>
-     </div>`,
-    '<dl class="anat-list sp-terms" id="ac-glossary"></dl>');
-  const gl = document.getElementById('ac-glossary');
-  for (const [, t] of Object.entries(ACTING_GLOSSARY)) {
-    const row = document.createElement('div');
-    const dt = document.createElement('dt'); dt.textContent = t.term;
-    const dd = document.createElement('dd'); dd.textContent = t.def;
-    row.append(dt, dd); gl.appendChild(row);
-  }
-}
-
 // ── Acting → Practice ─────────────────────────────────────────
 // Function words carry no accent feature worth a listen button.
 const DRILL_SMALL_WORDS = new Set(['a', 'an', 'the', 'of', 'to', 'at', 'in', 'on', 'and', 'or', 'it', 'is', 'if', 'by', 'but', 'got', 'get', 'that', 'this']);
