@@ -2997,94 +2997,6 @@ export async function run({ navDoc = document } = {}) {
       check('review: prepared work is never called missing or coming soon',
         !/coming soon|not yet written|is missing/i.test(doc.querySelector('main')?.textContent ?? ''));
 
-      // The two-application lesson: distinct tabs, acting default under
-      // the acting goal, glossary dialog that never touches history.
-      // Self-contained: pin the workspace and set the acting goal — the
-      // acting-first tab default only exists under that goal, and the
-      // workspace selector only exists on the shell.
-      clickIn(doc.getElementById('brand-home')); await sleep(300);
-      await pickWorkspace('speech');
-      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
-      await sleep(350);
-      const goalTabs = speechGoal();
-      setSpeechGoal('acting');
-      clickIn(doc.querySelector('[data-tile="textbook"]')); await sleep(400);
-      clickIn(doc.querySelector('[data-ch="sp-m-want"]'));
-      await until(() => doc.querySelector('.sp-tabs'));
-      setSpeechGoal(goalTabs);
-      const tabs = [...doc.querySelectorAll('.sp-tabs .son-tab')].map(b => b.textContent);
-      check('speech: What Do You Want? keeps Everyday and Acting & Text distinct',
-        String(tabs) === 'Everyday Speaking,Acting & Text'
-        && doc.querySelector('.sp-tabs .son-tab.on')?.textContent === 'Acting & Text'
-        && (doc.querySelector('.sp-tabpane[data-pane="acting"]:not([hidden])')?.textContent ?? '')
-          .includes('Given circumstances')
-        && !doc.querySelector('.sp-tabpane[data-pane="everyday"]:not([hidden])'));
-      clickIn([...doc.querySelectorAll('.sp-tabs .son-tab')].find(b => b.textContent === 'Everyday Speaking'));
-      await sleep(200);
-      check('speech: the Everyday tab carries its own teaching, not a copy of the acting tab',
-        !!doc.querySelector('.sp-tabpane[data-pane="everyday"]:not([hidden])')
-        && !doc.querySelector('.sp-tabpane[data-pane="acting"]:not([hidden])')
-        && doc.querySelector('.sp-tabpane[data-pane="everyday"]').textContent.includes('Desired result'));
-      const histLen = w().history.length;
-      const hashBefore = w().location.hash;
-      clickIn(doc.querySelector('[data-gloss]')); await sleep(250);
-      check('speech: a glossary term opens in place as an accessible dialog',
-        !!doc.querySelector('.gloss-overlay [role="dialog"]')
-        && doc.activeElement === doc.querySelector('.gloss-card .btn'));
-      doc.querySelector('.gloss-card')?.dispatchEvent(
-        new (frame.contentWindow.KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
-      await sleep(200);
-      check('speech: Esc dismisses the glossary; browser history untouched',
-        !doc.querySelector('.gloss-overlay')
-        && w().history.length === histLen && w().location.hash === hashBefore);
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-
-      // Completion is recorded once, never twice; then a gated Stage-1 page.
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-      // Nothing awards anything anywhere now, so the live assertion is
-      // that reading does not mark a LESSON complete: the Library is a
-      // reference, not a course.
-      const doneBeforeRead = store.completed.size;
-      check('speech: reading a chapter never completes a lesson — the Library is not a course',
-        store.completed.size === doneBeforeRead);
-      clickIn(doc.getElementById('brand-home')); await sleep(300);
-      clickIn(side('Library')); await sleep(350);
-      clickIn(doc.querySelector('[data-tile="textbook"]')); await sleep(400);
-      clickIn(doc.querySelector('[data-ch="sp-f-jaw"]')); await sleep(380);
-      check('speech: the anatomy chapter is published — body renders, owner-approved, specialist review honestly outstanding',
-        doc.body.textContent.includes('Bruxism may contribute')
-        && !doc.body.textContent.includes('awaiting review by a qualified voice professional')
-        && speechReviewFor('sp-f-jaw')?.verdict === 'owner-approved'
-        && speechReviewFor('sp-f-jaw')?.reviewerType === 'product-owner'
-        && speechReviewFor('sp-f-jaw')?.date === '2026-08-14'
-        && !speechApproved('sp-f-jaw'));
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-      clickIn(doc.getElementById('nav-back')); await sleep(300);
-
-      // Approaches now live in the Acting Library, published by the
-      // 2026-08-17 owner editorial approval. Self-contained: the
-      // workspace selector only exists on the shell, so go home first.
-      clickIn(doc.getElementById('brand-home')); await sleep(300);
-      await pickWorkspace('acting');
-      clickIn(side('Library')); await sleep(350);
-      clickIn(doc.querySelector('[data-tile="col:approaches"]')); await sleep(350);
-      check('speech: all four approaches published — owner approval recorded, specialist review still outstanding',
-        doc.querySelectorAll('[data-approach]').length === 4
-        && ACTING_APPROACHES.every(a => !!doc.querySelector(`[data-approach="${a.id}"]`))
-        && [...doc.querySelectorAll('[data-approach]')].every(b => !b.textContent.includes('awaiting review'))
-        && ACTING_APPROACHES.every(a => speechReviewFor(a.id)?.verdict === 'owner-approved'
-          && speechReviewFor(a.id)?.date === '2026-08-17'
-          && !speechApproved(a.id)));
-      clickIn(doc.querySelector('[data-approach="adler"]')); await sleep(300);
-      check('speech: a published approach page carries its method content — no gate, honest ledger',
-        doc.querySelector('main h1')?.textContent === 'Stella Adler'
-        && doc.body.textContent.includes('Historical background')
-        && doc.body.textContent.includes('justification (finding the reason')
-        && !doc.body.textContent.includes('awaiting review by a qualified acting teacher')
-        && speechReviewFor('adler')?.verdict === 'owner-approved'
-        && !speechApproved('adler'));
-      clickIn(doc.getElementById('nav-back')); await sleep(250);
       // Back to Speech from a known state — the workspace selector only
       // exists on the shell. Dialects in Speech now lives behind the
       // Library's "IPA, Sound & Dialect Reference" card, and the Accent
@@ -3427,6 +3339,161 @@ export async function run({ navDoc = document } = {}) {
     ok('Speech system drive (skipped — SPEECH_LIVE is false)');
   } else {
     ok('Speech system drive (runner only — run tests/run-all.html)');
+  }
+
+  // ── 19c. Speech surfaces that are still reachable ────────────
+  // These EIGHT checks lived inside 19b and ran ZERO TIMES, because 19b is
+  // skipped behind SPEECH_LIVE. Nothing they test is withdrawn: the
+  // Speechcraft Textbook is shelved in the ACTING Library, its chapter
+  // pages still render the tab panes, the glossary dialog and the chapter
+  // nav, and Approaches was already being driven from Acting. Only the way
+  // IN was Speech-shaped. Lifted out 2026-11-18, entry changed to Acting
+  // and the tile key to `col:textbook`; everything else is as it was.
+  if (navDoc !== document) {
+    const frame = document.querySelector('iframe');
+    const sleep = scSleep;
+    try {
+      const doc = frame.contentDocument;
+      const w = () => frame.contentWindow;
+      const clickIn = el => el?.dispatchEvent(new (frame.contentWindow.MouseEvent)('click', { bubbles: true }));
+      const side = name => [...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes(name));
+      const until = async (fn, ms = 10000) => { const t0 = Date.now();
+        while (Date.now() - t0 < ms) { if (fn()) return true; await sleep(200); } return fn(); };
+      const pickWorkspace = async id => {
+        clickIn(doc.getElementById('ws-chip')); await sleep(150);
+        clickIn(doc.querySelector(`[data-ws="${id}"]`)); await sleep(400);
+      };
+      // The two-application lesson: distinct tabs, acting default under
+      // the acting goal, glossary dialog that never touches history.
+      // Self-contained: pin the workspace and set the acting goal — the
+      // acting-first tab default only exists under that goal, and the
+      // workspace selector only exists on the shell.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      await pickWorkspace('acting');
+      clickIn([...doc.querySelectorAll('.side-item')].find(b => b.textContent.includes('Library')));
+      await sleep(350);
+      const goalTabs = speechGoal();
+      setSpeechGoal('acting');
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ch="sp-m-want"]'));
+      await until(() => doc.querySelector('.sp-tabs'));
+      setSpeechGoal(goalTabs);
+      const tabs = [...doc.querySelectorAll('.sp-tabs .son-tab')].map(b => b.textContent);
+      check('speech: What Do You Want? keeps Everyday and Acting & Text distinct',
+        String(tabs) === 'Everyday Speaking,Acting & Text'
+        && doc.querySelector('.sp-tabs .son-tab.on')?.textContent === 'Acting & Text'
+        && (doc.querySelector('.sp-tabpane[data-pane="acting"]:not([hidden])')?.textContent ?? '')
+          .includes('Given circumstances')
+        && !doc.querySelector('.sp-tabpane[data-pane="everyday"]:not([hidden])'));
+      clickIn([...doc.querySelectorAll('.sp-tabs .son-tab')].find(b => b.textContent === 'Everyday Speaking'));
+      await sleep(200);
+      check('speech: the Everyday tab carries its own teaching, not a copy of the acting tab',
+        !!doc.querySelector('.sp-tabpane[data-pane="everyday"]:not([hidden])')
+        && !doc.querySelector('.sp-tabpane[data-pane="acting"]:not([hidden])')
+        && doc.querySelector('.sp-tabpane[data-pane="everyday"]').textContent.includes('Desired result'));
+      const histLen = w().history.length;
+      const hashBefore = w().location.hash;
+      clickIn(doc.querySelector('[data-gloss]')); await sleep(250);
+      check('speech: a glossary term opens in place as an accessible dialog',
+        !!doc.querySelector('.gloss-overlay [role="dialog"]')
+        && doc.activeElement === doc.querySelector('.gloss-card .btn'));
+      doc.querySelector('.gloss-card')?.dispatchEvent(
+        new (frame.contentWindow.KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
+      await sleep(200);
+      check('speech: Esc dismisses the glossary; browser history untouched',
+        !doc.querySelector('.gloss-overlay')
+        && w().history.length === histLen && w().location.hash === hashBefore);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+
+      // Completion is recorded once, never twice; then a gated Stage-1 page.
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      // Nothing awards anything anywhere now, so the live assertion is
+      // that reading does not mark a LESSON complete: the Library is a
+      // reference, not a course.
+      const doneBeforeRead = store.completed.size;
+      check('speech: reading a chapter never completes a lesson — the Library is not a course',
+        store.completed.size === doneBeforeRead);
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      clickIn(side('Library')); await sleep(350);
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(400);
+      clickIn(doc.querySelector('[data-ch="sp-f-jaw"]')); await sleep(380);
+      check('speech: the anatomy chapter is published — body renders, owner-approved, specialist review honestly outstanding',
+        doc.body.textContent.includes('Bruxism may contribute')
+        && !doc.body.textContent.includes('awaiting review by a qualified voice professional')
+        && speechReviewFor('sp-f-jaw')?.verdict === 'owner-approved'
+        && speechReviewFor('sp-f-jaw')?.reviewerType === 'product-owner'
+        && speechReviewFor('sp-f-jaw')?.date === '2026-08-14'
+        && !speechApproved('sp-f-jaw'));
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+      clickIn(doc.getElementById('nav-back')); await sleep(300);
+
+      // Approaches now live in the Acting Library, published by the
+      // 2026-08-17 owner editorial approval. Self-contained: the
+      // workspace selector only exists on the shell, so go home first.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      await pickWorkspace('acting');
+      clickIn(side('Library')); await sleep(350);
+      clickIn(doc.querySelector('[data-tile="col:approaches"]')); await sleep(350);
+      check('speech: all four approaches published — owner approval recorded, specialist review still outstanding',
+        doc.querySelectorAll('[data-approach]').length === 4
+        && ACTING_APPROACHES.every(a => !!doc.querySelector(`[data-approach="${a.id}"]`))
+        && [...doc.querySelectorAll('[data-approach]')].every(b => !b.textContent.includes('awaiting review'))
+        && ACTING_APPROACHES.every(a => speechReviewFor(a.id)?.verdict === 'owner-approved'
+          && speechReviewFor(a.id)?.date === '2026-08-17'
+          && !speechApproved(a.id)));
+      clickIn(doc.querySelector('[data-approach="adler"]')); await sleep(300);
+      check('speech: a published approach page carries its method content — no gate, honest ledger',
+        doc.querySelector('main h1')?.textContent === 'Stella Adler'
+        && doc.body.textContent.includes('Historical background')
+        && doc.body.textContent.includes('justification (finding the reason')
+        && !doc.body.textContent.includes('awaiting review by a qualified acting teacher')
+        && speechReviewFor('adler')?.verdict === 'owner-approved'
+        && !speechApproved('adler'));
+      clickIn(doc.getElementById('nav-back')); await sleep(250);
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+    } catch (err) {
+      bad('Speech surfaces still reachable', String(err?.stack ?? err).slice(0, 220));
+    }
+  } else {
+    ok('Speech reachable surfaces (runner only — run tests/run-all.html)');
+  }
+
+  // ── 19d. The dormancy guard ──────────────────────────────────
+  // Section 19b is skipped whole while SPEECH_LIVE is false, and that is
+  // CORRECT: those drives need a workspace that is not rendered. What is
+  // not correct is that a check added inside it runs zero times, reports
+  // nothing, and therefore cannot fail — it looks green forever.
+  //
+  // 2026-11-18: I put two new checks in 19b. Nothing went red. The only
+  // symptom was the total reading 899 where 901 was due, which is exactly
+  // the kind of signal nobody reads. So the dormant population is PINNED.
+  // Add a check inside the gate and this check goes red with the new
+  // number — which is the prompt to ask whether it belongs in 19c, where
+  // the still-reachable Speech surfaces are driven, instead.
+  {
+    const selfSrc = await fetch('./regression.test.js').then(r => r.text()).catch(() => '');
+    if (!selfSrc) {
+      ok('suite: dormancy guard (own source unavailable here)');
+    } else {
+      const gate = 'if (navDoc !== document && speechLive) {';
+      const i = selfSrc.indexOf(gate);
+      const j = i < 0 ? -1 : selfSrc.indexOf('\n  } else if (navDoc !== document) {', i);
+      const dormant = (i < 0 || j < 0)
+        ? -1
+        : (selfSrc.slice(i, j).match(/\bcheck\(/g) ?? []).length;
+      check('suite: the SPEECH_LIVE-gated block holds exactly the 58 dormant checks it is known to hold',
+        dormant === 58,
+        `${dormant} checks inside the gate — pinned at 58. If you just added one, `
+        + 'it will NEVER RUN. Move it to 19c if its surface is reachable today.');
+      // Matched at LINE START with the file's own indentation, because a
+      // bare /&& speechLive/ also matches the three times this guard names
+      // the gate in its own source — which is how it first went red.
+      const gates = (selfSrc.match(/\n {2}if \(navDoc !== document && speechLive\) \{/g) ?? []).length;
+      check('suite: speechLive gates exactly one block, so this guard covers all of it',
+        gates === 1,
+        gates + ' gated block(s) — if this grew, the new one is dormant too and needs its own pin');
+    }
   }
 
   // ── 20. The Acting workspace ─────────────────────────────────
@@ -4434,8 +4501,16 @@ export async function run({ navDoc = document } = {}) {
       typeof SPEECH_LESSON_EXTRAS['sp-start-parts'].check === 'object');
   }
 
-  // Skipped while the Speech workspace is withdrawn — see `speechLive`.
-  if (navDoc !== document && speechLive) {
+  // THE GUIDED READING DRIVE — no longer skipped. It was gated behind
+  // `speechLive` because it used to enter through the Speech Library, and
+  // that shelf went with the workspace. Every surface it actually tests
+  // is still here: the Speechcraft Textbook is shelved in the ACTING
+  // Library, a chapter page still renders its "Study this in Learn"
+  // doorway (gated on moduleForLesson, not on SPEECH_LIVE), and the
+  // guided reading, Mark as read and Return to module all work. Only the
+  // way in had to change. Verified by hand before ungating: the whole
+  // flow drives from Acting Library -> Speechcraft Textbook today.
+  if (navDoc !== document) {
     const frame = document.querySelector('iframe');
     const sleep = scSleep;
     try {
@@ -4457,11 +4532,16 @@ export async function run({ navDoc = document } = {}) {
       delete doneBefore[probe];
       localStorage.setItem('speechcraft-speech-done', JSON.stringify(doneBefore));
 
-      await pickWs('speech');
+      // Self-contained: home -> Acting -> Library, so an earlier block can
+      // never strand this one in another workspace. The tile key is
+      // `col:textbook` on the Acting shelf, not the Speech Library's
+      // bare `textbook`.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
+      await pickWs('acting');
       clickIn(side('Library')); await sleep(400);
       // The Textbook is the browsing surface; a chapter page opens the
       // guided reading through its "Study this in Learn" doorway.
-      clickIn(doc.querySelector('[data-tile="textbook"]')); await sleep(380);
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(380);
       const row24 = doc.querySelector(`[data-ch="${probe}"]`);
       check('reading: the Textbook lists the chapter unlocked, no gate to pass',
         !!row24 && !row24.classList.contains('is-pending')
@@ -4513,19 +4593,20 @@ export async function run({ navDoc = document } = {}) {
           return !!draft && !speechApproved(draft.id);
         })());
       check('reading: zero microphone calls across the reading drive', mic24 === 0);
+      // This block drives now, so hand the app back in a neutral state.
+      clickIn(doc.getElementById('brand-home')); await sleep(300);
     } catch (err) {
       bad('Speech reading drive', String(err?.stack ?? err).slice(0, 220));
     }
-  } else if (navDoc !== document) {
-    // The guided Learn pathway lives inside the withdrawn workspace; its
-    // reading metadata must survive so the flag-flip restores it whole.
-    check('reading: the guided pathway is dormant, its metadata intact',
-      SPEECH_LESSONS.filter(l => l.id !== 'wsm')
-        .every(l => (SPEECH_LESSON_EXTRAS[l.id]?.objective ?? '').length > 20));
-    ok('Speech reading drive (skipped — SPEECH_LIVE is false)');
   } else {
     ok('Speech reading drive (runner only — run tests/run-all.html)');
   }
+  // Was the else-branch of the gate above, which no longer exists. It is a
+  // data check, not a drive, so it belongs in both modes: every chapter
+  // keeps the reading metadata a flag-flip would need.
+  check('reading: every chapter keeps its reading metadata, flag or no flag',
+    SPEECH_LESSONS.filter(l => l.id !== 'wsm')
+      .every(l => (SPEECH_LESSON_EXTRAS[l.id]?.objective ?? '').length > 20));
 
   // ── 25. The Speechcraft Textbook ─────────────────────────────
   {
