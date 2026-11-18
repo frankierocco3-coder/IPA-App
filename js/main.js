@@ -48,7 +48,7 @@ import { BRIDGE_ROUTES, routeFor, routeStatus, bridgeDrafts,
          loadBridgePrefs, saveBridgePrefs } from './data/bridge.js';
 import { SPEECH_STAGES, SPEECH_MODULES, speechModuleGroups, speechReading,
          TEXTBOOK_PARTS, TEXTBOOK_END_MATTER, textbookOrder, partForChapter,
-         chapterTitle, CHAPTER_TITLES, SPEECH_COLLECTIONS, SPEECH_LESSONS, speechLessonsFor,
+         chapterTitle, CHAPTER_TITLES, chapterNote, SPEECH_COLLECTIONS, SPEECH_LESSONS, speechLessonsFor,
          speechLessonById, collectionForLesson, moduleForLesson, lessonNumber, lessonKeywords,
          SPEECH_REVIEW_WHY, SPEECH_LESSON_EXTRAS,
          PRACTICE_PRINCIPLE_SHORT, SPEECH_SAFETY_LINE, SPEECH_COMFORT_LINE } from './data/speech/speech-course.js';
@@ -2445,7 +2445,10 @@ function renderTextbook() {
     return `
       <button class="chapter-row ${visible ? '' : 'is-pending'}" data-ch="${esc(id)}" type="button">
         <span class="ch-mark" aria-hidden="true">${!visible ? '◌' : done ? '✓' : '○'}</span>
-        <span class="ch-title">${esc(chapterTitle(id))}</span>
+        <span class="ch-text">
+          <span class="ch-title">${esc(chapterTitle(id))}</span>
+          ${chapterNote(id) ? `<span class="ch-note">${esc(chapterNote(id))}</span>` : ''}
+        </span>
         ${visible ? (done ? '<span class="sr-only">Read</span>' : '')
           : '<span class="badge is-pending">Review pending</span>'}
         <span class="tile-chev" aria-hidden="true">›</span>

@@ -838,6 +838,34 @@ export const CHAPTER_TITLES = {
 export const chapterTitle = id =>
   CHAPTER_TITLES[id] ?? (speechLessonById(id)?.title ?? '');
 
+// WHY AN ACTOR READS THIS CHAPTER — eight notes, and the only surviving
+// piece of the "Speech for Actors" page.
+//
+// That page (renderSpeechForActors) curated these eight chapters out of
+// the textbook and gave each one a line aimed at an actor rather than a
+// speaker. It was withdrawn behind SPEECH_LIVE on 2026-08-19 when the
+// Speechcraft Textbook superseded it, and deleted on 2026-11-18 once it
+// turned out nothing had ever called it. The curation was the one part
+// worth keeping, so it lives here instead of behind a second door: the
+// note attaches to the chapter it describes, on the shelf that already
+// carries it.
+//
+// NOT every chapter has one, and that is deliberate — a note means "an
+// actor has a specific reason to read this one", so adding one to all 25
+// would say nothing. renderTextbook renders the line only where it
+// exists.
+export const CHAPTER_NOTES = {
+  'sp-start-fluency': 'Why fluency frees you to listen and respond',
+  'sp-f-instrument': 'The physical chain your performance runs on',
+  'sp-f-breath': 'Breath that supports the scene without taking attention',
+  'sp-f-voice': 'Range and freedom for performance demands',
+  'sp-f-articulation': 'Clarity the back row can follow',
+  'sp-m-pace': 'Pace and phrasing as behavior, not delivery rules',
+  'sp-w-movement': 'Keeping speech available while the body works',
+  'sp-w-applying': 'Letting technique run in the background',
+};
+export const chapterNote = id => CHAPTER_NOTES[id] ?? '';
+
 export const TEXTBOOK_PARTS = [
   { n: 'I', title: 'Speechcraft Principles', tone: 'is-sage',
     chapters: ['wsm', 'sp-start-parts', 'sp-start-alphabet',

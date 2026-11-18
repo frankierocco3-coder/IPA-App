@@ -75,6 +75,7 @@ import { IDIOM, idiomFor, idiomDrafts } from '../js/data/idiom.js';
 import { idiomStatus, idiomVisible, idiomAwaitingSpecialist, CARRIED, IDIOM_REVIEWS } from '../js/data/idiom-reviews.js';
 import { SPEECH_LESSONS, SPEECH_COLLECTIONS, SPEECH_MODULES, speechModuleGroups, speechReading,
          TEXTBOOK_PARTS, TEXTBOOK_END_MATTER, textbookOrder, textbookPartChapters, chapterTitle,
+         CHAPTER_NOTES, chapterNote,
          speechLessonsFor, speechLessonById,
          collectionForLesson, moduleForLesson, lessonNumber, lessonKeywords,
          SPEECH_REVIEW_WHY, SPEECH_LESSON_EXTRAS } from '../js/data/speech/speech-course.js';
@@ -3685,6 +3686,29 @@ export async function run({ navDoc = document } = {}) {
             && !doc.querySelector('.review-strip');
         })(), doc.querySelector('.review-strip')?.textContent?.replace(/\s+/g, ' ').trim());
 
+      // THE EIGHT ACTOR NOTES. They are the only surviving piece of the
+      // deleted Speech for Actors page, and they ride the Textbook's own
+      // chapter rows rather than a second door. Driven from the ACTING
+      // Library on purpose: the Textbook is shelved there while the Speech
+      // workspace is withdrawn, and section 19b — the obvious-looking home
+      // for a textbook check — is skipped behind SPEECH_LIVE, so a check
+      // placed there runs zero times and looks green forever.
+      clickIn(side('Library')); await sleep(400);
+      clickIn(doc.querySelector('[data-tile="col:textbook"]')); await sleep(420);
+      check('textbook: the eight actor notes render, each under its own chapter and no other',
+        doc.querySelectorAll('.chapter-row .ch-note').length === 8
+        && [...doc.querySelectorAll('.chapter-row')].every(r => {
+          const want = CHAPTER_NOTES[r.dataset.ch] ?? '';
+          const got = r.querySelector('.ch-note');
+          return want ? got?.textContent.trim() === want : !got;
+        }),
+        [...doc.querySelectorAll('.chapter-row .ch-note')].map(n => n.textContent.trim()).join(' | '));
+      check('textbook: a note never replaces or hides its chapter title',
+        doc.querySelectorAll('.chapter-row').length === textbookOrder().length
+        && [...doc.querySelectorAll('.chapter-row')].every(r =>
+          (r.querySelector('.ch-title')?.textContent ?? '') === chapterTitle(r.dataset.ch)),
+        [...doc.querySelectorAll('.chapter-row .ch-title')].length + ' titles');
+      clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(side('Library')); await sleep(400);
       // A leftover query in the shared Library search would filter the
       // tile grid — normalize to the unfiltered landing before pinning it.
@@ -4547,6 +4571,17 @@ export async function run({ navDoc = document } = {}) {
         === String(TEXTBOOK_PARTS[0].chapters));
     check('textbook: end matter is reserved, not published',
       TEXTBOOK_END_MATTER.map(e => e.title).join() === 'Key Ideas,Glossary,Sources & Further Reading,Continue Your Work');
+    check('textbook: the eight Speech for Actors notes survive, on real chapters',
+      Object.keys(CHAPTER_NOTES).length === 8
+      && Object.keys(CHAPTER_NOTES).every(id => textbookOrder().includes(id))
+      && Object.values(CHAPTER_NOTES).every(n => typeof n === 'string' && n.length > 10),
+      Object.keys(CHAPTER_NOTES).join(','));
+    check('textbook: they are the exact eight the deleted page curated',
+      Object.keys(CHAPTER_NOTES).slice().sort().join(',')
+        === 'sp-f-articulation,sp-f-breath,sp-f-instrument,sp-f-voice,sp-m-pace,'
+          + 'sp-start-fluency,sp-w-applying,sp-w-movement');
+    check('textbook: chapterNote returns an empty string, never undefined',
+      chapterNote('sp-f-effort') === '' && chapterNote('no-such-chapter') === '');
     check('textbook: the alphabet experiment is one continuous block, no stepper',
       (() => {
         const e = speechLessonById('sp-start-alphabet').body.find(b => b.experiment)?.experiment;

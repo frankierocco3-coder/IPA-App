@@ -2471,6 +2471,13 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .chapter-row.is-pending { background: var(--panel-2); }
 .ch-mark { color: var(--green-dark); font-size: 14px; width: 1.1em; text-align: center; }
 .ch-title { font-size: 15px; font-weight: 600; }
+/* The chapter row's middle column. renderTextbook puts the title and, on
+   the eight chapters that have one, the actor-facing CHAPTER_NOTES line
+   underneath it. min-width:0 so a long note WRAPS inside the 1fr column
+   instead of widening the grid and pushing the page sideways. Rows with
+   no note are a one-child grid and render exactly as before. */
+.ch-text { display: grid; gap: 2px; min-width: 0; }
+.ch-note { font-size: 13px; font-weight: 400; color: var(--muted); line-height: 1.35; }
 
 /* ── The Learn sequence (preview, 2026-10-15) ──────────────────
    A sequence has to read top to bottom, so is-seq undoes the two
