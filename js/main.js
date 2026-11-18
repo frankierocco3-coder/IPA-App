@@ -7298,7 +7298,7 @@ function renderActorIpaTools() {
      </div>`,
     `<div class="item-grid">
        ${itemTileHtml({ key: 'chart', title: 'IPA Chart', note: 'Every sound across the courses' })}
-       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Upper Class (RP), General British, Australian' })}
+       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Upper Class (RP), General British, East London (Cockney), Australian' })}
        ${itemTileHtml({ key: 'dialects', title: 'Dialects in Speech', note: 'How dialect shapes rhythm, register and use' })}
      </div>`);
   app.querySelectorAll('[data-item]').forEach(b =>
