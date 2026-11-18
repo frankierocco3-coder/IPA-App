@@ -537,8 +537,8 @@ script instead and paste its block.
 
 - Neutral American (nam)     live
 - Traditional RP (rp)        live
-- Standard British (ssbe)    live
-- Cockney (cockney)          live
+- General British (ssbe)     live
+- East London (cockney)      live
 - Australian (aus)           live
 - IPA Foundations (core)     live
 

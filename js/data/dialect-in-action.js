@@ -152,7 +152,7 @@ export const DIALECT_ACTION = [
     reviewNotes: 'Original Speechcraft draft, ~150 words. Review period vocabulary and cadence; "knackered" register check for this speaker.',
   },
 
-  // ── Standard British ────────────────────────────────────────
+  // ── General British ────────────────────────────────────────
   {
     id: 'ssbe-exchange-pub',
     courseId: 'ssbe',

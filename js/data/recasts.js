@@ -28,7 +28,7 @@ import { editionStatus } from './edition-reviews.js';
 
 export const TRANSPOSITION_LABELS = {
   nam: 'Neutral American Transposition',
-  ssbe: 'Standard British Transposition',
+  ssbe: 'General British Transposition',
   aus: 'Australian Transposition',
   rp: 'Traditional RP Transposition',
 };

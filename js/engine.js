@@ -33,10 +33,10 @@ const ACCENT_FOREIGN = {
   // Australian uses the HCE/revised symbols /ɔ oː eː ɑe oɪ/, so the RP
   // LOT/THOUGHT/SQUARE/PRICE/CHOICE symbols are foreign to it.
   aus: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ʌ', 'ɑː', 'eɪ', 'aɪ', 'aʊ', 'əʊ', 'uː', 'ɒ', 'ɔː', 'eə', 'ɔɪ', 'ɛː', 'ʔ'],
-  // Standard British shares RP's system but SQUARE is the monophthong
+  // General British shares RP's system but SQUARE is the monophthong
   // /ɛː/, so the old /eə/ diphthong never appears.
   ssbe: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'eə'],
-  // Cockney is taught as realizations over the Standard British system
+  // Cockney is taught as realizations over the General British system
   // (broad symbols shared; th-fronting, glottal and l-vocalized forms are
   // narrow-bracket entries), so its foreign list mirrors ssbe's.
   cockney: ['ɝ', 'ɚ', 'ɑ', 'oʊ', 'ɐ', 'ɐː', 'æɪ', 'ɑe', 'æɔ', 'əʉ', 'ʉː', 'ɔ', 'oː', 'eː', 'oɪ', 'eə'],
@@ -93,7 +93,7 @@ const inventoryFor = accent => {
 const wordsWith = (ph, accent) => poolFor(accent).filter(w => contains(w, ph));
 const wordsWithout = (phs, accent) => poolFor(accent).filter(w => phs.every(p => !contains(w, p)));
 
-const ACCENT_NAMES = { rp: 'Traditional RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'Standard British', cockney: 'Cockney' };
+const ACCENT_NAMES = { rp: 'Traditional RP', nam: 'Neutral American', aus: 'Australian', ssbe: 'General British', cockney: 'East London' };
 
 // Word pairs that exist in both accents: the raw material for shift
 // drills. The RP form is the rp-tagged entry, or the untagged one
@@ -629,7 +629,7 @@ function genIdiom(accent) {
   };
 }
 
-// ── Authored idiom exercises (Standard British) ───────────────
+// ── Authored idiom exercises (General British) ───────────────
 // The banks live in data/idiom.js. These are recognition-focused; the
 // register question is the only one that surfaces flagged terms, because
 // knowing an expression is rude IS the lesson there.
@@ -705,7 +705,7 @@ const GENERATORS = {
   // and served that default's register regardless of the course.
   //
   // THAT WAS TWO LIVE BUGS, not one. idiomRegister defaulted to 'ssbe', so
-  // ck-s2 drilled Standard British expressions (lass, chav) inside the
+  // ck-s2 drilled General British expressions (lass, chav) inside the
   // Cockney course. idiom defaulted to 'rp', so the checkpoint in Standard
   // British's own shift unit served TRADITIONAL RP idioms — a course
   // serving another course's register with nothing in the UI to say so.

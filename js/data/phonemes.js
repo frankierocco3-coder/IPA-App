@@ -308,7 +308,7 @@ export const WORDS = [
   { word: 'lot', ipa: ['l', 'ɒ', 'ʔ'], accent: 'ssbe', narrow: true, note: 'phonemically /lɒt/ — LOT stays rounded /ɒ/; final /t/ often as [ʔ]' },
 
   // ── Cockney ─────────────────────────────────────────────────
-  // Cockney shares Standard British's broad system; what defines it is
+  // Cockney shares General British's broad system; what defines it is
   // the realizations, so most entries are narrow: true and display in
   // square brackets. TH-fronted, glottal and h-dropped forms all keep
   // their underlying phonemes in the note. The diphthong shift (FACE
@@ -333,12 +333,12 @@ export const WORDS = [
   { word: 'city', ipa: ['s', 'ɪ', 'ʔ', 'i'], accent: 'cockney', narrow: true, note: 'phonemically /sɪti/: glottal between vowels, tense happY /i/ at the end' },
   { word: 'house', ipa: ['aʊ', 's'], accent: 'cockney', narrow: true, note: 'phonemically /haʊs/: the /h/ drops in content words' },
   { word: 'hammer', ipa: ['æ', 'm', 'ə'], accent: 'cockney', narrow: true, note: 'phonemically /hæmə/: h-dropping' },
-  { word: 'horse', ipa: ['ɔː', 's'], accent: 'cockney', narrow: true, note: 'phonemically /hɔːs/: h-dropped, THOUGHT vowel as in Standard British' },
-  { word: 'hair', ipa: ['ɛː'], accent: 'cockney', narrow: true, note: 'phonemically /hɛː/: h-dropped, with the steady SQUARE /ɛː/ London shares with Standard British' },
+  { word: 'horse', ipa: ['ɔː', 's'], accent: 'cockney', narrow: true, note: 'phonemically /hɔːs/: h-dropped, THOUGHT vowel as in General British' },
+  { word: 'hair', ipa: ['ɛː'], accent: 'cockney', narrow: true, note: 'phonemically /hɛː/: h-dropped, with the steady SQUARE /ɛː/ London shares with General British' },
   { word: 'home', ipa: ['əʊ', 'm'], accent: 'cockney', narrow: true, note: 'phonemically /həʊm/: h-dropped; broad speakers also shift GOAT toward [æʊ]' },
-  { word: 'fair', ipa: ['f', 'ɛː'], accent: 'cockney', note: 'steady SQUARE /ɛː/, shared with Standard British' },
+  { word: 'fair', ipa: ['f', 'ɛː'], accent: 'cockney', note: 'steady SQUARE /ɛː/, shared with General British' },
   { word: 'there', ipa: ['ð', 'ɛː'], accent: 'cockney', note: 'steady SQUARE; word-initial /ð/ usually survives fronting' },
-  { word: 'tune', ipa: ['tʃ', 'uː', 'n'], accent: 'cockney', note: 'yod-coalescence, shared with Standard British: “choon”' },
+  { word: 'tune', ipa: ['tʃ', 'uː', 'n'], accent: 'cockney', note: 'yod-coalescence, shared with General British: “choon”' },
   { word: 'Tuesday', ipa: ['tʃ', 'uː', 'z', 'd', 'eɪ'], accent: 'cockney', note: 'yod-coalescence: “Chewsday”; broad speakers also shift the final FACE vowel toward [æɪ]' },
   { word: 'duty', ipa: ['dʒ', 'uː', 'ʔ', 'i'], accent: 'cockney', narrow: true, note: 'phonemically /djuːti/: fused yod /dʒ/ and a glottal between vowels' },
   { word: 'face', ipa: ['f', 'eɪ', 's'], accent: 'cockney', note: 'broad /eɪ/ names the phoneme; the Cockney diphthong shift speaks it [æɪ], toward “fice”' },

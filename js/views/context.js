@@ -56,7 +56,7 @@ export function expandUnit(unit) {
       const shiftTo = covered.find(x => x.shiftTo)?.shiftTo;
       // sprinkle in extra game-y types that fit the material
       const extras = accent || shiftTo ? ['fillBlank'] : ['match', 'fillBlank', 'gapBuild'];
-      // Standard British and Cockney checkpoints always carry idiom material
+      // General British and Cockney checkpoints always carry idiom material
       // — meaning questions early, register questions too (deterministic via
       // rotation).
       //
@@ -121,8 +121,8 @@ export const COCKNEY_LIVE = true;
 export const COURSES = [
   { id: 'nam', icon: '🇺🇸', label: 'Neutral American' },
   { id: 'rp', icon: '🎩', label: 'Traditional RP' },
-  { id: 'ssbe', icon: '🇬🇧', label: 'Standard British' },
-  { id: 'cockney', icon: '🚕', label: 'Cockney' },
+  { id: 'ssbe', icon: '🇬🇧', label: 'General British' },
+  { id: 'cockney', icon: '🚕', label: 'East London' },
   { id: 'aus', icon: '🇦🇺', label: 'Australian' },
   { id: 'core', icon: 'ʃə', label: 'IPA Foundations' },
 ];
@@ -575,10 +575,10 @@ export const rhetoricVisible = l => rhetoricPreview() || speechPublished(l.id);
 export const TEXT_DIALECTS = [
   { id: 'nam', label: 'Neutral American', lang: 'en-US', flag: '🇺🇸' },
   { id: 'rp', label: 'Traditional RP', lang: 'en-GB', flag: '🎩' },
-  { id: 'ssbe', label: 'Standard British', lang: 'en-GB', flag: '🇬🇧' },
+  { id: 'ssbe', label: 'General British', lang: 'en-GB', flag: '🇬🇧' },
   // Cockney joins the Studio dialect pickers only when its course is live —
   // a hidden course must never leak through a project screen.
-  ...(COCKNEY_LIVE ? [{ id: 'cockney', label: 'Cockney', lang: 'en-GB', flag: '🚕' }] : []),
+  ...(COCKNEY_LIVE ? [{ id: 'cockney', label: 'East London', lang: 'en-GB', flag: '🚕' }] : []),
   { id: 'aus', label: 'Australian', lang: 'en-AU', flag: '🇦🇺' },
 ];
 export const dialectName = id => (TEXT_DIALECTS.find(d => d.id === id) || {}).label || '';

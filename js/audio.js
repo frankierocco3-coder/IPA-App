@@ -44,7 +44,7 @@ speechSynthesis.onvoiceschanged = () => { Object.keys(voiceCache).forEach(k => d
 export const ACCENT_LANG = { rp: 'en-GB', nam: 'en-US', aus: 'en-AU', ssbe: 'en-GB', cockney: 'en-GB' };
 
 // …and back again, so a spoken language picks the right clip folder. Two
-// accents can share a TTS language (Traditional RP and Standard British are both
+// accents can share a TTS language (Traditional RP and General British are both
 // en-GB), so callers with a known accent pass it explicitly — the lang
 // mapping is only the fallback.
 const LANG_DIR = { 'en-GB': 'rp', 'en-US': 'nam', 'en-AU': 'aus' };

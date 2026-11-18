@@ -2621,7 +2621,7 @@ export const MLE = [
   { term: 'paigon', meaning: 'Enemy, rival, or fake friend' },
 ];
 
-// ── Authored idiom exercise banks (Standard British) ─────────
+// ── Authored idiom exercise banks (General British) ─────────
 // Deterministic lesson material — see the ssbe lesson type lists.
 // Two-line exchanges: pick the natural response.
 export const IDIOM_DIALOGUES = [

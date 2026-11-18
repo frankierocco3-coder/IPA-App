@@ -36,7 +36,7 @@ export const IPA_BOOKS = [
   { id: 'ipa', label: 'General IPA' },
   { id: 'nam', label: 'Neutral American' },
   { id: 'rp', label: 'Traditional RP' },
-  { id: 'ssbe', label: 'Standard British' },
+  { id: 'ssbe', label: 'General British' },
   { id: 'aus', label: 'Australian' },
 ];
 const ACTING_BOOK = { id: 'acting', label: 'Acting' };

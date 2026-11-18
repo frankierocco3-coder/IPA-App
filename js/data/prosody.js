@@ -19,7 +19,7 @@
 // THE DISCRIMINATOR RULE. Each clause below is true of its own accent and
 // FALSE of the other four, because a question whose distractors are also
 // true has no right answer. Function-word reduction is therefore NOT used:
-// Neutral American, Standard British and Cockney all reduce, and the
+// Neutral American, General British and Cockney all reduce, and the
 // standard says so for each. What survives is tune and the rhythmic carrier
 // — a mid-fall, a wide fall, a level tail, a glottal pulse, a rising
 // statement. Self-naming tells are removed ("the innit-style tags" hands

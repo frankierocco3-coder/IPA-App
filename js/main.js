@@ -1252,14 +1252,14 @@ function continueCard(track, course) {
   };
 }
 
-// ── Standard British: one-time introduction ───────────────────
+// ── General British: one-time introduction ───────────────────
 // Shown automatically on the FIRST visit to the course's Learn view, then
 // never again. It has no replay surface, and the card says so plainly —
 // the same material is taught in the course's own orientation lessons.
 
 function ssbeIntroBody() {
   return `
-    <p class="guide-text">Standard British is a modern pronunciation target for present-day British roles and conversation. It keeps core British features while including common present-day patterns — and because real speakers vary by age, region and situation, the course labels each feature honestly:</p>
+    <p class="guide-text">General British is a modern pronunciation target for present-day British roles and conversation. It keeps core British features while including common present-day patterns — and because real speakers vary by age, region and situation, the course labels each feature honestly:</p>
     <div class="guide-word"><span class="wii-who">Core target</span><span class="guide-note">non-rhotic, broad BATH /ɑː/, rounded LOT /ɒ/, steady SQUARE /ɛː/, fronted GOOSE, happY /i/</span></div>
     <div class="guide-word"><span class="wii-who">Common contemporary</span><span class="guide-note">glottal stop for non-initial /t/ (better /beʔə/), fused yods (tune /tʃuːn/)</span></div>
     <div class="guide-word"><span class="wii-who">Variable / relaxed</span><span class="guide-note">NEAR smoothing, heavier glottalling in casual speech — options, not rules</span></div>
@@ -1272,12 +1272,12 @@ function showSsbeIntro(course) {
   const ov = document.createElement('div');
   ov.className = 'intro-overlay';
   ov.innerHTML = `
-    <div class="intro-card" role="dialog" aria-modal="true" aria-label="Meet Standard British" tabindex="-1">
+    <div class="intro-card" role="dialog" aria-modal="true" aria-label="Meet General British" tabindex="-1">
       <button class="quit intro-close" aria-label="Close introduction" type="button">✕</button>
-      <h1>Meet Standard British</h1>
+      <h1>Meet General British</h1>
       ${ssbeIntroBody()}
       <div class="ob-actions ob-actions-col">
-        <button class="btn btn-primary" id="intro-begin" type="button">Begin Standard British</button>
+        <button class="btn btn-primary" id="intro-begin" type="button">Begin General British</button>
         <button class="btn-lite" id="intro-skip" type="button">Not now — just look around</button>
       </div>
       <p class="pane-note">This introduction appears only on your first visit.</p>
@@ -7298,7 +7298,7 @@ function renderActorIpaTools() {
      </div>`,
     `<div class="item-grid">
        ${itemTileHtml({ key: 'chart', title: 'IPA Chart', note: 'Every sound across the courses' })}
-       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Traditional RP, Standard British, Australian' })}
+       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Traditional RP, General British, Australian' })}
        ${itemTileHtml({ key: 'dialects', title: 'Dialects in Speech', note: 'How dialect shapes rhythm, register and use' })}
      </div>`);
   app.querySelectorAll('[data-item]').forEach(b =>
@@ -8660,7 +8660,7 @@ function rhetoricDrillResults(s) {
 // emotion that stands in for it, and the condition on using the shelves.
 //
 // Shown ONCE on the first visit to Rhetoric Learn, on the intro-overlay
-// mechanism the Standard British course already uses, and readable any
+// mechanism the General British course already uses, and readable any
 // time from the Library. The two ways out are the real ones: start the
 // course, or go straight to the shelves. Nobody is made to read it twice,
 // and nobody is prevented from skipping it, because a warning that traps
@@ -10473,7 +10473,7 @@ function renderInventory(d) {
 function renderIdioms(d) {
   record(() => renderIdioms(d));
   // Fresh filters every visit — landing on a pre-filtered list reads as
-  // missing content. Standard British defaults to Contemporary: its period
+  // missing content. General British defaults to Contemporary: its period
   // material is reference, not the point.
   Object.assign(idiomFilters, { q: '', era: d === 'ssbe' ? 'contemporary' : 'all', type: 'all', flagged: false });
   app.innerHTML = `
@@ -11360,7 +11360,7 @@ function hubIdiom(hub, d, track) {
       </details>` : ''}
     ${d === 'ssbe' ? `
       <details class="idiom-extra"><summary>London &amp; Multicultural London English — a separate register</summary>
-        <p class="pane-note">MLE is its own living variety, not generic British slang — these are labelled separately on purpose. Demonstrated in a Standard British accent here, but the words belong to London’s multicultural speech community. Reference only; never drilled.</p>
+        <p class="pane-note">MLE is its own living variety, not generic British slang — these are labelled separately on purpose. Demonstrated in a General British accent here, but the words belong to London’s multicultural speech community. Reference only; never drilled.</p>
         ${MLE.map(m => `<div class="idiom-card"><div class="idiom-head"><span class="idiom-term">${esc(m.term)}</span><span class="tag">MLE</span></div><p class="idiom-meaning">${esc(m.meaning)}</p></div>`).join('')}
       </details>` : ''}
     ${d === 'rp' ? `

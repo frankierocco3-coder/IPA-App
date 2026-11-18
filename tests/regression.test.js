@@ -1825,9 +1825,9 @@ export async function run({ navDoc = document } = {}) {
       && routeStatus('nam', 'nam') === 'same'
       && bridgeDrafts().length === 11
       && bridgeDrafts().every(r => r.id !== 'nam-rp'));
-    check('bridge: RP and Standard British stay distinct, correctly labelled',
+    check('bridge: RP and General British stay distinct, correctly labelled',
       BRIDGE_ROUTES.filter(r => r.from === 'ssbe' || r.to === 'ssbe')
-        .every(r => r.title.includes('Standard British'))
+        .every(r => r.title.includes('General British'))
       && BRIDGE_ROUTES.filter(r => r.from === 'rp' || r.to === 'rp')
         .every(r => r.title.includes('Traditional RP'))
       && BRIDGE_ROUTES.every(r => !/SSBE|Educated Southern|Contemporary British/.test(r.title))
@@ -2295,7 +2295,7 @@ export async function run({ navDoc = document } = {}) {
         && dchip().getAttribute('aria-expanded') === 'false');
       check('dialect: the audio line speaks about the CHOSEN dialect only',
         /Neutral American/.test(doc.getElementById('rd-audio')?.textContent ?? '')
-        && !/Cockney|Australian|Traditional RP/.test(doc.getElementById('rd-audio')?.textContent ?? ''),
+        && !/East London|Australian|Traditional RP/.test(doc.getElementById('rd-audio')?.textContent ?? ''),
         doc.getElementById('rd-audio')?.textContent);
       clickIn(dchip()); await sleep(200);
       const rows = [...(dmenu()?.querySelectorAll('.course-row') ?? [])];
@@ -2894,7 +2894,7 @@ export async function run({ navDoc = document } = {}) {
       clickIn(doc.getElementById('course-chip')); await sleep(200);
       check('workspaces: the course menu offers all six, IPA Foundations included',
         ['IPA Foundations', 'Neutral American', 'Traditional RP',
-         'Standard British', 'Cockney', 'Australian']
+         'General British', 'East London', 'Australian']
           .every(n => [...doc.querySelectorAll('#course-menu .course-row')].some(r => r.textContent.includes(n))));
       clickIn(doc.body); await sleep(150);
       check('workspaces: the pinned IPA-Foundations label is gone with the merge',
@@ -4135,7 +4135,7 @@ export async function run({ navDoc = document } = {}) {
         !!doc.getElementById('course-chip')
         && !doc.getElementById('ipa-context')
         && ['IPA Foundations', 'Neutral American', 'Traditional RP',
-            'Standard British', 'Cockney', 'Australian']
+            'General British', 'East London', 'Australian']
           .every(n => mergedRows.some(r => r.includes(n))),
         `rows=${mergedRows.length}`);
       check('acting: the course list is the course chip’s, never the workspace menu’s',
@@ -4600,7 +4600,7 @@ export async function run({ navDoc = document } = {}) {
       !/renders: 'about-/.test(facetSrc));
     check('about removal: no learner-facing copy points at an About page',
       ![src, facetSrc, bridgeSrc].some(t =>
-        /Library → About|About the Accent|About page|About Neutral American|About Traditional RP|About Standard British|About General Australian/.test(t)));
+        /Library → About|About the Accent|About page|About Neutral American|About Traditional RP|About General British|About General Australian/.test(t)));
     check('ssbe intro: says it appears only on the first visit',
       /This introduction appears only on your first visit\./.test(src)
       && !/reread this any time/.test(src));
@@ -7207,7 +7207,7 @@ export async function run({ navDoc = document } = {}) {
         .every(x => /option/.test(x.focus)));
     // The coalesced yod is the feature a British actor is heard on first,
     // so both British courses carry a Tuesday sentence, not only a twister.
-    check('drills: Standard British and Cockney each drill Tuesday in a sentence',
+    check('drills: General British and East London each drill Tuesday in a sentence',
       ['ssbe', 'cockney'].every(a => SPEAK_DRILLS.some(x =>
         x.accent === a && x.kind === 'sentence' && /Tuesday/.test(x.text)
         && /coalescence/.test(x.focus))));

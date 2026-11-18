@@ -195,9 +195,9 @@ export const BRIDGE_ROUTES = [
     id: 'nam-ssbe',
     from: 'nam',
     to: 'ssbe',
-    title: 'Neutral American → Standard British',
+    title: 'Neutral American → General British',
     intro: 'The same journey as the RP route, one generation on: the classic non-rhotic skeleton, worn with today’s habits — a steadied SQUARE, fused yods, and a /t/ that relaxes where RP’s stayed crisp.',
-    sourceNote: 'Restates the Neutral American and Standard British course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the Neutral American and General British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -207,7 +207,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'kɑr',
         targetIPA: 'kɑː',
         stays: 'The open back vowel — your PALM position is already close.',
-        changes: 'Standard British typically drops /r/ unless a vowel follows; the vowel takes the length instead: car /kɑː/, start /stɑːt/. Before a vowel it links back in — “car engine”.',
+        changes: 'General British typically drops /r/ unless a vowel follows; the vowel takes the length instead: car /kɑː/, start /stɑːt/. Before a vowel it links back in — “car engine”.',
         guidance: {
           lips: 'Neutral — nothing rounds for a vanished r.',
           tongue: 'Low and back for the vowel; the tip stays down where the r used to rise.',
@@ -297,7 +297,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'kɛr',
         targetIPA: 'kɛː',
         stays: 'The open-mid front starting position.',
-        changes: 'Where you say vowel-plus-r, Standard British typically holds one long steady vowel: /ɛː/ — care, air, there. No r, and (unlike Traditional RP) no glide either: the vowel simply lasts.',
+        changes: 'Where you say vowel-plus-r, General British typically holds one long steady vowel: /ɛː/ — care, air, there. No r, and (unlike Traditional RP) no glide either: the vowel simply lasts.',
         guidance: {
           lips: 'Relaxed, slightly spread, unmoving.',
           tongue: 'Mid-front and STILL — resist both the r and any drift to schwa.',
@@ -315,7 +315,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'tuːn',
         targetIPA: 'tʃuːn',
         stays: 'The long GOOSE vowel (spoken well forward in this accent).',
-        changes: 'Where your accent dropped the yod, Standard British typically fused it: tune /tʃuːn/, duty /ˈdʒuːti/. This is the modern habit — Traditional RP keeps /tj dj/ separate instead.',
+        changes: 'Where your accent dropped the yod, General British typically fused it: tune /tʃuːn/, duty /ˈdʒuːti/. This is the modern habit — Traditional RP keeps /tj dj/ separate instead.',
         guidance: {
           lips: 'Slight rounding through the affricate into the vowel.',
           tongue: 'Blade makes the /tʃ/ in one gesture — no separate t-then-y.',
@@ -606,9 +606,9 @@ export const BRIDGE_ROUTES = [
     id: 'rp-ssbe',
     from: 'rp',
     to: 'ssbe',
-    title: 'Traditional RP → Standard British',
+    title: 'Traditional RP → General British',
     intro: 'The shortest route in the app: the skeleton — non-rhoticity, BATH, LOT, GOAT — is shared. What changes is a generation of habits: SQUARE steadies, happY tenses, yods fuse, and the /t/ relaxes when off duty.',
-    sourceNote: 'Restates the Traditional RP and Standard British course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the Traditional RP and General British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'square',
@@ -809,7 +809,7 @@ export const BRIDGE_ROUTES = [
         startIPA: 'skweə',
         targetIPA: 'skweː',
         stays: 'Non-rhotic, front, one syllable.',
-        changes: 'The RP glide typically becomes a long steady vowel — but at /eː/, closer than Standard British’s /ɛː/: square /skweː/, care, there.',
+        changes: 'The RP glide typically becomes a long steady vowel — but at /eː/, closer than General British’s /ɛː/: square /skweː/, care, there.',
         guidance: {
           lips: 'Slightly spread, still.',
           tongue: 'Mid-front, a touch HIGHER than the English monophthong, held steady.',
@@ -844,9 +844,9 @@ export const BRIDGE_ROUTES = [
     id: 'ssbe-nam',
     from: 'ssbe',
     to: 'nam',
-    title: 'Standard British → Neutral American',
+    title: 'General British → Neutral American',
     intro: 'Every written r returns and colours its vowel, BATH flattens, LOT unrounds — and where your /t/ relaxes to a glottal catch, American relaxes it the other way, into a tap.',
-    sourceNote: 'Restates the Standard British and Neutral American course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the General British and Neutral American course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'rhoticity',
@@ -981,9 +981,9 @@ export const BRIDGE_ROUTES = [
     id: 'ssbe-rp',
     from: 'ssbe',
     to: 'rp',
-    title: 'Standard British → Traditional RP',
+    title: 'General British → Traditional RP',
     intro: 'One generation back. The skeleton you already have is RP’s — what changes is discipline: the /t/ goes back on duty everywhere, the yods separate, SQUARE learns to glide, and happY relaxes.',
-    sourceNote: 'Restates the Standard British and Traditional RP course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the General British and Traditional RP course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'square',
@@ -1082,9 +1082,9 @@ export const BRIDGE_ROUTES = [
     id: 'ssbe-aus',
     from: 'ssbe',
     to: 'aus',
-    title: 'Standard British → Australian',
+    title: 'General British → Australian',
     intro: 'The frame barely moves — both accents are non-rhotic, fuse their yods and link their r’s. The vowels do the travelling: diphthongs re-aim, and the short back vowels all sit one notch higher.',
-    sourceNote: 'Restates the Standard British and General Australian course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the General British and General Australian course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',
@@ -1493,9 +1493,9 @@ export const BRIDGE_ROUTES = [
     id: 'aus-ssbe',
     from: 'aus',
     to: 'ssbe',
-    title: 'Australian → Standard British',
+    title: 'Australian → General British',
     intro: 'The frame transfers whole — non-rhotic, fused yods, linking r. The work is vowel aim: launches lift, the back ladder steps down a rung, and the long front vowel opens a shade.',
-    sourceNote: 'Restates the General Australian and Standard British course targets — full citations under More → Sources & Credits.',
+    sourceNote: 'Restates the General Australian and General British course targets — full citations under More → Sources & Credits.',
     comparisons: [
       {
         id: 'face',

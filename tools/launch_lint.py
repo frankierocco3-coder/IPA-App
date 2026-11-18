@@ -6,9 +6,9 @@ Zero-dependency static checks that fail the deploy when:
   2. A forbidden course name appears in shipped JS/HTML strings
      (Contemporary British / Standard Southern / SSBE-as-display /
      "educated southern" / No Fear Shakespeare).
-  3. Traditional RP does not use 🎩, or Standard British does not use 🇬🇧,
+  3. Traditional RP does not use 🎩, or General British does not use 🇬🇧,
      or both courses share an icon.
-  4. Standard British checkpoints lose their deterministic Words &
+  4. General British checkpoints lose their deterministic Words &
      Expressions material (the expandUnit extras line).
   5. The sonnet reader stops deriving voices from the generated coverage
      manifest (hardcoded narration claims are how we lied last time).
@@ -77,11 +77,11 @@ def main():
     if not re.search(r"id: 'rp', icon: '🎩'", views_js):
         fail("Traditional RP course icon is not 🎩 in COURSES")
     if not re.search(r"id: 'ssbe', icon: '🇬🇧'", views_js):
-        fail("Standard British course icon is not 🇬🇧 in COURSES")
+        fail("General British course icon is not 🇬🇧 in COURSES")
     if "title: 'Traditional RP',\n    icon: '🎩'" not in course_js:
         fail("Traditional RP track icon is not 🎩")
-    if "title: 'Standard British',\n    icon: '🇬🇧'" not in course_js:
-        fail("Standard British track icon is not 🇬🇧")
+    if "title: 'General British',\n    icon: '🇬🇧'" not in course_js:
+        fail("General British track icon is not 🇬🇧")
 
     # 3c: lesson ids are unique across all courses (units/tracks may share
     # names with each other; lessons may not collide with anything)
@@ -240,8 +240,8 @@ def main():
     for banned in ["Educated Southern British", "SSBE", "Contemporary British"]:
         if banned in bridge_js.replace("'ssbe'", "").replace("ssbe-", "").replace("-ssbe", ""):
             fail("bridge data shows a banned course label: %r" % banned)
-    if bridge_js.count("Standard British") < 6:
-        fail("bridge routes must label ssbe as 'Standard British' in every title")
+    if bridge_js.count("General British") < 6:
+        fail("bridge routes must label ssbe as 'General British' in every title")
     # (2026-08-12: the bridge became a Practice listening exercise. Same-
     # accent selection is now structurally impossible — the start selector
     # never offers the target — so the old same-accent message is gone.)

@@ -50,7 +50,7 @@ export const DIALECT_INFO = {
     target: 'The historical prestige accent associated with twentieth-century British broadcasting, upper- and upper-middle-class speech, and classical stage performance — including the later performance traditions for writers such as Shakespeare, Wilde and Shaw.',
     period: 'Historical: codified in the early-to-mid twentieth century (the Gimson-style description this course follows). Still alive as a stage, period-drama and character accent.',
     context: 'Learned as a marker of class and education rather than region; the accent of the early BBC and the classical theatre. Shakespeare himself spoke nothing like it — RP is how his plays came to be performed centuries later.',
-    notClaim: 'It does not claim to be how most British people speak today, nor the pronunciation of Shakespeare’s own era. For a present-day British target, see Standard British.',
+    notClaim: 'It does not claim to be how most British people speak today, nor the pronunciation of Shakespeare’s own era. For a present-day British target, see General British.',
     core: [
       'Non-rhotic: /r/ only before a vowel — long vowels and centring diphthongs stand where r vanished',
       'The BATH split: bath, dance, grass, ask take /ɑː/',
@@ -72,7 +72,7 @@ export const DIALECT_INFO = {
     ],
     convention: 'The traditional Gimson-style inventory and symbols, matching classic dictionaries and stage-speech manuals. Broad transcription throughout; realizations such as [ɫ] appear in square brackets.',
     rhythm: 'Measured, evenly weighted stresses; wide controlled intonation falls; precision of articulation carries the accent’s authority.',
-    differsFrom: { id: 'ssbe', label: 'Standard British', how: 'Traditional RP glides SQUARE /eə/, holds a careful /t/, keeps its yods and ends happY words lax /ɪ/ — Standard British holds SQUARE steady at /ɛː/, often realizes /t/ as [ʔ], fuses yods (tune /tʃuːn/) and tenses happY to /i/. RP reads one generation older, more formal, more classed.' },
+    differsFrom: { id: 'ssbe', label: 'General British', how: 'Traditional RP glides SQUARE /eə/, holds a careful /t/, keeps its yods and ends happY words lax /ɪ/ — General British holds SQUARE steady at /ɛː/, often realizes /t/ as [ʔ], fuses yods (tune /tʃuːn/) and tenses happY to /i/. RP reads one generation older, more formal, more classed.' },
     sources: [
       'Roach, P. — “British English: Received Pronunciation”, Journal of the International Phonetic Association (Cambridge University Press).',
       'Cruttenden, A. (ed.) — Gimson’s Pronunciation of English (Routledge): the traditional inventory this course follows.',
@@ -107,7 +107,7 @@ export const DIALECT_INFO = {
     ],
     convention: 'RP-derived broad symbols updated where the contemporary sound has genuinely moved (/ɛː/), with realizations in square brackets. Broad /uː/ is kept for GOOSE — the symbol names the phoneme, not the exact modern tongue position.',
     rhythm: 'Lighter and quicker than Traditional RP: smaller intonation falls, more level tails, and heavy reduction of function words in connected speech. Register matters — the same speaker glottals more at the pub than in a job interview.',
-    differsFrom: { id: 'rp', label: 'Traditional RP', how: 'Standard British is Traditional RP one generation on: SQUARE steadies to /ɛː/, non-initial /t/ commonly becomes [ʔ], yods fuse, happY tenses to /i/, GOOSE fronts. The skeleton — non-rhoticity, BATH, LOT, GOAT — is shared, which is why the course drills the two side by side.' },
+    differsFrom: { id: 'rp', label: 'Traditional RP', how: 'General British is Traditional RP one generation on: SQUARE steadies to /ɛː/, non-initial /t/ commonly becomes [ʔ], yods fuse, happY tenses to /i/, GOOSE fronts. The skeleton — non-rhoticity, BATH, LOT, GOAT — is shared, which is why the course drills the two side by side.' },
     sources: [
       'Lindsey, G. — English After RP: Standard British Pronunciation Today (Palgrave Macmillan): the contemporary description this course follows.',
       'Wells, J. C. — Accents of English (Cambridge University Press): lexical sets and the RP baseline.',
@@ -128,7 +128,7 @@ export const DIALECT_INFO = {
       'L-vocalization: dark /l/ becomes an [o]-like vowel: milk [mɪok], well [weo]',
       'Yod coalescence: tune [tʃuːn], Tuesday [ˈtʃuːzdeɪ], duty [ˈdʒuːʔi]',
       'The diphthong shift: FACE realized [æɪ], PRICE realized [ɑɪ], GOAT realized [æʊ]',
-      'Non-rhotic with broad BATH /ɑː/: the London skeleton underneath is shared with Standard British',
+      'Non-rhotic with broad BATH /ɑː/: the London skeleton underneath is shared with General British',
     ],
     common: [
       'Word-initial /ð/ in function words realized [d] or dropped: the, them',
@@ -143,9 +143,9 @@ export const DIALECT_INFO = {
       'Rhyming slang in live use: recognition is essential for an actor, active use varies hugely by speaker and generation',
       'TH-fronting of initial /ð/: this, that keep [ð] or [d] more often than [v]',
     ],
-    convention: 'Broad symbols are shared with Standard British: the phoneme system underneath is the same, and what makes Cockney is the realizations. So drills write Cockney forms in square brackets: think is still /θɪŋk/ underneath, and [fɪŋk] is how the accent says it. The diphthong shift is taught the same way: FACE keeps its broad /eɪ/, spoken [æɪ].',
+    convention: 'Broad symbols are shared with General British: the phoneme system underneath is the same, and what makes Cockney is the realizations. So drills write Cockney forms in square brackets: think is still /θɪŋk/ underneath, and [fɪŋk] is how the accent says it. The diphthong shift is taught the same way: FACE keeps its broad /eɪ/, spoken [æɪ].',
     rhythm: 'Quick, forward and heavily linked, with strong reduction of function words and the glottal stop carrying much of the consonant rhythm. Intonation is lively, with wide rises on the innit-style tags. Register matters: the same speaker glottals and fronts more at the market than at a job interview.',
-    differsFrom: { id: 'ssbe', label: 'Standard British', how: 'Cockney and Standard British share a skeleton: non-rhotic, broad BATH, rounded LOT. Cockney then goes where Standard British does not: TH-fronting, h-dropping, the full diphthong shift, and glottal replacement as the norm rather than a relaxed-speech option. Standard British reads neutral and professional; Cockney reads local, working class and unmistakably London.' },
+    differsFrom: { id: 'ssbe', label: 'General British', how: 'Cockney and General British share a skeleton: non-rhotic, broad BATH, rounded LOT. Cockney then goes where General British does not: TH-fronting, h-dropping, the full diphthong shift, and glottal replacement as the norm rather than a relaxed-speech option. General British reads neutral and professional; Cockney reads local, working class and unmistakably London.' },
     sources: [
       'Wells, J. C. — Accents of English 2: The British Isles (Cambridge University Press): the London chapter this course follows for the feature set and the diphthong shift.',
       'Sivertsen, E. — Cockney Phonology (Oslo University Press): the classic descriptive study.',

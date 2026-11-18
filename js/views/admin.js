@@ -371,7 +371,7 @@ export function renderContentReview() {
       </section>
       ${block('Plain Meaning', 'plain', ed.plain)}
       ${block('In Today’s Voice — Neutral American', 'nam', ed.voices.nam)}
-      ${block('In Today’s Voice — Standard British', 'ssbe', ed.voices.ssbe)}
+      ${block('In Today’s Voice — General British', 'ssbe', ed.voices.ssbe)}
       ${block('In Today’s Voice — Australian', 'aus', ed.voices.aus)}
       <p class="pane-note">Traditional RP deliberately has no vocabulary adaptation — RP is a pronunciation target, not a modern slang register. Its course shows Original + Plain Meaning (once approved).</p>`;
   });

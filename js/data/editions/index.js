@@ -7,7 +7,7 @@
 //           literal argument, the speaker's situation, essential imagery,
 //           the emotional progression, the volta, and the couplet.
 //   nam   — In Today's Voice, Neutral American
-//   ssbe  — In Today's Voice, Standard British (class-neutral,
+//   ssbe  — In Today's Voice, General British (class-neutral,
 //           deliberately distinct from Traditional RP)
 //   aus   — In Today's Voice, Australian
 //
@@ -85,7 +85,7 @@ export const EDITION_CATALOG_COMPLETE = true;
 //
 // ALL 462 texts match as of 2026-09-25 — every sonnet in all three
 // dialects. The American ones went first (26, 29, 73, 112), then the same
-// four broke in Standard British and Australian, because the three were
+// four broke in General British and Australian, because the three were
 // written together and carry the same structural error. The fallback
 // stays: it is what stops a pane drawing an alignment that is not there,
 // and falling back is the correct failure.

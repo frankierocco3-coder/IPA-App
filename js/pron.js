@@ -93,7 +93,7 @@ const RE_CURE = new RegExp('ʊɹ(?![' + V + '])', 'g');
 // happY — the weak final vowel of happy, city, duty. The dictionary now
 // carries it as a bare /i/ (CMUdict IY0) and FLEECE as /iː/ (IY1/IY2), so
 // the two are finally distinguishable. The Accuracy Standard sets happY per
-// accent (dialects.js): Traditional RP keeps it lax /ɪ/, Standard British
+// accent (dialects.js): Traditional RP keeps it lax /ɪ/, General British
 // and Cockney tense it to /i/, Australian takes it to /iː/. A bare /i/ that
 // is followed by a vowel is NOT happY — it is the neutralised prevocalic
 // vowel of material, radio, various — so it is left alone.
@@ -153,7 +153,7 @@ function toAus(s, word) {
     .replace(/u(ː?)/g, 'ʉ$1');
 }
 
-// General American → Standard British: RP's skeleton with the steady
+// General American → General British: RP's skeleton with the steady
 // SQUARE /ɛː/. Fine-grained contemporary features (glottalling, yod
 // coalescence) are realizations, not respellings — the broad form is RP-like.
 function toSsbe(s, word) {
@@ -163,7 +163,7 @@ function toSsbe(s, word) {
   return toBritish(s, word).replace(/eə/g, 'ɛː');
 }
 
-// Standard British → Cockney: the SPOKEN realizations, because with this
+// General British → Cockney: the SPOKEN realizations, because with this
 // accent the realizations ARE the target (Dialect Accuracy Standard,
 // dialects.js). TH-fronting, h-dropping, intervocalic and final glottal
 // /t/, yod coalescence. The diphthong shift stays in the broad symbols

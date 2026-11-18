@@ -10,7 +10,7 @@
 //
 // The bank started as six twisters and six sentences per accent. It is no
 // longer symmetrical: owner order 2026-09-26 added a seventh sentence to
-// Standard British and to Cockney, both on Tuesday, because the coalesced
+// General British and to Cockney, both on Tuesday, because the coalesced
 // yod is the feature a British actor is heard on first and one line each
 // was thin. The regression suite pins a FLOOR of six per kind rather than
 // an exact count, so the bank can grow where a course needs it without
@@ -68,7 +68,7 @@ export const SPEAK_DRILLS = [
   { accent: 'rp', kind: 'sentence', text: 'The law and order of it all was awesome.',
     focus: 'Intrusive R, a common feature: an unwritten r typically appears in law and order.' },
 
-  // ── Standard British ─────────────────────────────────────────
+  // ── General British ─────────────────────────────────────────
   { accent: 'ssbe', kind: 'twister', text: 'There’s a spare chair somewhere near the stairs. Where?',
     focus: 'Steady SQUARE /ɛː/: there, spare, chair, somewhere, stairs, where hold one long vowel, no glide.' },
   { accent: 'ssbe', kind: 'twister', text: 'That bit of butter got a lot better, didn’t it?',
