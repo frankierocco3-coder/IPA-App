@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 96" width="120" height="96" fill="#6a7a52">
+<path d="M60 88 L49.53 86.53 L39.86 82.23 L31.76 75.43 L25.85 66.66 L22.58 56.6 L22.21 46.03 L24.77 35.76 L30.06 26.6 L37.66 19.26 L47 14.29" fill="none" stroke="#6a7a52" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".85"/>
+<path d="M0 0 C3.6 -5.1 2.95 -13.26 0 -17 C-2.95 -13.26 -3.6 -5.1 0 0 Z" transform="translate(49.53 86.53) rotate(-130)"/>
+<path d="M0 0 C3.6 -4.88 2.95 -12.7 0 -16.28 C-2.95 -12.7 -3.6 -4.88 0 0 Z" transform="translate(39.86 82.23) rotate(-2)"/>
+<path d="M0 0 C3.6 -4.67 2.95 -12.13 0 -15.55 C-2.95 -12.13 -3.6 -4.67 0 0 Z" transform="translate(31.76 75.43) rotate(-98)"/>
+<path d="M0 0 C3.6 -4.45 2.95 -11.57 0 -14.83 C-2.95 -11.57 -3.6 -4.45 0 0 Z" transform="translate(25.85 66.66) rotate(30)"/>
+<path d="M0 0 C3.6 -4.23 2.95 -11.01 0 -14.11 C-2.95 -11.01 -3.6 -4.23 0 0 Z" transform="translate(22.58 56.6) rotate(-66)"/>
+<path d="M0 0 C3.6 -4.02 2.95 -10.44 0 -13.39 C-2.95 -10.44 -3.6 -4.02 0 0 Z" transform="translate(22.21 46.03) rotate(62)"/>
+<path d="M0 0 C3.6 -3.8 2.95 -9.88 0 -12.66 C-2.95 -9.88 -3.6 -3.8 0 0 Z" transform="translate(24.77 35.76) rotate(-34)"/>
+<path d="M0 0 C3.6 -3.58 2.95 -9.32 0 -11.94 C-2.95 -9.32 -3.6 -3.58 0 0 Z" transform="translate(30.06 26.6) rotate(94)"/>
+<path d="M0 0 C3.6 -3.37 2.95 -8.75 0 -11.22 C-2.95 -8.75 -3.6 -3.37 0 0 Z" transform="translate(37.66 19.26) rotate(-2)"/>
+<path d="M60 88 L70.47 86.53 L80.14 82.23 L88.24 75.43 L94.15 66.66 L97.42 56.6 L97.79 46.03 L95.23 35.76 L89.94 26.6 L82.34 19.26 L73 14.29" fill="none" stroke="#6a7a52" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".85"/>
+<path d="M0 0 C3.6 -5.1 2.95 -13.26 0 -17 C-2.95 -13.26 -3.6 -5.1 0 0 Z" transform="translate(70.47 86.53) rotate(130)"/>
+<path d="M0 0 C3.6 -4.88 2.95 -12.7 0 -16.28 C-2.95 -12.7 -3.6 -4.88 0 0 Z" transform="translate(80.14 82.23) rotate(2)"/>
+<path d="M0 0 C3.6 -4.67 2.95 -12.13 0 -15.55 C-2.95 -12.13 -3.6 -4.67 0 0 Z" transform="translate(88.24 75.43) rotate(98)"/>
+<path d="M0 0 C3.6 -4.45 2.95 -11.57 0 -14.83 C-2.95 -11.57 -3.6 -4.45 0 0 Z" transform="translate(94.15 66.66) rotate(-30)"/>
+<path d="M0 0 C3.6 -4.23 2.95 -11.01 0 -14.11 C-2.95 -11.01 -3.6 -4.23 0 0 Z" transform="translate(97.42 56.6) rotate(66)"/>
+<path d="M0 0 C3.6 -4.02 2.95 -10.44 0 -13.39 C-2.95 -10.44 -3.6 -4.02 0 0 Z" transform="translate(97.79 46.03) rotate(-62)"/>
+<path d="M0 0 C3.6 -3.8 2.95 -9.88 0 -12.66 C-2.95 -9.88 -3.6 -3.8 0 0 Z" transform="translate(95.23 35.76) rotate(34)"/>
+<path d="M0 0 C3.6 -3.58 2.95 -9.32 0 -11.94 C-2.95 -9.32 -3.6 -3.58 0 0 Z" transform="translate(89.94 26.6) rotate(-94)"/>
+<path d="M0 0 C3.6 -3.37 2.95 -8.75 0 -11.22 C-2.95 -8.75 -3.6 -3.37 0 0 Z" transform="translate(82.34 19.26) rotate(2)"/>
+<circle cx="60" cy="91" r="2.4" fill-opacity=".72"/>
+</svg>

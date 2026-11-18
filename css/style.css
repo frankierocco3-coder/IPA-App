@@ -4244,8 +4244,23 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    980px; this one becomes rows, because the owner's mockup puts Mark
    lesson complete inside the notes and a phone would otherwise have no
    way to finish a lesson. One set of controls, every width. */
-.lx-shell { display: block; max-width: 1500px; margin: 0 auto;
-  padding: 0 16px 40px; }
+/* width:100% BECAUSE THE SHELL IS A FLEX ITEM IN A COLUMN. #app is
+   display:flex; flex-direction:column, so the shell's width is its CROSS
+   size, and an auto cross size resolves to the item's min-content width,
+   which the item is then allowed to overflow its container with. With no
+   width set, the first table in a study-layout lesson blew the shell out
+   to 602px at a 375px viewport — .lxtbl carries min-width:520px and
+   scrolls inside .lxtbl-wrap only when the wrap is the narrower of the
+   two — and the whole PAGE scrolled sideways with it: title bar,
+   breadcrumb, lesson picker and all. Measured, 2026-11-18: width:100%
+   gives 0 overflow and a 295px wrap that scrolls its own table.
+   `align-self: stretch` does NOT fix it, because a stretched cross size
+   is still clamped up to min-content; min-width:0 alone does not either,
+   since the automatic minimum size is a MAIN axis rule and this is the
+   cross axis. It is kept because the grid below says the same thing with
+   minmax(0, 1fr), and above 1040px nothing here changes. */
+.lx-shell { display: block; width: 100%; min-width: 0; max-width: 1500px;
+  margin: 0 auto; padding: 0 16px 40px; }
 .lx-main.guide { max-width: none; margin: 0; }
 /* THE LEFT COLUMN IS DESKTOP-ONLY, because below the grid it would sit
    between the title bar and the chapter and push the lesson itself a

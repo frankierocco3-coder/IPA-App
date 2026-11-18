@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 49" width="76" height="49" fill="#6a7a52">
+<path d="M8 42 L15.5 35.95 L23 30.26 L30.5 25.21 L38 21 L45.5 17.71 L53 15.26 L60.5 13.45 L68 12" fill="none" stroke="#6a7a52" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" stroke-opacity=".85"/>
+<path d="M0 0 C4 -5.7 3.28 -14.82 0 -19 C-3.28 -14.82 -4 -5.7 0 0 Z" transform="translate(15.5 35.95) rotate(107.94)"/>
+<path d="M0 0 C4 -5.38 3.28 -13.98 0 -17.92 C-3.28 -13.98 -4 -5.38 0 0 Z" transform="translate(23 30.26) rotate(-1.62)"/>
+<path d="M0 0 C4 -5.05 3.28 -13.14 0 -16.85 C-3.28 -13.14 -4 -5.05 0 0 Z" transform="translate(30.5 25.21) rotate(114.32)"/>
+<path d="M0 0 C4 -4.73 3.28 -12.3 0 -15.77 C-3.28 -12.3 -4 -4.73 0 0 Z" transform="translate(38 21) rotate(7.43)"/>
+<path d="M0 0 C4 -4.41 3.28 -11.46 0 -14.69 C-3.28 -11.46 -4 -4.41 0 0 Z" transform="translate(45.5 17.71) rotate(125.05)"/>
+<path d="M0 0 C4 -4.08 3.28 -10.62 0 -13.62 C-3.28 -10.62 -4 -4.08 0 0 Z" transform="translate(53 15.26) rotate(18.17)"/>
+<path d="M0 0 C4 -3.76 3.28 -9.78 0 -12.54 C-3.28 -9.78 -4 -3.76 0 0 Z" transform="translate(60.5 13.45) rotate(133.75)"/>
+<circle cx="11.5" cy="36.5" r="2.3" fill-opacity=".8"/>
+<circle cx="16" cy="40.5" r="1.9" fill-opacity=".62"/>
+</svg>
