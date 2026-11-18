@@ -7285,32 +7285,6 @@ function renderSpeechForActors() {
     b.addEventListener('click', () => { if (SPEECH_LIVE) setWorkspace('speech'); renderSpeechChapter(b.dataset.item); }));
 }
 
-// IPA and dialect resources for actors — links only.
-function renderActorIpaTools() {
-  record(renderActorIpaTools);
-  stopSpeech();
-  const d = activeCourse() === 'core' ? 'nam' : activeCourse();
-  workspacePage(
-    pageTopbar('ʃə IPA & Dialect Tools', '#8a6d3b'),
-    `<div class="ws-head">
-       <h1 class="page-h">IPA &amp; Dialect Tools for Actors</h1>
-       <p class="ws-sub">3 shared references · these live in the IPA and Accents workspaces and are linked, never copied.</p>
-     </div>`,
-    `<div class="item-grid">
-       ${itemTileHtml({ key: 'chart', title: 'IPA Chart', note: 'Every sound across the courses' })}
-       ${itemTileHtml({ key: 'accents', title: 'Accent courses', note: 'Neutral American, Upper Class (RP), General British, East London (Cockney), Australian' })}
-       ${itemTileHtml({ key: 'dialects', title: 'Dialects in Speech', note: 'How dialect shapes rhythm, register and use' })}
-     </div>`);
-  app.querySelectorAll('[data-item]').forEach(b =>
-    b.addEventListener('click', () => {
-      const k = b.dataset.item;
-      if (k === 'chart') return renderChart();
-      if (k === 'accents') { setWorkspace('ipa'); return goSection('learn'); }
-      if (k === 'action') { setWorkspace('ipa'); return renderDialectAction(d); }
-      renderDialectsInSpeech();
-    }));
-}
-
 // STANDALONE PAGES THAT SHELVE INSIDE A COLLECTION, rather than lesson
 // records. Written once so the renderer and the handler cannot disagree
 // about a key again. They did, and Lines & Memory became unreachable; see
