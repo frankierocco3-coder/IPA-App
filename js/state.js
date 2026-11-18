@@ -106,6 +106,51 @@ function todayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * Apply a change and write back ONLY THE FIELDS IT TOUCHED.
+ *
+ * WHY THIS EXISTS (2026-11-18). Every mutator here used to be
+ * `const s = load(); s.thing = x; save(s);` — a read-modify-write of the
+ * WHOLE `ipa-trainer-v1` blob. One realm doing that is safe, because the
+ * read and the write are synchronous and JavaScript is single-threaded.
+ * TWO realms are not: the app in a second tab, or the regression suite's
+ * parent page, which imports this module alongside the app running in its
+ * iframe. Both read the whole object and both write the whole object
+ * back, so whichever saves last wins ENTIRELY — a lesson completed in one
+ * tab is erased by a preference changed in the other, with no error and
+ * nothing in the console.
+ *
+ * The window was always small. It was never zero, and progress on this
+ * device is the one thing here that cannot be regenerated.
+ *
+ * HOW IT FIXES IT. The fields the change actually touched are diffed, the
+ * stored blob is re-read at the last possible moment, and only those
+ * fields are merged onto it. A concurrent writer's OTHER fields survive,
+ * because they are never part of what this writes. Two tabs editing the
+ * same field still race — localStorage offers no compare-and-swap, so
+ * last-write-wins is the floor — but that is one field, not the lot.
+ *
+ * It also stops writing when nothing changed, which is why `markOpened`
+ * can keep its early return and simply not mutate.
+ *
+ * @param {(s: object) => any} fn  mutates the state object in place
+ * @returns whatever `fn` returned
+ */
+function mutate(fn) {
+  const s = load();
+  const before = new Map(Object.keys(s).map(k => [k, JSON.stringify(s[k])]));
+  const result = fn(s);
+  const changed = Object.keys(s).filter(k =>
+    !before.has(k) || before.get(k) !== JSON.stringify(s[k]));
+  const removed = [...before.keys()].filter(k => !(k in s));
+  if (!changed.length && !removed.length) return result;   // nothing to write
+  const fresh = load();                 // re-read at the last possible moment
+  for (const k of changed) fresh[k] = s[k];
+  for (const k of removed) delete fresh[k];
+  save(fresh);
+  return result;
+}
+
 // ── XP: REMOVED 2026-10-05 ───────────────────────────────────
 // The last of it. XP was a points total that said nothing "lessons
 // completed" and "answers given" did not already say more honestly, and
@@ -156,9 +201,7 @@ export const store = {
   // COMPLETION SURVIVES, the points do not. Finishing a lesson is a fact
   // worth remembering; what it was "worth" was not.
   recordLesson(lessonId) {
-    const s = load();
-    s.completed = [...new Set([...(s.completed ?? []), lessonId])];
-    save(s);
+    mutate(s => { s.completed = [...new Set([...(s.completed ?? []), lessonId])]; });
   },
 
 
@@ -181,15 +224,15 @@ export const store = {
   },
 
   markOpened(lessonId) {
-    const s = load();
-    if ((s.opened ?? []).includes(lessonId)) return;   // no write on re-open
-    s.opened = [...new Set([...(s.opened ?? []), lessonId])];
-    save(s);
+    mutate(s => {
+      if ((s.opened ?? []).includes(lessonId)) return;   // no write on re-open
+      s.opened = [...new Set([...(s.opened ?? []), lessonId])];
+    });
   },
 
   // Last text pasted into "Train Any Text" — { title, body, accent }.
   get customText() { return load().customText ?? null; },
-  saveCustomText(v) { const s = load(); s.customText = v; save(s); },
+  saveCustomText(v) { mutate(s => { s.customText = v; }); },
 
   // ── Onboarding / preferences ────────────────────────────────
   // { done, goal, accent, diagnostic } — `goal` is legacy (its picker is
@@ -200,9 +243,9 @@ export const store = {
   // are marked done so they are never funnelled through first-run flows.
   get onboarding() { return load().onboarding ?? { done: false, goal: null, accent: null }; },
   saveOnboarding(patch) {
-    const s = load();
-    s.onboarding = { ...(s.onboarding ?? { done: false, goal: null, accent: null }), ...patch };
-    save(s);
+    mutate(s => {
+      s.onboarding = { ...(s.onboarding ?? { done: false, goal: null, accent: null }), ...patch };
+    });
   },
   // Quests stay quiet until something is earned.
   get hasEarnedAnything() { return (load().completed ?? []).length > 0; },
@@ -214,7 +257,7 @@ export const store = {
   // Strictly boolean both ways: any missing, legacy or malformed stored
   // value reads as false, and only `true` is ever written as true.
   get freePlay() { return load().freePlay === true; },
-  set freePlay(on) { const s = load(); s.freePlay = on === true; save(s); },
+  set freePlay(on) { mutate(s => { s.freePlay = on === true; }); },
 
   // ── First-launch preface (né "Before You Speak", now "Why
   // Speech Matters" — Build A retitled the copy; the record shape,
@@ -227,60 +270,56 @@ export const store = {
   // can be handled deliberately later.
   get threshold() { return load().threshold ?? null; },
   completeThreshold({ choice = null, source }) {
-    const s = load();
-    if (s.threshold) return s.threshold;          // never overwrite
-    s.threshold = {
-      version: 1,
-      completedAt: new Date().toISOString(),
-      choice,
-      source,
-      lastReplayedAt: null,
-      lastChoice: null,
-    };
-    save(s);
-    return s.threshold;
+    return mutate(s => {
+      if (s.threshold) return s.threshold;        // never overwrite
+      s.threshold = {
+        version: 1,
+        completedAt: new Date().toISOString(),
+        choice,
+        source,
+        lastReplayedAt: null,
+        lastChoice: null,
+      };
+      return s.threshold;
+    });
   },
   markThresholdReplay(lastChoice = null) {
-    const s = load();
-    if (!s.threshold) return null;                // replay implies a record
-    s.threshold = { ...s.threshold, lastReplayedAt: new Date().toISOString(),
-                    lastChoice: lastChoice ?? s.threshold.lastChoice ?? null };
-    save(s);
-    return s.threshold;
+    return mutate(s => {
+      if (!s.threshold) return null;              // replay implies a record
+      s.threshold = { ...s.threshold, lastReplayedAt: new Date().toISOString(),
+                      lastChoice: lastChoice ?? s.threshold.lastChoice ?? null };
+      return s.threshold;
+    });
   },
   // One-time invitation card for grandfathered users (adjacent flag, not
   // part of the spec'd threshold record).
   get thresholdInviteSeen() { return load().thresholdInviteSeen === true; },
-  dismissThresholdInvite() { const s = load(); s.thresholdInviteSeen = true; save(s); },
+  dismissThresholdInvite() { mutate(s => { s.thresholdInviteSeen = true; }); },
 
   // ── "What Is IPA?" intro module ─────────────────────────────
   // Completion badge only, so "Progress
   // activates after your first lesson" stays true for fresh users.
   get whatIsIpa() { return load().whatIsIpa ?? { done: false, correct: 0 }; },
   markWhatIsIpa(correct) {
-    const s = load();
-    s.whatIsIpa = { done: true, correct, at: Date.now() };
-    save(s);
+    mutate(s => { s.whatIsIpa = { done: true, correct, at: Date.now() }; });
   },
 
   // ── One-time course introductions ───────────────────────────
   get introsSeen() { return load().courseIntros ?? {}; },
   markIntroSeen(courseId) {
-    const s = load();
-    s.courseIntros = { ...(s.courseIntros ?? {}), [courseId]: true };
-    save(s);
+    mutate(s => { s.courseIntros = { ...(s.courseIntros ?? {}), [courseId]: true }; });
   },
 
   // ── Local profile ───────────────────────────────────────────
   get profile() {
+    mutate(s => { if (!s.firstSeen) s.firstSeen = Date.now(); });
     const s = load();
-    if (!s.firstSeen) { s.firstSeen = Date.now(); save(s); }
     return { name: s.profileName ?? 'Actor', avatar: s.profileAvatar ?? '🎭', firstSeen: s.firstSeen };
   },
   saveProfile({ name, avatar }) {
-    const s = load();
-    if (name != null) s.profileName = String(name).slice(0, 40);
-    if (avatar != null) s.profileAvatar = String(avatar).slice(0, 8);
-    save(s);
+    mutate(s => {
+      if (name != null) s.profileName = String(name).slice(0, 40);
+      if (avatar != null) s.profileAvatar = String(avatar).slice(0, 8);
+    });
   },
 };

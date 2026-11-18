@@ -378,6 +378,71 @@ export async function run({ navDoc = document } = {}) {
     }
   }
 
+  // ── 3c. One field at a time: the cross-realm write contract ──
+  // js/state.js used to read the WHOLE `ipa-trainer-v1` blob, change one
+  // field and write the whole thing back. One realm doing that is safe —
+  // the read and write are synchronous and JS is single-threaded. Two are
+  // not: a second tab, or this suite's parent page running beside the app
+  // in its iframe. Last writer won ENTIRELY, so a lesson finished in one
+  // tab could be erased by a preference changed in the other.
+  //
+  // mutate() now diffs the fields a change touched, re-reads at the last
+  // moment and merges only those. This proves it by serving the mutation
+  // a stale first read and a fresh second one — exactly the interleaving.
+  {
+    const SKEY = 'ipa-trainer-v1';
+    const proto = Object.getPrototypeOf(localStorage);
+    const realGet = proto.getItem;
+    const snapshot = realGet.call(localStorage, SKEY);
+    const OLD = JSON.stringify({ v: 3, completed: ['a'], freePlay: false });
+    const THEIRS = JSON.stringify({ v: 3, completed: ['a', 'b'], freePlay: false });
+    try {
+      localStorage.setItem(SKEY, OLD);
+      let reads = 0;
+      proto.getItem = function (k) {
+        if (k !== SKEY) return realGet.call(this, k);
+        reads += 1;
+        return reads === 1 ? OLD : THEIRS;   // another realm wrote between them
+      };
+      store.freePlay = true;
+      proto.getItem = realGet;
+      const after = JSON.parse(realGet.call(localStorage, SKEY) ?? '{}');
+      check('state: a write touches only its own field, so a concurrent realm is not erased',
+        after.freePlay === true && String(after.completed) === 'a,b',
+        JSON.stringify(after));
+      check('state: the stale read was really served, so the test exercised the race',
+        reads >= 2, `reads=${reads}`);
+    } finally {
+      proto.getItem = realGet;
+      if (snapshot === null) localStorage.removeItem(SKEY);
+      else localStorage.setItem(SKEY, snapshot);
+    }
+  }
+  // An unchanged mutation must not write at all — markOpened's early
+  // return depends on it, and a needless write is a needless race.
+  {
+    const SKEY = 'ipa-trainer-v1';
+    const snapshot = localStorage.getItem(SKEY);
+    try {
+      localStorage.setItem(SKEY, JSON.stringify({ v: 3, opened: ['x'] }));
+      const proto = Object.getPrototypeOf(localStorage);
+      const realSet = proto.setItem;
+      let writes = 0;
+      proto.setItem = function (k, val) { if (k === SKEY) writes += 1; return realSet.call(this, k, val); };
+      store.markOpened('x');          // already open — must not write
+      const noWrite = writes === 0;
+      store.markOpened('y');          // new — must write exactly once
+      const oneWrite = writes === 1;
+      proto.setItem = realSet;
+      check('state: re-opening a chapter writes nothing; a new one writes once',
+        noWrite && oneWrite && String(JSON.parse(localStorage.getItem(SKEY)).opened) === 'x,y',
+        `writes=${writes}`);
+    } finally {
+      if (snapshot === null) localStorage.removeItem(SKEY);
+      else localStorage.setItem(SKEY, snapshot);
+    }
+  }
+
   // ── 4. Isolated-phoneme contract (pure resolution checks) ───
   const A = ids => new Set(ids);
   check('reference voice key resolves when explicitly approved',
