@@ -994,27 +994,67 @@ export async function run({ navDoc = document } = {}) {
       clickIn(navDoc.getElementById('freeplay')); await sleep(250);
       const onNow = store.freePlay === true;
       const frame = navDoc.defaultView.frameElement;
-      frame.contentWindow.location.reload();
-      let doc2 = null;
-      for (let i = 0; i < 40; i++) { await sleep(150); doc2 = frame.contentDocument; if (doc2?.querySelector('.side-nav .side-item')) break; }
-      const onAfterReload = store.freePlay === true && doc2?.getElementById('freeplay')?.classList.contains('on');
+      // TWO HOLES CLOSED 2026-11-18, after `bug #2: disable also survives
+      // reload` went red once and told us NOTHING about why.
+      //
+      // 1. `!doc?.getElementById('freeplay')?.classList.contains('on')` is
+      //    TRUE when the document or the element is missing, so a reload
+      //    that never finished reported a PASS. The boot is now asserted
+      //    and the element is required to exist.
+      // 2. None of the three checks carried a detail string. When one
+      //    fails you need to tell "the click never landed" apart from "it
+      //    landed and did not survive", and the only way to do that is to
+      //    report store.freePlay from BEFORE the reload. It is reported now.
+      //
+      // NOT a reproduction. The sequence was driven 11 times by hand — 5
+      // idle, 6 against 8 busy CPU loops — and came back clean every time,
+      // and three later suite runs were green. The document-identity theory
+      // was tested too and is WRONG: frame.contentDocument swaps on the
+      // first 150ms poll, so the loop is not catching the pre-reload DOM.
+      // Cause still unknown; this only makes the next one legible.
+      const reloadAndWait = async () => {
+        frame.contentWindow.location.reload();
+        let d = null;
+        for (let i = 0; i < 40; i++) {
+          await sleep(150);
+          d = frame.contentDocument;
+          if (d?.querySelector('.side-nav .side-item')) return { d, booted: true, polls: i };
+        }
+        return { d, booted: false, polls: 40 };
+      };
+      const r2 = await reloadAndWait();
+      const doc2 = r2.d;
+      const fpEl2 = doc2?.getElementById('freeplay') ?? null;
+      const onAfterReload = r2.booted && store.freePlay === true
+        && !!fpEl2 && fpEl2.classList.contains('on');
       // course switch while enabled
-      doc2.querySelector('[aria-label^="Change course"]')?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
+      doc2?.querySelector('[aria-label^="Change course"]')?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
       await sleep(250);
-      [...doc2.querySelectorAll('[role="menuitem"]')].find(b => b.textContent.includes('Neutral American'))
+      [...(doc2?.querySelectorAll('[role="menuitem"]') ?? [])].find(b => b.textContent.includes('Neutral American'))
         ?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
       await sleep(450);
-      const onAfterSwitch = store.freePlay === true && doc2.getElementById('freeplay')?.classList.contains('on');
-      // disable and reload
-      doc2.getElementById('freeplay')?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
+      const fpElSwitch = doc2?.getElementById('freeplay') ?? null;
+      const onAfterSwitch = store.freePlay === true
+        && !!fpElSwitch && fpElSwitch.classList.contains('on');
+      // Disable and reload. The element is captured BEFORE the click so the
+      // detail can say whether there was anything to click at all.
+      const offTarget = doc2?.getElementById('freeplay') ?? null;
+      offTarget?.dispatchEvent(new frame.contentWindow.MouseEvent('click', { bubbles: true }));
       await sleep(250);
-      frame.contentWindow.location.reload();
-      let doc3 = null;
-      for (let i = 0; i < 40; i++) { await sleep(150); doc3 = frame.contentDocument; if (doc3?.querySelector('.side-nav .side-item')) break; }
-      const offAfterReload = store.freePlay === false && !doc3?.getElementById('freeplay')?.classList.contains('on');
-      check('bug #2: enable survives a real reload', onNow && onAfterReload);
-      check('bug #2: stays enabled across a course switch', onAfterSwitch);
-      check('bug #2: disable also survives reload', offAfterReload);
+      const fpAfterClick = store.freePlay;
+      const r3 = await reloadAndWait();
+      const doc3 = r3.d;
+      const fpEl3 = doc3?.getElementById('freeplay') ?? null;
+      const offAfterReload = r3.booted && store.freePlay === false
+        && !!fpEl3 && !fpEl3.classList.contains('on');
+      check('bug #2: enable survives a real reload', onNow && onAfterReload,
+        `onNow=${onNow} booted=${r2.booted}@poll${r2.polls} store=${store.freePlay} btn=${fpEl2 ? `"${fpEl2.className}"` : 'MISSING'}`);
+      check('bug #2: stays enabled across a course switch', onAfterSwitch,
+        `store=${store.freePlay} btn=${fpElSwitch ? `"${fpElSwitch.className}"` : 'MISSING'}`);
+      check('bug #2: disable also survives reload', offAfterReload,
+        `clickTarget=${offTarget ? 'found' : 'MISSING'} storeAfterClick=${fpAfterClick} `
+        + `booted=${r3.booted}@poll${r3.polls} storeNow=${store.freePlay} `
+        + `btn=${fpEl3 ? `"${fpEl3.className}"` : 'MISSING'}`);
     } catch (err) {
       bad('B04 bug-fix journeys', String(err));
     } finally {
