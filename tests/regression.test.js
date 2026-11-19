@@ -3937,8 +3937,19 @@ export async function run({ navDoc = document } = {}) {
         await sleep(250);
       }
       clickIn(doc.querySelector('[data-tile="col:principles"]')); await sleep(400);
+      // PINNED BY THE DOOR, NOT BY THE CLASS. This counted `.item-tile`
+      // until the programme layout landed (2026-11-19) and the collection
+      // page started emitting `.mp-row` instead. Nothing was broken: every
+      // chapter was on the page and every one opened. The check went red
+      // because it was asserting the name of a CSS class, which is the one
+      // thing a restyle is entitled to change.
+      //
+      // `[data-item]` is the hook the two driven clicks below actually use
+      // and the hook both renderers have always emitted, so it survives the
+      // next restyle too. The exact-count comparison still catches an
+      // overcount, so widening the selector costs nothing.
       check('acting: opening a collection reveals its chapters',
-        doc.querySelectorAll('.item-tile').length === ACTING_COLLECTIONS[0].lessons.length
+        doc.querySelectorAll('main [data-item]').length === ACTING_COLLECTIONS[0].lessons.length
         && doc.body.textContent.includes('Behavior Comes From the Situation'));
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       // EVERY tile on a collection page opens something. Lines & Memory was

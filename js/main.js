@@ -6052,19 +6052,52 @@ function renderActingModule(n, ws = 'acting') {
   const ready = lessons.filter(B.visible);
   const done = ready.filter(l => speechLessonDone(l.id)).length;
   const st = groupStatus({ available: ready.length, done, prepared: lessons.length - ready.length });
+  // THE PROGRAMME. A module's lessons are its contents page, so they are
+  // set as one: a centred head under a double rule, then one readable
+  // column of numbered rows. Owner direction 2026-11-19.
+  //
+  // `itemTileHtml` is NOT used here any more and is NOT changed, because
+  // nine other call sites still want a tile. See the .mp- block in
+  // css/style.css for why this is a second component rather than a
+  // restyle of that one.
+  //
+  // TWO HOOKS ARE LOAD-BEARING AND MUST SURVIVE ANY RESTYLE OF THIS PAGE:
+  // `.page-h` carrying the module title, which the suite reads by exact
+  // text to prove Return to module landed, and `data-item="<lesson id>"`
+  // on the row itself, which two driven checks click to open a lesson.
+  // The row IS the button, so one click opens the lesson, which is the
+  // standing rule for every lesson card in this app.
   workspacePage(
     pageTopbar(`${B.icon} ${B.title}`, '#8a6d3b'),
-    `<div class="ws-head">
+    `<div class="mp-head">
+       <p class="mp-eyebrow">${esc(B.title)} <span aria-hidden="true">·</span> Module ${esc(String(m.n))}</p>
        <h1 class="page-h">${esc(moduleTitle(B, m))}</h1>
-       <p class="ws-sub"><span class="badge ${st.cls}">${esc(st.label)}</span>
-         ${ready.length ? ` · ${done} of ${ready.length} lessons completed` : ` · ${lessons.length} lessons prepared`}</p>
+       <p class="mp-lead">Choose a lesson to begin.</p>
+       <p class="mp-info"><span class="badge ${st.cls}">${esc(st.label)}</span>
+         <span>${ready.length
+           ? `${done} of ${ready.length} ${ready.length === 1 ? 'lesson' : 'lessons'} completed`
+           : `${lessons.length} ${lessons.length === 1 ? 'lesson' : 'lessons'} prepared`}</span></p>
      </div>`,
-    `<div class="item-grid">
-       ${lessons.map(l => itemTileHtml({
-         key: l.id, seq: bookLessonNumber(B, l), title: l.title,
-         note: B.visible(l) ? (speechLessonDone(l.id) ? 'Completed' : l.objective) : draftBadgeFor(l),
-         state: B.visible(l) ? '' : 'is-pending',
-       })).join('')}
+    `<div class="mp-caption"><p class="mp-label">Contents</p></div>
+     <div class="mp-list">
+       ${lessons.map(l => {
+         const live = B.visible(l);
+         const fin = live && speechLessonDone(l.id);
+         // The tick is a CHARACTER, not a colour: the row still says
+         // "Completed" in greyscale and to a screen reader.
+         const note = live
+           ? (fin ? '<span class="mp-done">\u2713 Completed</span>' : esc(l.objective ?? ''))
+           : esc(draftBadgeFor(l));
+         return `
+       <button class="mp-row${live ? '' : ' is-pending'}" data-item="${esc(l.id)}" type="button">
+         <span class="mp-num" aria-hidden="true">${esc(String(bookLessonNumber(B, l)))}</span>
+         <span class="mp-text">
+           <span class="mp-name">${esc(l.title)}</span>
+           ${note ? `<span class="mp-desc">${note}</span>` : ''}
+         </span>
+         <span class="mp-chev" aria-hidden="true">\u203a</span>
+       </button>`;
+       }).join('')}
      </div>`);
   app.querySelectorAll('[data-item]').forEach(b =>
     b.addEventListener('click', () => renderActingLesson(b.dataset.item)));
@@ -7580,13 +7613,24 @@ function renderActingCollection(collectionId, entryId = null, selectedKey = null
   }
   workspacePage(
     pageTopbar(`📚 ${B.libraryName}`, '#8a6d3b'),
-    `<div class="ws-head">
-       <h1 class="page-h"><span class="tile-emoji" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id] ?? c.icon}</span>${esc(moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }))}</h1>
-       <p class="ws-sub">${/* THE MODULE'S SIZE, NOT THE FILTER'S. `entries`
+    // THE SAME PROGRAMME THE MODULE PAGE USES. This is the other door
+    // into a module's contents: Theatre History reaches its lessons
+    // through Chapter and then Collection rather than through a module
+    // fold, so without this the one course with a chapter layer was the
+    // one course that never saw the programme. Owner direction 2026-11-19.
+    `<div class="mp-head">
+       <span class="mp-crest" aria-hidden="true">${ACTING_COLLECTION_EMOJI[c.id] ?? c.icon}</span>
+       <p class="mp-eyebrow">${esc(B.title)}</p>
+       <h1 class="page-h">${esc(moduleTitle(B, B.modules.find(m => m.id === c.id) ?? { id: c.id, title: c.title }))}</h1>
+       <p class="mp-lead">Choose a chapter to begin.</p>
+       <p class="mp-info"><span>${/* THE MODULE'S SIZE, NOT THE FILTER'S. `entries`
             is the visible tile list, so under an entry link this said
             "2 chapters" of a module that has twelve. The heading describes
             the module; the line under the links describes the filter. */
-          pages.filter(p2 => !p2.replaces).length + allLessons.length} chapters · ${esc(B.libraryName)}</p>
+          pages.filter(p2 => !p2.replaces).length + allLessons.length} ${
+          pages.filter(p2 => !p2.replaces).length + allLessons.length === 1
+            ? 'chapter' : 'chapters'}</span>
+         <span>${esc(B.libraryName)}</span></p>
      </div>`,
     `${picks.length ? `
      <div class="entry-links">
@@ -7601,10 +7645,23 @@ function renderActingCollection(collectionId, entryId = null, selectedKey = null
      <p class="pane-note">${pick
        ? `Showing ${lessons.length} of ${allLessons.length}. The same lessons as the full list, with the same progress.`
        : 'Read in any order. This sequence is a suggested starting point.'}</p>
-     <div class="item-grid">
-       ${entries.map((e, i) => itemTileHtml({
-         ...e, seq: String(i + 1).padStart(2, '0'),
-       })).join('')}
+     <div class="mp-caption"><p class="mp-label">Contents</p></div>
+     <div class="mp-list">
+       ${entries.map((e, i) => {
+         // A standalone PAGE in this shelf carries no objective, so its
+         // row simply has no description rather than an invented one.
+         // A withdrawn lesson shows its draft badge in that slot instead.
+         const desc = e.state ? e.note : e.blurb;
+         return `
+       <button class="mp-row${e.state ? ' ' + e.state : ''}" data-item="${esc(e.key)}" type="button">
+         <span class="mp-num" aria-hidden="true">${String(i + 1).padStart(2, '0')}</span>
+         <span class="mp-text">
+           <span class="mp-name">${esc(e.title)}</span>
+           ${desc ? `<span class="mp-desc">${esc(desc)}</span>` : ''}
+         </span>
+         <span class="mp-chev" aria-hidden="true">\u203a</span>
+       </button>`;
+       }).join('')}
      </div>`);
   // Lines & Memory is a standalone page, not a lesson record, so it is
   // routed here rather than through the chapter opener.
