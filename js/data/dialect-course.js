@@ -964,8 +964,8 @@ const BROAD = [
 ];
 
 export const MODES = [
-  { id: 'match', title: 'Matching', icon: '🃏', type: 'match', phonemes: BROAD, blurb: 'Match symbols to words.' },
-  { id: 'decode', title: 'Decode the Word', icon: '🔡', type: 'typeWord', blurb: 'Read IPA, type the word.' },
+  { id: 'match', title: 'Matching', icon: '🃏', img: 'img/ui/flash-cards.png', type: 'match', phonemes: BROAD, blurb: 'Match symbols to words.' },
+  { id: 'decode', title: 'Decode the Word', icon: '🔡', img: 'img/ui/ipa.png', type: 'typeWord', blurb: 'Read IPA, type the word.' },
   { id: 'spell', title: 'Spell It', icon: '✏️', type: 'spellBlank', blurb: 'Fill the missing letters.' },
   { id: 'gaps', title: 'Fill the Gaps', icon: '🧩', type: 'gapBuild', phonemes: BROAD, blurb: 'Complete the transcription.' },
   { id: 'build', title: 'Build a Word', icon: '🔨', type: 'build', phonemes: BROAD, blurb: 'Assemble it from tiles.' },
@@ -974,8 +974,8 @@ export const MODES = [
   { id: 'name', title: 'Name That Sound', icon: '💬', type: 'description', phonemes: BROAD, blurb: 'Match the description.' },
   { id: 'missing', title: 'Missing Symbol', icon: '⬜', type: 'fillBlank', phonemes: BROAD, blurb: 'One symbol is missing.' },
   { id: 'pairs', title: 'Minimal Pairs', icon: '👂', type: 'minimalPair', blurb: 'Which word did you hear?' },
-  { id: 'readsent', title: 'Read a Sentence', icon: '📖', type: 'sentenceToEnglish', blurb: 'Decode a full IPA line.' },
+  { id: 'readsent', title: 'Read a Sentence', icon: '📖', img: 'img/ui/one-line.png', type: 'sentenceToEnglish', blurb: 'Decode a full IPA line.' },
   { id: 'writesent', title: 'Transcribe a Sentence', icon: '📝', type: 'englishToIpa', blurb: 'Pick the right transcription.' },
   { id: 'shift', title: 'Accent Shift', icon: '⇄', type: 'shiftChoice', blurb: 'Transform between accents.' },
-  { id: 'earacc', title: 'Name the Accent', icon: '🌍', type: 'accentEar', blurb: 'RP or American?' },
+  { id: 'earacc', title: 'Name the Accent', icon: '🌍', img: 'img/ui/globe.png', type: 'accentEar', blurb: 'RP or American?' },
 ];

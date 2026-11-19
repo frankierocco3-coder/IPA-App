@@ -224,6 +224,42 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .mode-title { font-weight: 800; font-size: 15px; }
 .mode-blurb { font-size: 12px; color: var(--muted); }
 
+/* ── Practice families (owner approved 2026-11-19) ──────────────────
+   The Practice hub's four groups each carry a colour, so the edge down a
+   card says WHICH SKILL it trains rather than decorating it. The colours
+   are the app's own: #64748b, #8a6d3b, #6f8657 and #c0604a are already
+   track-color values on the More page, and the tints are the existing
+   tint and edge custom properties.
+
+   DO NOT WRITE THOSE TWO VARIABLE NAMES WITH A STAR WILDCARD IN A CSS
+   COMMENT. The star followed by a slash ends the comment early, the rest
+   of the prose is then parsed as a selector, and it SWALLOWS THE NEXT
+   RULE. The border-left below vanished from the CSSOM twice that way,
+   while sitting correctly in the file and being served correctly, which
+   is as invisible as a bug gets. Same family as the double hyphen that
+   kills an SVG.
+
+   SCOPED TO `.is-fam`, WHICH ONLY THE PRACTICE GRID CARRIES. `.mode-card`
+   is shared with three other pages (the arcade at js/main.js:3864, the
+   acting games at 8130, the speech games at 13015) and none of them sets
+   track-color; an unscoped border-left would draw those three a 10px edge
+   in no colour at all. The icon tile is scoped for the same reason. */
+.mode-grid.is-fam .mode-card { border-left: 10px solid var(--track-color); }
+.mode-grid.is-fam .mode-card:hover { border-color: var(--track-color); }
+.mode-grid.is-fam .mode-icon {
+  display: grid; place-items: center; width: 54px; height: 54px;
+  border-radius: 13px; background: var(--fam-tint);
+  border: 1px solid var(--fam-edge); margin-bottom: 2px;
+}
+/* The illustration keeps a neutral-ish ground, the same reasoning as
+   .track-glyph.has-img: a painted plate on a saturated square fights
+   itself. The family tint is pale enough to sit behind one. */
+.chart-h.is-fam { color: var(--track-color); }
+.chart-h.is-fam::after {
+  content: ""; height: 2px; flex: 1; border-radius: 2px;
+  background: var(--fam-edge); align-self: center;
+}
+
 /* ── IPA chart ── */
 .chart-entry { border-left-color: #64748b; }
 .chart-page { gap: 24px; }

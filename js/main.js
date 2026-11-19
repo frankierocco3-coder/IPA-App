@@ -2100,12 +2100,23 @@ function renderGuidebook(unit, track) {
 // ── Practice hub ──────────────────────────────────────────────
 
 // The games, grouped by the skill they train instead of one flat grid.
+// A COLOUR PER GROUP (owner approved 2026-11-19). Every value is already
+// in the app: the three --track-color values the More page sets, plus
+// terracotta from the tint/edge pairs. The grouping itself is UNCHANGED --
+// these four groups by trained skill predate this and the suite pins
+// Listening's contents by name, so nothing moved between groups.
 const PRACTICE_GROUPS = [
-  { title: 'Listening', ids: ['listen', 'pairs'] },
-  { title: 'Reading IPA', ids: ['match', 'decode', 'find', 'name', 'readsent'] },
-  { title: 'Transcription', ids: ['spell', 'gaps', 'build', 'missing', 'writesent'] },
-  { title: 'Accent & Vocabulary', ids: ['shift', 'earacc'] },
+  { title: 'Listening', ids: ['listen', 'pairs'],
+    color: '#64748b', tint: 'var(--tint-blue)', edge: 'var(--edge-blue)' },
+  { title: 'Reading IPA', ids: ['match', 'decode', 'find', 'name', 'readsent'],
+    color: '#8a6d3b', tint: 'var(--tint-gold)', edge: 'var(--edge-gold)' },
+  { title: 'Transcription', ids: ['spell', 'gaps', 'build', 'missing', 'writesent'],
+    color: '#6f8657', tint: 'var(--tint-sage)', edge: 'var(--edge-sage)' },
+  { title: 'Accent & Vocabulary', ids: ['shift', 'earacc'],
+    color: '#c0604a', tint: 'var(--tint-terracotta)', edge: 'var(--edge-terracotta)' },
 ];
+// The three custom properties a family sets on a card or a heading.
+const famStyle = g => `--track-color:${g.color};--fam-tint:${g.tint};--fam-edge:${g.edge}`;
 const AUDIO_MODES = new Set(['listen', 'pairs', 'earacc']);
 
 // ── Practice: contents follow the active workspace ────────────
@@ -2142,9 +2153,15 @@ function ipaPracticePane(el, course) {
     ? `Aimed at what keeps slipping: ${picks.slice(0, 3).map(p => esc(p.title)).join(', ')}.`
     : `Not enough answer data to target yet — a mixed review of everything ${esc(name)} has taught you so far.`;
 
-  const modeCard = m => `
-    <button class="mode-card" data-mode="${m.id}" type="button">
-      <span class="mode-icon" aria-hidden="true">${m.icon}</span>
+  // THE GLYPH IS THE DRAWN ICON WHERE ONE EXISTS, the emoji where it does
+  // not. Same contract as cardGlyph: `img` on the record wins, and a mode
+  // with no art still renders rather than showing a gap. The CSS for the
+  // img has been waiting since 2026-10-13 (see the 36px note in style.css).
+  const modeCard = (m, g) => `
+    <button class="mode-card" data-mode="${m.id}" type="button" style="${famStyle(g)}">
+      <span class="mode-icon" aria-hidden="true">${m.img
+        ? `<img src="${esc(m.img)}" alt="" width="36" height="36" loading="lazy" decoding="async">`
+        : m.icon}</span>
       <span class="mode-title">${esc(m.title)}</span>
       <span class="mode-blurb">${esc(m.blurb)}</span>
       <span class="mode-meta">~4 min${AUDIO_MODES.has(m.id) ? ' · 🎧 audio' : ''}</span>
@@ -2168,16 +2185,17 @@ function ipaPracticePane(el, course) {
     ${dailyRehearsalCard()}
     <p class="pane-note">Practice as often as you like. Nothing here is scored against you, and nothing is ever lost by getting something wrong.</p>
     ${PRACTICE_GROUPS.map(g => `
-      <h2 class="chart-h">${esc(g.title)} <span>in ${esc(name)}</span></h2>
-      <div class="mode-grid">
+      <h2 class="chart-h is-fam" style="${famStyle(g)}">${esc(g.title)} <span>in ${esc(name)}</span></h2>
+      <div class="mode-grid is-fam" style="${famStyle(g)}">
         ${g.title === 'Accent & Vocabulary' && d ? `
           <button class="mode-card idiom-mode" id="hub-idiom-drill" type="button">
-            <span class="mode-icon" aria-hidden="true">🗣</span>
+            <span class="mode-icon" aria-hidden="true"><img src="img/ui/dictionary.png" alt=""
+              width="36" height="36" loading="lazy" decoding="async"></span>
             <span class="mode-title">Words &amp; Expressions</span>
             <span class="mode-blurb">The words, not just the sounds.</span>
             <span class="mode-meta">~4 min</span>
           </button>` : ''}
-        ${g.ids.map(id => modeCard(MODES.find(m => m.id === id))).join('')}
+        ${g.ids.map(id => modeCard(MODES.find(m => m.id === id), g)).join('')}
         ${g.title === 'Listening' && bridgeRoutes.length ? `
           <button class="mode-card" id="mode-bridge" type="button">
             <span class="mode-icon" aria-hidden="true">🌉</span>
