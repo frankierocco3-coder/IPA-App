@@ -7759,12 +7759,30 @@ export async function run({ navDoc = document } = {}) {
     const capText = figs.map(([, f]) => f.caption).join(' ');
     check('commedia: picture captions keep house copy (no em dashes, no straight quotes)',
       !capText.includes('—') && !/["']/.test(capText));
+    const chStrings = v => typeof v === 'string' ? [v]
+      : Array.isArray(v) ? v.flatMap(chStrings)
+      : v && typeof v === 'object' ? Object.values(v).flatMap(chStrings) : [];
     const copy = [CHARACTER_PRINCIPLE, COMMEDIA_PRINCIPLE, ...ONE_LINES, ...MASK_SITUATIONS, ...MASK_PROBLEMS,
       ...[...CHARACTER_MODULES, ...COMMEDIA_MODULES].flatMap(m => [m.title, m.blurb]),
       ...[...CHARACTER_COLLECTIONS, ...COMMEDIA_COLLECTIONS].map(c => c.title),
       ...COMMEDIA_MASKS.flatMap(k => Object.values(k).flat().filter(v => typeof v === 'string')),
+      // EVERY STRING IN A BODY. This used to map a block as
+      // `b.list ?? b.steps ?? [b.p ?? b.h ?? '']`, which saw four kinds and
+      // silently scored every other kind the empty string. { panel },
+      // { cards } and { tiles } all carry prose and none of it was checked.
+      // Walking the values means a block type joins this check by existing
+      // rather than by somebody remembering to name it here, which is the
+      // failure mode that let the gap open in the first place.
+      //
+      // The id-bearing keys come along too: { fig }, { mask }, { profile },
+      // { roster } hold registry keys like 'cm-innamorata-mask'. They are
+      // lower case and hyphenated, so they trip neither the style rule nor
+      // the practitioner-name rule below, which is checked, not assumed.
+      // `chStrings`, not `strings`: the Shakespeare block further down
+      // declares its own, and a duplicate const in one scope is a
+      // SyntaxError that stops this whole module parsing.
       ...CH_ALL.flatMap(l => [l.title, l.objective, l.orientation, l.reflection,
-        ...l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? ''])])];
+        ...chStrings(l.body)])];
     const styleBad = copy.filter(t => /[—–"]/.test(t) || /n’t\b|’(re|ll|ve|m|d)\b/.test(t)
       || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(t));
     check('character: copy keeps house style (no dashes, no contractions, curly quotes)',
@@ -7983,11 +8001,21 @@ export async function run({ navDoc = document } = {}) {
     // does, failed this content on its own citations; that course simply
     // has no ranges in it.
     const unquoted = t => String(t ?? '').replace(/[“”"][^“”"]*[“”"]/g, ' ');
+    const thStrings = v => typeof v === 'string' ? [v]
+      : Array.isArray(v) ? v.flatMap(thStrings)
+      : v && typeof v === 'object' ? Object.values(v).flatMap(thStrings) : [];
     const thCopy = [...THEATRE_LESSONS, ...MUSICAL_LESSONS, ...SCREEN_LESSONS].flatMap(l => [
       l.title, l.objective, l.orientation, l.reflection, l.takeaway,
-      ...(l.body ?? []).flatMap(b => [b.p, b.h, b.sub, b.key, b.quote, b.note,
-        ...(b.list ?? []), ...(b.olist ?? []),
-        ...(b.defs ?? []).flatMap(d => [d.label, d.text])])]).filter(Boolean);
+      // NINE NAMED BLOCK TYPES BECAME ALL OF THEM. The list above was
+      // accurate when it was written and went stale as blocks were added:
+      // it missed { table } and { qa } across all three courses, and
+      // { cta } in Musical Theatre. Measured 2026-11-18, that is 44 tables
+      // and 44 knowledge checks whose copy had never been style checked,
+      // and widening it flags nothing, so it is a tightening rather than a
+      // repair. `thStrings` is named apart from the other walkers in this
+      // file on purpose: a duplicate const in one scope would be a
+      // SyntaxError and would take every check in the module with it.
+      ...thStrings(l.body)]).filter(Boolean);
     const thBad = thCopy.filter(t => /—/.test(unquoted(t))
       || /\bn’t\b|’(re|ll|ve|m)\b/.test(unquoted(t))
       || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(unquoted(t))
