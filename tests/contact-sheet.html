@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Speechcraft — contact sheet</title>
+<!--
+  EVERY TEMPLATE ON ONE PAGE, AT ONE WIDTH, IN ONE LOOK.
+
+  Dev-only, same as run-all.html; tools/build_artifact.py ships nothing
+  from tests/. Nothing here is reachable from the app.
+
+  WHY THIS EXISTS. Until 2026-11-19 the only way to judge how the app
+  looked was to open one page, at one width, in one session. There are
+  roughly a dozen distinct visual templates and nobody had ever seen them
+  side by side, so nothing that was wrong ACROSS pages was visible at all:
+  a type scale that drifts, four different ideas of what a page header is,
+  a spacing rhythm that changes per renderer. That is also exactly how the
+  Acting ground shipped invisible at 1024 — the defect only exists at a
+  width nobody happened to open.
+
+  A page is driven, not addressed: the app has no URL routing beyond the
+  owner hash tools (#audit, #review), so every cell clicks its way in the
+  way the suite does. A recipe that stops matching says so IN THE CELL.
+  A blank cell with no error is the one failure mode this must never have,
+  so a cell that never arrives is painted red and named.
+
+  USE: ?w=390 phone, ?w=1024 the width that hid the ground, ?w=1440.
+       ?scale=.5 to fit more in one screenshot. ?only=acting to filter.
+-->
+<style>
+  :root { color-scheme: light; --line: #d9d2c2; --ink: #2c3c2e; --muted: #6b6b58; }
+  body { margin: 0; padding: 16px; background: #f3efe4; color: var(--ink);
+         font: 13px/1.4 ui-sans-serif, system-ui, sans-serif; }
+  h1 { font-size: 15px; margin: 0 0 2px; }
+  #meta { color: var(--muted); margin: 0 0 14px; }
+  #grid { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .cell { background: #fff; border: 1px solid var(--line); border-radius: 6px;
+          padding: 6px; }
+  .cap { display: flex; justify-content: space-between; gap: 8px;
+         font-size: 11px; font-weight: 700; padding: 2px 2px 6px; }
+  .cap .st { font-weight: 400; color: var(--muted); }
+  .cell.bad { border-color: #a33; background: #fff4f4; }
+  .cell.bad .st { color: #a33; font-weight: 700; }
+  .vp { overflow: hidden; }
+  iframe { border: 0; display: block; transform-origin: top left; }
+</style>
+</head>
+<body>
+<h1>Speechcraft — contact sheet</h1>
+<p id="meta">starting…</p>
+<div id="grid"></div>
+
+<script type="module">
+const q = new URLSearchParams(location.search);
+const W = Number(q.get('w') || 390);
+const H = Number(q.get('h') || (W < 700 ? 760 : 900));
+const SCALE = Number(q.get('scale') || (W < 700 ? 0.62 : 0.3));
+const ONLY = q.get('only') || '';
+
+// A step is [kind, arg]:
+//   ws   — click the workspace switch for this id
+//   side — click the side-nav item whose text matches
+//   sel  — click the first match for this CSS selector
+//   text — click the nearest button/row containing this text
+//   wait — sleep this many ms
+// Recipes are deliberately written in the app's own stable hooks
+// ([data-ws], [data-tile], [data-item]) rather than class names, for the
+// reason the suite learned twice: a class name is the one thing a restyle
+// is entitled to change.
+const SHEETS = [
+  { id: 'ipa-learn',     label: 'IPA · Learn',            steps: [['ws','ipa'], ['side','Learn']] },
+  { id: 'ipa-practice',  label: 'IPA · Practice',         steps: [['ws','ipa'], ['side','Practice']] },
+  { id: 'ipa-library',   label: 'IPA · Library',          steps: [['ws','ipa'], ['side','Library']] },
+  { id: 'ipa-progress',  label: 'IPA · Progress',         steps: [['ws','ipa'], ['side','Progress']] },
+  { id: 'act-learn',     label: 'Acting · Learn',         steps: [['ws','acting'], ['side','Learn']] },
+  { id: 'act-library',   label: 'Acting · Library',       steps: [['ws','acting'], ['side','Library']] },
+  { id: 'act-coll',      label: 'Acting · collection (mp-)', steps: [['ws','acting'], ['side','Library'], ['sel','[data-tile="col:principles"]']] },
+  { id: 'act-lesson',    label: 'Acting · lesson',        steps: [['ws','acting'], ['side','Library'], ['sel','[data-tile="col:principles"]'], ['sel','[data-item]']] },
+  { id: 'act-shelf',     label: 'Acting · Script Analysis shelf', steps: [['ws','acting'], ['side','Library'], ['sel','[data-tile="col:scene"]']] },
+  { id: 'act-textbook',  label: 'Acting · Textbook',      steps: [['ws','acting'], ['side','Library'], ['sel','[data-tile="col:textbook"]']] },
+  { id: 'shak-learn',    label: 'Shakespeare · Learn',    steps: [['ws','shakespeare'], ['side','Learn']] },
+  { id: 'rhet-learn',    label: 'Rhetoric · Learn',       steps: [['ws','rhetoric'], ['side','Learn']] },
+  { id: 'comm-learn',    label: 'Commedia · Learn',       steps: [['ws','commedia'], ['side','Learn']] },
+  { id: 'char-learn',    label: 'Character · Learn',      steps: [['ws','character'], ['side','Learn']] },
+  { id: 'mus-learn',     label: 'Musical · Learn',        steps: [['ws','musical'], ['side','Learn']] },
+  { id: 'scr-learn',     label: 'Screen · Learn',         steps: [['ws','screen'], ['side','Learn']] },
+  { id: 'theatre-learn', label: 'Theatre History · Learn', steps: [['ws','theatre'], ['side','Learn']] },
+  { id: 'ipa-studio',    label: 'IPA · Studio',           steps: [['ws','ipa'], ['side','Studio']] },
+  { id: 'more',          label: 'More',                   steps: [['ws','ipa'], ['side','More']] },
+  { id: 'prefs',         label: 'Preferences',            steps: [['ws','ipa'], ['side','More'], ['text','Preferences']] },
+];
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const grid = document.getElementById('grid');
+const meta = document.getElementById('meta');
+
+// Onboarding only — the same single flag run-all.js merges. Progress is
+// never written. This origin is a dev server and is not the live site's
+// origin anyway, but the rule stands wherever it runs.
+try {
+  const k = 'ipa-trainer-v1';
+  const s = JSON.parse(localStorage.getItem(k) || '{}');
+  s.onboarding = { ...(s.onboarding || {}), done: true };
+  localStorage.setItem(k, JSON.stringify(s));
+} catch { /* storage blocked; cells will say so */ }
+
+function clickIn(el) {
+  if (!el) return false;
+  el.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, view: el.ownerDocument.defaultView }));
+  return true;
+}
+
+async function drive(doc, steps) {
+  for (const [kind, arg] of steps) {
+    let el = null;
+    if (kind === 'wait') { await sleep(Number(arg)); continue; }
+    if (kind === 'ws')   el = doc.querySelector(`[data-ws="${arg}"]`);
+    if (kind === 'sel')  el = doc.querySelector(arg);
+    if (kind === 'side') el = [...doc.querySelectorAll('.side-nav .side-item')]
+                                .find(e => new RegExp(arg, 'i').test(e.textContent));
+    if (kind === 'text') el = [...doc.querySelectorAll('button, [data-item], [data-tile]')]
+                                .find(e => e.textContent.includes(arg));
+    if (!el) return `no match: ${kind} ${arg}`;
+    clickIn(el);
+    await sleep(520);
+  }
+  return '';
+}
+
+// STRICTLY SEQUENTIAL. Every frame shares one origin and therefore one
+// localStorage, so two frames switching workspace at once would read each
+// other's writes. Driving one at a time costs a few seconds and removes
+// a whole class of phantom result.
+const list = SHEETS.filter(s => !ONLY || s.id.includes(ONLY) || s.label.toLowerCase().includes(ONLY.toLowerCase()));
+let bad = 0;
+
+for (const [i, sheet] of list.entries()) {
+  meta.textContent = `${W}px · driving ${i + 1}/${list.length} — ${sheet.label}`;
+  const cell = document.createElement('div');
+  cell.className = 'cell';
+  cell.innerHTML = `<div class="cap"><span>${sheet.label}</span><span class="st">…</span></div>
+    <div class="vp" style="width:${Math.round(W * SCALE)}px;height:${Math.round(H * SCALE)}px">
+      <iframe style="width:${W}px;height:${H}px;transform:scale(${SCALE})"></iframe></div>`;
+  grid.appendChild(cell);
+  const frame = cell.querySelector('iframe');
+  const st = cell.querySelector('.st');
+
+  const err = await new Promise(resolve => {
+    frame.addEventListener('load', async () => {
+      const d = frame.contentDocument;
+      for (let n = 0; n < 60; n++) {
+        if (d.querySelector('.side-nav .side-item')) break;
+        await sleep(100);
+      }
+      if (!d.querySelector('.side-nav .side-item')) return resolve('never booted');
+      resolve(await drive(d, sheet.steps));
+    }, { once: true });
+    frame.src = '../index.html';
+  });
+
+  // A CELL THAT DID NOT ARRIVE IS NAMED, NEVER LEFT BLANK. A silently
+  // empty cell reads as "that page looks empty", which is the opposite
+  // of what happened.
+  if (err) { cell.classList.add('bad'); st.textContent = err; bad++; }
+  else {
+    const d = frame.contentDocument;
+    const h = d.querySelector('.page-h')?.textContent?.trim();
+    const over = d.documentElement.scrollWidth > frame.contentWindow.innerWidth + 1;
+    st.textContent = (h ? h.slice(0, 28) : 'ok') + (over ? ' · SIDEWAYS SCROLL' : '');
+    if (over) { cell.classList.add('bad'); bad++; }
+  }
+}
+
+meta.textContent = `${W}px · ${list.length} templates · ${bad} not arrived or scrolling sideways`;
+</script>
+</body>
+</html>
