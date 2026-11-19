@@ -4025,8 +4025,22 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   width: calc(100% + 610px); height: calc(100% + 28px);
   object-fit: cover; object-position: top center;
   opacity: .5; pointer-events: none; user-select: none; }
+/* BLEED BY THE GUTTER THAT APPLIES HERE, WHICH IS 14 AND NOT 16.
+   This carries the drawing out under the shell's side padding to the
+   window edges, so it needs that padding exactly. It used 16px, which is
+   the DESKTOP gutter (`.shell` line ~1208); inside this same breakpoint
+   the shell is `padding: 0 14px 86px`, so the bleed overshot by 2px a
+   side and the whole page scrolled sideways on a phone. Measured at
+   390px: ground 394px wide starting at x -2, document scrollWidth 392
+   against a 390 viewport.
+
+   It showed on Commedia and Rhetoric only, because the cards and banded
+   grounds are `display: none` down here, and those two were the only
+   Learn pages that still drew one. 929 suite checks never saw it: not
+   one of them looks at document width. The contact sheet found it on its
+   first run, which is the argument for the contact sheet. */
 @media (max-width: 979px) {
-  .lm-ground { left: -16px; width: calc(100% + 32px); }
+  .lm-ground { left: -14px; width: calc(100% + 28px); }
 }
 /* THE BLEED IS SIZED FOR THE PANE IT IS IN, and the cards layout is a
    different pane. The 610px above is the Commedia path's: a 620px reading
