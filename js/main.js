@@ -6221,7 +6221,19 @@ const SPRIG = where => {
 
 // The drawing inside the "Try it" box at the foot of a lesson, which is
 // the same leak one layer down: it was hard coded to a Commedia figure.
-const COURSE_REFLECT = { rhetoric: 'rh-wreath' };
+//
+// A COURSE REGISTERED WITH `null` GETS NO DRAWING, which is why the
+// lookup below is `in` rather than `??`. Nullish coalescing falls through
+// on null, so `COURSE_REFLECT[ws] ?? 'cm-l01-reflect'` would have handed
+// a course that asked for nothing the Commedia figure anyway.
+//
+// Acting is registered null DELIBERATELY and not by oversight. Its
+// lessons gained a trailing panel in the interiors pass, and a trailing
+// panel is what makes the renderer pair the reflection into a "Try it"
+// box with a figure in it — so without this entry that pass would have
+// put Commedia's drawing on 41 Acting pages in the same move that was
+// meant to tidy the course up. Acting has no mark of its own yet.
+const COURSE_REFLECT = { rhetoric: 'rh-wreath', acting: null };
 
 function principleCardsHtml(cards) {
   return `<ol class="lxc-cards">${cards.map(c => `
@@ -6898,7 +6910,8 @@ function renderActingLesson(id) {
     const pairHtml = tailPanel ? `
           <div class="lxc-panels">
             ${lessonPanelHtml({ tone: 'terracotta', title: 'Try it',
-    fig: COURSE_REFLECT[B.ws] ?? 'cm-l01-reflect', text: l.reflection })}
+    fig: B.ws in COURSE_REFLECT ? COURSE_REFLECT[B.ws] : 'cm-l01-reflect',
+    text: l.reflection })}
             ${lessonPanelHtml(tailPanel)}
           </div>`
       // A lesson whose panels live in the rail has already said this

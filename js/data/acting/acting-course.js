@@ -137,7 +137,8 @@ const ACTING_LESSONS_ALL = [
     body: [
       { p: ACTING_PRINCIPLE },
       { p: 'Behavior is not chosen from a menu of feelings. It comes out of a person in a particular situation, wanting something, meeting resistance. Change the situation and the behavior changes with it. The same words spoken by someone who has just been fired, or just been forgiven, are not the same words at all.' },
-      { p: 'This is why the actor’s first job is not delivery. It is understanding: what is happening, who these people are to each other, what has just occurred, what is at stake, and what this character is trying to get. Delivery is the last thing to settle, and mostly it settles itself once everything else is in place.' },
+      { p: 'This is why the actor’s first job is not delivery. It is understanding.' },
+      { key: 'Delivery is the last thing to settle, and mostly it settles itself once everything else is in place.' },
       { h: 'What this rules out' },
       { list: [
         'Deciding in advance that a line is “angry” and then performing anger.',
@@ -145,6 +146,13 @@ const ACTING_LESSONS_ALL = [
         'Fixing a reading in rehearsal and repeating it regardless of what your partner gives you.',
       ] },
       { p: 'None of these is a moral failing. They are simply less useful than the alternative, because they replace a living situation with a fixed decision.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'What there is to understand',
+        lead: 'Settle these, and delivery mostly settles itself.',
+        items: [
+          'What is happening, and who these people are to each other.',
+          'What has just occurred, and what is at stake.',
+          'What this character is trying to get.',
+        ] } },
     ] },
 
   { id: 'ac-circumstances', module: 'work', order: 3,
@@ -155,8 +163,9 @@ const ACTING_LESSONS_ALL = [
     reflection: 'For your scene: which three circumstances change the most if you get them wrong?',
     glossary: ['given-circumstances'],
     body: [
-      { p: 'The given circumstances are the facts the text establishes: who the character is, where and when the scene happens, what has already occurred, what each person knows, and what the world of the play permits or forbids. They are given because the writer gave them to you; they are not open to preference.' },
-      { p: 'Working from circumstances is what keeps an interpretation honest. An actor who has read carefully cannot play a casual goodbye in a scene where the text says the train leaves in four minutes.' },
+      { p: 'The given circumstances are the facts the text establishes: who the character is, where and when the scene happens, what has already occurred, what each person knows, and what the world of the play permits or forbids.' },
+      { key: 'Given circumstances are given because the writer gave them to you; they are not open to preference.' },
+      { p: 'Working from circumstances is what keeps an interpretation honest.' },
       { h: 'Where to look' },
       { list: [
         'What characters say about themselves, treated as claims rather than facts.',
@@ -165,7 +174,11 @@ const ACTING_LESSONS_ALL = [
         'What the events of the play require to have been true.',
         'What the period, place and social world make likely or impossible.',
       ] },
-      { p: 'Speechcraft’s Question Everything framework, in the Actor’s Studio, walks this systematically for a text you are working on.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'Doing this on your own text',
+        items: [
+          'Question Everything, in the Actor’s Studio, walks it systematically for the text you are working on.',
+          'The test of having read carefully: you cannot play a casual goodbye in a scene where the text says the train leaves in four minutes.',
+        ] } },
     ] },
 
   { id: 'ac-objective', module: 'work', order: 4,
@@ -178,14 +191,20 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Write your scene objective as “I want you to ___.” Does it name something the other person can actually do?',
     glossary: ['objective', 'overall-objective', 'scene-objective'],
     body: [
-      { p: 'An objective is what the character is trying to get, usually from the other person in the room. “Make her stay.” “Get him to admit it.” “Be forgiven.” It is testable: at the end of the scene you either got it, lost it, or the situation changed under you.' },
-      { p: 'Emotional states are not objectives. “Be angry” gives you nothing to do and nobody to do it to. If a strong feeling is genuinely present in the scene, it arrives as a consequence of pursuing something under pressure, not as an instruction to yourself.' },
+      { p: 'An objective is what the character is trying to get, usually from the other person in the room. “Make her stay.” “Get him to admit it.” “Be forgiven.”' },
+      { key: 'An objective is testable: at the end of the scene you either got it, lost it, or the situation changed under you.' },
+      { p: 'Emotional states are not objectives.' },
       { h: 'Scene objective and overall objective' },
       { list: [
         'The scene objective is what you want here, now, from this person.',
         'The overall objective is what the character wants across the whole play.',
         'A good scene objective serves the overall one, even when the character does not know it.',
       ] },
+      { panel: { tone: 'sage', icon: 'target', title: 'Writing one you can play',
+        items: [
+          '“Be angry” gives you nothing to do and nobody to do it to.',
+          'A strong feeling arrives as a consequence of pursuing something under pressure, not as an instruction to yourself.',
+        ] } },
     ] },
 
   { id: 'ac-obstacle', module: 'work', order: 5,
@@ -197,9 +216,15 @@ const ACTING_LESSONS_ALL = [
     glossary: ['obstacle'],
     body: [
       { p: 'An obstacle is whatever resists the objective. It may be the other person’s opposing want, the situation (time, distance, a locked door, the presence of a third party), or something inside the character: fear, loyalty, shame, a promise they made.' },
-      { p: 'Obstacles are worth finding precisely, because the size and kind of resistance shape everything the character does. Pursuit against mild resistance looks like conversation; pursuit against serious resistance looks like strategy.' },
+      { p: 'Obstacles are worth finding precisely, because the size and kind of resistance shape everything the character does.' },
+      { key: 'Pursuit against mild resistance looks like conversation; pursuit against serious resistance looks like strategy.' },
       { h: 'A useful test' },
-      { p: 'If a scene feels flat in rehearsal, the objective is often fine and the obstacle has gone missing. The actor has quietly assumed the other person will cooperate. Restore the resistance and the scene usually starts moving again.' },
+      { p: 'If a scene feels flat in rehearsal, the objective is often fine and the obstacle has gone missing.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Restoring the resistance',
+        items: [
+          'Check whether you have quietly assumed the other person will cooperate.',
+          'Restore the resistance, and the scene usually starts moving again.',
+        ] } },
     ] },
 
   { id: 'ac-stakes', module: 'work', order: 6,
@@ -209,14 +234,20 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Stakes are the answer to “so what?”, and the scene is only as alive as its answer.',
     reflection: 'If your character fails in this scene, what is the worst honest consequence?',
     body: [
-      { p: 'Stakes are what the outcome costs. What does the character gain if this goes well, and lose if it does not? Stakes are established by the circumstances, not chosen for effect, and reading them accurately is more useful than inflating them.' },
-      { p: 'Raising the stakes arbitrarily produces a familiar kind of bad acting: everything urgent, nothing meaning anything. Reading them accurately produces the opposite, a scene where a small thing can matter enormously because of what surrounds it.' },
+      { p: 'Stakes are what the outcome costs.' },
+      { key: 'Stakes are established by the circumstances, not chosen for effect, and reading them accurately is more useful than inflating them.' },
+      { p: 'Reading them accurately produces a scene where a small thing can matter enormously because of what surrounds it.' },
       { h: 'Kinds of stakes worth naming' },
       { list: [
         'Practical: money, the job, the room, the deadline.',
         'Relational: whether this person stays, trusts you, forgives you.',
         'Internal: whether the character can go on thinking of themselves as they do.',
       ] },
+      { panel: { tone: 'sage', icon: 'target', title: 'Read them, do not inflate them',
+        items: [
+          'Ask what the character gains if this goes well, and loses if it does not.',
+          'Raising them arbitrarily produces a familiar kind of bad acting: everything urgent, nothing meaning anything.',
+        ] } },
     ] },
 
   { id: 'ac-urgency', module: 'work', order: 7,
@@ -229,8 +260,9 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Why can your character not have this conversation tomorrow instead?',
     glossary: ['urgency'],
     body: [
-      { p: 'Urgency is the need to affect something now, and, as the Speech chapter establishes, it is not automatically faster or louder speech. It can produce slowness, precision, repetition, stillness or a change of tactic.' },
-      { p: 'In dramatic circumstances, urgency is usually written into the situation: something has just happened, something is about to, someone is about to leave, a decision is being made tonight, an opportunity is closing. Find it in the text before inventing it.' },
+      { p: 'Urgency is the need to affect something now.' },
+      { p: 'In dramatic circumstances, urgency is usually written into the situation.' },
+      { key: 'Find it in the text before inventing it.' },
       { h: 'Where dramatic urgency comes from' },
       { list: [
         'A deadline the circumstances impose.',
@@ -238,6 +270,11 @@ const ACTING_LESSONS_ALL = [
         'A window that is closing: the other person is leaving, or will not be alone again.',
         'A consequence that becomes irreversible after this scene.',
       ] },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Reading urgency',
+        items: [
+          'As the Speech chapter establishes, it is not automatically faster or louder speech. It can produce slowness, precision, repetition, stillness or a change of tactic.',
+          'It is usually written into the situation: something has just happened, something is about to, someone is about to leave, a decision is being made tonight, an opportunity is closing.',
+        ] } },
     ] },
 
   // THE PHYSICAL SCORE (owner order, 2026-10-21). Added at the end of
@@ -263,7 +300,8 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Which moment went vague the second you could not speak?',
     body: [
       { p: 'A physical score is the scene played silently: no lines, no mouthing, nothing but what the character physically does. You still pursue the objective, you still meet the obstacle, you still take in whatever the other person gives you. You simply cannot say any of it.' },
-      { p: 'It is a test rather than a performance. Speech is generous, and it will cover for a choice you have not really made: an actor who has not decided what they want can still say the line convincingly enough to get through a rehearsal. Take the line away and there is nothing left to hide behind. Either you are doing something to the other person or you are standing there.' },
+      { p: 'It is a test rather than a performance. Speech is generous, and it will cover for a choice you have not really made: an actor who has not decided what they want can still say the line convincingly enough to get through a rehearsal. Take the line away and there is nothing left to hide behind.' },
+      { key: 'Either you are doing something to the other person or you are standing there.' },
       { h: 'Running it' },
       { steps: [
         'Know the scene well enough that you are not trying to remember it. This is work for a secure text.',
@@ -281,7 +319,12 @@ const ACTING_LESSONS_ALL = [
         'Which moments were carried entirely by the writing and not by you.',
         'Where you were waiting for your cue rather than listening.',
       ] },
-      { p: 'Work gently and inside what your body allows today. None of this needs falls, lifts or anything strenuous to be useful, and a physical score done sitting in a chair still answers the question it is asking.' },
+      { p: 'Work gently and inside what your body allows today.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'It asks nothing strenuous of you',
+        items: [
+          'None of this needs falls, lifts or anything strenuous to be useful.',
+          'A physical score done sitting in a chair still answers the question it is asking.',
+        ] } },
     ] },
 
   { id: 'ac-offbook', module: 'work', order: 1,
@@ -294,7 +337,8 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Which lines are still not automatic? Those are tonight’s work, not tomorrow’s.',
     body: [
       { p: 'Being off book is the professional actor’s responsibility. The words are fixed and they are not yours to approximate: the exact language should become secure enough that you are no longer searching for the next one.' },
-      { p: 'Knowing the words is preparation, not acting. Fluency frees the actor to listen, respond and pursue the objective. An actor still hunting for text has no attention left for the other person, and acting lives in what happens between people.' },
+      { p: 'Knowing the words is preparation, not acting. Fluency frees the actor to listen, respond and pursue the objective.' },
+      { key: 'An actor still hunting for text has no attention left for the other person, and acting lives in what happens between people.' },
       { h: 'What securing text actually buys' },
       { list: [
         'Attention for the other actor, instead of for your own next line.',
@@ -303,7 +347,12 @@ const ACTING_LESSONS_ALL = [
         'A rehearsal room that can work on the scene rather than on the lines.',
       ] },
       { p: 'Speechcraft’s Practice section holds text-based recall exercises: Vanishing Text, Cue Pickup, First-Letter Recall, built for exactly this stage of the work.' },
-      { p: 'One warning before you trust a clean run: feeling fluent and knowing the lines are two different measurements, and the first one lies. The Library’s Lines & Memory lesson shows why, and how to test which one you actually have.' },
+      { p: 'One warning before you trust a clean run.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Fluent is not the same as known',
+        items: [
+          'Feeling fluent and knowing the lines are two different measurements, and the first one lies.',
+          'The Library’s Lines & Memory lesson shows why, and how to test which one you actually have.',
+        ] } },
     ],
     doorway: { id: 'lines-memory', label: 'Lines & Memory' } },
 
@@ -333,7 +382,8 @@ const ACTING_LESSONS_ALL = [
       { fig: 'fourth-wall-house' },
       { p: 'This chapter is not about breaking that wall. Direct address, the aside, the confidant speech to the house: those are real tools, and some plays are built on them, but they are a different subject. This is the ordinary night in a realistic play, where the wall stays up and the actor has to live behind it. Used well, the fourth wall is not a limitation to be coped with. It is a quarter of the character’s world that happens to be invisible, and it is yours to furnish.' },
       { h: 'Build the wall before you need it' },
-      { p: 'A wall you have not built is a wall you cannot use, and the failure is visible. Eyes with nowhere to land drift across the house, focus on nothing, or lock politely into the middle distance, and every one of those reads from the back row. So build it in rehearsal, as deliberately as the designer built the other three. Decide what is on it and where. Then keep it there, every run, every night.' },
+      { key: 'A wall you have not built is a wall you cannot use, and the failure is visible.' },
+      { p: 'Eyes with nowhere to land drift across the house, focus on nothing, or lock politely into the middle distance, and every one of those reads from the back row. So build it in rehearsal, as deliberately as the designer built the other three. Decide what is on it and where. Then keep it there, every run, every night.' },
       { list: [
         'A window, and, more important, what the character sees through it.',
         'Something at eye level with a history: a mirror, a photograph, a clock the character has looked at ten thousand times.',
@@ -352,8 +402,15 @@ const ACTING_LESSONS_ALL = [
         'Solo scenes have somewhere to happen: business at the mirror, a watch kept at the window, a letter read in the best light in the room.',
         'The beginner tells disappear: the dead middle-distance stare, the eyes scanning the exit signs, the guilty flick down to the front row.',
       ] },
-      { p: 'One classic rehearsal problem makes a useful private drill: do something real in an imaginary mirror hanging in the middle of the audience. Fix your hair. Check your collar. Practice until your focus sits at the reflection’s distance and the task is genuinely absorbing. An observer should be able to tell where the mirror hangs, and they should never once catch your eye.' },
+      { p: 'One classic rehearsal problem makes a useful private drill.' },
       { p: 'None of this seals you off from the house. The audience still gets your voice, your face and most of your body precisely because the missing wall is missing. The convention is a trade: the theatre removes a wall so they can see in, and you rebuild it in imagination so there is something worth seeing.' },
+      { panel: { tone: 'sage', icon: 'mask', title: 'A private drill: the imaginary mirror',
+        lead: 'Hang it in the middle of the audience and do something real in it.',
+        items: [
+          'Fix your hair. Check your collar.',
+          'Practice until your focus sits at the reflection’s distance and the task is genuinely absorbing.',
+          'An observer should be able to tell where the mirror hangs, and they should never once catch your eye.',
+        ] } },
     ] },
 
   // ── Module 2 · Script Analysis ────────────────────────────────
@@ -363,13 +420,19 @@ const ACTING_LESSONS_ALL = [
     objective: 'Gather the evidence the text gives you before you invent anything.',
     orientation: 'Investigation starts with collection. These are the four things to collect.',
     body: [
-      { p: 'Before you interpret a word, collect what the play already states. Five read-throughs and four inventories: the facts the text gives outright, what your character says about themselves, what they say about everyone else, and what everyone else says about them. The first reading has no pen in it at all.' },
-      { p: 'The lists are evidence rather than biography, and the useful part is where they disagree. A character whose account of themselves contradicts the stated facts, or whose reputation contradicts their own account, has handed you the argument the play is having about them.' },
+      { p: 'Before you interpret a word, collect what the play already states. Five read-throughs and four inventories: the facts the text gives outright, what your character says about themselves, what they say about everyone else, and what everyone else says about them.' },
+      { key: 'The lists are evidence rather than biography, and the useful part is where they disagree.' },
+      { p: 'A character whose account of themselves contradicts the stated facts, or whose reputation contradicts their own account, has handed you the argument the play is having about them.' },
       // The whole method, not a summary of it (owner order 2026-09-29),
       // rendered from FOUR_LISTS_SECTIONS so the lesson and the page
       // cannot drift apart.
       { fourLists: true },
-      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything is the interrogation the lists get. To work the lists on your own script, open The Four Lists from the Script Analysis shelf: they save with that project.' },
+      { p: 'Everything else in Script Analysis digs into what you collect here, and Question Everything is the interrogation the lists get.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'Before you interpret a word',
+        items: [
+          'The first reading has no pen in it at all.',
+          'To work the lists on your own script, open The Four Lists from the Script Analysis shelf. They save with that project.',
+        ] } },
     ],
     reflection: 'Which of your four lists came out shortest? What does that absence tell you?' },
   { id: 'ac-question', module: 'text', order: 4,
@@ -382,13 +445,19 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Which question about your scene are you avoiding because you do not like the answer?',
     body: [
       { p: 'A script gives you the words. Question Everything helps you discover what is happening underneath them, systematically, so the investigation does not stop at whatever occurred to you first.' },
-      { p: 'Six sections, in order, and none of them settles for a first impression. Work them on the text in front of you rather than reading them through: the value is in the answering, and the questions you least want to answer are usually the ones the scene turns on.' },
+      { key: 'Six sections, in order, and none of them settles for a first impression.' },
+      { p: 'Work them on the text in front of you rather than reading them through.' },
       // THE COMPLETE LIST, not a sample (owner order 2026-09-29). It used
       // to be ten questions quoted as "a taste of the list" with the rest
       // behind a link, which is the version this replaces. It renders from
       // DISSECT_SECTIONS, the same record the textbook page and the
       // per-project worksheet both run on, so there is no second copy.
       { dissect: true },
+      { panel: { tone: 'sage', icon: 'target', title: 'Working the questions',
+        items: [
+          'The value is in the answering, not in the reading.',
+          'The questions you least want to answer are usually the ones the scene turns on.',
+        ] } },
     ] },
 
   // ── Module 3 · Listening and Responding ───────────────────────
@@ -400,8 +469,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Most of what reads as presence is simply attention pointed outward.',
     reflection: 'In your last run-through, what did your partner actually do that you missed?',
     body: [
-      { p: 'An actor watching themselves has divided attention, and it shows. An actor genuinely watching their partner has something to respond to, and that reads as presence.' },
-      { p: 'This is trainable, and it is mostly a matter of where practice puts your attention. Secure text helps enormously: what is automatic no longer needs supervising, which leaves attention available for the person in front of you.' },
+      { p: 'An actor watching themselves has divided attention, and it shows.' },
+      { key: 'An actor genuinely watching their partner has something to respond to, and that reads as presence.' },
+      { p: 'This is trainable, and it is mostly a matter of where practice puts your attention.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Freeing the attention up',
+        lead: 'One thing to do about it, and what it buys.',
+        items: [
+          'Secure the text first. What is automatic no longer needs supervising.',
+          'What that frees is attention for the person in front of you.',
+        ] } },
     ] },
 
   { id: 'ac-receiving', module: 'listening', order: 2,
@@ -412,8 +488,14 @@ const ACTING_LESSONS_ALL = [
     orientation: 'The gap between receiving and responding is where acting happens.',
     reflection: 'Where in the scene are you answering before you have listened?',
     body: [
-      { p: 'Waiting for your cue is not listening. Receiving means letting what the other person does actually affect you before your line arrives, and letting the size of the effect match what they gave you.' },
-      { p: 'When this is missing, scenes sound like two people reciting alternately. When it is present, the same text sounds like a conversation, because each line is visibly caused by the one before it.' },
+      { p: 'Waiting for your cue is not listening.' },
+      { key: 'Receiving means letting what the other person does actually affect you before your line arrives, and letting the size of the effect match what they gave you.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Listen to the scene and name it',
+        lead: 'The same text gives you one of two sounds.',
+        items: [
+          'Two people reciting alternately: the receiving is missing.',
+          'A conversation, where each line is visibly caused by the one before it: it is there.',
+        ] } },
     ] },
 
   { id: 'ac-moment', module: 'listening', order: 3,
@@ -424,8 +506,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'A plan is useful. A plan executed regardless of the other person is not acting.',
     reflection: 'What in your scene is fixed by the text, and what is genuinely free to change each time?',
     body: [
-      { p: 'Preparation gives you circumstances, objective, obstacle and a vocabulary of actions. It does not give you a performance to reproduce. The scene is played forward each time, in response to what is actually happening.' },
-      { p: 'This is not an argument against rehearsal, quite the opposite. Thorough preparation is what makes moment-to-moment work possible, because the things that must be reliable are reliable, leaving the live things free.' },
+      { p: 'Preparation gives you circumstances, objective, obstacle and a vocabulary of actions. It does not give you a performance to reproduce.' },
+      { key: 'The scene is played forward each time, in response to what is actually happening.' },
+      { p: 'This is not an argument against rehearsal, quite the opposite.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'What the preparation is for',
+        lead: 'Thorough preparation is what makes moment-to-moment work possible.',
+        items: [
+          'Make the things that must be reliable reliable.',
+          'That is what leaves the live things free.',
+        ] } },
     ] },
 
   { id: 'ac-newinfo', module: 'listening', order: 4,
@@ -436,8 +525,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Characters who learn nothing produce scenes that go nowhere.',
     reflection: 'What does your character learn in this scene, and at exactly which line?',
     body: [
-      { p: 'Scenes deliver information: a confession, a refusal, a fact the character did not have. The question is whether it lands. An actor who already knows the whole play can quietly stop being surprised by it.' },
-      { p: 'Find the exact line where each piece of new information arrives, and let it cost something. The adjustment that follows, a change of tactic, a pause, a retreat, is often the most alive moment in the scene.' },
+      { p: 'Scenes deliver information: a confession, a refusal, a fact the character did not have. The question is whether it lands.' },
+      { key: 'An actor who already knows the whole play can quietly stop being surprised by it.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Working a piece of new information',
+        lead: 'Three moves, on each thing the character learns.',
+        items: [
+          'Find the exact line where it arrives.',
+          'Let it cost something.',
+          'Play the adjustment that follows: a change of tactic, a pause, a retreat. It is often the most alive moment in the scene.',
+        ] } },
     ] },
 
   { id: 'ac-repetition', module: 'listening', order: 5,
@@ -448,8 +544,14 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Rehearsal repeats the situation, not the reading.',
     reflection: 'What stayed identical in your last two run-throughs that did not need to?',
     body: [
-      { p: 'Repetition is how the work becomes reliable. It is also how a scene dies, if what is repeated is a performance rather than a pursuit. The difference is what you are repeating: the circumstances, the objective and the listening, or a remembered set of line-readings.' },
-      { p: 'A practical test: if a run-through would be unchanged had your partner done something different, the scene has been fixed rather than rehearsed.' },
+      { p: 'Repetition is how the work becomes reliable. It is also how a scene dies, if what is repeated is a performance rather than a pursuit.' },
+      { key: 'The difference is what you are repeating: the circumstances, the objective and the listening, or a remembered set of line-readings.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'A practical test',
+        lead: 'Run it on your last rehearsal.',
+        items: [
+          'Ask whether that run-through would have been unchanged had your partner done something different.',
+          'If it would, the scene has been fixed rather than rehearsed.',
+        ] } },
     ] },
 
   { id: 'ac-playing', module: 'listening', order: 6,
@@ -460,8 +562,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Displayed emotion is a report. Pursuit is an event.',
     reflection: 'Where are you showing a feeling instead of trying to get something?',
     body: [
-      { p: 'Emotion cannot be played directly with any reliability; attempts to produce it on command usually produce its indication instead. What can be played is a pursuit under real resistance, and feeling tends to arrive on its own when the pursuit matters.' },
-      { p: 'This course takes no position on which of the many approaches to emotional life an actor should adopt; the Approaches to Acting introductions in the Library describe several. What it does insist on is that “be sad” is not a playable instruction, while “get her to stay” is.' },
+      { p: 'Emotion cannot be played directly with any reliability; attempts to produce it on command usually produce its indication instead.' },
+      { key: 'What can be played is a pursuit under real resistance, and feeling tends to arrive on its own when the pursuit matters.' },
+      { p: 'This course takes no position on which of the many approaches to emotional life an actor should adopt; the Approaches to Acting introductions in the Library describe several.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Playable, or not',
+        lead: 'The one thing this course does insist on.',
+        items: [
+          '“Be sad” is not a playable instruction.',
+          '“Get her to stay” is.',
+        ] } },
     ] },
 
   // ── Module 5 · Preparing the Performance ──────────────────────
@@ -479,9 +588,14 @@ const ACTING_LESSONS_ALL = [
     glossary: ['action', 'tactic'],
     reflection: 'Choose one action for your strongest beat. Then try its opposite. What did the scene do?',
     body: [
-      { p: 'An action is what you are doing TO the other person: to reassure, to confront, to draw out, to warn. Actions are playable because they are transitive. They land on someone, and you can tell whether they worked.' },
+      { p: 'An action is what you are doing TO the other person: to reassure, to confront, to draw out, to warn.' },
+      { key: 'Actions are playable because they are transitive. They land on someone, and you can tell whether they worked.' },
       { p: 'Speechcraft’s Playable Actions library holds twelve actions organised into six contrast pairs, each pair sharing one practice line so the difference between them is audible in the same words. It lives in the Actor’s Studio and is used unchanged across the app.' },
-      { p: 'No action is the correct action for a beat. The library is a vocabulary, not an answer key.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'Using the actions library',
+        items: [
+          'No action is the correct action for a beat.',
+          'The library is a vocabulary, not an answer key.',
+        ] } },
     ] },
 
   { id: 'ac-monologue', module: 'performance', order: 1,
@@ -491,8 +605,14 @@ const ACTING_LESSONS_ALL = [
     orientation: 'A monologue is not a solo. It is a pursuit that happens to be uninterrupted.',
     reflection: 'Who is your monologue aimed at, and what do you want from them?',
     body: [
-      { p: 'The questions do not change: circumstances, who this is addressed to, what the character wants, what resists, what changes. The only difference is that the other person does not answer in words, which does not mean they do not answer.' },
-      { p: 'Locate the turns. A monologue that plays as one continuous statement is usually several distinct attempts that have been flattened together. Where does the character change approach because the first one did not work?' },
+      { p: 'The questions do not change: circumstances, who this is addressed to, what the character wants, what resists, what changes.' },
+      { key: 'The only difference is that the other person does not answer in words, which does not mean they do not answer.' },
+      { p: 'Locate the turns.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Where a monologue turns',
+        items: [
+          'A monologue that plays as one continuous statement is usually several distinct attempts that have been flattened together.',
+          'Find where the character changes approach because the first one did not work.',
+        ] } },
     ] },
 
   { id: 'ac-scene', module: 'performance', order: 2,
@@ -503,8 +623,14 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Scene work is where preparation meets someone else’s preparation.',
     reflection: 'What does your partner want, and how does it collide with what you want?',
     body: [
-      { p: 'Everything prepared alone gets tested here: your reading of the circumstances, your objective, your actions. Some of it will not survive contact with the other actor’s choices, and that is the process working, not failing.' },
-      { p: 'Two disciplines matter most: know what YOU want, and genuinely watch what THEY do. A scene in which both actors manage this rarely needs much else.' },
+      { p: 'Everything prepared alone gets tested here: your reading of the circumstances, your objective, your actions.' },
+      { key: 'Some of it will not survive contact with the other actor’s choices, and that is the process working, not failing.' },
+      { p: 'A scene in which both actors manage two things rarely needs much else.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Two disciplines matter most',
+        items: [
+          'Know what YOU want.',
+          'Genuinely watch what THEY do.',
+        ] } },
     ] },
 
 
@@ -517,7 +643,8 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Which of your current choices exist only because nobody was there to resist them?',
     glossary: ['off-book'],
     body: [
-      { p: 'A scene is built out of what two people do to each other, and most of your preparation happens with the other person absent. That is not a defect of the profession; it is the profession. The skill is knowing what alone-time is for, and what it quietly ruins when it is misused.' },
+      { p: 'A scene is built out of what two people do to each other, and most of your preparation happens with the other person absent. That is not a defect of the profession; it is the profession.' },
+      { key: 'The skill is knowing what alone-time is for, and what it quietly ruins when it is misused.' },
       { p: 'What it ruins, when it goes wrong, is listening. Run a scene by yourself often enough and you will set melodies: a fixed reading for every line, timed against cues you deliver to yourself in your head. A partner then becomes an interruption to a performance you have already given. Actors call this being married to a reading, and it is built, line by line, in solitary rehearsal.' },
       { h: 'What alone-time is for' },
       { list: [
@@ -529,7 +656,13 @@ const ACTING_LESSONS_ALL = [
       { p: 'Give the absent partner a body. A chair, a mark on the wall, an object at eye height: something specific to speak to, at a real distance, so your eyes and voice learn to land on a person instead of drifting into the middle distance. The Using the Fourth Wall chapter builds the same muscle for the audience side of the room.' },
       { p: 'Protect yourself from your own readings. When you speak the text aloud alone, vary the pursuit on purpose: run a speech as three different actions, raise the stakes, change the urgency. The point is not to find the best version; it is to keep any version from hardening. The Action Swap and Same Line Three Ways exercises in Practice are built for exactly this, and every scene on the Scenes shelf works in them.' },
       { h: 'When the partner arrives' },
-      { p: 'Everything you decided alone is a hypothesis. The first pass together is for listening, not for showing your homework: expect real contact to kill half of your prepared choices, and let it. The preparation was not wasted; it is what lets you notice what the other actor is actually doing, instead of clinging to what you expected.' },
+      { p: 'Everything you decided alone is a hypothesis.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'The first pass together',
+        items: [
+          'It is for listening, not for showing your homework.',
+          'Expect real contact to kill half of your prepared choices, and let it.',
+          'The preparation was not wasted. It is what lets you notice what the other actor is actually doing, instead of clinging to what you expected.',
+        ] } },
     ] },
 
   { id: 'ac-rehearsal', module: 'performance', order: 4,
@@ -540,14 +673,21 @@ const ACTING_LESSONS_ALL = [
     reflection: 'What are you hoping rehearsal will solve that you could settle tonight?',
     body: [
       { p: 'Text security, a first reading of the circumstances, an objective you are willing to test, questions you cannot answer alone: that is a well-prepared arrival. Rehearsal then spends its time on what actually requires the room.' },
-      { p: 'Keep rehearsal notes as questions rather than verdicts where you can. “Why does she stay after that line?” travels better into the next rehearsal than “play this colder”.' },
+      { key: 'Keep rehearsal notes as questions rather than verdicts where you can.' },
       // A third paragraph here sent the reader to "Rehearsal Notes
       // alongside your scene study" in the Actor's Studio. Removed
       // 2026-10-21: neither is reachable. 'Rehearsal Notes' appears
       // nowhere in the view layer — it was never built, not withdrawn —
       // and scene study sits behind SCENE_STUDY_LIVE, which is false.
-      // The lesson's own advice to keep notes as questions survives in
-      // the paragraph above, which needs no feature to act on.
+      // The lesson's own advice to keep notes as questions survives as
+      // the { key } above and the panel below, neither of which needs a
+      // feature to act on. It used to say "the paragraph above": that
+      // paragraph became the panel in the interiors pass, 2026-11-18.
+      { panel: { tone: 'sage', icon: 'book', title: 'Notes that travel',
+        items: [
+          '“Why does she stay after that line?” travels into the next rehearsal.',
+          '“Play this colder” does not.',
+        ] } },
     ] },
 
   { id: 'ac-integrating', module: 'performance', order: 5,
@@ -560,7 +700,12 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Which prepared element disappeared the moment you ran the scene with a partner?',
     body: [
       { p: 'Isolated work is temporary by design. In a scene the actor is speaking, listening, moving and responding at once, and whichever element still needs conscious management will take attention from the others.' },
-      { p: 'Use the collapse diagnostically. If clarity vanishes under pressure, that is articulation practice, not an acting problem. If the objective vanishes, that is scene work. The Speech workspace holds the general training for each element.' },
+      { p: 'Use the collapse diagnostically. The Speech workspace holds the general training for each element.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Read the collapse',
+        items: [
+          'If clarity vanishes under pressure, that is articulation practice, not an acting problem.',
+          'If the objective vanishes, that is scene work.',
+        ] } },
     ] },
 
   { id: 'ac-applying', module: 'performance', order: 6,
@@ -573,8 +718,13 @@ const ACTING_LESSONS_ALL = [
     orientation: 'In performance, attention belongs to the other person, not to your own craft.',
     reflection: 'What were you supervising during your last run that could have been left alone?',
     body: [
-      { p: 'An actor consciously managing breath, pace and beat structure while playing a scene has no attention left for the person opposite. Trust the preparation: what practice made reliable will be there unsupervised.' },
-      { p: 'When something wobbles, note it and finish the scene with your attention where it belongs. The wobble is tomorrow’s practice, not tonight’s emergency.' },
+      { p: 'An actor consciously managing breath, pace and beat structure while playing a scene has no attention left for the person opposite.' },
+      { key: 'Trust the preparation: what practice made reliable will be there unsupervised.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'When something wobbles',
+        items: [
+          'Note it, and finish the scene with your attention where it belongs.',
+          'The wobble is tomorrow’s practice, not tonight’s emergency.',
+        ] } },
     ] },
 
   { id: 'ac-performance', module: 'performance', order: 8,
@@ -584,9 +734,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'The audience changes the room. The work should be able to survive that.',
     reflection: 'What are you willing to let be different tonight?',
     body: [
-      { p: 'Performance adds an audience, nerves, and the fact that this run cannot be stopped. What survives that is the work that was built on pursuit and listening rather than on a remembered shape.' },
-      { p: 'Two things travel well: knowing exactly what you want in each scene, and being genuinely available to your partner. Almost everything else can be rebuilt live from those two.' },
+      { p: 'Performance adds an audience, nerves, and the fact that this run cannot be stopped.' },
+      { key: 'What survives that is the work that was built on pursuit and listening rather than on a remembered shape.' },
+      { p: 'Almost everything else can be rebuilt live from two things.' },
       { p: 'Nothing in Speechcraft evaluates a performance. This course prepares the work; what happens in the room belongs to you and the people you make it with.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Two things travel well',
+        items: [
+          'Knowing exactly what you want in each scene.',
+          'Being genuinely available to your partner.',
+        ] } },
     ] },
 
   // ── Module 2 · Script Analysis, continued ─────────────────────
@@ -605,18 +761,27 @@ const ACTING_LESSONS_ALL = [
     body: [
       { p: 'Analysis works like detective work. You read the whole play, more than once, and you collect what it actually states: the world this person lives in, what they do for a living, who they answer to, what they want out loud and what they seem to want underneath. You gather what they say about themselves, what they say about everyone else, and what everyone else says about them. Then you look for the places where those accounts disagree, because the disagreements are where the person is hiding.' },
       { p: 'You already own the tools. This module does exactly this work: facts, relationships, beats, subtext, playable actions. The Four Lists in the Library turns the reading into four concrete inventories on your own script. This lesson is not here to repeat them. It is here to point them at a new target.' },
-      { p: 'Because here is the shift: those tools are usually aimed at understanding a scene. Aim them at building a person instead. The world of the play tells you what shaped this character before page one. The facts tell you what they cannot escape. The gap between what they claim and what others report tells you what they are hiding, and a person is mostly made of what they are hiding. Analysis done this way does not end in notes. It ends in somebody.' },
+      { p: 'Because here is the shift: those tools are usually aimed at understanding a scene. Aim them at building a person instead.' },
+      { key: 'Analysis done this way does not end in notes. It ends in somebody.' },
       // The paragraph that stood here was removed on 2026-10-21. It sent
       // the reader to 'the other road' and 'the feeling road' — the two-
       // roads structure that left this course for Building a Character on
       // 2026-09-23. It had been pointing at nothing for a month. The
       // lesson now ends on 'It ends in somebody', which was always the
-      // line the paragraph was walking away from.
+      // line the paragraph was walking away from. SINCE 2026-11-18 a
+      // { panel } sits after it, which is what pairs the reflection into
+      // the two boxes at the foot; the { key } is still the last prose.
       //
       // THE DEEPER QUESTION IS STILL OPEN: this record teaches building a
       // character from a text, which is Building a Character's subject,
       // and it reads as the ninth sibling of the eight lessons handed over
       // in September. Moving it is an owner decision, not a correction.
+      { panel: { tone: 'sage', icon: 'book', title: 'Aiming the tools at a person',
+        items: [
+          'The world of the play tells you what shaped this character before page one.',
+          'The facts tell you what they cannot escape.',
+          'The gap between what they claim and what others report tells you what they are hiding, and a person is mostly made of what they are hiding.',
+        ] } },
     ] },
 
   { id: 'ac-markup', module: 'text', order: 2,
@@ -675,7 +840,14 @@ const ACTING_LESSONS_ALL = [
 
       { h: 'The margin' },
       { p: 'The margin is where everything goes that is not a mark: a fact you had to look up, a question you cannot answer yet, the thing you noticed on the fourth read and will certainly have lost by the sixth. Date the notes that are decisions. In a long rehearsal you will want to know whether a note is from before or after the director changed something.' },
-      { p: 'One rule holds across every system anyone uses: a mark you cannot read at speed is worse than no mark, because it stops you. If you have to work out what your own page means, the page has become another thing to act around.' },
+      { key: 'A mark you cannot read at speed is worse than no mark, because it stops you.' },
+      { p: 'If you have to work out what your own page means, the page has become another thing to act around.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'Marking the margin',
+        items: [
+          'The margin takes what is not a mark: a fact you looked up, a question you cannot answer yet, the thing you noticed on the fourth read.',
+          'Date the notes that are decisions, so you know whether one is from before or after the director changed something.',
+          'Mark a cut so you can still read what is under it. Cuts get restored more often than anyone expects.',
+        ] } },
     ] },
 
   { id: 'ac-ownmarks', module: 'text', order: 3,
@@ -685,7 +857,8 @@ const ACTING_LESSONS_ALL = [
     orientation: 'The right system is the one that survives a week of rehearsal without being abandoned.',
     reflection: 'Think back to the last thing you performed. What did you keep forgetting? That is the thing your system has to hold.',
     body: [
-      { p: 'Actors who have been doing this a long time mark very differently from one another, and the differences are not arbitrary. They come from what each person keeps losing. Somebody who forgets why they are in the room writes objectives at the top of every page. Somebody who rushes marks breath and nothing else. Somebody who goes up on lines marks only the cue words. The system is a record of a weakness, which is why copying someone else’s rarely holds.' },
+      { p: 'Actors who have been doing this a long time mark very differently from one another, and the differences are not arbitrary. They come from what each person keeps losing. Somebody who forgets why they are in the room writes objectives at the top of every page. Somebody who rushes marks breath and nothing else. Somebody who goes up on lines marks only the cue words.' },
+      { key: 'The system is a record of a weakness, which is why copying someone else’s rarely holds.' },
 
       { h: 'Four shapes that recur' },
       { p: 'None of these is better than the others. They suit different weaknesses, and most working actors end up with a mix.' },
@@ -729,7 +902,12 @@ const ACTING_LESSONS_ALL = [
         'Use it on a whole script and see whether you still read it on day five.',
         'Add a second mark only when a second thing keeps going missing.',
       ] },
-      { p: 'Use pencil for anything a director might change, and keep the marks that are yours separate from the marks that came from the room. When a production ends, the page you kept is a record of how you solved that part, and it is worth reading again before you solve the next one.' },
+      { p: 'When a production ends, the page you kept is a record of how you solved that part, and it is worth reading again before you solve the next one.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'Keeping the page usable',
+        items: [
+          'Use pencil for anything a director might change.',
+          'Keep the marks that are yours separate from the marks that came from the room.',
+        ] } },
     ] },
   { id: 'ac-dials', module: 'rhythm', order: 1,
     title: 'Two Dials, Not One',
@@ -738,9 +916,16 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Most actors have one word for speed and use it for two different things. That is one control for two dials.',
     reflection: 'Take a speech you know well. Is the problem its speed, or the pattern inside the speed?',
     body: [
-      { p: 'Tempo is how fast you are going. Rhythm is the pattern inside the speed, the long and the short of it. They are separate dials and they turn separately. Fast and smooth is one thing. Fast and jagged is a different animal. Slow and steady, slow and broken: four states, two dials.' },
+      { p: 'Tempo is how fast you are going. Rhythm is the pattern inside the speed, the long and the short of it.' },
+      { key: 'Tempo and rhythm are separate dials and they turn separately.' },
+      { p: 'Fast and smooth is one thing. Fast and jagged is a different animal. Slow and steady, slow and broken: four states, two dials.' },
       { p: 'Why care? Because the repairs are different. Wrong tempo, change the speed. Wrong rhythm, and changing the speed just hauls the same bad pattern along at a new rate. You have heard the note a hundred times: pick up the pace. And the scene did not get better, did it? Because the scene was dragging in its rhythm, and nobody touched that dial.' },
-      { p: 'Three traps, so you can spot yourself in them. The actor whose body is rhythmic and whose speech is not, or the reverse. The actor with one rhythm for every role, always recognizably themselves in a different coat. And the actor who nails the metre perfectly with nothing alive underneath it.' },
+      { panel: { tone: 'sage', icon: 'mask', title: 'Three traps, so you can spot yourself in them',
+        items: [
+          'The actor whose body is rhythmic and whose speech is not, or the reverse.',
+          'The actor with one rhythm for every role, always recognizably themselves in a different coat.',
+          'The actor who nails the metre perfectly with nothing alive underneath it.',
+        ] } },
     ] },
   { id: 'ac-feeling', module: 'rhythm', order: 2,
     title: 'Rhythm Reaches Feeling',
@@ -749,9 +934,17 @@ const ACTING_LESSONS_ALL = [
     orientation: 'You cannot order a feeling to show up. You can set a speed. That loophole is the whole trick.',
     reflection: 'What circumstance would make your character move at the speed you have given them?',
     body: [
-      { p: 'There are three doors into an actor. Text reaches the mind. Objective reaches the will. And tempo-rhythm reaches the feelings, which answer to nobody. Try commanding yourself to dread something. Nothing happens. Now set the rhythm of dread, the caught breath, the too-still hands, and give it a minute. The feeling walks in on its own, behind the rhythm, like it was invited.' },
-      { p: 'But it does not work empty. A rhythm with nothing behind it is drumming on a table. Give it a circumstance to sit on and the two start feeding each other: the situation shapes the rhythm, and the rhythm starts showing you corners of the situation you had not imagined yet.' },
-      { p: 'And never mistake speed for meaning. A march, a stroll and a funeral can move at exactly the same tempo and share nothing else on earth. When a rhythm feels arbitrary, you are not missing a better rhythm. You are missing the circumstance that would make this one inevitable.' },
+      { p: 'There are three doors into an actor.' },
+      { key: 'Text reaches the mind. Objective reaches the will. And tempo-rhythm reaches the feelings, which answer to nobody.' },
+      { p: 'Try commanding yourself to dread something. Nothing happens. Now set the rhythm of dread, the caught breath, the too-still hands, and give it a minute. The feeling walks in on its own, behind the rhythm, like it was invited.' },
+      { p: 'But it does not work empty. Give it a circumstance to sit on and the two start feeding each other: the situation shapes the rhythm, and the rhythm starts showing you corners of the situation you had not imagined yet.' },
+      { p: 'And never mistake speed for meaning. A march, a stroll and a funeral can move at exactly the same tempo and share nothing else on earth.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'If the rhythm is not going anywhere',
+        items: [
+          'A rhythm with nothing behind it is drumming on a table.',
+          'When a rhythm feels arbitrary, you are not missing a better rhythm.',
+          'You are missing the circumstance that would make this one inevitable.',
+        ] } },
     ] },
   { id: 'ac-tworhythms', module: 'rhythm', order: 3,
     title: 'Two Rhythms at Once',
@@ -760,9 +953,16 @@ const ACTING_LESSONS_ALL = [
     orientation: 'A person hiding something runs two rhythms at once. The gap between them is what the audience is actually reading.',
     reflection: 'Where in your script is your character calmer on the outside than on the inside?',
     body: [
-      { p: 'Watch anyone waiting on terrible news. The body is stone. Inside, the pulse is sprinting. Watch a good liar: the speech is even, almost bored, and underneath it every gear is screaming. Inside and outside do not match, and most of the time they should not, because the distance between them is where the performance lives.' },
-      { p: 'Better yet, the two rhythms push on each other. The harder you clamp the outside steady, the faster the inside runs, and the faster the inside runs, the harder the outside is to hold. Do not solve that loop. Play it. It plays beautifully.' },
-      { p: 'One mind can split the same way, resolve at one speed and doubt at another, both running at once. So when a scene feels flat and every other thing about it checks out, look here first. You have probably given the character one rhythm in a moment that is begging for two.' },
+      { p: 'Watch anyone waiting on terrible news. The body is stone. Inside, the pulse is sprinting. Watch a good liar: the speech is even, almost bored, and underneath it every gear is screaming.' },
+      { key: 'Inside and outside do not match, and most of the time they should not, because the distance between them is where the performance lives.' },
+      { p: 'Better yet, the two rhythms push on each other. The harder you clamp the outside steady, the faster the inside runs, and the faster the inside runs, the harder the outside is to hold.' },
+      { p: 'One mind can split the same way, resolve at one speed and doubt at another, both running at once.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'When a scene feels flat',
+        items: [
+          'If every other thing about it checks out, look here first.',
+          'You have probably given the character one rhythm in a moment that is begging for two.',
+          'Do not solve that loop. Play it. It plays beautifully.',
+        ] } },
     ] },
   { id: 'ac-harmony', module: 'rhythm', order: 4,
     title: 'Harmony, Not Unison',
@@ -771,9 +971,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Two people in the same rhythm are singing in unison. A scene almost never wants unison.',
     reflection: 'In this scene, are you in harmony with the other character or in unison? If it is unison, did you choose it?',
     body: [
-      { p: 'Everybody in a room is running their own rhythm. When a group truly shares one, that is unison, and unison is a special effect: soldiers on parade, a chorus, a mob with one idea in its head. The sameness is the point there. A scene is not built like that. A scene is harmony: different lines, sounding at the same time.' },
+      { p: 'Everybody in a room is running their own rhythm. When a group truly shares one, that is unison, and unison is a special effect: soldiers on parade, a chorus, a mob with one idea in its head. The sameness is the point there. A scene is not built like that.' },
+      { key: 'A scene is harmony: different lines, sounding at the same time.' },
       { p: 'Think about what a chord is. Different notes. Two players on the same note are not making a chord, they are making one note louder. What the audience actually receives from two characters is the interval between them, and here is the thing about the interval: nobody plays it. You hold your line, the other actor holds theirs, and the music happens in the space neither of you owns.' },
-      { p: 'Some intervals sit sweet. Some grate. Both are music, so a scene where two rhythms refuse to settle is not a scene going wrong. The thing to fear is accidental unison: a scene rehearsed until everybody has drifted onto one polite shared pace. It sounds tidy. It sounds finished. It sounds nothing like people.' },
+      { p: 'Some intervals sit sweet. Some grate. Both are music, so a scene where two rhythms refuse to settle is not a scene going wrong.' },
+      { panel: { tone: 'sage', icon: 'mask', title: 'The thing to fear is accidental unison',
+        items: [
+          'A scene rehearsed until everybody has drifted onto one polite shared pace.',
+          'It sounds tidy. It sounds finished. It sounds nothing like people.',
+        ] } },
     ] },
   { id: 'ac-rests', module: 'rhythm', order: 5,
     title: 'Notes and Rests',
@@ -783,8 +989,15 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Which of your pauses are carrying something? Which are just waiting?',
     body: [
       { p: 'Speech is time, divided. Words take some of it, pauses take the rest, and both of them carry rhythm. Long sounds, short sounds, hard stresses, soft ones. That is the entire toolkit, and every rhythm anyone has ever spoken was built out of it.' },
-      { p: 'Here is the failure you already know: the dead pause. The silence where the rhythm just drops. You feel the thread snap, the audience feels it snap, and the next line has to start the engine cold. The fix costs nothing to describe and takes real practice to own: keep a silent count running under the pause. The rhythm never stops. Only the sound does.' },
-      { p: 'That same count is your bridge between phrases that do not share a rhythm, which in prose is most of them. One phrase runs long, the next is three words, each has its own shape. Do not iron them into one measure. Keep counting across the joins and let the count carry you over.' },
+      { p: 'Here is the failure you already know: the dead pause. The silence where the rhythm just drops. You feel the thread snap, the audience feels it snap, and the next line has to start the engine cold. The fix costs nothing to describe and takes real practice to own.' },
+      { key: 'The rhythm never stops. Only the sound does.' },
+      { p: 'That same count is your bridge between phrases that do not share a rhythm, which in prose is most of them. One phrase runs long, the next is three words, each has its own shape.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Keep the count running',
+        lead: 'Two places it does the work.',
+        items: [
+          'Under the pause: keep a silent count going, so the rhythm never stops and only the sound does.',
+          'Across the joins: do not iron two phrases into one measure. Let the count carry you over.',
+        ] } },
     ] },
   { id: 'ac-speeds', module: 'rhythm', order: 6,
     title: 'The Two Missing Speeds',
@@ -794,8 +1007,16 @@ const ACTING_LESSONS_ALL = [
     reflection: 'Can you say your hardest line at half speed without it dying, and at double speed without it turning to mush?',
     body: [
       { p: 'True slow is hard because slow wants to die. The words drift apart, the line stalls, restarts, and now the audience can hear the machinery. What keeps a slow line alive is sound, not silence. Let the vowels carry. Keep the line sounding all the way through its length instead of chopping it into pieces with air between them.' },
-      { p: 'True fast is a separate discipline, and it is not rushing. Fast is built out of slow. Take the passage at a crawl, slower than you will ever perform it, every consonant finished like you are being paid by the consonant. Repeat until your mouth knows it without you. Then, and only then, accelerate. Speed built any other way turns to mush, and it turns to mush at exactly the moment you most need every word to land.' },
-      { p: 'Last thing. Both speeds need a reason to exist. Slow with no reason behind it is pompous. Fast with no reason behind it is a party trick. Circumstance first, speed second. That order never flips.' },
+      { p: 'True fast is a separate discipline, and it is not rushing.' },
+      { key: 'Fast is built out of slow.' },
+      { p: 'Take the passage at a crawl, slower than you will ever perform it, every consonant finished like you are being paid by the consonant. Repeat until your mouth knows it without you. Then, and only then, accelerate. Speed built any other way turns to mush, and it turns to mush at exactly the moment you most need every word to land.' },
+      { p: 'Last thing. Both speeds need a reason to exist.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Neither speed is free',
+        items: [
+          'Slow with no reason behind it is pompous.',
+          'Fast with no reason behind it is a party trick.',
+          'Circumstance first, speed second. That order never flips.',
+        ] } },
     ] },
 
   // ── The Professional Actor ─────────────────────────────────
@@ -812,9 +1033,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'You will hear this more than once in this app. That is on purpose.',
     reflection: 'Which of your current lines still cost you attention? Those are tonight’s work.',
     body: [
-      { p: 'Being off book is job requirement number one, and it earns that spot twice over. Professionally, it is simply the minimum: an actor holding a script in week three is a problem everyone else in the room now has to manage. Craft-wise, it is the key that unlocks everything. Text you own completely is text you no longer think about, and the attention it frees is what lets you play, choose, and discover.' },
+      { p: 'Being off book is job requirement number one, and it earns that spot twice over. Professionally, it is simply the minimum: an actor holding a script in week three is a problem everyone else in the room now has to manage. Craft-wise, it is the key that unlocks everything.' },
+      { key: 'Text you own completely is text you no longer think about, and the attention it frees is what lets you play, choose, and discover.' },
       { p: 'Notice what the room can do when you are off book and what it cannot do when you are not. Off book, you can look the other actor in the eye, take a note and apply it on the next pass, try a completely different choice on a whim. On book, every one of those doors is closed, because a piece of your head is still reading.' },
-      { p: 'There is no shortcut and no substitute. Drill the lines until they are boring, because boring is the goal: words so automatic they cost you nothing. What you save on remembering, you spend on acting.' },
+      { p: 'There is no shortcut and no substitute.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'How the text gets owned',
+        items: [
+          'Drill the lines until they are boring. Boring is the goal: words so automatic they cost you nothing.',
+          'What you save on remembering, you spend on acting.',
+        ] } },
     ] },
   { id: 'ac-pro-choices', module: 'professional', order: 3,
     title: 'Make Choices, Never Ask Permission',
@@ -823,9 +1050,16 @@ const ACTING_LESSONS_ALL = [
     orientation: 'The director did not hire you to ask what to do. The director hired you so there would be one less thing to do.',
     reflection: 'In your last rehearsal, how many choices did you offer before anyone asked you for one?',
     body: [
-      { p: 'Your job is to walk in already carrying an idea of who this person is, built from the research and preparation you did before you showed up, and then to make choices based on that knowledge. Never wait for a director to ask you for a choice. Never ask whether you are allowed to try something. Make the choice, offer it, and let the room respond to something real.' },
+      { p: 'Your job is to walk in already carrying an idea of who this person is, built from the research and preparation you did before you showed up, and then to make choices based on that knowledge.' },
       { p: 'Think about hiring any other professional. If you hired a chef and they kept asking you how to prepare each ingredient, when to season, whether they were allowed to make every small decision, you would start wondering why you hired them. Their uncertainty would slow the whole kitchen down and force you to do their job for them. An actor who waits to be told is that chef.' },
-      { p: 'A wrong choice, made fully, is useful: the director now knows something about the scene and can steer. No choice teaches nobody anything, and it quietly hands your job to someone who already has their own. Bring the person into the room. That is what the call time is for.' },
+      { key: 'A wrong choice, made fully, is useful: the director now knows something about the scene and can steer.' },
+      { p: 'No choice teaches nobody anything, and it quietly hands your job to someone who already has their own. Bring the person into the room. That is what the call time is for.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Walk in carrying the choice',
+        items: [
+          'Never wait for a director to ask you for a choice.',
+          'Never ask whether you are allowed to try something.',
+          'Make the choice, offer it, and let the room respond to something real.',
+        ] } },
     ] },
   { id: 'ac-pro-notes', module: 'professional', order: 4,
     title: 'Taking a Note',
@@ -834,9 +1068,16 @@ const ACTING_LESSONS_ALL = [
     orientation: 'A note is not a criticism of you. It is information about the show.',
     reflection: 'Think of the last note you resisted. What was it protecting?',
     body: [
-      { p: 'When a note comes, take it. Do not defend the old choice, do not explain what you were going for, do not relitigate the scene. The director watched it and wants something different; your account of your intentions changes nothing about what the audience will see. Say thank you, and thank you is a complete sentence.' },
-      { p: 'Then actually apply it, visibly, on the next pass. A note applied fast tells the room you are steerable, and steerable actors get hired again. A note that vanishes into a nod and never appears in the work is worse than arguing, because now the director wonders whether you listened at all.' },
-      { p: 'Applying a note is not surrendering your character. You built the person; the note adjusts the person; you are the one who knows how to make the adjustment true. Take the note INTO the character you built rather than dropping the character to obey it. That is the difference between a puppet and a professional.' },
+      { p: 'When a note comes, take it. The director watched it and wants something different; your account of your intentions changes nothing about what the audience will see.' },
+      { key: 'Say thank you, and thank you is a complete sentence.' },
+      { p: 'Then actually apply it, visibly, on the next pass. A note applied fast tells the room you are steerable, and steerable actors get hired again.' },
+      { p: 'Applying a note is not surrendering your character. You built the person; the note adjusts the person; you are the one who knows how to make the adjustment true. That is the difference between a puppet and a professional.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Taking a note',
+        items: [
+          'Do not defend the old choice, do not explain what you were going for, do not relitigate the scene.',
+          'A note that vanishes into a nod and never appears in the work is worse than arguing, because now the director wonders whether you listened at all.',
+          'Take the note INTO the character you built rather than dropping the character to obey it.',
+        ] } },
     ] },
   { id: 'ac-pro-early', module: 'professional', order: 5,
     title: 'Early Is On Time',
@@ -845,9 +1086,18 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Early is on time. On time is late. Late is unacceptable.',
     reflection: 'What time do you actually arrive, measured honestly against your last three calls?',
     body: [
-      { p: 'Say it again, because it runs the whole working life: early is on time, on time is late, and late is unacceptable. Walking in at the call time means the room is now waiting while you take off your coat, find your script and settle. Walking in early means that at the call time you are already warmed, ready and reachable. One of those people gets remembered fondly.' },
-      { p: 'The rest of rehearsal etiquette is the same idea wearing different clothes: make yourself easy to work with. Pencil, never pen, because blocking changes. Mark your script so the same question never gets asked twice. Know whose room it is, and it is not yours. Keep your problems small and your solutions ready.' },
+      { p: 'Say it again, because it runs the whole working life.' },
+      { key: 'Early is on time, on time is late, and late is unacceptable.' },
+      { p: 'Walking in at the call time means the room is now waiting while you take off your coat, find your script and settle. Walking in early means that at the call time you are already warmed, ready and reachable. One of those people gets remembered fondly.' },
+      { p: 'The rest of rehearsal etiquette is the same idea wearing different clothes: make yourself easy to work with.' },
       { p: 'None of this is servility. It is craft applied to the workplace. The same discipline that gets you off book gets you in the building twenty minutes early, and the room can feel both.' },
+      { panel: { tone: 'sage', icon: 'book', title: 'Make yourself easy to work with',
+        items: [
+          'Pencil, never pen, because blocking changes.',
+          'Mark your script so the same question never gets asked twice.',
+          'Know whose room it is, and it is not yours.',
+          'Keep your problems small and your solutions ready.',
+        ] } },
     ] },
   { id: 'ac-pro-director', module: 'professional', order: 6,
     title: 'What a Director Actually Wants',
@@ -856,9 +1106,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'The director has a hundred fires. Do not be the hundred and first.',
     reflection: 'Last time something was wrong in a scene, did you bring the problem or the solution?',
     body: [
-      { p: 'What a director wants from you is simple to say: options, preparedness, and going full out. This is no time to be shy. Arrive with two or three real ways the scene could go, played fully enough to judge. Now the director’s job is choosing, which is fast and pleasant, instead of inventing your performance for you, which is slow and is not their job.' },
-      { p: 'When something is wrong, report it WITH a proposed fix. A costume that blocks the cross, a prop that will not open, a line that fights the blocking: fine, say so, and in the same breath say what you would do about it. A problem plus a solution is collaboration. A problem alone is a task you just assigned to a person with a hundred of them.' },
-      { p: 'And learn each director’s language fast. Some speak in images, some in actions, some in results. Translating their note into your process is your work, not theirs, and the actors who translate quickly are the ones every director calls again.' },
+      { p: 'What a director wants from you is simple to say: options, preparedness, and going full out. This is no time to be shy. Now the director’s job is choosing, which is fast and pleasant, instead of inventing your performance for you, which is slow and is not their job.' },
+      { p: 'When something is wrong, report it WITH a proposed fix. A costume that blocks the cross, a prop that will not open, a line that fights the blocking: fine, say so, and in the same breath say what you would do about it. A problem plus a solution is collaboration.' },
+      { key: 'A problem alone is a task you just assigned to a person with a hundred of them.' },
+      { p: 'And learn each director’s language fast. Some speak in images, some in actions, some in results, and the actors who translate quickly are the ones every director calls again.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'What to bring, and what to carry',
+        items: [
+          'Arrive with two or three real ways the scene could go, played fully enough to judge.',
+          'Translating their note into your process is your work, not theirs.',
+        ] } },
     ] },
   { id: 'ac-pro-audition', module: 'professional', order: 1,
     title: 'The Audition Is the Job',
@@ -867,9 +1123,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'They are not only casting the role. They are casting the weeks of work that come with you.',
     reflection: 'In your last audition, what did your behavior tell them about week three of rehearsals with you?',
     body: [
-      { p: 'An audition shows two things, and the scene is only one of them. The other is what you are like to work with: prepared or scrambling, off book or buried in the pages, adjustable or brittle when they throw you a change. Every behavior in that room is a free sample of every rehearsal you would ever have together.' },
-      { p: 'So run the audition the way you would run the job. Fully prepared, choices made, person built. When they redirect you, and they often redirect you just to see what happens, take the note visibly and completely, because that moment is the whole interview. They may not remember your reading. They will remember whether you could change.' },
-      { p: 'Then leave it in the room. The audition is the work; the booking is the weather. Actors who treat every audition as a finished performance, given freely, walk out intact either way, and walk in better next time.' },
+      { p: 'An audition shows two things, and the scene is only one of them. The other is what you are like to work with: prepared or scrambling, off book or buried in the pages, adjustable or brittle when they throw you a change.' },
+      { key: 'Every behavior in that room is a free sample of every rehearsal you would ever have together.' },
+      { p: 'So run the audition the way you would run the job. When they redirect you, and they often redirect you just to see what happens, take the note visibly and completely, because that moment is the whole interview. They may not remember your reading. They will remember whether you could change.' },
+      { p: 'Then leave it in the room. The audition is the work; the booking is the weather.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Run it the way you would run the job',
+        items: [
+          'Fully prepared, choices made, person built.',
+          'Treat every audition as a finished performance, given freely. You walk out intact either way, and walk in better next time.',
+        ] } },
     ] },
   { id: 'ac-pro-stageset', module: 'professional', order: 7,
     title: 'Stage and Set Are Different Countries',
@@ -878,9 +1140,15 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Same craft, different physics. Visit both like a local.',
     reflection: 'Which country are you a local in? What would the other one charge you at the border?',
     body: [
-      { p: 'On stage, the performance is built by repetition and then given whole, live, hundreds of times, reaching the back row every night. The discipline is consistency: hitting the mark, the light and the laugh the same way twice a night for two months without letting it go dead.' },
-      { p: 'On set, everything is inverted. The performance is assembled from takes, out of order, with the climax possibly shot before the meeting scene. The camera stands where the back row used to be, so the work that reached fifty meters now needs to reach one. The discipline is freshness in fragments: take twelve must be as alive as take one, and continuity means your coffee cup is in the same hand every time.' },
-      { p: 'Neither is the senior service. An actor who can fill a house and then, the next month, do almost nothing in a close-up and have it read, is not doing two jobs. They are doing one job with the volume knob under their control, and that knob is a professional skill in itself.' },
+      { p: 'On stage, the performance is built by repetition and then given whole, live, hundreds of times, reaching the back row every night.' },
+      { p: 'On set, everything is inverted. The performance is assembled from takes, out of order, with the climax possibly shot before the meeting scene. The camera stands where the back row used to be, so the work that reached fifty meters now needs to reach one, and continuity means your coffee cup is in the same hand every time.' },
+      { p: 'Neither is the senior service. An actor who can fill a house and then, the next month, do almost nothing in a close-up and have it read, is not doing two jobs.' },
+      { key: 'They are doing one job with the volume knob under their control, and that knob is a professional skill in itself.' },
+      { panel: { tone: 'sage', icon: 'mask', title: 'The discipline each one asks for',
+        items: [
+          'On stage, consistency: hitting the mark, the light and the laugh the same way twice a night for two months without letting it go dead.',
+          'On set, freshness in fragments: take twelve must be as alive as take one.',
+        ] } },
     ] },
   { id: 'ac-pro-reputation', module: 'professional', order: 8,
     title: 'Your Reputation Is the Career',
@@ -889,9 +1157,16 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Talent gets you noticed. Reputation gets you rehired.',
     reflection: 'If the stage manager from your last job were asked about you, what two words would they use?',
     body: [
-      { p: 'The industry is smaller than it looks, and it talks. Directors trade names, stage managers remember everything, and casting keeps lists that never get shown to anyone. Ten years in, most work arrives because somebody in a room said the sentence: they were great, and they were easy. Both halves of that sentence are earned on every job, including the small ones. Especially the small ones.' },
+      { p: 'The industry is smaller than it looks, and it talks. Directors trade names, stage managers remember everything, and casting keeps lists that never get shown to anyone.' },
+      { key: 'Ten years in, most work arrives because somebody in a room said the sentence: they were great, and they were easy.' },
+      { p: 'Both halves of that sentence are earned on every job, including the small ones. Especially the small ones.' },
       { p: 'Easy does not mean silent, and it does not mean agreeing with everything. It means prepared, on time, choice-making, note-taking, problem-solving: everything in this collection, practiced until it is just what you are like. Difficult and brilliant works for a very short list of people, and the list is shorter than the people on it think.' },
-      { p: 'Here is the compounding effect nobody explains early enough: every room you are good in produces three people who will say your name in rooms you have never entered. Play the long game. The role ends. The reputation is the career.' },
+      { p: 'Here is the compounding effect nobody explains early enough.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Play the long game',
+        items: [
+          'Every room you are good in produces three people who will say your name in rooms you have never entered.',
+          'The role ends. The reputation is the career.',
+        ] } },
     ] },
 ];
 
