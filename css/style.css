@@ -1357,6 +1357,89 @@ body.modal-open { overflow: hidden; }
   .shell:has(.vp-grid) { grid-template-columns: 216px minmax(0, 1fr); }
 }
 
+/* THE RAIL GOES BEFORE THE READING COLUMN DOES (owner approved 2026-11-19).
+
+   THE SHELL WANTS 1254px AND SILENTLY GIVES UP THE MIDDLE WHEN IT CANNOT
+   HAVE IT. 216 nav + 620 measure + 330 rail + 56 of gaps + 32 of padding
+   is 1254. Below that the only track with any give is the middle one, so
+   the READING COLUMN pays for the rail: measured at 1024 it rendered
+   390px wide, which is phone width, while 546px went to the furniture
+   either side. 466px at 1100, 546px at 1180, 620px only at 1254.
+
+   THIRTEEN OF TWENTY TEMPLATES WERE DOING THIS, not the Learn pages
+   alone: IPA Learn, Practice, Library, Progress and Studio, More,
+   Theatre History and six course Learn pages. It is a property of the
+   shell, so the fix is on the shell. The seven that were fine are the
+   ones already dropping the rail through the three has() rules above,
+   which is the same answer arrived at three times for one page each.
+
+   NOTHING IS LOST WITH THE RAIL, and the app already proves it: below
+   980 `.side-nav, .right-rail { display: none; }` has always hidden it
+   outright, so every phone user has been using this app without the rail
+   since it shipped. Nothing is reachable only from there.
+
+   THE MIDDLE TAKES ITS OWN 620 RATHER THAN 1fr. The three rules above
+   use 1fr because they hold GRIDS of cards that want every pixel; this
+   band is mostly reading panes, and 1fr would hand prose a 977px line at
+   1253. 216 + 28 + 620 + 32 is 896, so it fits from 980 up, and
+   justify-content on the shell keeps it centred in whatever is left.
+
+   Specificity keeps the three has() rules winning where they apply: they
+   are 0,2,0 against this rule's 0,1,0. */
+@media (min-width: 980px) and (max-width: 1253px) {
+  .shell { grid-template-columns: 216px minmax(0, 620px); }
+  /* THE FOUR PATH LAYOUTS NEED SAYING AGAIN AT THEIR OWN SPECIFICITY.
+     They carry their own rule a hundred lines above this one, which keeps
+     the 330px rail and hands the middle `1fr`; at 0,3,0 it outranks the
+     plain `.shell` above at 0,1,0, so without this they were the six
+     pages the fix did not reach. Measured: 390px at 1024, while every
+     other page had already gone to 620.
+
+     They keep `1fr` rather than 620 because that is their own intent, a
+     wide pane for cards and bands rather than a reading measure. Dropping
+     only the rail takes them from 390 to 748 at 1024. */
+  .shell:has(.lm-path.is-gallery),
+  .shell:has(.lm-path.is-shelf),
+  .shell:has(.lm-path.is-banded),
+  .shell:has(.lm-path.is-pathcards) {
+    grid-template-columns: 216px minmax(0, 1fr);
+  }
+  /* AND THE GROUND HAS TO STOP BLEEDING RIGHT, because the thing it was
+     bleeding INTO has just gone. Its width is the column plus 250 left
+     and 360 right, and the 360 was the rail. Widen the column to 748 and
+     keep the same bleed and the drawing becomes 1358px in a 1024 window:
+     measured, document scrollWidth 1368, a horizontal scrollbar on three
+     Learn pages that had none before this rule existed.
+
+     This is the identical failure the cards layout hit when IT took the
+     rail's column, and it takes the identical answer: bleed LEFT only,
+     into the sidebar, where the drawings put their margins anyway.
+     248 + 748 is 996 inside a 1024 window, and 248 + 977 is 1225 inside
+     1253, so it clears at both ends of the band.
+
+     `.tr-view .lm-ground` at 0,2,0, NOT a plain `.lm-ground`. The base
+     ground rule sits about 2,600 lines below this one, so a bare
+     `.lm-ground` here ties on specificity and loses on order, leaving the
+     610px bleed exactly as it was. That is the same trap the rail rule
+     above fell into, and in this stylesheet it is the normal case rather
+     than the exception: the layout section is near the top and the
+     component rules are all below it. Check the computed value, never the
+     cascade in your head.
+
+     The cards layout's own left-only rule is 0,4,0 and still wins over
+     this, which is right: it already solved this for itself above 980. */
+  .tr-view .lm-ground { left: -248px; width: calc(100% + 248px); }
+  /* `.shell .right-rail`, NOT `.right-rail`. The rail's own rule sets
+     `display: flex` about 250 lines below this one at the same
+     specificity, so a bare `.right-rail` here loses on order and the rail
+     stays visible. It then occupies an IMPLICIT third grid track, the
+     middle shrinks to pay for it exactly as before, and the two-track
+     rule above looks broken while being applied perfectly: measured
+     216px 390px 330px at 1024, which is the bug this is fixing. The
+     three has() rules above dodge it by being two classes deep already. */
+  .shell .right-rail { display: none; }
+}
+
 /* Sidebar */
 .side-nav {
   position: sticky; top: 0; align-self: start; height: 100vh; height: 100dvh;
