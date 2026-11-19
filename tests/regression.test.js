@@ -33,6 +33,7 @@ import { SCRIPT_ANALYSIS_REVIEWS, scriptAnalysisApproved } from '../js/data/scri
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, WARMUP_ALL, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
+import { LEARN_SCENES } from '../js/data/learn-scenes.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable-actions.js';
 import { emptyProject, saveProject, splitLines } from '../js/projects.js';
@@ -7420,6 +7421,104 @@ export async function run({ navDoc = document } = {}) {
     check('figures: the fourth wall chapter shows the theatre, then the room, after its opening',
       String((fw?.body ?? []).filter(b => b.fig).map(b => b.fig)) === 'fourth-wall-theatre,fourth-wall-house'
       && fw.body.findIndex(b => b.fig) === 1);
+  }
+
+  // ── 21n. The Learn page grounds: declared, shipped, drawn to size ──
+  // WHY THIS EXISTS, AND WHAT IT STILL CANNOT SEE.
+  //
+  // On 2026-11-19 the Acting ground was INVISIBLE at a 1024px window and
+  // all 924 checks passed. A grep of this file for `lm-ground`,
+  // `acting-ground` or `object-fit` returned ZERO: four courses carry a
+  // drawn backdrop and not one line here looked at any of them. It was
+  // caught by opening a page, which is the one method that does not scale.
+  //
+  // What follows pins WHAT A MACHINE CAN SEE: that a declared ground
+  // ships, decodes, carries its own intrinsic size, is still emitted by
+  // the renderer, and is contained rather than cropped on the banded
+  // layout. IT CANNOT SEE COMPOSITION. A ground that loads perfectly and
+  // is cropped to an empty slice passes every check below, because
+  // "the visible part has something in it" is a judgement about a picture.
+  // Look at a new ground in a browser at more than one width. This only
+  // guarantees that you are looking at something.
+  {
+    // THE TOP-LEVEL KEY ONLY. `moduleCard.ground` is a DIFFERENT
+    // NAMESPACE: Rhetoric's first module is called Ground and carries its
+    // own painting, which learn-scenes.js warns about in its own comment.
+    // Widening this filter to walk the scene would quietly swallow six
+    // module paintings and test them as backdrops.
+    const declared = Object.entries(LEARN_SCENES)
+      .filter(([, s]) => typeof s.ground === 'string')
+      .map(([ws, s]) => ({ ws, src: s.ground }));
+
+    check('grounds: exactly the four courses known to carry one declare a ground',
+      String(declared.map(d => d.ws).sort()) === 'acting,commedia,rhetoric,shakespeare',
+      declared.map(d => d.ws).sort().join(',')
+      + ' — a fifth is welcome, but name it here so the checks below cover it');
+
+    const probed = await Promise.all(declared.map(async d => {
+      const text = await fetch('../' + d.src).then(r => (r.ok ? r.text() : '')).catch(() => '');
+      const vb = (text.match(/viewBox="0 0 ([0-9.]+) ([0-9.]+)"/) ?? []).slice(1).map(Number);
+      const nat = await new Promise(res => {
+        const img = new Image();
+        img.onload = () => res([img.naturalWidth, img.naturalHeight]);
+        img.onerror = () => res([0, 0]);
+        img.src = '../' + d.src;
+      });
+      return Object.assign({}, d, { vb, nat });
+    }));
+
+    check('grounds: every declared ground ships and decodes',
+      probed.length === 4 && probed.every(p => p.nat[0] > 0),
+      probed.filter(p => !p.nat[0]).map(p => p.src).join(', ')
+      + ' — a missing file and a malformed SVG are identical here, both load as 0x0');
+
+    // AND `naturalWidth > 0` IS NOT ENOUGH, measured 2026-11-19 rather
+    // than assumed. An SVG with a viewBox and NO width/height still
+    // LOADS, and the browser hands it the default replaced-element box:
+    // 267x150 for a 16:9 viewBox, not zero. The weaker test waves through
+    // a drawing that will then scale to the wrong size wherever it is
+    // placed, which is the trap every generator in tools/ asserts against
+    // on its way out. Comparing intrinsic size to the file's own viewBox
+    // is what actually catches it.
+    check('grounds: every ground carries its own intrinsic size, not the default box',
+      probed.length === 4
+      && probed.every(p => p.vb.length === 2 && p.nat[0] === p.vb[0] && p.nat[1] === p.vb[1]),
+      probed.filter(p => !(p.nat[0] === p.vb[0] && p.nat[1] === p.vb[1]))
+        .map(p => p.src + ' viewBox ' + p.vb.join('x') + ' vs natural ' + p.nat.join('x')).join('; '));
+
+    // A SOURCE PIN, in the manner of the dormancy guard above. Everything
+    // else in this section passes with the <img> deleted from the
+    // renderer, because all of it reads files and stylesheets rather than
+    // a rendered page.
+    const mainSrc = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
+    const sites = (mainSrc.match(/class="lm-ground/g) ?? []).length;
+    check('grounds: the renderer still draws a ground at both of its two sites',
+      sites === 2 && mainSrc.includes('scene.ground')
+      && mainSrc.includes('learnScene(B.ws)?.ground'),
+      sites + ' site(s) — the Learn page draws one and the lesson page draws one; '
+      + 'if that moved, say where, because nothing else here would notice');
+
+    // THE CONTAIN RULE, READ AS A RULE rather than as applied. This frame
+    // is 390px wide, so the min-width 980 query never matches inside it
+    // and getComputedStyle would faithfully report the PHONE case and
+    // tell us nothing. Walking the CSSOM reads the declaration itself, at
+    // any viewport. Same origin, so the rules are readable.
+    const sheet = [...navDoc.styleSheets].find(s => (s.href ?? '').includes('style.css'));
+    let banded = null;
+    try {
+      for (const r of sheet ? sheet.cssRules : []) {
+        const cond = r.conditionText ?? r.media?.mediaText ?? '';
+        if (!cond.includes('min-width: 980px')) continue;
+        for (const inner of r.cssRules ?? []) {
+          const sel = inner.selectorText ?? '';
+          if (sel.includes('is-banded') && sel.includes('lm-ground')) banded = inner.style.objectFit;
+        }
+      }
+    } catch { banded = null; }
+    check('grounds: above 980px the banded ground is contained, not cropped',
+      banded === 'contain',
+      'object-fit reads ' + (banded || 'NO RULE FOUND') + ' — the banded pane is 996x1413 at a '
+      + '1024 window, and cover scales that by height and crops the drawing to its empty middle');
   }
 
   // ── 21c. Speak-aloud drills: a full bank per accent course ───

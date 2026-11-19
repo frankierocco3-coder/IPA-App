@@ -590,7 +590,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 - js/main.js                17131 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  897
+- regression check() sites  902
 
 ### Review
 
