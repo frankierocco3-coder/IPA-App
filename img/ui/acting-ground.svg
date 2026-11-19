@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMin slice" fill="none" stroke="#7b6f57" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round">
+<line x1="0" y1="782" x2="1600" y2="782"/>
+<line x1="0" y1="797" x2="1600" y2="797" stroke-opacity=".45"/>
+<line x1="150" y1="782" x2="150" y2="530"/>
+<line x1="104" y1="782" x2="196" y2="782"/>
+<line x1="150" y1="748" x2="112" y2="782" stroke-opacity=".7"/>
+<line x1="150" y1="748" x2="188" y2="782" stroke-opacity=".7"/>
+<circle cx="150" cy="496" r="34" stroke-opacity=".8"/>
+<line x1="116" y1="496" x2="184" y2="496" stroke-opacity=".45"/>
+<line x1="150" y1="462" x2="150" y2="530" stroke-opacity=".45"/>
+<path d="M139 505 C137 488 163 488 161 505 Z" stroke-opacity=".9"/>
+<line x1="143" y1="505" x2="157" y2="505"/>
+<line x1="1240" y1="740" x2="1284" y2="740"/>
+<line x1="1240" y1="740" x2="1233" y2="782"/>
+<line x1="1284" y1="740" x2="1291" y2="782"/>
+<line x1="1284" y1="740" x2="1293" y2="666"/>
+<line x1="1293" y1="666" x2="1286" y2="666" stroke-opacity=".75"/>
+<line x1="1289" y1="703" x2="1283" y2="703" stroke-opacity=".5"/>
+<line x1="1236" y1="768" x2="1288" y2="768" stroke-opacity=".5"/>
+<line x1="1346" y1="740" x2="1390" y2="740"/>
+<line x1="1346" y1="740" x2="1339" y2="782"/>
+<line x1="1390" y1="740" x2="1397" y2="782"/>
+<line x1="1390" y1="740" x2="1399" y2="666"/>
+<line x1="1399" y1="666" x2="1392" y2="666" stroke-opacity=".75"/>
+<line x1="1395" y1="703" x2="1389" y2="703" stroke-opacity=".5"/>
+<line x1="1342" y1="768" x2="1394" y2="768" stroke-opacity=".5"/>
+<line x1="1452" y1="740" x2="1496" y2="740"/>
+<line x1="1452" y1="740" x2="1445" y2="782"/>
+<line x1="1496" y1="740" x2="1503" y2="782"/>
+<line x1="1496" y1="740" x2="1505" y2="666"/>
+<line x1="1505" y1="666" x2="1498" y2="666" stroke-opacity=".75"/>
+<line x1="1501" y1="703" x2="1495" y2="703" stroke-opacity=".5"/>
+<line x1="1448" y1="768" x2="1500" y2="768" stroke-opacity=".5"/>
+<line x1="1558" y1="740" x2="1602" y2="740"/>
+<line x1="1558" y1="740" x2="1551" y2="782"/>
+<line x1="1602" y1="740" x2="1609" y2="782"/>
+<line x1="1602" y1="740" x2="1611" y2="666"/>
+<line x1="1611" y1="666" x2="1604" y2="666" stroke-opacity=".75"/>
+<line x1="1607" y1="703" x2="1601" y2="703" stroke-opacity=".5"/>
+<line x1="1554" y1="768" x2="1606" y2="768" stroke-opacity=".5"/>
+</svg>

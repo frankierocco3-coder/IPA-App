@@ -4059,6 +4059,17 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    lost by leaving it out, because there was never room for it. */
 @media (max-width: 979px) {
   .tr-view:has(.lm-path.is-cards) .lm-ground { display: none; }
+  /* AND THE BANDED LAYOUT, for the same reason and with the same
+     measurement behind it. Acting's ground went on at 375px wide and
+     rendered 375x1386: `cover` scales a 1600x900 drawing by its HEIGHT
+     there, so the visible slice is about 240 units of the middle, and the
+     middle is the one part of that drawing deliberately left empty. It
+     cost a file fetch and showed nothing.
+
+     The shelf layout is NOT included. Rhetoric's temple is drawn across
+     its full width rather than in two margins, so a phone still gets a
+     usable slice of it, which was checked rather than assumed. */
+  .tr-view:has(.lm-path.is-banded) .lm-ground { display: none; }
 }
 /* Everything the reader actually reads sits above it.
    THIS LIST IS NOT OPTIONAL AND IT HAS TO GROW WITH THE PANE. It used to
