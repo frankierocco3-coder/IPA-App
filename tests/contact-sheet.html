@@ -164,14 +164,27 @@ for (const [i, sheet] of list.entries()) {
   if (err) { cell.classList.add('bad'); st.textContent = err; bad++; }
   else {
     const d = frame.contentDocument;
+    const w = frame.contentWindow;
     const h = d.querySelector('.page-h')?.textContent?.trim();
-    const over = d.documentElement.scrollWidth > frame.contentWindow.innerWidth + 1;
-    st.textContent = (h ? h.slice(0, 28) : 'ok') + (over ? ' · SIDEWAYS SCROLL' : '');
-    if (over) { cell.classList.add('bad'); bad++; }
+    const over = d.documentElement.scrollWidth > w.innerWidth + 1;
+    // AND THE SQUEEZE, WHICH IS INVISIBLE AND WAS THE WHOLE POINT.
+    // On 2026-11-19 thirteen of twenty templates rendered their reading
+    // column at 390px at a 1024 viewport, because the shell could not
+    // afford 216 + 620 + 330 and the middle track is the only one with
+    // any give. It produced no overflow and no error, so this sheet drew
+    // thirteen perfectly healthy looking cells. A page that gives the
+    // reader phone width on a laptop is a defect; say so.
+    const main = d.querySelector('main');
+    const mw = main ? Math.round(main.getBoundingClientRect().width) : 0;
+    const squeezed = W >= 980 && mw > 0 && mw < 560;
+    st.textContent = (h ? h.slice(0, 24) : 'ok')
+      + (over ? ' · SIDEWAYS SCROLL' : '')
+      + (squeezed ? ` · SQUEEZED ${mw}px` : '');
+    if (over || squeezed) { cell.classList.add('bad'); bad++; }
   }
 }
 
-meta.textContent = `${W}px · ${list.length} templates · ${bad} not arrived or scrolling sideways`;
+meta.textContent = `${W}px · ${list.length} templates · ${bad} not arrived, scrolling sideways or squeezed`;
 </script>
 </body>
 </html>
