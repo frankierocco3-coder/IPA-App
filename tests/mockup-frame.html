@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speechcraft — landing mockup</title>
+<!--
+  ONE LANDING-PAGE MOCKUP, RENDERED IN THE APP'S OWN STYLESHEET.
+
+  Dev-only, beside run-all.html and contact-sheet.html; build_artifact.py
+  ships nothing from tests/.
+
+  WHY IT LOADS ../css/style.css RATHER THAN ITS OWN. A mockup drawn in its
+  own CSS tells you how the mockup looks, not how the APP would look. The
+  whole point is to see a direction sitting in the real type scale, the
+  real tokens and the real breakpoints, so that what you approve is what
+  ships. The shell wrapper below reproduces the live DOM chain measured in
+  the running app: .shell > .main-col > main > the page's own root.
+
+  ?d=<id>  picks a direction from mockup-data.js
+  ?list=1  prints the ids
+
+  Drive it at 390px for the phone and 1024 for the band where the reading
+  column collapses. Media queries read the VIEWPORT, so open it at the
+  width you are judging rather than scaling a wide window down.
+-->
+<link rel="stylesheet" href="../css/style.css">
+<style>
+  /* The caption bar is the only thing on this page that is not the app.
+     It is deliberately plain and outside .shell so it cannot inherit or
+     leak any of the styles being judged. */
+  .mk-bar { font: 11px/1.45 ui-sans-serif, system-ui, sans-serif;
+    background: #1e2a1d; color: #e8e2d2; padding: 7px 12px; }
+  .mk-bar b { font-size: 12px; letter-spacing: .02em; }
+  .mk-bar span { opacity: .72; }
+  .mk-missing { padding: 24px 14px; font: 13px/1.5 ui-sans-serif, system-ui, sans-serif; color: #a33; }
+</style>
+</head>
+<body>
+<div class="mk-bar" id="mk-bar">loading…</div>
+<!-- THE TWO EMPTY SIBLINGS ARE LOAD-BEARING. `.shell` is a three column
+     grid (216px nav / 620px measure / 330px rail). With only .main-col
+     inside it, the mockup lands in the NAV column and renders about
+     155px wide, which looks like a broken design and is a broken
+     harness. They are empty on purpose: what is being judged is the
+     measure the page gets, not the chrome around it. Below 980px the
+     shell collapses to one column and both disappear, exactly as in the
+     app. -->
+<div class="shell">
+  <nav class="side-nav" aria-hidden="true"></nav>
+  <div class="main-col">
+    <main id="mk"></main>
+  </div>
+  <aside class="right-rail" aria-hidden="true"></aside>
+</div>
+
+<script type="module">
+import { DIRECTIONS } from './mockup-data.js';
+
+const q = new URLSearchParams(location.search);
+const bar = document.getElementById('mk-bar');
+const host = document.getElementById('mk');
+
+if (q.get('list')) {
+  bar.textContent = `${DIRECTIONS.length} directions`;
+  host.innerHTML = `<ul>${DIRECTIONS.map(d =>
+    `<li><a href="?d=${encodeURIComponent(d.id)}">${d.id}</a> — ${d.pageLabel}: ${d.name}</li>`).join('')}</ul>`;
+} else {
+  const id = q.get('d') || DIRECTIONS[0]?.id;
+  const d = DIRECTIONS.find(x => x.id === id);
+  if (!d) {
+    // NAMED, NEVER BLANK — the same rule the contact sheet follows. An
+    // empty mockup reads as "that direction is empty", which is the
+    // opposite of what happened.
+    bar.textContent = 'NO SUCH DIRECTION';
+    host.innerHTML = `<p class="mk-missing">No direction with id <code>${id}</code>.
+      Open <a href="?list=1">?list=1</a> for the ids.</p>`;
+  } else {
+    bar.innerHTML = `<b>${d.pageLabel} · ${d.name}</b> <span>${d.angle}</span>`;
+    host.innerHTML = d.html;
+    document.title = `${d.pageLabel} — ${d.name}`;
+  }
+}
+</script>
+</body>
+</html>
