@@ -4057,6 +4057,31 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    happened to land under the words — a random slice of ivy behind the
    reading, which is the opposite of what a watermark is for. Nothing is
    lost by leaving it out, because there was never room for it. */
+/* THE BANDED GROUND IS CONTAINED, NOT COVERED, and this is the whole
+   reason it is visible at all below a very wide window.
+
+   `cover` fills the box and crops whatever does not fit. The banded pane
+   is WIDE AND SHORT at 1440 and TALL AND NARROW at 1024, because the
+   module cards drop from two columns to one: measured, 1412x802 against
+   996x1413. Covering the second one scales the drawing by its HEIGHT,
+   1.569, and shows a 635 unit slice of the middle of a 1600 unit
+   drawing. This drawing deliberately keeps its middle empty and puts the
+   ghost light at x 150 and the chairs at x 1240, so at 1024 BOTH were
+   cropped away and the page showed one horizontal line.
+
+   `contain` fits the whole width in and leaves the unused height
+   transparent, which is right for a watermark: the drawing keeps its
+   alignment with the margins at every width instead of only the one it
+   was composed at. Measured after the change at 1024: the drawing is
+   996x560, the ghost light lands at x 105 under the empty lower nav and
+   the chairs at x 784 to 1008 under the empty lower rail.
+
+   Scoped to banded. The other three grounds are composed across their
+   full width rather than in two margins, so centre cropping costs them
+   nothing and `cover` is still right for them. */
+@media (min-width: 980px) {
+  .tr-view:has(.lm-path.is-banded) .lm-ground { object-fit: contain; }
+}
 @media (max-width: 979px) {
   .tr-view:has(.lm-path.is-cards) .lm-ground { display: none; }
   /* AND THE BANDED LAYOUT, for the same reason and with the same

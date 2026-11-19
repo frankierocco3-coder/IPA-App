@@ -194,7 +194,10 @@ def build():
     parts.append(f'<line x1="0" y1="{floor + 15}" x2="{W}" y2="{floor + 15}" stroke-opacity=".45"/>')
 
     # LEFT: the ghost light, in the strip below the navigation items.
-    parts += ghost_light(150, floor, 330)
+    # 250, not 330. At a 1024 window the pane is tall and narrow, the
+    # drawing scales down, and a taller stand put the lamp head level with
+    # the last navigation item. Short enough to clear it at every width.
+    parts += ghost_light(150, floor, 250)
 
     # RIGHT: the chairs, in the margin below the rail, facing the reading.
     for x in (1240, 1346, 1452, 1558):

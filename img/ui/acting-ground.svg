@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMin slice" fill="none" stroke="#7b6f57" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round">
 <line x1="0" y1="782" x2="1600" y2="782"/>
 <line x1="0" y1="797" x2="1600" y2="797" stroke-opacity=".45"/>
-<line x1="150" y1="782" x2="150" y2="530"/>
+<line x1="150" y1="782" x2="150" y2="610"/>
 <line x1="104" y1="782" x2="196" y2="782"/>
 <line x1="150" y1="748" x2="112" y2="782" stroke-opacity=".7"/>
 <line x1="150" y1="748" x2="188" y2="782" stroke-opacity=".7"/>
-<circle cx="150" cy="496" r="34" stroke-opacity=".8"/>
-<line x1="116" y1="496" x2="184" y2="496" stroke-opacity=".45"/>
-<line x1="150" y1="462" x2="150" y2="530" stroke-opacity=".45"/>
-<path d="M139 505 C137 488 163 488 161 505 Z" stroke-opacity=".9"/>
-<line x1="143" y1="505" x2="157" y2="505"/>
+<circle cx="150" cy="576" r="34" stroke-opacity=".8"/>
+<line x1="116" y1="576" x2="184" y2="576" stroke-opacity=".45"/>
+<line x1="150" y1="542" x2="150" y2="610" stroke-opacity=".45"/>
+<path d="M139 585 C137 568 163 568 161 585 Z" stroke-opacity=".9"/>
+<line x1="143" y1="585" x2="157" y2="585"/>
 <line x1="1240" y1="740" x2="1284" y2="740"/>
 <line x1="1240" y1="740" x2="1233" y2="782"/>
 <line x1="1284" y1="740" x2="1291" y2="782"/>
