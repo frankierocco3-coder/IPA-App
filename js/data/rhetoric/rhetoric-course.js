@@ -618,7 +618,7 @@ export const RHETORIC_LESSONS = [
         lead: 'Invention is finding, not making up. Treat it as a search with two stages.',
         items: [
           'Ask what is available here, not what you want to say.',
-          'Write every argument down, including the ones you will not use.',
+          'The weak ones are what the other side will reach for, so they are worth having on paper.',
           'Choose from the list. Five arguments means four spares when one fails.',
           'One argument, and it is the one you started with? That is a conviction, not a case.',
         ] } },
@@ -744,7 +744,6 @@ export const RHETORIC_LESSONS = [
         items: [
           'What would I expect to see if this were false? Has anybody looked?',
           'Would the general claim survive without the story? If not, the story is standing in for it.',
-          'Is there one true vivid thing I could show them, and why is it not in the argument yet?',
           'Do they want this outcome? If not, more evidence is not the missing piece.',
         ] } },
     ] },
@@ -1049,7 +1048,6 @@ export const RHETORIC_LESSONS = [
       { panel: { tone: 'sage', icon: 'lamp', title: 'Testing a metaphor',
         lead: 'Before you use one near the centre of a case.',
         items: [
-          'Say plainly what the comparison asserts, in a sentence with no figure in it.',
           'Ask whether you would defend that sentence out loud. If not, it is doing work you have not earned.',
           'Wake the dead ones. An assumption you inherited in a phrase is still an assumption you are asserting.',
           'Stop before the figure starts generating conclusions nobody meant.',

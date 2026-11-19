@@ -6233,7 +6233,7 @@ const SPRIG = where => {
 // box with a figure in it — so without this entry that pass would have
 // put Commedia's drawing on 41 Acting pages in the same move that was
 // meant to tidy the course up. Acting has no mark of its own yet.
-const COURSE_REFLECT = { rhetoric: 'rh-wreath', acting: null };
+const COURSE_REFLECT = { rhetoric: 'rh-wreath', acting: null, shakespeare: null };
 
 function principleCardsHtml(cards) {
   return `<ol class="lxc-cards">${cards.map(c => `

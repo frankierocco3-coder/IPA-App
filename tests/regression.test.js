@@ -7227,11 +7227,27 @@ export async function run({ navDoc = document } = {}) {
     check('shakespeare: lesson 5.3 records that its contested claims are unchecked',
       /A Shakespeare scholar has NOT checked/.test(speechReviewFor('sh-capitals')?.notes ?? ''));
 
+    // EVERY STRING IN A BODY, not the four block types this used to name.
+    // It mapped a block as `b.list ?? b.steps ?? [b.p ?? b.h ?? '']`, so a
+    // { key }, a { panel }, a { defs } or a { qa } yielded the empty string
+    // and its copy went UNCHECKED. That was harmless while the course was
+    // paragraphs and lists; the interiors pass of 2026-11-18 added a key
+    // and a trailing panel to all 37 lessons, which would have moved 74
+    // blocks of new copy out of the only check that enforces house style
+    // on this course. Walking the values means a block type joins the
+    // check by existing rather than by being remembered here.
+    //
+    // Rhetoric's equivalent check never had this hole: it stringifies the
+    // whole body. Building a Character's and Theatre History's still do,
+    // and both are worth the same treatment.
+    const strings = v => typeof v === 'string' ? [v]
+      : Array.isArray(v) ? v.flatMap(strings)
+      : v && typeof v === 'object' ? Object.values(v).flatMap(strings) : [];
     const shCopy = [SHAKESPEARE_PRINCIPLE,
       ...SHAKESPEARE_MODULES.flatMap(m => [m.title, m.blurb]),
       ...SHAKESPEARE_COLLECTIONS.map(c => c.title),
       ...SHAKESPEARE_LESSONS.flatMap(l => [l.title, l.objective, l.orientation, l.reflection,
-        ...l.body.flatMap(b => b.list ?? b.steps ?? [b.p ?? b.h ?? ''])])];
+        ...strings(l.body)])];
     const shBad = shCopy.filter(t2 => /[—–"]/.test(t2)
       || /n’t\b|’(re|ll|ve|m|d)\b/.test(t2)
       || /\b(it|that|there|here|what|he|she|let|who)’s\b/i.test(t2));
