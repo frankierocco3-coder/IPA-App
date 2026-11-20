@@ -10676,9 +10676,21 @@ function progressMain(el) {
   // Before anything is earned there is nothing to chart — say so on purpose
   // instead of showing a dashboard of zeroes.
   if (!store.hasEarnedAnything) {
+    // A TITLE, BECAUSE THE PAGE NEVER SAID ITS OWN NAME. pageTopbar's
+    // `.track-title` is `display: none` below 979px by deliberate rule
+    // (keep titles off the logo), so on a phone this page opened on a
+    // sentence and a learner had no way to know where they were.
+    //
+    // AND THE THREE ROWS ARE A PROMISE, NOT A DENIAL. They carried
+    // `is-locked`, which is `filter: grayscale(1); opacity: .55`, built
+    // for an achievement you have not earned. Here they describe what the
+    // page WILL show, on the first screen a new learner sees, and greying
+    // them out made a working page look disabled. They keep their
+    // Inactive tag, which says the same thing honestly in a word.
     el.innerHTML = `
+      <h1 class="page-h">Progress</h1>
       <section class="quest-banner">
-        <div><h1>Complete your first lesson to activate Progress</h1>
+        <div><h2>Complete your first lesson to activate Progress</h2>
         <p>One lesson is all it takes — then this page starts keeping score.</p></div>
         <span class="quest-banner-emoji">📈</span>
       </section>
@@ -10689,7 +10701,7 @@ function progressMain(el) {
         ['🎓', 'Achievements', 'long-run milestones'],
       ].map(([icon, t, blurb]) => `
         <div class="ach-row">
-          <span class="ach-icon is-locked" aria-hidden="true">${icon}</span>
+          <span class="ach-icon" aria-hidden="true">${icon}</span>
           <div class="ach-info"><span class="ach-name">${t} <span class="tag">Inactive</span></span>
             <p class="pane-note">${blurb}</p></div>
         </div>`).join('')}
@@ -10704,10 +10716,14 @@ function progressMain(el) {
     .filter(r => r.tier !== CONFIDENCE.NONE)
     .sort((a, b) => a.accuracy - b.accuracy)
     .slice(0, 3);
+  // Same title as the empty state above. The banner's own heading said
+  // "Your progress", which under a page called Progress is the same word
+  // twice, so the banner is now a status strip: its quest line was always
+  // the useful part.
   el.innerHTML = `
+    <h1 class="page-h">Progress</h1>
     <section class="quest-banner">
-      <div><h1>Your progress</h1>
-      <p>${doneCount} of ${rows.length} daily quests done — they reset at midnight.</p></div>
+      <div><p>${doneCount} of ${rows.length} daily quests done — they reset at midnight.</p></div>
       <span class="quest-banner-emoji">📈</span>
     </section>
     <h2 class="chart-h">Daily Quests</h2>
@@ -11029,6 +11045,7 @@ function renderPreferences() {
   app.innerHTML = `
     ${pageTopbar('⚙️ Preferences', '#64748b')}
     <main class="guide">
+      <h1 class="page-h">Preferences</h1>
       <h2 class="guide-heading">Active course</h2>
       <div class="chip-row" id="pref-courses">
         ${visibleCourses().map(c => `<button class="chip-pick ${c.id === course.id ? 'on' : ''}" data-course="${c.id}" type="button"

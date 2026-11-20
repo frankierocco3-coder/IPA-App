@@ -1010,6 +1010,18 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .perform-target-row .grow { flex: 1 1 auto; min-width: 0; }
 .perform-sub { margin-top: 10px; }
 .chip-row { display: flex; flex-wrap: wrap; gap: 6px; max-height: 132px; overflow-y: auto; }
+/* EXCEPT ON PREFERENCES, WHERE THE CAP ONLY CUT A CHIP IN HALF. 132px
+   holds two rows of pills; the course list wraps to three and the goals
+   list to three, so both scrolled by FOURTEEN PIXELS. Measured: 132
+   visible against 146 and 148 of content. Fourteen pixels of scroll
+   reads as a rendering fault, not as a scroller, and it sliced the last
+   row of chips through the middle on the one page whose whole job is
+   choosing from those chips.
+
+   By id rather than by `.guide .chip-row`: the cap is doing real work
+   elsewhere, on the review filters and the avatar picker, where the list
+   genuinely runs long. These two are six items and four. */
+#pref-courses, #pref-goals { max-height: none; overflow-y: visible; }
 .chip-pick {
   font: inherit; font-size: 14px; cursor: pointer; padding: 5px 11px; color: var(--ink);
   background: var(--panel-2); border: 2px solid var(--line); border-radius: 999px;
@@ -1732,7 +1744,11 @@ body.modal-open { overflow: hidden; }
   background: var(--accent-tint); border: 2px solid var(--green); border-radius: 18px;
   padding: 18px 20px; margin-bottom: 14px;
 }
-.quest-banner h1 { font-size: 20px; margin-bottom: 4px; }
+/* h2 as well as h1: the banner's heading was demoted when Progress
+   gained a real `.page-h` above it, and two h1 elements on one page is a
+   heading-order fault as well as a styling one. The earned state has no
+   banner heading at all now, so this has to tolerate its absence. */
+.quest-banner h1, .quest-banner h2 { font-size: 20px; margin-bottom: 4px; }
 .quest-banner p { font-size: 13px; color: var(--green-dark); }
 .quest-banner-emoji { font-size: 34px; font-weight: 800; white-space: nowrap; }
 .shop-banner { background: rgba(201,162,75,0.14); border-color: var(--gold); }
