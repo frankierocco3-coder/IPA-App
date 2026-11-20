@@ -176,10 +176,18 @@ for (const [i, sheet] of list.entries()) {
     // reader phone width on a laptop is a defect; say so.
     const main = d.querySelector('main');
     const mw = main ? Math.round(main.getBoundingClientRect().width) : 0;
-    const squeezed = W >= 980 && mw > 0 && mw < 560;
+    // ONE DELIBERATE EXCEPTION (owner decision, 2026-11-20). Commedia keeps
+    // its right rail between 980 and 1253 and therefore keeps the narrow
+    // column that comes with it: the rail carries Your Troupe and Current
+    // Lesson, and he would rather have those than the width. That is a
+    // choice, not the shell silently giving up, so flagging it red every
+    // run would train us to ignore this column. Named, not guessed at: a
+    // page squeezed WITHOUT a rail is still the bug this check is for.
+    const keepsRail = !!d.querySelector('.lm-path.is-pathcards');
+    const squeezed = W >= 980 && mw > 0 && mw < 560 && !keepsRail;
     st.textContent = (h ? h.slice(0, 24) : 'ok')
       + (over ? ' · SIDEWAYS SCROLL' : '')
-      + (squeezed ? ` · SQUEEZED ${mw}px` : '');
+      + (squeezed ? ` · SQUEEZED ${mw}px` : (keepsRail && mw < 560 ? ` · ${mw}px, rail kept` : ''));
     if (over || squeezed) { cell.classList.add('bad'); bad++; }
   }
 }
