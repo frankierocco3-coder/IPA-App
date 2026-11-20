@@ -1635,8 +1635,59 @@ body.modal-open { overflow: hidden; }
    The 760px query stays. auto-fit would give a phone two columns of its
    own accord once the nav and rail collapse, and the handoff's rule is
    that a phone gets one. */
-.ch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 18px; }
-@media (max-width: 760px) { .ch-grid { grid-template-columns: 1fr; } }
+/* THE CHAPTER RAIL (owner approved 2026-11-19), replacing a responsive
+   grid of cards.
+
+   WHY A RAIL. This renderer serves the only course in the app that is a
+   SEQUENCE rather than a set: four chapters carrying real date ranges,
+   Origins to c. 500 CE through c. 1920 to the present. A grid of equal
+   cards says "take these in any order", which is true of every other
+   course here and false of this one. The dates and the art were already
+   on the cards; only the shape changed.
+
+   The line is a border on the list and the dots are generated from
+   `data-n`, so nothing is drawn, no asset is fetched, and a fifth
+   chapter needs no edit here.
+
+   THE NUMBER COMES FROM THE DATA, NOT FROM A CSS COUNTER. `content:
+   attr(data-n)` reads the chapter's own `n`; a counter would read DOM
+   order and silently disagree with it the first time a chapter is
+   hidden or reordered. */
+.ch-rail {
+  display: grid; gap: 30px; margin: 4px 0 0;
+  padding-left: 38px; border-left: 2px solid var(--edge-sage);
+}
+.ch-rail .ch-card { position: relative; overflow: visible; }
+.ch-rail .ch-card::before {
+  content: attr(data-n);
+  position: absolute; left: -51px; top: 14px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--tint-sage); border: 2px solid var(--edge-sage);
+  font-family: var(--serif); font-size: 14px; font-weight: 700;
+  color: var(--ink); display: grid; place-items: center;
+}
+.ch-rail .ch-card:hover::before { border-color: var(--green); }
+/* The head lost its big number to the dot, so the gold rule that used to
+   separate the two would now be a stripe against nothing. */
+.ch-rail .ch-card-head { padding: 13px 16px 11px; }
+.ch-rail .ch-card-title { padding-left: 0; border-left: 0; }
+.ch-rail .ch-card-title b { font-size: 21px; }
+.ch-rail .ch-card-title i {
+  font-style: normal; font-size: 11px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: #8a6d3b;
+}
+@media (max-width: 560px) {
+  .ch-rail { padding-left: 26px; gap: 24px; }
+  .ch-rail .ch-card::before { left: -39px; width: 22px; height: 22px; font-size: 12px; }
+  .ch-rail .ch-card-title b { font-size: 19px; }
+}
+/* The principle sits above the rail and says what the walk is for. */
+.ch-principle {
+  margin: 14px 0 22px; padding: 14px 16px;
+  background: var(--tint-sage); border-left: 3px solid var(--edge-sage);
+  border-radius: 0 10px 10px 0;
+  font-family: var(--serif); font-size: 16px; line-height: 1.45; max-width: 46ch;
+}
 .ch-card {
   font: inherit; text-align: left; cursor: pointer; color: var(--ink);
   background: var(--bg); border: 2px solid var(--line); border-radius: 16px;
@@ -3868,8 +3919,11 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    THE CAP MATCHES THE SHELL RULE above, which hands this layout the
    rail's column at 1160. A narrower cap here would waste the width the
    shell just gave it and squeeze the words beside each picture. This is
-   measured against the COLUMN, not the viewport — the mistake recorded
-   on .ch-grid above, where a viewport query stacked cards at 1500px.
+   measured against the COLUMN, not the viewport — the mistake once
+   recorded on .ch-grid, which was a responsive grid of chapter cards
+   where a viewport query stacked them at 1500px. That grid is gone: the
+   chapter pane is a rail now (see .ch-rail), so the lesson is kept here
+   rather than pointed at a rule that no longer exists.
 
    AND THE FLOOR IS WRAPPED IN min(380px, 100%), BECAUSE A FLOOR IS A
    MINIMUM AND NOT A PREFERENCE. A bare minmax(380px, 1fr) holds the

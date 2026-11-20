@@ -5196,6 +5196,13 @@ function chapterLearnPane(el, B) {
       <p class="ws-sub">${esc(B.subtitle ?? '')}</p>
       <p class="ch-meta">${B.chapters.length} chapters &middot; ${tot.topics} topics</p>
     </div>
+    ${/* THE COURSE'S OWN THESIS, WHICH THIS PAGE NEVER SHOWED. Every course
+         carries one as <COURSE>_PRINCIPLE in its data file and it is the
+         best sentence written about it. bookLearnPane renders B.principle
+         in its .ws-sub; this pane renders B.subtitle instead, so on a
+         chaptered course the principle was written, imported, and then
+         displayed nowhere. It says what the whole timeline is FOR. */''}
+    ${B.principle ? `<p class="ch-principle">${esc(B.principle)}</p>` : ''}
     ${/* ONE PROGRESS DISPLAY, NOT THREE. The mockup draws a bar here AND a
           "Your course" panel in the rail, and the handoff's own note says to
           avoid duplicated progress displays if the page becomes busy. Built
@@ -5219,14 +5226,21 @@ function chapterLearnPane(el, B) {
       <h2 id="ch-start-h">Every chapter read</h2>
       <p class="ch-start-where">The ${esc(B.libraryName)} stays open in any order.</p>
     </section>`}
-    <div class="ch-grid">
+    ${/* A RAIL, NOT A GRID (owner approved 2026-11-19). This course is the
+         only one in the app that is a SEQUENCE: four chapters carrying real
+         date ranges, Origins to the present. Every other course is modules
+         you may take in any order, and a grid of cards says exactly that.
+         The dates and the art were already on the cards; nothing new is
+         drawn or written, the shape just stops contradicting the content.
+         Keyed on the renderer rather than on Theatre History, so a second
+         chaptered book inherits it. */''}
+    <div class="ch-rail">
       ${B.chapters.map(ch => {
         const c = chapterCounts(B, ch);
         return `
-      <button class="ch-card" data-ch="${esc(ch.id)}" type="button"
+      <button class="ch-card" data-ch="${esc(ch.id)}" data-n="${ch.n}" type="button"
               aria-label="Chapter ${ch.n}, ${esc(ch.title)}, ${c.topics} topics">
         <span class="ch-card-head">
-          <span class="ch-card-n"><i>Chapter</i><b>${ch.n}</b></span>
           <span class="ch-card-title"><b>${esc(ch.title)}</b><i>${esc(ch.dates)}</i></span>
         </span>
         ${ch.img ? `<img class="ch-card-img" src="${esc(ch.img)}" alt="${esc(ch.alt ?? '')}"
