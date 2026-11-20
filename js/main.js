@@ -2080,6 +2080,7 @@ function renderGuidebook(unit, track) {
   app.innerHTML = `
     ${pageTopbar(`📘 ${esc(unit.title)}`, unit.color)}
     <main class="guide">
+      <h1 class="page-h">${esc(unit.title)}</h1>
       <p class="pane-note">The guidebook for <b>${esc(unit.title)}</b> — every sound and idea this unit teaches. Tap a symbol to hear it; open its diagram from the IPA chart any time.</p>
       ${sections}
     </main>`;
@@ -10337,7 +10338,9 @@ function renderTextsPage() {
   record(renderTextsPage);
   app.innerHTML = `
     ${pageTopbar('📜 Scripts & Speeches', '#8a6d3b')}
-    <main class="track-list" id="texts-page"></main>`;
+    <main class="track-list">
+      <h1 class="page-h">Scripts &amp; Speeches</h1>
+      <div id="texts-page"></div></main>`;
   wireBrandHome();
   textSpeechPane(document.getElementById('texts-page'));
 }
@@ -10537,6 +10540,7 @@ function renderInventory(d) {
   app.innerHTML = `
     ${pageTopbar('📖 IPA', trackFor(d).color)}
     <main class="track-list">
+      <h1 class="page-h">IPA</h1>
       ${whatIsIpaCard()}
       <div id="inv-pane"></div>
     </main>`;
@@ -10553,7 +10557,9 @@ function renderIdioms(d) {
   Object.assign(idiomFilters, { q: '', era: d === 'ssbe' ? 'contemporary' : 'all', type: 'all', flagged: false });
   app.innerHTML = `
     ${pageTopbar('🗣 Words & Expressions', trackFor(d).color)}
-    <main class="track-list" id="idiom-page"></main>`;
+    <main class="track-list">
+      <h1 class="page-h">Words &amp; Expressions</h1>
+      <div id="idiom-page"></div></main>`;
   wireBrandHome();
   hubIdiom(document.getElementById('idiom-page'), d, trackFor(d));
 }
@@ -11891,6 +11897,7 @@ function renderInstrument() {
   app.innerHTML = `
     ${pageTopbar('🎭 Your Instrument', '#64748b')}
     <main class="guide instrument">
+      <h1 class="page-h">Your Instrument</h1>
       <p class="track-blurb">You don’t play the voice — you <b>are</b> the instrument. Here’s the workshop, in pictures.</p>
       ${VOICE_ATLAS.map(fig).join('')}
       <h2 class="guide-heading">The Working Parts</h2>
@@ -11916,6 +11923,7 @@ function renderSonnetList() {
   app.innerHTML = `
     ${pageTopbar('📜 Shakespeare’s Sonnets', '#8a6d3b')}
     <main class="track-list sonnet-list">
+      <h1 class="page-h">Shakespeare’s Sonnets</h1>
       <input class="sonnet-search" id="sonnet-search" type="search" placeholder="Search by number or opening line…" autocomplete="off">
       <p class="sonnet-hint" id="sonnet-hint">154 sonnets · public domain</p>
       <div class="sonnet-rows" id="sonnet-rows">${rows}</div>
@@ -12036,6 +12044,7 @@ function renderPrivacy() {
   app.innerHTML = `
     ${pageTopbar('🔒 Privacy & Data', '#8a6d3b')}
     <main class="track-list">
+      <h1 class="page-h">Privacy &amp; Data</h1>
       <p class="track-blurb">Everything Speechcraft stores stays in this browser on this device. Nothing you record, write or practise is ever sent anywhere.</p>
       <p class="pane-note"><b>New recording is temporarily unavailable</b> in this version of Speechcraft. Your existing saved recordings remain on this device, and you can still play, download and delete them — here, or from a project's Takes tab. Clearing this site's browser data removes everything.</p>
 
@@ -12126,6 +12135,7 @@ function renderWeakSounds() {
   app.innerHTML = `
     ${pageTopbar('📊 Weak Sounds', '#6f8657')}
     <main class="track-list">
+      <h1 class="page-h">Weak Sounds</h1>
       ${!t.attempts ? `
         <div class="empty-state">
           <p class="empty-emoji">📊</p>
@@ -12431,6 +12441,7 @@ function renderNewProject() {
   app.innerHTML = `
     ${pageTopbar('🎬 New Project', '#8a6d3b')}
     <main class="guide">
+      <h1 class="page-h">New Project</h1>
       <p class="track-blurb">Paste the text you're working on. You can change everything later — nothing is saved until you press Create.</p>
       <div class="proj-form">
         <div class="form-grid">
@@ -14058,6 +14069,7 @@ function renderLibraryList(key) {
   app.innerHTML = `
     ${pageTopbar(`${lib.icon} ${esc(lib.title)}`, '#8a6d3b')}
     <main class="track-list sonnet-list">
+      <h1 class="page-h">${esc(lib.title)}</h1>
       <input class="sonnet-search" id="lib-search" type="search" placeholder="Search by character, play, title or tone…" autocomplete="off">
       <p class="sonnet-hint" id="lib-hint">${esc(summary)}</p>
       <div id="lib-rows">${groups}</div>
@@ -14181,6 +14193,10 @@ async function renderSonnet(n) {
 // The reader: any text, three ways (Speak / Scan / Sound), any dialect.
 function renderReader({ label, lines, accent, prev, next, clip, verse = true, metre = PENTAMETER, meta = null, narrated = [], recast = null, today = [], scopeId = null, projectId = null, offline = null }) {
   // Header for a curated piece: where it's from, how long it runs, what it asks of you.
+  // A HEADING EITHER WAY. This was `meta ? ... : ''`, so a reader opened
+  // without meta had no h1 anywhere on the page, and pageTopbar's title
+  // is `display: none` below 979px, so on a phone it named nothing at
+  // all. The titled branch is unchanged.
   const metaHtml = meta ? `
     <div class="piece-meta">
       <h1 class="piece-title">${esc(meta.title)}</h1>
@@ -14193,7 +14209,7 @@ function renderReader({ label, lines, accent, prev, next, clip, verse = true, me
         ${(meta.dialects ?? []).map(t => `<span class="tag tag-dialect">🗣 ${esc(t)}</span>`).join('')}
       </div>
       ${meta.note ? `<p class="content-note"><b>Content note:</b> ${esc(meta.note)}</p>` : ''}
-    </div>` : '';
+    </div>` : `<div class="piece-meta"><h1 class="piece-title">${esc(label)}</h1></div>`;
   app.innerHTML = `
     ${pageTopbar('📜 ' + esc(label), '#8a6d3b')}
     <main class="guide sonnet-view">
@@ -15266,6 +15282,7 @@ function renderDictionary() {
   app.innerHTML = `
     ${pageTopbar('📕 Personal Dictionary', '#8a6d3b')}
     <main class="track-list">
+      <h1 class="page-h">Personal Dictionary</h1>
       <p class="track-blurb">Pronunciations you've corrected. These apply everywhere in the app, for the dialect you saved them in.</p>
       <input class="sonnet-search" id="dict-search" type="search" aria-label="Search your personal dictionary" placeholder="Search word, IPA or note…" value="${esc(dictQuery)}" autocomplete="off">
       <div class="proj-tools">
@@ -15478,6 +15495,7 @@ function renderTrack(track) {
   app.innerHTML = `
     ${pageTopbar(`${track.icon} ${esc(track.title)}`, track.color)}
     <main class="track-scroll">
+      <h1 class="page-h">${esc(track.title)}</h1>
       <div class="practice-row">
         <button class="btn btn-practice" id="practice">🎯 Practice — mixed review</button>
       </div>
