@@ -6239,6 +6239,12 @@ function stepCardsHtml(steps) {
 const UI_ORNAMENTS = {
   'rh-laurel': { src: 'img/ui/rhetoric-sprig.svg', w: 76, h: 49, alt: '' },
   'rh-wreath': { src: 'img/ui/rhetoric-wreath.svg', w: 120, h: 96, alt: '' },
+  // A PLUMB LINE, by tools/make_character_sprig.py. Building a Character
+  // owns no plant the way Rhetoric owns laurel; what it owns is a
+  // question about a body, and its first lesson asks where the weight
+  // sits and where the body holds itself off true. Same box as the
+  // raster it replaces, 76x49, so the CSS placing .lxc-sprig is untouched.
+  'ch-plumb': { src: 'img/ui/character-sprig.svg', w: 76, h: 49, alt: '' },
 };
 
 function lessonOrnamentHtml(key) {
@@ -6277,7 +6283,16 @@ function lessonOrnamentHtml(key) {
 // immediately applied closure it was, the lookup would run while main.js
 // is still evaluating, long before any workspace is chosen, and every
 // course would get whatever the first read returned.
-const COURSE_SPRIG = { rhetoric: UI_ORNAMENTS['rh-laurel'] };
+// WHAT IS NOT IN THIS TABLE WEARS COMMEDIA'S LEAF. `SPRIG` falls back to
+// `cm-l01-sprig`, a spray cropped from the owner's commedia rendering, so
+// every absent course decorates its headings with another course's
+// artwork. js/main.js:4795 states the house rule against exactly that.
+// Acting, Shakespeare, Musical Theatre, Screen Acting and Theatre History
+// are still borrowing it and each wants a mark of its own.
+const COURSE_SPRIG = {
+  rhetoric: UI_ORNAMENTS['rh-laurel'],
+  character: UI_ORNAMENTS['ch-plumb'],
+};
 const SPRIG = where => {
   const f = COURSE_SPRIG[activeWorkspace()] ?? characterFigure('cm-l01-sprig');
   return f
