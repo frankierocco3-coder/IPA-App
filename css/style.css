@@ -1412,7 +1412,8 @@ body.modal-open { overflow: hidden; }
      only the rail takes them from 390 to 748 at 1024. */
   .shell:has(.lm-path.is-gallery),
   .shell:has(.lm-path.is-shelf),
-  .shell:has(.lm-path.is-banded) {
+  .shell:has(.lm-path.is-banded),
+  .shell:has(.lm-path.is-pathcards) {
     grid-template-columns: 216px minmax(0, 1fr);
   }
   /* AND THE GROUND HAS TO STOP BLEEDING RIGHT, because the thing it was
@@ -1439,11 +1440,7 @@ body.modal-open { overflow: hidden; }
 
      The cards layout's own left-only rule is 0,4,0 and still wins over
      this, which is right: it already solved this for itself above 980. */
-  /* And its ground keeps the full bleed with it. The left-only bleed
-     exists because the rail's 360px was gone; on this course it is not. */
-  .tr-view:not(:has(.lm-path.is-pathcards)) .lm-ground {
-    left: -248px; width: calc(100% + 248px);
-  }
+  .tr-view .lm-ground { left: -248px; width: calc(100% + 248px); }
   /* `.shell .right-rail`, NOT `.right-rail`. The rail's own rule sets
      `display: flex` about 250 lines below this one at the same
      specificity, so a bare `.right-rail` here loses on order and the rail
@@ -1452,17 +1449,7 @@ body.modal-open { overflow: hidden; }
      rule above looks broken while being applied perfectly: measured
      216px 390px 330px at 1024, which is the bug this is fixing. The
      three has() rules above dodge it by being two classes deep already. */
-  /* EXCEPT ON THE PATH-CARDS COURSE, BY OWNER DECISION (2026-11-20).
-     Commedia keeps its rail in this band and therefore keeps the 390px
-     reading column that comes with it. The rail is not decoration there:
-     it carries Your Troupe, with the mask set and the lesson count, and
-     Current Lesson with its own art and Start course. Trading those for
-     a wider measure is a content decision, and it is his.
-
-     `:not(:has())` rather than dropping the rule, because every OTHER
-     page in this band still wants the rail gone: that is the whole fix,
-     and seven templates were at 390px with no design behind it. */
-  .shell:not(:has(.lm-path.is-pathcards)) .right-rail { display: none; }
+  .shell .right-rail { display: none; }
 }
 
 /* Sidebar */
