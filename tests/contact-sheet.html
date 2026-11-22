@@ -131,6 +131,21 @@ async function drive(doc, steps) {
 // localStorage, so two frames switching workspace at once would read each
 // other's writes. Driving one at a time costs a few seconds and removes
 // a whole class of phantom result.
+//
+// IT DOES NOT REMOVE ALL OF IT, AND THIS IS THE SHEET'S ONE LIE.
+// Sequential driving is only true WHILE the run is going. The frames stay
+// live afterwards, they still share that one workspace key, and an
+// earlier frame that re-renders for any reason picks up whatever the LAST
+// cell set. Measured 2026-11-22: reading the nine Learn cells after the
+// run, three showed another course's text, and each showed the course
+// exactly three positions later in the run. Rhetoric wore Musical's
+// sentence, Commedia wore Screen's, Character wore Theatre's. The app was
+// correct in all three cases.
+//
+// So: this sheet is for SHAPE, not for CONTENT. Trust it on layout,
+// overflow, whether a page arrived. Never read course-specific text out
+// of a finished sheet and believe it. Check that in the real app, one
+// course at a time, with a reload between.
 const list = SHEETS.filter(s => !ONLY || s.id.includes(ONLY) || s.label.toLowerCase().includes(ONLY.toLowerCase()));
 let bad = 0;
 

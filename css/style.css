@@ -1681,8 +1681,17 @@ body.modal-open { overflow: hidden; }
   .ch-rail .ch-card::before { left: -39px; width: 22px; height: 22px; font-size: 12px; }
   .ch-rail .ch-card-title b { font-size: 19px; }
 }
-/* The principle sits above the rail and says what the walk is for. */
-.ch-principle {
+/* THE COURSE PRINCIPLE, on every Learn page that has one.
+
+   Shared by the chapter pane and the scene pane, which is why it is not
+   called .ch-anything: seven scene courses and one chaptered course all
+   render the same sentence in the same place, and two near identical
+   rules would drift the first time one was touched.
+
+   46ch, not the full column. It is one sentence of serif prose sitting
+   above a grid or a rail, and at 748px it would set as a single long
+   line that reads as a banner rather than as a thought. */
+.course-principle {
   margin: 14px 0 22px; padding: 14px 16px;
   background: var(--tint-sage); border-left: 3px solid var(--edge-sage);
   border-radius: 0 10px 10px 0;

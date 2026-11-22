@@ -5064,6 +5064,21 @@ function bookLearnSequence(el, B) {
       ${learnScene(B.ws)?.live ? '' : `
       <p class="pane-note pane-warn tr-warn">Learn preview. Open <code>#learn-sequence-off</code> to go back to the current page.</p>`}
     </div>
+    ${/* THE COURSE'S OWN THESIS. Every course carries one as
+         <COURSE>_PRINCIPLE in its data file and it is the best sentence
+         written about that course. bookLearnPane renders B.principle in
+         its .ws-sub and chapterLearnPane renders it above the rail, but
+         THIS pane, the one all seven scene courses use, rendered it
+         nowhere: written, imported, and shown on no page a learner
+         reaches. The head above says what the course is CALLED and how
+         big it is; this says what it is for.
+
+         OUTSIDE .tr-top ON PURPOSE. `.tr-top.has-hero` sets
+         `overflow: hidden` and caps its children at `max-width: 62%` so
+         the cards hero can sit behind the title. A paragraph in there
+         would be cropped to two thirds width and set over a picture on
+         Shakespeare, which is the one course whose head has art. */''}
+    ${B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
     ${sceneStageHtml(scene, lessons)}
     ${isCards ? cardsResumeHtml(B, lessons, next?.id ?? null, scene)
       : isBanded ? bandedStartHtml(B, lessons, next?.id ?? null) : ''}
@@ -5202,7 +5217,7 @@ function chapterLearnPane(el, B) {
          in its .ws-sub; this pane renders B.subtitle instead, so on a
          chaptered course the principle was written, imported, and then
          displayed nowhere. It says what the whole timeline is FOR. */''}
-    ${B.principle ? `<p class="ch-principle">${esc(B.principle)}</p>` : ''}
+    ${B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
     ${/* ONE PROGRESS DISPLAY, NOT THREE. The mockup draws a bar here AND a
           "Your course" panel in the rail, and the handoff's own note says to
           avoid duplicated progress displays if the page becomes busy. Built
