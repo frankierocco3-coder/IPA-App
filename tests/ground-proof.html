@@ -1,0 +1,54 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Ground proof</title>
+<style>
+ body { background:#efe9dc; color:#2f3a2e; font:13px/1.5 "Iowan Old Style",Palatino,Georgia,serif;
+        margin:0; padding:20px 24px; }
+ h1 { font-size:17px; margin:0 0 4px; }
+ p.note { margin:0 0 16px; color:#625f4c; }
+ .wrap { position:relative; width:1000px; height:562.5px; margin:0 0 26px; }
+ .wrap img { position:absolute; inset:0; width:100%; height:100%; opacity:.5; }
+ /* the reading column: viewBox x 282..1193 of 1600 */
+ .cover { position:absolute; top:0; bottom:0; left:17.625%; width:56.94%;
+          background:rgba(246,241,232,.97); border-left:1px solid #c9a24b;
+          border-right:1px solid #c9a24b; }
+ /* the nav strip (left, full height) and the Next-step rail (right, to y 354) */
+ .nav  { position:absolute; top:0; bottom:0; left:0; width:14.5%;
+         background:rgba(201,162,75,.10); border-right:1px dashed rgba(201,162,75,.55); }
+ .rail { position:absolute; top:0; left:74.56%; right:0;
+         background:rgba(192,96,74,.10); border-bottom:1px dashed rgba(192,96,74,.5); }
+ .depth { position:absolute; right:4px; font-size:11px; color:#a34c38; letter-spacing:.05em; }
+ .lbl  { position:absolute; font-size:11px; letter-spacing:.06em; text-transform:uppercase;
+         color:#625f4c; }
+ .name { font-size:13px; font-weight:700; margin:0 0 6px; letter-spacing:.04em;
+         text-transform:uppercase; }
+</style></head><body>
+<h1>The Learn grounds against what the reader can actually see</h1>
+<p class="note">Cream block = the reading column, opaque, covers everything behind it.
+Gold strip = the navigation, full height, last item ends at unit 360.
+Terracotta block = the right rail, which is <b>position: sticky</b> and therefore covers the
+same band at every scroll position. <b>Its depth is PER COURSE</b> — these are measured, not
+assumed, and an earlier version of this page drew Acting's 287 for all four, which is how a
+dressing mirror and a whole monitor came to be drawn where nobody could see them.
+Re-measure after any change to a course's Next step or Practice content.</p>
+<div id="out"></div>
+<script>
+// The second number is that course's own measured rail depth, in viewBox
+// units, from the deepest OPAQUE card in .right-rail at a 1440 window.
+// The floor line in every ground is at 782.
+const G = [
+ ['acting (shipped, reference)','img/ui/acting-ground.svg', 287],
+ ['character','img/ui/character-ground.svg', 717],
+ ['musical','img/ui/musical-ground.svg', 602],
+ ['screen','img/ui/screen-ground.svg', 1012],
+];
+document.getElementById('out').innerHTML = G.map(([n,src,depth]) => `
+ <p class="name">${n} &mdash; rail covers to unit ${depth}${depth > 782
+   ? ' (past the floor: NO usable right margin)'
+   : ', leaving ' + (782 - depth) + ' units above the floor'}</p>
+ <div class="wrap">
+   <img src="../${src}" alt="">
+   <div class="nav"></div><div class="cover"></div>
+   <div class="rail" style="height:${Math.min(depth, 900) / 900 * 100}%"></div>
+   <span class="lbl" style="left:2px;bottom:4px">left margin</span>
+   <span class="lbl" style="right:2px;bottom:4px">right margin</span>
+ </div>`).join('');
+</script></body></html>

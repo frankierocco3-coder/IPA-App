@@ -7439,8 +7439,8 @@ export async function run({ navDoc = document } = {}) {
   //
   // On 2026-11-19 the Acting ground was INVISIBLE at a 1024px window and
   // all 924 checks passed. A grep of this file for `lm-ground`,
-  // `acting-ground` or `object-fit` returned ZERO: four courses carry a
-  // drawn backdrop and not one line here looked at any of them. It was
+  // `acting-ground` or `object-fit` returned ZERO: the courses carrying a
+  // drawn backdrop had not one line here looking at any of them. It was
   // caught by opening a page, which is the one method that does not scale.
   //
   // What follows pins WHAT A MACHINE CAN SEE: that a declared ground
@@ -7461,10 +7461,15 @@ export async function run({ navDoc = document } = {}) {
       .filter(([, s]) => typeof s.ground === 'string')
       .map(([ws, s]) => ({ ws, src: s.ground }));
 
-    check('grounds: exactly the four courses known to carry one declare a ground',
-      String(declared.map(d => d.ws).sort()) === 'acting,commedia,rhetoric,shakespeare',
+    // SEVEN SINCE 2026-11-22. Character, Musical Theatre and Screen
+    // Acting were the three banded courses with no backdrop; they have
+    // one now, so the only scene without a ground is Theatre History,
+    // which has no scene at all.
+    const GROUNDED = 'acting,character,commedia,musical,rhetoric,screen,shakespeare';
+    check('grounds: exactly the seven courses known to carry one declare a ground',
+      String(declared.map(d => d.ws).sort()) === GROUNDED,
       declared.map(d => d.ws).sort().join(',')
-      + ' — a fifth is welcome, but name it here so the checks below cover it');
+      + ' — an eighth is welcome, but name it here so the checks below cover it');
 
     const probed = await Promise.all(declared.map(async d => {
       const text = await fetch('../' + d.src).then(r => (r.ok ? r.text() : '')).catch(() => '');
@@ -7479,7 +7484,7 @@ export async function run({ navDoc = document } = {}) {
     }));
 
     check('grounds: every declared ground ships and decodes',
-      probed.length === 4 && probed.every(p => p.nat[0] > 0),
+      probed.length === 7 && probed.every(p => p.nat[0] > 0),
       probed.filter(p => !p.nat[0]).map(p => p.src).join(', ')
       + ' — a missing file and a malformed SVG are identical here, both load as 0x0');
 
@@ -7492,7 +7497,7 @@ export async function run({ navDoc = document } = {}) {
     // on its way out. Comparing intrinsic size to the file's own viewBox
     // is what actually catches it.
     check('grounds: every ground carries its own intrinsic size, not the default box',
-      probed.length === 4
+      probed.length === 7
       && probed.every(p => p.vb.length === 2 && p.nat[0] === p.vb[0] && p.nat[1] === p.vb[1]),
       probed.filter(p => !(p.nat[0] === p.vb[0] && p.nat[1] === p.vb[1]))
         .map(p => p.src + ' viewBox ' + p.vb.join('x') + ' vs natural ' + p.nat.join('x')).join('; '));

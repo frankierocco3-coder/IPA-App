@@ -214,6 +214,14 @@ export const LEARN_SCENES = {
   // above assembles as the parts below are made.
   character: {
     title: 'The Person You Build',
+    // A DRESSING ROOM, by tools/make_character_ground.py, 2026-11-22:
+    // a costume rail on the left, a mirror and table on the right, and
+    // the three garments are the three routes the principle names, one
+    // you invent, one a writer cut and one the tradition already owns.
+    // Drawn, not painted, for the reason the others are: the pane's
+    // height is the page's height, so a bitmap tiles or stretches.
+    // Edit the script, never the SVG.
+    ground: 'img/ui/character-ground.svg',
     // LIVE 2026-10-28, once all five module paintings were in and
     // the stage band stopped drawing a dark box on parchment.
     live: true,
@@ -550,6 +558,13 @@ export const LEARN_SCENES = {
   // RETIRED id that must never be reused.
   musical: {
     title: 'Musical Theatre',
+    // THE REHEARSAL ROOM AGAIN, WITH MUSIC IN IT, by
+    // tools/make_musical_ground.py, 2026-11-22: an upright and three
+    // stands, at Acting's own floor height. The repetition is the
+    // argument: a number is not a break from the acting, so a learner
+    // crossing between the two courses should not feel they left the
+    // building. Edit the script, never the SVG.
+    ground: 'img/ui/musical-ground.svg',
     live: true,
     layout: 'banded',
     light: true,
@@ -605,6 +620,12 @@ export const LEARN_SCENES = {
   // not be. See docs/SCREEN_LEARN_ART_BRIEF.md.
   screen: {
     title: 'Screen Acting',
+    // A SET, by tools/make_screen_ground.py, 2026-11-22: a stand and a
+    // flag, the monitor and apple boxes, and dolly track where the
+    // other grounds have a floor. NO CAMERA: this course's heading
+    // ornament is already a phone on a tripod and the two appear on the
+    // same pages. Edit the script, never the SVG.
+    ground: 'img/ui/screen-ground.svg',
     live: true,
     layout: 'banded',
     light: true,

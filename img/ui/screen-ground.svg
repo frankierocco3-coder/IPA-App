@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" width="1600" height="900" preserveAspectRatio="xMidYMin slice" fill="none" stroke="#6f6a5c" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round">
+<line x1="0" y1="782" x2="1600" y2="782"/>
+<line x1="0" y1="758" x2="1600" y2="758" stroke-opacity=".75"/>
+<line x1="26" y1="758" x2="35" y2="782" stroke-opacity=".5"/>
+<line x1="118" y1="758" x2="127" y2="782" stroke-opacity=".5"/>
+<line x1="210" y1="758" x2="219" y2="782" stroke-opacity=".5"/>
+<line x1="302" y1="758" x2="311" y2="782" stroke-opacity=".5"/>
+<line x1="394" y1="758" x2="403" y2="782" stroke-opacity=".5"/>
+<line x1="486" y1="758" x2="495" y2="782" stroke-opacity=".5"/>
+<line x1="578" y1="758" x2="587" y2="782" stroke-opacity=".5"/>
+<line x1="670" y1="758" x2="679" y2="782" stroke-opacity=".5"/>
+<line x1="762" y1="758" x2="771" y2="782" stroke-opacity=".5"/>
+<line x1="854" y1="758" x2="863" y2="782" stroke-opacity=".5"/>
+<line x1="946" y1="758" x2="955" y2="782" stroke-opacity=".5"/>
+<line x1="1038" y1="758" x2="1047" y2="782" stroke-opacity=".5"/>
+<line x1="1130" y1="758" x2="1139" y2="782" stroke-opacity=".5"/>
+<line x1="1222" y1="758" x2="1231" y2="782" stroke-opacity=".5"/>
+<line x1="1314" y1="758" x2="1323" y2="782" stroke-opacity=".5"/>
+<line x1="1406" y1="758" x2="1415" y2="782" stroke-opacity=".5"/>
+<line x1="1498" y1="758" x2="1507" y2="782" stroke-opacity=".5"/>
+<line x1="1590" y1="758" x2="1599" y2="782" stroke-opacity=".5"/>
+<path d="M84 714 L200 714 L200 756 L84 756 Z"/>
+<line x1="125.76" y1="734.16" x2="158.24" y2="734.16" stroke-opacity=".55"/>
+<path d="M91 675 L199 675 L199 714 L91 714 Z"/>
+<line x1="129.88" y1="693.72" x2="160.12" y2="693.72" stroke-opacity=".55"/>
+<path d="M52 562 L232 562 L232 678 L52 678 Z"/>
+<path d="M63 573 L221 573 L221 667 L63 667 Z" stroke-opacity=".45"/>
+<line x1="116" y1="678" x2="122" y2="692" stroke-opacity=".7"/>
+<line x1="168" y1="678" x2="162" y2="692" stroke-opacity=".7"/>
+<line x1="112" y1="692" x2="172" y2="692" stroke-opacity=".8"/>
+<path d="M96 752 C166 770 -130 738 -40 758" fill="none" stroke-opacity=".45"/>
+</svg>
