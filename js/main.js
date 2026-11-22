@@ -6260,6 +6260,31 @@ const UI_ORNAMENTS = {
   // sits and where the body holds itself off true. Same box as the
   // raster it replaces, 76x49, so the CSS placing .lxc-sprig is untouched.
   'ch-plumb': { src: 'img/ui/character-sprig.svg', w: 76, h: 49, alt: '' },
+  // THE LAST FIVE, by tools/make_course_sprigs.py, 2026-11-22. One script
+  // rather than five because they ship together and are seen together as
+  // a learner moves between courses, so the stroke weights live in one
+  // place. Each object is read out of that course's own PRINCIPLE and
+  // none of them was chosen to look nice: two chairs turned towards each
+  // other for the situation Acting says behaviour arises from; the iamb
+  // for verse that is information about the acting, written down; a tie
+  // for a number that is not a break from the acting; a tripod for the
+  // record you answer to and the take that has to repeat; a cairn, with
+  // no bottom stone, for a history with no agreed first moment.
+  //
+  // THE CAIRN IS DRAWN AND IS NOT VISIBLE YET, AND THAT IS NOT A BUG.
+  // Measured in the running app on 2026-11-22: a Theatre History lesson
+  // renders ZERO ornaments of any kind. `renderActingLesson` branches on
+  // `learnSceneLive(B.ws)` and js/data/learn-scenes.js has no `theatre`
+  // entry, so that course alone takes the pre-scene layout, which calls
+  // `actingChapterBlocks(l)` with no options and therefore never reaches
+  // `SPRIG`. It was never wearing Commedia's leaf either: the comment
+  // that used to sit below this one said it was, and was wrong. The mark
+  // is registered so it is simply there the day the course gets a scene.
+  'ac-chairs': { src: 'img/ui/acting-sprig.svg', w: 76, h: 49, alt: '' },
+  'sh-iamb': { src: 'img/ui/shakespeare-sprig.svg', w: 76, h: 49, alt: '' },
+  'mu-tie': { src: 'img/ui/musical-sprig.svg', w: 76, h: 49, alt: '' },
+  'sc-tripod': { src: 'img/ui/screen-sprig.svg', w: 76, h: 49, alt: '' },
+  'th-cairn': { src: 'img/ui/theatre-sprig.svg', w: 76, h: 49, alt: '' },
 };
 
 function lessonOrnamentHtml(key) {
@@ -6290,9 +6315,7 @@ function lessonOrnamentHtml(key) {
 // in one frame.
 //
 // A course registered here gets its own mark. A course that is not keeps
-// exactly what it has today, so nothing moves under Acting, Shakespeare,
-// Theatre History, Musical Theatre or Screen Acting — all five are still
-// wearing Commedia's leaf and still want marks of their own.
+// exactly what it has today.
 //
 // RESOLVED PER CALL, NOT ONCE AT MODULE LOAD. Written as the old
 // immediately applied closure it was, the lookup would run while main.js
@@ -6300,13 +6323,29 @@ function lessonOrnamentHtml(key) {
 // course would get whatever the first read returned.
 // WHAT IS NOT IN THIS TABLE WEARS COMMEDIA'S LEAF. `SPRIG` falls back to
 // `cm-l01-sprig`, a spray cropped from the owner's commedia rendering, so
-// every absent course decorates its headings with another course's
+// an absent course would decorate its headings with another course's
 // artwork. js/main.js:4795 states the house rule against exactly that.
-// Acting, Shakespeare, Musical Theatre, Screen Acting and Theatre History
-// are still borrowing it and each wants a mark of its own.
+//
+// THE LEAK IS CLOSED AS OF 2026-11-22. Every course that reaches this
+// table now has its own mark, and the only one still resolving through
+// the fallback is COMMEDIA ITSELF, which owns the drawing. If a new book
+// course is added, it joins this table in the same commit or it ships
+// wearing somebody else's hand.
+//
+// VERIFIED IN THE RUNNING APP, ONE COURSE AT A TIME WITH A RELOAD
+// BETWEEN, because `activeWorkspace()` is read per call and a sheet that
+// drives several courses in one document reports whichever ran last:
+// acting 1 instance, shakespeare 1, musical 6, screen 8, each resolving
+// to its own file and none broken. Theatre History renders none at all,
+// for the reason recorded against `th-cairn` above.
 const COURSE_SPRIG = {
   rhetoric: UI_ORNAMENTS['rh-laurel'],
   character: UI_ORNAMENTS['ch-plumb'],
+  acting: UI_ORNAMENTS['ac-chairs'],
+  shakespeare: UI_ORNAMENTS['sh-iamb'],
+  musical: UI_ORNAMENTS['mu-tie'],
+  screen: UI_ORNAMENTS['sc-tripod'],
+  theatre: UI_ORNAMENTS['th-cairn'],
 };
 const SPRIG = where => {
   const f = COURSE_SPRIG[activeWorkspace()] ?? characterFigure('cm-l01-sprig');

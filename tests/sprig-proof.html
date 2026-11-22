@@ -1,0 +1,40 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Sprig proof</title>
+<style>
+ body { background:#efe9dc; color:#2f3a2e; font:14px/1.5 "Iowan Old Style",Palatino,Georgia,serif;
+        margin:0; padding:24px; }
+ h1 { font-size:18px; margin:0 0 18px; }
+ .row { display:flex; align-items:center; gap:22px; border-bottom:1px solid #ddd6c4;
+        padding:14px 0; }
+ .name { width:120px; font-size:12px; color:#625f4c; letter-spacing:.04em; text-transform:uppercase; }
+ .shipping { width:60px; text-align:center; }
+ .shipping img { width:46px; height:auto; }
+ .big img { width:115px; height:auto; }
+ h2.head { font-family:"Iowan Old Style",Palatino,Georgia,serif; font-size:19px; font-weight:600;
+           margin:0; flex:1; }
+ h2.head img { width:46px; height:auto; margin-left:10px; vertical-align:-6px; }
+ .panel { background:#e6ebdd; border-radius:10px; padding:10px 14px; position:relative;
+          width:210px; min-height:52px; }
+ .panel img { position:absolute; top:8px; right:8px; width:62px; opacity:.9; }
+ .panel p { margin:0; font-size:13px; padding-right:56px; color:#3f5230; font-weight:600; }
+</style></head><body>
+<h1>The seven marks at shipping size, beside a heading, and in a panel corner</h1>
+<div id="out"></div>
+<script>
+const S = [
+ ['rhetoric (done)','img/ui/rhetoric-sprig.svg','Ethical persuasion'],
+ ['character (done)','img/ui/character-sprig.svg','Where the weight sits'],
+ ['acting','img/ui/acting-sprig.svg','The situation'],
+ ['shakespeare','img/ui/shakespeare-sprig.svg','Verse and prose'],
+ ['musical','img/ui/musical-sprig.svg','The same dramatic life'],
+ ['screen','img/ui/screen-sprig.svg','Listening and reacting'],
+ ['theatre','img/ui/theatre-sprig.svg','What it left behind'],
+];
+document.getElementById('out').innerHTML = S.map(([n,src,h]) => `
+ <div class="row">
+   <div class="name">${n}</div>
+   <div class="shipping"><img src="../${src}" alt=""></div>
+   <div class="big"><img src="../${src}" alt=""></div>
+   <h2 class="head">${h}<img src="../${src}" alt=""></h2>
+   <div class="panel"><p>Try it</p><img src="../${src}" alt=""></div>
+ </div>`).join('');
+</script></body></html>

@@ -127,10 +127,17 @@ that.
 Rhetoric alone, so every other course, this one and Acting and
 Shakespeare included, fell back to `cm-l01-sprig` — Commedia's leaf
 spray, cropped from your commedia rendering, against the house rule at
-`js/main.js:4795`. Building a Character is off it now. **Acting,
-Shakespeare, Musical Theatre, Screen Acting and Theatre History are
-still wearing it** and each wants a mark of its own, which is five more
-scripts and no artwork.
+`js/main.js:4795`.
+
+**DONE, 2026-11-22. The table is full and no course borrows another's
+mark.** `tools/make_course_sprigs.py` drew the last five: two chairs
+turned towards each other for Acting, the iamb for Shakespeare, a tie for
+Musical Theatre, a tripod for Screen Acting and a cairn for Theatre
+History, each read out of that course's own principle. Four of them are
+live on their lesson pages. The cairn is registered and does not show
+yet, because Theatre History is the one course with no Learn scene and
+its lessons take an older layout that renders no ornament at all — so it
+was never wearing Commedia's leaf either, whatever this file said before.
 
 ## When they arrive
 
