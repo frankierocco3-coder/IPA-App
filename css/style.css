@@ -3895,6 +3895,34 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   align-items: start; padding-left: 0; }
 .lm-path.is-banded::before { content: none; }
 .lm-path.is-banded { align-items: stretch; }
+
+/* TWO COLUMNS, SAID OUT LOUD, BECAUSE auto-fit LOSES THEM BY FIFTEEN
+   PIXELS AT 1280 (2026-11-23).
+
+   auto-fit needs 2 x 300 plus an 18px gap, so 618, before it will lay a
+   second track. Measured across the range, the content column clears
+   that everywhere except one narrow band:
+
+       1024   column 705, no rail       2 columns, page 1035
+       1200   column 881, no rail       2 columns, page 1063
+       1280   column 603, rail back     1 column,  page 1788
+       1360   column 683                2 columns, page 1037
+       1600   column 912                2 columns, page 1055
+
+   The 330px rail returns at 1254 and the window does not give the middle
+   enough back to cover it until about 1295. In that forty pixel band the
+   path falls to one track and the Learn page runs to 1788, which is two
+   full screens to see four modules. 1280 is a common laptop width and it
+   sits in the middle of it.
+
+   repeat(2, …) states the intent the auto-fit was approximating. It
+   matches what auto-fit already produced at 1024, 1200, 1360 and 1500,
+   so nothing outside the band moves; it only stops the page folding in
+   half inside it. It is capped at 1500 because above that the first
+   shell rule hands the path 912px and auto-fit is correct again. */
+@media (min-width: 980px) and (max-width: 1500px) {
+  .lm-path.is-banded { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .is-banded .lm-mod { position: relative; margin: 0; padding: 0; display: flex; }
 
 /* The whole card is one button, so it carries the focus ring and sheds
