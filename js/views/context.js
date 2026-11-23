@@ -505,7 +505,40 @@ export const activeWorkspace = () => {
     return 'ipa';
   } catch { return 'ipa'; }
 };
-export const setWorkspace = w => { try { localStorage.setItem(WORKSPACE_KEY, w); } catch {} };
+// ── THE WORKSPACE, ON THE DOCUMENT (2026-11-23) ────────────────────
+// Until now every per workspace difference was decided in JavaScript at
+// render time, and the stylesheet had no idea which course a reader was
+// in. The Acting paper needs it in CSS, so one attribute carries it:
+// `body[data-paper="acting"]` in css/style.css is the only reader today.
+//
+// IT IS NOT CALLED data-ws, AND THAT IS NOT A STYLE CHOICE. `data-ws` is
+// already load bearing: the workspace menu puts it on each of its rows,
+// and the suite drives the app with `doc.querySelector('[data-ws=...]')`
+// and reads the whole menu with `querySelectorAll('[data-ws]')`. Putting
+// the same attribute on <body> makes the body the FIRST match in
+// document order, so every one of those selectors quietly starts
+// addressing the page instead of a button. Written as data-ws first, and
+// the suite caught it within the hour: two workspace checks came back
+// with a tenth entry at the head of a list of nine. The name says what
+// it is for instead, which is the paper and nothing else.
+//
+// IT IS WRITTEN FROM activeWorkspace() AND NEVER FROM THE STORED VALUE.
+// The getter above has eight fallbacks in it — a withdrawn workspace, a
+// retired id, two migrations — so the string in localStorage is often
+// not the workspace the reader is actually looking at. Writing `w` here
+// would dress the page as a course it is not showing.
+//
+// Two call sites and no more: here, which is the only place the value
+// changes, and renderShell, which is the only paint that can happen
+// without passing through here (boot, and a reload). A lesson page needs
+// neither, because an attribute on <body> outlives the renders beneath it.
+export const syncPaper = () => {
+  try { document.body.dataset.paper = activeWorkspace(); } catch { /* no DOM yet */ }
+};
+export const setWorkspace = w => {
+  try { localStorage.setItem(WORKSPACE_KEY, w); } catch {}
+  syncPaper();
+};
 // The course a workspace works in — now simply the stored one, which is
 // the whole point of the 2026-11-03 merge.
 //

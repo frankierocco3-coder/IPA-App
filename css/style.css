@@ -47,6 +47,77 @@ body {
   min-height: 100dvh;
 }
 
+/* ── THE ACTING PAPER (owner's mockup, 2026-11-23) ──────────────────
+   A warmer, yellower paper for the Acting workspace, with a ruled
+   fibre texture and two washes at the head of the page.
+
+   WHY IT IS SCOPED TO ONE WORKSPACE AND NOT THE WHOLE APP. The app
+   already dresses each course separately: its own Learn ground, its
+   own sprig, its own principle. The paper is the next layer of that,
+   not a new design system, which is what hard constraint 6 forbids.
+   Nothing here introduces a colour, a font or a shape the app did not
+   already own. Lift it to :root the day every course has its own.
+
+   IT IS A VARIABLE OVERRIDE AND ALMOST NOTHING ELSE. Four of the
+   theme's tokens move warmer and every panel, border, tag and card in
+   the course follows without a single component being touched. That
+   is the whole reason the tokens exist, and it is why this section is
+   twenty lines rather than two hundred. --green, --red, --ink and the
+   serif stack are deliberately NOT here: the controls stay sage and
+   the type stays as it is, which is what the mockup shows.
+
+   THE HOOK IS document.body.dataset.paper, set by syncPaper() in
+   js/views/context.js, and the name matters: data-ws is already taken
+   by the workspace menu rows and the suite drives the app through it.
+   There was
+   no global workspace attribute before this; every other per course
+   difference was decided in JavaScript at render time. See setPaper()
+   for why it is set from record() and not from renderShell. */
+body[data-paper="acting"] {
+  --bg: #fff3dc;        /* warm cream  -> papyrus */
+  --panel: #fff8eb;
+  --panel-2: #f5e6ca;   /* lighter than the base theme, so --muted
+                           gains contrast here rather than losing it:
+                           5.14:1 on the old panel, 5.9:1 on this one */
+  --line: #dcc69e;
+  background:
+    /* The two washes are anchored in PIXELS at the top of the page, not
+       in percentages. A percentage resolves against the body box, which
+       is as tall as the document, so on a long lesson the second wash
+       would sit four thousand pixels down where nobody will ever see
+       it. Pixels put both of them at the page head, which is where
+       light falling on paper belongs. */
+    radial-gradient(ellipse 980px 620px at 0 180px, #edc98655, transparent 70%),
+    radial-gradient(ellipse 900px 560px at 100% 520px, #e8c17b44, transparent 70%),
+    /* Paper fibre. One line in five, at 6% ink, so it reads as tooth
+       rather than as ruling. This one DOES scroll with the page. */
+    repeating-linear-gradient(0deg, #b68c3910 0 1px, transparent 1px 5px),
+    var(--bg);
+}
+
+/* NO CURTAINS, AND THIS IS MEASURED (2026-11-23). The mockup hangs a
+   tied back curtain at each top corner, and they are the one part of it
+   that cannot be built: this layout has no corner to hang them in.
+
+       1440 window, lesson page   side nav 16 to 222, reading column
+                                  248 to 1067, notes rail 1093 to 1409,
+                                  shell 0 to 1425 of 1440
+       1024 window, Learn page    shell 0 to 1009 of 1024, ground 14 to 991
+
+   The free edges are sixteen and thirty one pixels wide and both sit
+   behind opaque panels. Drawn and hung at opacity .26, then .5, then
+   .6, the curtain was invisible at every width tried, because the brand
+   occupies one top corner and the course panel the other. The mockup
+   had room for them because its preview container is padded and
+   narrower than the app it is previewing.
+
+   The course already carries this ornament anyway, in the only part of
+   the page that IS free: acting-ground.svg stands a ghost light in the
+   bottom left margin and a row of chairs in the bottom right, and both
+   are visible at 1440. A proscenium belongs in that drawing, beside the
+   lighting bar, rather than in a corner that is already taken. See
+   tools/make_acting_ground.py, which owns that composition. */
+
 h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
   font-family: var(--serif);
   font-weight: 600;
@@ -5374,7 +5445,22 @@ body.nb-full #app { display: none; }
 
 /* Voice-science figures inside chapters and references. */
 .sp-fig { margin: 18px 0; }
-.sp-fig img { width: 100%; height: auto; border-radius: 10px; border: 1px solid rgba(0,0,0,.08); }
+/* NATURAL SIZE, NEVER STRETCHED (2026-11-23). This was width: 100%,
+   which is right for the 1536px drawings that were the only figures
+   here and wrong for the Acting paintings, which are 504 to 760 wide
+   and would be blown up to 819 in a desktop column. max-width keeps
+   every picture at its own size or smaller, so a big drawing still
+   fills the measure and a small one is never upscaled. The owner's
+   handoff asks for exactly this: natural height, contain sizing, no
+   forced crops and no stretching. */
+.sp-fig img { max-width: 100%; height: auto; display: block; margin-inline: auto;
+  border-radius: 10px; border: 1px solid rgba(0,0,0,.08); }
+/* A picture painted on the same cream the page is made of. Multiply
+   makes its ground vanish into the paper, so the illustration reads as
+   printed on the page rather than laid on it, and the frame comes off
+   because there is no longer an edge for it to describe. Set by
+   `paper: true` in the figure registry, never by the course. */
+.sp-fig-paper img { border: 0; border-radius: 0; mix-blend-mode: multiply; }
 .sp-figcap { margin-top: 8px; font-size: 14px; line-height: 1.5; color: var(--muted); }
 
 /* ── Motion opt-out, app-wide (2026-09-15) ───────────────────────

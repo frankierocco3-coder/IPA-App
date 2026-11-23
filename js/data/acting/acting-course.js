@@ -170,6 +170,9 @@ const ACTING_LESSONS_ALL = [
           'What has just occurred, and what is at stake.',
           'What this character is trying to get.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'behavior-doorway' },
     ] },
 
   { id: 'ac-circumstances', module: 'work', order: 3,
@@ -196,6 +199,9 @@ const ACTING_LESSONS_ALL = [
           'Question Everything, in the Actor’s Studio, walks it systematically for the text you are working on.',
           'The test of having read carefully: you cannot play a casual goodbye in a scene where the text says the train leaves in four minutes.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'circumstances-desk' },
     ] },
 
   { id: 'ac-objective', module: 'work', order: 4,
@@ -222,6 +228,9 @@ const ACTING_LESSONS_ALL = [
           '“Be angry” gives you nothing to do and nobody to do it to.',
           'A strong feeling arrives as a consequence of pursuing something under pressure, not as an instruction to yourself.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'objective-reach' },
     ] },
 
   { id: 'ac-obstacle', module: 'work', order: 5,
@@ -242,6 +251,9 @@ const ACTING_LESSONS_ALL = [
           'Check whether you have quietly assumed the other person will cooperate.',
           'Restore the resistance, and the scene usually starts moving again.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'obstacle-door' },
     ] },
 
   { id: 'ac-stakes', module: 'work', order: 6,
@@ -272,6 +284,9 @@ const ACTING_LESSONS_ALL = [
           'Ask what the character gains if this goes well, and loses if it does not.',
           'Raising them arbitrarily produces a familiar kind of bad acting: everything urgent, nothing meaning anything.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'stakes-letter' },
     ] },
 
   { id: 'ac-urgency', module: 'work', order: 7,
@@ -334,6 +349,9 @@ const ACTING_LESSONS_ALL = [
           'Find the line where the text hands you the clock, and say it like somebody who knows what it means.',
           'Then take the speed out and play it slowly once. What is left is your urgency.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'urgency-leaving' },
     ] },
 
   // THE PHYSICAL SCORE (owner order, 2026-10-21). Added at the end of
@@ -384,6 +402,9 @@ const ACTING_LESSONS_ALL = [
           'None of this needs falls, lifts or anything strenuous to be useful.',
           'A physical score done sitting in a chair still answers the question it is asking.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'physical-score-three' },
     ] },
 
   { id: 'ac-offbook', module: 'work', order: 1,
@@ -420,6 +441,9 @@ const ACTING_LESSONS_ALL = [
           'Feeling fluent and knowing the lines are two different measurements, and the first one lies.',
           'The Library’s Lines & Memory lesson shows why, and how to test which one you actually have.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'off-book-hands' },
     ],
     doorway: { id: 'lines-memory', label: 'Lines & Memory' } },
 
@@ -447,6 +471,13 @@ const ACTING_LESSONS_ALL = [
       { p: 'A realistic set has three walls. The fourth one, the one that would complete the room, is missing, and the audience sits where it belongs. The convention says: for the character, the wall is still there. The room is whole. The character can lean near it, glance at it, stare out of a window in it, and never once notice the several hundred people breathing where the wallpaper should be.' },
       { fig: 'fourth-wall-theatre' },
       { fig: 'fourth-wall-house' },
+      // THE SAME TWO VIEWS, TURNED AROUND (owner handoff, 2026-11-23).
+      // The two above are the fourth wall from where the audience sits.
+      // These two are the same room from where the actor stands, which
+      // is the half of the idea a picture can carry and a sentence
+      // cannot. They go here, immediately after their pair.
+      { fig: 'fourth-wall-from-the-stage' },
+      { fig: 'fourth-wall-from-the-room' },
       { p: 'This chapter is not about breaking that wall. Direct address, the aside, the confidant speech to the house: those are real tools, and some plays are built on them, but they are a different subject. This is the ordinary night in a realistic play, where the wall stays up and the actor has to live behind it. Used well, the fourth wall is not a limitation to be coped with. It is a quarter of the character’s world that happens to be invisible, and it is yours to furnish.' },
       { h: 'Build the wall before you need it' },
       { key: 'A wall you have not built is a wall you cannot use, and the failure is visible.' },
@@ -500,6 +531,9 @@ const ACTING_LESSONS_ALL = [
           'The first reading has no pen in it at all.',
           'To work the lists on your own script, open The Four Lists from the Script Analysis shelf. They save with that project.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'four-lists-table' },
     ],
     reflection: 'Which of your four lists came out shortest? What does that absence tell you?' },
   { id: 'ac-question', module: 'text', order: 4,
@@ -525,6 +559,9 @@ const ACTING_LESSONS_ALL = [
           'The value is in the answering, not in the reading.',
           'The questions you least want to answer are usually the ones the scene turns on.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'question-notebook' },
     ] },
 
   // ── Module 3 · Listening and Responding ───────────────────────
@@ -578,6 +615,9 @@ const ACTING_LESSONS_ALL = [
           'Name three things your partner did that you had not planned for. If you cannot name one, your attention was inward.',
           'Ask them to change one thing without telling you which. If the run plays identically, you were not watching.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'attention-listening' },
     ] },
 
   { id: 'ac-receiving', module: 'listening', order: 2,
@@ -621,6 +661,9 @@ const ACTING_LESSONS_ALL = [
       { h: 'The overcorrection' },
       { p: 'Told to receive, actors add pauses. A scene paved with pauses is not a scene that listens, it is a scene that has learned to look thoughtful, and it is slower without being fuller. Receiving is not duration. It is causation.' },
       { key: 'Test: take out every pause you added and play it fast. Whatever still reads as caused was genuinely received, and the rest was decoration.' },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'receiving-pause' },
     ] },
 
   { id: 'ac-moment', module: 'listening', order: 3,
@@ -665,6 +708,9 @@ const ACTING_LESSONS_ALL = [
 
       { h: 'When your partner is fixed and you are not' },
       { p: 'It happens, and it is not a reason to fix yourself to match. You cannot make somebody else play moment to moment, but you can keep giving them something real to answer, and a scene with one live actor in it is still better than a scene with none. Keep your own attempts genuine, keep the sizes honest, and do not punish them by withdrawing: that produces two people performing separately, which is the thing you were trying to avoid.' },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'moment-reach' },
     ] },
 
   { id: 'ac-newinfo', module: 'listening', order: 4,
@@ -713,6 +759,9 @@ const ACTING_LESSONS_ALL = [
 
       { h: 'Information your character already has' },
       { p: 'Not everything said in a scene is news, and treating it as news is its own mistake. Half of what passes between people who know each other is old ground, deliberately raised. When your partner says a thing your character has heard a hundred times, the live question is not what it means but why it is being said again, now.' },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'new-information-letter' },
     ] },
 
   { id: 'ac-repetition', module: 'listening', order: 5,
@@ -760,6 +809,9 @@ const ACTING_LESSONS_ALL = [
 
       { h: 'The long run' },
       { p: 'Over months the danger reverses. Early on the risk is freezing; later it is drift, where the scene has been varied so often that nobody can find the version that worked. The discipline is the same one from both directions: hold the situation exactly, and leave the behaviour free. Anything you cannot say about the circumstances in one sentence is something that has drifted.' },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'repetition-pair' },
     ] },
 
   { id: 'ac-playing', module: 'listening', order: 6,
@@ -809,6 +861,9 @@ const ACTING_LESSONS_ALL = [
 
       { h: 'And when the feeling does arrive' },
       { p: 'Let it, and keep going. The pursuit does not stop because you are moved, and a character who stops to experience their own emotion is a character who has given up on getting the thing. Most of the strongest moments on a stage are somebody trying to carry on with something while it is happening to them.' },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'playing-objective' },
     ] },
 
   // ── Module 5 · Preparing the Performance ──────────────────────
@@ -1101,6 +1156,9 @@ const ACTING_LESSONS_ALL = [
           'Date the notes that are decisions, so you know whether one is from before or after the director changed something.',
           'Mark a cut so you can still read what is under it. Cuts get restored more often than anyone expects.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'markup-pencil' },
     ] },
 
   { id: 'ac-ownmarks', module: 'text', order: 3,
@@ -1161,6 +1219,9 @@ const ACTING_LESSONS_ALL = [
           'Use pencil for anything a director might change.',
           'Keep the marks that are yours separate from the marks that came from the room.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'own-marks-pair' },
     ] },
   { id: 'ac-dials', module: 'rhythm', order: 1,
     title: 'Two Dials, Not One',
@@ -1204,6 +1265,9 @@ const ACTING_LESSONS_ALL = [
           'The actor with one rhythm for every role, always recognizably themselves in a different coat.',
           'The actor who nails the metre perfectly with nothing alive underneath it.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'rhythm-dials-hand' },
     ] },
   { id: 'ac-feeling', module: 'rhythm', order: 2,
     title: 'Rhythm Reaches Feeling',
@@ -1238,6 +1302,9 @@ const ACTING_LESSONS_ALL = [
           'When a rhythm feels arbitrary, you are not missing a better rhythm.',
           'You are missing the circumstance that would make this one inevitable.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'rhythm-feeling-path' },
     ] },
   { id: 'ac-tworhythms', module: 'rhythm', order: 3,
     title: 'Two Rhythms at Once',
@@ -1279,6 +1346,9 @@ const ACTING_LESSONS_ALL = [
           'You have probably given the character one rhythm in a moment that is begging for two.',
           'Do not solve that loop. Play it. It plays beautifully.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'rhythm-two-inside' },
     ] },
   { id: 'ac-harmony', module: 'rhythm', order: 4,
     title: 'Harmony, Not Unison',
@@ -1316,6 +1386,9 @@ const ACTING_LESSONS_ALL = [
           'A scene rehearsed until everybody has drifted onto one polite shared pace.',
           'It sounds tidy. It sounds finished. It sounds nothing like people.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'rhythm-harmony-three' },
     ] },
   { id: 'ac-rests', module: 'rhythm', order: 5,
     title: 'Notes and Rests',
@@ -1352,6 +1425,9 @@ const ACTING_LESSONS_ALL = [
           'Under the pause: keep a silent count going, so the rhythm never stops and only the sound does.',
           'Across the joins: do not iron two phrases into one measure. Let the count carry you over.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'rhythm-rests-board' },
     ] },
   { id: 'ac-speeds', module: 'rhythm', order: 6,
     title: 'The Two Missing Speeds',
@@ -1389,6 +1465,9 @@ const ACTING_LESSONS_ALL = [
           'Fast with no reason behind it is a party trick.',
           'Circumstance first, speed second. That order never flips.',
         ] } },
+      // The chapter closes on its picture, after the last panel and
+      // before the reflection, which is where the mockup puts it.
+      { fig: 'rhythm-speeds-pair' },
     ] },
 
   // ── The Professional Actor ─────────────────────────────────
@@ -1414,6 +1493,9 @@ const ACTING_LESSONS_ALL = [
           'Drill the lines until they are boring. Boring is the goal: words so automatic they cost you nothing.',
           'What you save on remembering, you spend on acting.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'off-book-minimum' },
     ] },
   { id: 'ac-pro-choices', module: 'professional', order: 3,
     title: 'Make Choices, Never Ask Permission',
@@ -1432,6 +1514,9 @@ const ACTING_LESSONS_ALL = [
           'Never ask whether you are allowed to try something.',
           'Make the choice, offer it, and let the room respond to something real.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'choices-notebook' },
     ] },
   { id: 'ac-pro-notes', module: 'professional', order: 4,
     title: 'Taking a Note',
@@ -1450,6 +1535,9 @@ const ACTING_LESSONS_ALL = [
           'A note that vanishes into a nod and never appears in the work is worse than arguing, because now the director wonders whether you listened at all.',
           'Take the note INTO the character you built rather than dropping the character to obey it.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'taking-a-note' },
     ] },
   { id: 'ac-pro-early', module: 'professional', order: 5,
     title: 'Early Is On Time',
@@ -1470,6 +1558,9 @@ const ACTING_LESSONS_ALL = [
           'Know whose room it is, and it is not yours.',
           'Keep your problems small and your solutions ready.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'early-arrival' },
     ] },
   { id: 'ac-pro-director', module: 'professional', order: 6,
     title: 'What a Director Actually Wants',
@@ -1487,6 +1578,9 @@ const ACTING_LESSONS_ALL = [
           'Arrive with two or three real ways the scene could go, played fully enough to judge.',
           'Translating their note into your process is your work, not theirs.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'director-floor-marks' },
     ] },
   { id: 'ac-pro-audition', module: 'professional', order: 1,
     title: 'The Audition Is the Job',
@@ -1504,6 +1598,9 @@ const ACTING_LESSONS_ALL = [
           'Fully prepared, choices made, person built.',
           'Treat every audition as a finished performance, given freely. You walk out intact either way, and walk in better next time.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'audition-table' },
     ] },
   { id: 'ac-pro-stageset', module: 'professional', order: 7,
     title: 'Stage and Set Are Different Countries',
@@ -1521,6 +1618,9 @@ const ACTING_LESSONS_ALL = [
           'On stage, consistency: hitting the mark, the light and the laugh the same way twice a night for two months without letting it go dead.',
           'On set, freshness in fragments: take twelve must be as alive as take one.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'stage-and-camera' },
     ] },
   { id: 'ac-pro-reputation', module: 'professional', order: 8,
     title: 'Your Reputation Is the Career',
@@ -1539,6 +1639,9 @@ const ACTING_LESSONS_ALL = [
           'Every room you are good in produces three people who will say your name in rooms you have never entered.',
           'The role ends. The reputation is the career.',
         ] } },
+      // The chapter closes on its picture, the same as every other
+      // chapter in this course.
+      { fig: 'reputation-handshake' },
     ] },
 ];
 

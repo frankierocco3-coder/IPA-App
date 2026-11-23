@@ -130,7 +130,7 @@ import { resolvePronunciation, validateIpa, setPersonal, getPersonal, deletePers
 import { recordAttempt, symbolBreakdown, confusionPairs, totals, dailyRehearsal,
          rehearsalTargets, resetAnalytics, hasEnoughData, accuracyLabel, CONFIDENCE,
          confidenceOf } from './analytics.js';
-import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, SCREEN_LIVE, SCREEN_PREVIEW_KEY, screenOpen, screenPreview, screenVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, migrateMergedWorkspace, setCourse, setWorkspace, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
+import { ACCENTLESS_WORKSPACES, CHARACTER_LIVE, LEARN_SEQUENCE_PREVIEW_KEY, learnSequencePreview, CHARACTER_PREVIEW_KEY, COURSES, SHAKESPEARE_LIVE, SHAKESPEARE_PREVIEW_KEY, RHETORIC_COURSE_LIVE, RHETORIC_PREVIEW_KEY, RHETORIC_WORKSHEET_LIVE, SPEECH_LIVE, TEXT_DIALECTS, TRACK_LESSONS, UNIT_EXPANDED, WORKSPACES, actingVisible, activeCourse, characterOpen, characterPreview, characterVisible, COMMEDIA_LIVE, COMMEDIA_PREVIEW_KEY, commediaOpen, commediaPreview, commediaVisible, THEATRE_LIVE, THEATRE_PREVIEW_KEY, theatreOpen, theatrePreview, theatreVisible, MUSICAL_LIVE, MUSICAL_PREVIEW_KEY, musicalOpen, musicalPreview, musicalVisible, SCREEN_LIVE, SCREEN_PREVIEW_KEY, screenOpen, screenPreview, screenVisible, shakespeareOpen, shakespearePreview, shakespeareVisible, rhetoricOpen, rhetoricPreview, rhetoricVisible, activeWorkspace, dialectName, liveWorkspaces, migrateMergedWorkspace, setCourse, setWorkspace, syncPaper, trackFor, unitById, visibleCourses, workspaceCourse } from './views/context.js';
 import { actionPieceHtml, wireActionPiece } from './views/action-piece.js';
 import { renderAudioAudit, renderContentReview } from './views/admin.js';
 import { fillSound, openWordEditor, stripStage } from './views/ipa-tools.js';
@@ -393,6 +393,10 @@ function showSection(id) {
 
 function renderShell(section) {
   stopSpeech();
+  // THE PAPER FOLLOWS THE WORKSPACE. setWorkspace() does this too and is
+  // the place it normally happens; this is the one paint that can be
+  // reached without passing through it, on boot and after a reload.
+  syncPaper();
   setSection(section);
   window.scrollTo(0, 0);          // each section starts at its own top
   releaseTryIt();
@@ -6165,7 +6169,10 @@ function actingFigureHtml(key) {
   // drawings here are 1536x1024; a registry entry carrying its own w/h
   // (the commedia collection is 1536x864) is believed over the default,
   // so nothing jumps when the picture loads.
-  return f ? `<figure class="sp-fig">
+  // `paper` marks a picture whose own ground IS the page: it loses the
+  // frame and multiplies into the paper instead of sitting on top of it.
+  // See the note beside the flag in js/data/acting/art.js.
+  return f ? `<figure class="sp-fig${f.paper ? ' sp-fig-paper' : ''}">
       <img src="${f.src}" alt="${esc(f.alt)}" width="${f.w ?? 1536}" height="${f.h ?? 1024}" loading="lazy">
       ${f.caption ? `<figcaption class="sp-figcap">${esc(f.caption)}</figcaption>` : ''}
     </figure>` : '';

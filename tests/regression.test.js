@@ -4056,16 +4056,19 @@ export async function run({ navDoc = document } = {}) {
         + `main=${doc.querySelector('main')?.className ?? 'none'}`);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
       clickIn(doc.getElementById('nav-back')); await sleep(350);
-      // A chapter with figures: both render with their alt text and
-      // captions, from same-origin files, lazily.
+      // A chapter with figures: all four render with their alt text and
+      // captions, from same-origin files, lazily. It was two until
+      // 2026-11-23, when the reverse angle pair was added, and the count
+      // is deliberately exact rather than a floor: a figure appearing or
+      // vanishing in a chapter should be a decision somebody made.
       // Reached through 'principles' since 2026-10-25, not 'rehearsal': the
       // fourth wall moved to module 'work' when Preparing the Performance was
       // withdrawn, and its shelf went with its module.
       clickIn(doc.querySelector('[data-tile="col:principles"]')); await sleep(400);
       clickIn(doc.querySelector('[data-item="ac-fourthwall"]')); await sleep(450);
       const figs = [...doc.querySelectorAll('main figure.sp-fig')];
-      check('acting: the fourth wall chapter shows both figures, described and captioned',
-        figs.length === 2
+      check('acting: the fourth wall chapter shows all four figures, described and captioned',
+        figs.length === 4
         && figs.every(f => {
           const img = f.querySelector('img');
           return !!img && img.getAttribute('alt').length > 40
@@ -7450,9 +7453,36 @@ export async function run({ navDoc = document } = {}) {
     check('figures: captions keep house copy (no em dashes, no straight quotes)',
       !capText.includes('\u2014') && !/["']/.test(capText));
     const fw = ACTING_LESSONS.find(l => l.id === 'ac-fourthwall');
-    check('figures: the fourth wall chapter shows the theatre, then the room, after its opening',
-      String((fw?.body ?? []).filter(b => b.fig).map(b => b.fig)) === 'fourth-wall-theatre,fourth-wall-house'
+    // FOUR PICTURES AND THE ORDER IS THE TEACHING. Theatre then room is
+    // the fourth wall from where the AUDIENCE sits; stage then garden is
+    // the same two views from where the ACTOR stands. Reversing either
+    // pair, or splitting them, breaks the comparison the chapter makes.
+    // Two were added 2026-11-23; this check caught the change, which is
+    // what it was written for.
+    check('figures: the fourth wall chapter shows the house pair, then the actor pair, after its opening',
+      String((fw?.body ?? []).filter(b => b.fig).map(b => b.fig))
+        === 'fourth-wall-theatre,fourth-wall-house,fourth-wall-from-the-stage,fourth-wall-from-the-room'
       && fw.body.findIndex(b => b.fig) === 1);
+    // ── ONE CLOSING PICTURE PER CHAPTER (2026-11-23) ────────────────
+    // Every lesson in the live course now ends on an illustration, as
+    // the LAST block of its body. A chapter added later with no art, or
+    // with its figure dropped into the middle of the reading, is the
+    // thing this pins. Using the Fourth Wall is the one exception and
+    // is named: its four pictures are argued in place and it closes on
+    // prose, which the check above covers instead.
+    // WHICH LESSONS THIS COVERS, AND WHY IT IS NOT SIMPLY ACTING_LESSONS.
+    // That array still carries the eight records behind PERFORMANCE_LIVE,
+    // which are withdrawn and have no art because they are not in the
+    // course. What a reader can actually open is the four Learn modules
+    // plus the Professional Actor shelf, which is off the path and live,
+    // so both are walked and nothing else is.
+    const liveModules = [...ACTING_MODULES.map(m => m.id), 'professional'];
+    const reachable = ACTING_LESSONS.filter(l => liveModules.includes(l.module));
+    const closers = reachable.filter(l => l.id !== 'ac-fourthwall');
+    const noCloser = closers.filter(l => !((l.body ?? []).at(-1) || {}).fig);
+    check('figures: every acting chapter but the fourth wall ends on its illustration',
+      closers.length >= 30 && noCloser.length === 0,
+      noCloser.map(l => l.id).join(', ') || `${closers.length} chapters close on a picture`);
   }
 
   // ── 21n. The Learn page grounds: declared, shipped, drawn to size ──

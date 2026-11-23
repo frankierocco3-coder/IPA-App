@@ -64,6 +64,284 @@ export const ACTING_FIGURES = {
     alt: 'A horizontal bar divided into three. The wide middle section is shaded and labelled where almost all stage speech sits, and the two outer sections are labelled missing, with true slow at one end and true fast at the other. Below it, four rows compare pairs: true slow is long blocks almost touching, stretched slow is short blocks with wide gaps, true fast is many small evenly spaced blocks, and rushed is long blocks run together.',
     caption: 'Both ends of the range have to be built. Stretched slow is not slow speech, it is ordinary speech with air between the words, and rushed is not fast speech, it is fast speech with the ends falling off.',
   },
+
+  // ── ONE ILLUSTRATION PER LESSON (owner handoff, 2026-11-23) ──────
+  //
+  // `paper: true` IS WHAT MAKES THEM SIT ON THE PAGE. Each of these is
+  // painted on a cream ground that is very nearly the Acting paper, so
+  // framed in a border it reads as a postcard pinned to the page. The
+  // flag drops the frame and multiplies the picture into the paper
+  // instead, which is what the mockup does and the reason its lessons
+  // look printed rather than pasted. It is a property of the ARTWORK,
+  // not of the course: the four fourth wall pictures are richly
+  // coloured edge to edge and keep their frame, because multiplying a
+  // red stage curtain into cream paper turns it to mud.
+  // Twenty five paintings, one for each lesson in the live course, each
+  // placed as the LAST block of its chapter body so it closes the
+  // reading rather than interrupting it. That is where the owner's
+  // mockup puts them and it is also the only place they can go: the
+  // handoff is explicit that art must not sit behind reading text.
+  //
+  // WHERE THEY CAME FROM, AND HOW TO CUT THEM AGAIN. The owner supplied
+  // four atlas PNGs, one per module, each holding that module's lessons
+  // in a grid, plus a set of 340 by 227 crops. The crops are thumbnails
+  // and are not what ships. These are cut from the atlases instead, at
+  // the full cell size, which is between 1.5 and 2.3 times larger:
+  //
+  //     text.png        1536x1024   2 x 2   cells 768x512   4 lessons
+  //     work.png        1536x1024   3 x 3   cells 512x341   9 lessons
+  //     listening.png   1881x836    3 x 2   cells 627x418   6 lessons
+  //     rhythm.png      1881x836    3 x 2   cells 627x418   6 lessons
+  //
+  // Four pixels come off every edge to drop the pale seam the atlas
+  // leaves between cells, which is why the sizes below are four short
+  // of the cell. Twenty five cells, twenty five lessons, no cell used
+  // twice and none left over, which is the check that the grids above
+  // are right rather than merely plausible.
+  //
+  // THE ATLASES ARE NOT IN THIS REPOSITORY and should not be: they are
+  // 3MB each and hold nothing these JPEGs do not. The recipe above is
+  // what makes the cut reproducible from the handoff zip.
+  //
+  // THEY ARE SMALLER THAN THE HOUSE FIGURE, and knowingly. Every other
+  // drawing here is 1536 wide; these are 504 to 760, because that is
+  // the resolution the atlas holds. They are shown at their own width
+  // rather than stretched to the column, so they are never upscaled,
+  // but a reader on a high density screen will see them soft. The fix
+  // is regenerating one at full size, not resampling this.
+  'four-lists-table': {
+    title: 'The four lists, before anything is written on them',
+    file: 'four-lists-table.jpg', w: 760, h: 504, paper: true,
+    alt: 'A woman sits at a wooden table in a sunlit room with her chin resting on her hand, looking down at four sheets of paper laid side by side in front of her. Each sheet is ruled differently: a column of boxes, three linked circles, a grid, and a numbered line. A mug stands at her elbow, a jar of pencils behind it, and a clothes rail waits against the wall.',
+    caption: 'Four sheets, four shapes, and nothing on any of them yet. The collecting comes before a single word of it means anything.',
+  },
+  'markup-pencil': {
+    title: 'A script marked up',
+    file: 'markup-pencil.jpg', w: 760, h: 504, paper: true,
+    alt: 'A close view of a hand holding a yellow pencil above an open script. The page is already marked in colour: orange brackets down the left margin divide the speech into sections, a green arrow curves from one line to the next, and short red and green underlines pick out single phrases.',
+    caption: 'Brackets for the beats, an arrow for where it turns, underlines for the words that carry it. The marks are a record of decisions rather than decoration.',
+  },
+  'own-marks-pair': {
+    title: 'Two actors, two notations',
+    file: 'own-marks-pair.jpg', w: 760, h: 504, paper: true,
+    alt: 'Two actors sit side by side, each holding their own copy of the same script. His is marked with yellow highlighter, orange arrows and tabs along the edge; hers with purple brackets, wavy lines and small stars. He studies his page with a pencil held to his mouth while she talks and gestures with her free hand.',
+    caption: 'The same scene marked two ways. A notation only has to be legible to the person who made it.',
+  },
+  'question-notebook': {
+    title: 'The questions the lists have not answered',
+    file: 'question-notebook.jpg', w: 760, h: 504, paper: true,
+    alt: 'A man sits with his chin on his fist over an open spiral notebook, frowning at it. The left page carries a diagram of linked boxes and the right a line that rises and falls between plotted points. Four blank cards lie on the table in front of him, two of them marked with a question mark.',
+    caption: 'The lists are the evidence and this is the interrogation. The blank cards are the part nobody has answered yet.',
+  },
+  'off-book-hands': {
+    title: 'The script is on the table',
+    file: 'off-book-hands.jpg', w: 504, h: 333, paper: true,
+    alt: 'A woman stands in a rehearsal room with both arms thrown wide, mid sentence, looking up and smiling. A man watches her from the right. On the table behind her the script lies closed and face down.',
+    caption: 'The script is down and her hands are free. Everything an actor can do with the rest of themselves begins at this point.',
+  },
+  'behavior-doorway': {
+    title: 'One person, two situations',
+    file: 'behavior-doorway.jpg', w: 504, h: 333, paper: true,
+    alt: 'Two halves of one moment. On the left a young woman stands outside in heavy rain in a yellow hooded coat, soaked and braced, her hand on a door. On the right, inside, the same woman is wrapped in a hug by somebody who was waiting for her, her face loose with relief.',
+    caption: 'One person, two situations, two completely different sets of behaviour. Neither of them was decided in advance.',
+  },
+  'circumstances-desk': {
+    title: 'What the writer has already given you',
+    file: 'circumstances-desk.jpg', w: 504, h: 333, paper: true,
+    alt: 'A woman sits at a desk reading a single sheet of paper, her hand at her mouth. A clock hangs on the wall behind her, a window beside her looks onto summer leaves, a potted plant stands on the sill, books are stacked at her elbow, and a floor plan is spread open across the desk.',
+    caption: 'A room, an hour, a letter and a plan of the house. Every one of these is given rather than chosen, and every one of them narrows what the scene can be.',
+  },
+  'objective-reach': {
+    title: 'A pursuit, aimed at somebody',
+    file: 'objective-reach.jpg', w: 504, h: 333, paper: true,
+    alt: 'A woman leans forward with one arm stretched out toward a man who has turned his face away and down from her. Her hand is open and still reaching; he is half turned out of the frame.',
+    caption: 'An objective is aimed at a person. Watch where the hand goes, and notice that it keeps going after he looks away.',
+  },
+  'obstacle-door': {
+    title: 'The obstacle has reasons',
+    file: 'obstacle-door.jpg', w: 504, h: 333, paper: true,
+    alt: 'A man stands on the left with his arms folded and his face turned away, a part open wooden door between him and a woman on the right, who leans around the frame with both hands raised, arguing.',
+    caption: 'An obstacle is a person with reasons, not a wall. He is not failing to hear her, he is declining to agree.',
+  },
+  'stakes-letter': {
+    title: 'What the outcome costs',
+    file: 'stakes-letter.jpg', w: 504, h: 333, paper: true,
+    alt: 'A woman holds an opened letter in one hand and a plain ring raised in the other, looking at the ring rather than at the page. Her expression has gone still.',
+    caption: 'The cost, held up in the other hand. Stakes are rarely stated in the dialogue and very often sitting in an object.',
+  },
+  'urgency-leaving': {
+    title: 'The window closing',
+    file: 'urgency-leaving.jpg', w: 504, h: 333, paper: true,
+    alt: 'A man with a rucksack on his shoulder is half turned to leave. A woman has stepped into his path with both hands raised, speaking fast. A clock on the wall behind them is close to five.',
+    caption: 'There is a clock in this scene. Urgency is not a louder voice, it is the window closing while you are still talking.',
+  },
+  'physical-score-three': {
+    title: 'Three moves, in that order',
+    file: 'physical-score-three.jpg', w: 504, h: 333, paper: true,
+    alt: 'Three panels of the same woman alone in a bare room, moving through a sequence: walking across the floor, stopping to set both hands on the back of a wooden chair, and leaning over a table to put down a cup.',
+    caption: 'Three moves, repeatable in that order, with nothing said over them. A physical score is rehearsed until it holds without the words.',
+  },
+  // NOT SHIPPED: the work atlas carries a thirteenth painting, a living
+  // room set seen from the dark auditorium with one actor reaching past
+  // the missing wall. It is left out because Using the Fourth Wall
+  // already opens with fourth-wall-theatre, which says the same thing at
+  // 1536 wide and with both actors in it. Four pictures in one chapter is
+  // enough; five, two of them the same idea, is a slideshow.
+
+  'attention-listening': {
+    title: 'Attention, with nothing held back for the next line',
+    file: 'attention-listening.jpg', w: 619, h: 410, paper: true,
+    alt: 'Close on two actors facing one another in a bright room. The man on the left is speaking with both hands open in front of him. The woman on the right leans in, watching his face, saying nothing.',
+    caption: 'All of her attention is on him and none of it is on what she says next. That is the part an audience can see.',
+  },
+  'receiving-pause': {
+    title: 'The beat before the answer',
+    file: 'receiving-pause.jpg', w: 619, h: 410, paper: true,
+    alt: 'A man speaks with both hands raised to a woman who sits with her chin resting on her hand. She is looking away from him and slightly upward, taking in what he has said rather than answering it.',
+    caption: 'The beat between hearing it and answering it. Most of what reads as thought on a stage happens in that gap.',
+  },
+  'moment-reach': {
+    title: 'Between one moment and the next',
+    file: 'moment-reach.jpg', w: 619, h: 410, paper: true,
+    alt: 'A man reaches after a woman who has already turned away and begun to move, her weight forward and her hand pulled back out of his. Neither of them is settled in the pose.',
+    caption: 'Caught between one moment and the next, with nothing held. The behaviour is being made now rather than recalled from yesterday.',
+  },
+  'new-information-letter': {
+    title: 'It has landed',
+    file: 'new-information-letter.jpg', w: 619, h: 410, paper: true,
+    alt: 'A man stands in a rehearsal room holding an opened letter and its torn envelope, staring at the page. His eyes are wide and his free arm has dropped to his side. A clothes rail and a bench stand behind him.',
+    caption: 'He has read it and it has landed. Information is only new if you let it change what you do next.',
+  },
+  'repetition-pair': {
+    title: 'The same words, twice',
+    file: 'repetition-pair.jpg', w: 619, h: 410, paper: true,
+    alt: 'The same two actors shown twice, one panel above the other, in the same places and the same room. In the upper panel he speaks and she watches him warily. In the lower panel he speaks again and she has begun to smile.',
+    caption: 'Same words, same room, different both times. The exercise takes away everything except what the other person is doing.',
+  },
+  'playing-objective': {
+    title: 'Playing the pursuit, not the feeling',
+    file: 'playing-objective.jpg', w: 619, h: 410, paper: true,
+    alt: 'A woman leans hard toward a man who is turning away with a bag on his shoulder, both of her hands reaching and her face urgent. Her focus is entirely on him.',
+    caption: 'She is not playing distress. She is trying to stop him leaving, and the distress is what that looks like from outside.',
+  },
+  'rhythm-dials-hand': {
+    title: 'Two dials, turned separately',
+    file: 'rhythm-dials-hand.jpg', w: 619, h: 410, paper: true,
+    alt: 'On the left, two hands turn two separate dials, an upper one swept from yellow round to orange and a lower one from pale green round to deep green. On the right a woman reads from a marked page, concentrating.',
+    caption: 'Two dials and two hands. Tempo is one of them and rhythm is the other, and reaching for the wrong one is why a note about pace so often changes nothing.',
+  },
+  'rhythm-feeling-path': {
+    title: 'Walking the pattern',
+    file: 'rhythm-feeling-path.jpg', w: 619, h: 410, paper: true,
+    alt: 'A man crosses a room in a long stride with one hand raised, following a dashed line that loops across the floor between two marked spots. A large board beside him shows coloured strokes and marks laid out in rows.',
+    caption: 'He is walking a pattern rather than a mood. Feeling arrives through the rhythm instead of being fetched in advance of it.',
+  },
+  'rhythm-two-inside': {
+    title: 'Still outside, racing inside',
+    file: 'rhythm-two-inside.jpg', w: 619, h: 410, paper: true,
+    alt: 'A woman stands outdoors in green light with her eyes closed and her hands low and open, entirely calm. Above her head a thought bubble holds a sharp red zigzag driving fast to the right.',
+    caption: 'Still on the outside and racing underneath. What an audience reads is the distance between the two, which is why neither one plays on its own.',
+  },
+  'rhythm-harmony-three': {
+    title: 'Three rhythms at once',
+    file: 'rhythm-harmony-three.jpg', w: 619, h: 410, paper: true,
+    alt: 'Three actors sit close together in conversation, all three talking and gesturing at the same time. Above them run three separate lines of linked dots, one green, one red and one yellow, each rising and falling on a pattern of its own.',
+    caption: 'Three rhythms running together and no two of them matching. The scene is the interval between the lines, and no single actor can play an interval.',
+  },
+  'rhythm-rests-board': {
+    title: 'The silences are written down',
+    file: 'rhythm-rests-board.jpg', w: 619, h: 410, paper: true,
+    alt: 'A man stands holding a script with his hand at his chin, looking up and away from the page. Beside him a large sheet shows lines of text with yellow strokes and three musical rest symbols marked into the gaps, and two curved green strokes lead from the sheet toward him.',
+    caption: 'The rests are on the page beside the notes. A silence that has been scored is still being played.',
+  },
+  'rhythm-speeds-pair': {
+    title: 'The two speeds that go missing',
+    file: 'rhythm-speeds-pair.jpg', w: 619, h: 410, paper: true,
+    alt: 'The same man shown twice with an orange arrow running between the two. On the left he reads slowly with one hand raised and open, a long slow green wave beneath him. On the right he speaks quickly and lightly, a dense red wave of close packed points beneath him.',
+    caption: 'The two speeds most actors never reach, drawn as the waves underneath them. Both of them are available inside the same breath.',
+  },
+
+  // ── THE FOURTH WALL, FROM INSIDE THE ROOM (owner handoff, 2026-11-23)
+  // The reverse angle of the two pictures at the top of this file, and
+  // the reason the pair is worth having: the first two show the fourth
+  // wall from where the AUDIENCE sits, and these two show it from where
+  // the ACTOR stands. Same two people, same room, same framing, and the
+  // only difference is what lies beyond the missing wall.
+  //
+  // Both arrived at 1536x1024, the house size, so these two are not cut
+  // down from anything.
+  'fourth-wall-from-the-stage': {
+    title: 'The fourth wall: what the actor is standing in',
+    file: 'fourth-wall-from-the-stage.jpg', w: 1536, h: 1024,
+    alt: 'The view out from a stage set of a living room, past a sofa and a low table, through a proscenium hung with red curtains and into a full auditorium. Two actors stand in the middle of the room facing out, their arms open, and rows of people look back at them from the stalls and from the balcony above.',
+    caption: 'The same building, from the other side of the same wall. This is the room the actor is actually standing in.',
+  },
+  'fourth-wall-from-the-room': {
+    title: 'The fourth wall: what the character is standing in',
+    file: 'fourth-wall-from-the-room.jpg', w: 1536, h: 1024,
+    alt: 'Two people stand together in a bright living room, turned toward one another and talking, in front of a tall window that looks out onto a garden of trees, flowering shrubs and a white fence, with a neighbouring house beyond it. Nobody is outside.',
+    caption: 'And this is the room the character is standing in. The same wall, a garden behind it, and nobody out there at all.',
+  },
+
+  // ── THE PROFESSIONAL ACTOR (owner handoff, 2026-11-23) ──────────
+  // The fifth atlas, professional.png, 2172x724 cut 4 x 2 into cells of
+  // 543x362. It was the one set the mockup did not show, because the
+  // mockup walks the Learn path and these eight chapters are a LIBRARY
+  // shelf, deliberately off it. The art is plainly theirs: eight cells
+  // against eight chapters, in the shelf's own order reading across,
+  // and every one of them is that chapter's subject.
+  //
+  // Shipping them is what keeps the course whole. Without these, the
+  // eight professional chapters would be the only ones in Acting that
+  // close on nothing.
+  'audition-table': {
+    title: 'The audition is the job',
+    file: 'audition-table.jpg', w: 535, h: 354, paper: true,
+    alt: 'A woman stands in a bright studio talking and gesturing to three people seated behind a long table, one of them with a laptop open in front of him. All three are listening and one is smiling. A clothes rail and a plant stand against the windows behind her.',
+    caption: 'A table, three people and twenty minutes. This is not the way to the work, it is a piece of work, and it is most of the work an actor actually does.',
+  },
+  'off-book-minimum': {
+    title: 'Off book is the minimum',
+    file: 'off-book-minimum.jpg', w: 535, h: 354, paper: true,
+    alt: 'A young man with a rucksack still on his shoulder leans down to set a tabbed and coloured script on a folding chair at the edge of an empty rehearsal room. He is putting it down rather than picking it up.',
+    caption: 'He arrives with it learned and leaves it on the chair. Being off book is not the end of the preparation, it is the point at which the rehearsal can start.',
+  },
+  'choices-notebook': {
+    title: 'Bring two, not a question',
+    file: 'choices-notebook.jpg', w: 535, h: 354, paper: true,
+    alt: 'A woman holds an open spiral notebook up and out, turned toward somebody off to the side. Both pages carry small sketched scenes of two figures staged in different positions. She is smiling and looking down at what she is offering.',
+    caption: 'Two drawn versions, held out to be chosen between. A choice can be changed in a second; a question hands the work back to the person who asked you to do it.',
+  },
+  'taking-a-note': {
+    title: 'Taking a note',
+    file: 'taking-a-note.jpg', w: 535, h: 354, paper: true,
+    alt: 'An older man with glasses sits forward, one hand raised mid explanation, talking to a younger actor who holds an open notebook and a pen and is looking straight back at him. Neither of them is talking over the other.',
+    caption: 'He is listening and writing, and he is not explaining. A note taken whole can be tried; a note argued with has already been refused.',
+  },
+  'early-arrival': {
+    title: 'Early is on time',
+    file: 'early-arrival.jpg', w: 535, h: 354, paper: true,
+    alt: 'A woman walks into a large empty rehearsal room with a bag over her shoulder and a water bottle in one hand, glancing at her watch. A clock on the far wall reads a few minutes before the hour and the chairs are still stacked at the side.',
+    caption: 'In before the room fills, with a look at the clock on the way. Arriving on the hour means beginning to work some minutes after it.',
+  },
+  'director-floor-marks': {
+    title: 'What a director actually wants',
+    file: 'director-floor-marks.jpg', w: 535, h: 354, paper: true,
+    alt: 'Two people crouch together on a rehearsal floor marked out with tape. One of them is talking and sweeping a hand along a curved mark; the other is listening with a hand at his chin, looking at the floor rather than at her.',
+    caption: 'Both of them looking at the same problem on the floor. What a director wants is almost never a performance, it is somebody who can solve the thing in front of them.',
+  },
+  'stage-and-camera': {
+    title: 'Two different countries',
+    file: 'stage-and-camera.jpg', w: 535, h: 354, paper: true,
+    alt: 'Two panels divided by a diagonal. On the left an actor stands alone on a lit stage with her arms wide, footlights along the front and rows of red seats below her. On the right an actor stands very still and close to a film camera on a tripod, his face filling the monitor beside it, under a soft light panel.',
+    caption: 'The same craft and two different distances. What carries to the back of a house is enormous on a monitor six feet away.',
+  },
+  'reputation-handshake': {
+    title: 'The reputation is the career',
+    file: 'reputation-handshake.jpg', w: 535, h: 354, paper: true,
+    alt: 'A woman with a rucksack shakes hands with a stage manager who has headphones round her neck and a clipboard under one arm. Three colleagues stand with them, all of them smiling at the exchange.',
+    caption: 'The people in this picture are the next job. A reputation is built out of ordinary days and it travels faster than any showreel.',
+  },
 };
 
 export const actingFigure = key =>
