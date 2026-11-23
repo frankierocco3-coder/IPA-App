@@ -96,22 +96,77 @@ jobs:
       - name: Scan the exact files about to be published
         run: python3 tools/scan_secrets.py --artifact _site
 
-      # PINNED TO THE v5 LINE ON 2026-11-22, AND THE REASON MATTERS.
-      # The Nov 20 deploy succeeded and both Nov 22 deploys failed on the
-      # Deploy step with "No artifacts named github-pages were found",
-      # while the run page listed that artifact at 44.1 MB. Nothing in
-      # this file had changed since 2026-09-21 and githubstatus reported
-      # every component operational, so the platform moved, not the repo:
-      # the run's own annotation says these actions "target Node.js 20 but
-      # are being forced to run on Node.js 24", and deploy-pages v5.0.0 is
-      # the release that moved to Node 24. The old pins bundled a Node 20
-      # era @actions/artifact client whose lookup returns an EMPTY LIST
-      # rather than an error, which is why the message claims the artifact
-      # is absent when it is plainly there.
+      # PINNED TO THE v5 LINE ON 2026-11-22. The bump is worth having and
+      # it is NOT the fix for the failure that prompted it. Read the
+      # correction below before repeating my reasoning.
       #
-      # actions/checkout and actions/configure-pages carry the same Node 20
-      # warning and are NOT bumped here: their steps still pass, and one
-      # broken thing is one change.
+      # THE FAILURE. The Deploy step fails with
+      #
+      #     Error: No artifacts named "github-pages" were found for this
+      #     workflow run.
+      #
+      # while the same run page lists artifact github-pages at 44.1 MB.
+      # The audit job passes, build and upload pass, and 44 MB is a
+      # twentieth of the 1 GB Pages limit.
+      #
+      # WHAT I CONCLUDED, AND WHY IT WAS WRONG. Two consecutive failures
+      # on 2026-11-22 followed a long run of successes, this file had not
+      # changed since 2026-09-21, githubstatus was clean, and the run's own
+      # annotation said these actions "target Node.js 20 but are being
+      # forced to run on Node.js 24". deploy-pages v5.0.0 exists precisely
+      # to move to Node 24, so version drift looked like the cause and the
+      # next two deploys passed, which looked like proof. It was not.
+      # Measured over the eight runs either side of the bump:
+      #
+      #     2026-11-20  success   old pins   x3
+      #     2026-11-22  failure   old pins   x2
+      #     2026-11-22  success   NEW pins   x2
+      #     2026-11-23  failure   NEW pins
+      #
+      # The same failure happens on the current pins and the old pins
+      # succeeded for weeks, so the bump neither caused it nor cured it.
+      # Two failures in a row made an intermittent fault look structural,
+      # and two successes after a change made the change look like the
+      # remedy. The run's THIRD annotation says what it actually is, and
+      # it was there from the first failure: "Fetching artifact metadata
+      # failed ... Please re-run the deployment at a later time."
+      #
+      # WHAT TO DO WHEN IT HAPPENS: PUSH AGAIN. DO NOT RE-RUN THE JOB.
+      #
+      # This is the part that cost the most to learn, on 2026-11-23, and
+      # the action's own message sends you the wrong way. There are TWO
+      # different failures here and they read almost alike:
+      #
+      #   count 0  "No artifacts named github-pages were found"
+      #            The lookup ran before the upload was visible to the
+      #            artifact API, even though the Upload step passed and
+      #            the artifact is listed on the run page. This is the
+      #            intermittent one.
+      #
+      #   count 2  "Multiple artifacts named github-pages were
+      #            unexpectedly found ... Artifact count is 2."
+      #            SELF INFLICTED. Re-running the deploy job uploads a
+      #            SECOND artifact under the same name into the same run,
+      #            and deploy-pages requires exactly one. A re-run of this
+      #            job therefore CANNOT succeed, whatever the original
+      #            failure was, and it turns a transient fault into a
+      #            permanent one for that run.
+      #
+      # So "Please re-run the deployment at a later time", which the action
+      # prints on both, is advice this workflow cannot take. A new push
+      # gives a new run and a clean artifact namespace, which is the only
+      # retry that works. Read the Deploy step's log for the count line
+      # before doing anything: `Found N artifact(s)` names which failure
+      # you have.
+      #
+      # Do not change this file looking for a cause in it. Check the run
+      # list too: an intermittent failure sits among successes on the same
+      # pins, and a real break fails every time.
+      #
+      # actions/checkout and actions/configure-pages still carry the Node
+      # 20 warning and are deliberately NOT bumped. Their steps pass, and
+      # after the above I am not going to claim that bumping them fixes
+      # anything.
       - name: Upload artifact
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
