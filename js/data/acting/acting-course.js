@@ -58,6 +58,23 @@ export const ACTING_PRINCIPLE =
 // See the record itself for why it lands there.
 export const PERFORMANCE_LIVE = false;
 
+// THROUGH ANALYSIS IS WITHDRAWN (owner order, 2026-11-22: "get rid of
+// through analysis"). It was module 1 lesson 2, between The Four Lists
+// and Marking Up the Script.
+//
+// A FLAG AND NOT A DELETION, which is this project's answer every time
+// and matters more here than usual. `ac-analysis` is STORAGE: every
+// learner who finished it has that id in their completed set, and hard
+// constraint 5 says progress is never destroyed without a migration. The
+// record stays in ACTING_LESSONS_ALL, its ledger entry stays in
+// js/data/speech/reviews.js, and the filters below take it out of the
+// course. Flip this to true and it comes back published rather than as a
+// draft gate, which is the same contract PERFORMANCE_LIVE keeps.
+//
+// Deleting the record outright is a one line change from here if that is
+// what the owner wants; this is the reversible half of it.
+export const ANALYSIS_LIVE = false;
+
 const ACTING_MODULES_ALL = [
   // SCRIPT ANALYSIS COMES FIRST (owner order, 2026-10-21), on the way it
   // is actually taught: table work before anybody is on their feet, and
@@ -238,11 +255,18 @@ const ACTING_LESSONS_ALL = [
       { key: 'Stakes are established by the circumstances, not chosen for effect, and reading them accurately is more useful than inflating them.' },
       { p: 'Reading them accurately produces a scene where a small thing can matter enormously because of what surrounds it.' },
       { h: 'Kinds of stakes worth naming' },
+      // RAISED 2026-11-22 (owner order): the examples were the low end of
+      // each kind, which taught the categories and not the cost. They are
+      // the top of each kind now. The lesson's spine does NOT move with
+      // them: the panel below still says read them rather than inflate
+      // them, and these are high because the circumstances make them
+      // high, not because a bigger word was chosen.
       { list: [
-        'Practical: money, the job, the room, the deadline.',
-        'Relational: whether this person stays, trusts you, forgives you.',
-        'Internal: whether the character can go on thinking of themselves as they do.',
+        'Practical: the rent that is already late, the job that was the last offer, the deadline that ends in a courtroom.',
+        'Relational: whether this person stays married to you, whether they ever speak to you again, whether they forgive the thing you have not told them yet.',
+        'Internal: whether the character can go on believing they are the person they have always said they are.',
       ] },
+      { p: 'None of those is louder than the others. A scene about rent can cost more than a scene about a death, if the rent is the last thing holding a life together and the death is at arm’s length.' },
       { panel: { tone: 'sage', icon: 'target', title: 'Read them, do not inflate them',
         items: [
           'Ask what the character gains if this goes well, and loses if it does not.',
@@ -259,6 +283,12 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Every scene has to justify its own timing. The text usually tells you how.',
     reflection: 'Why can your character not have this conversation tomorrow instead?',
     glossary: ['urgency'],
+    // REWRITTEN DEEPER 2026-11-22 (owner order). The lesson was four
+    // sentences, a list and a panel: it named the idea and left the actor
+    // to apply it. What it was missing is the part that is actually hard,
+    // which is not what urgency IS but how to find the clock in a
+    // particular scene and what the pressure does to behaviour once you
+    // have. The original four lines all survive, in order, at the top.
     body: [
       { p: 'Urgency is the need to affect something now.' },
       { p: 'In dramatic circumstances, urgency is usually written into the situation.' },
@@ -269,11 +299,40 @@ const ACTING_LESSONS_ALL = [
         'New information that has just arrived.',
         'A window that is closing: the other person is leaving, or will not be alone again.',
         'A consequence that becomes irreversible after this scene.',
+        'A cost that rises for every minute the thing goes unsaid.',
+        'A third person who is about to walk through the door.',
+      ] },
+      { h: 'Why today, and not a week ago' },
+      { p: 'A scene that could have happened last Tuesday, or next Tuesday, has not found its urgency yet. The question is not whether your character wants something. It is what makes today the day they have to do something about it.' },
+      { p: 'Writers answer that question somewhere on the page, usually early, and usually in a line that sounds like information rather than pressure. Somebody mentions a flight, a hearing, a result that comes back on Friday. That is the clock, handed to you in passing.' },
+      { key: 'Two things supply the answer, and they behave differently: something has just changed, or something is about to.' },
+      { p: 'A change that has just landed gives you a person still absorbing it, working a half step behind their own situation. A change that is coming gives you a person trying to get in front of it, working a half step ahead. Decide which one your scene is running on before you decide anything else, because almost every behavioural choice in the scene follows from it.' },
+      { h: 'What the pressure does to behaviour' },
+      { p: 'Urgency is a pressure, not a tempo. It changes what a person is willing to do, not only how fast they do it.' },
+      { list: [
+        'It narrows the tactics: there is no longer time for the long way round, so people go at the thing directly.',
+        'It cuts the social opening. Nobody asks how the drive was.',
+        'It produces repetition, because being understood has stopped being optional.',
+        'It makes interruption reasonable, where in a slower scene it would be rude.',
+        'It can produce stillness and quiet, when any movement would cost them the thing they want.',
+        'It makes people bargain with things they would not normally offer.',
       ] },
       { panel: { tone: 'sage', icon: 'lamp', title: 'Reading urgency',
         items: [
           'As the Speech chapter establishes, it is not automatically faster or louder speech. It can produce slowness, precision, repetition, stillness or a change of tactic.',
           'It is usually written into the situation: something has just happened, something is about to, someone is about to leave, a decision is being made tonight, an opportunity is closing.',
+        ] } },
+      { h: 'The familiar bad version' },
+      { p: 'Played as general speed, urgency becomes faster lines and more volume with nothing underneath, and it reads as an actor in a hurry rather than a person who has run out of time. The giveaway is that it is even: real pressure is uneven, because it comes and goes as the character gets closer to the thing and further from it again.' },
+      { key: 'The test: slow the scene down on purpose. Whatever pressure survives the slowing was real, and whatever disappears was speed pretending.' },
+      { h: 'Urgency and stakes are not the same thing' },
+      { p: 'Stakes are what the outcome costs. Urgency is how little time there is to affect it. A scene can carry enormous stakes and no urgency, which is what a deathbed scene often is, and it can carry small stakes under a hard clock, which is most comedy. Knowing which of the two your scene is short of tells you what to go looking for in the text.' },
+      { panel: { tone: 'sage', icon: 'target', title: 'Finding it in the scene in front of you',
+        items: [
+          'Name the clock out loud: what exactly runs out, and when.',
+          'Name the cost of missing it in this character’s terms, not in general terms.',
+          'Find the line where the text hands you the clock, and say it like somebody who knows what it means.',
+          'Then take the speed out and play it slowly once. What is left is your urgency.',
         ] } },
     ] },
 
@@ -336,8 +395,16 @@ const ACTING_LESSONS_ALL = [
     orientation: 'Knowing the words is preparation, not acting.',
     reflection: 'Which lines are still not automatic? Those are tonight’s work, not tomorrow’s.',
     body: [
-      { p: 'Being off book is the professional actor’s responsibility. The words are fixed and they are not yours to approximate: the exact language should become secure enough that you are no longer searching for the next one.' },
-      { p: 'Knowing the words is preparation, not acting. Fluency frees the actor to listen, respond and pursue the objective.' },
+      // THE OPENING PARAGRAPH WAS CUT (owner order, 2026-11-22). It began
+      // 'Being off book is the professional actor's responsibility' and
+      // ran to 'no longer searching for the next one'.
+      //
+      // AND THE SENTENCE AFTER IT WENT WITH IT, which was not asked for
+      // and is the same cut: 'Knowing the words is preparation, not
+      // acting' is this lesson's `orientation` word for word, so with the
+      // paragraph above removed the body opened by repeating the line
+      // already printed at the top of the page.
+      { p: 'Fluency frees the actor to listen, respond and pursue the objective.' },
       { key: 'An actor still hunting for text has no attention left for the other person, and acting lives in what happens between people.' },
       { h: 'What securing text actually buys' },
       { list: [
@@ -472,11 +539,44 @@ const ACTING_LESSONS_ALL = [
       { p: 'An actor watching themselves has divided attention, and it shows.' },
       { key: 'An actor genuinely watching their partner has something to respond to, and that reads as presence.' },
       { p: 'This is trainable, and it is mostly a matter of where practice puts your attention.' },
+
+      { h: 'What divided attention looks like from outside' },
+      { p: 'It rarely looks like distraction. It looks like a small delay, as though every line were being checked before it was released, and an evenness in the face that does not change when the other person changes. An audience cannot see where your attention is. They can see that something is arriving slightly late.' },
+      { list: [
+        'The eyes go to the partner on your own line and leave on theirs.',
+        'You are listening with an expression chosen before the scene started.',
+        'Your reactions are the right size for the scene rather than the right size for what just happened.',
+        'You know exactly what you are doing next, whatever they do.',
+      ] },
+
+      { h: 'Attention is not concentration' },
+      { p: 'Concentration is effortful and inward, and a concentrating actor is often the least available person in the room. Attention is the opposite movement: loose, outward, interested. The two are easiest to tell apart when something goes wrong. Concentration is disturbed by a dropped line. Attention uses it.' },
+
+      { h: 'What to put it on' },
+      { p: 'Not the words. The words are the one part of the scene you already have. Put it on what the other person is doing while they say them, because that is the only part that is genuinely new tonight.' },
+      { list: [
+        'Where their weight is, and whether it has just moved.',
+        'What their hands have stopped doing.',
+        'Where they look when they reach the hard part of the line.',
+        'Whether this reading is the same as last night, and what changed.',
+        'What they want from you now, which is often not what they are asking for.',
+      ] },
+      { key: 'Watching for what they want is the version that survives performance, because it is the one that also serves your own objective.' },
+
       { panel: { tone: 'sage', icon: 'target', title: 'Freeing the attention up',
         lead: 'One thing to do about it, and what it buys.',
         items: [
           'Secure the text first. What is automatic no longer needs supervising.',
           'What that frees is attention for the person in front of you.',
+        ] } },
+
+      { h: 'Looking is not attending' },
+      { p: 'Actors told to watch their partner often produce a fixed, faintly intense stare, which reads worse than the divided attention it replaced. Attention does not have to be continuous and it does not live only in the eyes. Looking away at the moment a thing lands is frequently the most attentive move available, because it is what a person does when something has actually gone in.' },
+      { panel: { tone: 'sage', icon: 'lamp', title: 'Two tests you can run tonight',
+        lead: 'Both are answered after the run, not during it.',
+        items: [
+          'Name three things your partner did that you had not planned for. If you cannot name one, your attention was inward.',
+          'Ask them to change one thing without telling you which. If the run plays identically, you were not watching.',
         ] } },
     ] },
 
@@ -490,12 +590,37 @@ const ACTING_LESSONS_ALL = [
     body: [
       { p: 'Waiting for your cue is not listening.' },
       { key: 'Receiving means letting what the other person does actually affect you before your line arrives, and letting the size of the effect match what they gave you.' },
+
+      { h: 'What the gap actually is' },
+      { p: 'Between what they do and what you do, something has to happen to you. It does not have to take time. A great deal of receiving happens inside half a second, and what the audience registers is not a pause but the fact that your line could not have been said before theirs.' },
+
+      { h: 'Why waiting for a cue feels like listening' },
+      { p: 'Because it is attentive, and attentive to the wrong thing. An actor holding for a cue is tracking the END of the other line, which means tracking its last three or four words. That is a timing operation. It can be performed flawlessly while missing everything the line was about.' },
+
+      { h: 'Letting the size match' },
+      { p: 'The common failure is not the absence of a response but a response of the wrong size. A mild remark gets a devastated reaction because the actor knows what it will mean in act three. A genuinely wounding line gets a shrug because the actor has heard it two hundred times in rehearsal. Scale is information: an audience reads the size of your response as the size of the event.' },
+      { key: 'If every line lands equally hard, none of them lands.' },
+
+      { h: 'Where the receiving is written' },
+      { p: 'You do not have to invent these moments. The text marks most of them.' },
+      { list: [
+        'Any line that answers a question with something other than the answer.',
+        'Any place where your next line changes tactic.',
+        'Any line that opens with a refusal: no, wait, listen, stop.',
+        'Any silence the writer actually wrote down.',
+        'Any repetition of a word your partner has just used.',
+      ] },
+
       { panel: { tone: 'sage', icon: 'lamp', title: 'Listen to the scene and name it',
         lead: 'The same text gives you one of two sounds.',
         items: [
           'Two people reciting alternately: the receiving is missing.',
           'A conversation, where each line is visibly caused by the one before it: it is there.',
         ] } },
+
+      { h: 'The overcorrection' },
+      { p: 'Told to receive, actors add pauses. A scene paved with pauses is not a scene that listens, it is a scene that has learned to look thoughtful, and it is slower without being fuller. Receiving is not duration. It is causation.' },
+      { key: 'Test: take out every pause you added and play it fast. Whatever still reads as caused was genuinely received, and the rest was decoration.' },
     ] },
 
   { id: 'ac-moment', module: 'listening', order: 3,
@@ -509,12 +634,37 @@ const ACTING_LESSONS_ALL = [
       { p: 'Preparation gives you circumstances, objective, obstacle and a vocabulary of actions. It does not give you a performance to reproduce.' },
       { key: 'The scene is played forward each time, in response to what is actually happening.' },
       { p: 'This is not an argument against rehearsal, quite the opposite.' },
+
+      { h: 'What is fixed, and what is genuinely free' },
+      { p: 'Almost every argument about this subject comes from not separating the two. Some of a performance is fixed and should be: it is owed to the writer, to the lighting board and to the other actors. The rest is yours to play forward, and it is where the evening is either alive or not.' },
+      { defs: [
+        { label: 'Fixed', text: 'The words. The blocking that other people depend on. Entrances, exits, anything cued to light or sound, anything that would be unsafe to vary.' },
+        { label: 'Free', text: 'Which action you are playing on a given line. How hard you push. What you do while they speak. How long you take. What you look at. Whether this attempt works.' },
+      ] },
+      { p: 'The free list is longer than most actors use. Blocking and text being fixed does not fix the behaviour inside them, and a performance that varies nothing at all has decided that the other person cannot affect it.' },
+
+      { h: 'Why a reproduced performance decays' },
+      { p: 'Reproduction copies the surface of a thing that was caused. The first time, you took that pause because something genuinely landed; on the twentieth, the pause is there and the thing that caused it is not. The audience does not see a pause of the right length, they see one with nothing inside it. The same decay works on a laugh, a turn, a change of volume. Each is the visible end of something that has quietly stopped happening.' },
+      { key: 'Repeat the cause, and the effect comes back on its own. Repeat the effect, and the cause never returns.' },
+
+      { h: 'Playing it forward' },
+      { p: 'Playing forward means entering each moment from the one before it rather than from your memory of the run. Practically, that is a small number of habits.' },
+      { list: [
+        'Start the scene from what is true at the top tonight, not from how it went last night.',
+        'Let the attempt genuinely be an attempt: if it works on them, take the win and move, and if it does not, do something else.',
+        'Treat your partner’s change as information rather than as an error to absorb.',
+        'Finish the line you are on before you start arranging the one after it.',
+      ] },
+
       { panel: { tone: 'sage', icon: 'book', title: 'What the preparation is for',
         lead: 'Thorough preparation is what makes moment-to-moment work possible.',
         items: [
           'Make the things that must be reliable reliable.',
           'That is what leaves the live things free.',
         ] } },
+
+      { h: 'When your partner is fixed and you are not' },
+      { p: 'It happens, and it is not a reason to fix yourself to match. You cannot make somebody else play moment to moment, but you can keep giving them something real to answer, and a scene with one live actor in it is still better than a scene with none. Keep your own attempts genuine, keep the sizes honest, and do not punish them by withdrawing: that produces two people performing separately, which is the thing you were trying to avoid.' },
     ] },
 
   { id: 'ac-newinfo', module: 'listening', order: 4,
@@ -527,6 +677,32 @@ const ACTING_LESSONS_ALL = [
     body: [
       { p: 'Scenes deliver information: a confession, a refusal, a fact the character did not have. The question is whether it lands.' },
       { key: 'An actor who already knows the whole play can quietly stop being surprised by it.' },
+      { h: 'The problem is that you have read the end' },
+      { p: 'Your character finds out on page forty. You found out six weeks ago, and you have run the scene thirty times since. Nothing about rehearsal protects the moment of learning: it erodes it, every single time, and the erosion is invisible from the inside because the line still feels meaningful to say.' },
+      { p: 'The answer is not to pretend you do not know. Pretended surprise is one of the easiest things to spot in a theatre. The answer is to play the character’s situation, which is that they do not yet have the information and are therefore still operating on the old picture, right up until the line where the picture breaks.' },
+
+      { h: 'Finding the exact line' },
+      { p: 'Vagueness about where it lands is what produces a general cloud of significance over a whole page. Information arrives at a word, not in a region. Mark it.' },
+      { list: [
+        'Read the scene asking only this: what does my character know at the top that they do not know at the bottom?',
+        'Find the first line at which they could not go back to believing the old thing.',
+        'Check whether the line before it was still played on the old picture. If it was not, the information arrived early and the moment is gone.',
+      ] },
+
+      { h: 'What landing costs' },
+      { p: 'A fact that costs nothing has not landed, it has been received. The cost is whatever the character now has to give up: a plan, a story about somebody, an idea of themselves, the thing they came into the room to do. Name it in a few words and the scene usually starts telling you how to play it.' },
+      { key: 'The size of the adjustment is the size of the information. That is how an audience knows what it was worth.' },
+
+      { h: 'The adjustment is the acting' },
+      { p: 'What happens after is more interesting than the moment itself, and it is where most actors stop. A character who has just learned something does not simply continue. They do one of a small number of things, and choosing which is a real decision.' },
+      { list: [
+        'Change tactic: the old approach cannot work now, so try another.',
+        'Keep going anyway, because admitting the change would cost more than the lie.',
+        'Retreat, and buy time to think.',
+        'Attack, because the information is an injury and the nearest person did it.',
+        'Go quiet, which is the hardest to play and often the truest.',
+      ] },
+
       { panel: { tone: 'sage', icon: 'target', title: 'Working a piece of new information',
         lead: 'Three moves, on each thing the character learns.',
         items: [
@@ -534,6 +710,9 @@ const ACTING_LESSONS_ALL = [
           'Let it cost something.',
           'Play the adjustment that follows: a change of tactic, a pause, a retreat. It is often the most alive moment in the scene.',
         ] } },
+
+      { h: 'Information your character already has' },
+      { p: 'Not everything said in a scene is news, and treating it as news is its own mistake. Half of what passes between people who know each other is old ground, deliberately raised. When your partner says a thing your character has heard a hundred times, the live question is not what it means but why it is being said again, now.' },
     ] },
 
   { id: 'ac-repetition', module: 'listening', order: 5,
@@ -546,12 +725,41 @@ const ACTING_LESSONS_ALL = [
     body: [
       { p: 'Repetition is how the work becomes reliable. It is also how a scene dies, if what is repeated is a performance rather than a pursuit.' },
       { key: 'The difference is what you are repeating: the circumstances, the objective and the listening, or a remembered set of line-readings.' },
+      { h: 'Two things are being repeated and only one of them should be' },
+      { defs: [
+        { label: 'Repeat the situation', text: 'The circumstances, what you want, what is in the way, what it costs to fail. These should be identical every time, and they are what makes a run reliable.' },
+        { label: 'Do not repeat the reading', text: 'The exact pitch of a line, the length of a pause, the turn on a particular word. These were results the first time. Reproduced, they are shapes with nothing in them.' },
+      ] },
+      { p: 'An actor who has learned the difference can run a scene two hundred times without it dying, because what they are rehearsing is a thing that happens rather than a thing that is performed.' },
+
+      { h: 'How a scene actually freezes' },
+      { p: 'It does not usually die of boredom. It dies of success. Something works, everybody notices it working, and from then on it is protected: the pause is held because the pause got the laugh, the line is turned because the turn landed. Within a week the scene is a sequence of preserved results, and the actors are curating rather than playing.' },
+      { list: [
+        'You can predict your partner’s reading before they give it.',
+        'A note from the director feels like it would break something.',
+        'You are aware of a moment coming up and looking forward to it.',
+        'Nothing in the last three runs surprised you.',
+      ] },
+
+      { h: 'Opening a frozen scene again' },
+      { p: 'The aim is to make the old result impossible to reach so the cause has to do the work again. Most of these are rehearsal room moves and all of them are temporary: you are not keeping the new version, you are using it to find out what was still alive.' },
+      { list: [
+        'Run it at half speed, or at double, so no remembered rhythm fits.',
+        'Swap what you want: play the whole scene trying to get something adjacent and see what survives.',
+        'Change the physical situation: stand when you normally sit, put a door between you.',
+        'Play it to the partner you have tonight rather than the one you rehearsed with, especially if they are tired, or different, or late.',
+        'Take out every pause and put back only the ones that fight to return.',
+      ] },
+
       { panel: { tone: 'sage', icon: 'target', title: 'A practical test',
         lead: 'Run it on your last rehearsal.',
         items: [
           'Ask whether that run-through would have been unchanged had your partner done something different.',
           'If it would, the scene has been fixed rather than rehearsed.',
         ] } },
+
+      { h: 'The long run' },
+      { p: 'Over months the danger reverses. Early on the risk is freezing; later it is drift, where the scene has been varied so often that nobody can find the version that worked. The discipline is the same one from both directions: hold the situation exactly, and leave the behaviour free. Anything you cannot say about the circumstances in one sentence is something that has drifted.' },
     ] },
 
   { id: 'ac-playing', module: 'listening', order: 6,
@@ -565,12 +773,42 @@ const ACTING_LESSONS_ALL = [
       { p: 'Emotion cannot be played directly with any reliability; attempts to produce it on command usually produce its indication instead.' },
       { key: 'What can be played is a pursuit under real resistance, and feeling tends to arrive on its own when the pursuit matters.' },
       { p: 'This course takes no position on which of the many approaches to emotional life an actor should adopt; the Approaches to Acting introductions in the Library describe several.' },
+
+      { h: 'Why it cannot be played directly' },
+      { p: 'Feeling is not under voluntary control in the way an action is. You can decide to cross a room, ask a question or take somebody’s hand, and then do it. You cannot decide to be devastated and then be devastated, and the attempt produces something else instead: a performance of the signs of devastation, which is what indicating means and what an audience reads as acting rather than as a person.' },
+      { key: 'An action is something you do to somebody. An emotion is something that happens to you. Only the first can be rehearsed.' },
+
+      { h: 'What makes an objective playable' },
+      { p: 'A playable objective is specific, it is about the other person, and you can tell from outside whether it is working. Those three tests throw out most of what actors write in margins.' },
+      { defs: [
+        { label: 'Not playable', text: 'To be angry. To show that I love him. To be the kind of man who does not back down. To process my grief.' },
+        { label: 'Playable', text: 'To get her to stay in the room. To make him say it out loud. To get the keys off the table before she looks. To make her laugh so the subject changes.' },
+      ] },
+      { p: 'The second list has a common shape: a verb, a person, and a thing that would visibly be different if you succeeded.' },
+
+      { h: 'Converting one into the other' },
+      { p: 'When you are handed an unplayable instruction, by a director, a stage direction or yourself, the move is to ask what a person who felt that way would be TRYING TO DO in this room, to this person, right now.' },
+      { list: [
+        'Be furious, becomes: make him admit what he did.',
+        'Be in love with her, becomes: get her to look at me for longer than she means to.',
+        'Show that you are afraid, becomes: get out of this conversation without being noticed leaving.',
+        'Be devastated, becomes: get somebody to tell me it is not true.',
+      ] },
+      { p: 'Notice what survives the conversion. The feeling is not thrown away: it is now the reason the pursuit matters, which is where it can do some work.' },
+
       { panel: { tone: 'sage', icon: 'target', title: 'Playable, or not',
         lead: 'The one thing this course does insist on.',
         items: [
           '“Be sad” is not a playable instruction.',
           '“Get her to stay” is.',
         ] } },
+
+      { h: 'Where the feeling then comes from' },
+      { p: 'From the circumstances, the stakes and the resistance, which is why this module sits where it does in the course. If what you want matters, and somebody is genuinely stopping you getting it, feeling arrives without being sent for. When it does not arrive, the usual cause is not a failure of emotional access: it is an objective that was never worth very much, or an obstacle that is not really resisting.' },
+      { key: 'A scene with no feeling in it is more often a stakes problem than a feeling problem.' },
+
+      { h: 'And when the feeling does arrive' },
+      { p: 'Let it, and keep going. The pursuit does not stop because you are moved, and a character who stops to experience their own emotion is a character who has given up on getting the thing. Most of the strongest moments on a stage are somebody trying to carry on with something while it is happening to them.' },
     ] },
 
   // ── Module 5 · Preparing the Performance ──────────────────────
@@ -794,6 +1032,21 @@ const ACTING_LESSONS_ALL = [
       { p: 'Everything in this module happens at a desk, and almost none of it survives the walk into the rehearsal room unless you write it down. A decision you made on Tuesday about where a beat turns is worth nothing on Thursday if you cannot see it on the page in front of you. Marking up is not tidiness. It is the difference between having analysed the scene and being able to use the analysis while somebody is talking to you.' },
       { p: 'There is no standard notation. No two actors mark alike, no school agrees, and nobody is coming to check. What follows is not a system to adopt. It is the small set of marks that keep turning up, and what each one is for.' },
 
+      // ── OWNER REMINDER, 2026-11-22: REPLACE BOTH EXAMPLES ──────────
+      // Frankie asked to be reminded that the two marked-up passages in
+      // this lesson are to be swapped for different ones. They are the
+      // Macbeth I.7 beats-and-actions page below, and the Romeo and
+      // Juliet cut further down.
+      //
+      // NOT CHANGED HERE ON PURPOSE. Choosing the replacement passages is
+      // his call: the marks have to land on lines that genuinely turn
+      // where the beat line is drawn, and that is an editorial judgement
+      // about the text, not a formatting job. Logged in docs/ROADMAP.md
+      // so it survives this session.
+      //
+      // When the new passages arrive, only the `rows` change. The `key`
+      // and `note` are about the notation rather than the play, and the
+      // markup block renders whatever rows it is given.
       { h: 'Beats, and what you are doing in them' },
       { p: 'The most common mark in the world is a line across the page where a beat turns, with the action written beside it. That is two decisions recorded in about four seconds: here is where the scene changes, and here is what I am doing until it changes again.' },
       { markup: {
@@ -919,7 +1172,32 @@ const ACTING_LESSONS_ALL = [
       { p: 'Tempo is how fast you are going. Rhythm is the pattern inside the speed, the long and the short of it.' },
       { key: 'Tempo and rhythm are separate dials and they turn separately.' },
       { p: 'Fast and smooth is one thing. Fast and jagged is a different animal. Slow and steady, slow and broken: four states, two dials.' },
+      { fig: 'rhythm-dials' },
       { p: 'Why care? Because the repairs are different. Wrong tempo, change the speed. Wrong rhythm, and changing the speed just hauls the same bad pattern along at a new rate. You have heard the note a hundred times: pick up the pace. And the scene did not get better, did it? Because the scene was dragging in its rhythm, and nobody touched that dial.' },
+
+      { h: 'The four states, with people in them' },
+      { p: 'Say them out loud and you will recognise everybody you have ever worked with.' },
+      { defs: [
+        { label: 'Slow and even', text: 'A judge summing up. A priest at a graveside. Somebody choosing every word because the wrong one would cost them. Nothing hurried and nothing broken.' },
+        { label: 'Slow and broken', text: 'Somebody working it out while they speak, or lying and not enjoying it. Unhurried overall, and stalling and restarting inside that.' },
+        { label: 'Fast and even', text: 'A briefing. A pitch that has been given four hundred times. Quick, regular, frictionless, and very often a way of not being interrupted.' },
+        { label: 'Fast and broken', text: 'Panic. Interruption. Somebody whose thoughts are arriving faster than their mouth can sort them.' },
+      ] },
+      { p: 'Two of those four are fast and they have nothing else in common. That is the entire argument for the second dial.' },
+
+      { h: 'Which dial is wrong' },
+      { p: 'This is the part you can use tonight, because almost no note tells you which one it means.' },
+      { list: [
+        'The scene feels slow and you cannot find a single slow line: it is the rhythm. Everything is arriving at the same length.',
+        'The scene feels rushed but every line is landing: it is the tempo. Take it down and leave the pattern alone.',
+        'You have picked up the pace twice and it has not helped: stop turning that dial. It is the other one.',
+        'The speech is right and the body is wrong, or the reverse: two dials on two instruments, and the most common version of all.',
+      ] },
+
+      { h: 'A drill that proves you have both' },
+      { p: 'Take eight lines you know cold. Run them fast and even. Then fast and broken. Then slow and even, then slow and broken. Same words, same objective, four different people.' },
+      { key: 'If two of the four come out sounding the same, that is the dial you do not have yet.' },
+
       { panel: { tone: 'sage', icon: 'mask', title: 'Three traps, so you can spot yourself in them',
         items: [
           'The actor whose body is rhythmic and whose speech is not, or the reverse.',
@@ -939,6 +1217,21 @@ const ACTING_LESSONS_ALL = [
       { p: 'Try commanding yourself to dread something. Nothing happens. Now set the rhythm of dread, the caught breath, the too-still hands, and give it a minute. The feeling walks in on its own, behind the rhythm, like it was invited.' },
       { p: 'But it does not work empty. Give it a circumstance to sit on and the two start feeding each other: the situation shapes the rhythm, and the rhythm starts showing you corners of the situation you had not imagined yet.' },
       { p: 'And never mistake speed for meaning. A march, a stroll and a funeral can move at exactly the same tempo and share nothing else on earth.' },
+
+      { h: 'How you actually find one' },
+      { p: 'Not by naming the feeling and waiting. By finding the body it lives in, and that is a shorter list than it sounds: where the breath sits, what the hands have stopped doing, how long you can bear a silence before filling it, how far you move on each impulse.' },
+      { defs: [
+        { label: 'Dread', text: 'The caught breath. The too-still hands. A long wait before anything at all, and then not much.' },
+        { label: 'Elation', text: 'Breath high and quick, movement starting before the thought has finished, no waiting anywhere.' },
+        { label: 'Grief, the real kind', text: 'Very slow and very even, with almost no gesture. The performed kind is broken and busy, which is how you can tell them apart from the back row.' },
+        { label: 'Cornered', text: 'Fast and broken, with sudden stops where the person checks whether they have just given themselves away.' },
+      ] },
+      { p: 'Set one of those running for a full minute, honestly, with the circumstance underneath it. Then stop arranging it and see what turns up.' },
+
+      { h: 'Where it fails' },
+      { p: 'It fails when it is used as a machine for producing feeling to order, which is exactly what it looks like from outside. The rhythm is a door, not a generator. Set one with no circumstance under it and you get the shape of the feeling with nothing inside, and an audience reads that as technique, which is the kindest available word for it.' },
+      { key: 'The rhythm opens the door. The circumstance is what walks through it.' },
+
       { panel: { tone: 'sage', icon: 'lamp', title: 'If the rhythm is not going anywhere',
         items: [
           'A rhythm with nothing behind it is drumming on a table.',
@@ -955,8 +1248,31 @@ const ACTING_LESSONS_ALL = [
     body: [
       { p: 'Watch anyone waiting on terrible news. The body is stone. Inside, the pulse is sprinting. Watch a good liar: the speech is even, almost bored, and underneath it every gear is screaming.' },
       { key: 'Inside and outside do not match, and most of the time they should not, because the distance between them is where the performance lives.' },
+      { fig: 'rhythm-two' },
       { p: 'Better yet, the two rhythms push on each other. The harder you clamp the outside steady, the faster the inside runs, and the faster the inside runs, the harder the outside is to hold.' },
       { p: 'One mind can split the same way, resolve at one speed and doubt at another, both running at once.' },
+
+      { h: 'The text usually tells you where' },
+      { p: 'You are not hunting for these. Writers put them where they want them, and they leave fingerprints.' },
+      { list: [
+        'A character who is being asked a direct question and answers a different one.',
+        'Short, flat, polite lines in a scene that is anything but polite.',
+        'Any line that a stage direction describes as calm, quiet or pleasant.',
+        'A character who has just learned something and does not mention it.',
+        'Anybody waiting for somebody else to leave.',
+      ] },
+
+      { h: 'Building them' },
+      { p: 'Set the outside first, because it is the one you are choosing, and it has to be holdable for the length of the scene. Then set the inside running and leave it alone. The mistake is to play the inside, which is how actors end up signalling the secret they are supposed to be keeping.' },
+      { key: 'Play the outside. Let the inside leak.' },
+      { p: 'What the audience reads is the cost of holding the outer rhythm steady, and that cost shows in the places you are not managing: a hand, the length of a breath, how long it takes you to answer, a word that comes out slightly too fast and is immediately corrected.' },
+
+      { h: 'Two ways it goes wrong' },
+      { defs: [
+        { label: 'One rhythm', text: 'The outside and the inside match, so the scene plays as honest and goes flat. Usually because the actor decided what the character is feeling and then showed it.' },
+        { label: 'Both played', text: 'The outside is calm and the actor keeps showing you the inside anyway, in case you missed it. Now there is no secret and no gap, just an actor doing two things at once.' },
+      ] },
+
       { panel: { tone: 'sage', icon: 'target', title: 'When a scene feels flat',
         items: [
           'If every other thing about it checks out, look here first.',
@@ -974,7 +1290,27 @@ const ACTING_LESSONS_ALL = [
       { p: 'Everybody in a room is running their own rhythm. When a group truly shares one, that is unison, and unison is a special effect: soldiers on parade, a chorus, a mob with one idea in its head. The sameness is the point there. A scene is not built like that.' },
       { key: 'A scene is harmony: different lines, sounding at the same time.' },
       { p: 'Think about what a chord is. Different notes. Two players on the same note are not making a chord, they are making one note louder. What the audience actually receives from two characters is the interval between them, and here is the thing about the interval: nobody plays it. You hold your line, the other actor holds theirs, and the music happens in the space neither of you owns.' },
+      { fig: 'rhythm-harmony' },
       { p: 'Some intervals sit sweet. Some grate. Both are music, so a scene where two rhythms refuse to settle is not a scene going wrong.' },
+
+      { h: 'What the interval is made of' },
+      { p: 'It is not mystical and you can list it. Everything in this list is something an audience can hear without being able to name.' },
+      { list: [
+        'Who is quicker to answer, and by how much.',
+        'Who finishes their thoughts and who abandons them halfway.',
+        'Whose lines are getting longer across the scene and whose are getting shorter.',
+        'Who is comfortable in a silence, and who cannot leave one alone.',
+        'Who changes pace when the subject changes, and who does not notice it changed.',
+      ] },
+
+      { h: 'Holding your own line' },
+      { p: 'The practical difficulty is that rhythm is contagious. Spend four hours in a room with somebody and your pace drifts towards theirs without either of you deciding anything. That is fine at a read-through and fatal by the third week.' },
+      { key: 'Your rhythm comes from your character\u2019s circumstances, not from the pace of the person opposite you.' },
+      { p: 'If your character is in a hurry and theirs is not, you stay in a hurry. Matching them is not generosity, it is the scene quietly losing its only engine.' },
+
+      { h: 'When unison is right' },
+      { p: 'Sometimes it is exactly the point, and then it should be chosen rather than arrived at: two people who have been married for forty years finishing each other\u2019s rhythm, a crowd that has become one thing, a pair who have just agreed something and are briefly in step. Played deliberately, unison is powerful because the audience has spent the whole evening hearing intervals and suddenly there are none.' },
+
       { panel: { tone: 'sage', icon: 'mask', title: 'The thing to fear is accidental unison',
         items: [
           'A scene rehearsed until everybody has drifted onto one polite shared pace.',
@@ -991,7 +1327,25 @@ const ACTING_LESSONS_ALL = [
       { p: 'Speech is time, divided. Words take some of it, pauses take the rest, and both of them carry rhythm. Long sounds, short sounds, hard stresses, soft ones. That is the entire toolkit, and every rhythm anyone has ever spoken was built out of it.' },
       { p: 'Here is the failure you already know: the dead pause. The silence where the rhythm just drops. You feel the thread snap, the audience feels it snap, and the next line has to start the engine cold. The fix costs nothing to describe and takes real practice to own.' },
       { key: 'The rhythm never stops. Only the sound does.' },
+      { fig: 'rhythm-rests' },
       { p: 'That same count is your bridge between phrases that do not share a rhythm, which in prose is most of them. One phrase runs long, the next is three words, each has its own shape.' },
+
+      { h: 'Verse makes the count visible' },
+      { p: 'A line of pentameter is five feet, and a foot is a beat: da DUM, five times. Say it and you can feel where the count is, which is why the diagram above uses verse rather than prose. Prose has exactly the same count running under it. Verse is just the case where somebody wrote it down for you.' },
+      { quote: 'But soft, what light through yonder window breaks' },
+      { p: 'Ten syllables, five beats, and then the line stops. The beat does not. Whatever you do in the silence after breaks, beat six is arriving whether you use it or not, and the audience can feel whether you are in it or have fallen out of it.' },
+
+      { h: 'Four kinds of silence, and only one of them is dead' },
+      { defs: [
+        { label: 'The held rest', text: 'The count runs, you are still pursuing the thing, and the silence is doing work. It reads as a decision.' },
+        { label: 'The filled rest', text: 'Something physical happens in it: a look, a step, a hand that stops. The count is carried by the body instead of the voice.' },
+        { label: 'The caught rest', text: 'The silence happens TO the character, because something landed. Often the best moment in a scene.' },
+        { label: 'The dead pause', text: 'The count drops. The thread snaps, the audience feels it snap, and the next line has to start the engine from cold.' },
+      ] },
+
+      { h: 'Dynamics, which is the same idea wearing a different hat' },
+      { p: 'Musicians have a word for the other half of this. A phrase is not only long and short, it is loud and soft, and the two work together: a long quiet phrase and a long loud phrase are different rhythms even at an identical tempo. Actors tend to have one dial here too, and it is usually volume. Try varying the ATTACK instead, which is how hard a phrase begins, and leave the volume alone. A soft phrase begun hard is one of the most useful sounds available to an actor, and almost nobody uses it.' },
+
       { panel: { tone: 'sage', icon: 'target', title: 'Keep the count running',
         lead: 'Two places it does the work.',
         items: [
@@ -1010,6 +1364,24 @@ const ACTING_LESSONS_ALL = [
       { p: 'True fast is a separate discipline, and it is not rushing.' },
       { key: 'Fast is built out of slow.' },
       { p: 'Take the passage at a crawl, slower than you will ever perform it, every consonant finished like you are being paid by the consonant. Repeat until your mouth knows it without you. Then, and only then, accelerate. Speed built any other way turns to mush, and it turns to mush at exactly the moment you most need every word to land.' },
+      { fig: 'rhythm-speeds' },
+
+      { h: 'Why stretched slow is not slow' },
+      { p: 'Watch the second row of the diagram. The words themselves are ordinary length and the gaps are enormous, which is what most actors produce when they are asked to slow down. It is not slower speech. It is normal speech with holes in it, and every hole is a place for the line to die.' },
+      { p: 'True slow is a longer SOUND, not a longer silence. The vowels take the time, the line keeps sounding from one end to the other, and the thought stays joined up while it crosses. Try it on one sentence: hold every vowel twice as long as feels sensible and do not lengthen a single gap. It will feel absurd and it will sound, from outside, like somebody who means it.' },
+
+      { h: 'Building fast, in four passes' },
+      { p: 'Fast is built out of slow, and the order never changes. Each pass has a job and skipping one is why the mush arrives.' },
+      { olist: [
+        'Crawl it. Slower than any performance, every consonant finished, no expression at all. You are teaching your mouth, not acting.',
+        'Crawl it again until you stop having to think about the hard joins. There are usually three or four, and they are where the speed will break later.',
+        'Take it to a brisk, even conversational pace. Still no colour. If a word blurs, you are not ready and the crawl was too short.',
+        'Only now play it. The speed is already in your mouth, so the attention is free for the person you are talking to.',
+      ] },
+      { key: 'If it turns to mush at speed, the answer is always to go back to the crawl. It is never to try harder at speed.' },
+
+      { h: 'What each speed costs the audience' },
+      { p: 'Slow buys weight and spends patience. Fast buys pressure and spends comprehension. Both of those are real prices and both are worth paying in the right place, which is why the next line of this lesson is the one that matters most.' },
       { p: 'Last thing. Both speeds need a reason to exist.' },
       { panel: { tone: 'sage', icon: 'lamp', title: 'Neither speed is free',
         items: [
@@ -1190,7 +1562,8 @@ const ACTING_LESSONS_ALL = [
 export const ACTING_MODULES = ACTING_MODULES_ALL
   .filter(m => PERFORMANCE_LIVE || m.id !== 'performance');
 export const ACTING_LESSONS = ACTING_LESSONS_ALL
-  .filter(l => PERFORMANCE_LIVE || l.module !== 'performance');
+  .filter(l => PERFORMANCE_LIVE || l.module !== 'performance')
+  .filter(l => ANALYSIS_LIVE || l.id !== 'ac-analysis');
 
 export const actingLessonsFor = moduleId =>
   ACTING_LESSONS.filter(l => l.module === moduleId).sort((a, b) => a.order - b.order);
@@ -1277,7 +1650,14 @@ const ACTING_COLLECTIONS_ALL = [
 // Character's role card goes with ROLE_LIVE; the id 'rehearsal' is storage,
 // so the record stays and this removes it.
 export const ACTING_COLLECTIONS = ACTING_COLLECTIONS_ALL
-  .filter(c => PERFORMANCE_LIVE || c.id !== 'rehearsal');
+  .filter(c => PERFORMANCE_LIVE || c.id !== 'rehearsal')
+  // The fourth filter, and it works on the INSIDE of a shelf rather than
+  // on the shelf itself: Script Analysis still exists, with one fewer
+  // lesson on it. A collection that lists an id the course no longer
+  // exports would render a row that opens nothing.
+  .map(c => (ANALYSIS_LIVE || !c.lessons.includes('ac-analysis')
+    ? c
+    : Object.assign({}, c, { lessons: c.lessons.filter(id => id !== 'ac-analysis') })));
 
 // ── Acting glossary ───────────────────────────────────────────
 // Terms specific to the acting work. Shared terms (objective, beat,

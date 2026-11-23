@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 780" width="1200" height="780" fill="none">
+<text x="60" y="70" font-family="Georgia, serif" font-size="38" fill="#3f4a38" text-anchor="start" font-weight="600">Two dials, four states</text>
+<text x="60" y="108" font-family="Georgia, serif" font-size="25" fill="#7b8470" text-anchor="start" font-weight="normal" font-style="italic">Tempo is how fast. Rhythm is the pattern inside the speed.</text>
+<line x1="266" y1="150" x2="266" y2="630" stroke="#7b8470" stroke-width="1.4" stroke-linecap="round"/>
+<line x1="300" y1="664" x2="1140" y2="664" stroke="#7b8470" stroke-width="1.4" stroke-linecap="round"/>
+<text x="720" y="706" font-family="Georgia, serif" font-size="22" fill="#7b8470" text-anchor="middle" font-weight="normal" letter-spacing="3">TEMPO</text>
+<text transform="rotate(270 230 390)" x="230" y="390" font-family="Georgia, serif" font-size="22" fill="#7b8470" text-anchor="middle" font-weight="normal" letter-spacing="3">RHYTHM</text>
+<text x="510" y="700" font-family="Georgia, serif" font-size="23" fill="#7b8470" text-anchor="middle" font-weight="normal">slow</text>
+<text x="930" y="700" font-family="Georgia, serif" font-size="23" fill="#7b8470" text-anchor="middle" font-weight="normal">fast</text>
+<text x="248" y="270" font-family="Georgia, serif" font-size="23" fill="#7b8470" text-anchor="end" font-weight="normal">even</text>
+<text x="248" y="510" font-family="Georgia, serif" font-size="23" fill="#7b8470" text-anchor="end" font-weight="normal">broken</text>
+<rect x="300" y="150" width="390" height="210" rx="10" fill="none" stroke="#7b8470" stroke-width="1.2" stroke-opacity=".5"/>
+<text x="326" y="198" font-family="Georgia, serif" font-size="27" fill="#3f4a38" text-anchor="start" font-weight="600">Slow and even</text>
+<rect x="326" y="228" width="41.22" height="30" rx="2" fill="#6f8056"/>
+<rect x="400.2" y="228" width="41.22" height="30" rx="2" fill="#6f8056"/>
+<rect x="474.39" y="228" width="41.22" height="30" rx="2" fill="#6f8056"/>
+<rect x="548.59" y="228" width="41.22" height="30" rx="2" fill="#6f8056"/>
+<rect x="622.78" y="228" width="41.22" height="30" rx="2" fill="#6f8056"/>
+<text x="326" y="302" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">A held, regular line. Ceremony, grief,</text>
+<text x="326" y="329" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">somebody choosing every word.</text>
+<rect x="720" y="150" width="390" height="210" rx="10" fill="none" stroke="#7b8470" stroke-width="1.2" stroke-opacity=".5"/>
+<text x="746" y="198" font-family="Georgia, serif" font-size="27" fill="#3f4a38" text-anchor="start" font-weight="600">Fast and even</text>
+<rect x="746" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="772.92" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="799.84" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="826.76" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="853.68" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="880.6" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="907.52" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="934.44" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="961.36" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="988.28" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="1015.2" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="1042.12" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<rect x="1069.04" y="228" width="14.96" height="30" rx="2" fill="#6f8056"/>
+<text x="746" y="302" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">Quick and regular. Patter, briskness, a</text>
+<text x="746" y="329" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">mind that has already decided.</text>
+<rect x="300" y="390" width="390" height="210" rx="10" fill="none" stroke="#7b8470" stroke-width="1.2" stroke-opacity=".5"/>
+<text x="326" y="438" font-family="Georgia, serif" font-size="27" fill="#3f4a38" text-anchor="start" font-weight="600">Slow and broken</text>
+<rect x="326" y="468" width="52.68" height="30" rx="2" fill="#b45c42"/>
+<rect x="405.01" y="468" width="13.17" height="30" rx="2" fill="#b45c42"/>
+<rect x="479.64" y="468" width="35.12" height="30" rx="2" fill="#b45c42"/>
+<rect x="532.31" y="468" width="8.78" height="30" rx="2" fill="#b45c42"/>
+<rect x="620.1" y="468" width="43.9" height="30" rx="2" fill="#b45c42"/>
+<text x="326" y="542" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">Slow overall, lurching inside it.</text>
+<text x="326" y="569" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">Somebody working something out as they</text>
+<text x="326" y="596" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">speak.</text>
+<rect x="720" y="390" width="390" height="210" rx="10" fill="none" stroke="#7b8470" stroke-width="1.2" stroke-opacity=".5"/>
+<text x="746" y="438" font-family="Georgia, serif" font-size="27" fill="#3f4a38" text-anchor="start" font-weight="600">Fast and broken</text>
+<rect x="746" y="468" width="13.97" height="30" rx="2" fill="#b45c42"/>
+<rect x="773.93" y="468" width="41.9" height="30" rx="2" fill="#b45c42"/>
+<rect x="827.01" y="468" width="11.17" height="30" rx="2" fill="#b45c42"/>
+<rect x="880.08" y="468" width="33.52" height="30" rx="2" fill="#b45c42"/>
+<rect x="924.78" y="468" width="11.17" height="30" rx="2" fill="#b45c42"/>
+<rect x="947.12" y="468" width="47.49" height="30" rx="2" fill="#b45c42"/>
+<rect x="1030.93" y="468" width="13.97" height="30" rx="2" fill="#b45c42"/>
+<rect x="1056.07" y="468" width="27.93" height="30" rx="2" fill="#b45c42"/>
+<text x="746" y="542" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">Quick and jagged. Panic, interruption,</text>
+<text x="746" y="569" font-family="Georgia, serif" font-size="21" fill="#7b8470" text-anchor="start" font-weight="normal">somebody losing the thread.</text>
+<text x="60" y="724" font-family="Georgia, serif" font-size="23" fill="#3f4a38" text-anchor="start" font-weight="normal">Wrong tempo, change the speed. Wrong rhythm, and changing the speed only carries the</text>
+<text x="60" y="751" font-family="Georgia, serif" font-size="23" fill="#3f4a38" text-anchor="start" font-weight="normal">same pattern along faster.</text>
+</svg>

@@ -3640,13 +3640,16 @@ export async function run({ navDoc = document } = {}) {
       // 34 -> 26 path lessons and 42 -> 34 records on 2026-10-25, when
       // Preparing the Performance was withdrawn. The 8 withdrawn records
       // are still in ACTING_LESSONS_ALL and come back with the flag.
-      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 26
-      && ACTING_LESSONS.length === 34
+      // 26 -> 25 path lessons and 34 -> 33 records on 2026-11-22, when
+      // Through Analysis was withdrawn behind ANALYSIS_LIVE. Its record is
+      // still in ACTING_LESSONS_ALL and comes back with the flag.
+      && ACTING_MODULES.reduce((n, m) => n + actingLessonsFor(m.id).length, 0) === 25
+      && ACTING_LESSONS.length === 33
       // The fourth wall landed last in 'work', after the physical score.
       && actingLessonById('ac-fourthwall')?.module === 'work'
       && actingLessonNumber(actingLessonById('ac-fourthwall')) === '2.9'
       && !actingLessonById('ac-character')
-      && actingLessonById('ac-analysis')?.module === 'text'
+      && !actingLessonById('ac-analysis')
       && ACTING_LESSONS.filter(l => !ACTING_MODULES.some(m => m.id === l.module))
         .every(l => l.module === 'professional')
       && ACTING_MODULES.every(m => actingLessonsFor(m.id)
@@ -3679,9 +3682,9 @@ export async function run({ navDoc = document } = {}) {
     // 2026-09-25). Lines & Memory is a standalone page rather than a
     // lesson record, so it is not in `lessons` — main.js puts it at the
     // head of the shelf, and the drive below checks it renders there.
-    check('acting: Script Analysis holds the owner\u2019s five lessons, in order',
+    check('acting: Script Analysis holds the owner\u2019s four lessons, in order',
       String(ACTING_COLLECTIONS.find(c => c.id === 'scene').lessons)
-        === 'ac-fourlists,ac-analysis,ac-markup,ac-ownmarks,ac-question',
+        === 'ac-fourlists,ac-markup,ac-ownmarks,ac-question',
       String(ACTING_COLLECTIONS.find(c => c.id === 'scene').lessons));
     check('acting: the eight retired lessons are gone from records and ledger alike',
       ['ac-facts', 'ac-who', 'ac-before', 'ac-changed', 'ac-relationships',
@@ -3703,6 +3706,16 @@ export async function run({ navDoc = document } = {}) {
       // The one lesson kept is in the course, not behind the flag.
       && !!actingLessonById('ac-fourthwall')
       && speechPublished('ac-fourthwall'));
+    // THROUGH ANALYSIS, withdrawn alone on 2026-11-22 rather than with a
+    // module. Same contract as the eight above and the same reason: the
+    // id is storage, so the record and the approval both stay and the
+    // filter takes it out of the course. This check is what stops a later
+    // tidy-up from deleting the record or the ledger entry and calling it
+    // the same thing.
+    check('acting: Through Analysis is withdrawn, not retired, and keeps its approval',
+      !actingLessonById('ac-analysis')
+      && speechPublished('ac-analysis')
+      && !ACTING_COLLECTIONS.some(c => c.lessons.includes('ac-analysis')));
     check('acting: the Library collections cover the lessons without duplication',
       // 6 -> 5 on 2026-10-25: the 'rehearsal' shelf went with its module.
       ACTING_COLLECTIONS.length === 5
@@ -3831,7 +3844,7 @@ export async function run({ navDoc = document } = {}) {
         !doc.getElementById('course-chip')
         && !(doc.getElementById('statsbar')?.textContent ?? '').includes('Neutral American')
         && !!doc.getElementById('freeplay'));
-      check('acting: all 38 acting items are published by owner approval alone — no draft strip',
+      check('acting: all 37 acting items are published by owner approval alone — no draft strip',
         (() => {
           // Publication and specialist sign-off are separate facts: every
           // item carries the owner's editorial verdict, none claims a
@@ -3850,8 +3863,13 @@ export async function run({ navDoc = document } = {}) {
           // against a pin of 45, but the suite has not completed a run in a
           // non-Chrome browser since, because the app never booted inside
           // this runner's own iframe. See js/ui.js navTo.
+          // 38 -> 37 on 2026-11-22: Through Analysis withdrew behind
+          // ANALYSIS_LIVE (33 lessons + 4 approaches). Its ledger entry
+          // stays, which is why the approval half of this check is
+          // unchanged and why flipping the flag restores a published
+          // lesson rather than a draft gate.
           const items = [...ACTING_LESSONS, ...ACTING_APPROACHES];
-          return items.length === 38
+          return items.length === 37
             && items.every(x => speechReviewFor(x.id)?.verdict === 'owner-approved'
               && speechReviewFor(x.id)?.reviewerType === 'product-owner-editorial'
               && speechReviewFor(x.id)?.reviewer === 'Product owner'
@@ -3973,9 +3991,12 @@ export async function run({ navDoc = document } = {}) {
       // were briefly swapped for their full pages are LESSONS again: the
       // full text lives inside the lesson record now, which is what the
       // order actually asked for.
+      // 6 -> 5 on 2026-11-22, when Through Analysis withdrew: Lines &
+      // Memory still leads, and the owner's lessons behind it are four.
       check('acting: Script Analysis leads with Lines & Memory and every chapter carries a key',
         scKeys[0] === 'col:lines' && scKeys.every(Boolean)
-        && scKeys.length === 6
+        && scKeys.length === 5
+        && !scKeys.includes('ac-analysis')
         && scKeys.includes('ac-fourlists') && scKeys.includes('ac-question')
         && !scKeys.includes('col:lists') && !scKeys.includes('col:question'),
         scKeys.join(' '));

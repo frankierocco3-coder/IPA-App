@@ -74,6 +74,21 @@ head-on with the no-backend constraint. A decision, not a feature.
 
 ## Smaller, known
 
+- **OWNER REMINDER: replace both marked-up examples in Marking Up the Script**
+  (`ac-markup`, Acting module 1). Asked for 2026-11-22. The lesson carries two
+  `markup` blocks and Frankie wants different passages in both:
+  * the beats-and-actions page, currently **Macbeth I.7** (Macbeth's refusal into
+    Lady Macbeth's interrogation);
+  * the cut-and-pickup example, currently **Romeo and Juliet** (Benvolio into
+    Romeo's "He jests at scars").
+
+  Deliberately not changed without him. Choosing the passages is an editorial
+  judgement about where a beat genuinely turns, not a formatting job, and the
+  marks only teach anything if they land on lines that actually turn there.
+  When the new passages arrive only the `rows` change: the notation `key` and
+  the `note` are about marking, not about the play. A comment at the first
+  block in `js/data/acting/acting-course.js` says the same thing.
+
 - **A lesson refuting the iambic-heartbeat myth.** Audited 2026-10-19 from five angles
   (cardiology, metrics scholarship, early modern sources, linguistics, origin-tracing);
   all five came back *undermines*, high confidence. The course is ALREADY RIGHT and needs

@@ -559,6 +559,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Every X_LIVE switch
 
+- ANALYSIS_LIVE            false  js/data/acting/acting-course.js:76
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
 - CHARACTER_LIVE           true   js/views/context.js:280
 - COCKNEY_LIVE             true   js/views/context.js:120
@@ -590,7 +591,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 - js/main.js                17324 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  902
+- regression check() sites  903
 
 ### Review
 
