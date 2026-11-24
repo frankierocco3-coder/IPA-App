@@ -11,7 +11,8 @@ import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
 import { actingPathLabel, actingPathKind, ACTING_LESSON_ICONS } from './data/acting/path-labels.js';
-import { learnScene, learnSceneLive, sceneGround, scenePaletteStyle } from './data/learn-scenes.js';
+import { learnScene, learnSceneLive, sceneGround, scenePaletteStyle,
+         LEARN_PRINCIPLE_LIVE } from './data/learn-scenes.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
@@ -5138,7 +5139,7 @@ function bookLearnSequence(el, B) {
          the cards hero can sit behind the title. A paragraph in there
          would be cropped to two thirds width and set over a picture on
          Shakespeare, which is the one course whose head has art. */''}
-    ${B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
+    ${LEARN_PRINCIPLE_LIVE && B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
     ${isBanded ? '</div>' : ''}
     ${sceneStageHtml(scene, lessons)}
     ${isCards ? cardsResumeHtml(B, lessons, next?.id ?? null, scene)
@@ -5286,7 +5287,7 @@ function chapterLearnPane(el, B) {
          in its .ws-sub; this pane renders B.subtitle instead, so on a
          chaptered course the principle was written, imported, and then
          displayed nowhere. It says what the whole timeline is FOR. */''}
-    ${B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
+    ${LEARN_PRINCIPLE_LIVE && B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
     ${/* ONE PROGRESS DISPLAY, NOT THREE. The mockup draws a bar here AND a
           "Your course" panel in the rail, and the handoff's own note says to
           avoid duplicated progress displays if the page becomes busy. Built

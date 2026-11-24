@@ -70,6 +70,28 @@ export const SCENE_SIDES = [-1, 1];
 // position and z-index so the page stacks above the picture.
 export const GROUNDS_LIVE = false;
 
+// ── THE COURSE PRINCIPLE IS OFF THE LEARN PAGE (owner, 2026-11-24) ──
+// Pointed at on a screenshot of the Acting Learn page: the sage box
+// under the title holding "A character's behavior and dialogue arise
+// from the situation they are in...".
+//
+// IT IS THE DISPLAY THAT GOES, NOT THE SENTENCE. Every course still
+// carries its `<COURSE>_PRINCIPLE` and `B.principle` still resolves, so
+// the data is intact, the suite's content checks on the Rhetoric and
+// Shakespeare principles still read it, and anything written about a
+// course should still be written from it. What stops is the paragraph
+// being drawn on the Learn page.
+//
+// A FLAG, NOT A DELETION, the same as the grounds above. The CSS rule
+// stays in style.css. Flip this to true and the box comes back, in the
+// banner on the banded courses and under the title everywhere else.
+//
+// BOTH LEARN PANES, which is deliberate rather than overreach: it is
+// the same element doing the same job, and leaving it on Theatre
+// History alone would make one course's landing page differ from the
+// other nine for no reason anyone could name later.
+export const LEARN_PRINCIPLE_LIVE = false;
+
 // THE ART SLOT. `art: null` IS A REAL STATE, NOT A PLACEHOLDER. With no
 // file the band renders the code-drawn stage and looks deliberate, which
 // is the same rule every art registry here follows: an empty slot renders
