@@ -73,26 +73,40 @@ body {
    no global workspace attribute before this; every other per course
    difference was decided in JavaScript at render time. See setPaper()
    for why it is set from record() and not from renderShell. */
+/* ── ONE PAGE COLOUR FOR THE WHOLE APP (owner, 2026-11-24) ─────────
+   The canvas, the side nav and the space around the panels are the
+   muted oat every other workspace already had: `--bg: #efe9dc` at
+   `:root`, which is Building a Character's background and has been the
+   shared default all along.
+
+   WHAT CAME OUT OF THIS BLOCK, AND IT IS PAGE LEVEL ONLY. Acting alone
+   carried a golden canvas (#fff3dc) and a full-page papyrus: two warm
+   radial washes at the head of the page and a one-in-five fibre line
+   scrolling behind everything. Measured, it put the Acting workspace
+   sixteen points of hue away from the other nine, so moving between
+   courses changed the colour of the app.
+
+   The washes were anchored in PIXELS rather than percentages, because a
+   percentage resolves against the body box, which is as tall as the
+   document, and on a long lesson the second wash landed four thousand
+   pixels down. That reasoning is kept here because it is right and
+   because it will be needed again if a page wash ever returns.
+
+   WHAT STAYS, DELIBERATELY: the panel tokens below. The papyrus did not
+   go, it went back to being an ACCENT — the Learn banner's grain, the
+   lesson guide panel, the cards and the selected headers all still draw
+   on `--panel-2` and `--line`, which on this workspace stay warmer than
+   the base theme. `--panel-2` is also the lighter of the two on purpose:
+   `--muted` reads 5.14:1 on the base panel and 5.9:1 on this one, so
+   dropping it would cost contrast rather than gain it.
+
+   .side-nav, .shell and .main-col are all transparent and always were,
+   so they take the canvas from body without a rule of their own. That
+   is why this is one deletion and not four. */
 body[data-paper="acting"] {
-  --bg: #fff3dc;        /* warm cream  -> papyrus */
   --panel: #fff8eb;
-  --panel-2: #f5e6ca;   /* lighter than the base theme, so --muted
-                           gains contrast here rather than losing it:
-                           5.14:1 on the old panel, 5.9:1 on this one */
+  --panel-2: #f5e6ca;
   --line: #dcc69e;
-  background:
-    /* The two washes are anchored in PIXELS at the top of the page, not
-       in percentages. A percentage resolves against the body box, which
-       is as tall as the document, so on a long lesson the second wash
-       would sit four thousand pixels down where nobody will ever see
-       it. Pixels put both of them at the page head, which is where
-       light falling on paper belongs. */
-    radial-gradient(ellipse 980px 620px at 0 180px, #edc98655, transparent 70%),
-    radial-gradient(ellipse 900px 560px at 100% 520px, #e8c17b44, transparent 70%),
-    /* Paper fibre. One line in five, at 6% ink, so it reads as tooth
-       rather than as ruling. This one DOES scroll with the page. */
-    repeating-linear-gradient(0deg, #b68c3910 0 1px, transparent 1px 5px),
-    var(--bg);
 }
 
 /* NO CURTAINS, AND THIS IS MEASURED (2026-11-23). The mockup hangs a
