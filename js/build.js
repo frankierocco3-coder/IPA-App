@@ -8,6 +8,6 @@
 // Re-stamp before committing changes under js/ or css/. launch_lint fails
 // if this falls behind the newest commit that touched either.
 export const BUILD = Object.freeze({
-  date: '2026-11-23',
-  commit: '2342f1d9',
+  date: '2026-11-24',
+  commit: '70e365b7',
 });
