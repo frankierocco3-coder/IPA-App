@@ -3890,6 +3890,42 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    not a mistake — the mockup draws Screen as thin letterboxed strips,
    which is the one place in this app where the picture is shaped like
    the medium the course teaches. */
+/* ── THE THEATRE PROGRAMME BANNER (owner's mockup, 2026-11-24) ──────
+   The banded courses open on a centred strip: the course name in small
+   caps, the title large in the serif, its size in lessons, and the
+   course's own thesis in a sage box under it, all on parchment between
+   two hairlines.
+
+   IT IS A WRAPPER, NOT A RESTYLED `.tr-top`. `.tr-top` and
+   `.course-principle` are siblings and stay siblings — the note in
+   bookLearnSequence explains why the principle may not move back
+   inside the head — so the strip is a box around both rather than two
+   boxes pretending to be one. The other three layouts emit no wrapper
+   and are untouched.
+
+   THE TITLE SCALES WITH THE WINDOW and is capped. 45px is the mockup's
+   size at a desktop width; the floor is 27px, two pixels under the
+   29px every other layout uses, because a 45px cap and a 29px floor
+   would step DOWN on a phone from a page that is otherwise identical.
+
+   63ch ON THE PRINCIPLE, against 46ch everywhere else. It is centred
+   here rather than ranged left against a margin, and a 46ch column
+   centred under a 45px title reads as a pull quote rather than as the
+   sentence the course is about. */
+.tr-banner { max-width: 1040px; margin: 0 0 20px; padding: 20px 16px 22px;
+  text-align: center;
+  background: repeating-linear-gradient(0deg,
+      rgba(182, 140, 57, .063) 0 1px, transparent 1px 5px),
+    var(--panel-2);
+  border-top: 1px solid color-mix(in srgb, var(--gold) 60%, var(--line));
+  border-bottom: 1px solid color-mix(in srgb, var(--gold) 60%, var(--line)); }
+.tr-banner .tr-top { margin: 0; }
+.tr-banner .lp-course { color: var(--green-dark); }
+.tr-banner .tr-title { font-size: clamp(27px, 4.8vw, 45px); line-height: 1.08; }
+.tr-banner .tr-sub { margin-bottom: 0; }
+.tr-banner .course-principle { margin: 14px auto 0; max-width: 63ch;
+  text-align: left; }
+
 .lm-path.is-banded { display: grid; gap: 18px; max-width: 1040px;
   grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
   align-items: start; padding-left: 0; }
@@ -3935,23 +3971,34 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lb-card:hover { border-color: var(--sage); }
 .lb-card:focus-visible { outline: 3px solid var(--green-dark); outline-offset: 2px; }
 
-/* THE BAND. The number is the only large numeral on the page, so it is
-   set in the serif and sits under its own small-caps label, with a gold
-   hairline between it and the title. */
-.lb-band { display: flex; align-items: center; gap: 14px;
-  padding: 10px 16px; background: var(--accent-tint, #e6ebdd);
-  border-bottom: 1px solid var(--line); }
-.lb-n { display: flex; flex-direction: column; align-items: flex-start;
-  flex: 0 0 auto; line-height: 1; padding-right: 14px;
-  border-right: 2px solid var(--gold); }
-.lb-n small { font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
-  font-size: 9.5px; font-weight: 700; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--muted); }
-.lb-n b { font-family: var(--serif, Georgia, serif); font-size: 27px;
-  font-weight: 700; color: var(--green-dark);
-  font-variant-numeric: tabular-nums; }
-.lb-title { font-family: var(--serif, Georgia, serif); font-size: 19px;
-  line-height: 1.2; color: var(--ink); min-width: 0; }
+/* THE BAND, REBUILT AS A CAPTION (owner's Theatre Programme mockup,
+   2026-11-24). It was the card's header: the picture sat under it and
+   the number was the only large numeral on the page, set in the serif
+   beside a gold hairline.
+
+   The programme turns the card the other way up. The painting leads,
+   the band captions it, and the number stops being an ornament: it is
+   "MODULE 1" in small caps above the title, the same eyebrow the rest
+   of the page uses, so the one piece of display type left in the card
+   is the module's name.
+
+   THE BRASS RULE IS THE SEAM. It reads as a plate line under the
+   picture rather than as a border on the band, which is why it is 3px
+   and gold where every other edge in the card is a 1px --line. The
+   bottom border went with the inversion: there is nothing under the
+   band to divide, and the footer below it is the same card. */
+.lb-band { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 3px; padding: 10px 14px 11px; background: var(--accent-tint, #e6ebdd);
+  border-top: 3px solid var(--gold); }
+.lb-n { display: flex; flex-direction: row; align-items: baseline; gap: .4em;
+  flex: 0 0 auto; line-height: 1; }
+.lb-n small, .lb-n b {
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 11px; font-weight: 700; letter-spacing: .11em;
+  text-transform: uppercase; color: var(--green-dark); }
+.lb-n b { font-variant-numeric: tabular-nums; }
+.lb-title { font-family: var(--serif, Georgia, serif); font-size: 20px;
+  line-height: 1.15; color: var(--ink); min-width: 0; }
 
 /* THE PICTURE sits at its own aspect, full card width, cropped by
    object-fit rather than squashed — the ASSET-MAP's one explicit
@@ -3962,8 +4009,14 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
 .lb-art { display: block; width: 100%; height: 100%; object-fit: cover;
   object-position: var(--art-focus, center center); }
 
-.lb-foot { display: flex; align-items: flex-end; justify-content: space-between;
-  gap: 14px; padding: 11px 16px 13px; }
+/* THE FOOTER STACKS (owner's Theatre Programme mockup, 2026-11-24).
+   It used to set the blurb and "Explore module" side by side, which
+   worked while the band above carried the title on one line. The
+   programme runs the description the full width of the card and puts
+   the link under it, which is what lets the blurb be read in two lines
+   instead of four in a column two thirds as wide. */
+.lb-foot { display: flex; flex-direction: column; align-items: flex-start;
+  gap: 7px; padding: 11px 14px 13px; }
 /* THE REAL BLURB, CLAMPED TO THREE LINES. The mockup writes a short
    two-line description under each card; the course data carries the
    module's own blurb, which runs to five or six lines on some modules
@@ -3973,9 +4026,10 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    The clamp needs the old flexbox syntax; it is the only thing every
    engine supports, and `display: -webkit-box` here does not leak,
    because the element holds one run of text and nothing else. */
-.lb-desc { font-size: 13px; line-height: 1.4; color: var(--muted); min-width: 0;
-  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3;
-  line-clamp: 3; overflow: hidden; }
+.lb-desc { font-size: 13px; line-height: 1.4; color: var(--muted);
+  min-width: 0; width: 100%;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  line-clamp: 2; overflow: hidden; }
 .lb-go { flex: 0 0 auto; white-space: nowrap;
   font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
   font-size: 13px; font-weight: 700; color: var(--green-dark); }
@@ -4414,6 +4468,7 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    resume banner, a progress row and a rule. A child left off this list
    does not fail loudly — it renders UNDER the drawing. */
 .tr-view.has-ground > .tr-top,
+.tr-view.has-ground > .tr-banner,
 .tr-view.has-ground > .lm-path,
 .tr-view.has-ground > .lm-resume,
 .tr-view.has-ground > .lm-prog,

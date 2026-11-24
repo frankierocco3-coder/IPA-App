@@ -5061,6 +5061,21 @@ function bookLearnSequence(el, B) {
     ${lmGround ? `
     <img class="lm-ground" src="${esc(lmGround)}" alt="" aria-hidden="true"
          loading="lazy" decoding="async">` : ''}
+    ${/* THE THEATRE PROGRAMME BANNER (owner's mockup, 2026-11-24).
+         The banded courses set their head as a centred strip across the
+         column: eyebrow, title, size, and the course's own thesis in a
+         sage box under it, between two hairlines on parchment.
+
+         A WRAPPER RATHER THAN `:has(+ .course-principle)`, because the
+         strip is ONE surface and the two elements are siblings. Styling
+         them apart means matching two backgrounds and two borders and
+         getting the seam between them right at every width; wrapping
+         them means one box. The wrapper is banded-only, so the other
+         three layouts keep the element tree they had.
+
+         IT DOES NOT PUT THE PRINCIPLE BACK INSIDE `.tr-top`, which the
+         note below forbids for a reason that still holds. */''}
+    ${isBanded ? '<div class="tr-banner">' : ''}
     <div class="tr-top${isCards && scene.hero ? ' has-hero' : ''}">
       ${isCards && scene.hero ? `
       <img class="tr-hero" src="${esc(scene.hero.src)}" alt="${esc(scene.hero.alt ?? '')}"
@@ -5086,6 +5101,7 @@ function bookLearnSequence(el, B) {
          would be cropped to two thirds width and set over a picture on
          Shakespeare, which is the one course whose head has art. */''}
     ${B.principle ? `<p class="course-principle">${esc(B.principle)}</p>` : ''}
+    ${isBanded ? '</div>' : ''}
     ${sceneStageHtml(scene, lessons)}
     ${isCards ? cardsResumeHtml(B, lessons, next?.id ?? null, scene)
       : isBanded ? bandedStartHtml(B, lessons, next?.id ?? null) : ''}
@@ -5962,16 +5978,26 @@ function learnModuleBandHtml(B, g, gi, nextId, scene, locked) {
     <section class="lm-mod is-${state}">
       <button class="lm-fold lb-card" type="button" data-mod-go="${esc(String(g.m.n))}"
               aria-label="${esc(says)}">
-        <span class="lb-band">
-          <span class="lb-n"><small>Module</small><b>${g.m.n}</b></span>
-          <span class="lb-title">${esc(moduleTitle(B, g.m))}</span>
-        </span>
+        ${/* THE PICTURE LEADS THE CARD (owner's Theatre Programme
+             mockup, 2026-11-24). It used to sit under the band. The
+             programme sets the painting first and the module's name
+             under it, on the sage, with a brass rule between them.
+
+             MOVED IN THE MARKUP, NOT WITH `order`. The whole card is a
+             single button, so CSS order would have scrambled nothing
+             and still left the document saying one thing and the page
+             another. A card with no picture simply opens on its band,
+             which is what it already did. */''}
         ${card ? `
         <span class="lb-plate"${cardAspect ? ` style="--art-aspect:${cardAspect}"` : ''}>
           <img class="lb-art" src="${esc(card.src)}" alt="" aria-hidden="true"
                ${focus ? `style="--art-focus:${focus}"` : ''}
                width="900" height="400" loading="lazy" decoding="async">
         </span>` : ''}
+        <span class="lb-band">
+          <span class="lb-n"><small>Module</small><b>${g.m.n}</b></span>
+          <span class="lb-title">${esc(moduleTitle(B, g.m))}</span>
+        </span>
         <span class="lb-foot">
           <span class="lb-desc">${esc(g.m.blurb ?? '')}</span>
           <span class="lb-go">Explore module<i aria-hidden="true">&rarr;</i></span>
