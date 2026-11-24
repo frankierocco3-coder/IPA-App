@@ -4062,6 +4062,15 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
   .lb-start-go { flex: 1 0 100%; }
 }
 
+/* THE SAME STRIP, QUIETER, AT THE FOOT OF THE COLUMN. It closes the
+   page where the resume panel opens it, so it reuses that shape rather
+   than inventing a second one; what differs is weight. The panel at the
+   top is the page's instruction and is set at 25px; this is a standing
+   setting you can change, so its title steps down to 21px and it sits
+   above the page's bottom edge rather than against the modules. */
+.lb-working { margin: 22px 0 0; }
+.lb-working .lb-start-title { font-size: 21px; }
+
 /* ── THE CARDS LAYOUT (owner's mockup, 2026-11-05) ──────────────────
    Shakespeare's Learn page. Two columns of wide cards, picture always on
    the LEFT and never alternating, opened by a dark resume banner and the

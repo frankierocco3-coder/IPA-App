@@ -4884,6 +4884,44 @@ function bandedStartHtml(B, lessons, nextId) {
     </section>`;
 }
 
+// ── THE WORKING TEXT, AT THE FOOT OF THE COLUMN ───────────────────
+//
+// The Theatre Programme mockup closes the page on the working text, in
+// the same strip the resume panel uses at the top. It was left out of
+// the first pass on 2026-11-24 because the right rail already carries
+// this card and this repo's rule is that of two things saying the same
+// thing you show one.
+//
+// THE RULE WAS RIGHT AND MY READING OF IT WAS WRONG (owner, same day).
+// `.right-rail` is `display: none` below 980px, so the rail is not a
+// second copy on a phone — it is the ONLY copy, and it is not there.
+// The Learn page had no door to the working text at any width a phone
+// has. At the foot of the column it has one everywhere, and the
+// duplication is confined to desktop, where both are visible at once.
+//
+// NOT ON BUILDING A CHARACTER, which is the same condition drawRail
+// applies: character work needs no working text and never asks for one.
+//
+// THE COPY IS THE RAIL'S, WORD FOR WORD. Two controls for one thing
+// that describe it differently are worse than two that agree, and these
+// strings already ship.
+function bandedWorkingHtml(B) {
+  if (B.ws === 'character') return '';
+  const wt = workingText();
+  return `
+    <section class="lb-start lb-working" aria-label="Your working text">
+      <div class="lb-start-text">
+        <p class="lb-start-eyebrow">Next step</p>
+        <h2 class="lb-start-title">${wt ? esc(wt.title) : 'Choose a working text'}</h2>
+        <p class="lb-start-aim">${wt
+          ? 'Your working text \u2014 exercises that need text will use it.'
+          : 'Exercises that need text will use it \u2014 you can change it any time.'}</p>
+      </div>
+      <button class="btn btn-primary lb-start-go" id="lb-wt-go" type="button">${
+        wt ? 'Practice this text' : 'Choose a text'}<span class="btn-arrow" aria-hidden="true">&rarr;</span></button>
+    </section>`;
+}
+
 // ── THE CARDS LAYOUT'S OPENING (owner's mockup, 2026-11-05) ───────
 //
 // Three things the vertical path has no equivalent of, in the order the
@@ -5107,11 +5145,19 @@ function bookLearnSequence(el, B) {
       : isBanded ? bandedStartHtml(B, lessons, next?.id ?? null) : ''}
     ${learnPathHtml(B, lessons, next?.id ?? null)}
     ${opensAtTop ? '' : treeCardHtml(B, lessons, next?.id ?? null)}
+    ${isBanded ? bandedWorkingHtml(B) : ''}
     ${cats.total ? reviewStripHtml('ac-review-link', cats.total,
       `${esc(B.title)} drafts awaiting ${bookReviewerKind(B)} review`) : ''}
     </div>`;
 
   el.querySelector('#ac-review-link')?.addEventListener('click', () => renderActingReviewStatus(B.ws));
+  // READ AT PRESS TIME, not at render time. The strip is drawn once and
+  // the working text can be set from anywhere else in the app while this
+  // page is still on screen, so a handler bound to whichever state the
+  // page was built in would send the learner to the wrong place.
+  el.querySelector('#lb-wt-go')?.addEventListener('click', () => (workingText()
+    ? needWorkingText(t => renderSpeechExerciseChooser(t))
+    : renderWorkingTextPicker()));
 
   // THE CARDS OPEN THE LESSONS. This bound '.lp-node' until 2026-10-23 —
   // a class the band rebuild had already deleted — so every one of the
