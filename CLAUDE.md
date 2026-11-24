@@ -563,7 +563,7 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - BRIDGE_LIVE              false  js/data/bridge.js:1687
 - CHARACTER_LIVE           true   js/views/context.js:280
 - COCKNEY_LIVE             true   js/views/context.js:120
-- COINAGE_LIVE             false  js/main.js:356
+- COINAGE_LIVE             false  js/main.js:357
 - COMMEDIA_LIVE            true   js/views/context.js:316
 - DIALECT_ACTION_LIVE      false  js/data/dialect-in-action.js:276
 - GROUNDS_LIVE             false  js/data/learn-scenes.js:71
@@ -571,10 +571,10 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 - MUSICAL_LIVE             true   js/views/context.js:374
 - PERFORMANCE_LIVE         false  js/data/acting/acting-course.js:59
 - RHETORIC_COURSE_LIVE     true   js/views/context.js:421
-- RHETORIC_LIVE            false  js/main.js:329
+- RHETORIC_LIVE            false  js/main.js:330
 - RHETORIC_WORKSHEET_LIVE  false  js/views/context.js:433
 - ROLE_LIVE                false  js/data/character/character-course.js:65
-- SCENE_STUDY_LIVE         false  js/main.js:13094
+- SCENE_STUDY_LIVE         false  js/main.js:13127
 - SCREEN_LIVE              true   js/views/context.js:399
 - SHAKESPEARE_LIVE         true   js/views/context.js:407
 - SPEECH_LIVE              false  js/views/context.js:272
@@ -591,9 +591,9 @@ every learner. Ship its js/data/speech/reviews.js entry in the same commit.
 
 ### Size
 
-- js/main.js                17407 lines
+- js/main.js                17440 lines
 - js/views/                 8 modules: action-piece.js, admin.js, context.js, dialect-action.js, ipa-tools.js, lexicon-mark.js, reference.js, script-analysis.js
-- regression check() sites  905
+- regression check() sites  911
 
 ### Review
 

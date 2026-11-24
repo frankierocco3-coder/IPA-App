@@ -4875,6 +4875,38 @@ button.mask-card:hover, button.mask-card:focus-visible { border-color: var(--gre
    A counter rather than a list marker, because the number sits in its
    own disc inside the card. auto-fit so three cards sit in a row and
    five wrap to two rows instead of shrinking to slivers. */
+/* ── THE LESSON VISUAL GUIDE (owner handoff, 2026-11-24) ────────────
+   The panel near the top of a Building a Character lesson: the title of
+   what the lesson does, then its three moves side by side, each under a
+   brass rule.
+
+   AUTO-FIT, NOT `repeat(3, ...)`, EVEN THOUGH EVERY GUIDE HAS THREE
+   STEPS. Three fixed columns in a 319px phone column is 90px a cell,
+   which sets "Try the contrast" one word to a line. The floor is 190px,
+   so it is three columns on a laptop, two on a narrow tablet and one on
+   a phone, and a fourth step would wrap instead of squeezing the other
+   three. The `min()` is what keeps the floor from exceeding the track
+   on the narrowest screens and forcing a horizontal scrollbar.
+
+   The brass rule is `--gold` and the heading `--green-dark`, which is
+   the mockup's own pair to within a shade; nothing new is introduced. */
+.lx-guide { margin: 20px 0 26px; padding: 18px 20px 20px;
+  background: var(--panel-2); border: 1px solid var(--line);
+  border-radius: 12px; }
+.lx-guide-h { margin: 0 0 16px; font-family: var(--serif, Georgia, serif);
+  font-size: 21px; line-height: 1.3; font-weight: 600; color: var(--green-dark); }
+.lx-guide-steps { display: grid; gap: 18px; margin: 0; padding: 0;
+  list-style: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), 1fr)); }
+.lx-guide-step { min-width: 0; padding-top: 11px;
+  border-top: 2px solid var(--gold); }
+.lx-guide-label { margin: 0 0 6px; font-family: var(--serif, Georgia, serif);
+  font-size: 17px; line-height: 1.35; font-weight: 600; color: var(--ink); }
+.lx-guide-text { margin: 0;
+  font-family: var(--sans, system-ui, -apple-system, "Segoe UI", sans-serif);
+  font-size: 14.5px; line-height: 1.6; color: var(--muted);
+  overflow-wrap: anywhere; }
+
 .sx-steps { list-style: none; counter-reset: sx; margin: 4px 0 26px;
   padding: 0; display: grid; gap: 12px;
   grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); }

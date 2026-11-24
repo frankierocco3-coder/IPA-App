@@ -91,6 +91,7 @@ import { speechGoal, setSpeechGoal, speechHistory, speechLessonDone } from '../j
 import { ACTING_MODULES, ACTING_LESSONS, ACTING_COLLECTIONS, actingLessonsFor,
          actingLessonById, actingLessonNumber } from '../js/data/acting/acting-course.js';
 import { ACTING_GAMES, SCENE_STUDY_AREAS } from '../js/data/acting/practice.js';
+import { CHARACTER_GUIDES } from '../js/data/character/guides.js';
 import { CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS, CHARACTER_PRINCIPLE,
          COMMEDIA_MASKS, commediaMask, ONE_LINES, MASK_SITUATIONS, MASK_PROBLEMS } from '../js/data/character/character-course.js';
 import { CHARACTER_LIVE, CHARACTER_PREVIEW_KEY, liveWorkspaces, characterVisible,
@@ -7981,6 +7982,78 @@ export async function run({ navDoc = document } = {}) {
     const named = copy.filter(t => /\b(Stanislavski|Chekhov|Lecoq|Johnstone|Laban|Meisner|Adler|Bogosian|Andreini|Scala|Rudlin)\b/.test(t));
     check('character: no practitioner names in the copy (sources belong on Sources & Credits)',
       named.length === 0, named.slice(0, 2).join(' | '));
+  }
+
+  // ── 29c. The lesson visual guides: one per lesson, placed ────
+  // Owner handoff 2026-11-24. Every Building a Character lesson opens on
+  // a panel giving its three moves at a glance, before the chapter
+  // explains them.
+  //
+  // THE COVERAGE CHECK IS THE POINT. A guide that resolves to nothing
+  // renders nothing — that is the registry rule and it is right — which
+  // means a missing one is SILENT. Twenty-four panels and one plain
+  // lesson looks like a design decision rather than a gap, so the count
+  // is pinned from both ends: every lesson has a guide, and no guide
+  // names a lesson that is not in the course.
+  {
+    const ids = CHARACTER_LESSONS.map(l => l.id);
+    const keys = Object.keys(CHARACTER_GUIDES);
+    const without = ids.filter(id => !CHARACTER_GUIDES[id]);
+    check('guides: every Building a Character lesson has one',
+      ids.length > 0 && without.length === 0,
+      without.length ? `no guide: ${without.join(', ')}` : `${ids.length} lessons`);
+
+    const orphans = keys.filter(k => !ids.includes(k));
+    check('guides: none names a lesson the course does not walk',
+      orphans.length === 0, orphans.join(', '));
+
+    // THREE IS THE DATA'S SHAPE AND THE CSS LEANS ON IT. The grid is
+    // auto-fit so a fourth would wrap rather than break, but the panel
+    // is designed as three columns and a two-step guide would read as a
+    // broken one. Pinned so a later edit is a decision, not a slip.
+    const shapeBad = keys.filter(k => {
+      const g = CHARACTER_GUIDES[k];
+      return !g || typeof g.title !== 'string' || !g.title.trim()
+        || !Array.isArray(g.steps) || g.steps.length !== 3
+        || g.steps.some(st => !Array.isArray(st) || st.length !== 2
+          || st.some(x => typeof x !== 'string' || !x.trim()));
+    });
+    check('guides: each is a title and three labelled steps',
+      shapeBad.length === 0, shapeBad.join(', '));
+
+    // HOUSE COPY. The em dash is banned across learner-facing text and
+    // these are learner-facing. Straight quotes too: the guides came in
+    // from outside this repo, which is exactly where they get in.
+    const copyBad = keys.filter(k => {
+      const g = CHARACTER_GUIDES[k];
+      const all = [g.title, ...g.steps.flat()].join(' ');
+      return all.includes('\u2014') || all.includes('"') || all.includes("'");
+    });
+    check('guides: house copy, no em dash and no straight quotes',
+      copyBad.length === 0, copyBad.join(', '));
+
+    // PLACED, NOT JUST DECLARED. A registry entry with no { guide } block
+    // in the body renders nowhere, and the coverage check above would
+    // still pass. This is the one that catches that.
+    const misplaced = CHARACTER_LESSONS.filter(l => {
+      const body = Array.isArray(l.body) ? l.body : [];
+      const at = body.findIndex(b => b && b.guide);
+      return at !== 1 || body[at].guide !== l.id
+        || body.filter(b => b && b.guide).length !== 1
+        || !body[0] || typeof body[0].p !== 'string';
+    });
+    check('guides: one block per lesson, straight after the opening paragraph',
+      misplaced.length === 0, misplaced.map(l => l.id).join(', '));
+
+    // The block kind has to be wired, or every block above is inert.
+    // `mainSrc` IS BLOCK SCOPED EVERYWHERE ELSE IN THIS FILE, so this
+    // block reads its own. Borrowing the name from section 21n would
+    // throw a ReferenceError rather than fail a check, and a throw in
+    // here aborts run() and takes the other nine hundred with it.
+    const guideSrc = await viewSource();
+    check('guides: the block kind reaches its renderer',
+      /b\.guide \? lessonGuideHtml\(b\.guide\)/.test(guideSrc)
+      && /function lessonGuideHtml\(/.test(guideSrc));
   }
 
   // ── 29b. Theatre History and Musical Theatre ─────────────────

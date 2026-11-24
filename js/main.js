@@ -89,6 +89,7 @@ import { SCREEN_PRINCIPLE, SCREEN_MODULES, SCREEN_LESSONS, SCREEN_COLLECTIONS } 
 import { CHARACTER_PRINCIPLE, CHARACTER_MODULES, CHARACTER_LESSONS, CHARACTER_COLLECTIONS,
          COMMEDIA_MASKS, commediaMask, MASK_SITUATIONS, MASK_PROBLEMS,
          ONE_LINES } from './data/character/character-course.js';
+import { CHARACTER_GUIDES } from './data/character/guides.js';
 import { ACTING_GAMES, ACTING_DECKS, actingGameById,
          SCENE_STUDY_AREAS } from './data/acting/practice.js';
 import { sceneStudyNotes, saveSceneStudyNote } from './data/acting/store.js';
@@ -6292,6 +6293,37 @@ function stepLead(s) {
 // A step may be a bare string or { title, text, fig }. Strings keep the
 // lead-in behaviour above; objects say outright what they are, which is
 // how the owner's handoff supplies them.
+// ── THE LESSON VISUAL GUIDE (owner handoff, 2026-11-24) ────────────
+// A panel near the top of the lesson: a title, then the lesson's three
+// moves side by side, each under a brass rule.
+//
+// IT IS NOT stepCardsHtml. The step cards are the exercise — numbered,
+// in the reading order you do them, and as long as they need to be.
+// This is the shape of the lesson stated before it starts, so it is
+// three equal columns, unnumbered, and each cell is one sentence. Using
+// the same renderer for both would have made the summary look like a
+// second exercise, which is the one reading it must not have.
+//
+// THREE COLUMNS IS THE DATA'S SHAPE, NOT A GUESS: all 25 guides carry
+// exactly three steps, and the suite pins that. The grid still uses
+// auto-fit, so a fourth would wrap rather than squeeze.
+//
+// A KEY WITH NO ENTRY RENDERS NOTHING, never an empty panel, which is
+// the rule every registry in this repo follows.
+function lessonGuideHtml(key) {
+  const g = CHARACTER_GUIDES[key];
+  if (!g) return '';
+  return `<section class="lx-guide" aria-label="At a glance">
+    <h3 class="lx-guide-h">${esc(g.title)}</h3>
+    <ol class="lx-guide-steps">
+      ${g.steps.map(([label, text]) => `<li class="lx-guide-step">
+        <p class="lx-guide-label">${esc(label)}</p>
+        <p class="lx-guide-text">${esc(text)}</p>
+      </li>`).join('')}
+    </ol>
+  </section>`;
+}
+
 function stepCardsHtml(steps) {
   const rich = steps.some(s => s && typeof s === 'object');
   const leads = rich ? [] : steps.map(s => stepLead(String(s)));
@@ -6599,6 +6631,7 @@ function blockHtml(b, opts) {
     : b.cta ? `<p class="lx-cta"><button class="btn" data-cta="${esc(b.cta.page)}" type="button">${esc(b.cta.label)}</button></p>`
     : b.table ? lessonTableHtml(b.table)
     : b.qa ? lessonQaHtml(b.qa)
+    : b.guide ? lessonGuideHtml(b.guide)
     : b.steps ? stepCardsHtml(b.steps)
     : b.cards ? principleCardsHtml(b.cards)
     : b.tiles ? tileGridHtml(b.tiles)

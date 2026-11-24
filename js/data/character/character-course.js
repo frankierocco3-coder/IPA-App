@@ -1354,6 +1354,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Which of your own habits would be hardest to leave behind for a role, and why that one?',
     body: [
       { p: 'You arrive with a body that already has opinions. It has a preferred way of standing, a speed it walks at when nothing is urgent, a hand it gestures with, a place it holds tension, and a distance it likes to keep from other people. None of that is neutral. It is a character, and it is the one you have been playing your whole life.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-own' },
       { p: 'This matters for a practical reason. Unexamined habits leak. If your weight always sits back on your heels, every person you play will stand back on their heels, and you will call that your instrument when it is really one option out of many that you never noticed you were choosing.' },
       { h: 'Try it: the inventory' },
       { steps: [
@@ -1378,6 +1380,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Pick somebody you know well. What part of them arrives before the rest, and what does that tell you about what they want?',
     body: [
       { p: 'Imagine the energy a person moves with comes from one place in their body, and that everything else follows it. That place is their centre. A person centred in the chest looks open, or proud, or exposed. A person centred low in the belly looks settled, appetitive, hard to move. A person centred in the head looks like they are thinking their way across the room and have left their body to manage on its own.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-leads' },
       { p: 'Close to that idea, and easier to play, is what leads. The centre is where the movement comes from. What leads is the part that gets there first. They are often the same and they do not have to be. Somebody can be centred in the belly and still lead with the nose, which is exactly what makes them look greedy rather than grounded.' },
       { h: 'You have already met this' },
       { p: 'Every commedia breakdown in this course lists a centre and a what-leads, because those two answers are most of what makes each mask look different from the others. Pantalone is divided between a guarded pelvis and a searching nose, and that contradiction is the whole man. Il Dottore is belly and chest, leading with the belly, so his opinions arrive before he does. Arlecchino sits low in the belly where the hunger lives, with the feet beneath it. Pedrolino is the heart and the open chest, which is why nothing he feels can be hidden.' },
@@ -1403,6 +1407,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Which imaginary body felt least like acting and most like simply being somebody else?',
     body: [
       { p: 'Here is a tool that does more work than it has any right to. Picture a body that is not yours occupying the same space you occupy. Taller, or wider, or heavier through the shoulders, or thin and high and brittle. Do not act it. Step into it, as though putting on a coat, and let your real body do whatever it does in response.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-imaginary' },
       { p: 'What makes this useful is that it changes many things at once. A person who decides to play somebody heavy has to remember to move slowly, take up room, breathe low and speak deliberately, and they will drop two of those the moment they have a line to think about. A person standing inside an imagined heavy body gets all four for free, and keeps them while they think about something else.' },
       { h: 'Try it: three bodies' },
       { steps: [
@@ -1425,6 +1431,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Which of the three dials do you habitually leave in one position, whatever you are playing?',
     body: [
       { p: 'Three qualities do most of the work, and the useful thing about them is that they are dials rather than switches. You can turn each one a little rather than all the way, which is how you get a person instead of a caricature.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-weight' },
       { list: [
         'Weight: light or strong. Does this person move as if gravity barely applies to them, or as if every gesture has force behind it? Light is not weak, and strong is not loud. A quiet threat is played strong.',
         'Tempo: quick or sustained. Does movement arrive in sudden bursts, or unfold and keep going? Tempo is separate from speed of speech, and the mismatch between them is often the most interesting thing about somebody.',
@@ -1447,6 +1455,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'When you built your walk, which single change did the most work?',
     body: [
       { p: 'A walk is the most public thing a character has. It arrives before the face is readable and before a word is spoken, and an audience has usually decided a great deal about somebody by the time they have crossed a stage. That is why it is worth building deliberately rather than hoping one turns up.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-walk' },
       { p: 'Build it by changing one thing at a time. Change everything at once and you get a costume that falls off the moment you have to think about a line. Change one variable, walk with it until it stops feeling like a decision, then add the next.' },
       { h: 'The variables' },
       { list: [
@@ -1479,6 +1489,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'How little of the animal could you keep and still feel it changing you?',
     body: [
       { p: 'Choose an animal and watch it properly, for longer than is comfortable. Not a cartoon of it and not your memory of it: the real thing, in a video if you have no other way. Watch how it holds its weight when nothing is happening. Watch what it does with its head. Watch how it starts moving, and how it stops, and what it does when it is startled and when it wants something.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-animal' },
       { p: 'Then take almost none of it. The finished result should be a person, with perhaps one percent of the animal left in the rhythm, the stillness or the way the head turns. An audience should never think “that is a bird.” They should think there is something about that man that makes them uneasy, without being able to say why.' },
       { h: 'Why it works' },
       { p: 'It works because animals do not hide anything. A cat wanting something is entirely a cat wanting something, with no social layer over it, and watching that reminds an actor what pure want looks like in a body. It is also a shortcut past your own defaults, which is why it survives in training everywhere: it hands you rhythms and stillnesses you would never have chosen from your own habits.' },
@@ -1503,6 +1515,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'What is the gesture for somebody who wants to be forgiven but will not ask?',
     body: [
       { p: 'Take what a character wants and turn it into a single physical action made with the whole body rather than the hands. Somebody who wants to hold on to everything might close and pull inward. Somebody who wants to be seen might open and lift. Somebody who wants to push the world away might press outward and down. The gesture is not mime and it is not illustration. It is the want, made physical, at full size.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-ph-gesture' },
       { p: 'You rehearse it large and privately, several times, until the shape is in the body and carries a feeling with it. Then you put it away. It almost never appears on stage at full size. What appears is the residue: the pull inward reduced to a hand closing on a sleeve, the lift reduced to a chin. The audience never sees the gesture. They see everything it left behind.' },
       { h: 'Try it' },
       { steps: [
@@ -1533,6 +1547,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'When the shape gave you a voice, what surprised you about it?',
     body: [
       { p: 'Most character voices that do not work were chosen first. An actor decides the man sounds nasal and reedy, produces that sound, and then spends the rest of rehearsal carrying it around on a body it has nothing to do with. The audience hears the effort, even when they cannot name it. What they are hearing is two decisions that were never introduced to each other.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-vo-follows' },
       { p: 'The reliable order runs the other way, and you have met it already in the mask work. A shape changes the breath, because a chest that is braced and a chest that is lifted cannot take the same one. The breath, once it is audible, is most of a voice. The voice finds words. The words go to somebody. Work in that order and the voice arrives attached to a body that earned it, and it stays without being maintained.' },
       { h: 'Try it: take the voice from the shape' },
       { steps: [
@@ -1557,6 +1573,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Which of the three do you change most easily, and which one stays where it always is?',
     body: [
       { p: 'Actors talk about voices vaguely, which is why voice notes are so hard to act on. Gravelly, posh, whiny: none of those tell you what to do on Tuesday. Three plainer words do.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-vo-qualities' },
       { list: [
         'Pitch: where the voice sits, and how far it travels. Not high or low as a fixed setting, but whether this person moves around or stays on one note. A narrow pitch range reads as controlled, or exhausted, or dangerous. A wide one reads as open, or young, or unguarded.',
         'Pace: how fast, and more importantly how even. Somebody who speaks quickly in bursts with long gaps is a different person from somebody at the same average speed who never varies. The gaps carry more than the speed does.',
@@ -1584,6 +1602,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Does your character know the end of the sentence when they begin it?',
     body: [
       { p: 'One question separates two completely different people who might say identical words: does this person know how the sentence ends when they start it? Somebody who does speaks in finished shapes, arrives where they intended and stops. Somebody who does not builds as they go, changes direction, doubles back, and lands somewhere they did not plan. An audience reads that difference instantly and never names it.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-vo-rhythm' },
       { p: 'That is why rhythm is character work rather than voice work. A person who thinks in complete sentences and a person who thinks out loud can share a pitch, a pace and an accent and still be unmistakably different. The thinking shows in where the thought breaks.' },
       { h: 'Things to decide' },
       { list: [
@@ -1612,6 +1632,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'If the accent were removed from your character, what would be lost, and what would survive?',
     body: [
       { p: 'An accent is information about history: where a person grew up, who raised them, where they have lived since, and sometimes what they have tried to leave behind. It is not a personality, it is not a status, and it is not a joke. The moment an accent is carrying the characterisation on its own, there is no character underneath it.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-vo-accent' },
       { p: 'The test is simple and worth applying honestly. Take the accent away and play the same person in your own voice. If almost everything survives, the accent is doing its job, sitting on top of a real person. If the character collapses into nothing, you were not playing a person. You were doing an impression, and an audience will feel the difference even in the scenes where it seems to be working.' },
       { h: 'Where it goes wrong' },
       { list: [
@@ -1635,6 +1657,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'What is your character unable to say out loud, and what do they say instead?',
     body: [
       { p: 'Listen to anybody for ten minutes and a pattern appears. There is a phrase they lean on, a way they begin sentences, a filler they use while thinking, and a register they retreat to when uncomfortable. None of it is chosen. All of it is legible, and a small amount of it, placed well, does more character work than a whole accent.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-vo-habit' },
       { p: 'The more useful half is the negative one. What does this person never say? Somebody who cannot say the word love, or sorry, or money, or the name of the person who died, is telling you exactly where the pressure is. An avoidance is more revealing than a habit, because the habit is unconscious and the avoidance is defended.' },
       { h: 'Where to look in a script' },
       { list: [
@@ -1663,6 +1687,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Think of somebody with real authority who plays low. What does it get them?',
     body: [
       { p: 'Rank is what a character owns: a title, money, a job, a place in a family. Status is what they do about it. Those are different things, and confusing them is why so much acting about power looks like an impression of power. A duke who has to keep announcing he is a duke is playing low while holding high rank, and an audience reads that instantly.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-st-play' },
       { p: 'The useful move is to treat status as behaviour you choose, moment by moment. A servant can play high. A king can play low, and often does, because somebody secure has nothing to prove. What produces the drama is the distance between the rank a character holds and the status they are managing to play.' },
       { h: 'The gap is where the scene is' },
       { list: [
@@ -1692,6 +1718,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Which of the high-status habits is hardest for you, and what does that say about your own defaults?',
     body: [
       { p: 'The single most reliable signal is stillness. High status keeps the head still, moves when it has decided to, and does not fill silences with small adjustments. Low status fidgets, touches its own face and hair, shifts weight, and produces little sounds while thinking. None of that is about confidence as a feeling. It is a set of behaviours, and you can play them on a day when you feel nothing of the kind.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-st-body' },
       { list: [
         'The head. Still is high. Bobbing, tilting and nodding along while somebody else speaks is low.',
         'The eyes. Low status checks constantly to see how it is going. High status looks when it chooses to and is comfortable looking away, because it does not need the information.',
@@ -1720,6 +1748,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Whose sentences does your character finish, and who finishes theirs?',
     body: [
       { p: 'Loudness is the first thing actors reach for and it is close to useless. Shouting is usually somebody who has run out of authority. What actually carries status is control of time: who can pause, who can take as long as they like, and who has to hurry in case they lose the floor.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-st-voice' },
       { list: [
         'Pauses. High status can stop in the middle of a sentence and nobody fills the gap. Low status keeps talking to hold the space.',
         'Endings. Sentences that fall at the end are high. Sentences that lift, as though checking the answer is acceptable, are low.',
@@ -1748,6 +1778,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'In your scene, where does the status change hands, and does the audience see it happen?',
     body: [
       { p: 'Status only exists between people. Nobody is high in an empty room. That makes it a seesaw: every line either raises or lowers somebody, and the interesting question in any scene is not who is on top but where it changes hands.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-st-seesaw' },
       { h: 'The four moves' },
       { list: [
         'Raise yourself. Claim knowledge, space, time or the right to decide.',
@@ -1777,6 +1809,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'In the room you know best, who owns it, and how would somebody watching be able to tell?',
     body: [
       { p: 'Space is the most honest status signal because it is the hardest to fake. Somebody who owns a room walks through the middle of it. Somebody who does not skirts the edge, keeps near the door, and takes the seat nobody wanted. Watch two people meet in a corridor and notice which one adjusts. That adjustment happens below thinking and it settles the question.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-st-space' },
       { list: [
         'The path. Straight through the middle, or around the outside.',
         'The furniture. Who sits without being asked, who stays standing, and who is left standing while somebody else sits.',
@@ -1912,6 +1946,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Who has spoken up in you before, unprompted? And can you name where you absorbed them from?',
     body: [
       { p: 'Start with how a person learns to be anything. A doctor behaves like a doctor because doctors have been shown behaving that way. A truck driver talks like a truck driver because that is how truck drivers talk, and everyone, including the truck driver, learned it from somewhere. Behavior is not born in us. It is absorbed, from every person we have ever watched.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ac-inside' },
       { p: 'And you have watched more than the people in your life. You were never a cowboy. You never robbed a bank. But you know exactly how a cowboy leans in a doorway and exactly how a bank robber tells a room to stay calm, because the movies and television have been feeding you cowboys and bank robbers since before you could read. To the part of you that produces behavior, a remembered performance is as real as a remembered person. It does not sort its library into firsthand and secondhand. It just shelves everything.' },
       { p: 'Which means the cast is already in the building. A lifetime of absorbed people: met, overheard, watched on screens. So when inventing a character means looking inside instead of out, it is not mysticism. The inside IS the outside, collected. Improvise out loud with no plan, play the recording back, and one of them will step forward, someone you never planned, saying things you did not write. That is not invention from nothing. That is the library lending.' },
       { p: 'So forget building a character the way you would build a shelf. There is no finishing it. You are pulling somebody out of a collection you spent your whole life making, and you will know it is working when they start saying things you did not plan.' },
@@ -1926,6 +1962,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Where and when could you do this without being overheard? Name the room and the hour.',
     body: [
       { p: 'The setup could not be plainer. A recorder. A room where nobody can hear you. Enough floor to move around on. Say the date, say what you are working on, and go.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ac-room' },
       { p: 'The privacy is the whole machine. The second some part of you starts wondering how this sounds to another person, you are performing instead of finding, and whatever was about to show up will not. Self-consciousness kills this work faster than anything else. So no audience, no roommate down the hall, no phone face up on the table.' },
       { p: 'And record everything. Keep all of it. This method was invented on cassette tape, when every reel cost money and had to live in a shoebox, so you had to decide what mattered while you were still making it. You do not. Your phone holds more hours than you will ever fill. Let it run, make the mess, and save the judging for later. Later is when judging is useful.' },
       { p: 'One honest note: Speechcraft cannot do this part with you. The app does not record and does not listen. This is you, a phone, a shut door, and half an hour nobody needs you for. Bring back whatever turns out to be worth keeping.' },
@@ -1940,6 +1978,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Write down three fragments of speech you overheard this week. Which one has a person standing behind it?',
     body: [
       { p: 'Way one: a scrap of overheard speech. Keep your ears open all week. People hand you material constantly: arguments through car windows, one side of a phone call, a guy narrating his grievance to a whole train. Take one scrap and repeat it out loud until an attitude wakes up inside it. One word can be enough. Say “sir” over and over with a little acid in it and watch a whole officious clerk assemble himself around the word.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ac-waysin' },
       { p: 'Way two: a physical detail. How somebody lights a cigarette. How they hold a bottle, or will not put down their bag, or cross a room like the floor owes them money. Commit to one honest gesture and the rest of the body tends to show up around it.' },
       { p: 'Way three, and the strongest: a vocal stance. This is not doing an impression. An impression is hollow. This is letting a way of speaking steer the improv from the inside. Take something you know by heart and say it in a voice that is nothing like yours. Listen to what the voice does to the words. It will make choices you would never have made on purpose.' },
       { p: 'And a fourth door, since it is standing open: some people are already performing. A teacher in front of a class. A preacher in the pulpit. A gym instructor counting reps. A man yelling at traffic. Walk in through any of them.' },
@@ -1954,6 +1994,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Which everyday performance do you watch most often, and what does that person want from the people listening?',
     body: [
       { p: 'Behavior in front of other people is always performance, whoever the audience happens to be. A teacher addressing a class is performing. So is a preacher, a trainer running a session, a tour guide, a manager opening a meeting, a vendor working a queue, a stranger holding forth at a bus stop. None of them would call it acting. Every one of them is shaping how they come across, out loud, in public.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-everyday' },
       { p: 'Those situations are gifts, because the form does half the work for you. The person has a reason to talk, an audience that cannot easily leave, a job to get done, and a public manner they have built for exactly this. Start an improvisation inside one of them and you are not staring at an empty room. You are already somebody, speaking to somebody, about something, with something to lose.' },
       { p: 'So collect them. When you catch yourself watching one, note what it was: the situation, who was talking, who had to listen, and what the speaker wanted out of it. A sermon. The safety briefing on a plane. A coach at half time. A sales pitch. A toast that goes on too long. An announcement nobody can hear. A lecture from somebody who has read one article.' },
       { h: 'Try it' },
@@ -1976,6 +2018,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Play back something you improvised. Where can you hear yourself trying to be good?',
     body: [
       { p: 'When you improvise, aim at nothing. Do not try to be funny. Do not try to be moving. Do not try to be anything. Become the person, get into the situation, and let whatever happens happen. Your entire job is to cut loose and let the character talk.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ac-noaim' },
       { p: 'The finished piece is not your concern right now. The character rambles? Let them ramble. Repeats themselves? People repeat themselves. Makes no sense? Fine. Judging while you create shuts the whole factory down, and creating is the only thing on the schedule today.' },
       { p: 'And expect waste. Plan on it. Throw everything at the wall, because you cannot know in advance what sticks. Three good minutes come out of hours of tape. Hours. That is not you failing, that is the arithmetic of the method, and knowing the arithmetic going in is what gets you through the long stretch where all of it sounds like nothing.' },
     ] },
@@ -1989,6 +2033,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Read your oldest transcription again. Is there someone in it you did not notice at the time?',
     body: [
       { p: 'Now play it all back and listen for the parts you like the sound of. Not the cleverest parts. The parts where somebody real flickers past. This is panning for gold, and the ratio is supposed to be terrible: a lot of dirt, a little glitter. That is the deal you signed in the last lesson.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ac-transcribe' },
       { p: 'Whatever glitters, write it down. Keep every transcription, including the ones you have no use for. A scrap that reads as nothing in March has a way of starting a whole person in September. Your pile of transcriptions is an asset. It only grows.' },
       { p: 'Then work your gold. Take a fragment, clean it up, learn it by heart, and use it to launch the next improv. Pocket what you keep and go back for the next batch of dirt. Around and around: improvise, sift, transcribe, launch. The pile gets richer every pass, and the person in it gets more definite.' },
       { p: 'Once something is on paper, interrogate it with boring questions. What was this person doing ten minutes ago? What is in their pockets? How old are they, and what has that age done to the voice and the posture? The answers are not the point. The point is what the questions shake loose.' },
@@ -2003,6 +2049,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Watch your character with the sound off in your head. Is there anything to see?',
     body: [
       { p: 'Keep the character doing something. Standing, moving, working on the other person. And skip the decoration. No costume, no mime. The moment you mime driving a car, the audience starts grading your driving, and they stop watching the human being. The human being is the act. Everything else is a hat.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ac-essence' },
       { p: 'Want to know if it is working? Imagine playing it for a room that does not speak the language. Would they watch anyway? If the whole thing collapses without the words, there is no character yet. There is a script with a costume on. Notice this is the archetype test from earlier, pointed at your own work: the universal cast crosses every language barrier, and a built character should too.' },
       { p: 'Two more habits, and then the door. Let the character say the opposite of what the room expects, because nobody buys a ticket to hear your opinions recited. Give the worst person in the piece their side of the story; even the jerk thinks he is right, and he is more interesting the moment he gets to say why. Then hold everything you make to one final test: put on stage exactly what you would want to see if you were the one in the seat.' },
       { p: 'That is the loop, end to end: an empty room, a way in, no aiming, the recording, the transcript, and a person who is doing something. Now test what you found. Put the character into a scene, a script or a room full of other people, and find out what they cannot escape and what they are hiding. The person you discovered alone should survive contact with everyone else.' },
@@ -2017,6 +2065,8 @@ export const CHARACTER_LESSONS_ALL = [
     reflection: 'Take a character you are working on. Which of these questions could you not answer, and what did answering it change?',
     body: [
       { p: 'Improvising alone gets you a living person quickly, and it leaves holes. The character arrived talking, so you know their voice and their appetite, and you may have no idea where they were an hour ago or what they are carrying. Those holes show up in performance as vagueness. The cure is not more improvising. It is a short list of plain questions.' },
+      // At a glance, before the lesson explains it.
+      { guide: 'ch-questions' },
       { p: 'They are ordinary questions, the kind you would ask about any part:' },
       { list: [
         'What was this person doing ten minutes ago?',
