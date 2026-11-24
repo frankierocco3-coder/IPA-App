@@ -73,6 +73,7 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     permissions:
       contents: read      # read the repository being published
+      actions: read       # read THIS run's artifact list, for the wait below
       pages: write        # create and publish the Pages deployment
       id-token: write     # OIDC token that deploy-pages exchanges with Pages
     steps:
@@ -163,6 +164,14 @@ jobs:
       # list too: an intermittent failure sits among successes on the same
       # pins, and a real break fails every time.
       #
+      # SINCE 2026-11-24 THERE IS A GUARD, and it is a step rather than a
+      # change to these pins: "Wait for the artifact to be readable",
+      # below, between the upload and the Deploy that races it. Read its
+      # note before concluding anything from a failure here, because a
+      # count-0 Deploy failure now means the artifact was unreadable for
+      # 150 seconds, which is a different and much larger claim than the
+      # one-second race this paragraph was written about.
+      #
       # actions/checkout and actions/configure-pages still carry the Node
       # 20 warning and are deliberately NOT bumped. Their steps pass, and
       # after the above I am not going to claim that bumping them fixes
@@ -171,6 +180,58 @@ jobs:
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
+
+      # ── THE ARTIFACT HAS TO BE READABLE BEFORE DEPLOY LOOKS FOR IT ──
+      #
+      # Added 2026-11-24, after the failure described at length above
+      # took two pushes in a row. Everything in that note still holds;
+      # this is the guard it did not have.
+      #
+      # WHAT WAS MEASURED, on both of that day's failures: the artifact's
+      # `created_at` is the SAME SECOND the Deploy step starts, and
+      # Deploy is over one second later with count 0. deploy-pages reads
+      # the artifact metadata once, immediately, with no retry, so the
+      # upload finishing and the artifact being READABLE are two
+      # different moments and the action assumes they are one. Six of
+      # the fourteen deploys before it died exactly there, scattered
+      # among successes on these pins, with githubstatus clean.
+      #
+      # A POLL, NOT A `sleep`. The right wait is however long the index
+      # actually takes, which is not a number anyone here knows; and a
+      # count of 2 is the OTHER failure in the note above, which a sleep
+      # would hide for another second and then hand to deploy-pages as
+      # an unretryable error. This asks for the precondition in one
+      # line — exactly one artifact by that name, visible to the API
+      # deploy-pages is about to ask — and says which failure it has.
+      #
+      # IT DOES NOT REPLACE "PUSH AGAIN". A run that has already failed
+      # still cannot be re-run, for the reason given above.
+      - name: Wait for the artifact to be readable
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ARTIFACTS: repos/${{ github.repository }}/actions/runs/${{ github.run_id }}/artifacts
+        run: |
+          # `|| true` BECAUSE THIS SHELL RUNS UNDER `set -eo pipefail`
+          # (the job's `defaults: run: shell: bash`). Without it a single
+          # failed API call aborts the step at the assignment, which
+          # would trade one intermittent failure for another — and this
+          # step exists to survive exactly that kind of blip.
+          for i in $(seq 1 30); do
+            n=$(gh api "$RUN_ARTIFACTS?name=github-pages" --jq '.total_count' || true)
+            case "$n" in
+              1) echo "attempt $i: readable after $(( (i - 1) * 5 ))s"; exit 0 ;;
+              0) echo "attempt $i: not readable yet"; sleep 5 ;;
+              # Empty or non-numeric is the API not answering, NOT a
+              # verdict about the artifact. It must be its own branch and
+              # it must come before the catch-all, or it reads as a count
+              # and fails the deploy on a blip.
+              ''|*[!0-9]*) echo "attempt $i: could not read the artifact list, retrying"; sleep 5 ;;
+              *) echo "::error::Artifact count is $n, and deploy-pages requires exactly one. A re-run of this job uploads a second artifact under the same name; push a new commit instead."
+                 exit 1 ;;
+            esac
+          done
+          echo "::error::The github-pages artifact was still not readable after 150s. This is the count-0 failure described in this file: push again rather than re-running the job."
+          exit 1
 
       - name: Deploy
         id: deployment
