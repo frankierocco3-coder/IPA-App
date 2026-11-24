@@ -33,7 +33,7 @@ import { SCRIPT_ANALYSIS_REVIEWS, scriptAnalysisApproved } from '../js/data/scri
 import { SPEAK_DRILLS } from '../js/data/twisters.js';
 import { WARMUP_MOVEMENTS, WARMUP_ALL, warmupSteps } from '../js/data/warmup.js';
 import { ACTING_FIGURES, actingFigure } from '../js/data/acting/art.js';
-import { LEARN_SCENES } from '../js/data/learn-scenes.js';
+import { LEARN_SCENES, GROUNDS_LIVE, sceneGround } from '../js/data/learn-scenes.js';
 import { PLAYABLE_ACTIONS, ACTION_PAIRS, ACTION_CATEGORIES, actionById,
          searchActions, ACTION_VERBS, taughtActionFor } from '../js/data/playable-actions.js';
 import { emptyProject, saveProject, splitLines } from '../js/projects.js';
@@ -7559,11 +7559,36 @@ export async function run({ navDoc = document } = {}) {
     // a rendered page.
     const mainSrc = await fetch('../js/main.js').then(r => r.text()).catch(() => '');
     const sites = (mainSrc.match(/class="lm-ground/g) ?? []).length;
-    check('grounds: the renderer still draws a ground at both of its two sites',
-      sites === 2 && mainSrc.includes('scene.ground')
-      && mainSrc.includes('learnScene(B.ws)?.ground'),
-      sites + ' site(s) — the Learn page draws one and the lesson page draws one; '
-      + 'if that moved, say where, because nothing else here would notice');
+    // BOTH SITES ARE STILL THERE, AND BOTH NOW ASK sceneGround(). They
+    // used to carry their own expressions, `scene.ground` on the Learn
+    // page and `learnScene(B.ws)?.ground` on the lesson page, which is
+    // two expressions that have to agree. One predicate is what makes
+    // the withdrawal below a single fact rather than a coincidence.
+    const viaAccessor = (mainSrc.match(/sceneGround\(B\.ws\)/g) ?? []).length;
+    check('grounds: the renderer still draws a ground at both of its two sites, through one accessor',
+      sites === 2 && viaAccessor === 2,
+      sites + ' site(s), ' + viaAccessor + ' through sceneGround() — the Learn page draws one '
+      + 'and the lesson page draws one; if that moved, say where, because nothing else here '
+      + 'would notice');
+
+    // ── AND THEY ARE WITHDRAWN (owner order, 2026-11-23) ────────────
+    // The seven drawings, the seven `ground:` keys and every CSS rule
+    // that places them are all still here and all still checked above.
+    // GROUNDS_LIVE is what decides whether a learner sees one, so this
+    // pins the FLAG'S EFFECT rather than the flag's value: with it
+    // false, no course resolves a ground, at either site.
+    //
+    // It is written to go red the moment the flag is flipped back, which
+    // is the point. A withdrawal that nothing asserts is a withdrawal
+    // somebody restores by accident, and the restorer should have to
+    // come here and say so.
+    check('grounds: while GROUNDS_LIVE is false, no course resolves one',
+      GROUNDS_LIVE === false
+      && Object.keys(LEARN_SCENES).every(ws => sceneGround(ws) === null),
+      GROUNDS_LIVE
+        ? 'GROUNDS_LIVE is true — the drawn grounds are back on every Learn and lesson page; '
+          + 'if that is intended, update this check and say who asked'
+        : Object.keys(LEARN_SCENES).filter(ws => sceneGround(ws) !== null).join(', '));
 
     // THE CONTAIN RULE, READ AS A RULE rather than as applied. This frame
     // is 390px wide, so the min-width 980 query never matches inside it

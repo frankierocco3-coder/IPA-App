@@ -47,6 +47,29 @@ export const SCENE_STEP = 84;   // vertical gap between lessons
 export const SCENE_TOP = 92;    // first lesson, clear of the band label
 export const SCENE_SIDES = [-1, 1];
 
+// ── THE DRAWN GROUNDS ARE WITHDRAWN (owner order, 2026-11-23) ──────
+// "get rid of the black stencil drawing on the background of the landing
+// pages". Seven courses carry one: a line drawing in brand ink, standing
+// behind the Learn page and, at the same opacity, behind every lesson
+// page of the same course.
+//
+// A FLAG, NOT A DELETION, which is this project's answer every time. The
+// `ground:` key stays on all seven scenes, the SVGs stay in img/ui, the
+// generators stay in tools/ and the CSS that places them stays in
+// style.css. Nothing was drifted or re-cut. Flip this to true and all
+// seven come back exactly as they were.
+//
+// IT TAKES THEM OFF THE LESSON PAGES TOO, and that is deliberate rather
+// than overreach. It is the SAME FILE at the same opacity in both
+// places, so leaving it on the lesson pages would keep a drawing the
+// owner asked to be rid of, in the one spot where it is cropped to its
+// empty middle and nearly invisible anyway. Half a withdrawal is worse
+// than either whole one.
+//
+// `has-ground` goes with it, which costs nothing: that class only sets
+// position and z-index so the page stacks above the picture.
+export const GROUNDS_LIVE = false;
+
 // THE ART SLOT. `art: null` IS A REAL STATE, NOT A PLACEHOLDER. With no
 // file the band renders the code-drawn stage and looks deliberate, which
 // is the same rule every art registry here follows: an empty slot renders
@@ -731,6 +754,15 @@ export const LEARN_SCENES = {
  *  rather than falling back to Acting's tree: a printing house drawn in
  *  soil and leaves would be worse than no scene at all. */
 export const learnScene = ws => LEARN_SCENES[ws] ?? null;
+
+/** A course's drawn ground, or null while they are withdrawn.
+ *
+ *  ONE PREDICATE, TWO CALL SITES, for the reason learnSceneLive() below
+ *  gives in full: the Learn page and the lesson page each drew the ground
+ *  from their own expression (`scene.ground` and
+ *  `learnScene(B.ws)?.ground`), and two expressions that have to agree
+ *  are two expressions that can stop agreeing. They read this instead. */
+export const sceneGround = ws => (GROUNDS_LIVE ? learnScene(ws)?.ground ?? null : null);
 
 /** Does this course's scened Learn page go to LEARNERS, or only to the
  *  owner behind the preview key?

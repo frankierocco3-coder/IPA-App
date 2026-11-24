@@ -11,7 +11,7 @@ import { scriptAnalysisHtml } from './views/script-analysis.js';
 import { SHAKESPEARE_LEXICON, LEXICON_KINDS } from './data/shakespeare-lexicon.js';
 import { SHAKESPEARE_COINAGES, COINAGE_LIVES } from './data/shakespeare/coinages.js';
 import { actingPathLabel, actingPathKind, ACTING_LESSON_ICONS } from './data/acting/path-labels.js';
-import { learnScene, learnSceneLive, scenePaletteStyle } from './data/learn-scenes.js';
+import { learnScene, learnSceneLive, sceneGround, scenePaletteStyle } from './data/learn-scenes.js';
 import { RHETORIC_PRINCIPLE, RHETORIC_THRESHOLD, RHETORIC_MODULES, RHETORIC_LESSONS, RHETORIC_COLLECTIONS } from './data/rhetoric/rhetoric-course.js';
 import { FALLACIES, FALLACY_GROUPS, fallacyById } from './data/rhetoric/fallacies.js';
 import { FAMILIES, MODERN_FALLACIES, fallaciesInFamily } from './data/rhetoric/families.js';
@@ -5053,10 +5053,13 @@ function bookLearnSequence(el, B) {
        ${avail.length} ${avail.length === 1 ? 'lesson' : 'lessons'}`
     : `${done} of ${avail.length} ${esc(scene.done)} across ${B.modules.length} modules.`;
 
+  // Withdrawn behind GROUNDS_LIVE since 2026-11-23: null while the flag
+  // is false, the scene's own drawing when it is true.
+  const lmGround = sceneGround(B.ws);
   el.innerHTML = `
-    <div class="tr-view sc-${esc(B.ws)}${scene.light ? ' is-light' : ''}${scene.ground ? ' has-ground' : ''}" style="${scenePaletteStyle(scene)}">
-    ${scene.ground ? `
-    <img class="lm-ground" src="${esc(scene.ground)}" alt="" aria-hidden="true"
+    <div class="tr-view sc-${esc(B.ws)}${scene.light ? ' is-light' : ''}${lmGround ? ' has-ground' : ''}" style="${scenePaletteStyle(scene)}">
+    ${lmGround ? `
+    <img class="lm-ground" src="${esc(lmGround)}" alt="" aria-hidden="true"
          loading="lazy" decoding="async">` : ''}
     <div class="tr-top${isCards && scene.hero ? ' has-hero' : ''}">
       ${isCards && scene.hero ? `
@@ -7096,7 +7099,7 @@ function renderActingLesson(id) {
     // to Rome down the right, exactly as the course's Learn page does,
     // so it is the same file at the same opacity rather than a second
     // drawing that would drift from it.
-    const ground = learnScene(B.ws)?.ground ?? null;
+    const ground = sceneGround(B.ws);
     app.innerHTML = `
       <div class="lx-shell lx-has-bar${ground ? ' has-ground' : ''}">
         ${ground ? `<img class="lm-ground lx-ground" src="${esc(ground)}" alt=""
