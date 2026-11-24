@@ -392,7 +392,23 @@ export const LEARN_SCENES = {
     // door, and it cost a confusing half hour — the course opened, the
     // path did not, and nothing said why.
     live: true,
-    layout: 'path-cards',
+    // ── BANDED SINCE 2026-11-24 (owner: "make commedia match the rest
+    // in terms of layout"). It was the only course on `path-cards`, so
+    // that layout now renders nowhere; its code stays, because this is
+    // one line to put back.
+    //
+    // TWO PATH-CARDS FEATURES GO WITH IT, and both are losses worth
+    // naming rather than discovering later:
+    //   * `moduleTag` below — Roots / The Lazzi / The Company — is drawn
+    //     as a kicker ONLY by path-cards. The owner picked those three
+    //     words from his own mockup and confirmed them when queried, so
+    //     they are kept in the data against the layout coming back.
+    //   * the lesson pips, the row of numbered dots that said where you
+    //     are inside a module without opening it. The banded card says
+    //     the lesson count instead, which is what the other four do.
+    // `artCol` is likewise path-cards only and stays for the same
+    // reason.
+    layout: 'banded',
     // KEYED TO THE THREE MODULES, not the single one this course arrived
     // with. The ids changed under this when commedia split on the same
     // day; a stale key here is not an error, it is a module that quietly
@@ -401,11 +417,28 @@ export const LEARN_SCENES = {
     // "The Lazzi" names a lesson that lives in module 3, not module 2;
     // he sent the same mockup back, so it is his call and it stands.
     moduleTag: { 'cm-roots': 'Roots', 'cm-form': 'The Lazzi', 'cm-cast': 'The Company' },
-    // LANDSCAPE, AND WIDE (owner's mockup, 2026-11-02). The mockup draws
-    // a picture about half the card and twice as wide as it is tall. The
-    // other path-cards courses are 3:4 portraits in a 216px column and
-    // are untouched: both of these are per-course values.
-    artAspect: '3 / 2',
+    // LANDSCAPE, AND WIDE (owner's mockup, 2026-11-02). The mockup drew
+    // a picture about half the card and twice as wide as it is tall,
+    // which at 3:2 is what the paintings are to three decimal places.
+    //
+    // CROPPED TO 2.22 WITH THE MOVE TO BANDED (2026-11-24). The banded
+    // card runs the picture the full width of the card rather than
+    // beside the text, so the aspect stops being a column shape and
+    // becomes the band's depth. Left at 3:2 the cards came out 394px
+    // against Acting's 262px, the tallest of the five by half again.
+    //
+    // 2.22 IS CHARACTER'S OWN VALUE, not a number picked to look right:
+    // commedia was Building a Character's first module until it split on
+    // 2026-11-02, so matching that band is the one choice here with a
+    // reason behind it. Cards drop to 315px.
+    //
+    // WHAT THE CROP COSTS, LOOKED AT RATHER THAN ASSUMED. object-fit is
+    // cover and centred, so it takes 15% off the top and bottom of each
+    // painting. On cm-cast, the one with something at both edges, that
+    // is empty paper above the pinned plates and table below the masks:
+    // all five plates and all six masks survive. Checked at 373px wide,
+    // which is the card's real width at 1440.
+    artAspect: '2.22 / 1',
     artCol: '46%',
     // THE OWNER'S PAINTINGS, delivered 2026-11-02 — the three from his
     // mockup. Converted from the generator's WEBP to baseline JPEG,

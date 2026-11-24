@@ -7486,6 +7486,50 @@ export async function run({ navDoc = document } = {}) {
       noCloser.map(l => l.id).join(', ') || `${closers.length} chapters close on a picture`);
   }
 
+  // ── 21o. Which layout each course's Learn page uses ──────────
+  // Added 2026-11-24, after moving Commedia from `path-cards` to
+  // `banded` and finding that a grep of this file for `path-cards`,
+  // `is-banded` or `scene.layout` returned NOTHING. Ten courses, five
+  // layouts, and not one line looking at which was which: the move
+  // could have silently handed a course a layout its artwork is the
+  // wrong shape for and the suite would have read 938/0 either way.
+  //
+  // IT PINS THE ROSTER, NOT THE RENDERING. What a layout LOOKS like is
+  // a judgement about a page and belongs in a browser, which is where
+  // the Commedia move was actually checked. What a machine can see is
+  // that each course still asks for the layout somebody chose for it,
+  // and that no scene names one the renderer does not know — a typo
+  // there falls through `LAYOUTS[scene.layout] ?? ''` to the plain path
+  // with no error and no clue.
+  {
+    const KNOWN = ['shelf', 'gallery', 'path-cards', 'cards', 'banded'];
+    const EXPECTED = {
+      acting: 'banded', character: 'banded', commedia: 'banded',
+      musical: 'banded', screen: 'banded',
+      shakespeare: 'cards', rhetoric: 'shelf',
+    };
+    const scenes = Object.entries(LEARN_SCENES);
+    const unknown = scenes.filter(([, sc]) => sc.layout && !KNOWN.includes(sc.layout));
+    check('layouts: no scene names one the renderer does not know',
+      unknown.length === 0, unknown.map(([k]) => k).join(', '));
+
+    const moved = Object.entries(EXPECTED)
+      .filter(([ws, want]) => LEARN_SCENES[ws]?.layout !== want)
+      .map(([ws, want]) => `${ws}: want ${want}, got ${LEARN_SCENES[ws]?.layout}`);
+    check('layouts: every course still uses the one chosen for it',
+      moved.length === 0, moved.join(' | '));
+
+    // `path-cards` RENDERS NOWHERE SINCE 2026-11-24 and its code stays,
+    // which is this repo's answer every time. Pinned so that fact is a
+    // decision rather than something a reader has to go and work out:
+    // if a course is put back on it, this check says so.
+    const onPathCards = scenes.filter(([, sc]) => sc.layout === 'path-cards');
+    check('layouts: path-cards is retired but still implemented',
+      onPathCards.length === 0
+      && /'path-cards': ' is-pathcards'/.test(await viewSource()),
+      onPathCards.map(([k]) => k).join(', '));
+  }
+
   // ── 21n. The Learn page grounds: declared, shipped, drawn to size ──
   // WHY THIS EXISTS, AND WHAT IT STILL CANNOT SEE.
   //
