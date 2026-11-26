@@ -1397,9 +1397,17 @@ function learnMain(el, course, ws = activeWorkspace()) {
 // ── THE COURSE INDEX: IPA Foundations Learn (owner handoff, 2026-11-14)
 //
 // A three-part landing page: the course as a list of collapsible units,
-// and a preview of ONE lesson beside it. IPA FOUNDATIONS ONLY — the
-// handoff says so outright ("Do not change other Learn pages"), so the
-// accent courses keep ipaLearnPane and its tiles below.
+// and a preview of ONE lesson beside it.
+//
+// IT WAS IPA FOUNDATIONS ONLY FOR THREE DAYS. That handoff said so
+// outright ("Do not change other Learn pages"), and this paragraph used
+// to end "so the accent courses keep ipaLearnPane and its tiles below".
+// That stopped being true on 2026-11-17, when the owner put every Voice
+// & Speech course on this pane and learnMain stopped calling
+// ipaLearnPane at all. The sentence survived the change and read as a
+// live routing rule for nine days; it cost a session an hour on
+// 2026-11-26, chasing a contrast fault in `.vp-lesson` tiles that no
+// longer render. ipaLearnPane is WITHDRAWN, not in use.
 //
 // WHAT THE MOCKUP SHOWS THAT THE DATA DOES NOT HAVE, and is therefore not
 // here: a Difficulty row, a per-lesson progress percentage, and a drawn
