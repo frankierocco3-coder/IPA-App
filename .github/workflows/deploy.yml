@@ -181,7 +181,35 @@ jobs:
         with:
           path: _site
 
-      # ── THE ARTIFACT HAS TO BE READABLE BEFORE DEPLOY LOOKS FOR IT ──
+      # ── THIS STEP DOES NOT DO WHAT I BUILT IT TO DO ────────────────
+      #
+      # REFUTED 2026-11-26, by the run it was supposed to save. Read
+      # this before trusting the reasoning below it.
+      #
+      #     Wait for the artifact to be readable   success   0s
+      #     Deploy                                 failure   1s
+      #       Error: No artifacts named "github-pages" were found
+      #
+      # The wait asked the public REST API, `GET /actions/runs/{id}
+      # /artifacts?name=github-pages`, and got total_count 1 on its
+      # FIRST attempt. One second later deploy-pages' own
+      # getArtifactMetadata reported zero, on the same run, with the
+      # artifact listed at 47.4MB.
+      #
+      # So the two are not reading the same index. deploy-pages uses
+      # the Actions artifact service through @actions/artifact, with a
+      # run-scoped token; this step uses the repository REST API. A
+      # green wait says nothing about what the deploy will see, which
+      # means THE COUNT-0 FAILURE IS NOT THE VISIBILITY RACE I
+      # DIAGNOSED, or at least not one this check can observe.
+      #
+      # WHY IT STAYS ANYWAY, and it is a weaker reason than the one it
+      # was added for: it still catches the count-2 case cheaply and
+      # says plainly that a re-run cannot fix it, and it costs 0-3s.
+      # Do not read a green wait as evidence of anything else.
+      #
+      # THE REMEDY IS UNCHANGED AND IT IS STILL THE ONLY ONE THAT
+      # WORKS: push again. Do not re-run the job.
       #
       # Added 2026-11-24, after the failure described at length above
       # took two pushes in a row. Everything in that note still holds;
