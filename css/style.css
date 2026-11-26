@@ -19,7 +19,20 @@
   --panel: #f6f1e8;      /* warm cream (brand) */
   --panel-2: #ece5d6;    /* pressed / sunken */
   --glow: rgba(111, 134, 87, 0.0);
-  --sage: #8d997d;       /* brand sage */
+  --sage: #8d997d;       /* brand sage — BORDERS AND ORNAMENT ONLY. It is
+                            2.4:1 at worst on this app's papers, so it may
+                            not carry text. Use --sage-ink for that. */
+  /* SAGE YOU CAN READ (2026-11-24). The brand sage failed AA as text
+     everywhere it was used: 2.49:1 on the page canvas, 2.4:1 on the
+     base panel. --green-dark was the obvious candidate and is NOT
+     enough either — 4.43:1 on --panel-2, under the 4.5 line.
+
+     #4f6239 is 5.34:1 at worst across all five papers in the app
+     (canvas, both panels, both of Acting's warmer pair) and still
+     reads as sage rather than as --ink. The margin is deliberate: the
+     sidebar tagline is 8.5px with 2.2px of letter-spacing, which is
+     well under the size AA's 4.5 threshold assumes. */
+  --sage-ink: #4f6239;
   --lavender: #a99bc4;   /* brand muted lavender */
   --accent-tint: #e6ebdd; /* sage tint */
   --bad-tint: #f2e3dc;    /* terracotta tint */
@@ -188,7 +201,7 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .brand-sub {
   font-family: -apple-system, "SF Pro Text", system-ui, sans-serif;
   font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--sage); font-weight: 700; margin-top: 5px; white-space: nowrap;
+  color: var(--sage-ink); font-weight: 700; margin-top: 5px; white-space: nowrap;
 }
 .back-link {
   background: none; border: none; color: var(--muted); font: inherit;
@@ -197,7 +210,7 @@ h1, h2, h3, .brand, .prompt, .track-title, .unit-banner-title, .home-heading {
 .emblem { width: 150px; height: 156px; flex: none; }
 .brand-tagline {
   text-align: center; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
-  color: var(--sage); font-weight: 700; padding: 8px 0 2px;
+  color: var(--sage-ink); font-weight: 700; padding: 8px 0 2px;
 }
 .stats { display: flex; gap: 14px; font-weight: 800; align-items: center; }
 .stat { white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
@@ -1545,7 +1558,7 @@ body.modal-open { overflow: hidden; }
 }
 .side-brand { background: none; border: none; cursor: pointer; text-align: left; padding: 0 14px; }
 .side-brand-name { display: block; font-family: var(--serif); font-size: 26px; font-weight: 700; color: var(--ink); }
-.side-brand-sub { display: block; font-size: 8.5px; letter-spacing: 2.2px; color: var(--sage); font-weight: 700; margin-top: 2px; }
+.side-brand-sub { display: block; font-size: 8.5px; letter-spacing: 2.2px; color: var(--sage-ink); font-weight: 700; margin-top: 2px; }
 .side-nav nav { display: flex; flex-direction: column; gap: 4px; padding-right: 14px; }
 .side-item {
   font: inherit; font-weight: 800; font-size: 13px; letter-spacing: 0.8px; text-transform: uppercase;
@@ -2164,7 +2177,7 @@ body.modal-open { overflow: hidden; }
 .lxqa { list-style: decimal; margin: 6px 0 16px; padding-left: 22px; display: grid; gap: 12px; }
 .lxqa-q { font-size: 15.5px; line-height: 1.45; font-weight: 600; color: var(--ink); margin: 0 0 4px; }
 .lxqa-a > summary {
-  cursor: pointer; font-size: 13px; color: var(--sage); font-weight: 700;
+  cursor: pointer; font-size: 13px; color: var(--sage-ink); font-weight: 700;
   letter-spacing: 0.3px; list-style: none;
 }
 .lxqa-a > summary::-webkit-details-marker { display: none; }
